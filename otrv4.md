@@ -61,6 +61,7 @@ begins. Once all the desired messages have been sent and received any
 of the ends can signal the other end the conversation has finished.
 
 | Alice                       		| Server		| Bob					|
+|---------------------------------|-----------|-------------|
 | Requests for Bob's status   		| Bob is online		|					|
 | Requests to start conversation 	|			| Responds ready to start		|
 | Autenticates to Bob			|			| Autenticates to Alice			|
@@ -83,8 +84,8 @@ conversation. Bob should choose the higher version he supports.
 Once the conversation has started Alice and Bob will autenticate to
 each other and setup a secure channel for the conversation to take
 place. This process will use the deniable authenticated key exchange
-mechanism RSDAKE defined by Neil Unger in his paper "RSDAKE and SPAWN
-paper"[1] which provide both Alice and Bob with the following security
+mechanism RSDAKE defined by Neil Unger in his paper ["RSDAKE and SPAWN
+paper"][1] which provide both Alice and Bob with the following security
 properties:
 * Participation deniability
 * Message deniability
@@ -96,13 +97,17 @@ provides the following properties
 * ...
 
 Alice requests Bob to start a conversation
-| Alice				| Server	| Bob			|
-| request "?OTRV4,OTRV3"	|		| response "?OTRV4"	|
-| G^x				|		| G^y, m, m', c, c'	|
-| m, m', c, c'			|		|			|
+
+| Alice				            | Server	| Bob			          |
+|-------------------------|---------|-------------------|
+| request "?OTRV4,OTRV3"	|		      | response "?OTRV4"	|
+| G^x				              |		      | G^y, m, m', c, c'	|
+| m, m', c, c'			      |		      |			              |
 
 Alice notifies Bob willingness to start a conversation
+
 | Alice				| Server	| Bob			|
+|-------------|---------|---------|
 | notify "        "		|		|			|
 | 				|		| response "?OTRV4"	|
 | G^x				|		| G^y, m, m', c, c'	|
@@ -112,7 +117,7 @@ Alice notifies Bob willingness to start a conversation
 
 Bob might respond to Alice's request or notify of willingness to start a
 conversation with a version lower then version four. If this is the
-case the protocol falls back to OTR version 3 specification[2].
+case the protocol falls back to [OTR version 3 specification][2].
 
 Note. OTR version 4 is the last version to support previous versions.
 
@@ -140,6 +145,5 @@ Note. OTR version 4 is the last version to support previous versions.
 ## Transition from online conversation to offline conversation ##
 
 
-
-[1] Unger Niel, RSDAKE and SPAWN paper, http://www.paper.net/Unger/rsdake_spawn.pdf
-[2] Goldberg Ian, OTR V3 paper, https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html
+[1]: http://www.paper.net/Unger/rsdake_spawn.pdf
+[2]: https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html
