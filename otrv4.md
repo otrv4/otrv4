@@ -24,7 +24,7 @@ This protocol is not intended to enable group conversations.
 ## Overview ##
 
 This protocol refers to the initiator of the conversation as Alice
-and, refers to the receiver as Bob, in order to use the common
+and, refers to the receiver as Bob, in order to use the common 
 terminology used in the cryptographic literature.
 
 The messages exchanged between Alice and Bob are said to be
@@ -46,11 +46,11 @@ An online conversation happens when both Alice and Bob are
 online. An online conversation provides both participants with the
 following security properties:
 * at conversation start
-** identity verification
+ * identity verification
 * while exchanging messages
-** confidentiality
+ * confidentiality
 * after conversation is over
-** participation repudiability
+ * participation repudiability
 
 Alice knows Bob is online because the underlying protocol is
 able to answer questions about Bob's presence.
