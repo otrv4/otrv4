@@ -1,8 +1,6 @@
 # OTR version 4#
 
-The following protocol is deviced in order to enable two people to
-maintain a conversation over a network in a way that ressembles most
-to a secure and private in person conversation.
+The following protocol aims to allow two people to maintain a conversation over a network in a way that comes as close as possible to a private person to person conversation - where no other entity can overhear what is being said, and the other party can't prove anything that was said - or even the fact that you talked. 
 
 Security here means that both ends can verify at the begining of the
 conversation the identity of the other end and the stablishment of a
