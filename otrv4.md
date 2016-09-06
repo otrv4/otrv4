@@ -1,4 +1,4 @@
-# OTR version 4#
+# OTR version 4
 
 The following protocol aims to allow two people to maintain a conversation over a network in a way that comes as close as possible to a private person to person conversation - where no other entity can overhear what is being said, and the other party can't prove anything that was said - or even the fact that you talked. 
 
@@ -16,10 +16,10 @@ TODO: here does malleabiliy fits?
 
 TODO: table of contents.
 
-## Overview ##
+## Overview
 
 This protocol refers to the initiator of the conversation as Alice
-and, refers to the receiver as Bob, in order to use the common 
+and refers to the receiver as Bob, in order to use the common 
 terminology used in the cryptographic literature.
 
 The messages exchanged between Alice and Bob are said to be
@@ -35,15 +35,15 @@ the conversation is happening.
 This conversation will take place over public infraestructure where
 potential hostile intermediaries are present at different levels.
 
-## Assumptions ##
+## Assumptions
 
 This protocol assumes that at least Alice has an available network and that both ends run this protocol over an undelying protocol which enables the exchange of messages.
 
-## Exceptions ##
+## Exceptions
 
 This protocol is not intended to enable group conversations.
 
-## Online Conversations ##
+## Online Conversations
 
 An online conversation happens when both Alice and Bob are
 online. An online conversation provides both participants with the
@@ -71,7 +71,7 @@ of the ends can signal the other end the conversation has finished.
 | Sends message				|			| Receives message			|
 | Signals end of conversation		|			| Acknowledges end of conversation	|
 
-### Online conversation start ###
+### Online conversation start
 
 To start a conversation Alice should send either a request to do so or
 notify her willingness to start a conversation. Difference between
@@ -116,7 +116,7 @@ Alice notifies Bob willingness to start a conversation
 | G^x				|		| G^y, m, m', c, c'	|
 | m, m', c, c'			|		|			|
 
-#### Online conversation start with older OTR version ####
+#### Online conversation start with older OTR version
 
 Bob might respond to Alice's request or notify of willingness to start a
 conversation with a version lower then version four. If this is the
@@ -124,15 +124,15 @@ case the protocol falls back to [OTR version 3 specification][2].
 
 Note. OTR version 4 is the last version to support previous versions.
 
-### Online conversation message exchange ###
+### Online conversation message exchange
 
-### Online conversacion end ###
+### Online conversacion end
 
-## Offline conversation ##
+## Offline conversation
 
-### Offline conversation start ###
+### Offline conversation start
 
-#### Offline conversation start with older OTR version ####
+#### Offline conversation start with older OTR version
 
 Bob might respond to Alice's request or notify of willingness to start a
 conversation with a version lower then version four. Since previous
@@ -141,11 +141,11 @@ conversations the starting process is dropped.
 
 Note. OTR version 4 is the last version to support previous versions.
 
-### Offline conversation message exchange ###
+### Offline conversation message exchange
 
-### Offline conversacion end ###
+### Offline conversacion end
 
-## Transition from online conversation to offline conversation ##
+## Transition from online conversation to offline conversation
 
 
 [1]: http://www.paper.net/Unger/rsdake_spawn.pdf
