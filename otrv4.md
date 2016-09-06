@@ -12,14 +12,9 @@ To ressemble a in person conversation means that both ends can deny to
 have participated in said conversation or to have sent one or many of
 the exchanged messages once the conversation is over.
 
-## Assumptions ##
+TODO: here does malleabiliy fits?
 
-This protocol assumes there is an available network and an undelying
-protocol which enables the exchange of messages.
-
-## Exceptions ##
-
-This protocol is not intended to enable group conversations.
+TODO: table of contents.
 
 ## Overview ##
 
@@ -39,6 +34,14 @@ the conversation is happening.
 
 This conversation will take place over public infraestructure where
 potential hostile intermediaries are present at different levels.
+
+## Assumptions ##
+
+This protocol assumes that at least Alice has an available network and that both ends run this protocol over an undelying protocol which enables the exchange of messages.
+
+## Exceptions ##
+
+This protocol is not intended to enable group conversations.
 
 ## Online Conversations ##
 
