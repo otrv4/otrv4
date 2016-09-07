@@ -70,7 +70,7 @@ following security properties:
 Alice knows Bob is online because the underlying protocol is
 able to answer questions about Bob's presence.
 
-Alice then starts a conversation with Bob by sending a request that
+Alice starts a conversation with Bob by sending a request that
 Bob responds notifying he's ready to start and messages exchange
 begins. Once all the desired messages have been sent and received any
 of the ends can signal the other end the conversation has finished.
