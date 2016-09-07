@@ -2,8 +2,6 @@
 
 The following protocol aims to allow two people to maintain a conversation over a network in a way that comes as close as possible to a private person to person conversation - where no other entity can overhear what is being said, and the other party can't prove anything that was said - or even the fact that you talked. 
 
-We argue that not only encryption must be used to hide the contents of the conversation, but it must also provide forward secrecy to protect future compromises. Nevertheless, authentication must be used to ensure that the person whom you are talking to is who they claim to be; but this mechanism must offer repudation, so that the communications remain personal and unverifiable to third parties.  
-
 Security here means that both ends can verify at the begining of the
 conversation the identity of the other end and the stablishment of a
 trusted channel. Private here means that exchanged messages are hard
@@ -17,9 +15,13 @@ the exchanged messages once the conversation is over.
 ##Table of Contents
 
 1.[Overview](#overview)
+
 2.[Assumptions](#assumptions)
+
 3.[Exceptions](#exceptions)
+
 4.[Online Conversations](#conversation1)
+
 5.[Offline Conversations](#conversation2)
 
 ## Overview <a name="overview"></a>
@@ -39,7 +41,7 @@ as soon as he gets online.
 The initial connection state of both Alice and Bob might change while
 the conversation is happening.
 
-This conversation will take place over public infraestructure where
+This conversation will take place over public infrastructure where
 potential hostile intermediaries are present at different levels.
 
 
@@ -47,12 +49,11 @@ potential hostile intermediaries are present at different levels.
 
 This protocol assumes that at least Alice has an available network and that both ends run this protocol over an undelying protocol which enables the exchange of messages.
 
-TODO: check for other exceptions.
 ## Exceptions <a name="exceptions"></a>
 
 This protocol is not intended to enable group conversations.
 
-## Online Conversations <a name="conversation1></a>
+## Online Conversations <a name="conversation1"></a>
 
 An online conversation happens when both Alice and Bob are
 online. An online conversation provides both participants with the
