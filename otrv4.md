@@ -23,9 +23,10 @@ the exchanged messages once the conversation is over.
 4.[Exceptions](#exceptions)
 
 5.[Online Conversations](#online-conversation)
-  1. [Online authenticated key exchange (AKE)] (#online-AKE)
-  2. [Data message exchange] (#online-conversation-msg-exchange)
-  3. [Online conversation end] (#online-conversation-end)
+  1. [OTR Query Message] (#query-message)
+  2. [Online authenticated key exchange (AKE)] (#online-AKE)
+  3. [Data message exchange] (#online-conversation-msg-exchange)
+  4. [Online conversation end] (#online-conversation-end)
 
 6.[Offline Conversations](#offline-conversation)
   1. [Offline authenticated key exchange (AKE)] (#offline-AKE)
@@ -110,7 +111,7 @@ of the ends can signal the other end the conversation has finished.
 | Exchange data message           |               | Exchange data message            |
 | End conversation                |               | Acknowledges end of conversation |
 
-### Online authenticated key exchange (AKE) <a name="online-AKE"></a>
+### OTR query message <a name="query-message"></a>
 
 To start a conversation Alice should send either a request to do so or
 notify her willingness to start a conversation (using a whitespace-tagged
@@ -143,6 +144,9 @@ Alice requests Bob to start a conversation:
 |----------------------------------|-----------------------|
 | OTR Query Message or Space Tags  |                       |
 |                                  | supported OTR version |
+
+
+### Online authenticated key exchange (AKE) <a name="online-AKE"></a>
 
 Once the conversation has started Bob will initiate the authenticated key
 exchange (AKE) with Alice.
