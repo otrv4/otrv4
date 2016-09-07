@@ -21,14 +21,14 @@ the exchanged messages once the conversation is over.
 3.[Exceptions](#exceptions)
 
 4.[Online Conversations](#online-conversation)
-4.1 [Online conversation start] (#online-conversation-start)
-4.2 [Online conversation message exchange] (#online-conversation-msg-exchange)
-4.3 [Online conversation end] (#online-conversation-end)
+  1. [Online conversation start] (#online-conversation-start)
+  2. [Online conversation message exchange] (#online-conversation-msg-exchange)
+  3. [Online conversation end] (#online-conversation-end)
 
 5.[Offline Conversations](#offline-conversation)
-4.1 [Offline conversation start] (#offline-conversation-start)
-4.2 [Offline conversation message exchange] (#offline-conversation-msg-exchange)
-4.3 [Offline conversation end] (#offline-conversation-end)
+  1. [Offline conversation start] (#offline-conversation-start)
+  2. [Offline conversation message exchange] (#offline-conversation-msg-exchange)
+  3. [Offline conversation end] (#offline-conversation-end)
 
 ## Overview <a name="overview"></a>
 
