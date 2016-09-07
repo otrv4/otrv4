@@ -16,16 +16,18 @@ the exchanged messages once the conversation is over.
 
 1.[Overview](#overview)
 
-2.[Assumptions](#assumptions)
+2.[Security Properties](#security-properties)
 
-3.[Exceptions](#exceptions)
+3.[Assumptions](#assumptions)
 
-4.[Online Conversations](#online-conversation)
+4.[Exceptions](#exceptions)
+
+5.[Online Conversations](#online-conversation)
   1. [Online conversation start] (#online-conversation-start)
   2. [Online conversation message exchange] (#online-conversation-msg-exchange)
   3. [Online conversation end] (#online-conversation-end)
 
-5.[Offline Conversations](#offline-conversation)
+6.[Offline Conversations](#offline-conversation)
   1. [Offline conversation start] (#offline-conversation-start)
   2. [Offline conversation message exchange] (#offline-conversation-msg-exchange)
   3. [Offline conversation end] (#offline-conversation-end)
@@ -50,6 +52,37 @@ the conversation is happening.
 This conversation will take place over public infrastructure where
 potential hostile intermediaries are present at different levels.
 
+## Security Properties <a name="security-properties"></a>
+
+Online:
+
+An online conversation happens when both initiator and receiver are
+online.
+* at conversation start
+ * authentication
+ * repudiation for both initiator and receiver
+* while exchanging messages
+ * confidentiality
+ * integrity
+* after conversation is over
+ * forward secrecy
+ * malleability
+ * repudiation for both initiator and receiver
+
+Offline:
+
+An offline conversation happens when the initiator is offline and the receiver is
+online.
+* at conversation start
+ * authentication
+ * repudiation for *only* the receiver
+* while exchanging messages
+ * confidentiality
+ * integrity
+* after conversation is over
+ * forward secrecy
+ * malleability
+ * repudiation for both initiator and receiver
 
 ## Assumptions <a name="assumptions"></a>
 
@@ -60,18 +93,6 @@ This protocol assumes that at least Alice has an available network and that both
 This protocol is not intended to enable group conversations.
 
 ## Online Conversations <a name="online-conversation"></a>
-
-An online conversation happens when both Alice and Bob are
-online. An online conversation provides both participants with the
-following security properties:
-* at conversation start
- * identity verification
-* while exchanging messages
- * confidentiality
-* after conversation is over
- * participation repudiability
- * message repudiability
- * forward secrecy
 
 Alice knows Bob is online because the underlying protocol is
 able to answer questions about Bob's presence.
@@ -115,16 +136,7 @@ place.
 Bob will initiate the authenticated key exchange (AKE) with Alice. 
 This process will use the deniable authenticated key exchange
 mechanism RSDAKE defined by Neil Unger in his paper ["RSDAKE and SPAWN
-paper"][1] which provide both Alice and Bob with the following security
-properties:
-* Participation deniability
-* Message deniability
-
-Once the exchange has finished both ends have a channel which
-provides the following properties
-* Forward secrecy
-* Repudiation (participation and message)
-* Malleability
+paper"][1].
 
 Alice requests Bob to start a conversation
 
