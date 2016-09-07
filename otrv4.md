@@ -23,13 +23,13 @@ the exchanged messages once the conversation is over.
 4.[Exceptions](#exceptions)
 
 5.[Online Conversations](#online-conversation)
-  1. [Online conversation start] (#online-conversation-start)
-  2. [Online conversation message exchange] (#online-conversation-msg-exchange)
+  1. [Online authenticated key exchange (AKE)] (#online-AKE)
+  2. [Data message exchange] (#online-conversation-msg-exchange)
   3. [Online conversation end] (#online-conversation-end)
 
 6.[Offline Conversations](#offline-conversation)
-  1. [Offline conversation start] (#offline-conversation-start)
-  2. [Offline conversation message exchange] (#offline-conversation-msg-exchange)
+  1. [Offline authenticated key exchange (AKE)] (#offline-AKE)
+  2. [Data message exchange] (#offline-conversation-msg-exchange)
   3. [Offline conversation end] (#offline-conversation-end)
 
 ## Overview <a name="overview"></a>
@@ -102,60 +102,56 @@ Bob responds notifying he's ready to start and messages exchange
 begins. Once all the desired messages have been sent and received any
 of the ends can signal the other end the conversation has finished.
 
-| Alice                       		| Server		| Bob					|
-|---------------------------------------|-----------------------|---------------------------------------|
-| Requests for Bob' status   		| Bob is online		|					|
-| Requests to start conversation 	|			| Responds ready to start		|
-| Authenticates to Bob			|			| Authenticates to Alice		|
-| Sends message				|			| Receives message			|
-| Signals end of conversation		|			| Acknowledges end of conversation	|
+| Alice                           | Server        | Bob                              |
+|---------------------------------|---------------|----------------------------------|
+| Requests for Bob' status        | Bob is online |                                  |
+| Query Message                   |               | OTR v4 is supported              |
+| Establish Conversation with AKE |               |                                  |
+| Exchange data message           |               | Exchange data message            |
+| End conversation                |               | Acknowledges end of conversation |
 
-
-### Online conversation start <a name="online-conversation-start"></a>
+### Online authenticated key exchange (AKE) <a name="online-AKE"></a>
 
 To start a conversation Alice should send either a request to do so or
-notify her willingness to start a conversation (using a whitespace-tagged 
-plain-text message). Difference between them is that, in the first, 
-a response is expected and, in the second that a response is not expected 
+notify her willingness to start a conversation (using a whitespace-tagged
+plain-text message). Difference between them is that, in the first,
+a response is expected and, in the second that a response is not expected
 but may appear in the future.
 
-There are two ways Alice can inform Bob that she is willing to speak 
-with him: by sending him the OTR Query Message, or by including a special 
+There are two ways Alice can inform Bob that she is willing to speak
+with him: by sending him the OTR Query Message, or by including a special
 "tag" consisting of whitespace characters in one of her messages to him.
 
-Both the request and notification of willingness include the OTR
-versions Alice supports and is willing to use. 
-The response should include the OTR version. Bob supports and that version 
-will be used through the whole conversation. Bob must choose the higher 
-version he supports.
+The semantics of the OTR Query Message are that Alice is requesting that
+Bob start an OTR conversation with her (if, of course, he is willing and
+able to do so). On the other hand, the semantics of the whitespace tag are
+that Alice is merely indicating to Bob that she is willing and able to have
+an OTR conversation with him. If Bob has a policy of "only use OTR when it's
+explicitly requested", for example, then he would start an OTR conversation
+upon receiving an OTR Query Message, but would not upon receiving the
+whitespace tag.
 
-Once the conversation has started Alice and Bob will authenticate to
-each other and setup a secure channel for the conversation to take
-place. 
+Both OTR Query Message and Whitespace tag should include the OTR
+versions Alice supports and is willing to use.
 
-Bob will initiate the authenticated key exchange (AKE) with Alice. 
+The response should include the OTR version that Bob supports and will be used
+through the whole conversation. Bob must choose the latest version he supports.
+
+Alice requests Bob to start a conversation:
+
+| Alice                            | Bob                   |
+|----------------------------------|-----------------------|
+| OTR Query Message or Space Tags  |                       |
+|                                  | supported OTR version |
+
+Once the conversation has started Bob will initiate the authenticated key
+exchange (AKE) with Alice.
+
 This process will use the deniable authenticated key exchange
 mechanism RSDAKE defined by Neil Unger in his paper ["RSDAKE and SPAWN
 paper"][1].
 
-Alice requests Bob to start a conversation
-
-| Alice		          | Server  | Bob               |
-|-------------------------|---------|-------------------|
-| request "?OTRV4,OTRV3"  |         | response "?OTRV4"	|
-| G^x			  |	    | G^y, m, m', c, c'	|
-| m, m', c, c'	          |         |			|
-
-Alice notifies Bob willingness to start a conversation
-
-| Alice				| Server	| Bob			|
-|-------------------------------|---------------|-----------------------|
-| notify "        "		|		|			|
-| 				|		| response "?OTRV4"	|
-| G^x				|		| G^y, m, m', c, c'	|
-| m, m', c, c'			|		|			|
-
-#### Online conversation start with older OTR version
+#### Requesting Online conversation with older OTR version
 
 Bob might respond to Alice's request or notify of willingness to start a
 conversation with a version lower then version 4. If this is the
@@ -163,15 +159,15 @@ case the protocol falls back to [OTR version 3 specification][2].
 
 Note: OTR version 4 is the latest version to support previous versions.
 
-### Online conversation message exchange <a name="online-conversation-msg-exchange"></a>
+### Data message exchange <a name="online-conversation-msg-exchange"></a>
 
 ### Online conversation end <a name="online-conversation-end"></a>
 
-## Offline conversation <a name="offline-conversation"></a>
+## Offline Conversations <a name="offline-conversation"></a>
 
-### Offline conversation start <a name="offline-conversation-start"></a>
+### Requesting Offline conversation <a name="offline-conversation-start"></a>
 
-#### Offline conversation start with older OTR version
+#### Requesting Offline conversation with older OTR version
 
 Bob might respond to Alice's request or notify of willingness to start a
 conversation with a version lower then version 4. Since previous
@@ -180,7 +176,12 @@ conversations the starting process is dropped.
 
 Note. OTR version 4 is the last version to support previous versions.
 
-### Offline conversation message exchange <a name="offline-conversation-msg-exchange"></a>
+### Offline authenticated key exchange (AKE) <a name="offline-AKE"></a>
+
+#### Initiating Offline AKE
+#### Recieving Offline AKE
+
+### Data message exchange <a name="offline-conversation-msg-exchange"></a>
 
 ### Offline conversation end <a name="offline-conversation-end"></a>
 
