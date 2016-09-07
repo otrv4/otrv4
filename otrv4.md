@@ -151,6 +151,13 @@ This process will use the deniable authenticated key exchange
 mechanism RSDAKE defined by Neil Unger in his paper ["RSDAKE and SPAWN
 paper"][1].
 
+| Alice                              | Bob                            |
+|------------------------------------|--------------------------------|
+|                                    | select i, send {"I"; g^i}      |
+| select r, send {"R"; g^r; Auth(R)} |                                |
+|                                    | verify Auth(R), send {Auth(I)} |
+| verify Auth(R)                     |                                |
+
 #### Requesting Online conversation with older OTR version
 
 Bob might respond to Alice's request or notify of willingness to start a
