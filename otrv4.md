@@ -20,9 +20,15 @@ the exchanged messages once the conversation is over.
 
 3.[Exceptions](#exceptions)
 
-4.[Online Conversations](#conversation1)
+4.[Online Conversations](#online-conversation)
+4.1 [Online conversation start] (#online-conversation-start)
+4.2 [Online conversation message exchange] (#online-conversation-msg-exchange)
+4.3 [Online conversation end] (#online-conversation-end)
 
-5.[Offline Conversations](#conversation2)
+5.[Offline Conversations](#offline-conversation)
+4.1 [Offline conversation start] (#offline-conversation-start)
+4.2 [Offline conversation message exchange] (#offline-conversation-msg-exchange)
+4.3 [Offline conversation end] (#offline-conversation-end)
 
 ## Overview <a name="overview"></a>
 
@@ -53,7 +59,7 @@ This protocol assumes that at least Alice has an available network and that both
 
 This protocol is not intended to enable group conversations.
 
-## Online Conversations <a name="conversation1"></a>
+## Online Conversations <a name="online-conversation"></a>
 
 An online conversation happens when both Alice and Bob are
 online. An online conversation provides both participants with the
@@ -84,7 +90,7 @@ of the ends can signal the other end the conversation has finished.
 | Signals end of conversation		|			| Acknowledges end of conversation	|
 
 
-### Online conversation start
+### Online conversation start <a name="online-conversation-start"></a>
 
 To start a conversation Alice should send either a request to do so or
 notify her willingness to start a conversation (using a whitespace-tagged 
@@ -145,13 +151,13 @@ case the protocol falls back to [OTR version 3 specification][2].
 
 Note: OTR version 4 is the latest version to support previous versions.
 
-### Online conversation message exchange
+### Online conversation message exchange <a name="online-conversation-msg-exchange"></a>
 
-### Online conversation end
+### Online conversation end <a name="online-conversation-end"></a>
 
-## Offline conversation <a name="conversation2"></a>
+## Offline conversation <a name="offline-conversation"></a>
 
-### Offline conversation start
+### Offline conversation start <a name="offline-conversation-start"></a>
 
 #### Offline conversation start with older OTR version
 
@@ -162,9 +168,9 @@ conversations the starting process is dropped.
 
 Note. OTR version 4 is the last version to support previous versions.
 
-### Offline conversation message exchange
+### Offline conversation message exchange <a name="offline-conversation-msg-exchange"></a>
 
-### Offline conversation end
+### Offline conversation end <a name="offline-conversation-end"></a>
 
 
 [1]: http://www.paper.net/Unger/rsdake_spawn.pdf
