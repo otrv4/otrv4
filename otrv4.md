@@ -14,19 +14,19 @@ the exchanged messages once the conversation is over.
 
 ##Table of Contents
 
-1.[Overview](#overview)
+1. [Overview](#overview)
 
-2.[Security Properties](#security-properties)
+2. [Security Properties](#security-properties)
 
-3.[Assumptions](#assumptions)
+3. [Assumptions](#assumptions)
 
-4.[Online Conversations](#online-conversation)
+4. [Online Conversations](#online-conversation)
   1. [OTR Query Message] (#query-message)
   2. [Online authenticated key exchange (AKE)] (#online-AKE)
   3. [Data message exchange] (#online-conversation-msg-exchange)
   4. [Online conversation end] (#online-conversation-end)
 
-5.[Offline Conversations](#offline-conversation)
+5. [Offline Conversations](#offline-conversation)
   1. [Offline authenticated key exchange (AKE)] (#offline-AKE)
   2. [Data message exchange] (#offline-conversation-msg-exchange)
   3. [Offline conversation end] (#offline-conversation-end)
