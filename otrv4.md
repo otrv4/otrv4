@@ -14,21 +14,19 @@ the exchanged messages once the conversation is over.
 
 ##Table of Contents
 
-1.[Overview](#overview)
+1. [Overview](#overview)
 
-2.[Security Properties](#security-properties)
+2. [Security Properties](#security-properties)
 
-3.[Assumptions](#assumptions)
+3. [Assumptions](#assumptions)
 
-4.[Exceptions](#exceptions)
-
-5.[Online Conversations](#online-conversation)
+4. [Online Conversations](#online-conversation)
   1. [OTR Query Message] (#query-message)
   2. [Online authenticated key exchange (AKE)] (#online-AKE)
   3. [Data message exchange] (#online-conversation-msg-exchange)
   4. [Online conversation end] (#online-conversation-end)
 
-6.[Offline Conversations](#offline-conversation)
+5. [Offline Conversations](#offline-conversation)
   1. [Offline authenticated key exchange (AKE)] (#offline-AKE)
   2. [Data message exchange] (#offline-conversation-msg-exchange)
   3. [Offline conversation end] (#offline-conversation-end)
@@ -89,9 +87,6 @@ online.
 
 This protocol assumes that at least Alice has an available network and that both ends run this protocol over an underlying protocol which enables the exchange of messages.
 
-## Exceptions <a name="exceptions"></a>
-
-This protocol is not intended to enable group conversations.
 
 ## Online Conversations <a name="online-conversation"></a>
 
@@ -152,8 +147,9 @@ Once the conversation has started Bob will initiate the authenticated key
 exchange (AKE) with Alice.
 
 This process will use the deniable authenticated key exchange
-mechanism RSDAKE defined by Neil Unger in his paper ["RSDAKE and SPAWN
-paper"][1].
+mechanism RSDAKE defined by Nik Unger and Ian Goldberg in their paper 
+["Improved Techniques for Implementing Strongly Deniable
+Authenticated Key Exchanges"][1].
 
 | Alice                              | Bob                            |
 |------------------------------------|--------------------------------|
@@ -170,13 +166,13 @@ case the protocol falls back to [OTR version 3 specification][2].
 
 Note: OTR version 4 is the latest version to support previous versions.
 
-### Data message exchange <a name="online-conversation-msg-exchange"></a>
+### Data message exchange
 
-### Online conversation end <a name="online-conversation-end"></a>
+### Online conversation end
 
 ## Offline Conversations <a name="offline-conversation"></a>
 
-### Requesting Offline conversation <a name="offline-conversation-start"></a>
+### Requesting Offline conversation
 
 #### Requesting Offline conversation with older OTR version
 
@@ -187,15 +183,14 @@ conversations the starting process is dropped.
 
 Note. OTR version 4 is the last version to support previous versions.
 
-### Offline authenticated key exchange (AKE) <a name="offline-AKE"></a>
+### Offline authenticated key exchange (AKE)
 
 #### Initiating Offline AKE
 #### Recieving Offline AKE
 
-### Data message exchange <a name="offline-conversation-msg-exchange"></a>
+### Data message exchange
 
-### Offline conversation end <a name="offline-conversation-end"></a>
+### Offline conversation end
 
-
-[1]: http://www.paper.net/Unger/rsdake_spawn.pdf
+[1]: http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf
 [2]: https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html
