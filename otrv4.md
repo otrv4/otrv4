@@ -22,12 +22,10 @@ the exchanged messages once the conversation is over.
   1. [OTR Query Message] (#query-message)
   2. [Online authenticated key exchange (AKE)] (#online-AKE)
   3. [Data message exchange] (#online-conversation-msg-exchange)
-  4. [Online conversation end] (#online-conversation-end)
 
 5. [Offline Conversations](#offline-conversation)
   1. [Offline authenticated key exchange (AKE)] (#offline-AKE)
   2. [Data message exchange] (#offline-conversation-msg-exchange)
-  3. [Offline conversation end] (#offline-conversation-end)
 
 ## Overview <a name="overview"></a>
 
@@ -173,8 +171,6 @@ Note: OTR version 4 is the latest version to support previous versions.
 
 ### Data message exchange
 
-### Online conversation end
-
 ## Offline Conversations <a name="offline-conversation"></a>
 
 ### Requesting Offline conversation
@@ -194,8 +190,6 @@ Note. OTR version 4 is the last version to support previous versions.
 #### Recieving Offline AKE
 
 ### Data message exchange
-
-### Offline conversation end
 
 [1]: http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf
 [2]: https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html
