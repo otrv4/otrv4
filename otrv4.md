@@ -12,6 +12,8 @@ the exchanged messages once the conversation is over.
 
 1. [Overview](#overview)
 
+1. [What's New in version 4](#whats-new)
+
 2. [Security Properties](#security-properties)
 
 3. [Assumptions](#assumptions)
@@ -46,6 +48,13 @@ the conversation is happening.
 
 This conversation will take place over public infrastructure where
 potential hostile intermediaries are present at different levels.
+
+## What's New in version 4 <a name="whats-new"></a>
+
+1. Participation repudiation
+2. Support for out of order data messaging
+3. Encrypted messaging to offline participants
+4. Update crypto primitives to higher security level
 
 ## Security Properties <a name="security-properties"></a>
 
