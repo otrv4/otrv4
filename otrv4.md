@@ -185,7 +185,7 @@ conversations the starting process is dropped.
 
 Note. OTR version 4 is the last version to support previous versions.
 
-### Offline authenticated key exchange (AKE)
+### Offline authenticated key exchange (AKE) <a name="offline-AKE"></a>
 
 #### Initiating Offline AKE
 #### Recieving Offline AKE
