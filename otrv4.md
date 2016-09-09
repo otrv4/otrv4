@@ -12,20 +12,22 @@ the exchanged messages once the conversation is over.
 
 1. [Overview](#overview)
 
-1. [What's New in version 4](#whats-new)
+2. [What's New in version 4](#whats-new)
 
-2. [Security Properties](#security-properties)
+3. [Security Properties](#security-properties)
 
-3. [Assumptions](#assumptions)
+4. [Assumptions](#assumptions)
 
-4. [Online Conversations](#online-conversation)
+5. [Protocol Overview](#protocol-overview)
+
+6. [Online Conversation Initialization](#online-conversation-init)
   1. [OTR Query Message] (#query-message)
   2. [Online authenticated key exchange (AKE)] (#online-AKE)
-  3. [Data message exchange] (#online-conversation-msg-exchange)
 
-5. [Offline Conversations](#offline-conversation)
+7. [Offline Conversation Initialization](#offline-conversation-init)
   1. [Offline authenticated key exchange (AKE)] (#offline-AKE)
-  2. [Data message exchange] (#offline-conversation-msg-exchange)
+
+8. [Data message exchange] (conversation-msg-exchange)
 
 ## Overview <a name="overview"></a>
 
@@ -90,16 +92,7 @@ online.
 
 This protocol assumes that at least Alice has an available network and that both ends run this protocol over an underlying protocol which enables the exchange of messages.
 
-
-## Online Conversations <a name="online-conversation"></a>
-
-Alice knows Bob is online because the underlying protocol is
-able to answer questions about Bob's presence.
-
-Alice starts a conversation with Bob by sending a request that
-Bob responds notifying he's ready to start and messages exchange
-begins. Once all the desired messages have been sent and received any
-of the ends can signal the other end the conversation has finished.
+## Protocol Overview <a name="protocol-overview"></a>
 
 | Alice                           | Server        | Bob                              |
 |---------------------------------|---------------|----------------------------------|
@@ -107,7 +100,16 @@ of the ends can signal the other end the conversation has finished.
 | Query Message                   |               | OTR v4 is supported              |
 | Establish Conversation with AKE |               |                                  |
 | Exchange data message           |               | Exchange data message            |
-| End conversation                |               | Acknowledges end of conversation |
+
+
+## Online Conversations Initialization <a name="online-conversation-init"></a>
+
+Alice knows Bob is online because the underlying protocol is
+able to answer questions about Bob's presence.
+
+Alice starts a conversation with Bob by sending a request that
+Bob responds notifying he's ready to start and data message exchange
+begins.
 
 ### OTR query message <a name="query-message"></a>
 
@@ -169,9 +171,8 @@ case the protocol falls back to [OTR version 3 specification][2].
 
 Note: OTR version 4 is the latest version to support previous versions.
 
-### Data message exchange
 
-## Offline Conversations <a name="offline-conversation"></a>
+## Offline Conversations Initialization <a name="offline-conversation-init"></a>
 
 ### Requesting Offline conversation
 
@@ -189,7 +190,7 @@ Note. OTR version 4 is the last version to support previous versions.
 #### Initiating Offline AKE
 #### Recieving Offline AKE
 
-### Data message exchange
+## Data message exchange
 
 [1]: http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf
 [2]: https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html
