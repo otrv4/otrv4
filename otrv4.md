@@ -10,53 +10,57 @@ the exchanged messages once the conversation is over.
 
 ##Table of Contents
 
-1. [Overview](#overview)
+1. [What's New in version 4](#whats-new)
 
-2. [What's New in version 4](#whats-new)
+2. [High Level Overview](#overview)
 
-3. [Security Properties](#security-properties)
+3. [Assumptions](#assumptions)
 
-4. [Assumptions](#assumptions)
+4. [Security Properties](#security-properties)
 
-5. [Protocol Overview](#protocol-overview)
-
-6. [Online Conversation Initialization](#online-conversation-init)
+5. [Online Conversation Initialization](#online-conversation-init)
   1. [OTR Query Message] (#query-message)
   2. [Online authenticated key exchange (AKE)] (#online-AKE)
 
-7. [Offline Conversation Initialization](#offline-conversation-init)
+6. [Offline Conversation Initialization](#offline-conversation-init)
   1. [Offline authenticated key exchange (AKE)] (#offline-AKE)
 
-8. [Data message exchange] (conversation-msg-exchange)
-
-## Overview <a name="overview"></a>
-
-This protocol refers to the initiator of the conversation as Alice
-and refers to the receiver as Bob, to a passive attacker as Eve and 
-to an active attacker as Mallory, in order to use the common 
-terminology used in cryptography literature.
-
-The messages exchanged between Alice and Bob are said to be
-transported through a channel.
-
-This conversation may happen while both Alice and Bob are online or,
-when only Alice is online and Bob will receive messages posted for him
-as soon as he gets online.
-
-The initial connection state of both Alice and Bob might change while
-the conversation is happening.
-
-This conversation will take place over public infrastructure where
-potential hostile intermediaries are present at different levels.
+7. [Data message exchange] (conversation-msg-exchange)
 
 ## What's New in version 4 <a name="whats-new"></a>
 
 1. Participation repudiation
-2. Support for out of order data messaging
+2. Support for out of order data messages
 3. Encrypted messaging to offline participants
 4. Update crypto primitives to higher security level
 
+## High Level Overview <a name="overview"></a>
+
+Off The Record messaging (OTR) is a messaging protocol that achieves forward-secrecy
+and deniability.
+
+OTR conversations may happen while both participants are online, or one side
+is offline. Participants in an OTR conversation can go online and offline while
+the conversation is ongoing.
+
+The high level flow of this protocol will be:
+
+Alice                                            Bob
+--------------------------------------------------------------------------------
+Request OTR conversation         ------------->
+                                 <-------------  OTR v4 is supported
+Establish Conversation with AKE  <------------>  Establish Conversation with AKE
+Exchange Data Messages           <------------>  Exchange Data Messages
+
+## Assumptions <a name="assumptions"></a>
+
+At least one participant has an available network and that both ends run the OTR protocol
+over an underlying protocol which enables the exchange of messages.
+
 ## Security Properties <a name="security-properties"></a>
+
+An conversation will take place over an insecure channel where
+potential hostile intermediaries are present at different levels.
 
 Online:
 
@@ -88,19 +92,8 @@ online.
  * malleability
  * repudiation for both initiator and receiver
 
-## Assumptions <a name="assumptions"></a>
-
-This protocol assumes that at least Alice has an available network and that both ends run this protocol over an underlying protocol which enables the exchange of messages.
-
-## Protocol Overview <a name="protocol-overview"></a>
-
-| Alice                           | Server        | Bob                              |
-|---------------------------------|---------------|----------------------------------|
-| Requests for Bob' status        | Bob is online |                                  |
-| Query Message                   |               | OTR v4 is supported              |
-| Establish Conversation with AKE |               |                                  |
-| Exchange data message           |               | Exchange data message            |
-
+Threats that an OTR conversation does not mitigate:
+* An active attacker may perform a Denial of Service attack but not learn the contents of messages.
 
 ## Online Conversations Initialization <a name="online-conversation-init"></a>
 
