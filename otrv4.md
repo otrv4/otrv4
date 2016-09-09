@@ -1,6 +1,6 @@
 # OTR version 4
 
-The following protocol allows two people to maintain a conversation over a network in a way that comes as close as possible to a private person to person conversation - where no other entity can overhear what is being said, and the other party can't prove anything that was said - or even the fact that you talked.
+The following protocol aims to allow two people to maintain a conversation over a network in a way that comes as close as possible to a private person to person conversation - where no other entity can overhear what is being said, and the other party can't prove anything that was said - or even the fact that you talked.
 
 In an off the record conversation, both sides can verify the identity of the other participant (but cannot transfer this knowledge to a third party). Participants can converse with the assurance that their convesation will not be read or modified by a hostile third party listening to the conversation.
 
