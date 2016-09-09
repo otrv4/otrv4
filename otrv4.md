@@ -1,12 +1,9 @@
 # OTR version 4
 
-The following protocol aims to allow two people to maintain a conversation over a network in a way that comes as close as possible to a private person to person conversation - where no other entity can overhear what is being said, and the other party can't prove anything that was said - or even the fact that you talked.
-
-In an off the record conversation, both sides can verify the identity of the other participant (but cannot transfer this knowledge to a third party). Participants can converse with the assurance that their convesation will not be read or modified by a hostile third party listening to the conversation.
-
-To resemble a in person conversation means that both ends can deny to
-have participated in said conversation or to have sent one or many of
-the exchanged messages once the conversation is over.
+The following messaging protocol provides way for two people to have a conversation over a network
+in a way that provides the same security as a private in person conversation, where no external party
+can overhear what is being said, and no one (not even the conversation participants) can prove what
+was said, or even that the two participants spoke to each other at all.
 
 ##Table of Contents
 
@@ -58,6 +55,15 @@ At least one participant has an available network and that both ends run the OTR
 over an underlying protocol which enables the exchange of messages.
 
 ## Security Properties <a name="security-properties"></a>
+
+TODO: we need to find a better way to describe following (does this belong in the terminology section?)
+In an off the record conversation, both sides can verify the identity of the other participant
+(but cannot transfer this knowledge to a third party). Participants can converse with the assurance
+that their conversation will not be read or modified by a hostile third party listening to the conversation.
+
+To resemble an in person conversation means that both ends can deny to
+have participated in said conversation or to have sent one or many of
+the exchanged messages once the conversation is over.
 
 An conversation will take place over an insecure channel where
 potential hostile intermediaries are present at different levels.
