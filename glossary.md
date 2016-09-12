@@ -8,6 +8,12 @@
 
 * Forward secrecy
   - is when the compromise of a long-term key does not allow ciphertexts encrypted with previous session keys to be decrypted.
+  
+* Initiator
+  - after being requested to start a conversation, will send back the first material to establish a DAKE.
+
+* Responder
+  - after having received material to establish a DAKE, will send back the material to complete the DAKE.
 
 * Secure channel
   - a channel is a way to transfer messages and is said to be secure if these messages can not be overheard or tampered with.
