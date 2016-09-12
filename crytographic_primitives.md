@@ -1,7 +1,7 @@
 # Cryptographic primitives
 
 ----
-### Symmetric Encription: AES-256 256-bit (key size) (128-bit on PQ, block size)
+### Symmetric Encription: AES-256
 
 AES-256 is a 128-bit block cipher with a key size of 256 bits. This means that this algorithm is capable of using a cryptographic key of 256 bits to encrypt and decrypt data in blocks of 128 bits, as defined [here](http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf). Because of the length of the key and the number of hashes (14) of this 'flavor' of AES, it takes a long time to perform an attack.
 
