@@ -5,6 +5,8 @@ in a way that provides the same security as a private in person conversation, wh
 can overhear what is being said, and no one (not even the conversation participants) can prove what
 was said, or even that the two participants spoke to each other at all.
 
+Terms used in the context of this protocol have been defined in the [glossary][3] and the [cryptography primitives][4] pages.
+
 ##Table of Contents
 
 1. [What's New in version 4](#whats-new)
@@ -194,3 +196,5 @@ Note. OTR version 4 is the last version to support previous versions.
 
 [1]: http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf
 [2]: https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html
+[3]: glossary.md
+[4]: crytographic_primitives.md
