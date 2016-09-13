@@ -44,12 +44,12 @@ the conversation is ongoing.
 
 The high level flow of this protocol will be:
 
-Alice                                            Bob
---------------------------------------------------------------------------------
-Request OTR conversation         ------------->
-                                 <-------------  OTR v4 is supported
-Establish Conversation with AKE  <------------>  Establish Conversation with AKE
-Exchange Data Messages           <------------>  Exchange Data Messages
+    Alice                                            Bob
+    --------------------------------------------------------------------------------
+    Request OTR conversation         ------------->
+                                     <-------------  OTR v4 is supported
+    Establish Conversation with AKE  <------------>  Establish Conversation with AKE
+    Exchange Data Messages           <------------>  Exchange Data Messages
 
 ## Assumptions <a name="assumptions"></a>
 
