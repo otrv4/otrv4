@@ -6,10 +6,10 @@
 AES-256 is a 128-bit block cipher with a key size of 256 bits. This means that this algorithm is capable of using a cryptographic key of 256 bits to encrypt and decrypt data in blocks of 128 bits, as defined [here](http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf). Because of the length of the key and the number of hashes (14) of this 'flavor' of AES, it takes a long time to perform an attack.
 
 ----
-### Hash: SHA256 128-bit:
+### Hash: SHA256 256 bits:
 
 SHA256 (a member of SHA-2 family of hashes) is a hash function used for comparing the computed "hash" (the output from execution of the function) to a known and expected hash value so a person can determine the data's integrity. It was introduced to provide security level against collision search attack, as defined [here] (http://link.springer.com/chapter/10.1007/978-3-540-24654-1_13).
-SHA-256 algorithm generates an almost-unique, fixed size 256-bit (32-byte) hash. 
+iSHA-256 algorithm generates an almost-unique, fixed size 256-bit (32-byte) hash. 
 
 ----
 ### Group: ed25519 128-bit:
