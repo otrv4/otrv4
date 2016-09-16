@@ -58,21 +58,19 @@ over an underlying protocol which enables the exchange of messages.
 
 ## Security Properties <a name="security-properties"></a>
 
+TODO: differentiate between entire OTR conversation (including AKE) and text conversation (which happens after AKE)
+
 In an off the record conversation, both sides can verify the identity of the other participant
 (but cannot transfer this knowledge to a third party). Participants can converse with the assurance
-that their conversation will not be read or modified by a hostile third party listening to the conversation.
+that their conversation will not be read or modified by a hostile third party.
 
-To resemble an in person conversation means that both ends can deny to
-have participated in said conversation or to have sent one or many of
-the exchanged messages once the conversation is over.
+To resemble an in-person conversation means that both ends can deny that they have participated in
+said conversation. Both ends can also deny having sent one or many of the exchanged messages in the conversation.
 
 An conversation will take place over an insecure channel where
 potential hostile intermediaries are present at different levels.
 
-An interative AKE will happen when both initiator and receiver are online.
-An non-interactive AKE will happen when the initiator is offline and the receiver is online.
-
-### AKE (conversation initialization) properties:
+### AKE properties:
  * Mutual authentication
  * Interactive: participation repudiation for both initiatior and receiver
  * Non-interactive: participation repudiation for *only* the receiver
