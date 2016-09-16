@@ -58,8 +58,6 @@ over an underlying protocol which enables the exchange of messages.
 
 ## Security Properties <a name="security-properties"></a>
 
-TODO: we need to find a better way to describe following (does this belong in the terminology section?)
-
 In an off the record conversation, both sides can verify the identity of the other participant
 (but cannot transfer this knowledge to a third party). Participants can converse with the assurance
 that their conversation will not be read or modified by a hostile third party listening to the conversation.
