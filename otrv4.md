@@ -18,8 +18,8 @@ Terms used in the context of this protocol have been defined in the [glossary][3
 4. [Security Properties](#security-properties)
 
 5. [Online Conversation Initialization](#online-conversation-init)
-  1. [OTR Query Message] (#query-message)
-  2. [Online authenticated key exchange (AKE)] (#online-AKE)
+  1. [OTR Conversation Request] (#conversation-request)
+  2. [Interactive authenticated key exchange (AKE)] (#interactive-AKE)
 
 6. [Offline Conversation Initialization](#offline-conversation-init)
   1. [Offline authenticated key exchange (AKE)] (#offline-AKE)
@@ -56,6 +56,8 @@ The high level flow of this protocol will be:
 At least one participant has an available network and that both ends run the OTR protocol
 over an underlying protocol which enables the exchange of messages.
 
+TODO: Is this about the network model?
+
 ## Security Properties <a name="security-properties"></a>
 
 TODO: differentiate between entire OTR conversation (including AKE) and text conversation (which happens after AKE)
@@ -84,59 +86,62 @@ potential hostile intermediaries are present at different levels.
 Threats that an OTR conversation does not mitigate:
 * An active attacker may perform a Denial of Service attack but not learn the contents of messages.
 
-## Online Conversations Initialization <a name="online-conversation-init"></a>
+## OTR Conversation Initilization 
 
-Alice knows Bob is online because the underlying protocol is
-able to answer questions about Bob's presence.
-
-Alice starts a conversation with Bob by sending a request that
-Bob responds notifying he's ready to start and data message exchange
-begins.
-
-### OTR query message <a name="query-message"></a>
-
-To start a conversation Alice should send either a request to do so or
-notify her willingness to start a conversation (using a whitespace-tagged
-plain-text message). Difference between them is that, in the first,
-a response is expected and, in the second that a response is not expected
-but may appear in the future.
-
-There are two ways Alice can inform Bob that she is willing to speak
-with him: by sending him the OTR Query Message, or by including a special
-"tag" consisting of whitespace characters in one of her messages to him.
-
-The semantics of the OTR Query Message are that Alice is requesting that
-Bob start an OTR conversation with her (if, of course, he is willing and
-able to do so). On the other hand, the semantics of the whitespace tag are
-that Alice is merely indicating to Bob that she is willing and able to have
-an OTR conversation with him. If Bob has a policy of "only use OTR when it's
-explicitly requested", for example, then he would start an OTR conversation
-upon receiving an OTR Query Message, but would not upon receiving the
-whitespace tag.
-
-Both OTR Query Message and Whitespace tag should include the OTR
-versions Alice supports and is willing to use.
-
-The response should include the OTR version that Bob supports and will be used
-through the whole conversation. Bob must choose the latest version he supports.
-
-Alice requests Bob to start a conversation:
-
-| Alice                            | Bob                   |
-|----------------------------------|-----------------------|
-| OTR Query Message or Space Tags  |                       |
-|                                  | supported OTR version |
-
-
-### Online authenticated key exchange (AKE) <a name="online-AKE"></a>
-
-Once the conversation has started Bob will initiate the authenticated key
-exchange (AKE) with Alice.
+OTRv4 conversations are established by an deniable authenticated key exchange
+protocol (DAKE).
 
 This process will use the deniable authenticated key exchange
 mechanism RSDAKE defined by Nik Unger and Ian Goldberg in their paper 
 ["Improved Techniques for Implementing Strongly Deniable
 Authenticated Key Exchanges"][1].
+
+TODO: introduce interactive and non-interactive AKE
+
+TODO: How are long-term public keys distributed? In OTRv3 they are distributed
+as part of the AKE.
+
+## Establishing a conversation when both parties are online <a name="online-conversation-init"></a>
+
+A OTRv4 conversation is established by Alice requesting a conversation with
+Bob.
+
+There are two ways Alice can inform Bob that she is willing to speak
+with him: by sending him the OTR Query Message, or by including a special
+"tag" consisting of whitespace characters in one of her messages to him.
+
+Bob then decides to respond this request or not depending on his policy. And
+AKE messages will be exchanged to establish a shared secret.
+
+The message flow is:
+
+    Alice                                            Bob
+    ---------------------------------------------------------
+    OTRv4 Conversation Request    ------------->
+                                  <-------------    D-H Commit (ψ1)
+    D-H Key and Auth (ψ2)         -------------> 
+
+### Requesting a conversation <a name="conversation-request"></a>
+
+The semantics of the OTR Query Message are that Alice is requesting that
+Bob start an OTR conversation with her (if he is willing and able to do so).
+The semantics of the whitespace tag are that Alice is opportunistically indicating
+to Bob that she is willing to have an OTR conversation with him.
+
+For example, if Bob has a policy of "only use OTR when it's explicitly requested",
+then he would start an OTR conversation upon receiving an OTR Query Message, but
+would not upon receiving the whitespace tag.
+
+Both OTR Query Message and Whitespace tag include the OTR versions Alice supports
+and is willing to use.
+
+Once Bob has decided to start the conversation in response to Alice'e request,
+he will initiate an interactive authenticated key exchange (AKE).
+
+### Interactive authenticated key exchange (AKE) <a name="interactive-AKE"></a>
+
+TODO: introduce this
+TODO: Explain and talk about encoding, state machine, errors, all of it
 
 | Alice                              | Bob                            |
 |------------------------------------|--------------------------------|
@@ -145,32 +150,43 @@ Authenticated Key Exchanges"][1].
 |                                    | verify Auth(R), send {Auth(I)} |
 | verify Auth(R)                     |                                |
 
-#### Requesting Online conversation with older OTR version
+## Establishing a conversation when one participant is offline <a name="offline-conversation-init"></a>
+
+TODO: explain when this will be used?
+
+
+### Non-interactive authenticated key exchange (AKE) <a name="offline-AKE"></a>
+
+TODO: briefly explains the non-interactive AKE, how its the same as interactive
+but with a pre-key storage mechanism.
+
+    Alice                              Pre-key storage                     Bob
+    ---------------------------------------------------------------------------
+                                                       <------ D-H Commit (ψ1) 
+    Pre-key request     ------------->
+                        <------------- D-H Commit (ψ1)
+    D-H Key and Auth (ψ2) ------------------------------------> 
+
+In the non-interactive AKE, Bob generates one (or more) D-H Commit messages,
+named pre-keys for convenience, and stores them in a pre-key storage.
+
+When Alice wants to start a secure conversation, she asks the pre-key storage
+for a pre-key associated with Bob, and treats it as if it were a D-H Commit
+message in the interactive AKE.
+
+TODO: How pre-key storage is protocol-specific, maybe mention the XMPP
+extension for this.
+
+TODO: How to encode pre-keys.
+TODO: How to store pre-keys on device.
+
+## Requesting conversation with older OTR version
 
 Bob might respond to Alice's request or notify of willingness to start a
 conversation with a version lower then version 4. If this is the
 case the protocol falls back to [OTR version 3 specification][2].
 
 Note: OTR version 4 is the latest version to support previous versions.
-
-
-## Offline Conversations Initialization <a name="offline-conversation-init"></a>
-
-### Requesting Offline conversation
-
-#### Requesting Offline conversation with older OTR version
-
-Bob might respond to Alice's request or notify of willingness to start a
-conversation with a version lower then version 4. Since previous
-versions do not provide the ability to maintain an offline
-conversations the starting process is dropped.
-
-Note. OTR version 4 is the last version to support previous versions.
-
-### Offline authenticated key exchange (AKE) <a name="offline-AKE"></a>
-
-#### Initiating Offline AKE
-#### Recieving Offline AKE
 
 ## Data message exchange
 
