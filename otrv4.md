@@ -71,35 +71,19 @@ the exchanged messages once the conversation is over.
 An conversation will take place over an insecure channel where
 potential hostile intermediaries are present at different levels.
 
-Online:
+An interative AKE will happen when both initiator and receiver are online.
+An non-interactive AKE will happen when the initiator is offline and the receiver is online.
 
-An online conversation happens when both initiator and receiver are
-online.
-* at conversation start
- * authentication
- * repudiation for both initiator and receiver
-* while exchanging messages
- * confidentiality
- * integrity
-* after conversation is over
- * forward secrecy
- * malleability
- * repudiation for both initiator and receiver
+### AKE (conversation initialization) properties:
+ * Mutual authentication
+ * Interactive: participation repudiation for both initiatior and receiver
+ * Non-interactive: participation repudiation for *only* the receiver
 
-Offline:
-
-An offline conversation happens when the initiator is offline and the receiver is
-online.
-* at conversation start
- * authentication
- * repudiation for *only* the receiver
-* while exchanging messages
- * confidentiality
- * integrity
-* after conversation is over
- * forward secrecy
- * malleability
- * repudiation for both initiator and receiver
+### Conversation properties:
+ * Confidentiality
+ * Integrity
+ * Forward secrecy
+ * Message deniability
 
 Threats that an OTR conversation does not mitigate:
 * An active attacker may perform a Denial of Service attack but not learn the contents of messages.
