@@ -188,7 +188,123 @@ case the protocol falls back to [OTR version 3 specification][2].
 
 Note: OTR version 4 is the latest version to support previous versions.
 
-## Data message exchange
+## Data Exchange
+This section describes how each participant will use the Double Ratcheting
+algorithm to exchange data using the shared secret established in the DAKE.
+
+### Sending the first Encrypted Message
+The shared secret established in the DAKE will be used to create the initial first
+set of keys: root key (R0), header key (H0), and chain key
+(C0).
+
+R0, H0, C0 = HKDF(SharedSecret)
+
+The root key, chain key, and next header key will be kept to encrypt the following messages
+and decrypt received messages. Next the message keys are derived from the chain key
+and these are used to encrypt the plain text and create a MAC tag.
+
+MKenc || MKmac = HMAC(C0)
+msg = Enc(MKenc, plaintext)
+tag = MAC(MKmac, msg)
+
+Lastly, the first DH ratchet key will be created and encrypted along with the first
+message number, zero. This is data required to continue the double ratchet.
+
+firstDHR = generateECDH()
+
+msgNum = 0
+data = Enc(H0, msgNum || firstDHR) || H0
+
+Send the msg, tag, data, and the H0.
+
+### Decrypting the First Message
+Decrypt the double ratchet data with the header key received.
+
+msgNum || recvDHR = Decrypt(H0, data)
+
+If the msgNum is zero, derive the first root key (R0), header key (H0), and chain key (C0)
+from the shared secret using an HKDF. If the msgNum is not zero, this message was received
+out of order and it must be handled differently.
+
+R0, H0, C0 = HKDF(SharedSecret)
+
+Derive the keys for decryption and MAC tag verification from the chain key and use
+these values to verify the tag and decrypt the message.
+
+MKenc || MKmac = HMAC(C0)
+if valid(MKmac, tag):
+    plaintext = Decrypt(MKenc, msg)
+
+### Sending Subsequent Messages
+If a new DH Ratchet key has been received (recvDHR), begin a new ratchet. To
+begin a new ratchet, create a new DH Ratchet key (newDHR) and use ECDH to derive
+a shared secret from the new key and the received key. This shared secret and the
+current root key are used as input to a HKDF to produce a new root key (Ri), header
+key (Hi), and chain key (Ci). Keep the new DH Ratchet key to decrypt messages later.
+
+newDHR = generateECDH()
+Ri || Hi || Ci = HKDF(Ri-1, ECDH(recvDHR, newDHR))
+store(newDHR)
+
+The new chain key Ci is used to derive the message keys for encrypting and creating
+a MAC tag for the plaintext message.
+
+MKenc || MKmac = HMAC(Ci)
+msg = Enc(MKenc, plaintext)
+tag = MAC(MKmac, msg)
+
+The number of this message and the newDHR ratchet key are also sent encrypted with the
+header key (Hi) generated from the HKDF.
+
+msgNum = 0 because this is the first message within a ratchet
+data = Enc(Hi, msgNum || newDHR)
+msgNum = msgNum + 1
+
+Send the msg, tag, data, and the Hi.
+
+If reply has been received with new DH Ratchet key since beginning a new
+ratchet, sending an encrypted message is simpler. First an HMAC is used to compute
+a new chain key from the current chain. Then this new chain key is used to derive
+new messages keys that for encrypting the message and generating a MAC tag.
+
+Ci+1 = HMAC(Ci)
+MKenc || MKmac = HMAC(Ci+1)
+msg = Enc(MKenc, plaintext)
+tag = MAC(MKmac, msg)
+
+The current message number and the newDHR must also be encrypted with the header key (Hi)
+and sent. If this is the second message sent after starting a new ratchet, the msgNum is 1.
+If it is the third message, the msgNum is 2 and so on.
+
+data = Enc(Hi, msgNum || newDHR)
+msgNum = msgNum + 1
+
+Send the msg, tag, data, and the Hi.
+
+### Decrypting Subsequent Messages
+The encrypted message, message mac code, double ratchet data, and a header key should be a
+part of each received message. Use the header key to decrypt the double ratchet data.
+
+msgNum || recvDHR = Decrypt(recvHK, data)
+
+The msgNum is used to tell what version of the chain key should be used to decrypt the
+message. The recvDHR key is used with the stored DHR key to derive the keys needed to
+decrypt the received message. The recvDHR is also used to send the next set of messages.
+It is the recvDHR referenced at the beginning of the Sending Subsequent Messages section.
+
+storedDHR = getFromStorage()
+RK || Hi || CK = HDKF(Ri, DH(storedDHR, recvDHR))
+
+The message number is used to evaluate what version of the chain key is used to derive the
+decryption key. The message number will be some number i that is greater than 0. So derive the
+ChainKey i times, and then derive the message keys from the i'th chain key. Then use the
+message keys to decrypt the message and validate the tag.
+
+for i = 0; i < msgNum; i++:
+    CK = HMAC(CK)
+MKenc || MKmac = HMAC(CK)
+if valid(MKmac, tag):
+    plaintext = Decrypt(MKenc, msg)
 
 [1]: http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf
 [2]: https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html
