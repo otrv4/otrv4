@@ -91,8 +91,9 @@ Threats that an OTR conversation does not mitigate:
 OTRv4 conversations are established by an deniable authenticated key exchange
 protocol (DAKE).
 
+// TODO add in specific DAKE information
 This process will use the deniable authenticated key exchange
-mechanism RSDAKE defined by Nik Unger and Ian Goldberg in their paper 
+mechanism defined by Nik Unger and Ian Goldberg in their paper.
 ["Improved Techniques for Implementing Strongly Deniable
 Authenticated Key Exchanges"][1].
 
@@ -119,7 +120,7 @@ The message flow is:
     ---------------------------------------------------------
     OTRv4 Conversation Request    ------------->
                                   <-------------    D-H Commit (ψ1)
-    D-H Key and Auth (ψ2)         -------------> 
+    D-H Key and Auth (ψ2)         ------------->
 
 ### Requesting a conversation <a name="conversation-request"></a>
 
@@ -194,6 +195,27 @@ algorithm to exchange data using the shared secret established in the DAKE.
 
 ### Sending Messages
 
+TODO: Define structure of a data message (includes headers, encrypted message, MAC, ephemeral key, old mac keys)
+
+| Alice                                       | Bob                                         |
+|---------------------------------------------|---------------------------------------------|
+| Initialize root key, header key, chain key  | Initialize root key, header key, chain key  |
+|                                             |                                             |
+| Send data message 0                         | Verify MAC, decrypt message 0               |
+| Send data message 1                         | Verify MAC, decrypt message 1               |
+|                                             |                                             |
+|                                             | Ratchet root key, header key, chain key     |
+| Verify MAC, decrypt message 3               | Send data message 3                         |
+| Verify MAC, decrypt message 4               | Send data message 4                         |
+|                                             |                                             |
+| Ratchet root key, header key, chain key     |                                             |
+| Send data message 5                         | Verify MAC, decrypt message 5               |
+| Send data message 6                         | Verify MAC, decrypt message 6               |
+
+#### Initializing the Ratchet
+
+TODO: Bob can initialize the ratchet after receiving the AKE, he doesn't need to wait for the first message.
+
 If it's the very first message we send after AKE.
 The shared secret established in the DAKE will be used to create the initial first
 set of keys: root key (R0), header key (H0), and chain key (C0).
@@ -218,7 +240,6 @@ else if New_Rachet:
 else:
   reuse(privDHRs, pubDHRs)
   reuse(Ri, Hi, Ci_0)
-```
 
 The current ratchet message number (Ns), previous ratchet message number (PNs) and the (pubDHRs) must also be encrypted with the header key (Hi)
 and sent. If this is the first message sent after starting a new ratchet, the Ns is 0.
@@ -251,7 +272,7 @@ Send the ephemeral, ciphertext, mactag.
 
 Receive the ephemeral, ciphertext, mactag.
 
-If it's the very first message we receive after AKE
+If this is the very first message we receive after AKE
 
 ```
 R0, H0, C0_0 = HKDF(SharedSecret)
