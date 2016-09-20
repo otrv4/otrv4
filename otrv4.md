@@ -272,7 +272,25 @@ if valid(MKmac, mactag):
 
 ### Revealing MAC Keys
 
-TODO: we may want to reveal the MKmac for forgebility.
+To provide forgeability of messages, we want to reveal the MAC keys after deciding to abort
+corresponding chainkey.
+
+A receiver can always reveal a MAC key directly after verified this message.
+But receiver should not use/accept the revealed MAC key anymore.
+
+A sender would have different scenarios:
+1. the message is received and MAC key is revealed, which is fine
+2. the message is received but MAC key is not revealed
+3. the message is not yet received
+
+The second and third scenarios are kind of conflict, because it appears the same for a sender
+while no any acknowledgement announced from receiver.
+
+In this case, we need to give the sender a expiring preference to reveal a MAC key by itself
+when he decide the corresponding chain key is no more useful, regardless whether receiver has
+received and verified the message or not.
+
+TODO: deceide when and how the revealing MAC key should be like
 
 [1]: http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf
 [2]: https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html
