@@ -1,8 +1,5 @@
 # Glossary of terms
 
-* Backward secrecy
-  - is when the compromise of a long-term key does not allow subsequent ciphertexts to be decripted by passive attackers. However future ciphertexts are vulnerable to active atackers.
-
 * Conversation
   - is the exchange of messages between two sides, which can rely on an instant messaging mechanism able to send and receive said messages.
 
