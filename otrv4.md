@@ -229,16 +229,16 @@ Then the current chain key (Ci_msgNum) is used to derive messages keys for encry
 and generating a MAC tag.
 
 ```
-MKenc || MKmac = HMAC(Ci_msgNum, "0")
+MKenc || MKmac = SHA3-256(Ci_msgNum || "0")
 ciphertext = Enc(MKenc, plaintext)
 mactag = MAC(MKmac, ciphertext)
 ```
 
-Use HMAC to compute a new chain key (Ci_msgNum+1) from the current chain key (Ci_msgNum).
+Use SHA3-256 to compute a new chain key (Ci_msgNum+1) from the current chain key (Ci_msgNum).
 And increase the current message number (msgNum) by one.
 
 ```
-Ci_msgNum+1 = HMAC(Ci_msgNum, "1")
+Ci_msgNum+1 = SHA3-256(Ci_msgNum || "1")
 msgNum = msgNum + 1
 ```
 
@@ -264,10 +264,15 @@ Derive the keys for decryption and MAC tag verification from the chain key and u
 these keys to verify the tag and decrypt the message.
 
 ```
-MKenc || MKmac = HMAC^msgNum(Ci_0, "0")
+Ci_msgNum = SHA3-256^msgNum(Ci_0 || "0")
+MKenc || MKmac = Ci_msgNum
 if valid(MKmac, mactag):
     plaintext = Decrypt(MKenc, ciphertext)
 ```
+
+### Revealing MAC Keys
+
+TODO: we may want to reveal the MKmac for forgebility.
 
 [1]: http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf
 [2]: https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html
