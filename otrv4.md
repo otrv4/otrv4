@@ -232,7 +232,7 @@ Then the current chain key (Ci_Ns) is used to derive messages keys for encryptin
 and generating a MAC tag.
 
 ```
-MKenc || MKmac = SHA3-256(Ci_Ns || "0")
+MKenc, MKmac = KDF(Ci_Ns || "0")
 ciphertext = Enc(MKenc, plaintext)
 mactag = MAC(MKmac, ciphertext)
 ```
@@ -268,7 +268,7 @@ these keys to verify the tag and decrypt the message.
 
 ```
 Ci_Ns = SHA3-256(Ci_Ns-1 || "1")
-MKenc || MKmac = SHA3-256(Ci_Ns || "0")
+MKenc, MKmac = KDF(Ci_Ns || "0")
 if valid(MKmac, mactag):
     plaintext = Decrypt(MKenc, ciphertext)
 ```
