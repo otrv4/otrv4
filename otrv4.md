@@ -201,7 +201,8 @@ set of keys: root key (R0), header key (H0), and chain key (C0).
 If a new DH Ratchet key has been received (pubDHRr), begin a new ratchet.
 
 To begin a new ratchet, create and store a pair of DH Ratchet key (privDHRr, pubDHRr)
-and use ECDH to compute a shared secret from (privDHRr) and (pubDHRr).
+and use ECDH to compute a shared secret from (privDHRr) and (pubDHRr). After this, set
+previous ratchet message number (PNs) with current number (Ns).
 This shared secret and the current root key (Ri-1) are used as input to a HKDF to derive
 new root key (Ri), header key (Hi), and chain key (Ci).
 
@@ -212,34 +213,36 @@ else if New_Rachet:
   pubDHRs, privDHRs = generateECDH()
   store(privDHRs, pubDHRs)
   Ri, Hi, Ci_0 = HKDF(Ri-1, ECDH(privDHRs, pubDHRr))
+  PNs = Ns
+  Ns = 0
 else:
   reuse(privDHRs, pubDHRs)
   reuse(Ri, Hi, Ci_0)
 ```
 
-The current message number (msgNum) and the (pubDHRs) must also be encrypted with the header key (Hi)
-and sent. If this is the first message sent after starting a new ratchet, the msgNum is 0.
-If it is the second message, the msgNum is 1 and so on.
+The current ratchet message number (Ns), previous ratchet message number (PNs) and the (pubDHRs) must also be encrypted with the header key (Hi)
+and sent. If this is the first message sent after starting a new ratchet, the Ns is 0.
+If it is the second message, the Ns is 1 and so on.
 
 ```
-ephemeral = Enc(Hi, msgNum || pubDHRs)
+ephemeral = Enc(Hi, Ns, PNs || pubDHRs)
 ```
 
-Then the current chain key (Ci_msgNum) is used to derive messages keys for encrypting the message
+Then the current chain key (Ci_Ns) is used to derive messages keys for encrypting the message
 and generating a MAC tag.
 
 ```
-MKenc || MKmac = SHA3-256(Ci_msgNum || "0")
+MKenc || MKmac = SHA3-256(Ci_Ns || "0")
 ciphertext = Enc(MKenc, plaintext)
 mactag = MAC(MKmac, ciphertext)
 ```
 
-Use SHA3-256 to compute a new chain key (Ci_msgNum+1) from the current chain key (Ci_msgNum).
-And increase the current message number (msgNum) by one.
+Use SHA3-256 to compute a new chain key (Ci_Ns+1) from the current chain key (Ci_Ns).
+And increase the current message number (Ns) by one.
 
 ```
-Ci_msgNum+1 = SHA3-256(Ci_msgNum || "1")
-msgNum = msgNum + 1
+Ci_Ns+1 = SHA3-256(Ci_Ns || "1")
+Ns = Ns + 1
 ```
 
 Send the ephemeral, ciphertext, mactag.
@@ -257,18 +260,21 @@ R0, H0, C0_0 = HKDF(SharedSecret)
 Otherwise we derive the keys with current header key (Hi)
 
 ```
-msgNum || pubDHRs = Decrypt(Hi, ephemeral)
+Ns || PNs || pubDHRs = Decrypt(Hi, ephemeral)
 ```
 
 Derive the keys for decryption and MAC tag verification from the chain key and use
 these keys to verify the tag and decrypt the message.
 
 ```
-Ci_msgNum = SHA3-256(Ci_msgNum-1 || "1")
-MKenc || MKmac = SHA3-256(Ci_msgNum || "0")
+Ci_Ns = SHA3-256(Ci_Ns-1 || "1")
+MKenc || MKmac = SHA3-256(Ci_Ns || "0")
 if valid(MKmac, mactag):
     plaintext = Decrypt(MKenc, ciphertext)
 ```
+
+If the messages of previous ratchet is all received, by comparing (PNs) with the number
+of message received. The receiver can decide to discard the keys of previous ratchet.
 
 ### Revealing MAC Keys
 
