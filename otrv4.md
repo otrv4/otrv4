@@ -264,8 +264,8 @@ Derive the keys for decryption and MAC tag verification from the chain key and u
 these keys to verify the tag and decrypt the message.
 
 ```
-Ci_msgNum = SHA3-256^msgNum(Ci_0 || "0")
-MKenc || MKmac = Ci_msgNum
+Ci_msgNum = SHA3-256(Ci_msgNum-1 || "1")
+MKenc || MKmac = SHA3-256(Ci_msgNum || "0")
 if valid(MKmac, mactag):
     plaintext = Decrypt(MKenc, ciphertext)
 ```
