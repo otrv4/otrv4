@@ -190,10 +190,9 @@ case the protocol falls back to [OTR version 3 specification][2].
 Note: OTR version 4 is the latest version to support previous versions.
 
 ## Data Exchange <a name="data-exchange"></a>
+
 This section describes how each participant will use the Double Ratcheting
 algorithm to exchange data using the shared secret established in the DAKE.
-
-### Sending Messages
 
 TODO: Define structure of a data message (includes headers, encrypted message, MAC, ephemeral key, old mac keys)
 
@@ -212,44 +211,45 @@ TODO: Define structure of a data message (includes headers, encrypted message, M
 | Send data message 5                         | Verify MAC, decrypt message 5               |
 | Send data message 6                         | Verify MAC, decrypt message 6               |
 
-#### Initializing the Ratchet
+### Initialization of Double Ratchet
 
-TODO: Bob can initialize the ratchet after receiving the AKE, he doesn't need to wait for the first message.
+After AKE is finished, both side will initialize the first group of root key (R0), header key (H0),
+chain key (C0_0) deriving from SharedSecret.
 
-If it's the very first message we send after AKE.
-The shared secret established in the DAKE will be used to create the initial first
-set of keys: root key (R0), header key (H0), and chain key (C0).
+```
+R0, H0, C0_0 = HKDF(SharedSecret)
+```
 
-If a new DH Ratchet key has been received (pubDHRr), begin a new ratchet.
+### Sending Messages
+
+If a new DH Ratchet key (pubDHRr) has been received, begin a new ratchet.
 
 To begin a new ratchet, create and store a pair of DH Ratchet key (privDHRr, pubDHRr)
-and use ECDH to compute a shared secret from (privDHRr) and (pubDHRr). After this, set
-previous ratchet message number (PNs) with current number (Ns).
+and use ECDH to compute a shared secret from (privDHRr) and (pubDHRr).
 This shared secret and the current root key (Ri-1) are used as input to a HKDF to derive
 new root key (Ri), header key (Hi), and chain key (Ci).
 
 ```
-if First_Message:
-  R0, H0, C0_0 = HKDF(SharedSecret)
-else if New_Rachet:
+if New_Rachet:
   pubDHRs, privDHRs = generateECDH()
   store(privDHRs, pubDHRs)
   Ri, Hi, Ci_0 = HKDF(Ri-1, ECDH(privDHRs, pubDHRr))
-  PNs = Ns
+  discard(Ri-1, Hi-1)
   Ns = 0
 else:
   reuse(privDHRs, pubDHRs)
   reuse(Ri, Hi, Ci_0)
-
-The current ratchet message number (Ns), previous ratchet message number (PNs) and the (pubDHRs) must also be encrypted with the header key (Hi)
-and sent. If this is the first message sent after starting a new ratchet, the Ns is 0.
-If it is the second message, the Ns is 1 and so on.
-
-```
-ephemeral = Enc(Hi, Ns, PNs || pubDHRs)
 ```
 
-Then the current chain key (Ci_Ns) is used to derive messages keys for encrypting the message
+The current ratchet message number (Ns) and the (pubDHRs) must also be encrypted with the header key (Hi) and sent.
+If this is the first message sent after starting a new ratchet, the Ns is 0.
+If this is the second message, the Ns is 1 and so on.
+
+```
+ephemeral = Enc(Hi, Ns || pubDHRs)
+```
+
+Then the current chain key (Ci_Ns) is used to derive message keys for encrypting the message
 and generating a MAC tag.
 
 ```
@@ -272,16 +272,10 @@ Send the ephemeral, ciphertext, mactag.
 
 Receive the ephemeral, ciphertext, mactag.
 
-If this is the very first message we receive after AKE
+we derive the keys with current header key (Hi)
 
 ```
-R0, H0, C0_0 = HKDF(SharedSecret)
-```
-
-Otherwise we derive the keys with current header key (Hi)
-
-```
-Ns || PNs || pubDHRs = Decrypt(Hi, ephemeral)
+Ns || pubDHRs = Decrypt(Hi, ephemeral)
 ```
 
 Derive the keys for decryption and MAC tag verification from the chain key and use
@@ -292,10 +286,8 @@ Ci_Ns = SHA3-256(Ci_Ns-1 || "1")
 MKenc, MKmac = KDF(Ci_Ns || "0")
 if valid(MKmac, mactag):
     plaintext = Decrypt(MKenc, ciphertext)
+    reveal(MKmac)
 ```
-
-If the messages of previous ratchet is all received, by comparing (PNs) with the number
-of message received. The receiver can decide to discard the keys of previous ratchet.
 
 ### Revealing MAC Keys
 
@@ -305,19 +297,7 @@ corresponding chainkey.
 A receiver can always reveal a MAC key directly after verified this message.
 But receiver should not use/accept the revealed MAC key anymore.
 
-A sender would have different scenarios:
-1. the message is received and MAC key is revealed, which is fine
-2. the message is received but MAC key is not revealed
-3. the message is not yet received
-
-The second and third scenarios are kind of conflict, because it appears the same for a sender
-while no any acknowledgement announced from receiver.
-
-In this case, we need to give the sender a expiring preference to reveal a MAC key by itself
-when he decide the corresponding chain key is no more useful, regardless whether receiver has
-received and verified the message or not.
-
-TODO: deceide when and how the revealing MAC key should be like
+A sender can reveal a MAC key when they decide the message is expired.
 
 [1]: http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf
 [2]: https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html
