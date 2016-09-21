@@ -217,8 +217,11 @@ After AKE is finished, both side will initialize the first group of root key (R0
 chain key (C0_0) deriving from SharedSecret.
 
 ```
-R0, H0, C0_0 = HKDF(SharedSecret)
+R0, H0, Ca0_0, Cb0_0 = HKDF(SharedSecret)
 ```
+
+Both side would compare their public keys to choose a chain key for sending and receiving.
+TODO: describe how to decide
 
 ### Sending Messages
 
@@ -233,12 +236,12 @@ new root key (Ri), header key (Hi), and chain key (Ci).
 if New_Rachet:
   pubDHRs, privDHRs = generateECDH()
   store(privDHRs, pubDHRs)
-  Ri, Hi, Ci_0 = HKDF(Ri-1, ECDH(privDHRs, pubDHRr))
-  discard(Ri-1, Hi-1)
+  Ri, Hi, Cai_0, Cbi_0 = HKDF(Ri-1, ECDH(privDHRs, pubDHRr))
+  discard(Ri-1)
   Ns = 0
 else:
   reuse(privDHRs, pubDHRs)
-  reuse(Ri, Hi, Ci_0)
+  reuse(Hi)
 ```
 
 The current ratchet message number (Ns) and the (pubDHRs) must also be encrypted with the header key (Hi) and sent.
@@ -246,23 +249,23 @@ If this is the first message sent after starting a new ratchet, the Ns is 0.
 If this is the second message, the Ns is 1 and so on.
 
 ```
-ephemeral = Enc(Hi, Ns || pubDHRs)
+ephemeral = Enc(Hi, Ns || Nr || pubDHRs)
 ```
 
-Then the current chain key (Ci_Ns) is used to derive message keys for encrypting the message
+Then the current chain key (Csi_Ns) is used to derive message keys for encrypting the message
 and generating a MAC tag.
 
 ```
-MKenc, MKmac = KDF(Ci_Ns || "0")
+MKenc, MKmac = KDF(Csi_Ns || "0")
 ciphertext = Enc(MKenc, plaintext)
 mactag = MAC(MKmac, ciphertext)
 ```
 
-Use SHA3-256 to compute a new chain key (Ci_Ns+1) from the current chain key (Ci_Ns).
+Use SHA3-256 to compute a new chain key (Csi_Ns+1) from the current chain key (Csi_Ns).
 And increase the current message number (Ns) by one.
 
 ```
-Ci_Ns+1 = SHA3-256(Ci_Ns || "1")
+Csi_Ns+1 = SHA3-256(Csi_Ns || "1")
 Ns = Ns + 1
 ```
 
@@ -272,20 +275,20 @@ Send the ephemeral, ciphertext, mactag.
 
 Receive the ephemeral, ciphertext, mactag.
 
-we derive the keys with current header key (Hi)
+We decrypt the header with current header key (Hi)
 
 ```
-Ns || pubDHRs = Decrypt(Hi, ephemeral)
+Ns || Nr || pubDHRs = Decrypt(Hi, ephemeral)
 ```
 
 Derive the keys for decryption and MAC tag verification from the chain key and use
 these keys to verify the tag and decrypt the message.
 
 ```
-Ci_Ns = SHA3-256(Ci_Ns-1 || "1")
-MKenc, MKmac = KDF(Ci_Ns || "0")
+Cri_Ns = SHA3-256(Cri_Ns-1 || "1")
+MKdec, MKmac = KDF(Cri_Ns || "0")
 if valid(MKmac, mactag):
-    plaintext = Decrypt(MKenc, ciphertext)
+    plaintext = Decrypt(MKdec, ciphertext)
     reveal(MKmac)
 ```
 
@@ -296,6 +299,8 @@ corresponding chainkey.
 
 A receiver can always reveal a MAC key directly after verified this message.
 But receiver should not use/accept the revealed MAC key anymore.
+
+A sender can reveal the MAC keys corresponding to the Nr that a receiver replyed in header.
 
 [1]: http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf
 [2]: https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html
