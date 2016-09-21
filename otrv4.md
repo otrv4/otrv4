@@ -297,8 +297,6 @@ corresponding chainkey.
 A receiver can always reveal a MAC key directly after verified this message.
 But receiver should not use/accept the revealed MAC key anymore.
 
-A sender can reveal a MAC key when they decide the message is expired.
-
 [1]: http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf
 [2]: https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html
 [3]: glossary.md
