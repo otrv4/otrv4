@@ -229,6 +229,8 @@ Otherwise, she is the "low" end.
   - If she is the "high" end, use Ca0_0 as the sending chain key, Cb0_0 as the receiving chain key.
   - If she is the "low" end, use Cb0_0 as the sending chain key, Ca0_0 as the receiving chain key.
 
+### Sending Messages
+
 If a new DH Ratchet key (pubDHRr) has been received, begin a new ratchet.
 
 To begin a new ratchet, create and store a pair of DH Ratchet key (privDHRr, pubDHRr)
