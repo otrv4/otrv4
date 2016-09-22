@@ -306,7 +306,7 @@ corresponding chainkey.
 A receiver can always reveal a MAC key directly after verified this message.
 But receiver should not use/accept the revealed MAC key anymore.
 
-A sender can reveal the MAC keys corresponding to the Nr that a receiver replyed in header.
+The Revealing MAC key can be attached inside of a heartbeat message.
 
 [1]: http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf
 [2]: https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html
