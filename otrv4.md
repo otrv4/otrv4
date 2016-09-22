@@ -220,10 +220,14 @@ chain key (C0_0) deriving from SharedSecret.
 R0, H0, Ca0_0, Cb0_0 = HKDF(SharedSecret)
 ```
 
-Both side would compare their public keys to choose a chain key for sending and receiving.
-TODO: describe how to decide
+Both side would compare their public keys to choose a chain key for sending and receiving:
 
-### Sending Messages
+- Alice (and similarly for Bob) determines if she is the "low" end or the "high" end of this Data Message.
+If Alice's ephemeral D-H public key is numerically greater than Bob's public key, then she is the "high" end.
+Otherwise, she is the "low" end.
+- She select the chain keys for sending and receiving:
+  - If she is the "high" end, use Ca0_0 as the sending chain key, Cb0_0 as the receiving chain key.
+  - If she is the "low" end, use Cb0_0 as the sending chain key, Ca0_0 as the receiving chain key.
 
 If a new DH Ratchet key (pubDHRr) has been received, begin a new ratchet.
 
