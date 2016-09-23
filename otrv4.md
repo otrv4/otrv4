@@ -217,7 +217,7 @@ After AKE is finished, both side will initialize the first group of root key (R0
 chain key (C0_0) deriving from SharedSecret.
 
 ```
-R0, H0, Ca0_0, Cb0_0 = HKDF(SharedSecret)
+R0, H0, Ca0_0, Cb0_0 = KDF(SharedSecret)
 ```
 
 Both side would compare their public keys to choose a chain key for sending and receiving:
@@ -242,7 +242,8 @@ new root key (Ri), header key (Hi), and chain key (Ci).
 if New_Rachet:
   pubDHRs, privDHRs = generateECDH()
   store(privDHRs, pubDHRs)
-  Ri, Hi, Cai_0, Cbi_0 = HKDF(Ri-1, ECDH(privDHRs, pubDHRr))
+  NewSharedSecret = SHA3(Ri-1 || ECDH(privDHRs, pubDHRr))
+  Ri, Hi, Cai_0, Cbi_0 = KDF(NewSharedSecret)
   discard(Ri-1)
   Ns = 0
 else:
