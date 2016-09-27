@@ -194,30 +194,30 @@ Note: OTR version 4 is the latest version to support previous versions.
 This section describes how each participant will use the Double Ratcheting
 algorithm to exchange data using the shared secret established in the DAKE.
 
-TODO: Define structure of a data message (includes headers, encrypted message, MAC, ephemeral key, old mac keys)
+TODO: Define structure of a data message (includes header, encrypted message, MAC, ephemeral key, old mac keys)
 
 | Alice                                       | Bob                                         |
 |---------------------------------------------|---------------------------------------------|
-| Initialize root key, header key, chain key  | Initialize root key, header key, chain key  |
+| Initialize root key, chain key              | Initialize root key, chain key              |
 |                                             |                                             |
 | Send data message 0                         | Verify MAC, decrypt message 0               |
 | Send data message 1                         | Verify MAC, decrypt message 1               |
 |                                             |                                             |
-|                                             | Ratchet root key, header key, chain key     |
+|                                             | Ratchet root key, chain key                 |
 | Verify MAC, decrypt message 3               | Send data message 3                         |
 | Verify MAC, decrypt message 4               | Send data message 4                         |
 |                                             |                                             |
-| Ratchet root key, header key, chain key     |                                             |
+| Ratchet root key, chain key                 |                                             |
 | Send data message 5                         | Verify MAC, decrypt message 5               |
 | Send data message 6                         | Verify MAC, decrypt message 6               |
 
 ### Initialization of Double Ratchet
 
-After AKE is finished, both side will initialize the first group of root key (R0), header key (H0),
-chain key (C0_0) deriving from SharedSecret.
+After AKE is finished, both side will initialize the first group of root key (R0) and chain key
+(C0_0) deriving from SharedSecret.
 
 ```
-R0, H0, Ca0_0, Cb0_0 = KDF(SharedSecret)
+R0, Ca0_0, Cb0_0 = KDF(SharedSecret)
 ```
 
 Both side would compare their public keys to choose a chain key for sending and receiving:
@@ -236,7 +236,7 @@ If a new DH Ratchet key (pubDHRr) has been received, begin a new ratchet.
 To begin a new ratchet, create and store a pair of DH Ratchet key (privDHRr, pubDHRr)
 and use ECDH to compute a shared secret from (privDHRr) and (pubDHRr).
 This shared secret and the current root key (Ri-1) are used as input to a HKDF to derive
-new root key (Ri), header key (Hi), and chain key (Ci).
+new root key (Ri) and chain key (Ci).
 
 ```
 if New_Rachet:
@@ -245,18 +245,19 @@ if New_Rachet:
   NewSharedSecret = SHA3(Ri-1 || ECDH(privDHRs, pubDHRr))
   Ri, Hi, Cai_0, Cbi_0 = KDF(NewSharedSecret)
   discard(Ri-1)
+  i = i + 1
   Ns = 0
 else:
   reuse(privDHRs, pubDHRs)
   reuse(Hi)
 ```
 
-The current ratchet message number (Ns) and the (pubDHRs) must also be encrypted with the header key (Hi) and sent.
+The current ratchet id (i), current message keyid (Ns) and the (pubDHRs) must also be sent.
 If this is the first message sent after starting a new ratchet, the Ns is 0.
 If this is the second message, the Ns is 1 and so on.
 
 ```
-ephemeral = Enc(Hi, Ns || Nr || pubDHRs)
+header = i || Ns || pubDHRs
 ```
 
 Then the current chain key (Csi_Ns) is used to derive message keys for encrypting the message
@@ -265,7 +266,7 @@ and generating a MAC tag.
 ```
 MKenc, MKmac = KDF(Csi_Ns || "0")
 ciphertext = Enc(MKenc, plaintext)
-mactag = MAC(MKmac, ciphertext)
+mactag = MAC(MKmac, header || ciphertext)
 ```
 
 Use SHA3-256 to compute a new chain key (Csi_Ns+1) from the current chain key (Csi_Ns).
@@ -276,16 +277,14 @@ Csi_Ns+1 = SHA3-256(Csi_Ns || "1")
 Ns = Ns + 1
 ```
 
-Send the ephemeral, ciphertext, mactag.
+Send the header, ciphertext, mactag.
 
 ### Receiving Message
 
-Receive the ephemeral, ciphertext, mactag.
-
-We decrypt the header with current header key (Hi)
+Receive the header, ciphertext, mactag.
 
 ```
-Ns || Nr || pubDHRs = Decrypt(Hi, ephemeral)
+i || Ns || pubDHRs = header
 ```
 
 Derive the keys for decryption and MAC tag verification from the chain key and use
@@ -308,6 +307,69 @@ A receiver can always reveal a MAC key directly after verified this message.
 But receiver should not use/accept the revealed MAC key anymore.
 
 The Revealing MAC key can be attached inside of a heartbeat message.
+
+### Packet format
+
+Protocol version (SHORT)
+
+    The version number of this protocol is 0x0003.
+
+Message type (BYTE)
+
+    The Data Message has type 0x03.
+
+Sender Instance tag (INT)
+
+    The instance tag of the person sending this message.
+
+Receiver Instance tag (INT)
+
+    The instance tag of the intended recipient.
+
+Flags (BYTE)
+
+    The bitwise-OR of the flags for this message. Usually you should set this to 0x00. The only currently defined flag is:
+
+    IGNORE_UNREADABLE (0x01)
+
+        If you receive a Data Message with this flag set, and you are unable to decrypt the message or verify
+        the MAC (because, for example, you don't have the right keys), just ignore the message instead of producing
+        some kind of error or notification to the user.
+
+Ratchet id i (INT)
+
+    Must be strictly greater than 0, and increment by 1 with each ratchet
+
+Sender keyid Ns (INT)
+
+    Must be strictly greater than 0, and increment by 1 with each message
+
+pubDHRs (MPI)
+
+    The *next* ratchet [i.e. sender_keyid+1] public key for the sender
+
+Top half of counter init (CTR)
+
+    This should monotonically increase (as a big-endian value) for each message sent with the same (sender keyid,
+    recipient keyid) pair, and must not be all 0x00.
+
+Encrypted message (DATA)
+
+    Using the appropriate encryption key (see below) derived from the sender's and recipient's DH public keys
+    (with the keyids given in this message), perform AES128 counter-mode (CTR) encryption of the message.
+    The initial counter is a 16-byte value whose first 8 bytes are the above "top half of counter init" value,
+    and whose last 8 bytes are all 0x00.
+    Note that counter mode does not change the length of the message, so no message padding needs to be done.
+    If you *want* to do message padding (to disguise the length of your message), use the above TLV of type 0.
+
+Authenticator (MAC)
+
+    The SHA3 MAC, using the appropriate MAC key (see below) of everything from the Protocol version to the end
+    of the encrypted message
+
+Old MAC keys to be revealed (DATA)
+
+    See "Revealing MAC Keys"
 
 [1]: http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf
 [2]: https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html
