@@ -245,11 +245,10 @@ if New_Ratchet:
   pubDHRs, privDHRs = generateECDH()
   store(privDHRs, pubDHRs)
   NewSharedSecret = SHA3(Ri-1 || ECDH(privDHRs, pubDHRr))
-  Ri, Hi, Cai_0, Cbi_0 = KDF(NewSharedSecret)
+  Ri, Cai_0, Cbi_0 = KDF(NewSharedSecret)
   discard(Ri-1)
 else:
   reuse(privDHRs, pubDHRs)
-  reuse(Hi)
 ```
 
 The current ratchet id (i), current message keyid (Ns) and the (pubDHRs) must also be sent.
