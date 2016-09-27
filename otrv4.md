@@ -239,14 +239,14 @@ This shared secret and the current root key (Ri-1) are used as input to a HKDF t
 new root key (Ri) and chain key (Ci).
 
 ```
-if New_Rachet:
+if New_Ratchet:
+  i = i + 1
+  Ns = 0
   pubDHRs, privDHRs = generateECDH()
   store(privDHRs, pubDHRs)
   NewSharedSecret = SHA3(Ri-1 || ECDH(privDHRs, pubDHRr))
   Ri, Hi, Cai_0, Cbi_0 = KDF(NewSharedSecret)
   discard(Ri-1)
-  i = i + 1
-  Ns = 0
 else:
   reuse(privDHRs, pubDHRs)
   reuse(Hi)
