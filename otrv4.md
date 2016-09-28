@@ -335,11 +335,11 @@ We reveal old MAC keys to provide forgeability of messages. Old MAC keys are key
 
 MAC keys are revealed with data messages. They are also revealed with heartbeat messages (data messages that encode a plaintext of zero length) if the receiver has not sent a message in a configurable amount of time.
 
-A conversation participant can reveal a MAC key in the following case:
+A receiver can reveal a MAC key in the following case:
 
-- the participant has received a message and has verified the message's authenticity
-- the participant has discarded associated message keys
-- the participant has discarded the chain key that can be used to compute the message keys (chain keys from previous ratchets might be stored to compute message keys for skipped or delayed messages)
+- the receiver has received a message and has verified the message's authenticity
+- the receiver has discarded associated message keys
+- the receiver has discarded the chain key that can be used to compute the message keys (chain keys from previous ratchets might be stored to compute message keys for skipped or delayed messages)
 
 
 ### Packet format
