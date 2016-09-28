@@ -141,6 +141,16 @@ he will initiate an interactive authenticated key exchange (AKE).
 
 ### Interactive authenticated key exchange (AKE) <a name="interactive-AKE"></a>
 
+```
+    Alice                              Bob
+    ---------------------------------------
+    Query Message     ------->
+                      <------- Pre-key (ψ1)
+    DRE and Auth (ψ2) ------->
+                      <-------    Auth (ψ3)
+```
+
+
 TODO: introduce this
 TODO: Explain and talk about encoding, state machine, errors, all of it
 
@@ -161,12 +171,14 @@ TODO: explain when this will be used?
 TODO: briefly explains the non-interactive AKE, how its the same as interactive
 but with a pre-key storage mechanism.
 
+```
     Alice                              Pre-key storage                     Bob
     ---------------------------------------------------------------------------
-                                                       <------ D-H Commit (ψ1) 
-    Pre-key request     ------------->
-                        <------------- D-H Commit (ψ1)
-    D-H Key and Auth (ψ2) ------------------------------------> 
+                                                       <--------- Pre-key (ψ1)
+    Pre-key request   ------------->
+                      <-------------   Pre-key (ψ1)
+    DRE and Auth (ψ2) ------------------------------------------>
+```
 
 In the non-interactive AKE, Bob generates one (or more) D-H Commit messages,
 named pre-keys for convenience, and stores them in a pre-key storage.
@@ -198,7 +210,6 @@ TODO: Define structure of a data message (includes header, encrypted message, MA
 
 | Alice                                       | Bob                                         |
 |---------------------------------------------|---------------------------------------------|
-| Initialize root key, chain key              | Initialize root key, chain key              |
 |                                             |                                             |
 | Send data message 0                         | Verify MAC, decrypt message 0               |
 | Send data message 1                         | Verify MAC, decrypt message 1               |
@@ -211,6 +222,46 @@ TODO: Define structure of a data message (includes header, encrypted message, MA
 | Send data message 5                         | Verify MAC, decrypt message 5               |
 | Send data message 6                         | Verify MAC, decrypt message 6               |
 
+```
+    Alice                                                                           Bob
+    -----------------------------------------------------------------------------------
+    Initialize root key, chain keys                        Initialize root key, chain keys
+    Generate DH, pubDHa, privDHa                           Generate DH, pubDHb, privDHb
+    Send data message 0_0            -------------------->
+    Send data message 0_1            -------------------->
+
+                                                           Receive data message 0_0
+                                                           Recover receiving chain key 0_0
+                                                           Derive Enc-key & MAC-key
+                                                           Verify MAC, Decrypt message 0_0
+                                     <-------------------- Reveal MAC key of message 0_0
+
+                                                           Receive data message 0_1
+                                                           Recover receiving chain key 0_1
+                                                           Derive Enc-key & MAC-key
+                                                           Verify MAC, Decrypt message 0_1
+                                     <-------------------- Reveal MAC key of message 0_1
+
+                                                           Racheting with root key, pubDHa, privDHb
+
+                                     <-------------------- Send data message 1_0
+                                     <-------------------- Send data message 1_1
+
+    Receive data message 1_0
+
+    Racheting with root key, pubDHa, privDHb
+
+    Recover receiving chain key 1_0
+    Derive Enc-key & MAC-key
+    Verify MAC, Decrypt message 1_0
+    Reveal MAC key of message 1_0    -------------------->
+
+    Receive data message 1_1
+    Recover receiving chain key 1_1
+    Derive Enc-key & MAC-key
+    Verify MAC, Decrypt message 1_1
+    Reveal MAC key of message 1_1    -------------------->
+```
 ### Initialization of Double Ratchet
 
 After AKE is finished, both side will initialize the first group of root key (R0) and chain key
