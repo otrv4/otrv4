@@ -344,6 +344,7 @@ A receiver can reveal a MAC key in the following case:
 
 ### Packet format
 
+```
 Protocol version (SHORT)
 
     The version number of this protocol is 0x0003.
@@ -404,6 +405,7 @@ Authenticator (MAC)
 Old MAC keys to be revealed (DATA)
 
     See "Revealing MAC Keys"
+```
 
 [1]: http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf
 [2]: https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html
