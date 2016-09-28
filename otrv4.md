@@ -351,13 +351,16 @@ if valid(MKmac, mactag):
 
 ### Revealing MAC Keys
 
-To provide forgeability of messages, we want to reveal the MAC keys after deciding to abort
-corresponding chainkey.
+We reveal old MAC keys to provide forgeability of messages. Old MAC keys are keys that will no longer be used to verify the authenticity of a message.
 
-A receiver can always reveal a MAC key directly after verified this message.
-But receiver should not use/accept the revealed MAC key anymore.
+MAC keys are revealed with data messages. They are also revealed with heartbeat messages (data messages that encode a plaintext of zero length) if the receiver has not sent a message in a configurable amount of time.
 
-The Revealing MAC key can be attached inside of a heartbeat message.
+A conversation participant can reveal a MAC key in the following case:
+
+- the participant has received a message and has verified the message's authenticity
+- the participant has discarded associated message keys
+- the participant has discarded the chain key that can be used to compute the message keys (chain keys from previous ratchets might be stored to compute message keys for skipped or delayed messages)
+
 
 ### Packet format
 
