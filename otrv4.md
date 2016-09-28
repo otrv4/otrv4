@@ -147,7 +147,7 @@ he will initiate an interactive authenticated key exchange (AKE).
     Query Message     ------->
                       <------- Pre-key (ψ1)
     DRE and Auth (ψ2) ------->
-                      <-------    Auth (ψ3)
+                               Verify & Decrypt (ψ2)
 ```
 
 
@@ -178,6 +178,7 @@ but with a pre-key storage mechanism.
     Pre-key request   ------------->
                       <-------------   Pre-key (ψ1)
     DRE and Auth (ψ2) ------------------------------------------>
+                                                         Verify & Decrypt (ψ2)
 ```
 
 In the non-interactive AKE, Bob generates one (or more) D-H Commit messages,
