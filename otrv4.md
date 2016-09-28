@@ -116,11 +116,15 @@ AKE messages will be exchanged to establish a shared secret.
 
 The message flow is:
 
-    Alice                                            Bob
-    ---------------------------------------------------------
-    OTRv4 Conversation Request    ------------->
-                                  <-------------    D-H Commit (ψ1)
-    D-H Key and Auth (ψ2)         ------------->
+```
+    Alice                                          Bob
+    ---------------------------------------------------
+    Conversation Request ------->
+                         <------- Pre-key (ψ1)
+    DRE and Auth (ψ2)    ------->
+                                  Verify & Decrypt (ψ2)
+```
+
 
 ### Requesting a conversation <a name="conversation-request"></a>
 
@@ -141,15 +145,6 @@ he will initiate an interactive authenticated key exchange (AKE).
 
 ### Interactive authenticated key exchange (AKE) <a name="interactive-AKE"></a>
 
-```
-    Alice                              Bob
-    ---------------------------------------
-    Query Message     ------->
-                      <------- Pre-key (ψ1)
-    DRE and Auth (ψ2) ------->
-                               Verify & Decrypt (ψ2)
-```
-
 
 TODO: introduce this
 TODO: Explain and talk about encoding, state machine, errors, all of it
@@ -163,14 +158,6 @@ TODO: Explain and talk about encoding, state machine, errors, all of it
 
 ## Establishing a conversation when one participant is offline <a name="offline-conversation-init"></a>
 
-TODO: explain when this will be used?
-
-
-### Non-interactive authenticated key exchange (AKE) <a name="offline-AKE"></a>
-
-TODO: briefly explains the non-interactive AKE, how its the same as interactive
-but with a pre-key storage mechanism.
-
 ```
     Alice                              Pre-key storage                     Bob
     ---------------------------------------------------------------------------
@@ -180,6 +167,13 @@ but with a pre-key storage mechanism.
     DRE and Auth (ψ2) ------------------------------------------>
                                                          Verify & Decrypt (ψ2)
 ```
+
+TODO: explain when this will be used?
+
+### Non-interactive authenticated key exchange (AKE) <a name="offline-AKE"></a>
+
+TODO: briefly explains the non-interactive AKE, how its the same as interactive
+but with a pre-key storage mechanism.
 
 In the non-interactive AKE, Bob generates one (or more) D-H Commit messages,
 named pre-keys for convenience, and stores them in a pre-key storage.
@@ -208,20 +202,6 @@ This section describes how each participant will use the Double Ratcheting
 algorithm to exchange data using the shared secret established in the DAKE.
 
 TODO: Define structure of a data message (includes header, encrypted message, MAC, ephemeral key, old mac keys)
-
-| Alice                                       | Bob                                         |
-|---------------------------------------------|---------------------------------------------|
-|                                             |                                             |
-| Send data message 0                         | Verify MAC, decrypt message 0               |
-| Send data message 1                         | Verify MAC, decrypt message 1               |
-|                                             |                                             |
-|                                             | Ratchet root key, chain key                 |
-| Verify MAC, decrypt message 3               | Send data message 3                         |
-| Verify MAC, decrypt message 4               | Send data message 4                         |
-|                                             |                                             |
-| Ratchet root key, chain key                 |                                             |
-| Send data message 5                         | Verify MAC, decrypt message 5               |
-| Send data message 6                         | Verify MAC, decrypt message 6               |
 
 ```
     Alice                                                                           Bob
