@@ -28,6 +28,7 @@ Alice completes the authenticated key exchange
 ψ2 := ("R", γ, σ)
 k := (g^i)^r
 [COMPUTE HERE DH-2048 KEY]
+[COMPUTE HERE k := KDF(k, DH-2048key)]
 
 DH_MESSAGE {
 message: ψ2
@@ -36,19 +37,21 @@ message: ψ2
 Bob verifies the authenticated key exchange and decrypts γ
 Verify(σ)
 k := (g^r)^i
+[COMPUTE HERE k := KDF(k, DH-2048key)]
 
 Alice and Bob initialize keys
-Rk: root key
-Ck: chain key
-DHR: ratchet key
-N: message counter
+
+State:
 s: sender
 r: responder
+Rk: root key
+Ck: chain key
+DHR: DH or ECDH ratchet key
+N: message counter
 SK: super key
 B1: Bob's initial ratchet key
 
 Alice
-[REPLACE THIS LINE WITH KDF(k, SIDHkey)]
 Rk, Cks<none>, Ckr, B1 := KDF(k)
 Ns, Nr = 0, 0
 pubDH, privDH := GenDH()
