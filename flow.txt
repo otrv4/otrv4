@@ -11,7 +11,7 @@ REQUEST_MESSAGE {
 
 Bob starts the authenticated key exchange
 PKb, SKb := GenDHKeyPair(g1);
-ψ1 := ("I", PKb)
+ψ1 := ("I", g1^i)
 [COMPUTE HERE DH-2048 KEY]
 
 DH_COMMIT {
@@ -21,10 +21,10 @@ selectedVersion: "?OTRv4?"
 
 Alice completes the authenticated key exchange
 PKa, SKa := GenDHKeyPair(g2);
-γ = DREnc(LTPKa, LTPKb, "I", "R", PKb, PKa)
-σ := Auth(ZKP, "I"||"R"||PKb||γ, "?OTRv4?")
+γ = DREnc(PKa, PKb, "I" || "R" || g1^i || g1^r)
+σ := Auth(ZKP, "I"||"R"|| g1^i ||γ, "?OTRv4?")
 ψ2 := ("R", γ, σ)
-k := g^ir
+k := (g^i)^r
 [COMPUTE HERE DH-2048 KEY]
 
 DH_MESSAGE {
@@ -33,7 +33,7 @@ message: ψ2
 
 Bob verifies the authenticated key exchange and decrypts γ
 Verify(σ)
-k := g^ri
+k := (g^r)^i
 
 Alice and Bob initialize keys
 Rk: root key
