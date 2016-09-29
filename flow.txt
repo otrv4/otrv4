@@ -51,52 +51,53 @@ N: message counter
 B1: Bob's initial ratchet key
 Mk: message key
 
+// TO DO: Correct this to the correct flow
+
 Initialization:
 Alice
-Rk, Cks<none>, Ckr
+Rk_1, Cks<none>, Ckr := KDF(k)
 B1
 Ns, Nr = 0, 0
-pubDH, privDH := GenDH()
+pubDH_a, privDH_a := GenDH()
 iAmSender := pubDHa > pubDHb
 
 Bob
-Rk, Cks, Ckr<none> := KDF(k)
+Rk_1, Cks, Ckr<none> := KDF(k)
 Ns, Nr = 0, 0
-B1 := pubDH, privDH := GenDH()
+B1 := pubDH_b, privDH_b := GenDH()
 iAmSender := pubDHa > pubDHb
 
 Exchange of messages
 
 Alice sends message (s)
-[REPLACE THIS LINE WITH KDF(k, SIDHkey)]
-DHRs, DHRr<none>, B1 := KDF(k)
-Mk := HMAC(CKs, "0")
-c1 := Enc(Mk, p1)
+DHRs(pubDH_a, privDH_a), DHRr<B1>(pubDH_b)
+Mk_1 := HMAC(CKs_1, "0")
+c1 := Enc(Mk_1, p_1)
 Ns = Ns + 1
-Cks = HMAC(Cks, "1")
+Cks_2 = HMAC(Cks_1, "1")
 
 DATA_MESSAGE {
 message: c1
-pk: pubDHa
+pk: pubDH_a
 }
 
-Alice sends a second message (with same ratchet)
-Mk := HMAC(CKs, "0") // Rosalie
-c2 := Enc(Mk, p2)
+Alice sends a second message (in the same ratchet)
+Mk_2 := HMAC(CKs_2, "0") // Ask about the KDF function, add MAC. 
+c2 := Enc(Mk_2, p_2)
 Ns = Ns + 1
-Cks = HMAC(Cks, "1")
+Cks_3 = HMAC(Cks_2, "1")
 
 DATA_MESSAGE {
 message: c2
-pk: pubDHa
+pk: pubDH_a
 }
 
 Bob reads messages (r)
-Mk := mac then dec(Cks, "0") // Rosalie
-macP1 := get mac(Cks) // Rosalie
+Mk_1 := KDF(Ckr_1, "0") // Ask about the function
+macP1 := get mac(Mk_1) // Rosalie
 Verify(c1, macP1)
-p1 := Des(Mk, c1)
-Cks = HMAC(Cks, "1")
+p1 := Dec(Mk_1, c1)
+Ckr_1 = HMAC(Ckr_2, "1")
 
 Bob sends heartbeat
 DATA_MESSAGE {
@@ -104,20 +105,20 @@ message: macP1
 }
 
 Bob reads messages (r)
-Mk := mac then dec(Cks, "0") // Rosalie
-macP2 := get mac(Cks) // Rosalie
+Mk_2 := KDF(Ckr_2, "0")
+macP2 := get mac(Mk_2) // Rosalie
 Verify(c2, macP2)
-p2 := Des(Mk, c2)
+p2 := Dec(Mk_2, c2)
 
 Bob sends heartbeat
+
 DATA_MESSAGE {
 message: macP2
 }
 
 Bob responses (new ratchet)
-pubDHb, privDHb := genECDH(x) // Rosalie EC, x
-[REPLACE THIS LINE WITH KDF(Rk, privDHb, pubDHa, SIDHkey)]
-Rk, Cks<none>, Ckr, DHRs, DHRr<none> := KDF(Rk, privDHb, pubDHa)
+pubDHb, privDHb := genECDH() // Ask about the function
+Rk_2, Cks := KDF(HMAC(Rk_1, privDHb, pubDHa)
 Ns, Nr = 0, 0
 
 // bis message sending pletora
