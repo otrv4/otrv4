@@ -10,8 +10,8 @@ REQUEST_MESSAGE {
 }
 
 Bob starts the authenticated key exchange
-PKb, SKb := GenDHKeyPair(g1);
-ψ1 := ("I", g1^i)
+PKb, SKb := GenCSKeyPair(g1)
+ψ1 := ("I", g1^i);
 [COMPUTE HERE DH-2048 KEY]
 
 DH_COMMIT {
@@ -20,9 +20,9 @@ selectedVersion: "?OTRv4?"
 }
 
 Alice completes the authenticated key exchange
-PKa, SKa := GenDHKeyPair(g2);
+PKa, SKa := GenCSKeyPair(g2)
 γ = DREnc(PKa, PKb, "I" || "R" || g1^i || g1^r)
-σ := Auth(ZKP, "I"||"R"|| g1^i ||γ, "?OTRv4?")
+σ := Auth(Ai, ai, {S}, "I"||"R"|| g1^i ||γ || "?OTRv4?") where Ai, ai, and {S} are part of CS PK and SK.
 ψ2 := ("R", γ, σ)
 k := (g^i)^r
 [COMPUTE HERE DH-2048 KEY]
