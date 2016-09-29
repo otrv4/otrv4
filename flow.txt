@@ -1,6 +1,10 @@
 Interactive conversation
 Alice and Bob are honest
-LTPK: long term PK
+
+Setup:
+Long term keys:
+Bob: PKb, SKb := GenCSKeyPair(g1)
+Alice: PKa, SKa := GenCSKeyPair(g2)
 
 [INSERT HERE DOWNGRADE ATTACK PROTECTION]
 
@@ -10,8 +14,7 @@ REQUEST_MESSAGE {
 }
 
 Bob starts the authenticated key exchange
-PKb, SKb := GenCSKeyPair(g1)
-ψ1 := ("I", g1^i);
+ψ1 := ("I", g1^i)
 [COMPUTE HERE DH-2048 KEY]
 
 DH_COMMIT {
@@ -20,8 +23,7 @@ selectedVersion: "?OTRv4?"
 }
 
 Alice completes the authenticated key exchange
-PKa, SKa := GenCSKeyPair(g2)
-γ = DREnc(PKa, PKb, "I" || "R" || g1^i || g1^r)
+γ := DREnc(PKa, PKb, "I" || "R" || g1^i || g1^r)
 σ := Auth(Ai, ai, {S}, "I"||"R"|| g1^i ||γ || "?OTRv4?") where Ai, ai, and {S} are part of CS PK and SK.
 ψ2 := ("R", γ, σ)
 k := (g^i)^r
