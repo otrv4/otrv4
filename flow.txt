@@ -12,11 +12,11 @@ REQUEST_MESSAGE {
 Bob starts the authenticated key exchange
 PKb, SKb := GenDHKeyPair(g1);
 ψ1 := ("I", PKb)
-[COMPUTE HERE SIDH KEY]
+[COMPUTE HERE DH-2048 KEY]
 
 DH_COMMIT {
 message : ψ1
-selectedVersion:  "?OTRv4?"
+selectedVersion: "?OTRv4?"
 }
 
 Alice completes the authenticated key exchange
@@ -25,7 +25,7 @@ PKa, SKa := GenDHKeyPair(g2);
 σ := Auth(ZKP, "I"||"R"||PKb||γ, "?OTRv4?")
 ψ2 := ("R", γ, σ)
 k := g^ir
-[COMPUTE HERE SIDH KEY]
+[COMPUTE HERE DH-2048 KEY]
 
 DH_MESSAGE {
 message: ψ2
