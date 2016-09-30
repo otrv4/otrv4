@@ -9,26 +9,26 @@ Terms used in the context of this protocol have been defined in the [glossary][3
 
 ##Table of Contents
 
-1. [What's New in version 4](#whats-new)
+1. [What's New in version 4](#whats-new-in-version-4-)
 
-2. [High Level Overview](#overview)
+2. [High Level Overview](#high-level-overview-)
 
-3. [Assumptions](#assumptions)
+3. [Assumptions](#assumptions-)
 
-4. [Security Properties](#security-properties)
+4. [Security Properties](#security-properties-)
 
-5. [OTR Conversation Initilization](#conversation-init)
+5. [OTR Conversation Initilization](#otr-conversation-initilization--)
 
-7. [Data exchange] (data-exchange)
+7. [Data exchange](#data-exchange-)
 
-## What's New in version 4 <a name="whats-new"></a>
+## What's New in version 4
 
 1. Participation repudiation
 2. Support for out of order data messages
 3. Encrypted messaging to offline participants
 4. Update crypto primitives to higher security level
 
-## High Level Overview <a name="overview"></a>
+## High Level Overview
 
 Off The Record messaging (OTR) is a messaging protocol that achieves forward-secrecy
 and deniability.
@@ -46,14 +46,14 @@ The high level flow of this protocol will be:
     Establish Conversation with AKE  <------------>  Establish Conversation with AKE
     Exchange Data Messages           <------------>  Exchange Data Messages
 
-## Assumptions <a name="assumptions"></a>
+## Assumptions
 
 At least one participant has an available network and that both ends run the OTR protocol
 over an underlying protocol which enables the exchange of messages.
 
 TODO: Is this about the network model?
 
-## Security Properties <a name="security-properties"></a>
+## Security Properties
 
 TODO: differentiate between entire OTR conversation (including AKE) and text conversation (which happens after AKE)
 
@@ -67,12 +67,12 @@ said conversation. Both ends can also deny having sent one or many of the exchan
 An conversation will take place over an insecure channel where
 potential hostile intermediaries are present at different levels.
 
-### AKE properties:
+### AKE properties
  * Mutual authentication
  * Interactive: participation repudiation for both initiator and receiver
  * Non-interactive: participation repudiation for *only* the receiver
 
-### Conversation properties:
+### Conversation properties
  * Confidentiality
  * Integrity
  * Forward secrecy
@@ -81,7 +81,7 @@ potential hostile intermediaries are present at different levels.
 Threats that an OTR conversation does not mitigate:
 * An active attacker may perform a Denial of Service attack but not learn the contents of messages.
 
-## OTR Conversation Initilization  <a name="conversation-init"></a>
+## OTR Conversation Initilization
 
 OTRv4 conversations are established by an deniable authenticated key exchange
 protocol (DAKE).
@@ -89,7 +89,7 @@ protocol (DAKE).
 TODO: How are long-term public keys distributed? In OTRv3 they are distributed
 as part of the AKE.
 
-### Requesting a conversation <a name="conversation-request"></a>
+### Requesting a conversation
 
 The semantics of the OTR Query Message are that Alice is requesting that
 Bob start an OTR conversation with her (if he is willing and able to do so).
@@ -133,7 +133,7 @@ Nik Unger and Ian Goldberg in their paper.
 Now both sides have an authenticated shared secret k, that can be used to exchange
 encrypted data messages.
 
-### Interactive DAKE <a name="interactive-AKE"></a>
+### Interactive DAKE
 
 ```
     Alice                                          Bob
@@ -144,7 +144,7 @@ encrypted data messages.
                                   Verify & Decrypt (ψ2)
 ```
 
-### Non-interactive DAKE <a name="non-interactive-AKE"></a>
+### Non-interactive DAKE
 
 ```
     Alice                              Pre-key storage                     Bob
@@ -180,7 +180,7 @@ case the protocol falls back to [OTR version 3 specification][2].
 
 Note: OTR version 4 is the latest version to support previous versions.
 
-## Data Exchange <a name="data-exchange"></a>
+## Data Exchange
 
 This section describes how each participant will use the Double Ratcheting
 algorithm to exchange data using the shared secret established in the DAKE.
