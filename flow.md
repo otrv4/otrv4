@@ -13,7 +13,7 @@ _Alice and Bob are honest_
 
 2. Alice: PKa, SKa := `GenCSKeyPair(g2)`
 
-- [] TODO: INSERT HERE DOWNGRADE ATTACK PROTECTION]
+- [ ] TODO: INSERT HERE DOWNGRADE ATTACK PROTECTION]
 
 **Alice starts conversation**:
 
@@ -81,7 +81,7 @@ State:
 
 * N: message counter
 
-* B1: Bob's initial ratchet key
+* A1: Alice's initial ratchet key
 
 * Mk: message key
 
@@ -95,11 +95,11 @@ Alice
 ```
 Rk_1, Cks<none>, Ckr := KDF(k)
 
-B1
+A1
 
 Ns, Nr = 0, 0
 
-pubDH_a, privDH_a := GenDH()
+A1: = pubDH_a, privDH_a := GenDH(k)
 
 iAmSender := pubDHa > pubDHb
 ```
@@ -120,7 +120,7 @@ iAmSender := pubDHa > pubDHb
 
 Alice sends message (s):
 
-`DHRs(pubDH_a, privDH_a), DHRr<B1>(pubDH_b)`
+`DHRs<A1>(pubDH_a, privDH_a), DHRr(pubDH_b)`
 
 `Mk_1 := HMAC(CKs_1, "0")`
 
@@ -150,6 +150,7 @@ Alice sends a second message (in the same ratchet):
 
 `Cks_3 = HMAC(Cks_2, "1")`
 
+
 ```
 DATA_MESSAGE {
 
@@ -161,6 +162,7 @@ pk: pubDH_a
 ```
 
 Bob reads messages (r):
+
 
 `Mk_1 := KDF(Ckr_1, "0")`// Ask about the function
 
