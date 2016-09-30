@@ -2,6 +2,7 @@
 
 ## Interactive conversation
 
+
 _Alice and Bob are honest_
 
 ### Setup:
@@ -93,7 +94,7 @@ State:
 Alice
 
 ```
-Rk_1, Cks<none>, Ckr := KDF(k)
+Rk_1, Cks, Ckr<none> := KDF(k)
 
 A1
 
@@ -107,13 +108,14 @@ iAmSender := pubDHa > pubDHb
 Bob
 
 ```
-Rk_1, Cks, Ckr<none> := KDF(k)
+Rk_1, Cks<none>, Ckr := KDF(k)
 
 Ns, Nr = 0, 0
 
 B1 := pubDH_b, privDH_b := GenDH()
 
 iAmSender := pubDHa > pubDHb
+
 ```
 
 **Exchange of messages**
@@ -122,9 +124,11 @@ Alice sends message (s):
 
 `DHRs<A1>(pubDH_a, privDH_a), DHRr(pubDH_b)`
 
-`Mk_1 := HMAC(CKs_1, "0")`
+`Mk_1 / Mac_1 := HMAC(CKs_1, "0")`
 
-`c1 := Enc(Mk_1, p_1)`
+`c_1 := Enc(Mk_1, p_1)`
+
+`MACtag_1 := MAC(Mac_1 || c_1)`
 
 `Ns = Ns + 1`
 
@@ -133,18 +137,22 @@ Alice sends message (s):
 ```
 DATA_MESSAGE {
 
-message: c1
+message: c_1
 
 pk: pubDH_a
+
+Ns
 
 }
 ```
 
 Alice sends a second message (in the same ratchet):
 
-`Mk_2 := HMAC(CKs_2, "0")` // Ask about the KDF function, add MAC. 
+`Mk_2 / Mac_2 := HMAC(CKs_2, "0")` // Ask about the KDF function, add MAC. 
 
-`c2 := Enc(Mk_2, p_2)`
+`c_2 := Enc(Mk_2, p_2)`
+
+`MACtag_2 := MAC(Mac_2 || c_2)`
 
 `Ns = Ns + 1`
 
@@ -154,25 +162,23 @@ Alice sends a second message (in the same ratchet):
 ```
 DATA_MESSAGE {
 
-message: c2
+message: c_2 
 
 pk: pubDH_a
 
+Ns
 }
 ```
 
 Bob reads messages (r):
 
+`Mk_1, Mac_1 := KDF(Ckr_1, "0")`// Ask about the function
 
-`Mk_1 := KDF(Ckr_1, "0")`// Ask about the function
+`Verify(Mac_1, c_1)`
 
-`macP1 := get mac(Mk_1)` // Ask for the function
+`p1 := Dec(Mk_1, c_1)`
 
-`Verify(c1, macP1)`
-
-`p1 := Dec(Mk_1, c1)`
-
-`Ckr_1 = HMAC(Ckr_2, "1")`
+`Ckr_2 = HMAC(Ckr_1, "1")`
 
 
 Bob sends heartbeat
@@ -180,18 +186,16 @@ Bob sends heartbeat
 ```
 DATA_MESSAGE {
 
-message: macP1
+message: Mac_1
 
 }
 ```
 
 Bob reads messages (r):
 
-`Mk_2 := KDF(Ckr_2, "0")`
+`Mk_2, Mac_2 := KDF(Ckr_2, "0")`
 
-`macP2 := get mac(Mk_2)`// Ask for the function
-
-`Verify(c2, macP2)`
+`Verify(mac_2, c_2)`
 
 `p2 := Dec(Mk_2, c2)`
 
@@ -200,7 +204,7 @@ Bob sends heartbeat
 ```
 DATA_MESSAGE {
 
-message: macP2
+message: Mac_2
 
 }
 ```
