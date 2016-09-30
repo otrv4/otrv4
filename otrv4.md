@@ -74,7 +74,7 @@ potential hostile intermediaries are present at different levels.
 
 ### AKE properties:
  * Mutual authentication
- * Interactive: participation repudiation for both initiatior and receiver
+ * Interactive: participation repudiation for both initiator and receiver
  * Non-interactive: participation repudiation for *only* the receiver
 
 ### Conversation properties:
@@ -140,7 +140,7 @@ would not upon receiving the whitespace tag.
 Both OTR Query Message and Whitespace tag include the OTR versions Alice supports
 and is willing to use.
 
-Once Bob has decided to start the conversation in response to Alice'e request,
+Once Bob has decided to start the conversation in response to Alice's request,
 he will initiate an interactive authenticated key exchange (AKE).
 
 ### Interactive authenticated key exchange (AKE) <a name="interactive-AKE"></a>
