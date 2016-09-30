@@ -5,6 +5,7 @@
 _Alice and Bob are honest_
 
 ### Setup:
+
 &nbsp;
 **Long term keys**:
 
@@ -26,7 +27,7 @@ REQUEST_MESSAGE {
 
 **Bob starts the authenticated key exchange**:
 
-`ψ1 := {gDH2048^a, ("I", g1^i)}`
+`ψ1 := {gDH2048^b, ("I", g1^i)}`
 
 ```
 DH_COMMIT {
@@ -40,11 +41,11 @@ selectedVersion: "?OTRv4?"
 
 **Alice completes the authenticated key exchange**:
 
-`γ := DREnc(PKa, PKb, "I" || "R" || g1^i || g1^r || gDH2048^a || gDH2048^b)`
+`γ := DREnc(PKa, PKb, "I" || "R" || g1^i || g1^r || gDH2048^b || gDH2048^a)`
 
-`σ := Auth(Ai, ai, {S}, "I"||"R"|| g1^i ||γ || "?OTRv4?" || gDH2048^a)` where Ai, ai, and {S} are part of CS PK and SK.
+`σ := Auth(Ai, ai, {S}, "I"||"R"|| g1^i ||γ || "?OTRv4?" || gDH2048^b)` where Ai, ai, and {S} are part of CS PK and SK.
 
-`ψ2 := (gDH2048^b, "R", γ, σ)`
+`ψ2 := (gDH2048^a, "R", γ, σ)`
 
 `k := KDF((g^i)^r || (gDH2048^a)^b)`
 
