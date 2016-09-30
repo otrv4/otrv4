@@ -6,15 +6,20 @@ _Alice and Bob are honest_
 
 ### Setup:
 Long term keys:
-Bob: PKb, SKb := GenCSKeyPair(g1)
-Alice: PKa, SKa := GenCSKeyPair(g2)
 
+Bob: PKb, SKb := `GenCSKeyPair(g1)`
+
+Alice: PKa, SKa := `GenCSKeyPair(g2)`
+
+[](
 [INSERT HERE DOWNGRADE ATTACK PROTECTION]
+)
 
 Alice starts conversation
-REQUEST_MESSAGE {
+
+`REQUEST_MESSAGE {
 "?OTRv34?Bob I need to talk to you. In private."
-}
+}`
 
 Bob starts the authenticated key exchange
 ψ1 := ("I", g1^i)
