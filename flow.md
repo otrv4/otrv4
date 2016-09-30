@@ -1,7 +1,10 @@
-Interactive conversation
-Alice and Bob are honest
+# Flow of the conversation
 
-Setup:
+## Interactive conversation
+
+_Alice and Bob are honest_
+
+### Setup:
 Long term keys:
 Bob: PKb, SKb := GenCSKeyPair(g1)
 Alice: PKa, SKa := GenCSKeyPair(g2)
