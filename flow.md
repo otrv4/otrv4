@@ -2,7 +2,6 @@
 
 ## Interactive conversation
 
-
 _Alice and Bob are honest_
 
 ### Setup:
@@ -82,6 +81,8 @@ State:
 
 * N: message counter
 
+* CR: Current ratchet id
+
 * A1: Alice's initial ratchet key
 
 * Mk: message key
@@ -143,6 +144,7 @@ pk: pubDH_a
 
 Ns
 
+CR
 }
 ```
 
@@ -167,6 +169,8 @@ message: c_2
 pk: pubDH_a
 
 Ns
+
+CR
 }
 ```
 
@@ -179,7 +183,6 @@ Bob reads messages (r):
 `p1 := Dec(Mk_1, c_1)`
 
 `Ckr_2 = HMAC(Ckr_1, "1")`
-
 
 Bob sends heartbeat
 
@@ -210,6 +213,8 @@ message: Mac_2
 ```
 
 Bob responses (new ratchet):
+
+`CR = CR + 1`
 
 `pubDHb, privDHb := genECDH() // Ask about the function`
 
