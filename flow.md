@@ -2,6 +2,7 @@
 
 ## Interactive conversation
 
+
 _Alice and Bob are honest_
 
 ### Setup:
@@ -47,7 +48,7 @@ selectedVersion: "?OTRv4?"
 
 `ψ2 := (gDH2048^a, "R", γ, σ)`
 
-`k := KDF((g^i)^r || (gDH2048^a)^b)`
+`k := KDF((g^i)^r || (gDH2048^a)^b)` // What KDF? 
 
 
 ```
@@ -62,7 +63,7 @@ message: ψ2
 
 `Verify(σ)`
 
-`k := KDF((g^r)^i || (gDH2048^b)^a)`
+`k := KDF((g^r)^i || (gDH2048^b)^a)` // What KDF?
 
 
 **Alice and Bob initialize keys:**
@@ -95,7 +96,7 @@ State:
 Alice
 
 ```
-Rk_1, Cks, Ckr<none> := KDF(k)
+Rk_1, Cks, Ckr<none> := KDF := SHAKE256(k)
 
 A1
 
@@ -125,11 +126,11 @@ Alice sends message (s):
 
 `DHRs<A1>(pubDH_a, privDH_a), DHRr(pubDH_b)`
 
-`Mk_1 / Mac_1 := HMAC(CKs_1, "0")`
+`Mk_1 / Mac_1 := HMAC := SHA3-256(CKs_1, "0")`
 
-`c_1 := Enc(Mk_1, p_1)`
+`c_1 := ENC := AES-CTR(Mk_1, p_1)` // Are we choosing this? 
 
-`MACtag_1 := MAC(Mac_1 || c_1)`
+`MACtag_1 := MAC := SHA-3(Mac_1 || c_1)`
 
 `Ns = Ns + 1`
 
@@ -150,11 +151,11 @@ CR
 
 Alice sends a second message (in the same ratchet):
 
-`Mk_2 / Mac_2 := HMAC(CKs_2, "0")` // Ask about the KDF function, add MAC. 
+`Mk_2 / Mac_2 := HMAC := SHA3-256(CKs_2, "0")` // Ask about the KDF function, add MAC. 
 
-`c_2 := Enc(Mk_2, p_2)`
+`c_2 := Enc := AES-CTR(Mk_2, p_2)` //Are we choosing this?
 
-`MACtag_2 := MAC(Mac_2 || c_2)`
+`MACtag_2 := MAC := SHA-3(Mac_2 || c_2)`
 
 `Ns = Ns + 1`
 
@@ -176,7 +177,7 @@ CR
 
 Bob reads messages (r):
 
-`Mk_1, Mac_1 := KDF(Ckr_1, "0")`// Ask about the function
+`Mk_1, Mac_1 := HMAC := SHA3-256(Ckr_1, "0")`
 
 `Verify(Mac_1, c_1)`
 
@@ -196,7 +197,7 @@ message: Mac_1
 
 Bob reads messages (r):
 
-`Mk_2, Mac_2 := KDF(Ckr_2, "0")`
+`Mk_2, Mac_2 := SHA3-256(Ckr_2, "0")`
 
 `Verify(mac_2, c_2)`
 
