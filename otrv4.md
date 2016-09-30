@@ -17,12 +17,7 @@ Terms used in the context of this protocol have been defined in the [glossary][3
 
 4. [Security Properties](#security-properties)
 
-5. [Online Conversation Initialization](#online-conversation-init)
-  1. [OTR Conversation Request] (#conversation-request)
-  2. [Interactive authenticated key exchange (AKE)] (#interactive-AKE)
-
-6. [Offline Conversation Initialization](#offline-conversation-init)
-  1. [Offline authenticated key exchange (AKE)] (#offline-AKE)
+5. [OTR Conversation Initilization](#conversation-init)
 
 7. [Data exchange] (data-exchange)
 
@@ -86,45 +81,13 @@ potential hostile intermediaries are present at different levels.
 Threats that an OTR conversation does not mitigate:
 * An active attacker may perform a Denial of Service attack but not learn the contents of messages.
 
-## OTR Conversation Initilization 
+## OTR Conversation Initilization  <a name="conversation-init"></a>
 
 OTRv4 conversations are established by an deniable authenticated key exchange
 protocol (DAKE).
 
-// TODO add in specific DAKE information
-This process will use the deniable authenticated key exchange
-mechanism defined by Nik Unger and Ian Goldberg in their paper.
-["Improved Techniques for Implementing Strongly Deniable
-Authenticated Key Exchanges"][1].
-
-TODO: introduce interactive and non-interactive AKE
-
 TODO: How are long-term public keys distributed? In OTRv3 they are distributed
 as part of the AKE.
-
-## Establishing a conversation when both parties are online <a name="online-conversation-init"></a>
-
-A OTRv4 conversation is established by Alice requesting a conversation with
-Bob.
-
-There are two ways Alice can inform Bob that she is willing to speak
-with him: by sending him the OTR Query Message, or by including a special
-"tag" consisting of whitespace characters in one of her messages to him.
-
-Bob then decides to respond this request or not depending on his policy. And
-AKE messages will be exchanged to establish a shared secret.
-
-The message flow is:
-
-```
-    Alice                                          Bob
-    ---------------------------------------------------
-    Conversation Request ------->
-                         <------- Pre-key (ψ1)
-    DRE and Auth (ψ2)    ------->
-                                  Verify & Decrypt (ψ2)
-```
-
 
 ### Requesting a conversation <a name="conversation-request"></a>
 
@@ -143,20 +106,45 @@ and is willing to use.
 Once Bob has decided to start the conversation in response to Alice's request,
 he will initiate an interactive authenticated key exchange (AKE).
 
-### Interactive authenticated key exchange (AKE) <a name="interactive-AKE"></a>
+### Deniable Authenticated Key Exchange (DAKE)
 
+Deniable Authenticated Key Exchange is a deniable way to exchange an authenticated
+shared key, basically it's having following three steps with two message
+exchange:
 
-TODO: introduce this
-TODO: Explain and talk about encoding, state machine, errors, all of it
+This process will use the deniable authenticated key exchange mechanism defined by
+Nik Unger and Ian Goldberg in their paper.
+["Improved Techniques for Implementing Strongly Deniable Authenticated Key Exchanges"][1].
 
-| Alice                              | Bob                            |
-|------------------------------------|--------------------------------|
-|                                    | select i, send {"I"; g^i}      |
-| select r, send {"R"; g^r; Auth(R)} |                                |
-|                                    | verify Auth(R), send {Auth(I)} |
-| verify Auth(R)                     |                                |
+1. Initiator send the Pre-key message
+    1.1 Select i
+    1.2 Send ψ1 = {"I", g1^i} to Receiver
+2. Receiver receive Pre-key message
+    2.1 Select r
+    2.2 Compute γ = DREnc(PK_I, PK_R, {"I" || "R" || g1^i || g1^r})
+    2.3 Compute σ = Auth(h_R, z_R, {h_I, h_R, g1^i}, {"I" || "R" || g1^i || γ})
+    2.4 Send ψ2 ={"R", γ, σ} to Initiator
+    2.5 Compute k = (g1^i)^r and securely erase r
+3. Initiator receive the DRE and Auth message
+    3.1 Decrypt γ using SK_I, retrieve m = {"I" || "R" || g1^i || g1^r}
+    3.2 Verify σ, m using {h_I, h_R, g1^i}
+    3.3 Compute k = (g1^r)^i and securely erase i
 
-## Establishing a conversation when one participant is offline <a name="offline-conversation-init"></a>
+Now both sides have an authenticated shared secret k, that can be used to exchange
+encrypted data messages.
+
+### Interactive DAKE <a name="interactive-AKE"></a>
+
+```
+    Alice                                          Bob
+    ---------------------------------------------------
+    Conversation Request ------->
+                         <------- Pre-key (ψ1)
+    DRE and Auth (ψ2)    ------->
+                                  Verify & Decrypt (ψ2)
+```
+
+### Non-interactive DAKE <a name="non-interactive-AKE"></a>
 
 ```
     Alice                              Pre-key storage                     Bob
@@ -167,10 +155,6 @@ TODO: Explain and talk about encoding, state machine, errors, all of it
     DRE and Auth (ψ2) ------------------------------------------>
                                                          Verify & Decrypt (ψ2)
 ```
-
-TODO: explain when this will be used?
-
-### Non-interactive authenticated key exchange (AKE) <a name="offline-AKE"></a>
 
 TODO: briefly explains the non-interactive AKE, how its the same as interactive
 but with a pre-key storage mechanism.
