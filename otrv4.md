@@ -18,6 +18,12 @@ Terms used in the context of this protocol have been defined in the [glossary][3
 4. [Security Properties](#security-properties)
 
 5. [OTR Conversation Initilization](#otr-conversation-initilization)
+    1. [Requesting a conversation](#requesting-a-conversation)
+    2. [Deniable Authenticated Key Exchange (DAKE)](#deniable-authenticated-key-exchange-dake)
+    3. [Interactive DAKE](#interactive-dake)
+    4. [Non-interactive DAKE](#non-interactive-dake)
+
+6, [Requesting conversation with older OTR version](#requesting-conversation-with-older-otr-version)
 
 7. [Data exchange](#data-exchange)
 
@@ -117,18 +123,18 @@ Nik Unger and Ian Goldberg in their paper.
 ["Improved Techniques for Implementing Strongly Deniable Authenticated Key Exchanges"][1].
 
 1. Initiator send the Pre-key message
-    1.1 Select i
-    1.2 Send ψ1 = {"I", g1^i} to Receiver
+    1. Select i
+    2. Send ψ1 = {"I", g1^i} to Receiver
 2. Receiver receive Pre-key message
-    2.1 Select r
-    2.2 Compute γ = DREnc(PK_I, PK_R, {"I" || "R" || g1^i || g1^r})
-    2.3 Compute σ = Auth(h_R, z_R, {h_I, h_R, g1^i}, {"I" || "R" || g1^i || γ})
-    2.4 Send ψ2 ={"R", γ, σ} to Initiator
-    2.5 Compute k = (g1^i)^r and securely erase r
+    1. Select r
+    2. Compute γ = DREnc(PK_I, PK_R, {"I" || "R" || g1^i || g1^r})
+    3. Compute σ = Auth(h_R, z_R, {h_I, h_R, g1^i}, {"I" || "R" || g1^i || γ})
+    4. Send ψ2 ={"R", γ, σ} to Initiator
+    5. Compute k = (g1^i)^r and securely erase r
 3. Initiator receive the DRE and Auth message
-    3.1 Decrypt γ using SK_I, retrieve m = {"I" || "R" || g1^i || g1^r}
-    3.2 Verify σ, m using {h_I, h_R, g1^i}
-    3.3 Compute k = (g1^r)^i and securely erase i
+    1. Decrypt γ using SK_I, retrieve m = {"I" || "R" || g1^i || g1^r}
+    2. Verify σ, m using {h_I, h_R, g1^i}
+    3. Compute k = (g1^r)^i and securely erase i
 
 Now both sides have an authenticated shared secret k, that can be used to exchange
 encrypted data messages.
