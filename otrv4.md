@@ -23,7 +23,7 @@ Terms used in the context of this protocol have been defined in the [glossary][3
     3. [Interactive DAKE](#interactive-dake)
     4. [Non-interactive DAKE](#non-interactive-dake)
 
-6, [Requesting conversation with older OTR version](#requesting-conversation-with-older-otr-version)
+6. [Requesting conversation with older OTR version](#requesting-conversation-with-older-otr-version)
 
 7. [Data exchange](#data-exchange)
 
