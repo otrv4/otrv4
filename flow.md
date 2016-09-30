@@ -12,9 +12,7 @@ _Alice and Bob are honest_
 
 2. Alice: PKa, SKa := `GenCSKeyPair(g2)`
 
-[](
-[INSERT HERE DOWNGRADE ATTACK PROTECTION]
-)
+- [] TODO: INSERT HERE DOWNGRADE ATTACK PROTECTION]
 
 **Alice starts conversation**:
 
@@ -28,10 +26,7 @@ REQUEST_MESSAGE {
 
 **Bob starts the authenticated key exchange**:
 
-`ψ1 := ("I", g1^i)`
-
-[]([COMPUTE HERE DH-2048 KEY]
-)
+`ψ1 := {gDH2048^a, ("I", g1^i)}`
 
 ```
 DH_COMMIT {
@@ -45,33 +40,29 @@ selectedVersion: "?OTRv4?"
 
 **Alice completes the authenticated key exchange**:
 
-`γ := DREnc(PKa, PKb, "I" || "R" || g1^i || g1^r)`
+`γ := DREnc(PKa, PKb, "I" || "R" || g1^i || g1^r || gDH2048^a || gDH2048^b)`
 
-`σ := Auth(Ai, ai, {S}, "I"||"R"|| g1^i ||γ || "?OTRv4?")` where Ai, ai, and {S} are part of CS PK and SK.
+`σ := Auth(Ai, ai, {S}, "I"||"R"|| g1^i ||γ || "?OTRv4?" || gDH2048^a)` where Ai, ai, and {S} are part of CS PK and SK.
 
-`ψ2 := ("R", γ, σ)`
+`ψ2 := (gDH2048^b, "R", γ, σ)`
 
-`k := (g^i)^r`
+`k := KDF((g^i)^r || (gDH2048^a)^b)`
 
-[]([COMPUTE HERE DH-2048 KEY]
-[COMPUTE HERE k := KDF(k, DH-2048key)]
-)
 
 ```
-`DH_MESSAGE {
+DH_MESSAGE {
 
 message: ψ2
 
-}`
+}
 ```
 
 **Bob verifies the authenticated key exchange and decrypts γ:**
 
 `Verify(σ)`
 
-`k := (g^r)^i`
+`k := KDF((g^r)^i || (gDH2048^b)^a)`
 
-[]([COMPUTE HERE k := KDF(k, DH-2048key)])
 
 **Alice and Bob initialize keys:**
 
