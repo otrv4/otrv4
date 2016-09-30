@@ -9,17 +9,17 @@ Terms used in the context of this protocol have been defined in the [glossary][3
 
 ##Table of Contents
 
-1. [What's New in version 4](#whats-new-in-version-4-)
+1. [What's New in version 4](#whats-new-in-version-4)
 
-2. [High Level Overview](#high-level-overview-)
+2. [High Level Overview](#high-level-overview)
 
-3. [Assumptions](#assumptions-)
+3. [Assumptions](#assumptions)
 
-4. [Security Properties](#security-properties-)
+4. [Security Properties](#security-properties)
 
-5. [OTR Conversation Initilization](#otr-conversation-initilization--)
+5. [OTR Conversation Initilization](#otr-conversation-initilization)
 
-7. [Data exchange](#data-exchange-)
+7. [Data exchange](#data-exchange)
 
 ## What's New in version 4
 
