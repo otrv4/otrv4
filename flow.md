@@ -2,7 +2,6 @@
 
 ## Interactive conversation
 
-
 _Alice and Bob are honest_
 
 ### Setup:
@@ -48,7 +47,7 @@ selectedVersion: "?OTRv4?"
 
 `ψ2 := (gDH2048^a, "R", γ, σ)`
 
-`k := KDF((g^i)^r || (gDH2048^a)^b)` // What KDF? 
+`k := KDF((g^i)^r || (gDH2048^a)^b)` // Which KDF? 
 
 
 ```
@@ -63,7 +62,7 @@ message: ψ2
 
 `Verify(σ)`
 
-`k := KDF((g^r)^i || (gDH2048^b)^a)` // What KDF?
+`k := KDF((g^r)^i || (gDH2048^b)^a)` // Which KDF?
 
 
 **Alice and Bob initialize keys:**
@@ -110,7 +109,7 @@ iAmSender := pubDHa > pubDHb
 Bob
 
 ```
-Rk_1, Cks<none>, Ckr := KDF(k)
+Rk_1, Cks<none>, Ckr := KDF(k) := SHAKE256(k)
 
 Ns, Nr = 0, 0
 
@@ -134,7 +133,7 @@ Alice sends message (s):
 
 `Ns = Ns + 1`
 
-`Cks_2 = HMAC(Cks_1, "1")`
+`Cks_2 = HMAC := SHAKE256(Cks_1, "1")`
 
 ```
 DATA_MESSAGE {
@@ -217,9 +216,9 @@ Bob responses (new ratchet):
 
 `CR = CR + 1`
 
-`pubDHb, privDHb := genECDH() // Ask about the function`
+`pubDHb, privDHb := genECDH(privDHRs, pubDHRr) // Ask about the function`
 
-`Rk_2, Cks := KDF(HMAC(Rk_1, privDHb, pubDHa)`
+`Rk_2, Cks := KDF(HMAC) := SHAKE256(Rk_1, privDHb, pubDHa)`
 
 `Ns, Nr = 0, 0`
 
