@@ -61,8 +61,6 @@ TODO: Is this about the network model?
 
 ## Security Properties
 
-TODO: differentiate between entire OTR conversation (including AKE) and text conversation (which happens after AKE)
-
 In an off the record conversation, both sides can verify the identity of the other participant
 (but cannot transfer this knowledge to a third party). Participants can converse with the assurance
 that their conversation will not be read or modified by a hostile third party.
@@ -87,7 +85,7 @@ potential hostile intermediaries are present at different levels.
 Threats that an OTR conversation does not mitigate:
 * An active attacker may perform a Denial of Service attack but not learn the contents of messages.
 
-## OTR Conversation Initilization
+## OTR Conversation Initialization
 
 OTRv4 conversations are established by an deniable authenticated key exchange
 protocol (DAKE).
@@ -114,24 +112,24 @@ he will initiate an interactive authenticated key exchange (AKE).
 
 ### Deniable Authenticated Key Exchange (DAKE)
 
-Deniable Authenticated Key Exchange, is a deniable way to exchange an authenticated
-shared key. In the case of Spawn, this is basically achieved by having the following 
-three steps with two message exchange:
+A Deniable Authenticated Key Exchange is a way for two parties to agree upon a
+shared key- but later be able to deny their participation- and mutually authenticate
+to one another.
 
 This process will use the deniable authenticated key exchange mechanism, Spawn, defined by
 Nik Unger and Ian Goldberg in their paper.
 ["Improved Techniques for Implementing Strongly Deniable Authenticated Key Exchanges"][1].
 
-1. Initiator send the Pre-key message
+1. Initiator sends the Pre-key message
     1. Select i
     2. Send ψ1 = {"I", g1^i} to Receiver
-2. Receiver receive Pre-key message
+2. Receiver receives Pre-key message
     1. Select r
     2. Compute γ = DREnc(PK_I, PK_R, {"I" || "R" || g1^i || g1^r})
     3. Compute σ = Auth(h_R, z_R, {h_I, h_R, g1^i}, {"I" || "R" || g1^i || γ})
     4. Send ψ2 ={"R", γ, σ} to Initiator
     5. Compute k = (g1^i)^r and securely erase r
-3. Initiator receive the DRE and Auth message
+3. Initiator receives the DRE and Auth message
     1. Decrypt γ using SK_I, retrieve m = {"I" || "R" || g1^i || g1^r}
     2. Verify σ, m using {h_I, h_R, g1^i}
     3. Compute k = (g1^r)^i and securely erase i
@@ -162,10 +160,7 @@ i
                                                          Verify & Decrypt (ψ2)
 ```
 
-TODO: briefly explains the non-interactive AKE, how its the same as interactive
-but with a pre-key storage mechanism.
-
-In the non-interactive AKE, Bob generates one (or more) D-H Commit messages,
+In the non-interactive DAKE, Bob generates one (or more) D-H Commit messages,
 named pre-keys for convenience, and stores them in a pre-key storage.
 
 When Alice wants to start a secure conversation, she asks the pre-key storage
@@ -189,7 +184,7 @@ Note: OTR version 4 is the latest version to support previous versions.
 ## Data Exchange
 
 This section describes how each participant will use the Double Ratcheting
-algorithm to exchange data using the shared secret established in the DAKE.
+algorithm to exchange data using the shared secret established in the AKE.
 
 TODO: Define structure of a data message (includes header, encrypted message, MAC, ephemeral key, old mac keys)
 
@@ -235,19 +230,18 @@ TODO: Define structure of a data message (includes header, encrypted message, MA
 ```
 ### Initialization of Double Ratchet
 
-After AKE is finished, both side will initialize the first group of root key (R0) and chain key
+After the AKE is finished, both side will initialize the first group of root key (R0) and chain key
 (C0_0) deriving from SharedSecret.
 
 ```
 R0, Ca0_0, Cb0_0 = KDF(SharedSecret)
 ```
-
-Both side would compare their public keys to choose a chain key for sending and receiving:
+Both side will compare their public keys to choose a chain key for sending and receiving:
 
 - Alice (and similarly for Bob) determines if she is the "low" end or the "high" end of this Data Message.
 If Alice's ephemeral D-H public key is numerically greater than Bob's public key, then she is the "high" end.
 Otherwise, she is the "low" end.
-- She select the chain keys for sending and receiving:
+- Alice selects the chain keys for sending and receiving:
   - If she is the "high" end, use Ca0_0 as the sending chain key, Cb0_0 as the receiving chain key.
   - If she is the "low" end, use Cb0_0 as the sending chain key, Ca0_0 as the receiving chain key.
 
@@ -257,7 +251,7 @@ If a new DH Ratchet key (pubDHRr) has been received, begin a new ratchet.
 
 To begin a new ratchet, create and store a pair of DH Ratchet key (privDHRr, pubDHRr)
 and use ECDH to compute a shared secret from (privDHRr) and (pubDHRr).
-This shared secret and the current root key (Ri-1) are used as input to a HKDF to derive
+This shared secret and the current root key (Ri-1) are used as input to a KDF to derive
 new root key (Ri) and chain key (Ci).
 
 ```
@@ -274,43 +268,36 @@ else:
 ```
 
 The current ratchet id (i), current message keyid (Ns) and the (pubDHRs) must also be sent.
-If this is the first message sent after starting a new ratchet, the Ns is 0.
-If this is the second message, the Ns is 1 and so on.
+If this is the first message sent after starting a new ratchet, the keyid is 0.
+If this is the second message, the keyid is 1 and so on.
 
 ```
 header = i || Ns || pubDHRs
 ```
-
-Then the current chain key (Csi_Ns) is used to derive message keys for encrypting the message
+The current chain key (Csi_Ns) is used to derive message keys for encrypting the message
 and generating a MAC tag.
-
 ```
 MKenc, MKmac = KDF(Csi_Ns || "0")
 ciphertext = Enc(MKenc, plaintext)
 mactag = MAC(MKmac, header || ciphertext)
 ```
+Use SHA3-256 to compute a new chain key (Csi_Ns+1) from the current chain key (Csi_Ns), and
+increase the current message keyid (Ns) by one.
 
-Use SHA3-256 to compute a new chain key (Csi_Ns+1) from the current chain key (Csi_Ns).
-And increase the current message number (Ns) by one.
-
-```
 Csi_Ns+1 = SHA3-256(Csi_Ns || "1")
 Ns = Ns + 1
 ```
-
 Send the header, ciphertext, mactag.
+
 
 ### Receiving Message
 
 Receive the header, ciphertext, mactag.
-
 ```
 i || Ns || pubDHRs = header
-```
 
-Derive the keys for decryption and MAC tag verification from the chain key and use
+Derive the keys for decryption and MAC verification from the chain key and use
 these keys to verify the tag and decrypt the message.
-
 ```
 Cri_Ns = SHA3-256(Cri_Ns-1 || "1")
 MKdec, MKmac = KDF(Cri_Ns || "0")
@@ -321,7 +308,7 @@ if valid(MKmac, mactag):
 
 ### Revealing MAC Keys
 
-We reveal old MAC keys to provide forgeability of messages. Old MAC keys are keys that will no longer be used to verify the authenticity of a message.
+We reveal old MAC keys to provide forgeability of messages. Old MAC keys are keys for messages that have already been received, therefore will no longer be used to verify the authenticity of a message.
 
 MAC keys are revealed with data messages. They are also revealed with heartbeat messages (data messages that encode a plaintext of zero length) if the receiver has not sent a message in a configurable amount of time.
 
