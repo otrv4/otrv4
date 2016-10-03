@@ -47,9 +47,9 @@ The high level flow of this protocol will be:
 
     Alice                                            Bob
     --------------------------------------------------------------------------------
-    Request OTR conversation         ------------->
-                                     <-------------  OTR v4 is supported
-    Establish Conversation with AKE  <------------>  Establish Conversation with AKE
+    Request OTR conversation          ------------->
+                                      <-------------  OTR v4 is supported
+    Establish Conversation with DAKE  <------------>  Establish Conversation with DAKE
     Exchange Data Messages           <------------>  Exchange Data Messages
 
 ## Assumptions
@@ -71,7 +71,7 @@ said conversation. Both ends can also deny having sent one or many of the exchan
 An conversation will take place over an insecure channel where
 potential hostile intermediaries are present at different levels.
 
-### AKE properties
+### DAKE properties
  * Mutual authentication
  * Interactive: participation repudiation for both initiator and receiver
  * Non-interactive: participation repudiation for *only* the receiver
@@ -91,7 +91,7 @@ OTRv4 conversations are established by an deniable authenticated key exchange
 protocol (DAKE).
 
 TODO: How are long-term public keys distributed? In OTRv3 they are distributed
-as part of the AKE.
+as part of the DAKE.
 
 ### Requesting a conversation
 
@@ -108,7 +108,7 @@ Both OTR Query Message and Whitespace tag include the OTR versions Alice support
 and is willing to use.
 
 Once Bob has decided to start the conversation in response to Alice's request,
-he will initiate an interactive authenticated key exchange (AKE).
+he will initiate an interactive authenticated key exchange (DAKE).
 
 ### Deniable Authenticated Key Exchange (DAKE)
 
@@ -165,7 +165,7 @@ named pre-keys for convenience, and stores them in a pre-key storage.
 
 When Alice wants to start a secure conversation, she asks the pre-key storage
 for a pre-key associated with Bob, and treats it as if it were a D-H Commit
-message in the interactive AKE.
+message in the interactive DAKE.
 
 TODO: How pre-key storage is protocol-specific, maybe mention the XMPP
 extension for this.
@@ -184,7 +184,7 @@ Note: OTR version 4 is the latest version to support previous versions.
 ## Data Exchange
 
 This section describes how each participant will use the Double Ratcheting
-algorithm to exchange data using the shared secret established in the AKE.
+algorithm to exchange data using the shared secret established in the DAKE.
 
 TODO: Define structure of a data message (includes header, encrypted message, MAC, ephemeral key, old mac keys)
 
@@ -230,7 +230,7 @@ TODO: Define structure of a data message (includes header, encrypted message, MA
 ```
 ### Initialization of Double Ratchet
 
-After the AKE is finished, both side will initialize the first group of root key (R0) and chain key
+After the DAKE is finished, both side will initialize the first group of root key (R0) and chain key
 (C0_0) deriving from SharedSecret.
 
 ```
