@@ -114,11 +114,11 @@ he will initiate an interactive authenticated key exchange (AKE).
 
 ### Deniable Authenticated Key Exchange (DAKE)
 
-Deniable Authenticated Key Exchange is a deniable way to exchange an authenticated
-shared key, basically it's having following three steps with two message
-exchange:
+Deniable Authenticated Key Exchange, is a deniable way to exchange an authenticated
+shared key. In the case of Spawn, this is basically achieved by having the following 
+three steps with two message exchange:
 
-This process will use the deniable authenticated key exchange mechanism defined by
+This process will use the deniable authenticated key exchange mechanism, Spawn, defined by
 Nik Unger and Ian Goldberg in their paper.
 ["Improved Techniques for Implementing Strongly Deniable Authenticated Key Exchanges"][1].
 
@@ -138,7 +138,7 @@ Nik Unger and Ian Goldberg in their paper.
 
 Now both sides have an authenticated shared secret k, that can be used to exchange
 encrypted data messages.
-
+i
 ### Interactive DAKE
 
 ```
