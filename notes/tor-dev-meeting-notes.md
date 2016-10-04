@@ -49,8 +49,8 @@ TODO: define what receiver confirmation of having received a message means.
 ### 3. Superencryption
 
 We talked about:
-  - Mixing in quantum-resistant key material during the KDF versus adding an
-extra layer of encryption
+  - Mixing in quantum-resistant key material versus adding an extra layer of
+encryption
 
 We decided that mixing in key material would achieve the same outcome and is
 simpler overall and is therefore preferable.
