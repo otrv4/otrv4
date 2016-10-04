@@ -7,7 +7,7 @@ was said, or even that the two participants spoke to each other at all.
 
 ## Table of Contents
 
-1. [What's New in version 4](#whats-new-in-version-4)
+1. [Main Changes over Version 3](#main-changes-over-version-3)
 
 2. [High Level Overview](#high-level-overview)
 
@@ -25,12 +25,9 @@ was said, or even that the two participants spoke to each other at all.
 
 7. [Data exchange](#data-exchange)
 
-## What's New in version 4
+## Main Changes over Version 3
 
-1. Participation repudiation
-2. Support for out of order data messages
-3. Encrypted messaging to offline participants
-4. Update crypto primitives to higher security level
+TODO: Write this section when we have fleshed out the other sections of the spec and decide what is important to highlight here
 
 ## High Level Overview
 
