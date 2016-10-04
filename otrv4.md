@@ -15,7 +15,7 @@ was said, or even that the two participants spoke to each other at all.
 
 4. [Security Properties](#security-properties)
 
-5. [OTR Conversation Initilization](#otr-conversation-initilization)
+5. [OTR Conversation Initialization](#otr-conversation-initialization)
     1. [Requesting a conversation](#requesting-a-conversation)
     2. [Deniable Authenticated Key Exchange (DAKE)](#deniable-authenticated-key-exchange-dake)
     3. [Interactive DAKE](#interactive-dake)
@@ -203,14 +203,14 @@ TODO: Define structure of a data message (includes header, encrypted message, MA
                                                            Verify MAC, Decrypt message 0_1
                                      <-------------------- Reveal MAC key of message 0_1
 
-                                                           Racheting with root key, pubDHa, privDHb
+                                                           Ratcheting with root key, pubDHa, privDHb
 
                                      <-------------------- Send data message 1_0
                                      <-------------------- Send data message 1_1
 
     Receive data message 1_0
 
-    Racheting with root key, pubDHa, privDHb
+    Ratcheting with root key, pubDHa, privDHb
 
     Recover receiving chain key 1_0
     Derive Enc-key & MAC-key
