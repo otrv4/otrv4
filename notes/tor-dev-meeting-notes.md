@@ -190,6 +190,8 @@ post-quantum key after every two messages exchanged):
                                             |                           |
                                             +---- MK-1                  |
 
+(adapted from original documentation at [1])
+
 TODO: verify when New Hope keys get mixed in & ratcheted
 
 TODO: How do we re-derive the New Hope key when we are not re-negotiating on the
