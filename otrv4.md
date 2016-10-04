@@ -49,10 +49,11 @@ The high level flow of this protocol will be:
 
 ## Assumptions
 
-At least one participant has an available network and that both ends run the OTR protocol
-over an underlying protocol which enables the exchange of messages.
+At least one participant is online at the start of a conversation.
 
-TODO: Is this about the network model?
+Messages in a conversation will be exchanged over an insecure channel, where an attacker can eavesdrop or interfere with the messages.
+
+TODO: What assumptions are we making about the network model?
 
 ## Security Properties
 
@@ -62,9 +63,6 @@ that their conversation will not be read or modified by a hostile third party.
 
 To resemble an in-person conversation means that both ends can deny that they have participated in
 said conversation. Both ends can also deny having sent one or many of the exchanged messages in the conversation.
-
-An conversation will take place over an insecure channel where
-potential hostile intermediaries are present at different levels.
 
 ### DAKE properties
  * Mutual authentication
