@@ -49,11 +49,11 @@ TODO: define what receiver confirmation of having received a message means.
 ### 3. Superencryption
 
 We talked about:
-  - Mixing in quantum-resistant key material versus adding an extra layer of
+  - Mixing in post-quantum key material versus adding an extra layer of
 encryption
 
 We decided that mixing in key material would achieve the same outcome and is
-simpler overall and is therefore preferable.
+simpler and is therefore preferable.
 
   - 3072 bit Diffie-Hellman versus New Hope
 
@@ -75,8 +75,7 @@ At the end of our conversation, we ended up with this:
 
 TODO: maybe we don't need a formal name, but it might be helpful as this does
 depart from the Double Ratchet Algorithm. But we can think of a better name. It
-might be good to reflect in the name that this adds quantum resistance. The term
-"hybrid" seems to describe what we are trying to achieve.
+might be good to reflect in the name that this adds quantum resistance.
 
 TODO: It would also be good to differentiate why we add this. Is it enough to
 say that it will add post-quantum security, or do we also want to emphasize that
@@ -121,8 +120,7 @@ TODO: I'm not sure if we want to say "insurance key," it seems to imply that
 it might not ever be useful, which is not what I think we want to convey. It
 would be stronger to say "post-quantum key," "hybrid key", "New Hope key," etc.
 I'm going to just use post-quantum key for the remainder of this document, but
-we can think of better terminology to describe this. I personally would be in
-favor of using "New Hope key."
+we can think of better terminology to describe this.
 
 #### 4.3 Maintaining forward secrecy
 
@@ -156,6 +154,8 @@ can be decided by a fixed or variable value.
 
 This scheme would look something like this, if n=2 (meaning we ratchet our
 post-quantum key after every two messages exchanged):
+
+(adapted from original documentation at [1])
 
                   Sending | Root key ratchet | Receiving  |   Post-Quantum key ratchet
 
@@ -191,13 +191,11 @@ post-quantum key after every two messages exchanged):
                                             |                           |
                                             +---- MK-1                  |
 
-(adapted from original documentation at [1])
 
 TODO: verify when New Hope keys get mixed in & ratcheted
 
 TODO: How do we re-derive the New Hope key when we are not re-negotiating on the
 nth message? And why?
-
 
 #### 4.5 Deriving Root Keys
 
