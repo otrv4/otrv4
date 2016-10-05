@@ -126,14 +126,15 @@ favor of using "New Hope key."
 
 #### 4.3 Maintaining forward secrecy
 
-If we only negotiate a post-quantum key in the initial DAKE, this would
+If we only negotiate one post-quantum key in the initial DAKE, this would
 compromise perfect-forward secrecy for the conversation. Specifically, if
 a quantum adversary capable of breaking Elliptic Curve Diffie-Hellman were to
 steal our post-quantum key and record all message traffic, all messages in our
-past conversation would be compromised.
+conversation would be compromised.
 
 Therefore, we want to shorten the window of potential compromise and limit the
-lifetime of our post-quantum key. However, because of New Hope's large key size,
+lifetime of the post-quantum key in order to obtain forward secrecy in a
+post-quantum environment. However, because of New Hope's large key size,
 we have performance limitations and in most cases will not be able to re-negotiate
 a new key on every message that is sent.
 
