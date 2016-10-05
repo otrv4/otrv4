@@ -71,7 +71,7 @@ more towards New Hope.
 At the end of our conversation, we ended up with this:
 
 
-### 4. Triple Ratchet (Adding Quantum Resistance to the Double Ratchet Algorithm)
+### 4. Hybrid Ratchet (Adding Quantum Resistance to the Double Ratchet Algorithm)
 
 TODO: maybe we don't need a formal name, but it might be helpful as this does
 depart from the Double Ratchet Algorithm. But we can think of a better name. It
@@ -106,7 +106,7 @@ TODO: have clearer way of showing DRE inputs
 
 TODO: should we be referring to this as "transitionally-secure post-quantum?"
 
-#### 4.2 Message Ratchet (Triple Ratchet)
+#### 4.2 Message Ratchet (Hybrid Ratchet)
 
 TODO: find a better name
 
@@ -151,7 +151,7 @@ In short, we can re-negotiate our post-quantum key every *n* messages, where n
 can be decided by a fixed or variable value.
 
 
-#### 4.4 Triple Ratchet Algorithm
+#### 4.4 Hybrid Ratchet Algorithm
 
 This scheme would look something like this, if n=2 (meaning we ratchet our
 post-quantum key after every two messages exchanged):
