@@ -31,7 +31,7 @@ The sender cannot reveal MAC keys until they have received confirmation from
 the receiver that the corresponding message has been received. However, if we
 permit a network model that allows dropped messages, then we cannot rely on
 this confirmation from the receiver. On the other hand, we should not place
-full trust in the receiver to reveal MACs after receiving a message.
+full trust in the receiver to reveal MAC keys after receiving a message.
 
 Therefore, the responsibility for revealing MAC keys should be shared by both
 sides. The receiver should reveal MAC keys for messages that they have
@@ -41,8 +41,8 @@ receiver has confirmed receiving.
 TODO: decide how to handle dropped messages. Do we set a time limit so we don't
 have to keep key material around forever?
 
-TODO: decide whether we should reveal one MAC per message, or reveal a head
-value for which every MAC in that chain can be derived.
+TODO: decide whether we should reveal one MAC key per message, or reveal a head
+value for which every MAC key in that chain can be derived.
 
 TODO: define what receiver confirmation of having received a message means.
 
@@ -65,6 +65,9 @@ resistance (unlike 3072 DH).
 
 TODO: decide concretely on 3072 bit DH or New Hope. We left this leaning
 more towards New Hope.
+
+TODO: define a specific PQ threat model and make sure the language we are using
+is consistent with that.
 
   - Message flow
 
@@ -101,11 +104,11 @@ New Hope):
 | verify Auth(I)                          | verify Auth(R                      |
 
 
-TODO: have clearer way of showing DRE inputs
+TODO: have clearer way of showing this
 
 TODO: should we be referring to this as "transitionally-secure post-quantum?"
 
-#### 4.2 Message Ratchet (Hybrid Ratchet)
+#### 4.2 Hybrid Ratchet
 
 TODO: find a better name
 
