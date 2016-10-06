@@ -176,7 +176,7 @@ Note: OTR version 4 is the latest version to support previous versions.
 
 ## Data Exchange
 
-This section describes how each participant will use the Double Ratcheting
+This section describes how each participant will use the Double Ratchet
 algorithm to exchange data using the shared secret established in the DAKE.
 
 TODO: Define structure of a data message (includes header, encrypted message, MAC, ephemeral key, old mac keys)
@@ -290,7 +290,7 @@ Receive the header, ciphertext, mactag.
 i || Ns || pubDHRs = header
 
 Derive the keys for decryption and MAC verification from the chain key and use
-these keys to verify the tag and decrypt the message.
+these keys to verify the MAC tag and decrypt the message.
 ```
 Cri_Ns = SHA3-256(Cri_Ns-1 || "1")
 MKdec, MKmac = KDF(Cri_Ns || "0")
