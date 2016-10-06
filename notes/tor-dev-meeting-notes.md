@@ -94,9 +94,9 @@ New Hope):
 
 | Alice                                   | Bob                                |
 |-----------------------------------------|------------------------------------|
-|                                         | send {"I"; ECDH, newHope, Auth(I)} |
+|                                         | send {"I", ECDH, newHope}          |
 | send {"R", DRE(ECDH, newHope), Auth(R)} |                                    |
-|                                         | verify Auth(R                      |
+|                                         | verify Auth(R)                     |
 
 
 TODO: have clearer way of showing this
