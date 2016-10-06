@@ -164,13 +164,13 @@ post-quantum key after every two messages exchanged):
 
                    MK  CK |         RK       | CK   MK    |            PQK
 
-                      KDF(ECDH(A0,B0), newHope0)                    newHope0
+                      KDF(ECDH(A0,B0), newHope0)                    negotiateNewHope()
                                     |                                   |
                                     |                                   |
-    KDF(ECDH(A1,B0), RK, newHope0)  +                                   |
+     KDF(ECDH(A1,B0), RK, newHope)  +                                   + KDF(newHope)
                                    /|                                   |
                                   / |                                   |
-                                 /  + KDF(ECDH(A1,B1), RK, newHope1)    + newHope1
+                                 /  + KDF(ECDH(A1,B1), RK, newHope)     + negotiateNewHope()
                          CK-A1-B0   |\                                  |
                              |      | \                                 |
                     MK-0 ----+      |  \                                |
@@ -179,12 +179,12 @@ post-quantum key after every two messages exchanged):
                              |      |       +---- MK-0                  |
                     MK-2 ----+      |       |                           |
                                     |       +---- MK-1                  |
-    KDF(ECDH(A2,B1), RK, newHope1)  +                                   |
+    KDF(ECDH(A2,B1), RK, newHope1)  +                                   + KDF(newHope)
                                    /|                                   |
                                   / |                                   |
                                  /  |                                   |
                          CK-A2-B1   |                                   |
-                             |      + KDF(ECDH(A2,B2), RK, newHope2)    + newHope2
+                             |      + KDF(ECDH(A2,B2), RK, newHope)     + negotiateNewHope()
                     MK-0 ----+       \                                  |
                                       \                                 |
                                        \                                |
@@ -194,11 +194,6 @@ post-quantum key after every two messages exchanged):
                                             |                           |
                                             +---- MK-1                  |
 
-
-TODO: verify when New Hope keys get mixed in & ratcheted
-
-TODO: How do we re-derive the New Hope key when we are not re-negotiating on the
-nth message? And why?
 
 #### 4.5 Deriving Root Keys
 
@@ -219,8 +214,9 @@ keys will be derived on every message using a KDF:
 ```
 PQK-1 = KDF(PQK-0)
 ```
+This is important because if an attacker were to steal PQK-1, they would not be
+able to derive PQK-0.
 
-TODO: verify this, also explain why this would be necessary
 
 ### 5. Message Format
 
