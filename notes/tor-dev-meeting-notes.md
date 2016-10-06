@@ -38,13 +38,8 @@ sides. The receiver should reveal MAC keys for messages that they have
 received, while the sender should reveal MAC keys for messages which the
 receiver has confirmed receiving.
 
-TODO: decide how to handle dropped messages. Do we set a time limit so we don't
-have to keep key material around forever?
-
 TODO: decide whether we should reveal one MAC key per message, or reveal a head
 value for which every MAC key in that chain can be derived.
-
-TODO: define what receiver confirmation of having received a message means.
 
 ### 3. Superencryption
 
