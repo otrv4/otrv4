@@ -101,7 +101,7 @@ New Hope):
 |-----------------------------------------|------------------------------------|
 |                                         | send {"I"; ECDH, newHope, Auth(I)} |
 | send {"R", DRE(ECDH, newHope), Auth(R)} |                                    |
-| verify Auth(I)                          | verify Auth(R                      |
+|                                         | verify Auth(R                      |
 
 
 TODO: have clearer way of showing this
@@ -199,8 +199,8 @@ post-quantum key after every two messages exchanged):
 
 Adding a post-quantum ratchet means that we will need to change how
 root keys are derived, Rather than only deriving root keys from current ECDH
-ephemeral keys, root keys will be derived from these values as well as our
-post-quantum key.
+ephemeral keys and the previous root key, root keys will be derived from these
+values as well as our post-quantum key.
 
 ```
 RK-1 = KDF(An-Bn, RK-0, PQK-0)
