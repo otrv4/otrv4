@@ -53,7 +53,7 @@ At least one participant is online at the start of a conversation.
 
 Messages in a conversation will be exchanged over an insecure channel, where an attacker can eavesdrop or interfere with the messages.
 
-TODO: What assumptions are we making about the network model?
+We assume a network model which provides in-order delivery of messages. Some messages may not be delivered.
 
 ## Security Properties
 
