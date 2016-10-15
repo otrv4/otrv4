@@ -44,7 +44,7 @@ The high level flow of this protocol will be:
     Request OTR conversation          ------------->
                                       <-------------  OTR v4 is supported
     Establish Conversation with DAKE  <------------>  Establish Conversation with DAKE
-    Exchange Data Messages           <------------>  Exchange Data Messages
+    Exchange Data Messages            <------------>  Exchange Data Messages
 
 ## Assumptions
 
@@ -167,13 +167,13 @@ messages.
 ### Non-interactive DAKE Overview
 
 ```
-    Alice                              Prekey storage                     Bob
-    ---------------------------------------------------------------------------
-                                                       <--------- Prekey (ψ1)
-    Prekey request    ------------->
-                      <-------------   Prekey (ψ1)
-               ψ2 & m ------------------------------------------>
-                                                         Verify & Decrypt (ψ2)
+    Alice                       Prekey storage                     Bob
+    --------------------------------------------------------------------
+                                                <--------- Prekey (ψ1)
+    Prekey request              ------------->
+                                <-------------             Prekey (ψ1)
+    ψ2 & m         -------------------------------------->
+                                                 Verify & Decrypt (ψ2)
 ```
 
 In the non-interactive DAKE, Bob generates one (or more) prekeys and places
@@ -199,6 +199,49 @@ TODO: How pre-key storage is protocol-specific, maybe mention the XMPP
 extension for this.
 
 TODO: How to encode pre-keys.
+
+### Packet format
+
+#### Pre-key message
+
+This is the first message of the DAKE. Bob sends it to Alice to commit to a choice of D-H key.
+
+```
+Protocol version (SHORT)
+    The version number of this protocol is 0x0004.
+Message type (BYTE)
+    The D-H Commit Message has type 0x0f.
+Sender Instance tag (INT)
+    The instance tag of the person sending this message.
+Receiver Instance tag (INT)
+    The instance tag of the intended recipient. For a commit message this will often be 0, since the other party may not have identified their instance tag yet.
+g^b (DATA)
+    The public part of ECDH, b is randomly selected from the group defined.
+Supported versions (DATA)
+    TODO: encode this field
+```
+
+#### DRE-Auth message
+
+This is the second message of the DAKE. Alice sends it to Bob to commit to a choice of D-H key and acknowledgement of Bob's D-H key,
+use dual-receiver-encryption and zero-knowledge-proof-of-knowledge to encrypt and authenticate this message
+
+```
+Protocol version (SHORT)
+    The version number of this protocol is 0x0004.
+Message type (BYTE)
+    The D-H Commit Message has type 0x00.
+Sender Instance tag (INT)
+    The instance tag of the person sending this message.
+Receiver Instance tag (INT)
+    The instance tag of the intended recipient. For a commit message this will often be 0, since the other party may not have identified their instance tag yet.
+DREncrypted {pubB, pubA, "B" || g^b || "A" || g^a} (DATA)
+    Produce this field as follows:
+    TODO: decribe how to generate
+Authenticated {"B" || "A" || g^b || γ} (DATA)
+    Produce this field as follows:
+    TODO: decribe how to generate
+```
 
 ## Requesting conversation with older OTR version
 
@@ -351,7 +394,7 @@ A receiver can reveal a MAC key in the following case:
 ```
 Protocol version (SHORT)
 
-    The version number of this protocol is 0x0003.
+    The version number of this protocol is 0x0004.
 
 Message type (BYTE)
 
