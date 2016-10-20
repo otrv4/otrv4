@@ -113,9 +113,9 @@ d is an array of bytes.
 
 ## DAKE
 
-Alice long-term Cramer-Shoup key-pair is `SKa = (x1A, x2A, y1A, y2A, zA)` and `PKa = (cA, dA, hA)`.
-Bob long-term Cramer-Shoup key-pair is `SKb = (x1B, x2B, y1B, y2B, zB)` and `PKb = (cB, dB, hB)`.
-Both key pairs are generated with `DRGen()`.
+Alice long-term Cramer-Shoup key-pair is `SKa = (x1A, x2A, y1A, y2A, zA)` and `PKa = (cA, dA, hA)`.  
+Bob long-term Cramer-Shoup key-pair is `SKb = (x1B, x2B, y1B, y2B, zB)` and `PKb = (cB, dB, hB)`.  
+Both key pairs are generated with `DRGen()`.  
 
 ### Interactive SPAWN:
 
@@ -124,12 +124,15 @@ Alice:
 1. Generates an ephemeral private key `i` from `Z_ℓ` and a public key `g1^i`.
 2. Sends Bob `ψ1 = ("I", g1^i)`.
 
+
 Bob:
+
 1. Generates an ephemeral private key `r` from `Z_ℓ` and public key `g1^r`.
 2. Computes `m = "I" ∥ "R" ∥ g1^i ∥ g1^r`, `γ = DREnc(PKb, PKa, m)`.
 3. Computes `σ = Auth(hB, zB, {hA, g1^i}, "I" ∥ "R" ∥ g1^i ∥ γ)`.
 4. Computes `k = (g1^i) * r` and securely erase `r`.
 5. Sends Alice `ψ2 = ("R", γ, σ)`.
+
 
 Alice:
 
@@ -148,6 +151,7 @@ Alice:
 1. Generates an ephemeral private key `i` from `Z_ℓ` and a public key `g1^i`.
 2. Sends the pre-key `ψ1 = ("I", g1^i)` to a storage server.
 
+
 Bob:
 1. Requests one of Alice's pre-keys from the storage server.
 2. Generates an ephemeral private key `r` from `Z_ℓ` and public key `g1^r`.
@@ -156,6 +160,7 @@ Bob:
 5. Computes `k = (g1^i) * r` and securely erase `r`.
 6. Generates a data message `d` according to the spec.
 7. Sends Alice `ψ2 = ("R", γ, σ, d)`.
+
 
 Alice:
 
