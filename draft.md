@@ -154,6 +154,7 @@ Alice:
 
 
 Bob:
+
 1. Requests one of Alice's pre-keys from the storage server.
 2. Generates an ephemeral private key `r` from `Z_ℓ` and public key `g1^r`.
 3. Computes `m = "I" ∥ "R" ∥ g1^i ∥ g1^r`, `γ = DREnc(PKb, PKa, m)`.
