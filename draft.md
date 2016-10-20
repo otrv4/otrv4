@@ -111,3 +111,34 @@ d is an array of bytes.
 1. Compute h = SHA3-512(d) as an unsigned value, big-endian.
 2. Return h mod ℓ
 
+### DAKE
+
+Interactive SPAWN:
+
+Alice long-term Cramer-Shoup key-pair is `SKa = (x1A, x2A, y1A, y2A, zA)` and `PKa = (cA, dA, hA)`.
+
+Bob long-term Cramer-Shoup key-pair is `SKb = (x1B, x2B, y1B, y2B, zB)` and `PKb = (cB, dB, hB)`.
+
+Alice:
+
+1. Generate an ephemeral private key `i` from `Z_ℓ` and a public key `g1^i` uniformly at random.
+2. Send `ψ1 = ("I", g1^i)` to Bob.
+
+Bob:
+
+1. Generate an ephemeral private key `r` from `Z_ℓ` and public key `g1^r` uniformaly at random.
+2. Compute `γ = DREnc(PKb, PKa, "I" = HASH(username_a) ∥ "R" = HASH(username_b) ∥ g1^i ∥ g1^r)`. // The identifiers for the parties ("I" and "R") may be cryptographic hashes?
+3. Parse `ψ1`.
+4. Compute `σ = Auth(h_b, z_b, {h_a, h_b, g1^i}, “I” ∥ “R” ∥ g1^i ∥ γ)`.
+5. Compute `k = (g1^i) * r` and securely erase `r`.
+6. Send `ψ2 = (“R”, γ, σ)`.
+
+Alice:
+
+1. Compute `Verif( {A_1,A_2,A_3}, σ , “I” ∥ “R” ∥ g1^i ∥ γ)`.
+2. Decrypt `DREnc(PKa, PKb, SKa, γ)`// TODO: dec can fail at this point.
+3. Verify the following properties of the decrypted message:
+  1. The message is of the correct form (e.g., the fields are of the expected length)
+  2. Alice's identifier is the first one listed
+  3. Bob's identifier is the second one listed, and it matches the identifier transmitted outside of the ciphertext
+
