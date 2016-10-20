@@ -85,10 +85,10 @@ We reuse the previously defined generator in Cramer-Shoup of DRE:
 
 g = (501459341212218748317573362239202803024229898883658122912772232650473550786782902904842340270909267251001424253087988710625934010181862, 44731490761556280255905446185238890493953420277155459539681908020022814852045473906622513423589000065035233481733743985973099897904160).
 
-### Authentication: Auth(A_i, a_i, {A_1, A_2, A_3}, m):
+### Authentication: Auth(A2, a_2, {A_1, A_3}, m):
 
-A_i ∈ {A_1, A_2, A_3} and a_i is the secret value associated with it.
-m is the message to be signed.
+A_2 is the public value associated with a_2.
+m is the message to authenticate.
 
 1. Choose t_1, c_2, c_3, r_2, r_3 randomly from Z_ℓ.
 2. Compute T_1 = g⊗t_1.
@@ -96,10 +96,10 @@ m is the message to be signed.
 4. Compute T_3 = (g⊗r_3) ⊕ (A_3⊗c_3).
 5. Compute c = MapToZl(g ∥ ℓ ∥ A_1 ∥ A_2 ∥ A_3 ∥ T_1 ∥ T_2 ∥ T_3 ∥ m).
 6. Compute c_1 = c - c_2 - c_3 (mod ℓ).
-7. Compute r_1 = t_1 - c_1 * a_1 (mod ℓ). 
+7. Compute r_1 = t_1 - c_1 * a_2 (mod ℓ). 
 8. Send σ = (c_1, r_1, c_2, r_2, c_3, r_3).
 
-### Verification: Verif({A_1,A_2,A_3},σ,m)
+### Verification: Verif({A_1, A_2, A_3}, σ, m)
 
 1. Parse σ to retrive components (c_1, r_1, c_2, r_2, c_3, r_3).
 2. Compute T1 = (g⊗r_1) ⊕ (A_1⊗c_1)
