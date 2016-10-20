@@ -4,7 +4,7 @@ The DRE scheme consists of three functions:
 
 1. `pk, sk = DRGen()`, a key generation function
 
-2. `γ = DREnc(pk1, pk2, m, r)`, an encryption function
+2. `γ = DREnc(pk1, pk2, m)`, an encryption function
 
 3. `m = DRDec(pk1, pk2, sk_i, γ)`, a decryption function
 
@@ -70,9 +70,9 @@ Regarding to elliptic curve operations, we use ⊕ to represent PointAddition, �
 
 The Authentication scheme consists of two functions:
 
-1. `σ = Auth(A_i,a_i,{A_1,A_2,A_3}, m)`, an authentication function
+1. `σ = Auth(A_2, a_2, {A_1, A_3}, m)`, an authentication function
 
-2. `Verif({A_1,A_2,A_3}, σ, m)`, a verification function
+2. `Verif({A_1, A_2, A_3}, σ, m)`, a verification function
 
 
 ## Setup
@@ -111,33 +111,31 @@ d is an array of bytes.
 1. Compute h = SHA3-512(d) as an unsigned value, big-endian.
 2. Return h mod ℓ
 
-### DAKE
-
-Interactive SPAWN:
+## DAKE
 
 Alice long-term Cramer-Shoup key-pair is `SKa = (x1A, x2A, y1A, y2A, zA)` and `PKa = (cA, dA, hA)`.
-
 Bob long-term Cramer-Shoup key-pair is `SKb = (x1B, x2B, y1B, y2B, zB)` and `PKb = (cB, dB, hB)`.
+Both key pairs are generated with `DRGen()`.
+
+### Interactive SPAWN:
 
 Alice:
 
-1. Generate an ephemeral private key `i` from `Z_ℓ` and a public key `g1^i` uniformly at random.
-2. Send `ψ1 = ("I", g1^i)` to Bob.
+1. Generates an ephemeral private key `i` from `Z_ℓ` and a public key `g1^i`.
+2. Sends Bob `ψ1 = ("I", g1^i)`.
 
 Bob:
-
-1. Generate an ephemeral private key `r` from `Z_ℓ` and public key `g1^r` uniformaly at random.
-2. Compute `γ = DREnc(PKb, PKa, "I" = HASH(username_a) ∥ "R" = HASH(username_b) ∥ g1^i ∥ g1^r)`. // The identifiers for the parties ("I" and "R") may be cryptographic hashes?
-3. Parse `ψ1`.
-4. Compute `σ = Auth(h_b, z_b, {h_a, h_b, g1^i}, “I” ∥ “R” ∥ g1^i ∥ γ)`.
-5. Compute `k = (g1^i) * r` and securely erase `r`.
-6. Send `ψ2 = (“R”, γ, σ)`.
+1. Generates an ephemeral private key `r` from `Z_ℓ` and public key `g1^r`.
+2. Computes `m = "I" ∥ "R" ∥ g1^i ∥ g1^r`, `γ = DREnc(PKb, PKa, m)`.
+3. Computes `σ = Auth(hB, zB, {hA, g1^i}, "I" ∥ "R" ∥ g1^i ∥ γ)`.
+4. Computes `k = (g1^i) * r` and securely erase `r`.
+5. Sends Alice `ψ2 = ("R", γ, σ)`.
 
 Alice:
 
-1. Compute `Verif( {A_1,A_2,A_3}, σ , “I” ∥ “R” ∥ g1^i ∥ γ)`.
-2. Decrypt `DREnc(PKa, PKb, SKa, γ)`// TODO: dec can fail at this point.
-3. Verify the following properties of the decrypted message:
+1. Verifies `Verif({hA, hB, g1^i}, σ, “I” ∥ “R” ∥ g1^i ∥ γ)`.
+2. Decrypts `m = DRDec(PKa, PKb, SKa, γ)`.
+3. Verifies the following properties of the decrypted message `m`:
   1. The message is of the correct form (e.g., the fields are of the expected length)
   2. Alice's identifier is the first one listed
   3. Bob's identifier is the second one listed, and it matches the identifier transmitted outside of the ciphertext
