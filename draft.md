@@ -86,7 +86,7 @@ g = (501459341212218748317573362239202803024229898883658122912772232650473550786
 A_2 is the public value associated with a_2.
 m is the message to authenticate.
 
-1. Choose t_1, c_2, c_3, r_2, r_3 randomly from Z_ℓ.
+1. Choose t_1, c_2, c_3, r_2, r_3 randomly (56 bytes each) from Z_ℓ.
 2. Compute T_1 = g⊗t_1.
 3. Compute T_2 = (g⊗r_2) ⊕ (A_2⊗c_2).
 4. Compute T_3 = (g⊗r_3) ⊕ (A_3⊗c_3).
@@ -110,5 +110,4 @@ d is an array of bytes.
 
 1. Compute h = SHA3-512(d) as an unsigned value, big-endian.
 2. Return h mod ℓ
-
 
