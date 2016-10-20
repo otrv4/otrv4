@@ -60,11 +60,11 @@ Define MapToZl(d) as:
     2. T'_1j = (g1⊗n_j) ⊕ (u_1j⊗L)
     3. T'_2j = (g2⊗n_j) ⊕ (u_2j⊗L)
     4. T'_3j = (c_j ⊕ (d_j⊗a'_j))⊗n_j ⊕ (v_j⊗L)
-  2. T'_4 = ((h1⊗n1) ⊖ ( h2⊗n2)) ⊕ ((e1 ⊖ e2)⊗L)
+  2. T'_4 = ((h1⊗n1) ⊖ (h2⊗n2)) ⊕ ((e1 ⊖ e2)⊗L)
   3. Compute L' = MapToZl(g1 ∥ g2 ∥ q ∥ pk_1 ∥ pk_2 ∥ u_11 ∥ u_21 ∥ e_1 ∥ v_1 ∥ α'_1 ∥ u_12 ∥ u_22 ∥ e_2 ∥ v_2 ∥ α'_2 ∥ T'_11 ∥ T'_21 ∥ T'_31 ∥ T'_12 ∥ T'_22 ∥ T'_32 ∥ T'_4 ).
   4. Verify L ≟ L.
-  5. for i ∈ {1,2}:
-    1. Verify ((u_1i⊗x_1i) ⊕ (u_2i⊗x_2i)) ⊕ (((u_1i⊗y_1i) ⊕ (u_2i⊗y_2i))⊗α'_i) ≟ v_i.
+  5. Compute t_1 = u_1i⊗x_1i, t2 = u_2i⊗x_2i, t3 = u_1i⊗y_1i, t4 = u_2i⊗y_2i
+  6. Verify t_1 ⊕ t2 ⊕ (t3 ⊕ t4)⊗α'_i ≟ v_i.
 3. Recover secret key K_enc = (e_i) ⊖ (u1_i⊗z_i).
 4. Decrypt m = XSalsa20-Poly1305_K_enc(φ, nonce).
 
