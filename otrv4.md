@@ -314,12 +314,17 @@ Initialization of Double Ratchet
     ```
     R0, Ca0_0, Cb0_0 = KDF(SharedSecret)
     ```
+    - For the Initiator:
+      - She will ratchet once again by generating a new pair of DH keys and derive R1, Ca1_0, Cb1_0
+    - For the Receiver:
+      - He will reuse the DH keys used in the DAKE
+
     Both side will compare their public keys to choose a chain key for sending and receiving:
 
-    - Alice (and similarly for Bob) determines if she is the "low" end or the "high" end of this Data Message.
-    If Alice's ephemeral D-H public key is numerically greater than Bob's public key, then she is the "high" end.
+    - Initiator (and similarly for Receiver) determines if she is the "low" end or the "high" end of this Data Message.
+    If Initiator's ephemeral D-H public key is numerically greater than Receiver's public key, then she is the "high" end.
     Otherwise, she is the "low" end.
-    - Alice selects the chain keys for sending and receiving:
+    - Initiator selects the chain keys for sending and receiving:
       - If she is the "high" end, use Ca0_0 as the sending chain key, Cb0_0 as the receiving chain key.
       - If she is the "low" end, use Cb0_0 as the sending chain key, Ca0_0 as the receiving chain key.
 
