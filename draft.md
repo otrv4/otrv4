@@ -26,11 +26,8 @@ Regarding to elliptic curve operations, we use ⊕ to represent PointAddition, �
 2. Compute group elements c = g1⊗x1 ⊕ g2⊗x2, d = g1⊗y1 ⊕ g2⊗y2, h = g1⊗z. 
 3. The public key is pk = {c, d, h} and the secret key is sk = {x1, x2, y1, y2, z}.
 
-### Dual Receiver Encryption: DREnc(pk_1, pk_2, m)
 
-Define MapToZl(d) as:
-1. Compute h = SHA3-512(d) as an unsigned value, big-endian.
-2. Return h mod ℓ
+### Dual Receiver Encryption: DREnc(pk_1, pk_2, m)
 
 1. Pick random values K, k_1, k_2 (56 bytes each) in Z_ℓ.
 2. For i ∈ {1,2}:
@@ -69,8 +66,7 @@ Define MapToZl(d) as:
 4. Decrypt m = XSalsa20-Poly1305_K_enc(φ, nonce).
 
 
-================================================================
-## ROM-based Authentication
+## ROM Authentication
 
 The Authentication scheme consists of two functions:
 
@@ -107,4 +103,12 @@ m is the message to authenticate.
 4. Compute T3 = (g⊗r_3) ⊕ (A_3⊗c_3)
 5. Compute c' = MapToZl(g ∥ ℓ ∥ A_1 ∥ A_2 ∥ A_3 ∥ T1 ∥ T2 ∥ T3 ∥ m).
 6. Check if c' ≟ c_1 + c_2 + c_3 (mod ℓ).
+
+## MapToZl(d)
+
+d is an array of bytes.
+
+1. Compute h = SHA3-512(d) as an unsigned value, big-endian.
+2. Return h mod ℓ
+
 
