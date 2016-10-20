@@ -2,11 +2,9 @@
 
 The DRE scheme consists of three functions: 
 
-1. `pk, sk = DRGen()`, a key generation function
-
-2. `γ = DREnc(pk1, pk2, m)`, an encryption function
-
-3. `m = DRDec(pk1, pk2, sk_i, γ)`, a decryption function
+`pk, sk = DRGen()`, a key generation function.  
+`γ = DREnc(pk1, pk2, m)`, an encryption function.  
+`m = DRDec(pk1, pk2, sk_i, γ)`, a decryption function.
 
 ### Setup
 
@@ -17,7 +15,11 @@ g1 = (50145934121221874831757336223920280302422989888365812291277223265047355078
 
 g2 = (433103962059265674580308903270602732554589039120240665786107503148578357355610867319637982957210103802741854255963765310708419199319826, 637671230437811306883071736319873166937007728586178661428553286712849083212910048075550542694415936278788300723371476615776878488331711)
 
-Regarding to elliptic curve operations, we use ⊕ to represent PointAddition, ⊗ to represent ScalarMultiplication and ⊖ to represent point substraction in the following definitions.
+Regarding to elliptic curve operations, we use:
+
+⊕ to represent point additions,  
+⊗ to represent scalar multiplications, and  
+⊖ to represent point subtractions.
 
 
 ### Dual Receiver Key Generation: DRGen()
@@ -70,9 +72,8 @@ Regarding to elliptic curve operations, we use ⊕ to represent PointAddition, �
 
 The Authentication scheme consists of two functions:
 
-1. `σ = Auth(A_2, a_2, {A_1, A_3}, m)`, an authentication function
-
-2. `Verif({A_1, A_2, A_3}, σ, m)`, a verification function
+`σ = Auth(A_2, a_2, {A_1, A_3}, m)`, an authentication function.  
+`Verif({A_1, A_2, A_3}, σ, m)`, a verification function.
 
 
 ## Setup
@@ -83,7 +84,7 @@ g = (501459341212218748317573362239202803024229898883658122912772232650473550786
 
 ### Authentication: Auth(A2, a_2, {A_1, A_3}, m):
 
-A_2 is the public value associated with a_2.
+A_2 is the public value associated with a_2, that is, `A_2 = g⊗a_2`.  
 m is the message to authenticate.
 
 1. Pick random values t_1, c_2, c_3, r_2, r_3 (56 bytes each) in Z_ℓ.
