@@ -94,7 +94,7 @@ m is the message to be signed.
 2. Compute T_1 = g⊗t_1.
 3. Compute T_2 = (g⊗r_2) ⊕ (A_2⊗c_2).
 4. Compute T_3 = (g⊗r_3) ⊕ (A_3⊗c_3).
-5. Compute c = MapToZl(g ∥ q ∥ A_1 ∥ A_2 ∥ A_3 ∥ T_1 ∥ T_2 ∥ T_3 ∥ m).
+5. Compute c = MapToZl(g ∥ ℓ ∥ A_1 ∥ A_2 ∥ A_3 ∥ T_1 ∥ T_2 ∥ T_3 ∥ m).
 6. Compute c_1 = c - c_2 - c_3 (mod ℓ).
 7. Compute r_1 = t_1 - c_1 * a_1 (mod ℓ). 
 8. Send σ = (c_1, r_1, c_2, r_2, c_3, r_3).
@@ -105,6 +105,6 @@ m is the message to be signed.
 2. Compute T1 = (g⊗r_1) ⊕ (A_1⊗c_1)
 3. Compute T2 = (g⊗r_2) ⊕ (A_2⊗c_2)
 4. Compute T3 = (g⊗r_3) ⊕ (A_3⊗c_3)
-5. Compute c' = MapToZl(g ∥ q ∥ A_1 ∥ A_2 ∥ A_3 ∥ T1 ∥ T2 ∥ T3 ∥ m).
+5. Compute c' = MapToZl(g ∥ ℓ ∥ A_1 ∥ A_2 ∥ A_3 ∥ T1 ∥ T2 ∥ T3 ∥ m).
 6. Check if c' ≟ c_1 + c_2 + c_3 (mod ℓ).
 
