@@ -266,115 +266,84 @@ TODO: Define structure of a data message (includes header, encrypted message, MA
     Send data message 0_0            -------------------->
     Send data message 0_1            -------------------->
 
+
                                                            Receive data message 0_0
                                                            Recover receiving chain key 0_0
                                                            Derive Enc-key & MAC-key
                                                            Verify MAC, Decrypt message 0_0
-                                     <-------------------- Reveal MAC key of message 0_0
 
                                                            Receive data message 0_1
-                                                           Recover receiving chain key 0_1
+                                                           Recover receiving chain key 1_1
                                                            Derive Enc-key & MAC-key
                                                            Verify MAC, Decrypt message 0_1
-                                     <-------------------- Reveal MAC key of message 0_1
 
                                                            Ratcheting with root key, pubDHa, privDHb
-
                                      <-------------------- Send data message 1_0
                                      <-------------------- Send data message 1_1
 
     Receive data message 1_0
-
-    Ratcheting with root key, pubDHa, privDHb
-
     Recover receiving chain key 1_0
     Derive Enc-key & MAC-key
     Verify MAC, Decrypt message 1_0
-    Reveal MAC key of message 1_0    -------------------->
 
     Receive data message 1_1
     Recover receiving chain key 1_1
     Derive Enc-key & MAC-key
     Verify MAC, Decrypt message 1_1
-    Reveal MAC key of message 1_1    -------------------->
-```
-### Initialization of Double Ratchet
-
-After the DAKE is finished, both side will initialize the first group of root key (R0) and chain key
-(C0_0) deriving from SharedSecret.
-
-```
-R0, Ca0_0, Cb0_0 = KDF(SharedSecret)
-```
-Both side will compare their public keys to choose a chain key for sending and receiving:
-
-- Alice (and similarly for Bob) determines if she is the "low" end or the "high" end of this Data Message.
-If Alice's ephemeral D-H public key is numerically greater than Bob's public key, then she is the "high" end.
-Otherwise, she is the "low" end.
-- Alice selects the chain keys for sending and receiving:
-  - If she is the "high" end, use Ca0_0 as the sending chain key, Cb0_0 as the receiving chain key.
-  - If she is the "low" end, use Cb0_0 as the sending chain key, Ca0_0 as the receiving chain key.
-
-### Sending Messages
-
-If a new DH Ratchet key (pubDHRr) has been received, begin a new ratchet.
-
-To begin a new ratchet, create and store a pair of DH Ratchet key (privDHRr, pubDHRr)
-and use ECDH to compute a shared secret from (privDHRr) and (pubDHRr).
-This shared secret and the current root key (Ri-1) are used as input to a KDF to derive
-new root key (Ri) and chain key (Ci).
-
-```
-if New_Ratchet:
-  i = i + 1
-  Ns = 0
-  pubDHRs, privDHRs = generateECDH()
-  store(privDHRs, pubDHRs)
-  NewSharedSecret = SHA3(Ri-1 || ECDH(privDHRs, pubDHRr))
-  Ri, Cai_0, Cbi_0 = KDF(NewSharedSecret)
-  discard(Ri-1)
-else:
-  reuse(privDHRs, pubDHRs)
 ```
 
-The current ratchet id (i), current message keyid (Ns) and the (pubDHRs) must also be sent.
-If this is the first message sent after starting a new ratchet, the keyid is 0.
-If this is the second message, the keyid is 1 and so on.
+### Key management
 
-```
-header = i || Ns || pubDHRs
-```
-The current chain key (Csi_Ns) is used to derive message keys for encrypting the message
-and generating a MAC tag.
-```
-MKenc, MKmac = KDF(Csi_Ns || "0")
-ciphertext = Enc(MKenc, plaintext)
-mactag = MAC(MKmac, header || ciphertext)
-```
-Use SHA3-256 to compute a new chain key (Csi_Ns+1) from the current chain key (Csi_Ns), and
-increase the current message keyid (Ns) by one.
+For each correspondent, keep track of:
 
-Csi_Ns+1 = SHA3-256(Csi_Ns || "1")
-Ns = Ns + 1
-```
-Send the header, ciphertext, mactag.
+    ratchet_flag
+    i as Current ratchet id
+    j as Previous sent message id
+    k as Previous received message id
 
+    R as Root key
+    Cs_j as Sending Chain key
+    Cr_k as Receiving Chain key
+    our_dh, their_dh
 
-### Receiving Message
+Initialization of Double Ratchet
 
-Receive the header, ciphertext, mactag.
-```
-i || Ns || pubDHRs = header
+    After the DAKE is finished, both side will initialize the first group of root key (R0) and chain key
+    (C0_0) deriving from SharedSecret.
 
-Derive the keys for decryption and MAC verification from the chain key and use
-these keys to verify the MAC tag and decrypt the message.
-```
-Cri_Ns = SHA3-256(Cri_Ns-1 || "1")
-MKdec, MKmac = KDF(Cri_Ns || "0")
-if valid(MKmac, mactag):
-    plaintext = Decrypt(MKdec, ciphertext)
-    reveal(MKmac)
-```
+    ```
+    R0, Ca0_0, Cb0_0 = KDF(SharedSecret)
+    ```
+    Both side will compare their public keys to choose a chain key for sending and receiving:
+
+    - Alice (and similarly for Bob) determines if she is the "low" end or the "high" end of this Data Message.
+    If Alice's ephemeral D-H public key is numerically greater than Bob's public key, then she is the "high" end.
+    Otherwise, she is the "low" end.
+    - Alice selects the chain keys for sending and receiving:
+      - If she is the "high" end, use Ca0_0 as the sending chain key, Cb0_0 as the receiving chain key.
+      - If she is the "low" end, use Cb0_0 as the sending chain key, Ca0_0 as the receiving chain key.
+
+When you send a Data Message:
+
+    1. If ratchet_flag is true, first ratchet:
+        1. Derive new pair of R, Cs_0, Cr_0 from private part of our_dh and public part of their_dh.
+        2. Securely forget our_dh, increment i, and set our_dh to a new DH key pair which you generate.
+        3. Set ratchet_flag to false.
+
+    2. Set the ratchet_id to i.
+    3. Set the DH pubkey in the Data message to the public part of our_dh.
+    4. Increment j, and use Cs_j to derive the Enc and MAC key.
+    5. Use the Enc key to encrypt the message, and the MAC key to calculate its mactag.
+
+When you receive a Data Message:
+
+    1. If the ratchet_id does not equal i+1, reject the message.
+    2. If the message_id is not larger than k, reject the message.
+    3. Use the message_id to compute the Receiving Chain key Cr_message_id.
+    4. Use the Cr_message_id to derive the Enc and MAC key.
+    5. Use the MAC key to verify the mactag on the message. If it does not verify, reject the message.
+    6. Decrypt the message using the Enc key.
+    7. Set k to message_id, Set ratchet_flag to true, Set their_dh as pubDHRs of the message.
 
 ### Revealing MAC Keys
 
@@ -422,7 +391,7 @@ Ratchet id i (INT)
 
     Must be strictly greater than 0, and increment by 1 with each ratchet
 
-Sender keyid Ns (INT)
+Message id Ns (INT)
 
     Must be strictly greater than 0, and increment by 1 with each message
 
