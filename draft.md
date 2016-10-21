@@ -1,3 +1,14 @@
+## Setup
+
+All values on Z_ℓ are MPI. 
+
+Regarding to elliptic curve operations, we use:
+
+⊕ to represent point additions,  
+⊗ to represent scalar multiplications and  
+⊖ to represent point subtractions.
+
+
 ## ROM DRE
 
 The DRE scheme consists of three functions: 
@@ -15,13 +26,6 @@ g1 = (50145934121221874831757336223920280302422989888365812291277223265047355078
 
 g2 = (433103962059265674580308903270602732554589039120240665786107503148578357355610867319637982957210103802741854255963765310708419199319826, 637671230437811306883071736319873166937007728586178661428553286712849083212910048075550542694415936278788300723371476615776878488331711)
 
-Regarding to elliptic curve operations, we use:
-
-⊕ to represent point additions,  
-⊗ to represent scalar multiplications, and  
-⊖ to represent point subtractions.
-
-
 ### Dual Receiver Key Generation: DRGen()
 
 1. Pick random values x1, x2, y1, y2, z (56 bytes each) in Z_ℓ.
@@ -35,7 +39,7 @@ Regarding to elliptic curve operations, we use:
 2. For i ∈ {1,2}:
   1. pk_i = {c_i,d_i,h_i}
   2. Compute u_1i = g1⊗k_i, u_2i = g2⊗k_i, e_i = (h_i⊗k_i) ⊗ K
-  3. Compute α_i = MapToZl(u_1i, u_2i, e_i).
+  3. Compute α_i = MapToZl(u_1i ∥ u_2i ∥ e_i).
   4. Compute v_i = (c_i⊗k_i) ⊕ (d_i⊗(k_i ⊗ α_i))
 3. Compute K_enc = SHA3-256(K).
 4. Pick a random 24 bytes nonce and compute φ = XSalsa20-Poly1305_K_enc(m, nonce)
@@ -176,3 +180,113 @@ Alice:
   4. g1⊗i is a pre-key that Alice previously sent and remains unused.
 4. Computes k = (g1⊗r) ⊗ i and securely erase `i`.
 5. Process the data message `d` according to the spec.
+
+## Encoded messages
+
+### Data types
+
+Bytes (BYTE):  
+1 byte unsigned value
+
+Shorts (SHORT):  
+2 byte unsigned value, big-endian
+
+Ints (INT):  
+4 byte unsigned value, big-endian
+
+Multi-precision integers (MPI):  
+4 byte unsigned len, big-endian  
+len byte unsigned value, big-endian   
+(MPIs must use the minimum-length encoding; i.e. no leading 0x00 bytes. This is important when calculating public key fingerprints.)
+
+ED448 points (POINT):  
+We need to choose a point serialization format for ed448 points
+
+Opaque variable-length data (DATA):  
+4 byte unsigned len, big-endian  
+len byte data
+
+### Public keys and fingerprints
+
+OTR public authentication Cramer-Shoup key (PUBKEY):
+
+    Pubkey type (SHORT)
+      Cramer-Shoup public keys have type 0x0010
+    
+    c (MPI)
+    d (MPI)
+    h (MPI)
+      (c, d, h) are the Cramer-Shoup public key parameters
+
+OTR public keys have fingerprints, which are hex strings that serve as identifiers for the public key. The fingerprint is calculated by taking the SHA-1 hash of the byte-level representation of the public key.
+
+### ψ1 message
+
+This is the first message of the DAKE.
+
+    Protocol version (SHORT)
+      The version number of this protocol is 0x0004.
+    Message type (BYTE)
+      The message has type 0x01.
+    Sender Instance tag (INT)
+      The instance tag of the person sending this message.
+    Receiver Instance tag (INT)
+      The instance tag of the intended recipient. For a commit message this will often be 0, since the other party may not have identified their instance tag yet.
+    Initiator's identifier (DATA)
+      This can be the fingerprint or something else.
+    g1⊗i (MPI)
+      - Choose a random value i (446 bits) mod l
+      - Encode g1⊗i as the MPI field.
+
+### ψ2 message
+
+    Protocol version (SHORT)
+      The version number of this protocol is 0x0004.
+    Message type (BYTE)
+      The message has type 0x02.
+    Sender Instance tag (INT)
+      The instance tag of the person sending this message.
+    Receiver Instance tag (INT)
+      The instance tag of the intended recipient. For a commit message this will often be 0, since the other party may not have identified their instance tag yet.
+    Receiver's identifier (DATA)
+      This can be the fingerprint or something else.
+    γ (DATA)
+      - Choose a random value r (446 bits) mod l
+      - Compute g1⊗r
+      - Generate m = "I" ∥ "R" ∥ g1⊗i ∥ g1⊗r
+      - Compute (u11, u21, e1, v1, u12, u22, e2, v2, L, n1, n2, nonce, φ) = DREnc(pubA, pubB, m)
+      - Encode each returned value individually and concatenate all of them as γ.
+      - Encode the resulting value γ as the DATA field.
+
+      DREnc values are encoded as follows:
+      - u11 (POINT)
+      - u21 (POINT)
+      - e1 (POINT)
+      - v1 (POINT)
+      - u12 (POINT)
+      - u22 (POINT)
+      - e2 (POINT)
+      - v2 (POINT)
+      - L (MPI)
+      - n1 (MPI)
+      - n2 (MPI)
+      - nonce (DATA)
+      - φ (DATA)
+    σ (DATA)
+      - Compute (c1, r1, c2, r2, c3, r3) = Auth(hB, zB, {hA, g1⊗i}, "I" ∥ "R" ∥ g1⊗i ∥ γ) 
+      - Encode each returned value individually and concatenate all of them as σ.
+      - Encode the resulting value σ as the DATA field.
+      
+      Auth values are encoded as follows:
+      - c1 (MPI)
+      - r1 (MPI)
+      - c2 (MPI)
+      - r2 (MPI)
+      - c3 (MPI)
+      - r3 (MPI)
+
+### Data Message
+
+TODO
+
+
