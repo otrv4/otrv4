@@ -135,12 +135,12 @@ Encryption (DRE) and a NIZKPK for authentication (Auth).
 ### Interactive DAKE Overview
 
 ```
-    Alice                                          Bob
-    ---------------------------------------------------
-    Query Message or Whitespace Tag ------->
-                                    <------- ψ1
-                                 ψ2 ------->
-                                             Verify & Decrypt (ψ2)
+Alice                                          Bob
+---------------------------------------------------
+Query Message or Whitespace Tag ------->
+                                <------- ψ1
+                             ψ2 ------->
+                                         Verify & Decrypt (ψ2)
 ```
 
 The Query Message or Whitespace Tag will include the versions supported by
@@ -167,13 +167,13 @@ messages.
 ### Non-interactive DAKE Overview
 
 ```
-    Alice                       Prekey storage                     Bob
-    --------------------------------------------------------------------
-                                                <--------- Prekey (ψ1)
-    Prekey request              ------------->
-                                <-------------             Prekey (ψ1)
-    ψ2 & m         -------------------------------------->
-                                                 Verify & Decrypt (ψ2)
+Alice                       Prekey storage                     Bob
+--------------------------------------------------------------------
+                                            <--------- Prekey (ψ1)
+Prekey request              ------------->
+                            <-------------             Prekey (ψ1)
+ψ2 & m         -------------------------------------->
+                                             Verify & Decrypt (ψ2)
 ```
 
 In the non-interactive DAKE, Bob generates one (or more) prekeys and places
@@ -259,96 +259,96 @@ algorithm to exchange data using the shared secret established in the DAKE.
 TODO: Define structure of a data message (includes header, encrypted message, MAC, ephemeral key, old mac keys)
 
 ```
-    Alice                                                                           Bob
-    -----------------------------------------------------------------------------------
-    Initialize root key, chain keys                        Initialize root key, chain keys
-    Generate DH, pubDHa, privDHa                           Generate DH, pubDHb, privDHb
-    Send data message 0_0            -------------------->
-    Send data message 0_1            -------------------->
+Alice                                                                           Bob
+-----------------------------------------------------------------------------------
+Initialize root key, chain keys                        Initialize root key, chain keys
+Generate DH, pubDHa, privDHa                           Generate DH, pubDHb, privDHb
+Send data message 0_0            -------------------->
+Send data message 0_1            -------------------->
 
 
-                                                           Receive data message 0_0
-                                                           Recover receiving chain key 0_0
-                                                           Derive Enc-key & MAC-key
-                                                           Verify MAC, Decrypt message 0_0
+                                                       Receive data message 0_0
+                                                       Recover receiving chain key 0_0
+                                                       Derive Enc-key & MAC-key
+                                                       Verify MAC, Decrypt message 0_0
 
-                                                           Receive data message 0_1
-                                                           Recover receiving chain key 1_1
-                                                           Derive Enc-key & MAC-key
-                                                           Verify MAC, Decrypt message 0_1
+                                                       Receive data message 0_1
+                                                       Recover receiving chain key 1_1
+                                                       Derive Enc-key & MAC-key
+                                                       Verify MAC, Decrypt message 0_1
 
-                                                           Ratcheting with root key, pubDHa, privDHb
-                                     <-------------------- Send data message 1_0
-                                     <-------------------- Send data message 1_1
+                                                       Ratcheting with root key, pubDHa, privDHb
+                                 <-------------------- Send data message 1_0
+                                 <-------------------- Send data message 1_1
 
-    Receive data message 1_0
-    Recover receiving chain key 1_0
-    Derive Enc-key & MAC-key
-    Verify MAC, Decrypt message 1_0
+Receive data message 1_0
+Recover receiving chain key 1_0
+Derive Enc-key & MAC-key
+Verify MAC, Decrypt message 1_0
 
-    Receive data message 1_1
-    Recover receiving chain key 1_1
-    Derive Enc-key & MAC-key
-    Verify MAC, Decrypt message 1_1
+Receive data message 1_1
+Recover receiving chain key 1_1
+Derive Enc-key & MAC-key
+Verify MAC, Decrypt message 1_1
 ```
 
 ### Key management
 
-For each correspondent, keep track of:
+#### For each correspondent, keep track of:
 
-    ratchet_flag
-    i as Current ratchet id
-    j as Previous sent message id
-    k as Previous received message id
+ratchet_flag
+i as Current ratchet id
+j as Previous sent message id
+k as Previous received message id
 
-    R as Root key
-    Cs_j as Sending Chain key
-    Cr_k as Receiving Chain key
-    our_dh, their_dh
+R as Root key
+Cs_j as Sending Chain key
+Cr_k as Receiving Chain key
+our_dh, their_dh
 
-Initialization of Double Ratchet
+#### Initialization of Double Ratchet
 
-    After the DAKE is finished, both side will initialize the first group of root key (R0) and chain key
-    (C0_0) deriving from SharedSecret.
+After the DAKE is finished, both side will initialize the first group of root key (R0) and chain key
+(C0_0) deriving from SharedSecret.
 
-    ```
-    R0, Ca0_0, Cb0_0 = KDF(SharedSecret)
-    ```
-    - For the Initiator:
-      - She will ratchet once again by generating a new pair of DH keys and derive R1, Ca1_0, Cb1_0
-    - For the Receiver:
-      - He will reuse the DH keys used in the DAKE
+```
+R0, Ca0_0, Cb0_0 = KDF(SharedSecret)
+```
+- For the Initiator:
+  - She will ratchet once again by generating a new pair of DH keys and derive R1, Ca1_0, Cb1_0
+- For the Receiver:
+  - He will reuse the DH keys used in the DAKE
 
-    Both side will compare their public keys to choose a chain key for sending and receiving:
+Both side will compare their public keys to choose a chain key for sending and receiving:
 
-    - Initiator (and similarly for Receiver) determines if she is the "low" end or the "high" end of this Data Message.
-    If Initiator's ephemeral D-H public key is numerically greater than Receiver's public key, then she is the "high" end.
-    Otherwise, she is the "low" end.
-    - Initiator selects the chain keys for sending and receiving:
-      - If she is the "high" end, use Ca0_0 as the sending chain key, Cb0_0 as the receiving chain key.
-      - If she is the "low" end, use Cb0_0 as the sending chain key, Ca0_0 as the receiving chain key.
+- Initiator (and similarly for Receiver) determines if she is the "low" end or the "high" end of this Data Message.
+If Initiator's ephemeral D-H public key is numerically greater than Receiver's public key, then she is the "high" end.
+Otherwise, she is the "low" end.
+- Initiator selects the chain keys for sending and receiving:
+  - If she is the "high" end, use Ca0_0 as the sending chain key, Cb0_0 as the receiving chain key.
+  - If she is the "low" end, use Cb0_0 as the sending chain key, Ca0_0 as the receiving chain key.
 
-When you send a Data Message:
+#### When you send a Data Message:
 
-    1. If ratchet_flag is true, first ratchet:
-        1. Derive new pair of R, Cs_0, Cr_0 from private part of our_dh and public part of their_dh.
-        2. Securely forget our_dh, increment i, and set our_dh to a new DH key pair which you generate.
-        3. Set ratchet_flag to false.
+1. If ratchet_flag is true, first ratchet:
+    1. Derive new pair of R, Cs_0, Cr_0 from private part of our_dh and public part of their_dh.
+    2. Securely forget our_dh, increment i, and set our_dh to a new DH key pair which you generate.
+    3. Set ratchet_flag to false.
 
-    2. Set the ratchet_id to i.
-    3. Set the DH pubkey in the Data message to the public part of our_dh.
-    4. Increment j, and use Cs_j to derive the Enc and MAC key.
-    5. Use the Enc key to encrypt the message, and the MAC key to calculate its mactag.
+2. Set the ratchet_id to i.
+3. Set the DH pubkey in the Data message to the public part of our_dh.
+4. Increment j, and use Cs_j to derive the Enc and MAC key.
+5. Use the Enc key to encrypt the message, and the MAC key to calculate its mactag.
 
-When you receive a Data Message:
+#### When you receive a Data Message:
 
-    1. If the ratchet_id does not equal i+1, reject the message.
-    2. If the message_id is not larger than k, reject the message.
-    3. Use the message_id to compute the Receiving Chain key Cr_message_id.
-    4. Use the Cr_message_id to derive the Enc and MAC key.
-    5. Use the MAC key to verify the mactag on the message. If it does not verify, reject the message.
-    6. Decrypt the message using the Enc key.
-    7. Set k to message_id, Set ratchet_flag to true, Set their_dh as pubDHRs of the message.
+1. If the ratchet_id does not equal i+1, reject the message.
+2. If the message_id is not larger than k, reject the message.
+3. Use the message_id to compute the Receiving Chain key Cr_message_id.
+4. Use the Cr_message_id to derive the Enc and MAC key.
+5. Use the MAC key to verify the mactag on the message. If it does not verify, reject the message.
+6. Decrypt the message using the Enc key.
+7. Set k to message_id, Set ratchet_flag to true, Set their_dh as pubDHRs of the message.
 
 ### Revealing MAC Keys
 
