@@ -122,56 +122,57 @@ Both key pairs are generated with `DRGen()`.
 
 Alice:
 
-1. Generates an ephemeral private key `i` from `Z_ℓ` and a public key `g1^i`.
-2. Sends Bob `ψ1 = ("I", g1^i)`.
+1. Generates an ephemeral private key `i` from `Z_ℓ` and a public key g1⊗i.
+2. Sends Bob ψ1 = ("I", g1⊗i).
 
 
 Bob:
 
-1. Generates an ephemeral private key `r` from `Z_ℓ` and public key `g1^r`.
-2. Computes `m = "I" ∥ "R" ∥ g1^i ∥ g1^r`, `γ = DREnc(PKb, PKa, m)`.
-3. Computes `σ = Auth(hB, zB, {hA, g1^i}, "I" ∥ "R" ∥ g1^i ∥ γ)`.
-4. Computes `k = (g1^i) * r` and securely erase `r`.
-5. Sends Alice `ψ2 = ("R", γ, σ)`.
+1. Generates an ephemeral private key `r` from `Z_ℓ` and public key g1⊗r.
+2. Computes γ = DREnc(PKb, PKa, m), being m = "I" ∥ "R" ∥ g1⊗i ∥ g1⊗r.
+3. Computes σ = Auth(hB, zB, {hA, g1⊗i}, "I" ∥ "R" ∥ g1⊗i ∥ γ).
+4. Computes k = (g1⊗i) ⊗ r and securely erase `r`.
+5. Sends Alice ψ2 = ("R", γ, σ).
 
 
 Alice:
 
-1. Verifies `Verif({hA, hB, g1^i}, σ, “I” ∥ “R” ∥ g1^i ∥ γ)`.
-2. Decrypts `m = DRDec(PKa, PKb, SKa, γ)`.
+1. Verifies Verif({hA, hB, g1⊗i}, σ, “I” ∥ “R” ∥ g1^i ∥ γ).
+2. Decrypts m = DRDec(PKa, PKb, SKa, γ).
 3. Verifies the following properties of the decrypted message `m`:
   1. The message is of the correct form (e.g., the fields are of the expected length)
   2. Alice's identifier is the first one listed
   3. Bob's identifier is the second one listed, and it matches the identifier transmitted outside of the ciphertext
+4. Computes k = (g1⊗r) ⊗ i and securely erase `i`.
 
 
 ### Non-interactive SPAWN:
 
 Alice:
 
-1. Generates an ephemeral private key `i` from `Z_ℓ` and a public key `g1^i`.
-2. Sends the pre-key `ψ1 = ("I", g1^i)` to a storage server.
+1. Generates an ephemeral private key `i` from `Z_ℓ` and a public key g1⊗i.
+2. Sends the pre-key ψ1 = ("I", g1⊗i) to a storage server.
 
 
 Bob:
 
 1. Requests one of Alice's pre-keys from the storage server.
-2. Generates an ephemeral private key `r` from `Z_ℓ` and public key `g1^r`.
-3. Computes `m = "I" ∥ "R" ∥ g1^i ∥ g1^r`, `γ = DREnc(PKb, PKa, m)`.
-4. Computes `σ = Auth(hB, zB, {hA, g1^i}, "I" ∥ "R" ∥ g1^i ∥ γ)`.
-5. Computes `k = (g1^i) * r` and securely erase `r`.
+2. Generates an ephemeral private key `r` from `Z_ℓ` and public key g1⊗r.
+3. Computes m = "I" ∥ "R" ∥ g1⊗i ∥ g1⊗r, γ = DREnc(PKb, PKa, m).
+4. Computes σ = Auth(hB, zB, {hA, g1⊗i}, "I" ∥ "R" ∥ g1⊗i ∥ γ).
+5. Computes k = (g1⊗i) ⊗ r and securely erase `r`.
 6. Generates a data message `d` according to the spec.
-7. Sends Alice `ψ2 = ("R", γ, σ, d)`.
+7. Sends Alice ψ2 = ("R", γ, σ, d).
 
 
 Alice:
 
-1. Verifies `Verif({hA, hB, g1^i}, σ, “I” ∥ “R” ∥ g1^i ∥ γ)`.
-2. Decrypts `m = DRDec(PKa, PKb, SKa, γ)`.
+1. Verifies Verif({hA, hB, g1⊗i}, σ, “I” ∥ “R” ∥ g1⊗i ∥ γ).
+2. Decrypts m = DRDec(PKa, PKb, SKa, γ).
 3. Verifies the following properties of the decrypted message `m`:
   1. The message is of the correct form (e.g., the fields are of the expected length)
   2. Alice's identifier is the first one listed
   3. Bob's identifier is the second one listed, and it matches the identifier transmitted outside of the ciphertext
-  4. g1^i is a pre-key that Alice previously sent and remains unused.
-4. Process the data message `d` according to the spec.
-
+  4. g1⊗i is a pre-key that Alice previously sent and remains unused.
+4. Computes k = (g1⊗r) ⊗ i and securely erase `i`.
+5. Process the data message `d` according to the spec.
