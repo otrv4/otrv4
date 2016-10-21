@@ -324,13 +324,17 @@ our_dh, their_dh
 After the DAKE is finished, both side will initialize the first group of root key (R0) and chain key
 (C0_0) deriving from SharedSecret.
 
+How to derive the first ratchet (R0):
 ```
 R0, Ca0_0, Cb0_0 = KDF(SharedSecret)
 ```
+
 - For the Initiator:
-  - She will perform a new ratchet once again by generating a new pair of DH keys and derive R1, Ca1_0, Cb1_0
+  - Set ratchet_flag as true
+  - Set their_dh as g^b from the DAKE
+  - She will perform a new ratchet once again when sending her first message
 - For the Receiver:
-  - He will reuse the DH keys used in the DAKE
+  - Set ratchet_flag as false
 
 Both side will compare their public keys to choose a chain key for sending and receiving:
 
@@ -348,10 +352,30 @@ Otherwise, she is the "low" end.
     2. Securely forget our_dh, increment i, and set our_dh to a new DH key pair which you generate.
     3. Set ratchet_flag to false.
 
+    ```
+    our_dh = {pubDHa, privDHa} = generateECDH()
+    R1, Ca1_0, Cb1_0 = KDF(SHA3(R0 || ECDH(our_dh, their_dh)))
+    ```
+
 2. Set the ratchet_id to i.
 3. Set the DH pubkey in the Data message to the public part of our_dh.
 4. Increment j, and use Cs_j to derive the Enc and MAC key.
+
+    ```
+    MKenc, MKmac = KDF(Cs_j)
+    ```
+
 5. Use the Enc key to encrypt the message, and the MAC key to calculate its mactag.
+
+    ```
+    msg = Enc(MKenc, m) || Mac(MKmac, m)
+    ```
+
+6. Derive the next sending Chain Key
+
+    ```
+    Cs_j+1 = SHA3(Cs_j || j+1)
+    ```
 
 #### When you receive a Data Message:
 
