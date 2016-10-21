@@ -129,7 +129,7 @@ This section outlines the flow of the Deniable Authenticated Key Exchange, which
 is a way for two parties to mutually agree upon a shared key and authenticate one
 another while also allowing a level of participation deniability.
 
-This process is based on the Spawn protocol, which utilizes Dual Receiver
+This process is based on the Spawn protocol[1], which utilizes Dual Receiver
 Encryption (DRE) and a NIZKPK for authentication (Auth).
 
 ### Interactive DAKE Overview
@@ -138,22 +138,26 @@ Encryption (DRE) and a NIZKPK for authentication (Auth).
 Alice                                          Bob
 ---------------------------------------------------
 Query Message or Whitespace Tag ------->
-                                <------- ψ1
-                             ψ2 ------->
+                                <------- Prekey (ψ1)
+                  DRE-Auth (ψ2) ------->
                                          Verify & Decrypt (ψ2)
 ```
 
 The Query Message or Whitespace Tag will include the versions supported by
 Alice.
 
+```
 ψ1 = { "B", pubB, g^b, Bobs_versions }
+```
 
 "B" is Bob's account identifier. Bobs_versions are the versions supported
 by Bob.
 
+```
 ψ2 = { "A", pubA, γ, σ } where
 γ = DRE(pubB, pubA, "B" || g^b || "A" || g^a)
 σ = Auth(hA, zA, {hB, hA, g^b}, "B" || "A" || g^b || Alices_versions || Bobs_versions || γ )
+```
 
 "A" is Alice's account identifier.
 
@@ -161,8 +165,8 @@ After receiving ψ2, Alice authenticates σ and decrypts γ. She then verifies t
 versions that were sent by both parties. If Bob did not receive the Query
 Message or Whitespace Tag sent by Alice or if Bob is using a version of OTR that
 is not the highest preferable version, this check will fail. If all checks pass,
-then Alice and Bob have a shared secret with which to encrypt their data
-messages.
+then Alice and Bob have a shared secret with which to initialize their data
+messages exchange session.
 
 ### Non-interactive DAKE Overview
 
@@ -172,7 +176,7 @@ Alice                       Prekey storage                     Bob
                                             <--------- Prekey (ψ1)
 Prekey request              ------------->
                             <-------------             Prekey (ψ1)
-ψ2 & m         -------------------------------------->
+DRE-Auth (ψ2) & m ----------------------------------->
                                              Verify & Decrypt (ψ2)
 ```
 
@@ -184,11 +188,14 @@ A prekey consists of pubB, g^b, "B", and the OTR version of the prekey.
 When Alice wants to start a secure conversation with Bob, she requests one of
 Bob's prekeys from the storage, and then she computes ψ2 and m.
 
+```
 ψ2 = { pubA, γ, σ }
 γ = DRE(pubB, pubA, "B" || g^b || "A" || g^a || Alices_versions )
 σ = Auth(hA, zA, {hB, hA, g^b}, "B" || "A" || g^b || Bobs_prekey_version || γ )
+```
 
-m is a data message encrypted with the shared secret generated from g^a and g^b.
+m is the first data message sent after initializing the data message exchange
+session.
 
 Before Bob decrypts the message, he auathenticates the auth σ and decrypts γ. He
 then verifies that the prekey Alice is using corresponds to the version he placed
@@ -217,14 +224,14 @@ Receiver Instance tag (INT)
     The instance tag of the intended recipient. For a commit message this will often be 0, since the other party may not have identified their instance tag yet.
 g^b (DATA)
     The public part of ECDH, b is randomly selected from the group defined.
-Supported versions (DATA)
+Long-term Public Key (DATA)
     TODO: encode this field
 ```
 
 #### DRE-Auth message
 
-This is the second message of the DAKE. Alice sends it to Bob to commit to a choice of D-H key and acknowledgement of Bob's D-H key,
-use dual-receiver-encryption and zero-knowledge-proof-of-knowledge to encrypt and authenticate this message
+This is the second message of the DAKE. Alice sends it to Bob to commit to a choice of her D-H key and acknowledgement of Bob's D-H key.
+Dual-receiver-encryption is used to encrypt the public key and Zero-knowledge-proof-of-knowledge is used to authenticate the message.
 
 ```
 Protocol version (SHORT)
@@ -254,9 +261,15 @@ Note: OTR version 4 is the latest version to support previous versions.
 ## Data Exchange
 
 This section describes how each participant will use the Double Ratchet
-algorithm to exchange data using the shared secret established in the DAKE.
+algorithm to exchange data initialized with the shared secret established in the DAKE.
 
-TODO: Define structure of a data message (includes header, encrypted message, MAC, ephemeral key, old mac keys)
+To perform a new ratchet means to rotate the root key and chain key to use a new D-H key pair.
+A ratchet represents a group of data messages which are encrypted by keys derived from the
+same D-H key pair.
+
+A message with an empty human-readable part (the plaintext is of zero length, or starts
+with a NUL) is a "heartbeat" packet, and should not be displayed to the user. (But it's
+still useful to effect key rotations.)
 
 ```
 Alice                                                                           Bob
@@ -277,7 +290,7 @@ Send data message 0_1            -------------------->
                                                        Derive Enc-key & MAC-key
                                                        Verify MAC, Decrypt message 0_1
 
-                                                       Ratcheting with root key, pubDHa, privDHb
+                                                       Perform a new ratchet
                                  <-------------------- Send data message 1_0
                                  <-------------------- Send data message 1_1
 
@@ -315,7 +328,7 @@ After the DAKE is finished, both side will initialize the first group of root ke
 R0, Ca0_0, Cb0_0 = KDF(SharedSecret)
 ```
 - For the Initiator:
-  - She will ratchet once again by generating a new pair of DH keys and derive R1, Ca1_0, Cb1_0
+  - She will perform a new ratchet once again by generating a new pair of DH keys and derive R1, Ca1_0, Cb1_0
 - For the Receiver:
   - He will reuse the DH keys used in the DAKE
 
@@ -428,5 +441,5 @@ Old MAC keys to be revealed (DATA)
     See "Revealing MAC Keys"
 ```
 
-[1]: http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf
-[2]: https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html
+[1](http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf)
+[2](https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html)
