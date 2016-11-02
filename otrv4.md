@@ -40,7 +40,7 @@ The high level flow of this protocol will be:
 
 ## Assumptions
 
-At least one participant is online at the start of a conversation.
+Both participants are online at the start of a conversation.
 
 Messages in a conversation will be exchanged over an insecure channel, where an attacker can eavesdrop or interfere with the messages.
 
