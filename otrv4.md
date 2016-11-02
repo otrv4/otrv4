@@ -71,6 +71,56 @@ said conversation. Both ends can also deny having sent one or many of the exchan
 Threats that an OTR conversation does not mitigate:
 * An active attacker may perform a Denial of Service attack but not learn the contents of messages.
 
+## Preliminaries
+
+### Notation
+
+All values on Z_ℓ are MPIs. 
+
+Regarding to elliptic curve operations, we use:
+
+⊕ to represent point additions,  
+⊗ to represent scalar multiplications and  
+⊖ to represent point subtractions.
+
+### Data types
+
+    Bytes (BYTE):
+      1 byte unsigned value
+
+    Shorts (SHORT):
+      2 byte unsigned value, big-endian
+
+    Ints (INT):
+      4 byte unsigned value, big-endian
+
+    Multi-precision integers (MPI):
+      4 byte unsigned len, big-endian
+      len byte unsigned value, big-endian
+      (MPIs must use the minimum-length encoding; i.e. no leading 0x00 bytes. This is important when calculating public key fingerprints.)
+
+    ED448 points (POINT):
+      We need to choose a point serialization format for ed448 points
+
+    Opaque variable-length data (DATA):
+      4 byte unsigned len, big-endian
+      len byte data
+
+
+### Public keys and fingerprints
+
+OTR public authentication Cramer-Shoup key (PUBKEY):
+
+    Pubkey type (SHORT)
+      Cramer-Shoup public keys have type 0x0010
+    
+    c (MPI)
+    d (MPI)
+    h (MPI)
+      (c, d, h) are the Cramer-Shoup public key parameters
+
+OTR public keys have fingerprints, which are hex strings that serve as identifiers for the public key. The fingerprint is calculated by taking the SHA-1 hash of the byte-level representation of the public key.
+
 ## OTR Conversation Initialization
 
 OTR4 conversations are established by an deniable authenticated key exchange
