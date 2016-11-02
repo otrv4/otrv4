@@ -295,7 +295,13 @@ Otherwise, she is the "low" end.
 
     ```
     our_dh = {pubDHa, privDHa} = generateECDH()
-    R1, Ca1_0, Cb1_0 = KDF(SHA3(R0 || ECDH(our_dh, their_dh)))
+
+    R1 = SHA3(0x00 || R0 || ECDH(our_dh, their_dh))
+    Ca1_0 = SHA3(0x01 || R0 || ECDH(our_dh, their_dh))
+    Cb1_0 = SHA3(0x02 || R0 || ECDH(our_dh, their_dh))
+
+    i = i+1
+    ratchet_flag = false
     ```
 
 2. Set the ratchet_id to i.
@@ -303,30 +309,59 @@ Otherwise, she is the "low" end.
 4. Increment j, and use Cs_j to derive the Enc and MAC key.
 
     ```
-    MKenc, MKmac = KDF(Cs_j)
+    MKenc = SHA3(0x00 || Cs_j)
+    MKmac = SHA3(0x01 || Cs_j)
     ```
 
 5. Use the Enc key to encrypt the message, and the MAC key to calculate its mactag.
 
     ```
-    msg = Enc(MKenc, m) || Mac(MKmac, m)
+    ciphertext = Enc(MKenc, m)
+    msg = ciphertext || Mac(MKmac, ciphertext)
     ```
 
 6. Derive the next sending Chain Key
 
     ```
-    Cs_j+1 = SHA3(Cs_j || j+1)
+    Cs_j+1 = SHA3(Cs_j)
     ```
 
 #### When you receive a Data Message:
 
-1. If the ratchet_id does not equal i+1, reject the message.
+1. If the ratchet_id is not larger than i, reject the message.
 2. If the message_id is not larger than k, reject the message.
 3. Use the message_id to compute the Receiving Chain key Cr_message_id.
+
+    ```
+    Cr_message_id = SHA3(Cr_message_id-1)
+    ```
+
 4. Use the Cr_message_id to derive the Enc and MAC key.
+
+    ```
+    MKenc = SHA3(0x00 || Cs_j)
+    MKmac = SHA3(0x01 || Cs_j)
+    ```
+
 5. Use the MAC key to verify the mactag on the message. If it does not verify, reject the message.
+
+    ```
+    ciphertext, mactag = msg
+    verify(mactag == Mac(MKmac, m))
+    ```
+
 6. Decrypt the message using the Enc key.
+
+    ```
+    m = Dec(MKenc, ciphertext)
+    ```
+
 7. Set k to message_id, Set ratchet_flag to true, Set their_dh as pubDHRs of the message.
+
+    ```
+    k = message_id
+    ratchet_flag = true
+    ```
 
 ### Revealing MAC Keys
 
@@ -382,15 +417,10 @@ pubDHRs (MPI)
 
     The *next* ratchet [i.e. sender_keyid+1] public key for the sender
 
-Top half of counter init (CTR)
-
-    This should monotonically increase (as a big-endian value) for each message sent with the same (sender keyid,
-    recipient keyid) pair, and must not be all 0x00.
-
 Encrypted message (DATA)
 
     Using the appropriate encryption key (see below) derived from the sender's and recipient's DH public keys
-    (with the keyids given in this message), perform AES128 counter-mode (CTR) encryption of the message.
+    (with the keyids given in this message), perform Xsalsa encryption of the message.
     The initial counter is a 16-byte value whose first 8 bytes are the above "top half of counter init" value,
     and whose last 8 bytes are all 0x00.
     Note that counter mode does not change the length of the message, so no message padding needs to be done.
