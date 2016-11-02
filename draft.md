@@ -185,26 +185,26 @@ Alice:
 
 ### Data types
 
-Bytes (BYTE):  
-1 byte unsigned value
+    Bytes (BYTE):
+      1 byte unsigned value
 
-Shorts (SHORT):  
-2 byte unsigned value, big-endian
+    Shorts (SHORT):
+      2 byte unsigned value, big-endian
 
-Ints (INT):  
-4 byte unsigned value, big-endian
+    Ints (INT):
+      4 byte unsigned value, big-endian
 
-Multi-precision integers (MPI):  
-4 byte unsigned len, big-endian  
-len byte unsigned value, big-endian   
-(MPIs must use the minimum-length encoding; i.e. no leading 0x00 bytes. This is important when calculating public key fingerprints.)
+    Multi-precision integers (MPI):
+      4 byte unsigned len, big-endian  
+      len byte unsigned value, big-endian   
+      (MPIs must use the minimum-length encoding; i.e. no leading 0x00 bytes. This is important when calculating public key fingerprints.)
 
-ED448 points (POINT):  
-We need to choose a point serialization format for ed448 points
+    ED448 points (POINT):
+      We need to choose a point serialization format for ed448 points
 
-Opaque variable-length data (DATA):  
-4 byte unsigned len, big-endian  
-len byte data
+    Opaque variable-length data (DATA):
+      4 byte unsigned len, big-endian
+      len byte data
 
 ### Public keys and fingerprints
 
