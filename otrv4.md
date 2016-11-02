@@ -609,6 +609,32 @@ AUTHSTATE_AWAITING_DRE_AUTH
 
 TODO: backward compatiblity
 
+### Policies
+
+OTR clients can set different policies for different correspondents. For example, Alice could set up her client so that it speaks only OTR version 4, except with Charlie, who she knows has only an old client; so that it will opportunistically start an OTR conversation whenever it detects the correspondent supports it; or so that it refuses to send non-encrypted messages to Bob, ever.
+
+The policies that can be set (on a global or per-correspondent basis) are any combination of the following boolean flags:
+
+```
+ALLOW_V1
+Allow version 1 of the OTR protocol to be used (in general this document will not address OTR protocol version 1; see previous protocol documents for these details).
+ALLOW_V2
+Allow version 2 of the OTR protocol to be used.
+ALLOW_V3
+Allow version 3 of the OTR protocol to be used.
+ALLOW_V4
+Allow version 4 of the OTR protocol to be used.
+REQUIRE_ENCRYPTION
+Refuse to send unencrypted messages.
+SEND_WHITESPACE_TAG
+Advertise your support of OTR using the whitespace tag.
+WHITESPACE_START_AKE
+Start the OTR AKE when you receive a whitespace tag.
+ERROR_START_AKE
+Start the OTR AKE when you receive an OTR Error Message.
+Note that it is possible for UIs simply to offer the old "combinations" of options, and not ask about each one separately.
+```
+
 ## Appendices
 
 ### ROM DRE
