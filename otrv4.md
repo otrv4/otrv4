@@ -16,10 +16,8 @@ was said, or even that the two participants spoke to each other at all.
 4. [Security Properties](#security-properties)
 
 5. [OTR Conversation Initialization](#otr-conversation-initialization)
-    1. [Requesting a conversation](#requesting-a-conversation)
+    1. Version Negotiation
     2. [Deniable Authenticated Key Exchange (DAKE)](#deniable-authenticated-key-exchange-dake)
-    3. [Interactive DAKE](#interactive-dake)
-    4. [Non-interactive DAKE](#non-interactive-dake)
 
 6. [Requesting conversation with older OTR version](#requesting-conversation-with-older-otr-version)
 
@@ -33,9 +31,6 @@ TODO: Write this section when we have fleshed out the other sections of the spec
 
 Off The Record messaging (OTR) is a messaging protocol that achieves forward-secrecy
 and deniability.
-
-OTR conversations may happen while both participants are online (interactive), or one side
-is offline (non-interactive).
 
 The high level flow of this protocol will be:
 
@@ -65,8 +60,7 @@ said conversation. Both ends can also deny having sent one or many of the exchan
 
 ### DAKE properties
  * Mutual authentication
- * Interactive: participation repudiation for both initiator and receiver
- * Non-interactive: participation repudiation for *only* the receiver
+ * Participation repudiation for both initiator and receiver
 
 ### Conversation properties
  * Confidentiality
@@ -80,10 +74,7 @@ Threats that an OTR conversation does not mitigate:
 ## OTR Conversation Initialization
 
 OTR4 conversations are established by an deniable authenticated key exchange
-protocol (DAKE). The DAKE is different for either an interactive or non-interactive
-conversation.
-
-### Initialization in the interactive case
+protocol (DAKE).
 
 There are two ways Alice can inform Bob that she is willing to use the OTR
 protocol to speak with him in an interactive setting: by sending him the OTR
@@ -107,15 +98,6 @@ supports and is willing to use.
 Once Bob has decided to start the conversation in response to Alice's request,
 he will initiate an interactive, deniable, authenticated key exchange DAKE.
 
-### Initialization in the non-interactive case
-
-OTR4 introduces the ability to send a message to an offline participant.
-
-In this scenario, there is no Query Message or Whitespace tag. Bob begins the
-DAKE by placing his prekeys on an untrusted server. To send a message to Bob,
-Alice fetches one of Bob's prekeys and uses it to complete the DAKE and send
-Bob an encrypted message.
-
 ### Version negotiation
 
 OTR4 introduces mandatory version negotiation to resist version rollback. In
@@ -132,7 +114,7 @@ another while also allowing a level of participation deniability.
 This process is based on the Spawn protocol[1], which utilizes Dual Receiver
 Encryption (DRE) and a NIZKPK for authentication (Auth).
 
-### Interactive DAKE Overview
+#### Overview
 
 ```
 Alice                                          Bob
@@ -167,47 +149,6 @@ Message or Whitespace Tag sent by Alice or if Bob is using a version of OTR that
 is not the highest preferable version, this check will fail. If all checks pass,
 then Alice and Bob have a shared secret with which to initialize their data
 messages exchange session.
-
-### Non-interactive DAKE Overview
-
-```
-Alice                       Prekey storage                     Bob
---------------------------------------------------------------------
-                                            <--------- Prekey (ψ1)
-Prekey request              ------------->
-                            <-------------             Prekey (ψ1)
-DRE-Auth (ψ2) & m ----------------------------------->
-                                             Verify & Decrypt (ψ2)
-```
-
-In the non-interactive DAKE, Bob generates one (or more) prekeys and places
-them in a prekey storage, like a server.
-
-A prekey consists of pubB, g^b, "B", and the OTR version of the prekey.
-
-When Alice wants to start a secure conversation with Bob, she requests one of
-Bob's prekeys from the storage, and then she computes ψ2 and m.
-
-```
-ψ2 = { pubA, γ, σ }
-γ = DRE(pubB, pubA, "B" || g^b || "A" || g^a || Alices_versions )
-σ = Auth(hA, zA, {hB, hA, g^b}, "B" || "A" || g^b || Bobs_prekey_version || γ )
-```
-
-m is the first data message sent after initializing the data message exchange
-session.
-
-Before Bob decrypts the message, he auathenticates the auth σ and decrypts γ. He
-then verifies that the prekey Alice is using corresponds to the version he placed
-on the server, and then he checks that Alice and Bob are using the highest
-preferable version. If all the checks pass then Bob will decrypt the message
-
-TODO: How pre-key storage is protocol-specific, maybe mention the XMPP
-extension for this.
-
-TODO: How to encode pre-keys.
-
-### Packet format
 
 #### Pre-key message
 
