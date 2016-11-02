@@ -44,14 +44,15 @@ We will use ed448 as DH group for the extra security it provides.
 We will use SHA3-512 as cryptographic hash function.
 
 We will use XSalsa as stream cipher because it is faster than AES, is immune to
-timing attacks, it's safe to randomly generate its longer nonce. XSalsa will be
-used with the following parameters: 20 rounds, 192-bits nonce, and 256-bit key.
+timing attacks, and it's safe to randomly generate its longer nonce. XSalsa will 
+be used with the following parameters: 20 rounds, 192-bits nonce, and 256-bit key.
 
 We will use Poly-1305 for message authentication.
 
-We will use SHA3-512 as key derivation function, and use the construct
-SHA3-512(prefix || secret) every time multiple keys need to be derived from the
-same secret.
+We will use SHA3-512 as key derivation function. We use the construct
+SHA3-512(key || secret) when a keyed cryptographic hash function is expected,
+and use the construct SHA3-512(counter || secret) every time multiple keys need
+to be derived from the same secret.
 
 ### Consequences
 
