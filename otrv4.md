@@ -98,7 +98,7 @@ Regarding to elliptic curve operations, we use:
       (MPIs must use the minimum-length encoding; i.e. no leading 0x00 bytes. This is important when calculating public key fingerprints.)
 
     ED448 points (POINT):
-      We need to choose a point serialization format for ed448 points
+      TODO: We need to choose a point serialization format for ed448 points
 
     Opaque variable-length data (DATA):
       4 byte unsigned len, big-endian
@@ -245,9 +245,21 @@ Receiver Instance tag (INT)
   The instance tag of the intended recipient. For a commit message this will often be 0, since the other party may not have identified their instance tag yet.
 Initiator's identifier (DATA)
   This can be the fingerprint or something else.
-g1⊗i (MPI)
+g1⊗i (POINT)
   - Choose a random value i (446 bits) mod l
   - Encode g1⊗i as the MPI field.
+```
+
+This message has length:
+
+```
+LEN(Header) + LEN(Identifier) + LEN(Point)
+  = 13 + 184 + 56 = 253 bytes  
+
+LEN(Header) = 4 + 1 + 4 + 4 = 13 bytes  
+
+If Identifier is the public key,  
+  Len(Identifier) = 4 + 3*Len(MPI) = 4 + 3*(4 + 56) = 184 bytes
 ```
 
 #### DRE-Auth message
@@ -300,6 +312,19 @@ Receiver's identifier (DATA)
   - r2 (MPI)
   - c3 (MPI)
   - r3 (MPI)
+```
+
+This message has length:
+
+```
+LEN(HEADER) + LEN(Identifier) + LEN(γ) + LEN(σ)
+  = 13 + 184 + 1164 + 360 = 1721 bytes.
+
+LEN(γ) = 8 * LEN(Point) + 3 * LEN(MPI) + LEN(nonce) + LEN(φ) = 1164 bytes
+  8*56 + 3*60 + 24 + 512 = 1164 bytes
+  LEN(φ) = 32 + LEN(m) = 32 + 184 + 184 + 56 + 56 = 512 bytes  
+
+LEN(σ) = 6 * LEN(MPI) = 360 bytes
 ```
 
 ## Requesting conversation with older OTR version
