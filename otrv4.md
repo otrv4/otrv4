@@ -73,13 +73,42 @@ Threats that an OTR conversation does not mitigate:
 
 ### Notation
 
-All values on Z_ℓ are MPIs. 
+Integer variables are in lower case (x, y). Points and other variables are in upper case (P, Q).
 
-Regarding to elliptic curve operations, we use:
+Addition and subtraction of elliptic curve points A and B is A + B and A - B. Scalar multiplication of an integer a with an elliptic curve point B yields a new point C = a*B.
 
-⊕ to represent point additions,  
-⊗ to represent scalar multiplications and  
-⊖ to represent point subtractions.
+The concatenation of byte sequences x and P is x || P. In this case, x and P represent a fixed-length byte sequence encoding the respective values. See section "Data types" for encoding and decoding details.
+
+### Elliptic Curve Parameters
+
+OTRv4 uses the Curve448 elliptic curve specified in (add reference), which defines the following parameters:
+
+```
+Base point (B)
+  (x=117812161263436946737282484343310064665180535357016373416879082147939404277809514858788439644911793978499419995990477371552926308078495, y=19)
+
+Cofactor (c)
+  4
+
+Identity point (I)
+  (x=0, y=1)
+
+Field prime (p)
+  2448 - 2224 - 1
+
+Order of base point (q) [prime; q < p; q*B = I]
+  2446 - 13818066809895115352007386748515426880336692474882178609894547503885
+
+Number of bits in p (|p|)
+  448 bits
+
+Number of bits in q (|q|)
+  446 bits
+```
+
+An integer modulo p is a "field element". An integer modulo q is a a "scalar" (also a value on Z_q), and is considered a MPI for encoding and decoding purposes.
+
+TODO: If we use u-coordinate for encoding according to XEdDSA, do we need to consider the sign byte when hashing to a field element (the first byte)? Simply clearing seems to be the simplest solution.
 
 ### Data types
 
@@ -111,7 +140,7 @@ OTR public authentication Cramer-Shoup key (PUBKEY):
 
     Pubkey type (SHORT)
       Cramer-Shoup public keys have type 0x0010
-    
+
     c (MPI)
     d (MPI)
     h (MPI)
@@ -179,28 +208,28 @@ Query Message or Whitespace Tag ------->
 
 **Alice:**
 
-1. Generates an ephemeral private key `i` from `Z_ℓ` and a public key g1⊗i.
-2. Sends Bob ψ1 = ("I", g1⊗i).
+1. Generates an ephemeral private key `i` from `Z_q` and a public key g1*i.
+2. Sends Bob ψ1 = ("I", g1*i).
 
 
 **Bob:**
 
-1. Generates an ephemeral private key `r` from `Z_ℓ` and public key g1⊗r.
-2. Computes γ = DREnc(PKb, PKa, m), being m = "I" ∥ "R" ∥ g1⊗i ∥ g1⊗r.
-3. Computes σ = Auth(hB, zB, {hA, g1⊗i}, "I" ∥ "R" ∥ g1⊗i ∥ γ).
-4. Computes k = (g1⊗i) ⊗ r and securely erase `r`.
+1. Generates an ephemeral private key `r` from `Z_q` and public key g1*r.
+2. Computes γ = DREnc(PKb, PKa, m), being m = "I" || "R" || g1*i || g1*r.
+3. Computes σ = Auth(hB, zB, {hA, g1*i}, "I" || "R" || g1*i || γ).
+4. Computes k = (g1*i) * r and securely erase `r`.
 5. Sends Alice ψ2 = ("R", γ, σ).
 
 
 **Alice:**
 
-1. Verifies Verif({hA, hB, g1⊗i}, σ, “I” ∥ “R” ∥ g1^i ∥ γ).
+1. Verifies Verif({hA, hB, g1*i}, σ, “I” || “R” || g1^i || γ).
 2. Decrypts m = DRDec(PKa, PKb, SKa, γ).
 3. Verifies the following properties of the decrypted message `m`:
   1. The message is of the correct form (e.g., the fields are of the expected length)
   2. Alice's identifier is the first one listed
   3. Bob's identifier is the second one listed, and it matches the identifier transmitted outside of the ciphertext
-4. Computes k = (g1⊗r) ⊗ i and securely erase `i`.
+4. Computes k = (g1*r) * i and securely erase `i`.
 
 
 **TODO: the following is about version negotiation and may need to be moved.**
@@ -245,9 +274,9 @@ Receiver Instance tag (INT)
   The instance tag of the intended recipient. For a commit message this will often be 0, since the other party may not have identified their instance tag yet.
 Initiator's identifier (DATA)
   This can be the fingerprint or something else.
-g1⊗i (POINT)
+g1*i (POINT)
   - Choose a random value i (446 bits) mod l
-  - Encode g1⊗i as the MPI field.
+  - Encode g1*i as the MPI field.
 ```
 
 This message has length:
@@ -280,8 +309,8 @@ Receiver's identifier (DATA)
   This can be the fingerprint or something else.
 γ (DATA)
   - Choose a random value r (446 bits) mod l
-  - Compute g1⊗r
-  - Generate m = "I" ∥ "R" ∥ g1⊗i ∥ g1⊗r
+  - Compute g1*r
+  - Generate m = "I" || "R" || g1*i || g1*r
   - Compute (u11, u21, e1, v1, u12, u22, e2, v2, L, n1, n2, nonce, φ) = DREnc(pubA, pubB, m)
   - Encode each returned value individually and concatenate all of them as γ.
   - Encode the resulting value γ as the DATA field.
@@ -301,10 +330,10 @@ Receiver's identifier (DATA)
   - nonce (DATA)
   - φ (DATA)
 σ (DATA)
-  - Compute (c1, r1, c2, r2, c3, r3) = Auth(hB, zB, {hA, g1⊗i}, "I" ∥ "R" ∥ g1⊗i ∥ γ) 
+  - Compute (c1, r1, c2, r2, c3, r3) = Auth(hB, zB, {hA, g1*i}, "I" || "R" || g1*i || γ)
   - Encode each returned value individually and concatenate all of them as σ.
   - Encode the resulting value σ as the DATA field.
-  
+
   Auth values are encoded as follows:
   - c1 (MPI)
   - r1 (MPI)
@@ -639,65 +668,95 @@ Note that it is possible for UIs simply to offer the old "combinations" of optio
 
 ### ROM DRE
 
-The DRE scheme consists of three functions: 
+The DRE scheme consists of three functions:
 
-`pk, sk = DRGen()`, a key generation function.  
-`γ = DREnc(pk1, pk2, m)`, an encryption function.  
-`m = DRDec(pk1, pk2, sk_i, γ)`, a decryption function.
+`PK, SK = DRGen()`, a key generation function.  
+`γ = DREnc(PK1, PK2, m)`, an encryption function.  
+`m = DRDec(PK1, PK2, SKi, γ)`, a decryption function.
 
 #### Domain parameters
 
-The Cramer-Shoup scheme uses a group (G, ℓ, g1, g2). In OTRv4, we choose Ed448 with its group G and its
-correspondant prime order ℓ of 446 bits. The generators g1 and g2 are:
+The Cramer-Shoup scheme uses a group (G, q, g1, g2). This is a group with the same q as Curve 448. The generators G1 and G2 are:
 
-g1 = (501459341212218748317573362239202803024229898883658122912772232650473550786782902904842340270909267251001424253087988710625934010181862, 44731490761556280255905446185238890493953420277155459539681908020022814852045473906622513423589000065035233481733743985973099897904160)
+G1 = (501459341212218748317573362239202803024229898883658122912772232650473550786782902904842340270909267251001424253087988710625934010181862, 44731490761556280255905446185238890493953420277155459539681908020022814852045473906622513423589000065035233481733743985973099897904160)
 
-g2 = (433103962059265674580308903270602732554589039120240665786107503148578357355610867319637982957210103802741854255963765310708419199319826, 637671230437811306883071736319873166937007728586178661428553286712849083212910048075550542694415936278788300723371476615776878488331711)
+G2 = (433103962059265674580308903270602732554589039120240665786107503148578357355610867319637982957210103802741854255963765310708419199319826, 637671230437811306883071736319873166937007728586178661428553286712849083212910048075550542694415936278788300723371476615776878488331711)
+
+TODO: I want to replace one of the generators by B from Curve 448.
 
 #### Dual Receiver Key Generation: DRGen()
 
-1. Pick random values x1, x2, y1, y2, z (56 bytes each) in Z_ℓ.
-2. Compute group elements c = g1⊗x1 ⊕ g2⊗x2, d = g1⊗y1 ⊕ g2⊗y2, h = g1⊗z. 
-3. The public key is pk = {c, d, h} and the secret key is sk = {x1, x2, y1, y2, z}.
+1. Pick random values `x1, x2, y1, y2, z` in Z_q.
+2. Compute group elements
+  - `C = G1*x1 + G2*x2`
+  - `D = G1*y1 + G2*y2`
+  - `H = G1*z`.
+3. The public key is `PK = {C, D, H}` and the secret key is `SK = {x1, x2, y1, y2, z}`.
 
 
-#### Dual Receiver Encryption: DREnc(pk_1, pk_2, m)
+#### Dual Receiver Encryption: DREnc(PK1, PK2, m)
 
-1. Pick random values K, k_1, k_2 (56 bytes each) in Z_ℓ.
-2. For i ∈ {1,2}:
-  1. pk_i = {c_i,d_i,h_i}
-  2. Compute u_1i = g1⊗k_i, u_2i = g2⊗k_i, e_i = (h_i⊗k_i) ⊗ K
-  3. Compute α_i = MapToZl(u_1i ∥ u_2i ∥ e_i).
-  4. Compute v_i = (c_i⊗k_i) ⊕ (d_i⊗(k_i ⊗ α_i))
-3. Compute K_enc = SHA3-256(K).
-4. Pick a random 24 bytes nonce and compute φ = XSalsa20-Poly1305_K_enc(m, nonce)
-5. Generate a NIZKPK: 
-  1. for i ∈ {1,2}: 
-    1. Pick random value t_i (56 bytes) in Z_ℓ. 
-    2. Compute T_1i = g1⊗t_i, T_2i = g2⊗t_i, T_3i = (c_i ⊕ (d_i⊗α_i))⊗t_i. 
-  2. Compute T_4 = (h_1⊗t_1) ⊖ (h_2⊗t_2).
-  3. Compute L = MapToZl(g1 ∥g2 ∥ ℓ ∥ pk_1 ∥ pk_2 ∥ u_11 ∥ u_21 ∥ e_1 ∥ v_1 ∥ α_1 ∥ u_12 ∥ u_22 ∥ e_2 ∥ v_2 ∥ α_2 ∥ T_11 ∥ T_21 ∥ T_31 ∥ T_12 ∥ T_22 ∥ T_32 ∥ T_4 ).
-  4. Generate for i ∈ {1,2}: 
-    1. Compute n_i = t_i - L * k_i (mod ℓ).
-6. Send γ = (u_11, u_21, e_1, v_1, u_12, u_22, e_2, v_2, L, n_1, n_2, nonce, φ).
+Let `{C1, D1, H1} = PK1` and `{C2, D2, H2} = PK2`
+
+1. Pick random values `k1, k2, r` in Z_q and compute `K = G1*r`.
+2. For i ∈ {1, 2}:
+  1. Compute
+    - `U1i = G1*ki`
+    - `U2i = G2*ki`
+    - `Ei = (Hi*ki) + K`
+  2. Compute `αi = MapToZl(U1i || U2i || Ei)`.
+  3. Compute `Vi = Ci*ki + Di*(ki * αi)`
+3. Compute `K_enc = SHA3-256(K)`. TODO: we do this for key compression (K == 446 bits, K_enc = 256).
+4. Pick a random 24 bytes `nonce` and compute `φ = XSalsa20-Poly1305_K_enc(m, nonce)`
+5. Generate a NIZKPK:
+  1. for i ∈ {1, 2}:
+    1. Pick random value `ti` in Z_q.
+    2. Compute
+      - `T1i = G1*ti`
+      - `T2i = G2*ti`
+      - `T3i = (Ci + Di*αi)*ti`
+  2. Compute `T4 = H1*t1 - H2*t2`.
+  3. Compute
+    - `gV = G1 || G2 || q` (TODO: Do we really need to send this if they are part of the group definition)
+    - `pV = C1 || D1 || H1 || C2 || D2 || H2`
+    - `eV = U11 || U21 || E1 || V1 || α1 || U12 || U22 || E2 || V2 || α2`
+    - `zV = T11 || T21 || T31 || T12 || T22 || T32 || T4`
+    - `l = MapToZl(gV || pV || eV || zV)`
+  4. Generate for i ∈ {1,2}:
+    1. Compute `ni = ti - l * ki (mod q)`.
+6. Send `γ = (U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2, nonce, φ)`.
 
 
-#### Dual Receiver Decryption: DRDec(pk_1, pk_2, sk_i, γ):
+#### Dual Receiver Decryption: DRDec(PK1, PK2, SKi, γ):
 
-1. Parse γ to retrieve components γ = (u_11, u_21, e_1, v_1, u_12, u_22, e_2, v_2, L, n_1, n_2, nonce, φ).
-2. Verify NIZKPKi: 
-  1. for j ∈ {1,2} compute:
-    1. α'_j = MapToZl(u1_j ∥ u_2j ∥ e_j)
-    2. T'_1j = (g1⊗n_j) ⊕ (u_1j⊗L)
-    3. T'_2j = (g2⊗n_j) ⊕ (u_2j⊗L)
-    4. T'_3j = (c_j ⊕ (d_j⊗a'_j))⊗n_j ⊕ (v_j⊗L)
-  2. T'_4 = ((h1⊗n1) ⊖ (h2⊗n2)) ⊕ ((e1 ⊖ e2)⊗L)
-  3. Compute L' = MapToZl(g1 ∥ g2 ∥ q ∥ pk_1 ∥ pk_2 ∥ u_11 ∥ u_21 ∥ e_1 ∥ v_1 ∥ α'_1 ∥ u_12 ∥ u_22 ∥ e_2 ∥ v_2 ∥ α'_2 ∥ T'_11 ∥ T'_21 ∥ T'_31 ∥ T'_12 ∥ T'_22 ∥ T'_32 ∥ T'_4 ).
-  4. Verify L ≟ L.
-  5. Compute t_1 = u_1i⊗x_1i, t2 = u_2i⊗x_2i, t3 = u_1i⊗y_1i, t4 = u_2i⊗y_2i
-  6. Verify t_1 ⊕ t2 ⊕ (t3 ⊕ t4)⊗α'_i ≟ v_i.
-3. Recover secret key K_enc = (e_i) ⊖ (u1_i⊗z_i).
-4. Decrypt m = XSalsa20-Poly1305_K_enc(φ, nonce).
+Let `{C1, D1, H1} = PK1`, `{C2, D2, H2} = PK2` and `{x1i, x2i, y1i, y2i, zi} = SKi`.
+
+TODO: How to say that `i` is 1 or 2 depending if it is the corresponding secret key of either 1 or 2.
+
+1. Parse `γ` to retrieve components
+  `(U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2, nonce, φ) = γ`.
+2. Verify NIZKPKi:
+  1. for j ∈ {1, 2} compute:
+    1. `αj = MapToZl(U1j || U2j || Ej)`
+    2. `T1j = G1*nj + U1j*l`
+    3. `T2j = G2*nj + U2j*l`
+    4. `T3j = (Cj + Dj*αj)*nj + Vj*l`
+  2. Compute `T4 = H1*n1 - H2*n2 + (E1-E2)*l`
+  3. Compute
+    - `gV = G1 || G2 || q` (TODO: Do we really need to get this from here if they are part of the group definition)
+    - `pV = C1 || D1 || H1 || C2 || D2 || H2`
+    - `eV = U11 || U21 || E1 || V1 || α1 || U12 || U22 || E2 || V2 || α2`
+    - `zV = T11 || T21 || T31 || T12 || T22 || T32 || T4`
+    - `l' = MapToZl(gV || pV || eV || zV)`
+  4. Verify `l' ≟ l`.
+  5. Compute
+    - `T1 = U1i*x1i`
+    - `T2 = U2i*x2i`
+    - `T3 = U1i*y1i`
+    - `T4 = U2i*y2i`
+  6. Verify `T1 + T2 + (T3 + T4)*αi ≟ Vi`.
+3. Recover secret key `K_enc = SHA3-256(Ei - U1i*zi)`.TODO: we do this for key compression (K == 446 bits, K_enc = 256).
+4. Decrypt `m = XSalsa20-Poly1305_K_enc(φ, nonce)`.
 
 
 ### ROM Authentication
@@ -711,37 +770,37 @@ The Authentication scheme consists of two functions:
 
 We reuse the previously defined generator in Cramer-Shoup of DRE:
 
-g = (501459341212218748317573362239202803024229898883658122912772232650473550786782902904842340270909267251001424253087988710625934010181862, 44731490761556280255905446185238890493953420277155459539681908020022814852045473906622513423589000065035233481733743985973099897904160).
+G = (501459341212218748317573362239202803024229898883658122912772232650473550786782902904842340270909267251001424253087988710625934010181862, 44731490761556280255905446185238890493953420277155459539681908020022814852045473906622513423589000065035233481733743985973099897904160).
 
-#### Authentication: Auth(A2, a_2, {A_1, A_3}, m):
+#### Authentication: Auth(A2, a2, {A1, A3}, m):
 
-A_2 is the public value associated with a_2, that is, `A_2 = g⊗a_2`.  
+A2 is the public value associated with a2, that is, `A2 = G*a2`.  
 m is the message to authenticate.
 
-1. Pick random values t_1, c_2, c_3, r_2, r_3 (56 bytes each) in Z_ℓ.
-2. Compute T_1 = g⊗t_1.
-3. Compute T_2 = (g⊗r_2) ⊕ (A_2⊗c_2).
-4. Compute T_3 = (g⊗r_3) ⊕ (A_3⊗c_3).
-5. Compute c = MapToZl(g ∥ ℓ ∥ A_1 ∥ A_2 ∥ A_3 ∥ T_1 ∥ T_2 ∥ T_3 ∥ m).
-6. Compute c_1 = c - c_2 - c_3 (mod ℓ).
-7. Compute r_1 = t_1 - c_1 * a_2 (mod ℓ). 
-8. Send σ = (c_1, r_1, c_2, r_2, c_3, r_3).
+1. Pick random values `t1, c2, c3, r2, r3` in Z_q.
+2. Compute `T1 = G*t1`.
+3. Compute `T2 = G*r2 + A2*c2`.
+4. Compute `T3 = G*r3 + A3*c3`.
+5. Compute `c = MapToZl(G || q || A1 || A2 || A3 || T1 || T2 || T3 || m)`.
+6. Compute `c1 = c - c2 - c3 (mod q)`.
+7. Compute `r1 = t1 - c1 * a2 (mod q)`.
+8. Send `σ = (c1, r1, c2, r2, c3, r3)`.
 
-#### Verification: Verif({A_1, A_2, A_3}, σ, m)
+#### Verification: Verif({A1, A2, A3}, σ, m)
 
-1. Parse σ to retrive components (c_1, r_1, c_2, r_2, c_3, r_3).
-2. Compute T1 = (g⊗r_1) ⊕ (A_1⊗c_1)
-3. Compute T2 = (g⊗r_2) ⊕ (A_2⊗c_2)
-4. Compute T3 = (g⊗r_3) ⊕ (A_3⊗c_3)
-5. Compute c' = MapToZl(g ∥ ℓ ∥ A_1 ∥ A_2 ∥ A_3 ∥ T1 ∥ T2 ∥ T3 ∥ m).
-6. Check if c' ≟ c_1 + c_2 + c_3 (mod ℓ).
+1. Parse σ to retrive components `(c1, r1, c2, r2, c3, r3)`.
+2. Compute `T1 = G*r1 + A1*c1`
+3. Compute `T2 = G*r2 + A2*c2`
+4. Compute `T3 = G*r3 + A3*c3`
+5. Compute `c = MapToZl(G || q || A1 || A2 || A3 || T1 || T2 || T3 || m)`.
+6. Check if `c ≟ c1 + c2 + c3 (mod q)`.
 
 ### MapToZl(d)
 
 d is an array of bytes.
 
-1. Compute h = SHA3-512(d) as an unsigned value, big-endian.
-2. Return h mod ℓ
+1. Compute `h = SHA3-512(d)` as an unsigned value, big-endian.
+2. Return `h (mod q)`
 
 ## References
 
