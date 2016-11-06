@@ -210,27 +210,27 @@ Query Message or Whitespace Tag ------->
 **Alice:**
 
 1. Generates an ephemeral private key `i` from `Z_q` and a public key g1*i.
-2. Sends Bob ψ1 = ("I", g1*i).
+2. Sends Bob `ψ1 = ("I", g1*i)`.
 
 
 **Bob:**
 
-1. Generates an ephemeral private key `r` from `Z_q` and public key g1*r.
-2. Computes γ = DREnc(PKb, PKa, m), being m = "I" || "R" || g1*i || g1*r.
-3. Computes σ = Auth(hB, zB, {hA, g1*i}, "I" || "R" || g1*i || γ).
-4. Computes k = (g1*i) * r and securely erase `r`.
-5. Sends Alice ψ2 = ("R", γ, σ).
+1. Generates an ephemeral private key `r` from `Z_q` and public key `g1*r`.
+2. Computes `γ = DREnc(PKb, PKa, m)`, being `m = "I" || "R" || g1*i || g1*r`.
+3. Computes `σ = Auth(hB, zB, {hA, g1*i}, "I" || "R" || g1*i || γ)`.
+4. Computes `k = (g1*i) * r` and securely erase `r`.
+5. Sends Alice `ψ2 = ("R", γ, σ)`.
 
 
 **Alice:**
 
-1. Verifies Verif({hA, hB, g1*i}, σ, “I” || “R” || g1^i || γ).
-2. Decrypts m = DRDec(PKa, PKb, SKa, γ).
+1. Verifies `Verif({hA, hB, g1*i}, σ, “I” || “R” || g1*i || γ)`.
+2. Decrypts `m = DRDec(PKa, PKb, SKa, γ)`.
 3. Verifies the following properties of the decrypted message `m`:
   1. The message is of the correct form (e.g., the fields are of the expected length)
   2. Alice's identifier is the first one listed
   3. Bob's identifier is the second one listed, and it matches the identifier transmitted outside of the ciphertext
-4. Computes k = (g1*r) * i and securely erase `i`.
+4. Computes `k = (g1*r) * i` and securely erase `i`.
 
 
 **TODO: the following is about version negotiation and may need to be moved.**
@@ -603,9 +603,9 @@ Old MAC keys to be revealed (DATA)
 
 ## Socialist Millionaries' Protocol
 
-TODO: This may need to be moved. 
-TODO: Define TLV
-TODO: Update to new notation: integers and points. 
+TODO: This may need to be moved.  
+TODO: Define TLV  
+TODO: Update to new notation: integers and points.  
 
 The Socialist Millionaires' Protocol allows two parties with secret information x and y respectively to check whether (x==y) without revealing any additional information about the secrets. The protocol used by OTR is based on the work of Boudot, Schoenmakers and Traore (2001). A full justification for its use in OTR is made by Alexander and Goldberg, in a paper published in 2007. The following is a technical account of what is transmitted during the course of the protocol.
 
