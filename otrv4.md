@@ -603,7 +603,9 @@ Old MAC keys to be revealed (DATA)
 
 ## Socialist Millionaries' Protocol
 
-TODO: This may need to be moved. Define TLV
+TODO: This may need to be moved. 
+TODO: Define TLV
+TODO: Update to new notation: integers and points. 
 
 The Socialist Millionaires' Protocol allows two parties with secret information x and y respectively to check whether (x==y) without revealing any additional information about the secrets. The protocol used by OTR is based on the work of Boudot, Schoenmakers and Traore (2001). A full justification for its use in OTR is made by Alexander and Goldberg, in a paper published in 2007. The following is a technical account of what is transmitted during the course of the protocol.
 
