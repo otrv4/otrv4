@@ -16,8 +16,9 @@ was said, or even that the two participants spoke to each other at all.
   2. [Deniable Authenticated Key Exchange (DAKE)](#deniable-authenticated-key-exchange-dake)
 6. [Requesting conversation with older OTR version](#requesting-conversation-with-older-otr-version)
 7. [Data exchange](#data-exchange)
-8. [The protocol state machine](#the-protocol-state-machine)
-9. Appendices
+8. [Socialist Millionaires' Protocol(SMP)](#socialist-millionaire-protocol)
+9. [The protocol state machine](#the-protocol-state-machine)
+10. Appendices
   1. ROM DRE
   2. ROM Authentication
 
@@ -540,8 +541,69 @@ A receiver can reveal a MAC key in the following case:
 - the receiver has discarded associated message keys
 - the receiver has discarded the chain key that can be used to compute the message keys (chain keys from previous ratchets might be stored to compute message keys for skipped or delayed messages)
 
+### Packet format
+
+```
+Protocol version (SHORT)
+
+    The version number of this protocol is 0x0004.
+
+Message type (BYTE)
+
+    The Data Message has type 0x03.
+
+Sender Instance tag (INT)
+
+    The instance tag of the person sending this message.
+
+Receiver Instance tag (INT)
+
+    The instance tag of the intended recipient.
+
+Flags (BYTE)
+
+    The bitwise-OR of the flags for this message. Usually you should set this to 0x00. The only currently defined flag is:
+
+    IGNORE_UNREADABLE (0x01)
+
+        If you receive a Data Message with this flag set, and you are unable to decrypt the message or verify
+        the MAC (because, for example, you don't have the right keys), just ignore the message instead of producing
+        some kind of error or notification to the user.
+
+Ratchet id i (INT)
+
+    Must be strictly greater than 0, and increment by 1 with each ratchet
+
+Message id Ns (INT)
+    Must be strictly greater than 0, and increment by 1 with each message
+
+pubDHRs (MPI)
+
+    The *next* ratchet [i.e. sender_keyid+1] public key for the sender
+
+Encrypted message (DATA)
+
+    Using the appropriate encryption key (see below) derived from the sender's and recipient's DH public keys
+    (with the keyids given in this message), perform Xsalsa encryption of the message.
+    The initial counter is a 16-byte value whose first 8 bytes are the above "top half of counter init" value,
+    and whose last 8 bytes are all 0x00.
+    Note that counter mode does not change the length of the message, so no message padding needs to be done.
+    If you *want* to do message padding (to disguise the length of your message), use the above TLV of type 0.
+
+Authenticator (MAC)
+
+    The SHA3 MAC, using the appropriate MAC key (see below) of everything from the Protocol version to the end
+    of the encrypted message
+
+Old MAC keys to be revealed (DATA)
+
+    See "Revealing MAC Keys"
+```
+
 
 ## Socialist Millionaries' Protocol
+
+TODO: This may need to be moved. Define TLV
 
 The Socialist Millionaires' Protocol allows two parties with secret information x and y respectively to check whether (x==y) without revealing any additional information about the secrets. The protocol used by OTR is based on the work of Boudot, Schoenmakers and Traore (2001). A full justification for its use in OTR is made by Alexander and Goldberg, in a paper published in 2007. The following is a technical account of what is transmitted during the course of the protocol.
 
@@ -555,34 +617,34 @@ Assuming that Alice begins the exchange:
 
 Alice:  
 * Picks random exponents `a2` and `a3`  
-* Sends Bob `g2_a = g1⊗a2` and `g3_a = g1⊗a3`  
+* Sends Bob `g2_a = g1*a2` and `g3_a = g1*a3`  
 
 Bob:  
 * Picks random exponents `b2` and `b3`  
-* Computes `g2_b = g1⊗b2` and `g3_b = g1⊗b3`  
-* Computes `g2 = g2_a⊗b2` and `g3 = g3_a⊗b3`  
+* Computes `g2_b = g1*b2` and `g3_b = g1*b3`  
+* Computes `g2 = g2_a*b2` and `g3 = g3_a*b3`  
 * Picks random exponent `r` and `y`  
-* Computes `P_b = g3⊗r` and `Q_b = g1⊗r ⊕ g2⊗y`  
+* Computes `P_b = g3*r` and `Q_b = g1*r ⊕ g2*y`  
 * Sends Alice `g2_b`, `g3_b`, `P_b and Q_b`  
 
 Alice:  
-* Computes `g2 = g2_b⊗a2` and `g3 = g3_b⊗a3`  
+* Computes `g2 = g2_b*a2` and `g3 = g3_b*a3`  
 * Picks random exponent `s` and `x`  
-* Computes `P_a = g3⊗s` and `Q_a = g1⊗s ⊕ g2⊗x`  
-* Computes `R_a = (Q_a / Q_b) ⊗ a3`  
+* Computes `P_a = g3*s` and `Q_a = g1*s + g2*x`  
+* Computes `R_a = (Q_a / Q_b)*a3` //TODO: check notation for this  
 * Sends Bob `P_a`, `Q_a` and `R_a`  
 
 Bob:  
-* Computes `R_b = (Qa / Qb) ⊗ b3`//to check  
-* Computes `R_a_b = R_a⊗b3`  
+* Computes `R_b = (Qa / Qb)*b3` //TODO: check notation for this  
+* Computes `R_a_b = R_a*b3`  
 * Checks whether `R_a_b == (P_a / P_b)`  
 * Sends Alice `R_b`  
 
 Alice:  
-* Computes `R_a_b = R_b⊗a3`   
+* Computes `R_a_b = R_b*a3`   
 * Checks whether `R_a_b == (P_a / P_b)`  
 
-If everything is done correctly, then `R_a_b` should hold the value of `(P_a / P_b)` times `(g2⊗a3⊕b3)⊗(x - y)`, which means that the test at the end of the protocol will only succeed if x == y. Further, since `g2⊗a3⊕b3` is a random number not known to any party, if x is not equal to y, no other information is revealed.
+If everything is done correctly, then `R_a_b` should hold the value of `(P_a / P_b)` times `(g2*a3*b3)*(x - y)`, which means that the test at the end of the protocol will only succeed if x == y. Further, since `g2*a3*b3` is a random number not known to any party, if x is not equal to y, no other information is revealed.
 
 ### Secret Information
 
@@ -597,9 +659,6 @@ The secret information x and y compared during this protocol contains not only i
     Responder fingerprint (20 BYTEs)
       The fingerprint that the party that did not initiate SMP is using in the current conversation.
 
-    Secure Session ID
-      The ssid described below.
-
     User-specified secret
       The input string given by the user at runtime.
 
@@ -607,7 +666,7 @@ Then the SHA3-256 hash of the above is taken, and the digest becomes the actual 
 
 ### The SMP state machine
 
-Whenever the OTR message state machine has MSGSTATE_ENCRYPTED set (see below), the SMP state machine may progress. If at any point MSGSTATE_ENCRYPTED becomes unset, SMP must abandon its state and return to its initial setup. The SMP state consists of one main variable, as well as information from the partial computations at each protocol step.
+Whenever the OTR message state machine has `MSGSTATE_ENCRYPTED` set (see below), the SMP state machine may progress. If at any point `MSGSTATE_ENCRYPTED` becomes unset, SMP must abandon its state and return to its initial setup. The SMP state consists of one main variable, as well as information from the partial computations at each protocol step.
 
 ### Expected Message
 
@@ -639,9 +698,11 @@ There are 7 actions that an OTR client must handle:
       User requests to begin SMP
       User requests to abort SMP
 
-The following sections outline what is to be done in each case. They all assume that MSGSTATE_ENCRYPTED is set. For simplicity, they also assume that Alice has begun SMP, and Bob is responding to her.
+The following sections outline what is to be done in each case. They all assume that `MSGSTATE_ENCRYPTED` is set. For simplicity, they also assume that Alice has begun SMP, and Bob is responding to her.
 
 ### SMP Hash function
+
+TODO: check this
 
 In the following actions, there are many places where a SHA3-256 hash of an integer followed by one or two MPIs is taken. The input to this hash function is:
 
@@ -677,20 +738,20 @@ If smpstate is `SMPSTATE_EXPECT1`:
 
 * Verify Alice's zero-knowledge proofs for g2_a and g3_a:  
   1. Check that both `g2_a` and `g3_a` are `>= 2` and `<= modulus-2`.  
-  2. Check that `c2 = SHA3-256(1, g1⊗D2 ⊕ g2_a⊗c2)`.  
-  3. Check that `c3 = SHA3-256(2, g1⊗D3 ⊕ g3_a⊗c3)`.  
+  2. Check that `c2 = SHA3-256(1, g1*D2 + g2_a*c2)`.  
+  3. Check that `c3 = SHA3-256(2, g1*D3 + g3_a*c3)`.  
 
 * Create a type 3 TLV (SMP message 2) and send it to Alice:
   1. Determine Bob's secret input `y`, which is to be compared to Alice's secret x.
   2. Pick random exponents `b2` and `b3`. These will used during the DH exchange to pick generators.
   3. Pick random exponents `r2`, `r3`, `r4`, `r5` and `r6`. These will be used to add a blinding factor to the final results, and to generate zero-knowledge proofs that this message was created honestly.
   4. Compute `g2_b = g1⊗b2` and `g3_b = g1⊗b3`.
-  5. Generate a zero-knowledge proof that the exponent `b2` is known by setting `c2 = SHA3-256(3, g1⊗r2)` and `D2 = (r2 - (b2) (c2)) mod q`. In the zero-knowledge proofs the D values are calculated modulo q, where q is the same 446-bit prime as elsewhere. // TO CHECK
-  6. Generate a zero-knowledge proof that the exponent `b3` is known by setting `c3 = SHA3-256(4, g1⊗r3)` and `D3 = r3 - b3 * c3 mod q`.
-  7. Compute `g2 = g2_a⊗b2` and `g3 = g3_a⊗b3`.
-  8. Compute `P_b = g3⊗r4` and `Q_b = g1⊗r4 ⊕ g2⊗y`.
-  9. Generate a zero-knowledge proof that `P_b` and `Q_b` were created according to the protocol by setting `cP = SHA3-256(5, g3⊗r5, g1⊗r5 g2⊗r6)`, `D5 = r5 - r4 cP mod q` and `D6 = r6 - y cP mod q`.
-  10. Securelly store the values of `g3_a`, `g2`, `g3`, `b3`, `P_b` and `Q_b` for use later in the protocol.
+  5. Generate a zero-knowledge proof that the exponent `b2` is known by setting `c2 = SHA3-256(3, g1*r2)` and `D2 = (r2 - (b2 * c2)) mod q`. In the zero-knowledge proofs the D values are calculated modulo q, where q = (p - 1) / 2, where p is the same 448-bit prime as elsewhere. The random exponents are 446-bit numbers. //TO DO: check bits.   
+  6. Generate a zero-knowledge proof that the exponent `b3` is known by setting `c3 = SHA3-256(4, g1*r3)` and `D3 = r3 - b3 * c3 mod q`.
+  7. Compute `g2 = g2_a*b2` and `g3 = g3_a*b3`.
+  8. Compute `P_b = g3*r4` and `Q_b = g1*r4 + g2*y`.
+  9. Generate a zero-knowledge proof that `P_b` and `Q_b` were created according to the protocol by setting `cP = SHA3-256(5, g3*r5, g1*r5 + g2*r6)`, `D5 = r5 - r4 cP mod q` and `D6 = r6 - y cP mod q`.
+  10. Store the values of `g3_a`, `g2`, `g3`, `b3`, `P_b` and `Q_b` for use later in the protocol.
   11. Send Alice a type 3 TLV (SMP message 2) containing `g2_b`, `c2`, `D2`, `g3_b`, `c3`, `D3`, `P_b`, `Q_b`, `cP`, `D5` and `D6`, in that order.
 
 * Set smpstate to `SMPSTATE_EXPECT3`.
@@ -721,33 +782,33 @@ If smpstate is `SMPSTATE_EXPECT2`:
 
 * Verify Bob's zero-knowledge proofs for `g2_b`, `g3_b`, `P_b` and `Q_b`:
     1. Check that `g2_b`, `g3_b`, `P_b` and `Q_b` are `>= 2` and `<= modulus-2`.
-    2. Check that `c2 = SHA3-256(3, g1⊗D2 ⊕ g2_b⊗c2)`.
-    3. Check that `c3 = SHA3-256(4, g1⊗D3 ⊕ g3_b⊗c3)`.
-    4. Check that `cP = SHA3-256(5, g3⊗D5 ⊕ Pb⊗cP, g1⊗D5 ⊕ g2⊗D6 ⊕ Qb⊗cP)`.
+    2. Check that `c2 = SHA3-256(3, g1*D2 + g2_b*c2)`.
+    3. Check that `c3 = SHA3-256(4, g1*D3 + g3_b*c3)`.
+    4. Check that `cP = SHA3-256(5, g3*D5 + P_b*cP, g1*D5 + g2*D6 + Q_b*cP)`.
   
 * Create a type 4 TLV (SMP message 3) and send it to Bob:
   
     1. Pick random exponents `r4`, `r5`, `r6` and `r7`. These will be used to add a blinding factor to the final results, and to generate zero-knowledge proofs that this message was created honestly.
-    2. Compute `g2 = g2_b⊗a2` and `g3 = g3_b⊗a3`.
-    3. Compute `P_a = g3⊗r4` and `Q_a = g1⊗r4 ⊕ g2⊗x`.
-    4. Generate a zero-knowledge proof that `P_a` and `Q_a` were created according to the protocol by setting `cP = SHA3-256(6, g3⊗r5, g1⊗r5 g2⊗r6)`, `D5 = r5 - r4 cP mod q` and `D6 = r6 - x cP mod q`.
-    5. Compute `R_a = (Qa / Qb) ⊗ a3`.
-    6. Generate a zero-knowledge proof that `R_a` was created according to the protocol by setting `cR = SHA3-256(7, g1⊗r7, (Qa / Qb)⊗r7)` and `D7 = r7 - a3 cR mod q`.
+    2. Compute `g2 = g2_b*a2` and `g3 = g3_b*a3`.
+    3. Compute `P_a = g3*r4` and `Q_a = g1*r4 + g2*x`.
+    4. Generate a zero-knowledge proof that `P_a` and `Q_a` were created according to the protocol by setting `cP = SHA3-256(6, g3*r5, g1*r5 + g2*r6)`, `D5 = r5 - r4 cP mod q` and `D6 = r6 - x cP mod q`.
+    5. Compute `R_a = (Qa / Qb) * a3`. // TO DO: check notation
+    6. Generate a zero-knowledge proof that `R_a` was created according to the protocol by setting `cR = SHA3-256(7, g1*r7, (Qa / Qb)*r7)` and `D7 = r7 - a3 cR mod q`.
     7. Store the values of `g3_b`, `(P_a / P_b)`, `(Q_a / Q_b)` and `R_a` for use later in the protocol.
     8. Send Bob a type 4 TLV (SMP message 3) containing `P_a`, `Q_a`, `cP`, `D5`, `D6`, `R_a`, `cR` and `D7` in that order.
 
 * Set smpstate to `SMPSTATE_EXPECT4`.
  
  
-###Receiving a type 4 TLV (SMP message 3)
+### Receiving a type 4 TLV (SMP message 3)
 
 SMP message 3 is Alice's final message in the SMP exchange. It has the last of the information required by Bob to determine if x = y. It contains the following mpi values:
 
-    Pa, Qa
+    P_a, Q_a
       These values are used in the final comparison to determine if Alice and Bob share the same secret.
     cP, D5, D6
       A zero-knowledge proof that Pa and Qa were created according to the protcol given above.
-    Ra
+    R_a
       This value is used in the final comparison to determine if Alice and Bob share the same secret.
     cR, D7
      A zero-knowledge proof that Ra was created according to the protcol given above.
@@ -761,17 +822,17 @@ If smpstate is `SMPSTATE_EXPECT3`:
 
 * Verify Alice's zero-knowledge proofs for `P_a`, `Q_a` and `R_a`:
   1. Check that `P_a`, `Q_a` and `R_a` are `>= 2` and `<= modulus-2`.
-  2. Check that `cP = SHA256(6, g3⊗D5 ⊕ Pa⊗cP, g1⊗D5 ⊕ g2⊗D6 ⊕ Q_a⊗cP)`.
-  3. Check that `cR = SHA256(7, g1⊗D7 ⊕ g3_a⊗cR, (Q_a / Q_b)⊗D7 ⊕ R_acR)`.
+  2. Check that `cP = SHA256(6, g3*D5 + P_a*cP, g1*D5 + g2*D6 + Q_a*cP)`.
+  3. Check that `cR = SHA256(7, g1*D7 + g3_a*cR, (Q_a / Q_b)*D7 + R_a*cR)`.
 
 * Create a type 5 TLV (SMP message 4) and send it to Alice:
   1. Pick a random exponent `r7`. This will be used to generate Bob's final zero-knowledge proof that this message was created honestly.
-  2. Compute `R_b = (Qa / Qb) ⊗ b3`.
-  3. Generate a zero-knowledge proof that `R_b` was created according to the protocol by setting `cR = SHA256(8, g1⊗r7, (Qa / Qb)⊗r7)` and `D7 = r7 - b3 cR mod q`.
+  2. Compute `R_b = (Qa / Qb) * b3`.
+  3. Generate a zero-knowledge proof that `R_b` was created according to the protocol by setting `cR = SHA256(8, g1*r7, (Q_a / Q_b)*r7)` and `D7 = r7 - b3 cR mod q`.
   4. Send Alice a type 5 TLV (SMP message 4) containing `R_b`, `cR` and `D7` in that order.
  
 * Check whether the protocol was successful:
-  1. Compute `R_a_b = R_a⊗b3`.
+  1. Compute `R_a_b = R_a*b3`.
   2. Determine if `x = y` by checking the equivalent condition that `(P_a / P_b) = R_a_b`.
 
 * Set smpstate to `SMPSTATE_EXPECT1`, as no more messages are expected from Alice.
@@ -795,10 +856,10 @@ If smpstate is SMPSTATE_EXPECT4:
 
 * Verify Bob's zero-knowledge proof for R_b:
    1. Check that `R_b` is `>= 2` and `<= modulus-2`.
-   2. Check that `cR = SHA3-256(8, g1⊗D7 g3_b⊗cR, (Q_a / Q_b)⊗D7 ⊕ R_b⊗cR)`.
+   2. Check that `cR = SHA3-256(8, g1*D7 g3_b*cR, (Q_a / Q_b)*D7 + R_b*cR)`.
 
 * Check whether the protocol was successful:
-    1. `Compute R_a_b = R_b⊗a3`.
+    1. `Compute R_a_b = R_b*a3`.
     2. Determine if `x = y` by checking the equivalent condition that `(P_a / P_b) = R_a_b`.
 
 Set smpstate to `SMPSTATE_EXPECT1`, as no more messages are expected from Bob.
@@ -808,85 +869,27 @@ Set smpstate to `SMPSTATE_EXPECT1`, as no more messages are expected from Bob.
 If smpstate is not set to `SMPSTATE_EXPECT1`:  
 SMP is already underway. If you wish to restart SMP, send a type 6 TLV (SMP abort) to the other party and then proceed as if smpstate was `SMPSTATE_EXPECT1`. Otherwise, you may simply continue the current SMP instance.
 
-If smpstate is set to SMPSTATE_EXPECT1:  
+If smpstate is set to `SMPSTATE_EXPECT1`:  
 
 No current exchange is underway. In this case, Alice should create a valid type 2 TLV (SMP message 1) as follows:
 
 1. Determine her secret input `x`, which is to be compared to Bob's secret `y`.
-2. Pick random values `a2` and `a3` (128 bits)// ?. These will be Alice's exponents for the DH exchange to pick generators. //?
-3. Pick random values `r2` and `r3` (128 bits). These will be used to generate zero-knowledge proofs that this message was created according to the protocol.
-4. Compute `g2_a = g1⊗a2` and `g3_a = g1⊗a3`.
-5. Generate a zero-knowledge proof that the exponent a2 is known by setting `c2 = SHA3-256(1, g1⊗r2)` and `D2 = r2 - a2 * c2 mod q`.
-6. Generate a zero-knowledge proof that the exponent a3 is known by setting `c3 = SHA3-256(2, g1⊗r3)` and `D3 = r3 - a3 * c3 mod q`.
+2. Pick random values `a2` and `a3` (128 bits). These will be Alice's exponents for the DH exchange to pick generators. // TODO: should they still be 128 bits? 
+3. Pick random values `r2` and `r3` (128 bits). These will be used to generate zero-knowledge proofs that this message was created according to the protocol. // TODO: should they still be 128 bits? 
+4. Compute `g2_a = g1*a2` and `g3_a = g1*a3`.
+5. Generate a zero-knowledge proof that the exponent a2 is known by setting `c2 = SHA3-256(1, g1*r2)` and `D2 = r2 - a2 * c2 mod q`.
+6. Generate a zero-knowledge proof that the exponent a3 is known by setting `c3 = SHA3-256(2, g1*r3)` and `D3 = r3 - a3 * c3 mod q`.
 7. Store the values of `x`, `a2` and `a3` for use later in the protocol.
 8. Send Bob a type 2 TLV (SMP message 1) containing `g2_a`, `c2`, `D2`, `g3_a`, `c3` and `D3` in that order.
 
-Set smpstate to `SMPSTATE_EXPECT2`.
+* Set smpstate to `SMPSTATE_EXPECT2`.
 
 
 ### User requests to abort SMP
 
 In all cases, send a type 6 TLV (SMP abort) to the correspondent and set smpstate to `SMPSTATE_EXPECT1`.
 
-### Packet format
 
-```
-Protocol version (SHORT)
-
-    The version number of this protocol is 0x0004.
-
-Message type (BYTE)
-
-    The Data Message has type 0x03.
-
-Sender Instance tag (INT)
-
-    The instance tag of the person sending this message.
-
-Receiver Instance tag (INT)
-
-    The instance tag of the intended recipient.
-
-Flags (BYTE)
-
-    The bitwise-OR of the flags for this message. Usually you should set this to 0x00. The only currently defined flag is:
-
-    IGNORE_UNREADABLE (0x01)
-
-        If you receive a Data Message with this flag set, and you are unable to decrypt the message or verify
-        the MAC (because, for example, you don't have the right keys), just ignore the message instead of producing
-        some kind of error or notification to the user.
-
-Ratchet id i (INT)
-
-    Must be strictly greater than 0, and increment by 1 with each ratchet
-
-Message id Ns (INT)
-
-    Must be strictly greater than 0, and increment by 1 with each message
-
-pubDHRs (MPI)
-
-    The *next* ratchet [i.e. sender_keyid+1] public key for the sender
-
-Encrypted message (DATA)
-
-    Using the appropriate encryption key (see below) derived from the sender's and recipient's DH public keys
-    (with the keyids given in this message), perform Xsalsa encryption of the message.
-    The initial counter is a 16-byte value whose first 8 bytes are the above "top half of counter init" value,
-    and whose last 8 bytes are all 0x00.
-    Note that counter mode does not change the length of the message, so no message padding needs to be done.
-    If you *want* to do message padding (to disguise the length of your message), use the above TLV of type 0.
-
-Authenticator (MAC)
-
-    The SHA3 MAC, using the appropriate MAC key (see below) of everything from the Protocol version to the end
-    of the encrypted message
-
-Old MAC keys to be revealed (DATA)
-
-    See "Revealing MAC Keys"
-```
 ## The protocol state machine
 
 An OTR client maintains separate state for every correspondent. For example, Alice may have an active OTR
