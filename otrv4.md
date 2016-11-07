@@ -12,7 +12,7 @@ was said, or even that the two participants spoke to each other at all.
 3. [Assumptions](#assumptions)
 4. [Security Properties](#security-properties)
 5. [OTR Conversation Initialization](#otr-conversation-initialization)
-  1. Version Negotiation
+  1. [Version Advertisement](#version-advertisement)
   2. [Deniable Authenticated Key Exchange (DAKE)](#deniable-authenticated-key-exchange-dake)
 6. [Requesting conversation with older OTR version](#requesting-conversation-with-older-otr-version)
 7. [Data exchange](#data-exchange)
@@ -176,9 +176,9 @@ supports and is willing to use.
 Once Bob has decided to start the conversation in response to Alice's request,
 he will initiate an interactive, deniable, authenticated key exchange DAKE.
 
-### Version negotiation
+### Version Advertisement
 
-OTR4 introduces mandatory version negotiation to resist version rollback. In
+OTR4 introduces mandatory version advertisement to resist version rollback. In
 both cases, the receiving party will include in the DAKE authenticated
 information about what versions they received, and the initializing party will
 verify that the versions are correct.
@@ -233,7 +233,7 @@ Query Message or Whitespace Tag ------->
 4. Computes `k = (g1*r) * i` and securely erase `i`.
 
 
-**TODO: the following is about version negotiation and may need to be moved.**
+**TODO: the following is about version advertisement and may need to be moved.**
 
 The Query Message or Whitespace Tag will include the versions supported by
 Alice.
