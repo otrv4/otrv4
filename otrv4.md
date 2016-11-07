@@ -600,7 +600,6 @@ Old MAC keys to be revealed (DATA)
     See "Revealing MAC Keys"
 ```
 
-
 ## Socialist Millionaries' Protocol
 
 TODO: This may need to be moved.  
@@ -715,7 +714,6 @@ In the following actions, there are many places where a SHA3-256 hash of an inte
     Second MPI (MPI)
       The second MPI given as input, if present, serialized in the usual way. If only one MPI is given as input, this field is simply omitted.
 
-
 ### Receiving a type 2 TLV (SMP message 1)
 
 SMP message 1 is sent by Alice to begin a DH exchange to determine two new generators, g2 and g3. It contains the following MPI values:
@@ -801,7 +799,6 @@ If smpstate is `SMPSTATE_EXPECT2`:
 
 * Set smpstate to `SMPSTATE_EXPECT4`.
  
- 
 ### Receiving a type 4 TLV (SMP message 3)
 
 SMP message 3 is Alice's final message in the SMP exchange. It has the last of the information required by Bob to determine if x = y. It contains the following mpi values:
@@ -824,13 +821,13 @@ If smpstate is `SMPSTATE_EXPECT3`:
 
 * Verify Alice's zero-knowledge proofs for `P_a`, `Q_a` and `R_a`:
   1. Check that `P_a`, `Q_a` and `R_a` are `>= 2` and `<= modulus-2`.
-  2. Check that `cP = SHA256(6, g3*D5 + P_a*cP, g1*D5 + g2*D6 + Q_a*cP)`.
-  3. Check that `cR = SHA256(7, g1*D7 + g3_a*cR, (Q_a / Q_b)*D7 + R_a*cR)`.
+  2. Check that `cP = SHA3-256(6, g3*D5 + P_a*cP, g1*D5 + g2*D6 + Q_a*cP)`.
+  3. Check that `cR = SHA3-256(7, g1*D7 + g3_a*cR, (Q_a / Q_b)*D7 + R_a*cR)`.
 
 * Create a type 5 TLV (SMP message 4) and send it to Alice:
   1. Pick a random exponent `r7`. This will be used to generate Bob's final zero-knowledge proof that this message was created honestly.
   2. Compute `R_b = (Qa / Qb) * b3`.
-  3. Generate a zero-knowledge proof that `R_b` was created according to the protocol by setting `cR = SHA256(8, g1*r7, (Q_a / Q_b)*r7)` and `D7 = r7 - b3 cR mod q`.
+  3. Generate a zero-knowledge proof that `R_b` was created according to the protocol by setting `cR = SHA3-256(8, g1*r7, (Q_a / Q_b)*r7)` and `D7 = r7 - b3 cR mod q`.
   4. Send Alice a type 5 TLV (SMP message 4) containing `R_b`, `cR` and `D7` in that order.
  
 * Check whether the protocol was successful:
@@ -838,7 +835,6 @@ If smpstate is `SMPSTATE_EXPECT3`:
   2. Determine if `x = y` by checking the equivalent condition that `(P_a / P_b) = R_a_b`.
 
 * Set smpstate to `SMPSTATE_EXPECT1`, as no more messages are expected from Alice.
-
 
 ### Receiving a type 5 TLV (SMP message 4)
 
@@ -886,11 +882,9 @@ No current exchange is underway. In this case, Alice should create a valid type 
 
 * Set smpstate to `SMPSTATE_EXPECT2`.
 
-
 ### User requests to abort SMP
 
 In all cases, send a type 6 TLV (SMP abort) to the correspondent and set smpstate to `SMPSTATE_EXPECT1`.
-
 
 ## The protocol state machine
 
@@ -914,7 +908,6 @@ MSGSTATE_ENCRYPTED
 MSGSTATE_FINISHED
 
     This state indicates that outgoing messages are not delivered at all. This state is entered only when the other party indicates he has terminated his side of the OTR conversation. For example, if Alice and Bob are having an OTR conversation, and Bob instructs his OTR client to end its private session with Alice (for example, by logging out), Alice will be notified of this, and her client will switch to MSGSTATE_FINISHED mode. This prevents Alice from accidentally sending a message to Bob in plaintext. (Consider what happens if Alice was in the middle of typing a private message to Bob when he suddenly logs out, just as Alice hits Enter.)
-
 
 ### Authentication state
 
@@ -985,7 +978,6 @@ TODO: I want to replace one of the generators by B from Curve 448.
   - `H = G1*z`.
 3. The public key is `PK = {C, D, H}` and the secret key is `SK = {x1, x2, y1, y2, z}`.
 
-
 #### Dual Receiver Encryption: DREnc(PK1, PK2, m)
 
 Let `{C1, D1, H1} = PK1` and `{C2, D2, H2} = PK2`
@@ -1018,7 +1010,6 @@ Let `{C1, D1, H1} = PK1` and `{C2, D2, H2} = PK2`
     1. Compute `ni = ti - l * ki (mod q)`.
 6. Send `γ = (U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2, nonce, φ)`.
 
-
 #### Dual Receiver Decryption: DRDec(PK1, PK2, SKi, γ):
 
 Let `{C1, D1, H1} = PK1`, `{C2, D2, H2} = PK2` and `{x1i, x2i, y1i, y2i, zi} = SKi`.
@@ -1049,7 +1040,6 @@ TODO: How to say that `i` is 1 or 2 depending if it is the corresponding secret 
   6. Verify `T1 + T2 + (T3 + T4)*αi ≟ Vi`.
 3. Recover secret key `K_enc = SHA3-256(Ei - U1i*zi)`.TODO: we do this for key compression (K == 446 bits, K_enc = 256).
 4. Decrypt `m = XSalsa20-Poly1305_K_enc(φ, nonce)`.
-
 
 ### ROM Authentication
 
