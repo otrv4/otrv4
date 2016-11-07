@@ -16,7 +16,7 @@ was said, or even that the two participants spoke to each other at all.
   2. [Deniable Authenticated Key Exchange (DAKE)](#deniable-authenticated-key-exchange-dake)
 6. [Requesting conversation with older OTR version](#requesting-conversation-with-older-otr-version)
 7. [Data exchange](#data-exchange)
-8. [Socialist Millionaires' Protocol(SMP)](#socialist-millionaire-protocol)
+8. [Socialist Millionaires' Protocol (SMP)](#socialist-millionaires-protocol-smp)
 9. [The protocol state machine](#the-protocol-state-machine)
 10. Appendices
   1. ROM DRE
@@ -600,7 +600,7 @@ Old MAC keys to be revealed (DATA)
     See "Revealing MAC Keys"
 ```
 
-## Socialist Millionaries' Protocol
+## Socialist Millionaires Protocol (SMP)
 
 TODO: This may need to be moved.  
 TODO: Define TLV  
