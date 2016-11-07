@@ -608,7 +608,7 @@ TODO: Update to new notation: integers and points.
 
 The Socialist Millionaires' Protocol allows two parties with secret information x and y respectively to check whether (x==y) without revealing any additional information about the secrets. The protocol used by OTR is based on the work of Boudot, Schoenmakers and Traore (2001). A full justification for its use in OTR is made by Alexander and Goldberg, in a paper published in 2007. The following is a technical account of what is transmitted during the course of the protocol.
 
-While data messages are being exchanged, either Alice or Bob may run SMP to detect impersonation or man-in-the-middle attacks. As above, all exponentiations are done modulo a particular prime ℓ of 446 bits, and g1 is a generator of that group. 
+While data messages are being exchanged, either Alice or Bob may run SMP to detect impersonation or man-in-the-middle attacks. As above, an integer modulo p (448-bit) is a "field element". An integer modulo q (446 bit) is a a "scalar" (also a value on Z_q)
 
 We reuse the previously defined generator in Cramer-Shoup of DRE:
 
@@ -617,21 +617,21 @@ We reuse the previously defined generator in Cramer-Shoup of DRE:
 Assuming that Alice begins the exchange:
 
 Alice:  
-* Picks random exponents `a2` and `a3`  
+* Picks random values `a2` and `a3`  
 * Sends Bob `g2_a = g1*a2` and `g3_a = g1*a3`  
 
 Bob:  
-* Picks random exponents `b2` and `b3`  
+* Picks field elements `b2` and `b3`  
 * Computes `g2_b = g1*b2` and `g3_b = g1*b3`  
 * Computes `g2 = g2_a*b2` and `g3 = g3_a*b3`  
-* Picks random exponent `r` and `y`  
-* Computes `P_b = g3*r` and `Q_b = g1*r ⊕ g2*y`  
+* Picks random value `r`.   
+* Computes `P_b = g3*r` and `Q_b = g1*r ⊕ g2*y`, where y is the 'actual secret'  
 * Sends Alice `g2_b`, `g3_b`, `P_b and Q_b`  
 
 Alice:  
 * Computes `g2 = g2_b*a2` and `g3 = g3_b*a3`  
-* Picks random exponent `s` and `x`  
-* Computes `P_a = g3*s` and `Q_a = g1*s + g2*x`  
+* Picks random value `s`  
+* Computes `P_a = g3*s` and `Q_a = g1*s + g2*x`, where x is the 'actual secret'  
 * Computes `R_a = (Q_a / Q_b)*a3` //TODO: check notation for this  
 * Sends Bob `P_a`, `Q_a` and `R_a`  
 
@@ -721,11 +721,11 @@ SMP message 1 is sent by Alice to begin a DH exchange to determine two new gener
     g2_a
       Alice's half of the DH exchange to determine g2.
     c2, D2
-      A zero-knowledge proof that Alice knows the exponent associated with her transmitted value g2_a.
+      A zero-knowledge proof that Alice knows the value associated with her transmitted value g2_a.
     g3_a
       Alice's half of the DH exchange to determine g3.
     c3, D3
-      A zero-knowledge proof that Alice knows the exponent associated with her transmitted value g3_a.
+      A zero-knowledge proof that Alice knows the value associated with her transmitted value g3_a.
 
 A type 7 (SMP Message 1Q) TLV is the same as the above, but is preceded by a user-specified question, which is associated with the user-specified portion of the secret.
 
@@ -743,11 +743,11 @@ If smpstate is `SMPSTATE_EXPECT1`:
 
 * Create a type 3 TLV (SMP message 2) and send it to Alice:
   1. Determine Bob's secret input `y`, which is to be compared to Alice's secret x.
-  2. Pick random exponents `b2` and `b3`. These will used during the DH exchange to pick generators.
-  3. Pick random exponents `r2`, `r3`, `r4`, `r5` and `r6`. These will be used to add a blinding factor to the final results, and to generate zero-knowledge proofs that this message was created honestly.
+  2. Pick random values `b2` and `b3`. These will used during the DH exchange to pick generators.
+  3. Pick random values `r2`, `r3`, `r4`, `r5` and `r6`. These will be used to add a blinding factor to the final results, and to generate zero-knowledge proofs that this message was created honestly.
   4. Compute `g2_b = g1⊗b2` and `g3_b = g1⊗b3`.
-  5. Generate a zero-knowledge proof that the exponent `b2` is known by setting `c2 = SHA3-256(3, g1*r2)` and `D2 = (r2 - (b2 * c2)) mod q`. In the zero-knowledge proofs the D values are calculated modulo q, where q = (p - 1) / 2, where p is the same 448-bit prime as elsewhere. The random exponents are 446-bit numbers. //TO DO: check bits.   
-  6. Generate a zero-knowledge proof that the exponent `b3` is known by setting `c3 = SHA3-256(4, g1*r3)` and `D3 = r3 - b3 * c3 mod q`.
+  5. Generate a zero-knowledge proof that the value `b2` is known by setting `c2 = SHA3-256(3, g1*r2)` and `D2 = (r2 - (b2 * c2)) mod q`. In the zero-knowledge proofs the D values are calculated modulo q, where q = (p - 1) / 2, where p is the same 448-bit prime as elsewhere. The random values are 446-bit numbers. //TO DO: check bits.   
+  6. Generate a zero-knowledge proof that the value `b3` is known by setting `c3 = SHA3-256(4, g1*r3)` and `D3 = r3 - b3 * c3 mod q`.
   7. Compute `g2 = g2_a*b2` and `g3 = g3_a*b3`.
   8. Compute `P_b = g3*r4` and `Q_b = g1*r4 + g2*y`.
   9. Generate a zero-knowledge proof that `P_b` and `Q_b` were created according to the protocol by setting `cP = SHA3-256(5, g3*r5, g1*r5 + g2*r6)`, `D5 = r5 - r4 cP mod q` and `D6 = r6 - y cP mod q`.
@@ -763,11 +763,11 @@ SMP message 2 is sent by Bob to complete the DH exchange to determine the new ge
     g2_b
       Bob's half of the DH exchange to determine g2.
     c2, D2
-      A zero-knowledge proof that Bob knows the exponent associated with his transmitted value g2_b.
+      A zero-knowledge proof that Bob knows the value associated with his transmitted value g2_b.
     g3_b
       Bob's half of the DH exchange to determine g3.
     c3, D3
-      A zero-knowledge proof that Bob knows the exponent associated with his transmitted value g3_b.
+      A zero-knowledge proof that Bob knows the value associated with his transmitted value g3_b.
     P_b, Q_b
       These values are used in the final comparison to determine if Alice and Bob share the same secret.
     cP, D5, D6
@@ -788,7 +788,7 @@ If smpstate is `SMPSTATE_EXPECT2`:
   
 * Create a type 4 TLV (SMP message 3) and send it to Bob:
   
-    1. Pick random exponents `r4`, `r5`, `r6` and `r7`. These will be used to add a blinding factor to the final results, and to generate zero-knowledge proofs that this message was created honestly.
+    1. Pick random values `r4`, `r5`, `r6` and `r7`. These will be used to add a blinding factor to the final results, and to generate zero-knowledge proofs that this message was created honestly.
     2. Compute `g2 = g2_b*a2` and `g3 = g3_b*a3`.
     3. Compute `P_a = g3*r4` and `Q_a = g1*r4 + g2*x`.
     4. Generate a zero-knowledge proof that `P_a` and `Q_a` were created according to the protocol by setting `cP = SHA3-256(6, g3*r5, g1*r5 + g2*r6)`, `D5 = r5 - r4 cP mod q` and `D6 = r6 - x cP mod q`.
@@ -825,7 +825,7 @@ If smpstate is `SMPSTATE_EXPECT3`:
   3. Check that `cR = SHA3-256(7, g1*D7 + g3_a*cR, (Q_a / Q_b)*D7 + R_a*cR)`.
 
 * Create a type 5 TLV (SMP message 4) and send it to Alice:
-  1. Pick a random exponent `r7`. This will be used to generate Bob's final zero-knowledge proof that this message was created honestly.
+  1. Pick a random value `r7`. This will be used to generate Bob's final zero-knowledge proof that this message was created honestly.
   2. Compute `R_b = (Qa / Qb) * b3`.
   3. Generate a zero-knowledge proof that `R_b` was created according to the protocol by setting `cR = SHA3-256(8, g1*r7, (Q_a / Q_b)*r7)` and `D7 = r7 - b3 cR mod q`.
   4. Send Alice a type 5 TLV (SMP message 4) containing `R_b`, `cR` and `D7` in that order.
@@ -875,8 +875,8 @@ No current exchange is underway. In this case, Alice should create a valid type 
 2. Pick random values `a2` and `a3` (128 bits). These will be Alice's exponents for the DH exchange to pick generators. // TODO: should they still be 128 bits? 
 3. Pick random values `r2` and `r3` (128 bits). These will be used to generate zero-knowledge proofs that this message was created according to the protocol. // TODO: should they still be 128 bits? 
 4. Compute `g2_a = g1*a2` and `g3_a = g1*a3`.
-5. Generate a zero-knowledge proof that the exponent a2 is known by setting `c2 = SHA3-256(1, g1*r2)` and `D2 = r2 - a2 * c2 mod q`.
-6. Generate a zero-knowledge proof that the exponent a3 is known by setting `c3 = SHA3-256(2, g1*r3)` and `D3 = r3 - a3 * c3 mod q`.
+5. Generate a zero-knowledge proof that the value a2 is known by setting `c2 = SHA3-256(1, g1*r2)` and `D2 = r2 - a2 * c2 mod q`.
+6. Generate a zero-knowledge proof that the value a3 is known by setting `c3 = SHA3-256(2, g1*r3)` and `D3 = r3 - a3 * c3 mod q`.
 7. Store the values of `x`, `a2` and `a3` for use later in the protocol.
 8. Send Bob a type 2 TLV (SMP message 1) containing `g2_a`, `c2`, `D2`, `g3_a`, `c3` and `D3` in that order.
 
