@@ -390,6 +390,10 @@ LEN(γ) = 8 * LEN(Point) + 3 * LEN(MPI) + LEN(nonce) + LEN(φ) = 1164 bytes
 LEN(σ) = 6 * LEN(MPI) = 360 bytes
 ```
 
+#### The protocol state machine
+
+**TODO**
+
 ## Requesting conversation with older OTR version
 
 Bob might respond to Alice's request or notify of willingness to start a
