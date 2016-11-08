@@ -618,7 +618,7 @@ Message id Ns (INT)
 
 pubDHRs (MPI)
 
-    The *next* ratchet [i.e. sender_keyid+1] public key for the sender
+    The *next* ratchet [i.e. i+1] public key for the sender
 
 Encrypted message (DATA)
 
