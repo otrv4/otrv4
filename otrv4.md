@@ -308,9 +308,9 @@ Receiver Instance tag (INT)
   The instance tag of the intended recipient. For a commit message this will often be 0, since the other party may not have identified their instance tag yet.
 Initiator's identifier (DATA)
   This can be the fingerprint or something else.
-g1*i (POINT)
-  - Choose a random value i (446 bits) mod l
-  - Encode g1*i as the MPI field.
+G1*i (POINT)
+  - Choose a random value i (446 bits) mod q
+  - Encode G1*i as the POINT field.
 ```
 
 This message has length:
@@ -342,29 +342,29 @@ Receiver Instance tag (INT)
 Receiver's identifier (DATA)
   This can be the fingerprint or something else.
 γ (DATA)
-  - Choose a random value r (446 bits) mod l
-  - Compute g1*r
-  - Generate m = "I" || "R" || g1*i || g1*r
-  - Compute (u11, u21, e1, v1, u12, u22, e2, v2, L, n1, n2, nonce, φ) = DREnc(pubA, pubB, m)
+  - Choose a random value r (446 bits) mod q
+  - Compute G1*r
+  - Generate m = "I" || "R" || G1*i || G1*r
+  - Compute (U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2, nonce, φ) = DREnc(pubA, pubB, m)
   - Encode each returned value individually and concatenate all of them as γ.
   - Encode the resulting value γ as the DATA field.
 
   DREnc values are encoded as follows:
-  - u11 (POINT)
-  - u21 (POINT)
-  - e1 (POINT)
-  - v1 (POINT)
-  - u12 (POINT)
-  - u22 (POINT)
-  - e2 (POINT)
-  - v2 (POINT)
-  - L (MPI)
+  - U11 (POINT)
+  - U21 (POINT)
+  - E1 (POINT)
+  - V1 (POINT)
+  - U12 (POINT)
+  - U22 (POINT)
+  - E2 (POINT)
+  - V2 (POINT)
+  - l (MPI)
   - n1 (MPI)
   - n2 (MPI)
   - nonce (DATA)
   - φ (DATA)
 σ (DATA)
-  - Compute (c1, r1, c2, r2, c3, r3) = Auth(hB, zB, {hA, g1*i}, "I" || "R" || g1*i || γ)
+  - Compute (c1, r1, c2, r2, c3, r3) = Auth(Hb, zb, {Ha, G1*i}, "I" || "R" || G1*i || γ)
   - Encode each returned value individually and concatenate all of them as σ.
   - Encode the resulting value σ as the DATA field.
 
@@ -1009,7 +1009,7 @@ The DRE scheme consists of three functions:
 
 #### Domain parameters
 
-The Cramer-Shoup scheme uses a group (G, q, g1, g2). This is a group with the same q as Curve 448. The generators G1 and G2 are:
+The Cramer-Shoup scheme uses a group (G, q, G1, G2). This is a group with the same q as Curve 448. The generators G1 and G2 are:
 
 G1 = (501459341212218748317573362239202803024229898883658122912772232650473550786782902904842340270909267251001424253087988710625934010181862, 44731490761556280255905446185238890493953420277155459539681908020022814852045473906622513423589000065035233481733743985973099897904160)
 
