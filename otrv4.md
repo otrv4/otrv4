@@ -224,8 +224,8 @@ another while also allowing a level of participation deniability.
 This process is based on the Spawn protocol[1], which utilizes Dual Receiver
 Encryption (DRE) and a NIZKPK for authentication (Auth).
 
-Alice long-term Cramer-Shoup key-pair is `SKa = (x1A, x2A, y1A, y2A, zA)` and `PKa = (cA, dA, hA)`.  
-Bob long-term Cramer-Shoup key-pair is `SKb = (x1B, x2B, y1B, y2B, zB)` and `PKb = (cB, dB, hB)`.  
+Alice long-term Cramer-Shoup key-pair is `SKa = (x1a, x2a, y1a, y2a, za)` and `PKa = (Ca, Da, Ha)`.  
+Bob long-term Cramer-Shoup key-pair is `SKb = (x1b, x2b, y1b, y2b, zb)` and `PKb = (Cb, Db, Hb)`.  
 Both key pairs are generated with `DRGen()`.  
 
 #### Overview
@@ -241,28 +241,27 @@ Query Message or Whitespace Tag ------->
 
 **Alice:**
 
-1. Generates an ephemeral private key `i` from `Z_q` and a public key g1*i.
-2. Sends Bob `ψ1 = ("I", g1*i)`.
+1. Generates an ephemeral private key `i` and a public key `G1*i`.
+2. Sends Bob `ψ1 = ("I", G1*i)`.
 
 
 **Bob:**
 
-1. Generates an ephemeral private key `r` from `Z_q` and public key `g1*r`.
-2. Computes `γ = DREnc(PKb, PKa, m)`, being `m = "I" || "R" || g1*i || g1*r`.
-3. Computes `σ = Auth(hB, zB, {hA, g1*i}, "I" || "R" || g1*i || γ)`.
-4. Computes `k = (g1*i) * r` and securely erase `r`.
+1. Generates an ephemeral private key `r` and public key `G1*r`.
+2. Computes `γ = DREnc(PKb, PKa, m)`, being `m = "I" || "R" || G1*i || G1*r`.
+3. Computes `σ = Auth(Hb, zb, {Ha, G1*i}, "I" || "R" || G1*i || γ)`.
+4. Computes `k = (G1*i) * r` and securely erase `r`.
 5. Sends Alice `ψ2 = ("R", γ, σ)`.
-
 
 **Alice:**
 
-1. Verifies `Verif({hA, hB, g1*i}, σ, “I” || “R” || g1*i || γ)`.
+1. Verifies `Verif({Ha, Hb, G1*i}, σ, “I” || “R” || G1*i || γ)`.
 2. Decrypts `m = DRDec(PKa, PKb, SKa, γ)`.
 3. Verifies the following properties of the decrypted message `m`:
   1. The message is of the correct form (e.g., the fields are of the expected length)
   2. Alice's identifier is the first one listed
   3. Bob's identifier is the second one listed, and it matches the identifier transmitted outside of the ciphertext
-4. Computes `k = (g1*r) * i` and securely erase `i`.
+4. Computes `K = G1*r*i` and securely erase `i`.
 
 
 **TODO: the following is about version advertisement and may need to be moved.**
@@ -291,6 +290,8 @@ Message or Whitespace Tag sent by Alice or if Bob is using a version of OTR that
 is not the highest preferable version, this check will fail. If all checks pass,
 then Alice and Bob have a shared secret with which to initialize their data
 messages exchange session.
+
+**END OF TODO**
 
 #### Pre-key message
 
@@ -475,6 +476,8 @@ R0, Ca0_0, Cb0_0 = KDF(SharedSecret)
 - For the Receiver:
   - Set ratchet_flag as false
 
+TODO: What is `g`?
+
 Both side will compare their public keys to choose a chain key for sending and receiving:
 
 - Initiator (and similarly for Receiver) determines if she is the "low" end or the "high" end of this Data Message.
@@ -640,44 +643,56 @@ TODO: Update to new notation: integers and points.
 
 The Socialist Millionaires' Protocol allows two parties with secret information x and y respectively to check whether (x==y) without revealing any additional information about the secrets. The protocol used by OTR is based on the work of Boudot, Schoenmakers and Traore (2001). A full justification for its use in OTR is made by Alexander and Goldberg, in a paper published in 2007. The following is a technical account of what is transmitted during the course of the protocol.
 
-While data messages are being exchanged, either Alice or Bob may run SMP to detect impersonation or man-in-the-middle attacks. As above, an integer modulo p (448-bit) is a "field element". An integer modulo q (446 bit) is a a "scalar" (also a value on Z_q)
+While data messages are being exchanged, either Alice or Bob may run SMP to detect impersonation or man-in-the-middle attacks.
 
 We reuse the previously defined generator in Cramer-Shoup of DRE:
 
-`g1 = (501459341212218748317573362239202803024229898883658122912772232650473550786782902904842340270909267251001424253087988710625934010181862, 44731490761556280255905446185238890493953420277155459539681908020022814852045473906622513423589000065035233481733743985973099897904160)`
+`G = (501459341212218748317573362239202803024229898883658122912772232650473550786782902904842340270909267251001424253087988710625934010181862, 44731490761556280255905446185238890493953420277155459539681908020022814852045473906622513423589000065035233481733743985973099897904160)`
 
 Assuming that Alice begins the exchange:
 
-Alice:  
-* Picks random values `a2` and `a3`  
-* Sends Bob `g2_a = g1*a2` and `g3_a = g1*a3`  
+**Alice:**
 
-Bob:  
-* Picks field elements `b2` and `b3`  
-* Computes `g2_b = g1*b2` and `g3_b = g1*b3`  
-* Computes `g2 = g2_a*b2` and `g3 = g3_a*b3`  
-* Picks random value `r`.   
-* Computes `P_b = g3*r` and `Q_b = g1*r ⊕ g2*y`, where y is the 'actual secret'  
-* Sends Alice `g2_b`, `g3_b`, `P_b and Q_b`  
+* Picks random values `a2` and `a3`.
+* Sends Bob `G2a = G*a2` and `G3a = G*a3`.
 
-Alice:  
-* Computes `g2 = g2_b*a2` and `g3 = g3_b*a3`  
-* Picks random value `s`  
-* Computes `P_a = g3*s` and `Q_a = g1*s + g2*x`, where x is the 'actual secret'  
-* Computes `R_a = (Q_a / Q_b)*a3` //TODO: check notation for this  
-* Sends Bob `P_a`, `Q_a` and `R_a`  
 
-Bob:  
-* Computes `R_b = (Qa / Qb)*b3` //TODO: check notation for this  
-* Computes `R_a_b = R_a*b3`  
-* Checks whether `R_a_b == (P_a / P_b)`  
-* Sends Alice `R_b`  
+**Bob:**
 
-Alice:  
-* Computes `R_a_b = R_b*a3`   
-* Checks whether `R_a_b == (P_a / P_b)`  
+* Picks field elements `b2` and `b3`.
+* Computes `G2b = G*b2` and `G3b = G*b3`.
+* Computes `G2 = G2a*b2` and `G3 = G3a*b3`.
+* Picks random value `r`.
+* Computes `Pb = G3*r` and `Qb = G*r + G2*y`, where y is the 'actual secret'.
+* Sends Alice `G2b`, `G3b`, `Pb` and `Qb`.
 
-If everything is done correctly, then `R_a_b` should hold the value of `(P_a / P_b)` times `(g2*a3*b3)*(x - y)`, which means that the test at the end of the protocol will only succeed if x == y. Further, since `g2*a3*b3` is a random number not known to any party, if x is not equal to y, no other information is revealed.
+
+**Alice:**
+
+* Computes `G2 = G2b*a2` and `G3 = G3b*a3`.
+* Picks random value `s`.
+* Computes `Pa = G3*s` and `Qa = G1*s + G2*x`, where x is the 'actual secret'.
+* Computes `Ra = (Qa - Qb)*a3`.
+* Sends Bob `Pa`, `Qa` and `Ra`.
+
+
+**Bob:**
+
+* Computes `Rb = (Qa - Qb)*b3`.
+* Computes `Rab = Ra*b3`.
+* Checks whether `Rab == Pa - P_b`.
+* Sends Alice `Rb`.
+
+
+**Alice:**
+
+* Computes `Rab = Rb*a3`.
+* Checks whether `Rab == Pa - P_b`.
+
+
+If everything is done correctly, then `Rab` should hold the value of `Pa - Pb` times `(G2*a3*b3)*(x - y)`, which means that the test at the end of the protocol will only succeed if `x == y`. Further, since `G2*a3*b3` is a random number not known to any party, if `x` is not equal to `y`, no other information is revealed.
+
+TODO: It may be useful to streamline this section, similarly to how we did with the DAKE, adding a description of each message type with information about how to generate and how to serialize together. Then, present the state machine.
 
 ### Secret Information
 
@@ -685,6 +700,7 @@ The secret information x and y compared during this protocol contains not only i
 
     Version (BYTE)  
       The version of SMP used. The version described here is 1.
+      TODO: Should it be version 2?
 
     Initiator fingerprint (20 BYTEs)
       The fingerprint that the party initiating SMP is using in the current conversation.
@@ -695,7 +711,7 @@ The secret information x and y compared during this protocol contains not only i
     User-specified secret
       The input string given by the user at runtime.
 
-Then the SHA3-256 hash of the above is taken, and the digest becomes the actual secret (x or y) to be used in SMP. The additional fields insure that not only do both parties know the same secret input string, but no man-in-the-middle is capable of reading their communication either.
+Then the HashToScalar() of the above becomes the actual secret (x or y) to be used in SMP. The additional fields insure that not only do both parties know the same secret input string, but no man-in-the-middle is capable of reading their communication either.
 
 ### The SMP state machine
 
@@ -1020,7 +1036,7 @@ Let `{C1, D1, H1} = PK1` and `{C2, D2, H2} = PK2`
     - `U1i = G1*ki`
     - `U2i = G2*ki`
     - `Ei = (Hi*ki) + K`
-  2. Compute `αi = MapToZl(U1i || U2i || Ei)`.
+  2. Compute `αi = HashToScalar(U1i || U2i || Ei)`.
   3. Compute `Vi = Ci*ki + Di*(ki * αi)`
 3. Compute `K_enc = SHA3-256(K)`. TODO: we do this for key compression (K == 446 bits, K_enc = 256).
 4. Pick a random 24 bytes `nonce` and compute `φ = XSalsa20-Poly1305_K_enc(m, nonce)`
@@ -1037,7 +1053,7 @@ Let `{C1, D1, H1} = PK1` and `{C2, D2, H2} = PK2`
     - `pV = C1 || D1 || H1 || C2 || D2 || H2`
     - `eV = U11 || U21 || E1 || V1 || α1 || U12 || U22 || E2 || V2 || α2`
     - `zV = T11 || T21 || T31 || T12 || T22 || T32 || T4`
-    - `l = MapToZl(gV || pV || eV || zV)`
+    - `l = HashToScalar(gV || pV || eV || zV)`
   4. Generate for i ∈ {1,2}:
     1. Compute `ni = ti - l * ki (mod q)`.
 6. Send `γ = (U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2, nonce, φ)`.
@@ -1052,7 +1068,7 @@ TODO: How to say that `i` is 1 or 2 depending if it is the corresponding secret 
   `(U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2, nonce, φ) = γ`.
 2. Verify NIZKPKi:
   1. for j ∈ {1, 2} compute:
-    1. `αj = MapToZl(U1j || U2j || Ej)`
+    1. `αj = HashToScalar(U1j || U2j || Ej)`
     2. `T1j = G1*nj + U1j*l`
     3. `T2j = G2*nj + U2j*l`
     4. `T3j = (Cj + Dj*αj)*nj + Vj*l`
@@ -1062,7 +1078,7 @@ TODO: How to say that `i` is 1 or 2 depending if it is the corresponding secret 
     - `pV = C1 || D1 || H1 || C2 || D2 || H2`
     - `eV = U11 || U21 || E1 || V1 || α1 || U12 || U22 || E2 || V2 || α2`
     - `zV = T11 || T21 || T31 || T12 || T22 || T32 || T4`
-    - `l' = MapToZl(gV || pV || eV || zV)`
+    - `l' = HashToScalar(gV || pV || eV || zV)`
   4. Verify `l' ≟ l`.
   5. Compute
     - `T1 = U1i*x1i`
@@ -1095,7 +1111,7 @@ m is the message to authenticate.
 2. Compute `T1 = G*t1`.
 3. Compute `T2 = G*r2 + A2*c2`.
 4. Compute `T3 = G*r3 + A3*c3`.
-5. Compute `c = MapToZl(G || q || A1 || A2 || A3 || T1 || T2 || T3 || m)`.
+5. Compute `c = HashToScalar(G || q || A1 || A2 || A3 || T1 || T2 || T3 || m)`.
 6. Compute `c1 = c - c2 - c3 (mod q)`.
 7. Compute `r1 = t1 - c1 * a2 (mod q)`.
 8. Send `σ = (c1, r1, c2, r2, c3, r3)`.
@@ -1106,10 +1122,10 @@ m is the message to authenticate.
 2. Compute `T1 = G*r1 + A1*c1`
 3. Compute `T2 = G*r2 + A2*c2`
 4. Compute `T3 = G*r3 + A3*c3`
-5. Compute `c = MapToZl(G || q || A1 || A2 || A3 || T1 || T2 || T3 || m)`.
+5. Compute `c = HashToScalar(G || q || A1 || A2 || A3 || T1 || T2 || T3 || m)`.
 6. Check if `c ≟ c1 + c2 + c3 (mod q)`.
 
-### MapToZl(d)
+### HashToScalar(d)
 
 d is an array of bytes.
 
