@@ -18,6 +18,7 @@ was said, or even that the two participants spoke to each other at all.
 7. [Data exchange](#data-exchange)
 9. [The protocol state machine](#the-protocol-state-machine)
 10. [Socialist Millionaires' Protocol (SMP) version 2](#socialist-millionaires-protocol-smp-version-2)
+11. [Fragmentation] (#fragmentation)
 11. Appendices
   1. ROM DRE
   2. ROM Authentication
@@ -775,6 +776,9 @@ Initiator fingerprint (20 BYTEs)
 Responder fingerprint (20 BYTEs)
   The fingerprint that the party that did not initiate SMP is using in the current conversation.
 
+Secure Session ID
+  The ssid described below.
+
 User-specified secret (DATA)
   The input string given by the user at runtime.
 ```
@@ -1063,7 +1067,72 @@ If smpstate is SMPSTATE_EXPECT4:
 
 Set smpstate to `SMPSTATE_EXPECT1`, as no more messages are expected from Bob.
 
+## Fragmentation
+**TODO:** are we keeping this this way for version 4? Are we keeping this backwards compatibility?
 
+Some networks may have a maximum message size that is too small to contain an encoded OTR message. In that event, the sender may choose to split the message into a number of fragments. This section describes the format of the fragments. All OTR version 2, 3 and 4 clients must be able to assemble received fragments, but performing fragmentation on outgoing messages is optional.
+
+###Transmitting Fragments
+
+If you have information about the maximum size of message you are able to send (the different IM networks have different limits), you can fragment an encoded OTR message as follows:
+
+* Start with the OTR message as you would normally transmit it. For example, a Data Message would start with `"?OTR:AAED"` and end with `"."`.
+* Break it up into sufficiently small pieces. Let the number of pieces be (n), and the pieces be piece[1],piece[2],...,piece[n].
+* Transmit (n) OTR version 3 or 4 fragmented messages with the following (printf-like) structure (as k runs from 1 to n inclusive):
+`"?OTR|%x|%x,%hu,%hu,%s," , sender_instance, receiver_instance, k, n, piece[k]`  
+OTR version 2 messages get fragmented in a similar format, but without the instance tags fields:
+`"?OTR,%hu,%hu,%s," , sender_instance, receiver_instance, k, n, piece[k]`
+
+* Note that `k` and `n` are unsigned short ints (2 bytes), and each has a maximum value of 65535. Also, each piece[k] must be non-empty.
+
+###Receiving Fragments:
+
+If you receive a message containing "?OTR|" (note that you'll need to check for this **before** checking for any of the other "?OTR:" markers):
+
+* Parse it as the printf statement above into k, n, and piece.
+* If the recipient's own instance tag does not match the listed receiver instance tag, and the listed receiver instance tag is not zero, the recipient should discard the message and optionally pass along a warning for the user.
+* Let `(K,N)` be your currently stored fragment number, and `F` be your currently stored fragment (if you have no currently stored fragment, then `K = N = 0` and `F = ""`).
+* If `k == 0` or `n == 0` or `k > n`, discard this (illegal) fragment.
+* If `k == 1`:
+  * Forget any stored fragment you may have
+  * Store (piece) as `F`.
+  * Store `(k,n)` as `(K,N)`.
+* If `n == N` and `k == K+1`:
+  * Append (piece) to `F`.
+  * Store `(k,n)` as `(K,N)`.
+* Otherwise:
+  * Forget any stored fragment you may have
+  * Store `""` as `F`.
+  * Store `(0,0)` as `(K,N)`.
+
+* After this, if `N > 0` and `K == N`, treat `F` as the received message.
+
+If you receive a non-OTR message, or an unfragmented message, forget any stored fragment you may have, store `""` as `F` and store `(0,0)` as `(K,N)`.  
+
+OTR version 2 fragmented messages follow the same behaviour as described above, but do not list the sender and receiver instance tags.  
+
+For example, here is a Data Message we would like to transmit over a network with an unreasonably small maximum message size:
+
+```
+?OTR:AAMDJ+MVmSfjFZcAAAAAAQAAAAIAAADA1g5IjD1ZGLDVQEyCgCyn9hb
+rL3KAbGDdzE2ZkMyTKl7XfkSxh8YJnudstiB74i4BzT0W2haClg6dMary/jo
+9sMudwmUdlnKpIGEKXWdvJKT+hQ26h9nzMgEditLB8vjPEWAJ6gBXvZrY6ZQ
+rx3gb4v0UaSMOMiR5sB7Eaulb2Yc6RmRnnlxgUUC2alosg4WIeFN951PLjSc
+ajVba6dqlDi+q1H5tPvI5SWMN7PCBWIJ41+WvF+5IAZzQZYgNaVLbAAAAAAA
+AAAEAAAAHwNiIi5Ms+4PsY/L2ipkTtquknfx6HodLvk3RAAAAAA==.
+We could fragment this message into (for example) three pieces:
+
+?OTR|5a73a599|27e31597,00001,00003,?OTR:AAMDJ+MVmSfjFZcAAAAA
+AQAAAAIAAADA1g5IjD1ZGLDVQEyCgCyn9hbrL3KAbGDdzE2ZkMyTKl7XfkSx
+h8YJnudstiB74i4BzT0W2haClg6dMary/jo9sMudwmUdlnKpIGEKXWdvJKT+
+hQ26h9nzMgEditLB8v,
+?OTR|5a73a599|27e31597,00002,00003,jPEWAJ6gBXvZrY6ZQrx3gb4v0
+UaSMOMiR5sB7Eaulb2Yc6RmRnnlxgUUC2alosg4WIeFN951PLjScajVba6dq
+lDi+q1H5tPvI5SWMN7PCBWIJ41+WvF+5IAZzQZYgNaVLbAAAAAAAAAAEAAAA
+HwNiIi5Ms+4PsY/L2i,
+?OTR|5a73a599|27e31597,00003,00003,pkTtquknfx6HodLvk3RAAAAAA
+==.,
+```
 
 ## Appendices
 
