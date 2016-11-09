@@ -13,6 +13,7 @@ was said, or even that the two participants spoke to each other at all.
 4. [Security Properties](#security-properties)
 5. [OTR Conversation Initialization](#otr-conversation-initialization)
   1. [Version Advertisement](#version-advertisement)
+  1. [Creating a Version Advertisement](#creating-version-advertisement)
   2. [Deniable Authenticated Key Exchange (DAKE)](#deniable-authenticated-key-exchange-dake)
 6. [Requesting conversation with older OTR version](#requesting-conversation-with-older-otr-version)
 7. [Data exchange](#data-exchange)
@@ -267,9 +268,36 @@ he will initiate an interactive, deniable, authenticated key exchange DAKE.
 ### Version Advertisement
 
 OTR4 introduces mandatory version advertisement to resist version rollback. In
-both cases, the receiving party will include in the DAKE authenticated
-information about what versions they received, and the initializing party will
-verify that the versions are correct.
+both cases, both parties will include in the DAKE authenticated information
+about what versions they support.
+
+### Creating a Version Advertisement
+
+#### Overview
+
+To create a version advertisement, both Alice and Bob generate three sets
+of keys (signing keys are based on Ed448):
+
+1. One master signing set: PKm, SKm
+2. One version signing set: PKv, SKv
+3. One set for Dual Receiver Encryption (DRE): PKe, SKe
+
+They use these keys to create the 4 parts of the version advertisement.
+
+1. The public master signing key: PKm
+2. The public version signing key and a signature of it by the secret master
+   signing key:
+
+PKv || sign( SKm, PKv )
+
+3. The public DRE key and a signature of it by the secret master signing key:
+
+PKe || sign( SKm, PKe )
+
+3. The version, version expiration and the signature of both signed by the
+   secret version signing key:
+
+Version || Vers.Expiry || sign( SKv, Version || Vers.Expiry )
 
 ### Deniable Authenticated Key Exchange (DAKE)
 
