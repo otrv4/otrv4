@@ -17,7 +17,7 @@ was said, or even that the two participants spoke to each other at all.
 6. [Requesting conversation with older OTR version](#requesting-conversation-with-older-otr-version)
 7. [Data exchange](#data-exchange)
 9. [The protocol state machine](#the-protocol-state-machine)
-10. [Socialist Millionaires' Protocol (SMP) version 2](#socialist-millionaires-protocol-smp)
+10. [Socialist Millionaires' Protocol (SMP) version 2](#socialist-millionaires-protocol-smp-version-2)
 11. Appendices
   1. ROM DRE
   2. ROM Authentication
@@ -721,36 +721,41 @@ Assuming that Alice begins the exchange:
 **Alice:**
 
 * Picks random values `a2` and `a3`.
-* TODO: it is missing c2, c3 and D2, D3.
-* Sends Bob a SMP message 1 with `G2a = G*a2` and `G3a = G*a3`.
-
+* Picks random values `r2` and `r3`.
+* Computes `c2 = HashToScalar(1 || G*r2)` and `d2 = r2 - a2 * c2`.
+* Computes `c3 = HashToScalar(2 || G*r3)` and `d3 = r3 - a3 * c3`.
+* Sends Bob a SMP message 1 with `G2a = G*a2`, `c2`, `d2`, `G3a = G*a3`, `c3` and `d3`. 
 
 **Bob:**
 
-* Picks field elements `b2` and `b3`.
+* Picks random values `b2` and `b3`.
+* Picks random values `r2`, `r3`, `r4`, `r5` and `r6`. 
 * Computes `G2b = G*b2` and `G3b = G*b3`.
+* Computes `c2 = HashToScalar(3 || G*r2)` and `d2 = r2 - b2 * c2`.
+* Computes `c3 = HashToScalar(4 || G*r3)` and `d3 = r3 - b3 * c3`.
 * Computes `G2 = G2a*b2` and `G3 = G3a*b3`.
-* Picks random value `r`.
-* Computes `Pb = G3*r` and `Qb = G*r + G2*y`, where y is the 'actual secret'.
-* Sends Alice a SMP message 2 with `G2b`, `G3b`, `Pb` and `Qb`.
-
+* Computes `Pb = G3*r4` and `Qb = G*r4 + G2*y`, where y is the 'actual secret'.
+* Comoutes `cP = HashToScalar(5 || G3*r5 || G*r5 + G2*r6)`, `d5 = r5 - r4 * cP` and `d6 = r6 - y * cP`.
+* Sends Alice a SMP message 2 with `G2b`, `c2`, `d2`, `G3b`, `c3`, `d3`, `Pb`, `Qb`, `cP`, `d5` and `d6`.
 
 **Alice:**
 
 * Computes `G2 = G2b*a2` and `G3 = G3b*a3`.
-* Picks random value `s`.
-* Computes `Pa = G3*s` and `Qa = G1*s + G2*x`, where x is the 'actual secret'.
+* Picks random values `r4`, `r5`, `r6` and `r7`.
+* Computes `Pa = G3*r4` and `Qa = G1*r4 + G2*x`, where x is the 'actual secret'.
+* Coumputes `cP = HashToScalar(6 || G3*r5 || G*r5 + G2*r6)`, `d5 = r5 - r4 * cP` and `d6 = r6 - x * cP`.
 * Computes `Ra = (Qa - Qb)*a3`.
-* Sends Bob a SMP message 3 with `Pa`, `Qa` and `Ra`.
-
+* Computes `cR = HashToScalar(7 || G*r7 || (Qa - Qb)*r7)` and `d7 = r7 - a3 * cR`. 
+* Sends Bob a SMP message 3 with `Pa`, `Qa`, `cP`, `d5`, `d6`, `Ra`, `cR` and `d7`.
 
 **Bob:**
 
+* Picks a random value `r7`. 
 * Computes `Rb = (Qa - Qb)*b3`.
 * Computes `Rab = Ra*b3`.
+* Computes `cR = HashToScalar(8 || G*r7 || (Qa - Qb)*r7)` and `d7 = r7 - b3 * cR`. 
 * Checks whether `Rab == Pa - Pb`.
-* Sends Alice a SMP message 4 with `Rb`.
-
+* Sends Alice a SMP message 4 with `Rb`, `cR`, `d7`.
 
 **Alice:**
 
@@ -789,10 +794,9 @@ SMP messages are sent as TLVs in data messages. To allow mutual implementations 
 
 A SMP abort message is a type 10 TLV with no data.
 
-
 #### SMP message 1
 
-SMP message 1 is sent by Alice to begin a DH exchange to determine two new generators, g2 and g3. A valid  SMP message 1 is generated as follows:
+SMP message 1 is sent by Alice to begin a DH exchange to determine two new generators, `g2` and `g3`. A valid  SMP message 1 is generated as follows:
 
 1. Determine her secret input `x`, which is to be compared to Bob's secret `y`, as specified in the "Secret Information" section.
 2. Pick random values `a2` and `a3` in `Z_q`. These will be Alice's exponents for the DH exchange to pick generators.
@@ -812,7 +816,7 @@ G2a (POINT)
 c2 (MPI), d2 (MPI)
   A zero-knowledge proof that Alice knows the value associated with her transmitted value G2a.
 
-G3a
+G3a (POINT)
   Alice's half of the DH exchange to determine G3.
 
 c3 (MPI), d3 (MPI)
@@ -838,7 +842,7 @@ G2a (POINT)
 c2 (MPI), d2 (MPI)
   A zero-knowledge proof that Alice knows the value associated with her transmitted value G2a.
 
-G3a
+G3a (POINT)
   Alice's half of the DH exchange to determine G3.
 
 c3 (MPI), d3 (MPI)
@@ -846,12 +850,11 @@ c3 (MPI), d3 (MPI)
 
 ```
 
-
 #### SMP message 2
 
 SMP message 2 is sent by Bob to complete the DH exchange to determine the new generators, g2 and g3. It also begins the construction of the values used in the final comparison of the protocol. A valid SMP message 2 is generated as follows:
 
-1. Determine Bob's secret input `y`, which is to be compared to Alice's secret x.
+1. Determine Bob's secret input `y`, which is to be compared to Alice's secret `x`.
 2. Pick random values `b2` and `b3` in `Z_q`. These will used during the DH exchange to pick generators.
 3. Pick random values `r2`, `r3`, `r4`, `r5` and `r6` in `Z_q`. These will be used to add a blinding factor to the final results, and to generate zero-knowledge proofs that this message was created honestly.
 4. Compute `G2b = G*b2` and `G3b = G*b3`.
@@ -859,7 +862,7 @@ SMP message 2 is sent by Bob to complete the DH exchange to determine the new ge
 6. Generate a zero-knowledge proof that the value `b3` is known by setting `c3 = HashToScalar(4 || G*r3)` and `d3 = r3 - b3 * c3 mod q`.
 7. Compute `G2 = G2a*b2` and `G3 = G3a*b3`.
 8. Compute `Pb = G3*r4` and `Qb = G*r4 + G2*y`.
-9. Generate a zero-knowledge proof that `Pb` and `Qb` were created according to the protocol by setting `cP = HashToScalar(5 || G3*r5 || G*r5 + G2*r6)`, `d5 = r5 - r4 cP mod q` and `d6 = r6 - y cP mod q`.
+9. Generate a zero-knowledge proof that `Pb` and `Qb` were created according to the protocol by setting `cP = HashToScalar(5 || G3*r5 || G*r5 + G2*r6)`, `d5 = r5 - r4 * cP mod q` and `d6 = r6 - y * cP mod q`.
 10. Store the values of `G3a`, `G2`, `G3`, `b3`, `Pb` and `Qb` for use later in the protocol.
 
 
