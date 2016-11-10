@@ -15,8 +15,9 @@ by a "three step ratchet" which behaves as[1]:
    hey pubB.
 
 In [1], the Double Ratchet Algorithm is introduced, which allows for:
-1) out-of-order messages
-2) per-message forward secrecy.
+
+1. out-of-order messages
+2. per-message forward secrecy.
 
 We consider adding this new algorithm into OTRv4, but we also need to maintain
 the same security properties of prior OTR versions, such as message deniability
@@ -25,9 +26,10 @@ that is achieved by revealing MAC keys.
 In [2], a vulnerability was found in Message Integrity for OTR version 2, where
 revealing MAC keys is done immediately by both sides. Two potential solutions are
 possible:
-1) only the receiver can reveal MAC keys, which still has weaken deniability as it
+
+1. only the receiver can reveal MAC keys, which still has weaken deniability as it
 puts full trust in receiver
-2) both sender and receiver can reveal, but the sender must reveal MAC keys only
+2. both sender and receiver can reveal, but the sender must reveal MAC keys only
 after two ratchet generations.
 
 OTRv3 made the decision to reveal MAC keys only by the receiver per ratchet.
@@ -39,14 +41,15 @@ Double Ratchet is that in the three-step ratchet, one MAC key is used for
 each ratchet, whereas for the Double Ratchet, one MAC key used for each message.
 
 Therefore, in revealing MAC keys in the Double Ratchet, we have two options:
-1) to reveal one MAC key per message
-2) to reveal a key that can be used to derive all the MAC keys in that ratchet.
+
+1. to reveal one MAC key per message
+2. to reveal a key that can be used to derive all the MAC keys in that ratchet.
 
 ### Decision
 
 For OTRv4, we decided to use the Double Ratchet Algorithm for key management. Even
-though our network model is in-order, we can benefit from the per-message that the
-Double Ratchet algorithm provides.
+though our network model is in-order, we can benefit from the per-message forward
+secrecy that the Double Ratchet algorithm provides.
 
 We decided that only the receiver will reveal MAC keys per message for simplicity.
 
