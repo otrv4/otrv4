@@ -515,11 +515,12 @@ Otherwise, she is the "low" end.
     MKmac = SHA3(0x01 || Cs_j)
     ```
 
-5. Use the Enc key to encrypt the message, and the MAC key to calculate its mactag.
+5. Use the Enc key to encrypt the message with Xsalsa, and the MAC key to calculate its mactag with SHA3.
 
     ```
-    ciphertext = Enc(MKenc, m)
-    msg = ciphertext || Mac(MKmac, ciphertext)
+    ciphertext = Xsalsa_Enc(MKenc, m)
+    mactag = SHA3(MKmac || ciphertext)
+    msg = ciphertext || mactag
     ```
 
 6. Derive the next sending Chain Key
@@ -545,17 +546,17 @@ Otherwise, she is the "low" end.
     MKmac = SHA3(0x01 || Cs_j)
     ```
 
-5. Use the MAC key to verify the mactag on the message. If it does not verify, reject the message.
+5. Use the MAC key to verify the mactag on the message with SHA3. If it does not verify, reject the message.
 
     ```
     ciphertext, mactag = msg
-    verify(mactag == Mac(MKmac, m))
+    verify(mactag == SHA3(MKmac || ciphertext))
     ```
 
-6. Decrypt the message using the Enc key.
+6. Decrypt the message using the Enc key with Xsalsa.
 
     ```
-    m = Dec(MKenc, ciphertext)
+    m = Xsalsa_Dec(MKenc, ciphertext)
     ```
 
 7. Set k to message_id, Set ratchet_flag to true, Set their_dh as pubDHRs of the message.
