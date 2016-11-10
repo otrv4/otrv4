@@ -888,6 +888,32 @@ If msgstate is `MSGSTATE_FINISHED`:
 
 * How can we address the problem of multiple Query Messages received while the AKE is in progress?
 
+Example: Alice has `REQUIRE_ENCRYPTION`.
+
+```
+| Alice                      | Bob                    |
+| Types "Hi", Sends Q1       |                        |
+|                            | Receives Q1, Sends ψ1a |
+| Types "Hey", Sends Q2      |                        |
+| Receives ψ1a, Sends ψ2a    |                        |
+| Sends ENC(Ka, "Hi")        |                        |
+| Sends ENC(Ka, "Hey")       |                        |
+|                            | Receives Q2, Sends ψ1b |
+| Types "Yes", ENC(Ka, "Yes")|                        |
+|                            | Receives ψ2a           |
+|                            | Receives ENC(Ka, "Hi") |
+|                            | Receives ENC(Ka, "Hey")|
+|                            | Sends ENC(Ka, "Hello") |
+| Receives ψ1b, Sends ψ2b    |                        |
+| Forget Ka??                |                        |
+| Receive ENC(Ka, "Hello")   |                        |
+| Can't dec if Ka is gone!!  |                        |
+| Types "Yo", ENC(Kb, "Yo")  |                        |
+|                            | Receives ψ2b           |
+|                            | Forget Ka??            |
+```
+
+Messages may be lost.
 
 ## Socialist Millionaires Protocol (SMP) version 2
 
