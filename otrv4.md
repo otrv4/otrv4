@@ -498,9 +498,9 @@ Otherwise, she is the "low" end.
     ```
     our_dh = {pubDHa, privDHa} = generateECDH()
 
-    R1 = SHA3(0x00 || R0 || ECDH(our_dh, their_dh))
-    Ca1_0 = SHA3(0x01 || R0 || ECDH(our_dh, their_dh))
-    Cb1_0 = SHA3(0x02 || R0 || ECDH(our_dh, their_dh))
+    R1 = SHA3-256(0x00 || R0 || ECDH(our_dh, their_dh))
+    Ca1_0 = SHA3-256(0x01 || R0 || ECDH(our_dh, their_dh))
+    Cb1_0 = SHA3-256(0x02 || R0 || ECDH(our_dh, their_dh))
 
     i = i+1
     ratchet_flag = false
@@ -511,22 +511,22 @@ Otherwise, she is the "low" end.
 4. Increment j, and use Cs_j to derive the Enc and MAC key.
 
     ```
-    MKenc = SHA3(0x00 || Cs_j)
-    MKmac = SHA3(0x01 || Cs_j)
+    MKenc = SHA3-256(0x00 || Cs_j)
+    MKmac = SHA3-256(0x01 || Cs_j)
     ```
 
-5. Use the Enc key to encrypt the message with Xsalsa, and the MAC key to calculate its mactag with SHA3.
+5. Use the Enc key to encrypt the message with Xsalsa, and the MAC key to calculate its mactag with SHA3-256.
 
     ```
     ciphertext = Xsalsa_Enc(MKenc, m)
-    mactag = SHA3(MKmac || ciphertext)
+    mactag = SHA3-256(MKmac || ciphertext)
     msg = ciphertext || mactag
     ```
 
 6. Derive the next sending Chain Key
 
     ```
-    Cs_j+1 = SHA3(Cs_j)
+    Cs_j+1 = SHA3-256(Cs_j)
     ```
 
 #### When you receive a Data Message:
@@ -536,21 +536,21 @@ Otherwise, she is the "low" end.
 3. Use the message_id to compute the Receiving Chain key Cr_message_id.
 
     ```
-    Cr_message_id = SHA3(Cr_message_id-1)
+    Cr_message_id = SHA3-256(Cr_message_id-1)
     ```
 
 4. Use the Cr_message_id to derive the Enc and MAC key.
 
     ```
-    MKenc = SHA3(0x00 || Cs_j)
-    MKmac = SHA3(0x01 || Cs_j)
+    MKenc = SHA3-256(0x00 || Cs_j)
+    MKmac = SHA3-256(0x01 || Cs_j)
     ```
 
-5. Use the MAC key to verify the mactag on the message with SHA3. If it does not verify, reject the message.
+5. Use the MAC key to verify the mactag on the message with SHA3-256. If it does not verify, reject the message.
 
     ```
     ciphertext, mactag = msg
-    verify(mactag == SHA3(MKmac || ciphertext))
+    verify(mactag == SHA3-256(MKmac || ciphertext))
     ```
 
 6. Decrypt the message using the Enc key with Xsalsa.
