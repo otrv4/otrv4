@@ -448,17 +448,19 @@ Verify MAC, Decrypt message 1_1
 
 ### Key management
 
-#### For each correspondent, keep track of:
+For each correspondent, keep track of:
 
-ratchet_flag  
-i as Current ratchet id  
-j as Previous sent message id  
+```
+ratchet_flag
+i as Current ratchet id
+j as Previous sent message id
 k as Previous received message id
 
-R as Root key  
-Cs_j as Sending Chain key  
-Cr_k as Receiving Chain key  
+R as Root key
+Cs_j as Sending Chain key
+Cr_k as Receiving Chain key
 our_dh, their_dh
+```
 
 #### Initialization of Double Ratchet
 
