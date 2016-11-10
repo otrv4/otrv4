@@ -810,9 +810,12 @@ This indicates that you have already sent a Pre-key message to your corresponden
 Regardless of authstate value, you should:
 
   * Reply with a DRE Auth Message
-  * If there is a recent stored message, encrypt it and send it as a Data Message. (TODO: does it apply?)
   * Transition authstate to `AUTHSTATE_NONE`.
   * Transition msgstate to `MSGSTATE_ENCRYPTED`.
+  * Initialize the double ratcheting by:
+    * Set `ratchet_flag` as `false`.
+    * Set `our_dh` as our ephemeral public key from the DAKE (`G1*r`).
+  * If there is a recent stored message, encrypt it and send it as a Data Message. (TODO: does it apply?)
 
 
 #### Receiving a DRE Auth message
@@ -824,6 +827,9 @@ If authstate is `AUTHSTATE_AWAITING_DRE_AUTH`:
   * (Explain how to process and verify this message briefly). If everything checks out:
   * Transition authstate to `AUTHSTATE_NONE`.
   * Transition msgstate to `MSGSTATE_ENCRYPTED`.
+  * Initialize the double ratcheting by:
+    * Set `ratchet_flag` as `true`.
+    * Set `their_dh` as the their ephemeral public key from the DAKE (`G1*r`).
   * If there is a recent stored message, encrypt it and send it as a Data Message.
 
 Otherwise, ignore the message.
