@@ -469,6 +469,8 @@ MKenc = SHA3-256(0x00 || Cr_message_id)
 MKmac = SHA3-256(0x01 || Cr_message_id)
 ```
 
+You may need to use receiving chain keys older than `message_id-1` to calculate the current if you have missed previous messages.
+
 Use the "mac key" (`MKmac`) to verify the MAC on the message. If it does not verify, reject the message.
 If the MAC verifies, decrypt the message using the "encryption key" (`MKenc`).
 
