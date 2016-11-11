@@ -18,7 +18,7 @@ was said, or even that the two participants spoke to each other at all.
 7. [Data exchange](#data-exchange)
 9. [The protocol state machine](#the-protocol-state-machine)
 10. [Socialist Millionaires' Protocol (SMP) version 2](#socialist-millionaires-protocol-smp-version-2)
-11. Appendices
+11. [Appendices](#appendices)
   1. ROM DRE
   2. ROM Authentication
 
@@ -150,6 +150,28 @@ OTRv4 has the same message formats as OTRv3 without compatibility with version 2
 
 Fragmentation is should be implemented to be strictly compatible with OTRv3 (have "|" as separators and always have instance tags).
 
+Although Data messages have a different format in OTRv4, they use the same format for TLV (type/length/value) records. OTRv4 supports the same TLV record types from OTRv3, with the exception of SMP (version 1) TLVs (types 2-7).
+
+OTRv4 defines additional TLV record types:
+
+Type 10: SMP Abort Message
+  If the user cancels SMP prematurely or encounters an error in the protocol and cannot continue, you may send a message (possibly with empty human-readable part) with this TLV type to instruct the other party's client to abort the protocol. The associated length should be zero and the associated value should be empty. If you receive a TLV of this type, you should change the SMP state to SMP_EXPECT1 (see below).
+
+Type 11: SMPv2 Message 1
+  The value represents an initiating message of the Socialist Millionaires' Protocol, described below.
+
+Type 12: SMPv2 Message 2
+  The value represents the second message in an instance of SMPv2.
+
+Type 13: SMPv2 Message 3
+  The value represents the third message in an instance of SMPv2.
+
+Type 14: SMPv2 Message 4
+  The value represents the final message in an instance of SMPv2.
+
+Type 15: SMPv2 Message 1Q
+  Like a SMPv2 Message 1, but whose value begins with a NUL-terminated user-specified question.
+
 
 ### Data types
 
@@ -188,6 +210,7 @@ OTR public authentication Cramer-Shoup key (PUBKEY):
       (c, d, h) are the Cramer-Shoup public key parameters
 
 OTR public keys have fingerprints, which are hex strings that serve as identifiers for the public key. The fingerprint is calculated by taking the SHA-1 hash of the byte-level representation of the public key.
+
 
 ## OTR Conversation Initialization
 
