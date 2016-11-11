@@ -399,6 +399,77 @@ case the protocol falls back to [OTR version 3 specification][2].
 
 Note: OTR version 4 is the latest version to support previous versions.
 
+## Key management
+
+TODO: the point of the "key management" section in OTRv3 is to put this concern as a vertical (how to do key management in the AKE and Data message context). Here, we use this section to describe the double ratchet. I vote for removing this "Key management" if we only want to talk about the double ratchet.
+
+TODO: I dont like this section, but if we were to add it, this is how it would look like:
+
+For each correspondent, keep track of:
+
+```
+ratchet_flag whether we should ratchet before sending the next message
+i as Current ratchet id
+j as Previous sent message id
+k as Previous received message id
+
+Ri as Root key
+Csi_j as Sending Chain key
+Cri_k as Receiving Chain key
+our_dh an ephemeral key pair
+their_dh an ephemeral public key
+```
+
+#### When you start a new DAKE
+
+#### Upon completing the DAKE
+
+The AKE is considered to be completed when either:
+
+1. Bob sends the DRE Auth message. In this case:
+  * Set `ratchet_flag` as `false`.
+  * Set `our_dh` as our ephemeral key pair from the DAKE (`r`, `G1*r`).
+2. Alice receives and verifies the DRE Auth message. In this case:
+  * Set `ratchet_flag` as `true`.
+  * Set `our_dh` as our ephemeral public key from the DAKE (`i`, `G1*i`).
+  * Set `their_dh` as the their ephemeral public key from the DAKE (`G1*r`).
+
+In any event, calculate the first set of keys `R0, Cs0_0, Cr0_0 = calculate_ratchet_keys(K)`.
+
+#### When you send a Data Message:
+
+If ratchet_flag is true:
+  * Securely forget our_dh, increment i, reset j, and set our_dh to a new DH key pair which you generate. The new DH key pair should be generated with **TODO**.
+  * Derive new set of keys R, Cs_0, Cr_0 from private part of our_dh and public part of their_dh:
+    `Ri, Cai_j, Cbi_j = calculate_ratchet_keys(Ri-1 || ECDH(our_dh, their_dh))`
+  * Set ratchet_flag to false.
+
+#### When you receive a Data Message:
+
+
+#### Calculating the root key, sender chain key and receiver chain key
+
+```
+calculate_ratchet_keys(secret):
+  R  = SHA3-256(0x0 || secret)
+  Ca = SHA3-256(0x01 || secret)
+  Cb = SHA3-256(0x02 || secret)
+
+  Cs, Cr = decide_between(Ca, Cb)
+
+  return R, Cs, Cr
+```
+
+Both side will compare their public keys to choose a chain key for sending and receiving:
+
+- Alice (and similarly for Bob) determines if she is the "low" end or the "high" end of this ratchet.
+If Alice's ephemeral D-H public key is numerically greater than Bob's public key, then she is the "high" end.
+Otherwise, she is the "low" end.
+- Alice selects the chain keys for sending and receiving:
+  - If she is the "high" end, use Ca as the sending chain key, Cb as the receiving chain key.
+  - If she is the "low" end, use Cb as the sending chain key, Ca as the receiving chain key.
+
+
 ## Data Exchange
 
 This section describes how each participant will use the Double Ratchet
@@ -446,7 +517,9 @@ Derive Enc-key & MAC-key
 Verify MAC, Decrypt message 1_1
 ```
 
-### Key management
+### The double ratcheting
+
+TODO: The double ratchet does ...
 
 For each correspondent, keep track of:
 
@@ -463,40 +536,6 @@ our_dh an ephemeral key pair
 their_dh an ephemeral public key
 ```
 
-
-#### Calculating the root key, sender chain key and receiver chain key
-
-```
-calculate_ratchet_keys(secret):
-  R  = SHA3-256(0x0 || secret)
-  Ca = SHA3-256(0x01 || secret)
-  Cb = SHA3-256(0x02 || secret)
-
-  Cs, Cr = decide_between(Ca, Cb)
-
-  return R, Cs, Cr
-```
-
-Both side will compare their public keys to choose a chain key for sending and receiving:
-
-- Alice (and similarly for Bob) determines if she is the "low" end or the "high" end of this ratchet.
-If Alice's ephemeral D-H public key is numerically greater than Bob's public key, then she is the "high" end.
-Otherwise, she is the "low" end.
-- Alice selects the chain keys for sending and receiving:
-  - If she is the "high" end, use Ca as the sending chain key, Cb as the receiving chain key.
-  - If she is the "low" end, use Cb as the sending chain key, Ca as the receiving chain key.
-
-
-#### Initialization of Double Ratchet
-
-After the DAKE is finished, both side will initialize the first group of root key (R0) and chain keys
-(Cs0_0 and Cr0_0) deriving from SharedSecret.
-
-```
-R0, Cs0_0, Cr0_0 = calculate_ratchet_keys(K)
-```
-
-
 #### When you send a Data Message:
 
 1. If ratchet_flag is true, first ratchet:
@@ -507,9 +546,7 @@ R0, Cs0_0, Cr0_0 = calculate_ratchet_keys(K)
     ```
     our_dh = {pubDHa, privDHa} = generateECDH()
 
-    R1 = SHA3-256(0x00 || R0 || ECDH(our_dh, their_dh))
-    Ca1_0 = SHA3-256(0x01 || R0 || ECDH(our_dh, their_dh))
-    Cb1_0 = SHA3-256(0x02 || R0 || ECDH(our_dh, their_dh))
+    R1, Ca1_0, Cb1_0 = calculate_ratchet_keys(R0 || ECDH(our_dh, their_dh))
 
     i = i+1
     ratchet_flag = false
