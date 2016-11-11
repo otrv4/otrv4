@@ -478,6 +478,10 @@ You may need to use receiving chain keys older than `message_id-1` to calculate 
 Use the "mac key" (`MKmac`) to verify the MAC on the message. If it does not verify, reject the message.
 If the MAC verifies, decrypt the message using the "encryption key" (`MKenc`).
 
+Finally:
+  * Set `ratchet_flag` to `true`
+  * Set `their_dh` as pubDHRs from the message.
+
 
 #### Calculating the root key, sender chain key and receiver chain key
 
