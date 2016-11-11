@@ -737,11 +737,11 @@ Flags (BYTE)
         the MAC (because, for example, you don't have the right keys), just ignore the message instead of producing
         some kind of error or notification to the user.
 
-Ratchet id i (INT)
+Ratchet id ratchet_id (INT)
 
     Must be strictly greater than 0, and increment by 1 with each ratchet
 
-Message id Ns (INT)
+Message id message_id (INT)
     Must be strictly greater than 0, and increment by 1 with each message
 
 pubDHRs (MPI)
