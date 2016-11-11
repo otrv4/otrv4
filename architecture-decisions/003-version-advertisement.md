@@ -5,9 +5,9 @@
 ### Context
 
 Currently, OTRv3 support its previous versions, user should configure their
-policy to tell the protocol if they wanna to support previous versions or not.
-When a user wanna to have a conversation with someone, its should send a query
-message telling which versions its support. This message is send as plaintext
+policy to tell the protocol if they wanna to allow previous versions or not.
+When an user wanna to have a conversation with someone, its should send a query
+message telling which versions its supports. This message is send as plaintext
 and can be intercepted and changed without the user been notified.
 
 As we are updating OTR to provide cryptographic primitives with a higher security
@@ -58,8 +58,6 @@ version advertisement to server.
 As OTRv4 upgrades is not to fix any security issue on OTRv3, is acceptable for
 users to chat using version 3, but is preferable to use 4 if both support it.
 
-
-If for some reason, he didn't find any advertisement for Alice and he allow 3
-in his policy, the conversation will be established as OTR3. Otherwise, just
-ignore.
+We will support a conversation on version 3 if we don't find any version
+advertisement and user allow it in its policy.
 
