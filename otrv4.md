@@ -144,9 +144,13 @@ An integer modulo p is a "field element". An integer modulo q is a a "scalar" (a
 
 TODO: If we use u-coordinate for encoding according to XEdDSA, do we need to consider the sign byte when hashing to a field element (the first byte)? Simply clearing seems to be the simplest solution.
 
+
 ### OTR messages
 
-**TODO:** we need to mention query messages are the same as OTRv3, whitespace tags are the same, error messages are the same, and messages are encoded in the same way ("?OTR:", followed by the base-64 encoding, followed by ".").
+OTRv4 has the same message formats as OTRv3 without compatibility with version 2. It means query messages, whitespace tags, error messages, encoding and fragmentation is performed as specified in OTRv3.
+
+Fragmentation is should be implemented to be strictly compatible with OTRv3 (have "|" as separators and always have instance tags).
+
 
 ### Data types
 
