@@ -13,15 +13,15 @@ was said, or even that the two participants spoke to each other at all.
 4. [Security Properties](#security-properties)
 5. [OTR Conversation Initialization](#otr-conversation-initialization)
   1. [Version Advertisement](#version-advertisement)
-  1. [Creating a Version Advertisement](#creating-version-advertisement)
-  2. [Deniable Authenticated Key Exchange (DAKE)](#deniable-authenticated-key-exchange-dake)
+  2. [Creating a Version Advertisement](#creating-version-advertisement)
+  3. [Deniable Authenticated Key Exchange (DAKE)](#deniable-authenticated-key-exchange-dake)
 6. [Requesting conversation with older OTR version](#requesting-conversation-with-older-otr-version)
 7. [Data exchange](#data-exchange)
 9. [The protocol state machine](#the-protocol-state-machine)
 10. [Socialist Millionaires' Protocol (SMP) version 2](#socialist-millionaires-protocol-smp-version-2)
 11. [Appendices](#appendices)
-  1. ROM DRE
-  2. ROM Authentication
+  1. [ROM DRE](#rom-dre)
+  2. [ROM Authentication](#rom-authentication)
 
 ## Main Changes over Version 3
 
