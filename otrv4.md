@@ -114,7 +114,7 @@ The concatenation of byte sequences x and P is x || P. In this case, x and P rep
 
 ### Elliptic Curve Parameters
 
-OTRv4 uses the Curve448 elliptic curve specified in (add reference), which defines the following parameters:
+OTRv4 uses the Curve448 elliptic curve specified in (TODO: add reference), which defines the following parameters:
 
 ```
 Base point (B)
@@ -154,51 +154,39 @@ Although Data messages have a different format in OTRv4, they use the same forma
 
 OTRv4 defines additional TLV record types:
 
-Type 10: SMP Abort Message
+* Type 10: SMP Abort Message  
   If the user cancels SMP prematurely or encounters an error in the protocol and cannot continue, you may send a message (possibly with empty human-readable part) with this TLV type to instruct the other party's client to abort the protocol. The associated length should be zero and the associated value should be empty. If you receive a TLV of this type, you should change the SMP state to SMP_EXPECT1 (see below).
 
-Type 11: SMPv2 Message 1
+* Type 11: SMPv2 Message 1  
   The value represents an initiating message of the Socialist Millionaires' Protocol, described below.
 
-Type 12: SMPv2 Message 2
+* Type 12: SMPv2 Message 2  
   The value represents the second message in an instance of SMPv2.
 
-Type 13: SMPv2 Message 3
+* Type 13: SMPv2 Message 3  
   The value represents the third message in an instance of SMPv2.
 
-Type 14: SMPv2 Message 4
+* Type 14: SMPv2 Message 4  
   The value represents the final message in an instance of SMPv2.
 
-Type 15: SMPv2 Message 1Q
+* Type 15: SMPv2 Message 1Q  
   Like a SMPv2 Message 1, but whose value begins with a NUL-terminated user-specified question.
 
 
 ### Data types
 
-    Bytes (BYTE):
-      1 byte unsigned value
+OTRv4 uses the same data types as specified in OTRv3 (bytes, shorts, ints, MPIs, and DATA) with the addition of:
 
-    Shorts (SHORT):
-      2 byte unsigned value, big-endian
-
-    Ints (INT):
-      4 byte unsigned value, big-endian
-
-    Multi-precision integers (MPI):
-      4 byte unsigned len, big-endian
-      len byte unsigned value, big-endian
-      (MPIs must use the minimum-length encoding; i.e. no leading 0x00 bytes. This is important when calculating public key fingerprints.)
-
-    ED448 points (POINT):
-      TODO: We need to choose a point serialization format for ed448 points
-
-    Opaque variable-length data (DATA):
-      4 byte unsigned len, big-endian
-      len byte data
-
+```
+ED448 points (POINT):
+  TODO: We need to choose a point serialization format for ed448 points
+```
 
 ### Public keys and fingerprints
 
+OTRv4 introduces a new type of public-key:
+
+```
 OTR public authentication Cramer-Shoup key (PUBKEY):
 
     Pubkey type (SHORT)
@@ -208,6 +196,7 @@ OTR public authentication Cramer-Shoup key (PUBKEY):
     d (MPI)
     h (MPI)
       (c, d, h) are the Cramer-Shoup public key parameters
+```
 
 OTR public keys have fingerprints, which are hex strings that serve as identifiers for the public key. The fingerprint is calculated by taking the SHA-1 hash of the byte-level representation of the public key.
 
@@ -344,7 +333,7 @@ G1*i (POINT)
   - Encode G1*i as the POINT field.
 ```
 
-This message has length:
+This message has length (TODO: this can be removed):
 
 ```
 LEN(Header) + LEN(Identifier) + LEN(Point)
@@ -408,7 +397,7 @@ Receiver's identifier (DATA)
   - r3 (MPI)
 ```
 
-This message has length:
+This message has length (TODO: this can be removed):
 
 ```
 LEN(HEADER) + LEN(Identifier) + LEN(γ) + LEN(σ)
