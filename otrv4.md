@@ -822,7 +822,7 @@ Regardless of authstate value, you should:
   * Compute the Diffie-Hellman shared secret `K = (G1*i)*r`.
   * Transition authstate to `AUTHSTATE_NONE`.
   * Transition msgstate to `MSGSTATE_ENCRYPTED`.
-  * Initialize the double ratcheting by:
+  * Initialize the double ratcheting:
     * Set `ratchet_flag` as `false`.
     * Set `our_dh` as our ephemeral key pair from the DAKE (`r`, `G1*r`).
     * Calculate the first set of keys `R0, Cs0_0, Cr0_0 = calculate_ratchet_keys(K)`
@@ -840,7 +840,7 @@ If authstate is `AUTHSTATE_AWAITING_DRE_AUTH`:
   * Compute the Diffie-Hellman shared secret `K = (G1*r)*i`.
   * Transition authstate to `AUTHSTATE_NONE`.
   * Transition msgstate to `MSGSTATE_ENCRYPTED`.
-  * Initialize the double ratcheting by:
+  * Initialize the double ratcheting:
     * Set `ratchet_flag` as `true`.
     * Set `our_dh` as our ephemeral public key from the DAKE (`i`, `G1*i`).
     * Set `their_dh` as the their ephemeral public key from the DAKE (`G1*r`).
