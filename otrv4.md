@@ -1037,6 +1037,7 @@ Example: Alice has `REQUIRE_ENCRYPTION`.
 
 Messages may be lost.
 
+
 ## Socialist Millionaires Protocol (SMP) version 2
 
 The Socialist Millionaires' Protocol allows two parties with secret information `x` and `y` respectively to check whether `x == y` without revealing any additional information about the secrets. The protocol used by OTR is based on the work of Boudot, Schoenmakers and Traore (2001). A full justification for its use in OTR is made by Alexander and Goldberg, in a paper published in 2007. The following is a technical account of what is transmitted during the course of the protocol.
@@ -1122,15 +1123,15 @@ User-specified secret (DATA)
 Then the HashToScalar() of the above becomes the actual secret (x or y) to be used in SMP. The additional fields insure that not only do both parties know the same secret input string, but no man-in-the-middle is capable of reading their communication either.
 
 
-### SMP messages
+### SMPv2 messages
 
-SMP messages are sent as TLVs in data messages. To allow mutual implementations of OTRv3 (with SMPv1) and OTRv4 (with SMPv2) the TLV type for SMPv2 messages start at 10 (decimal).
+SMPv2 messages are sent as TLVs in data messages. For backwards compatibility with SMP version 1, the TLV type for SMPv2 messages start at 10 (decimal).
 
-#### SMP Abort message
+#### SMPv2 Abort message
 
 A SMP abort message is a type 10 TLV with no data.
 
-#### SMP message 1
+#### SMPv2 message 1
 
 SMP message 1 is sent by Alice to begin a DH exchange to determine two new generators, `g2` and `g3`. A valid  SMP message 1 is generated as follows:
 
@@ -1143,7 +1144,7 @@ SMP message 1 is sent by Alice to begin a DH exchange to determine two new gener
 7. Store the values of `x`, `a2` and `a3` for use later in the protocol.
 
 
-The SMP message 1 is a TLV type 11 with the following data:
+The SMPv2 message 1 is a TLV type 11 with the following data:
 
 ```
 G2a (POINT)
@@ -1217,7 +1218,7 @@ G3b (POINT)
 c3 (MPI), d3 (MPI)
   A zero-knowledge proof that Bob knows the exponent associated with his transmitted value G3b.
 
-Pb, Qb
+Pb (POINT), Qb (POINT)
   These values are used in the final comparison to determine if Alice and Bob share the same secret.
 
 cP (MPI), d5 (MPI), d6 (MPI)
@@ -1265,10 +1266,10 @@ SMP message 4 is Bob's final message in the SMP exchange. It has the last of the
 The SMP message 4 is a TLV type 14 with the following data:
 
 ```
-Rb
+Rb (POINT)
   This value is used in the final comparison to determine if Alice and Bob share the same secret.
 
-cR, d7
+cR (MPI), d7 (MPI)
   A zero-knowledge proof that Rb was created according to the protocol given above.
 ```
 
