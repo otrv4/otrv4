@@ -13,10 +13,10 @@ at the beginning of the protocol and can be intercepted and changed by a MITM.
 With this attack, how can OTR ensure that participants will talk in the highest
 version? OTR4 seeks to solve this problem.
 
-Since we are updating OTR to upgrade the cryptographic primitives with higher security
-and to provide more deniability, at same time we want version 4 to be compatible with
-version 3. So how do we provide cryptographic agility and leave user in a sensible
-position? OTR4 also tries to address backwards compatibility.
+Since we are updating OTR to upgrade the cryptographic primitives with higher
+security and to provide more deniability, at same time OTRv4 also tries to
+address backwards compatibility. So how do we provide cryptographic agility
+without to put user in a sensible position?
 
 ### Decision
 
