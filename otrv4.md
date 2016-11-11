@@ -451,44 +451,51 @@ Verify MAC, Decrypt message 1_1
 For each correspondent, keep track of:
 
 ```
-ratchet_flag
+ratchet_flag whether we should ratchet before sending the next message
 i as Current ratchet id
 j as Previous sent message id
 k as Previous received message id
 
-R as Root key
-Cs_j as Sending Chain key
-Cr_k as Receiving Chain key
-our_dh, their_dh
+Ri as Root key
+Csi_j as Sending Chain key
+Cri_k as Receiving Chain key
+our_dh an ephemeral key pair
+their_dh an ephemeral public key
 ```
 
-#### Initialization of Double Ratchet
 
-After the DAKE is finished, both side will initialize the first group of root key (R0) and chain key
-(C0_0) deriving from SharedSecret.
+#### Calculating the root key, sender chain key and receiver chain key
 
-How to derive the first ratchet (R0):
 ```
-R0, Ca0_0, Cb0_0 = KDF(SharedSecret)
+calculate_ratchet_keys(secret):
+  R  = SHA3-256(0x0 || secret)
+  Ca = SHA3-256(0x01 || secret)
+  Cb = SHA3-256(0x02 || secret)
+
+  Cs, Cr = decide_between(Ca, Cb)
+
+  return R, Cs, Cr
 ```
-
-- For the Initiator:
-  - Set ratchet_flag as true
-  - Set their_dh as g^b from the DAKE
-  - She will perform a new ratchet once again when sending her first message
-- For the Receiver:
-  - Set ratchet_flag as false
-
-TODO: What is `g`?
 
 Both side will compare their public keys to choose a chain key for sending and receiving:
 
-- Initiator (and similarly for Receiver) determines if she is the "low" end or the "high" end of this Data Message.
-If Initiator's ephemeral D-H public key is numerically greater than Receiver's public key, then she is the "high" end.
+- Alice (and similarly for Bob) determines if she is the "low" end or the "high" end of this ratchet.
+If Alice's ephemeral D-H public key is numerically greater than Bob's public key, then she is the "high" end.
 Otherwise, she is the "low" end.
-- Initiator selects the chain keys for sending and receiving:
-  - If she is the "high" end, use Ca0_0 as the sending chain key, Cb0_0 as the receiving chain key.
-  - If she is the "low" end, use Cb0_0 as the sending chain key, Ca0_0 as the receiving chain key.
+- Alice selects the chain keys for sending and receiving:
+  - If she is the "high" end, use Ca as the sending chain key, Cb as the receiving chain key.
+  - If she is the "low" end, use Cb as the sending chain key, Ca as the receiving chain key.
+
+
+#### Initialization of Double Ratchet
+
+After the DAKE is finished, both side will initialize the first group of root key (R0) and chain keys
+(Cs0_0 and Cr0_0) deriving from SharedSecret.
+
+```
+R0, Cs0_0, Cr0_0 = calculate_ratchet_keys(K)
+```
+
 
 #### When you send a Data Message:
 
@@ -810,11 +817,13 @@ This indicates that you have already sent a Pre-key message to your corresponden
 Regardless of authstate value, you should:
 
   * Reply with a DRE Auth Message
+  * Compute the Diffie-Hellman shared secret `K = (G1*i)*r`.
   * Transition authstate to `AUTHSTATE_NONE`.
   * Transition msgstate to `MSGSTATE_ENCRYPTED`.
   * Initialize the double ratcheting by:
     * Set `ratchet_flag` as `false`.
-    * Set `our_dh` as our ephemeral public key from the DAKE (`G1*r`).
+    * Set `our_dh` as our ephemeral key pair from the DAKE (`r`, `G1*r`).
+    * Calculate the first set of keys `R0, Cs0_0, Cr0_0 = calculate_ratchet_keys(K)`
   * If there is a recent stored message, encrypt it and send it as a Data Message. (TODO: does it apply?)
 
 
@@ -825,11 +834,14 @@ If the message is version 4 and `ALLOW_V4` is not set, ignore this message. Othe
 If authstate is `AUTHSTATE_AWAITING_DRE_AUTH`:
 
   * (Explain how to process and verify this message briefly). If everything checks out:
+  * Compute the Diffie-Hellman shared secret `K = (G1*r)*i`.
   * Transition authstate to `AUTHSTATE_NONE`.
   * Transition msgstate to `MSGSTATE_ENCRYPTED`.
   * Initialize the double ratcheting by:
     * Set `ratchet_flag` as `true`.
+    * Set `our_dh` as our ephemeral public key from the DAKE (`i`, `G1*i`).
     * Set `their_dh` as the their ephemeral public key from the DAKE (`G1*r`).
+    * Calculate the first set of keys `R0, Cs0_0, Cr0_0 = calculate_ratchet_keys(K)`
   * If there is a recent stored message, encrypt it and send it as a Data Message.
 
 Otherwise, ignore the message.
