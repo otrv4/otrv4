@@ -284,10 +284,15 @@ Alice long-term Cramer-Shoup key-pair is `SKa = (x1a, x2a, y1a, y2a, za)` and `P
 Bob long-term Cramer-Shoup key-pair is `SKb = (x1b, x2b, y1b, y2b, zb)` and `PKb = (Cb, Db, Hb)`.  
 Both key pairs are generated with `DRGen()`.  
 
+x_*: 3072-bit DH secret key
+X_*: 3072-bit DH public key
+X_*^x_*: mix-key, a 3072-bit shared secret computed from a DH exchange
+
+
 #### Overview
 
 ```
-Alice                                          Bob
+Alice (I)                                Bob (R)
 ---------------------------------------------------
 Query Message or Whitespace Tag ------->
                                 <------- Prekey (ψ1)
@@ -297,27 +302,30 @@ Query Message or Whitespace Tag ------->
 
 **Alice:**
 
-1. Generates an ephemeral private key `i` and a public key `G1*i`.
-2. Sends Bob `ψ1 = ("I", G1*i)`.
+1. Generates an ephemeral ECDH private key `i` and a public key `G1*i`.
+2. Generates an ephemeral DH private key `x_i` and a public key `X_i`.
+3. Sends Bob `ψ1 = ("I", G1*i, X_i)`.
 
 
 **Bob:**
 
 1. Generates an ephemeral private key `r` and public key `G1*r`.
-2. Computes `γ = DREnc(PKb, PKa, m)`, being `m = "I" || "R" || G1*i || G1*r`.
-3. Computes `σ = Auth(Hb, zb, {Ha, G1*i}, "I" || "R" || G1*i || γ)`.
-4. Computes `k = (G1*i) * r` and securely erase `r`.
-5. Sends Alice `ψ2 = ("R", γ, σ)`.
+2. Generates an ephemeral DH private key `x_r` and a public key `X_r`.
+3. Computes `γ = DREnc(PKb, PKa, m)`, being `m = "I" || "R" || G1*i || G1*r || X_i || X_r`.
+4. Computes `σ = Auth(Hb, zb, {Ha, G1*i}, "I" || "R" || G1*i || X_i || γ)`.
+5. Computes `k = SHA3((G1*i) * r || X_i^x_r)` and securely erases `r` and `x_r`.
+6. Sends Alice `ψ2 = ("R", γ, σ)`.
 
 **Alice:**
 
-1. Verifies `Verif({Ha, Hb, G1*i}, σ, “I” || “R” || G1*i || γ)`.
+1. Verifies `Verif({Ha, Hb, G1*i}, σ, “I” || “R” || G1*i || X_i || γ)`.
 2. Decrypts `m = DRDec(PKa, PKb, SKa, γ)`.
 3. Verifies the following properties of the decrypted message `m`:
   1. The message is of the correct form (e.g., the fields are of the expected length)
   2. Alice's identifier is the first one listed
   3. Bob's identifier is the second one listed, and it matches the identifier transmitted outside of the ciphertext
-4. Computes `K = G1*r*i` and securely erase `i`.
+  4. (G1*i, X_i) is a prekey that Alice previously sent and remains unused
+4. Computes `k = SHA3((G1*r) * i || X_r^x_i)` and securely erases `i` and `x_i`.
 
 
 **TODO: the following is about version advertisement and may need to be moved.**
