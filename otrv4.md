@@ -418,16 +418,24 @@ case the protocol falls back to [OTR version 3 specification][2].
 
 Note: OTR version 4 is the latest version to support previous versions.
 
+
 ## Key management
 
-TODO: the point of the "key management" section in OTRv3 is to put this concern as a vertical (how to do key management in the AKE and Data message context). Here, we use this section to describe the double ratchet. I vote for removing this "Key management" if we only want to talk about the double ratchet.
+In the DAKE, OTRv4 makes use of long-term Cramer-Shoup keys and ephemeral D-H keys.
 
-TODO: I dont like this section, but if we were to add it, this is how it would look like:
+For exchanging conversation messages, OTRv4 uses a key structure, and key-rotation strategy, inspired on the "Double Ratchet" spec. The goal is to provide forward secrecy even in the advent of not receiving messages from the other participant for a considerable amount of time.
 
-For each correspondent, keep track of:
+The messages are encrypted and authenticated using a set of receiving (and sending) MAC and encryption keys, derived from sending (and receiving) chain keys.
+
+OTRv4 keys are rotated in two levels:
+
+1. Root level: every time a new D-H key is advertised/acknowledged a new root key is derived, as long as new initial sending and receiving chain keys.
+2. Chain level: every time a new message needs to be sent before an acknowledgement is received, the sending chain key is rotated, being derived from the previous sending chain key.
+
+In order to manage keys, each correspondent keeps track of:
 
 ```
-ratchet_flag whether we should ratchet before sending the next message
+ratchet_flag whether we should rotate the root key before sending the next message
 i as Current ratchet id
 j as Previous sent message id
 k as Previous received message id
@@ -439,9 +447,11 @@ our_dh an ephemeral key pair
 their_dh an ephemeral public key
 ```
 
+The previously mentioned keys are affected by these events:
+
 #### When you start a new DAKE
 
-**TODO**
+* Generates a new ephemeral D-H key-pair: Alice generates `(i, G1*i)` and Bob generates `(r, G1*r)`.
 
 
 #### Upon completing the DAKE
@@ -464,26 +474,28 @@ In any event, calculate the first set of keys `R0, Cs0_0, Cr0_0 = calculate_ratc
 If `ratchet_flag` is `true`:
   * Securely forget our_dh, increment i, reset j, and set our_dh to a new DH key pair which you generate. The new DH key pair should be generated with **TODO**.
   * Derive new set of keys R, Cs_ij Cr_ij from private part of our_dh and public part of their_dh:
-    `Ri, Csi_j, Csi_j = calculate_ratchet_keys(Ri-1 || ECDH(our_dh, their_dh))`
+    `Ri, Cs_i_j, Cs_i_j = calculate_ratchet_keys(Ri-1 || ECDH(our_dh, their_dh))`
   * Set ratchet_flag to false.
 
 Otherwise:
-  * Derive the next sending Chain Key `Cs_j+1 = SHA3-256(Cs_j)`.
+  * Derive the next sending Chain Key `Cs_i_j+1 = SHA3-256(Cs_i_j)`.
   * Increment `j`.
 
 In any event, calculate:
-  * `MKenc = SHA3-256(0x00 || Cs_j)`
-  * `MKmac = SHA3-256(0x01 || Cs_j)`
+  * `MKenc = SHA3-256(0x00 || Cs_i_j)`
+  * `MKmac = SHA3-256(0x01 || Cs_i_j)`
 
 Use the "encryption key" (`MKenc`) to encrypt the message, and the "mac key" (`MKmac`) to calculate its MAC.
 
 
 #### When you receive a Data Message:
 
-Use the `message_id` to compute the Receiving Chain key and calculate `MKenc` and `Mkmac`:
+Use the `message_id` from the message to compute the Receiving Chain key (since `k`) and calculate `MKenc` and `Mkmac`:
 
 ```
-Cr_message_id = SHA3-256(Cr_message_id-1)
+for recId = k+1; recId <= message_id; recId++:
+  Cr_i_recId = SHA3-256(Cr_i_recId-1)
+
 MKenc = SHA3-256(0x00 || Cr_message_id)
 MKmac = SHA3-256(0x01 || Cr_message_id)
 ```
@@ -498,7 +510,7 @@ Finally:
   * Set `their_dh` as pubDHRs from the message.
 
 
-#### Calculating the root key, sender chain key and receiver chain key
+#### Calculating the root key, sending chain key and receiving chain key
 
 ```
 calculate_ratchet_keys(secret):
