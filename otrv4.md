@@ -422,6 +422,9 @@ their_dh an ephemeral public key
 
 #### When you start a new DAKE
 
+**TODO**
+
+
 #### Upon completing the DAKE
 
 The AKE is considered to be completed when either:
@@ -436,15 +439,38 @@ The AKE is considered to be completed when either:
 
 In any event, calculate the first set of keys `R0, Cs0_0, Cr0_0 = calculate_ratchet_keys(K)`.
 
+
 #### When you send a Data Message:
 
-If ratchet_flag is true:
+If `ratchet_flag` is `true`:
   * Securely forget our_dh, increment i, reset j, and set our_dh to a new DH key pair which you generate. The new DH key pair should be generated with **TODO**.
-  * Derive new set of keys R, Cs_0, Cr_0 from private part of our_dh and public part of their_dh:
-    `Ri, Cai_j, Cbi_j = calculate_ratchet_keys(Ri-1 || ECDH(our_dh, their_dh))`
+  * Derive new set of keys R, Cs_ij Cr_ij from private part of our_dh and public part of their_dh:
+    `Ri, Csi_j, Csi_j = calculate_ratchet_keys(Ri-1 || ECDH(our_dh, their_dh))`
   * Set ratchet_flag to false.
 
+Otherwise:
+  * Increment `j`.
+  * Derive the next sending Chain Key `Cs_j = SHA3-256(Cs_j)`.
+
+In any event, calculate:
+  * `MKenc = SHA3-256(0x00 || Cs_j)`
+  * `MKmac = SHA3-256(0x01 || Cs_j)`
+
+Use the "encryption key" (`MKenc`) to encrypt the message, and the "mac key" (`MKmac`) to calculate its MAC.
+
+
 #### When you receive a Data Message:
+
+Use the `message_id` to compute the Receiving Chain key and calculate `MKenc` and `Mkmac`:
+
+```
+Cr_message_id = SHA3-256(Cr_message_id-1)
+MKenc = SHA3-256(0x00 || Cr_message_id)
+MKmac = SHA3-256(0x01 || Cr_message_id)
+```
+
+Use the "mac key" (`MKmac`) to verify the MAC on the message. If it does not verify, reject the message.
+If the MAC verifies, decrypt the message using the "encryption key" (`MKenc`).
 
 
 #### Calculating the root key, sender chain key and receiver chain key
