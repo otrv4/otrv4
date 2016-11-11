@@ -355,36 +355,6 @@ Query Message or Whitespace Tag ------->
   4. `(G1*i, X_i)` is a prekey that Alice previously sent and remains unused
 4. Computes `k = SHA3((G1*r) * i || X_r^x_i)` and securely erases `i` and `x_i`.
 
-
-**TODO: the following is about version advertisement and may need to be moved.**
-
-The Query Message or Whitespace Tag will include the versions supported by
-Alice.
-
-```
-ψ1 = { "B", pubB, g^b, Bobs_versions }
-```
-
-"B" is Bob's account identifier. Bobs_versions are the versions supported
-by Bob.
-
-```
-ψ2 = { "A", pubA, γ, σ } where
-γ = DRE(pubB, pubA, "B" || g^b || "A" || g^a)
-σ = Auth(hA, zA, {hB, hA, g^b}, "B" || "A" || g^b || Alices_versions || Bobs_versions || γ )
-```
-
-"A" is Alice's account identifier.
-
-After receiving ψ2, Alice authenticates σ and decrypts γ. She then verifies the
-versions that were sent by both parties. If Bob did not receive the Query
-Message or Whitespace Tag sent by Alice or if Bob is using a version of OTR that
-is not the highest preferable version, this check will fail. If all checks pass,
-then Alice and Bob have a shared secret with which to initialize their data
-messages exchange session.
-
-**END OF TODO**
-
 #### Pre-key message
 
 This is the first message of the DAKE. Bob sends it to Alice to commit to a choice of D-H key. A valid Pre-key message is generated as follows:
