@@ -492,18 +492,18 @@ In any event, calculate the first set of keys `R0, Cs0_0, Cr0_0 = calculate_ratc
 
 #### When you send a Data Message:
 
-If `ratchet_flag` is `true`:
-  * Securely forget our_dh, increment i, reset j, and set our_dh to a new DH key pair which you generate. The new DH key pair should be generated with **TODO**.
-  * Derive new set of keys R, Cs_ij Cr_ij from private part of our_dh and public part of their_dh:
+If `ratchet_flag` is `true`:  
+  * Securely forget `our_dh`, increment `i`, reset `j`, and set `our_dh` to a new DH key pair which you generate. The new DH key pair should be generated with: **TODO**.
+  * Derive new set of keys `R`, `Cs_ij` `Cr_ij` from private part of `our_dh` and public part of `their_dh`:  
     `Ri, Cs_i_j, Cs_i_j = calculate_ratchet_keys(Ri-1 || ECDH(our_dh, their_dh))`
-  * Set ratchet_flag to false.
+  * Set `ratchet_flag` to false.
 
-Otherwise:
-  * Derive the next sending Chain Key `Cs_i_j+1 = SHA3-256(Cs_i_j)`.
+Otherwise:  
+  * Derive the next sending Chain Key `Cs_i_j+1 = SHA3-256(Cs_i_j)`.  
   * Increment `j`.
 
-In any event, calculate:
-  * `MKenc = SHA3-256(0x00 || Cs_i_j)`
+In any event, calculate:  
+  * `MKenc = SHA3-256(0x00 || Cs_i_j)`  
   * `MKmac = SHA3-256(0x01 || Cs_i_j)`
 
 Use the "encryption key" (`MKenc`) to encrypt the message, and the "mac key" (`MKmac`) to calculate its MAC.
@@ -526,8 +526,8 @@ You may need to use receiving chain keys older than `message_id-1` to calculate 
 Use the "mac key" (`MKmac`) to verify the MAC on the message. If it does not verify, reject the message.
 If the MAC verifies, decrypt the message using the "encryption key" (`MKenc`).
 
-Finally:
-  * Set `ratchet_flag` to `true`
+Finally:  
+  * Set `ratchet_flag` to `true`.  
   * Set `their_dh` as pubDHRs from the message.
 
 
@@ -623,9 +623,9 @@ their_dh an ephemeral public key
 #### When you send a Data Message:
 
 1. If ratchet_flag is true, first ratchet:
-    1. Derive new pair of R, Cs_0, Cr_0 from private part of our_dh and public part of their_dh.
-    2. Securely forget our_dh, increment i, and set our_dh to a new DH key pair which you generate.
-    3. Set ratchet_flag to false.
+    1. Derive new pair of `R`, `Cs_0`, `Cr_0` from private part of `our_dh` and public part of `their_dh`.
+    2. Securely forget `our_dh`, increment `i`, and set `our_dh` to a new DH key pair which you generate.
+    3. Set `ratchet_flag` to false.
 
     ```
     our_dh = {pubDHa, privDHa} = generateECDH()
@@ -636,19 +636,19 @@ their_dh an ephemeral public key
     ratchet_flag = false
     ```
 
-2. Set the ratchet_id to i.
-3. Set the DH pubkey in the Data message to the public part of our_dh.
-4. Increment j, and use Cs_j to derive the Enc and MAC key.
+2. Set the `ratchet_id` to `i`.
+3. Set the DH pubkey in the Data message to the public part of `our_dh`.
+4. Increment `j`, and use `Cs_j` to derive the Enc and MAC key.
 
     ```
     MKenc = SHA3-256(0x00 || Cs_j)
     MKmac = SHA3-256(0x01 || Cs_j)
     ```
 
-5. Use the Enc key to encrypt the message with Xsalsa, and the MAC key to calculate its mactag with SHA3-256.
+5. Use the Enc key to encrypt the message with Xsalsa20, and the MAC key to calculate its mactag with SHA3-256. TO DO: we are missing the nonce of XSalsa20
 
     ```
-    ciphertext = Xsalsa_Enc(MKenc, m)
+    ciphertext = Xsalsa20_Enc(MKenc, m)
     mactag = SHA3-256(MKmac || ciphertext)
     msg = ciphertext || mactag
     ```
@@ -661,15 +661,15 @@ their_dh an ephemeral public key
 
 #### When you receive a Data Message:
 
-1. If the ratchet_id is not larger than i, reject the message.
-2. If the message_id is not larger than k, reject the message.
-3. Use the message_id to compute the Receiving Chain key Cr_message_id.
+1. If the ratchet_id is not larger than `i`, reject the message.
+2. If the message_id is not larger than `k`, reject the message.
+3. Use the `message_id` to compute the Receiving Chain key `Cr_message_id`.
 
     ```
     Cr_message_id = SHA3-256(Cr_message_id-1)
     ```
 
-4. Use the Cr_message_id to derive the Enc and MAC key.
+4. Use the `Cr_message_id` to derive the Enc and MAC key.
 
     ```
     MKenc = SHA3-256(0x00 || Cs_j)
@@ -683,13 +683,13 @@ their_dh an ephemeral public key
     verify(mactag == SHA3-256(MKmac || ciphertext))
     ```
 
-6. Decrypt the message using the Enc key with Xsalsa.
+6. Decrypt the message using the Enc key with Xsalsa20.
 
     ```
-    m = Xsalsa_Dec(MKenc, ciphertext)
+    m = Xsalsa20_Dec(MKenc, ciphertext)
     ```
 
-7. Set k to message_id, Set ratchet_flag to true, Set their_dh as pubDHRs of the message.
+7. Set k to `message_id`, set `ratchet_flag` to true, set `their_dh` as `pubDHRs` of the message.
 
     ```
     k = message_id
@@ -751,9 +751,10 @@ pubDHRs (MPI)
 Encrypted message (DATA)
 
     Using the appropriate encryption key (see below) derived from the sender's and recipient's DH public keys
-    (with the keyids given in this message), perform Xsalsa encryption of the message.
+    (with the keyids given in this message), perform Xsalsa20 encryption of the message.
     The initial counter is a 16-byte value whose first 8 bytes are the above "top half of counter init" value,
     and whose last 8 bytes are all 0x00.
+    TODO: update this
     Note that counter mode does not change the length of the message, so no message padding needs to be done.
     If you *want* to do message padding (to disguise the length of your message), use the above TLV of type 0.
 
@@ -799,7 +800,7 @@ MSGSTATE_FINISHED
 
 ### Authentication state
 
-The authentication state variable, authstate, can take one of four values:
+The authentication state variable, `authstate`, can take one of four values:
 
 ```
 AUTHSTATE_NONE
@@ -844,19 +845,19 @@ Note that it is possible for UIs simply to offer the old "combinations" of optio
 
 There are ten actions an OTRv4 client must handle:
 
-User actions:
-  * User requests to start an OTR conversation
-  * User requests to end an OTR conversation
-  * User types a message to be sent
+User actions:  
+  * User requests to start an OTR conversation  
+  * User requests to end an OTR conversation  
+  * User types a message to be sent  
 
-Received messages:
-  * Plaintext without the whitespace tag
-  * Plaintext with the whitespace tag
-  * Query Message
-  * Error Message
-  * Pre-key message
-  * DRE Auth message
-  * Data Message
+Received messages:  
+  * Plaintext without the whitespace tag  
+  * Plaintext with the whitespace tag  
+  * Query Message  
+  * Error Message  
+  * Pre-key message  
+  * DRE Auth message  
+  * Data Message  
 
 
 The following sections will outline what actions to take in each case. They all assume that at least one of `ALLOW_V3` or `ALLOW_V4` is set; if not, then OTR is completely disabled, and no special handling of messages should be done at all. Version 1 and 2 messages are out of the scope of this specification.
@@ -1060,6 +1061,34 @@ Example: Alice has `REQUIRE_ENCRYPTION`.
 Messages may be lost.
 
 
+## Computing Double Ratchet keys and secure session id
+
+TODO: this is repeated from above but only to explain the secure session id.. where to put it?
+
+OTR uses Diffie-Hellman to calculate shared secrets in the usual way: if Bob knows `x`, and tells Alice `g*x`, and Alice knows `y`, and tells Bob `g*y`, then they each can calculate `s = (g*x)*y`: Alice calculates `(g*x)*y`, and Bob calculates `(g*y)*x`.
+
+During the AKE, Alice and Bob each calculate `s` in this way, and then they each compute values based on `s`:
+
+```
+A 64-bit secure session id, ssid
+TO DO: this is the calculate_ratchet_keys(K). 
+A 256-bit SHA3-256 root key R
+Two 256-bit SHA3-256 keys Ca and Cb
+```
+This is done by:
+
+TO DO: change the name of the function and shared secret in accordance to above. 
+
+* Write the value of `s` as a minimum-length MPI, as specified above (4-byte big-endian len, len-byte big-endian value). Let this (4+len)-byte value be "secbytes".
+* For a given byte `b`, define `h1(s)` to be the 256-bit output of the SHA3-256 hash of the (5+len) bytes consisting of the byte b followed by secbytes.
+  * Let ssid be the first 64 bits of h1(0x00).
+  * Let R be the first 256 bits of h1(0x01). 
+* Let Ca be h1(0x02).
+* Let Cb be h1(0x03).
+
+If the user requests to see the secure session id, it should be displayed as two 32-bit bigendian unsigned values, in C "%08x" format. If the user transmitted the Reveal Signature message during the AKE that produced this ssid, then display the first 32 bits in bold, and the second 32 bits in non-bold. If the user transmitted the Signature message instead, display the first 32 bits in non-bold, and the second 32 bits in bold. This session id can be used by the parties to verify (say, over the telephone, assuming the parties recognize each others' voices) that there is no man-in-the-middle by having each side read his bold part to the other. Note that this only needs to be done in the event that the users do not trust that their long-term signature keys have not been compromised.
+
+
 ## Socialist Millionaires Protocol (SMP) version 2
 
 The Socialist Millionaires' Protocol allows two parties with secret information `x` and `y` respectively to check whether `x == y` without revealing any additional information about the secrets. The protocol used by OTR is based on the work of Boudot, Schoenmakers and Traore (2001). A full justification for its use in OTR is made by Alexander and Goldberg, in a paper published in 2007. The following is a technical account of what is transmitted during the course of the protocol.
@@ -1136,7 +1165,7 @@ Responder fingerprint (20 BYTEs)
   The fingerprint that the party that did not initiate SMP is using in the current conversation.
 
 Secure Session ID
-  The ssid described below.
+  The ssid described above.
 
 User-specified secret (DATA)
   The input string given by the user at runtime.
