@@ -509,8 +509,8 @@ k as Previous received message id
 Ri as Root key
 Csi_j as Sending Chain key
 Cri_k as Receiving Chain key
-our_dh an ephemeral key pair
-their_dh an ephemeral public key
+our_ecdh an ephemeral key pair
+their_ecdh an ephemeral public key
 ```
 
 The previously mentioned keys are affected by these events:
@@ -526,11 +526,11 @@ The AKE is considered to be completed when either:
 
 1. Bob sends the DRE Auth message. In this case:
   * Set `ratchet_flag` as `false`.
-  * Set `our_dh` as our ephemeral key pair from the DAKE (`r`, `G1*r`).
+  * Set `our_ecdh` as our ephemeral key pair from the DAKE (`r`, `G1*r`).
 2. Alice receives and verifies the DRE Auth message. In this case:
   * Set `ratchet_flag` as `true`.
-  * Set `our_dh` as our ephemeral public key from the DAKE (`i`, `G1*i`).
-  * Set `their_dh` as the their ephemeral public key from the DAKE (`G1*r`).
+  * Set `our_ecdh` as our ephemeral public key from the DAKE (`i`, `G1*i`).
+  * Set `their_ecdh` as the their ephemeral public key from the DAKE (`G1*r`).
 
 In any event, calculate the first set of keys `R0, Cs0_0, Cr0_0 = calculate_ratchet_keys(K)`.
 
@@ -538,9 +538,9 @@ In any event, calculate the first set of keys `R0, Cs0_0, Cr0_0 = calculate_ratc
 #### When you send a Data Message:
 
 If `ratchet_flag` is `true`:  
-  * Securely forget `our_dh`, increment `i`, reset `j`, and set `our_dh` to a new DH key pair which you generate. The new DH key pair should be generated with: **TODO**.
-  * Derive new set of keys `R`, `Cs_ij` `Cr_ij` from secret part of `our_dh` and public part of `their_dh`:
-    `Ri, Cs_i_j, Cs_i_j = calculate_ratchet_keys(Ri-1 || ECDH(our_dh, their_dh))`
+  * Securely forget `our_ecdh`, increment `i`, reset `j`, and set `our_ecdh` to a new DH key pair which you generate. The new DH key pair should be generated with: **TODO**.
+  * Derive new set of keys `R`, `Cs_ij` `Cr_ij` from secret part of `our_ecdh` and public part of `their_ecdh`:
+    `Ri, Cs_i_j, Cs_i_j = calculate_ratchet_keys(Ri-1 || ECDH(our_ecdh, their_ecdh))`
   * Set `ratchet_flag` to false.
 
 Otherwise:  
@@ -573,7 +573,7 @@ If the MAC verifies, decrypt the message using the "encryption key" (`MKenc`).
 
 Finally:  
   * Set `ratchet_flag` to `true`.  
-  * Set `their_dh` as pubDHRs from the message.
+  * Set `their_ecdh` as pubDHRs from the message.
 
 
 #### Calculating the root key, sending chain key and receiving chain key
@@ -661,28 +661,28 @@ k as Previous received message id
 Ri as Root key
 Csi_j as Sending Chain key
 Cri_k as Receiving Chain key
-our_dh an ephemeral key pair
-their_dh an ephemeral public key
+our_ecdh an ephemeral key pair
+their_ecdh an ephemeral public key
 ```
 
 #### When you send a Data Message:
 
 1. If ratchet_flag is true, first ratchet:
-    1. Derive new pair of `R`, `Cs_0`, `Cr_0` from secret part of `our_dh` and public part of `their_dh`.
-    2. Securely forget `our_dh`, increment `i`, and set `our_dh` to a new DH key pair which you generate.
+    1. Derive new pair of `R`, `Cs_0`, `Cr_0` from secret part of `our_ecdh` and public part of `their_ecdh`.
+    2. Securely forget `our_ecdh`, increment `i`, and set `our_ecdh` to a new DH key pair which you generate.
     3. Set `ratchet_flag` to false.
 
     ```
-    our_dh = {pubDHa, privDHa} = generateECDH()
+    our_ecdh = {pubDHa, privDHa} = generateECDH()
 
-    R1, Ca1_0, Cb1_0 = calculate_ratchet_keys(R0 || ECDH(our_dh, their_dh))
+    R1, Ca1_0, Cb1_0 = calculate_ratchet_keys(R0 || ECDH(our_ecdh, their_ecdh))
 
     i = i+1
     ratchet_flag = false
     ```
 
 2. Set the `ratchet_id` to `i`.
-3. Set the DH pubkey in the Data message to the public part of `our_dh`.
+3. Set the DH pubkey in the Data message to the public part of `our_ecdh`.
 4. Increment `j`, and use `Cs_j` to derive the Enc and MAC key.
 
     ```
@@ -734,7 +734,7 @@ their_dh an ephemeral public key
     m = Xsalsa20_Dec(MKenc, ciphertext)
     ```
 
-7. Set k to `message_id`, set `ratchet_flag` to true, set `their_dh` as `pubDHRs` of the message.
+7. Set k to `message_id`, set `ratchet_flag` to true, set `their_ecdh` as `pubDHRs` of the message.
 
     ```
     k = message_id
@@ -991,7 +991,7 @@ Regardless of authstate value, you should:
   * Transition msgstate to `MSGSTATE_ENCRYPTED`.
   * Initialize the double ratcheting:
     * Set `ratchet_flag` as `false`.
-    * Set `our_dh` as our ephemeral key pair from the DAKE (`r`, `G1*r`).
+    * Set `our_ecdh` as our ephemeral key pair from the DAKE (`r`, `G1*r`).
     * Calculate the first set of keys `R0, Cs0_0, Cr0_0 = calculate_ratchet_keys(K)`
   * If there is a recent stored message, encrypt it and send it as a Data Message. (TODO: does it apply?)
 
@@ -1009,8 +1009,8 @@ If authstate is `AUTHSTATE_AWAITING_DRE_AUTH`:
   * Transition msgstate to `MSGSTATE_ENCRYPTED`.
   * Initialize the double ratcheting:
     * Set `ratchet_flag` as `true`.
-    * Set `our_dh` as our ephemeral public key from the DAKE (`i`, `G1*i`).
-    * Set `their_dh` as the their ephemeral public key from the DAKE (`G1*r`).
+    * Set `our_ecdh` as our ephemeral public key from the DAKE (`i`, `G1*i`).
+    * Set `their_ecdh` as the their ephemeral public key from the DAKE (`G1*r`).
     * Calculate the first set of keys `R0, Cs0_0, Cr0_0 = calculate_ratchet_keys(K)`
   * If there is a recent stored message, encrypt it and send it as a Data Message.
 
