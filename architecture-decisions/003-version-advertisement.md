@@ -3,8 +3,23 @@
 **Status**: proposed
 
 ### Context
-Current in OTR3, Alice only can tell Bob about the versions she supports by
-query message.
+### Decision
+### Consequences
+
+Currently, OTRv3 support its previous versions, user should configure their
+policy to tell the protocol if they wanna to support previous versions or not.
+When a user wanna to have a conversation with someone, its should send a query
+message telling which versions its support. This message is send as plaintext
+and can be intercepted and changed without the user been notified.
+
+As we are updating OTR to provide cryptographic primitives with a higher security
+level and to provide more deniability, at same time we don't wanna to foce all
+users to upgrade now so if two parties are stabilishing a conversation and both
+of them support versions 3 and 4, how OTR can ensure that they are going to
+talk in the highest version? How to provide cryptographic agility without leave
+user in a sensible position?
+
+
 The problem with query message is that Eve can intercept it and change the
 version value without Alice and Bob realizing it. The only way Alice could
 control which version is going to be used in this conversation is to have a
@@ -17,7 +32,6 @@ and an expiration date, both of which are signed with the participant's long
 term private key.
 
 
-### Decision
 Alice wants to tell Bob which version she uses but without compromising her
 repudiation participation in this conversation. She should have her supported
 versions signed and published on a pre-key server, so when she invites Bob
@@ -44,7 +58,6 @@ both.
 To request version advertisement is not mandatory for all conversations but is
 the only way to have idea about what the other peer support.
 
-### Consequences
 
 As Alice can use OTR4 in more than one device, probably she is going to have
 different version advertisement signed by different long term keys.
