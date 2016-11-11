@@ -114,7 +114,7 @@ The concatenation of byte sequences x and P is x || P. In this case, x and P rep
 
 ### Elliptic Curve Parameters
 
-OTRv4 uses the Curve448 elliptic curve specified in (TODO: add reference), which defines the following parameters:
+OTRv4 uses the Curve448 elliptic curve[3][4], which defines the following parameters:
 
 ```
 Base point (B)
@@ -450,7 +450,7 @@ LEN(σ) = 6 * LEN(MPI) = 360 bytes
 
 Bob might respond to Alice's request or notify of willingness to start a
 conversation with a version lower then version 4. If this is the
-case the protocol falls back to [OTR version 3 specification][2].
+case the protocol falls back to OTR version 3[2].
 
 Note: OTR version 4 is the latest version to support previous versions.
 
@@ -1584,5 +1584,7 @@ d is an array of bytes.
 
 ## References
 
-1. http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf  
-2. https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html
+1. N. Unger, I. Goldberg. "Improved Techniques for Implementing Strongly Deniable Authenticated Key Exchanges." http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf
+2. "Off-the-Record Messaging Protocol version 3" https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html
+3. M. Hamburg. "Ed448-Goldilocks, a new elliptic curve." http://csrc.nist.gov/groups/ST/ecc-workshop-2015/papers/session7-hamburg-michael.pdf
+4. A. Langley, M. Hamburg, and S. Turner, “Elliptic Curves for Security.” Internet Engineering Task Force; RFC 7748 (Informational); IETF, Jan-2016. http://www.ietf.org/rfc/rfc7748.txt
