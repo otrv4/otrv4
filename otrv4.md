@@ -816,6 +816,8 @@ This indicates that you have already sent a Pre-key message to your corresponden
 
 Regardless of authstate value, you should:
 
+(TODO: Explain how to process and verify this message briefly). If everything checks out:
+
   * Reply with a DRE Auth Message
   * Compute the Diffie-Hellman shared secret `K = (G1*i)*r`.
   * Transition authstate to `AUTHSTATE_NONE`.
@@ -833,7 +835,8 @@ If the message is version 4 and `ALLOW_V4` is not set, ignore this message. Othe
 
 If authstate is `AUTHSTATE_AWAITING_DRE_AUTH`:
 
-  * (Explain how to process and verify this message briefly). If everything checks out:
+(TODO: Explain how to process and verify this message briefly). If everything checks out:
+
   * Compute the Diffie-Hellman shared secret `K = (G1*r)*i`.
   * Transition authstate to `AUTHSTATE_NONE`.
   * Transition msgstate to `MSGSTATE_ENCRYPTED`.
