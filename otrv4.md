@@ -284,8 +284,8 @@ Alice long-term Cramer-Shoup key-pair is `SKa = (x1a, x2a, y1a, y2a, za)` and `P
 Bob long-term Cramer-Shoup key-pair is `SKb = (x1b, x2b, y1b, y2b, zb)` and `PKb = (Cb, Db, Hb)`.  
 Both key pairs are generated with `DRGen()`.  
 
-x_*: 3072-bit DH secret key
-X_*: 3072-bit DH public key
+x_*: 3072-bit DH secret key  
+X_*: 3072-bit DH public key  
 X_*^x_*: mix-key, a 3072-bit shared secret computed from a DH exchange
 
 
@@ -324,7 +324,7 @@ Query Message or Whitespace Tag ------->
   1. The message is of the correct form (e.g., the fields are of the expected length)
   2. Alice's identifier is the first one listed
   3. Bob's identifier is the second one listed, and it matches the identifier transmitted outside of the ciphertext
-  4. (G1*i, X_i) is a prekey that Alice previously sent and remains unused
+  4. `(G1*i, X_i)` is a prekey that Alice previously sent and remains unused
 4. Computes `k = SHA3((G1*r) * i || X_r^x_i)` and securely erases `i` and `x_i`.
 
 
