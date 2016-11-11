@@ -449,8 +449,8 @@ If `ratchet_flag` is `true`:
   * Set ratchet_flag to false.
 
 Otherwise:
+  * Derive the next sending Chain Key `Cs_j+1 = SHA3-256(Cs_j)`.
   * Increment `j`.
-  * Derive the next sending Chain Key `Cs_j = SHA3-256(Cs_j)`.
 
 In any event, calculate:
   * `MKenc = SHA3-256(0x00 || Cs_j)`
