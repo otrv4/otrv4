@@ -3,8 +3,6 @@
 **Status**: proposed
 
 ### Context
-### Decision
-### Consequences
 
 Currently, OTRv3 support its previous versions, user should configure their
 policy to tell the protocol if they wanna to support previous versions or not.
@@ -19,62 +17,47 @@ of them support versions 3 and 4, how OTR can ensure that they are going to
 talk in the highest version? How to provide cryptographic agility without leave
 user in a sensible position?
 
+### Decision
 
-The problem with query message is that Eve can intercept it and change the
-version value without Alice and Bob realizing it. The only way Alice could
-control which version is going to be used in this conversation is to have a
-restrict policy, disallowing any other previous version.
+We will keep  the use of query message for OTRv3 compability and also to work as
+kind of ping message.
 
-To prevent version rollback on OTR4, Alice and Bob will create a public,
-verified advertisement of the versions they support and publish them on a
-publicly available server. This advertisement includes the supported versions
-and an expiration date, both of which are signed with the participant's long
-term private key.
+We will use this version advertisement in two ways, one is publishing it in a
+public server so when a person wanna to chat with someone using OTR, they can
+check peer's compability and version support. Also, we should have this
+information public to provide initiator's participation deniability.
 
+We will prioritise high versions, so in the case when user receives 2 different
+version advertisement from server, the conversation should initalize in the
+higer version supported by both.
 
-Alice wants to tell Bob which version she uses but without compromising her
-repudiation participation in this conversation. She should have her supported
-versions signed and published on a pre-key server, so when she invites Bob
-to a conversation, Bob will be able to request Alice's supported version to
-the server and to check if this was signed by her long term key or not.
+As query message does not have any data to validate if the version advertised
+is true and belongs to the person that sends it, we are going to have ZKPK
+signed version advertisement attached to DAKE messages (field one and field
+two), so users can validate if this version was signed by the person
+who belongs to.
 
-
-As version advertisement is public information, Alice is not able to delete it
-from public servers. To facilitate versions revocation, they should have a
-short expiration date. By default, each advertisement will expires in 6 (six)
-months but users and clients are able to personalise it, changing OTR policy.
-
-
-As OTRv4 upgrades the current primitives and provides extra deniability, but as
-it not develop to fix security issue on OTRv3, is acceptable for Alice to talk
-with Bob on version 3, but is preferable to use 4 if both support it.
-
-
-High versions have priority, so in the case where Bob receives multiples
-supported versions for Alice, OTR will chose the highest version supported by
-both.
-
+To provide revogation and to prevent people from using obsolete versions, we will
+have a medium (6 months) expiration date attached to each version advertisement.
+Clients and user also are able to define the expiration if they wanna.
 
 To request version advertisement is not mandatory for all conversations but is
-the only way to have idea about what the other peer support.
+the only way to have an idea about what the other peer supports.
 
+And alse as the idea is to protect user from version downgrade and not to provide
+identification, if a user is going to engage in a conversation and its receive
+an advertisemente where does not belong to it but its suuport the same version,
+we will not abort the conversation.
 
-As Alice can use OTR4 in more than one device, probably she is going to have
-different version advertisement signed by different long term keys.
-So, in this case Bob probably is going to receive more than one advertisement,
-they can have or not the same version number, they can have or not the same
-expiration.
+To reduce downgrade possibility, if user receives query message requesting
+conversation in version 3, we should checks peer compability by requesting
+version advertisement to server.
 
-Highest non-expired version supported by Bob will have a priority.
+### Consequences
 
-As this version wasn't generated in this device, but its supports exactly this
-version, instead of abort this conversation, Alice replies back as normal.
+As OTRv4 upgrades is not to fix any security issue on OTRv3, is acceptable for
+users to chat using version 3, but is preferable to use 4 if both support it.
 
-As query message is sent as plaintext and can be changed without peers realise,
-this can be changed to any other version.
-So, to reduce the possibility to downgrade OTR4 to OTR3, Bob should confirm if
-he can find out Alice's version advertisement. If yes, he can keep the
-conversation in the version he found.
 
 If for some reason, he didn't find any advertisement for Alice and he allow 3
 in his policy, the conversation will be established as OTR3. Otherwise, just
