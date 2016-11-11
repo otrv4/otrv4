@@ -364,6 +364,9 @@ This is the first message of the DAKE. Bob sends it to Alice to commit to a choi
 1. Choose a random ephemeral D-H key pair:
   * secret key `i` a random element from `Z_q` (446 bits).
   * public key `G1*i`
+2. Generates an ephemeral DH private key pair:
+  * secret key `x_i` TODO: what size in bits, how? What is the prime to do (mod p)?
+  * and a public key `X_i = g ^ x_i`. TODO: what is the generator?
 
 A pre-key is an OTR message encoded as:
 
@@ -380,6 +383,8 @@ Initiator's identifier (DATA)
   TODO: This can be the fingerprint or something else.
 G1*i (POINT)
   The ephemeral public D-H key.
+X_i (MPI)
+  The ephemeral public D-H key. TODO: Do they have the same name?
 ```
 
 This message has length (TODO: this can be removed):
@@ -391,7 +396,7 @@ LEN(Header) + LEN(Identifier) + LEN(Point)
 LEN(Header) = 4 + 1 + 4 + 4 = 13 bytes  
 
 If Identifier is the public key,  
-  Len(Identifier) = 4 + 3*Len(MPI) = 4 + 3*(4 + 56) = 184 bytes
+  Len(Identifier) = 4 + 3*Len(MPI) = 4 + 3*(4 + 56) = 184 bytes + Len(MPI)
 ```
 
 #### DRE-Auth message
@@ -403,9 +408,13 @@ A valid DRE-Auth message is generated as follows:
 1. Choose a random ephemeral D-H key pair:
   * secret key `r` a random element from `Z_q` (446 bits).
   * public key `G1*r`
-2. Generate `m = "I" || "R" || G1*i || G1*r`. TODO: What should be "I" and "R"?
-3. Compute `DREnc(pubA, pubB, m)` and serialize it as a DRE-M value in the variable `γ`.
-4. Compute `σ = Auth(Hb, zb, {Ha, G1*i}, "I" || "R" || G1*i || γ)`.
+2. Generates an ephemeral DH private key pair:
+  * secret key `x_r` TODO: what size in bits, how? What is the prime to do (mod p)?
+  * and a public key `X_r = g ^ x_r`. TODO: what is the generator?
+3. Generate `m = "I" || "R" || G1*i || G1*r || X_i || X_r`. TODO: What should be "I" and "R"?
+4. Compute `DREnc(pubA, pubB, m)` and serialize it as a DRE-M value in the variable `γ`.
+5. Compute `σ = Auth(Hb, zb, {Ha, G1*i}, "I" || "R" || G1*i || X_i || γ)`.
+
 
 A DRE-Auth is an OTR message encoded as:
 
@@ -1079,18 +1088,18 @@ During the AKE, Alice and Bob each calculate `s` in this way, and then they each
 
 ```
 A 64-bit secure session id, ssid
-TO DO: this is the calculate_ratchet_keys(K). 
+TO DO: this is the calculate_ratchet_keys(K).
 A 256-bit SHA3-256 root key R
 Two 256-bit SHA3-256 keys Ca and Cb
 ```
 This is done by:
 
-TO DO: change the name of the function and shared secret in accordance to above. 
+TO DO: change the name of the function and shared secret in accordance to above.
 
 * Write the value of `s` as a minimum-length MPI, as specified above (4-byte big-endian len, len-byte big-endian value). Let this (4+len)-byte value be "secbytes".
 * For a given byte `b`, define `h1(s)` to be the 256-bit output of the SHA3-256 hash of the (5+len) bytes consisting of the byte b followed by secbytes.
   * Let ssid be the first 64 bits of h1(0x00).
-  * Let R be the first 256 bits of h1(0x01). 
+  * Let R be the first 256 bits of h1(0x01).
 * Let Ca be h1(0x02).
 * Let Cb be h1(0x03).
 
