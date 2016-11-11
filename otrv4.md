@@ -546,18 +546,23 @@ Finally:
   * Set `their_ecdh` as pubDHRs from the message.
 
 
-#### Calculating the root key, sending chain key and receiving chain key
+#### Calculating the root key, sending chain key, receiving chain key and secure session id
 
 ```
 calculate_ratchet_keys(secret):
-  R  = SHA3-256(0x0 || secret)
+  R  = SHA3-256(0x00 || secret)
   Ca = SHA3-256(0x01 || secret)
   Cb = SHA3-256(0x02 || secret)
+  64-bit ssid = SHA(0x03 || secret) // TODO: how to generate this
 
   Cs, Cr = decide_between(Ca, Cb)
 
   return R, Cs, Cr
 ```
+
+This is done by:
+
+TODO: specify how to compute the share secret: serialize point and hash it with the MPI: SHA3-256(serializedECkey(POINT) || DHkey)
 
 Both side will compare their public keys to choose a chain key for sending and receiving:
 
@@ -1074,35 +1079,6 @@ Example: Alice has `REQUIRE_ENCRYPTION`.
 ```
 
 Messages may be lost.
-
-
-## Computing Double Ratchet keys and secure session id
-
-TODO: this is repeated from above but only to explain the secure session id.. where to put it?
-
-OTR uses Diffie-Hellman to calculate shared secrets in the usual way: if Bob knows `x`, and tells Alice `g*x`, and Alice knows `y`, and tells Bob `g*y`, then they each can calculate `s = (g*x)*y`: Alice calculates `(g*x)*y`, and Bob calculates `(g*y)*x`.
-
-During the AKE, Alice and Bob each calculate `s` in this way, and then they each compute values based on `s`:
-
-```
-A 64-bit secure session id, ssid
-TO DO: this is the calculate_ratchet_keys(K).
-A 256-bit SHA3-256 root key R
-Two 256-bit SHA3-256 keys Ca and Cb
-```
-This is done by:
-
-TO DO: change the name of the function and shared secret in accordance to above.
-
-* Write the value of `s` as a minimum-length MPI, as specified above (4-byte big-endian len, len-byte big-endian value). Let this (4+len)-byte value be "secbytes".
-* For a given byte `b`, define `h1(s)` to be the 256-bit output of the SHA3-256 hash of the (5+len) bytes consisting of the byte b followed by secbytes.
-  * Let ssid be the first 64 bits of h1(0x00).
-  * Let R be the first 256 bits of h1(0x01).
-* Let Ca be h1(0x02).
-* Let Cb be h1(0x03).
-
-If the user requests to see the secure session id, it should be displayed as two 32-bit bigendian unsigned values, in C "%08x" format. If the user transmitted the Reveal Signature message during the AKE that produced this ssid, then display the first 32 bits in bold, and the second 32 bits in non-bold. If the user transmitted the Signature message instead, display the first 32 bits in non-bold, and the second 32 bits in bold. This session id can be used by the parties to verify (say, over the telephone, assuming the parties recognize each others' voices) that there is no man-in-the-middle by having each side read his bold part to the other. Note that this only needs to be done in the event that the users do not trust that their long-term signature keys have not been compromised.
-
 
 ## Socialist Millionaires Protocol (SMP) version 2
 
