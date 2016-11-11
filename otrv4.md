@@ -215,7 +215,7 @@ Auth message (AUTH):
   r2 (MPI)
   c3 (MPI)
   r3 (MPI)
-    Where (c1, r1, c2, r2, c3, r3) = Auth(Hb, zb, {Ha, G1*i}, "I" || "R" || G1*i || γ)
+    Where (c1, r1, c2, r2, c3, r3) = Auth(A_2, a_2, {A_1, A_3}, m)
 ```
 
 ### Public keys and fingerprints
