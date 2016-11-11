@@ -69,7 +69,6 @@ while received = messaging.receive():
 while to_send = client.message_to_send()
   for each message in otr.send(to_send):
     messaging.send(message)
-
 ```
 
 ## Assumptions
@@ -180,6 +179,43 @@ OTRv4 uses the same data types as specified in OTRv3 (bytes, shorts, ints, MPIs,
 ```
 ED448 points (POINT):
   TODO: We need to choose a point serialization format for ed448 points
+```
+
+### DRE messages and Auth NIZKPK
+
+A Dual-receiver encrypted message is serialized as follows:
+
+```
+Dual-receiver encrypted message (DRE-M):
+
+  U11 (POINT)
+  U21 (POINT)
+  E1 (POINT)
+  V1 (POINT)
+  U12 (POINT)
+  U22 (POINT)
+  E2 (POINT)
+  V2 (POINT)
+  l (MPI)
+  n1 (MPI)
+  n2 (MPI)
+  nonce (DATA)
+  φ (DATA)
+    Where (U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2, nonce, φ) = DREnc(pubA, pubB, m)
+```
+
+And an Auth non-interactive zero-knowledge proof of knowledge is serialized as follows:
+
+```
+Auth message (AUTH):
+
+  c1 (MPI)
+  r1 (MPI)
+  c2 (MPI)
+  r2 (MPI)
+  c3 (MPI)
+  r3 (MPI)
+    Where (c1, r1, c2, r2, c3, r3) = Auth(Hb, zb, {Ha, G1*i}, "I" || "R" || G1*i || γ)
 ```
 
 ### Public keys and fingerprints
@@ -315,7 +351,13 @@ messages exchange session.
 
 #### Pre-key message
 
-This is the first message of the DAKE. Bob sends it to Alice to commit to a choice of D-H key.
+This is the first message of the DAKE. Bob sends it to Alice to commit to a choice of D-H key. A valid Pre-key message is generated as follows:
+
+1. Choose a random ephemeral D-H key pair:
+  * secret key `i` a random element from `Z_q` (446 bits).
+  * public key `G1*i`
+
+A pre-key is an OTR message encoded as:
 
 ```
 Protocol version (SHORT)
@@ -325,12 +367,11 @@ Message type (BYTE)
 Sender Instance tag (INT)
   The instance tag of the person sending this message.
 Receiver Instance tag (INT)
-  The instance tag of the intended recipient. For a commit message this will often be 0, since the other party may not have identified their instance tag yet.
+  The instance tag of the intended recipient. For a pre-key message this will often be 0, since the other party may not have identified their instance tag yet.
 Initiator's identifier (DATA)
-  This can be the fingerprint or something else.
+  TODO: This can be the fingerprint or something else.
 G1*i (POINT)
-  - Choose a random value i (446 bits) mod q
-  - Encode G1*i as the POINT field.
+  The ephemeral public D-H key.
 ```
 
 This message has length (TODO: this can be removed):
@@ -347,8 +388,18 @@ If Identifier is the public key,
 
 #### DRE-Auth message
 
-This is the second message of the DAKE. Alice sends it to Bob to commit to a choice of her D-H key and acknowledgement of Bob's D-H key.
-Dual-receiver-encryption is used to encrypt the public key and Zero-knowledge-proof-of-knowledge is used to authenticate the message.
+This is the second message of the DAKE. Alice sends it to Bob to commit to a choice of her D-H key and acknowledgement of Bob's D-H key. The long-term public key and D-H public keys are encrypted with Dual-receiver encryption and authenticated with an Non-interactive Zero-knowledge proof of knowledge.
+
+A valid DRE-Auth message is generated as follows:
+
+1. Choose a random ephemeral D-H key pair:
+  * secret key `r` a random element from `Z_q` (446 bits).
+  * public key `G1*r`
+2. Generate `m = "I" || "R" || G1*i || G1*r`. TODO: What should be "I" and "R"?
+3. Compute `DREnc(pubA, pubB, m)` and serialize it as a DRE-M value in the variable `γ`.
+4. Compute `σ = Auth(Hb, zb, {Ha, G1*i}, "I" || "R" || G1*i || γ)`.
+
+A DRE-Auth is an OTR message encoded as:
 
 ```
 Protocol version (SHORT)
@@ -358,43 +409,13 @@ Message type (BYTE)
 Sender Instance tag (INT)
   The instance tag of the person sending this message.
 Receiver Instance tag (INT)
-  The instance tag of the intended recipient. For a commit message this will often be 0, since the other party may not have identified their instance tag yet.
+  The instance tag of the intended recipient.
 Receiver's identifier (DATA)
   This can be the fingerprint or something else.
-γ (DATA)
-  - Choose a random value r (446 bits) mod q
-  - Compute G1*r
-  - Generate m = "I" || "R" || G1*i || G1*r
-  - Compute (U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2, nonce, φ) = DREnc(pubA, pubB, m)
-  - Encode each returned value individually and concatenate all of them as γ.
-  - Encode the resulting value γ as the DATA field.
-
-  DREnc values are encoded as follows:
-  - U11 (POINT)
-  - U21 (POINT)
-  - E1 (POINT)
-  - V1 (POINT)
-  - U12 (POINT)
-  - U22 (POINT)
-  - E2 (POINT)
-  - V2 (POINT)
-  - l (MPI)
-  - n1 (MPI)
-  - n2 (MPI)
-  - nonce (DATA)
-  - φ (DATA)
-σ (DATA)
-  - Compute (c1, r1, c2, r2, c3, r3) = Auth(Hb, zb, {Ha, G1*i}, "I" || "R" || G1*i || γ)
-  - Encode each returned value individually and concatenate all of them as σ.
-  - Encode the resulting value σ as the DATA field.
-
-  Auth values are encoded as follows:
-  - c1 (MPI)
-  - r1 (MPI)
-  - c2 (MPI)
-  - r2 (MPI)
-  - c3 (MPI)
-  - r3 (MPI)
+γ (DRE-M)
+  The Dual-receiver encrypted value.
+σ (AUTH)
+  The Auth value.
 ```
 
 This message has length (TODO: this can be removed):
