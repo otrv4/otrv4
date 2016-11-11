@@ -330,15 +330,15 @@ Query Message or Whitespace Tag ------->
 
 **Alice:**
 
-1. Generates an ephemeral ECDH private key `i` and a public key `G1*i`.
-2. Generates an ephemeral DH private key `x_i` and a public key `X_i`.
+1. Generates an ephemeral ECDH secret key `i` and a public key `G1*i`.
+2. Generates an ephemeral DH secret key `x_i` and a public key `X_i`.
 3. Sends Bob `ψ1 = ("I", G1*i, X_i)`.
 
 
 **Bob:**
 
-1. Generates an ephemeral private key `r` and public key `G1*r`.
-2. Generates an ephemeral DH private key `x_r` and a public key `X_r`.
+1. Generates an ephemeral ECDH secret key `r` and public key `G1*r`.
+2. Generates an ephemeral DH secret key `x_r` and a public key `X_r`.
 3. Computes `γ = DREnc(PKb, PKa, m)`, being `m = "I" || "R" || G1*i || G1*r || X_i || X_r`.
 4. Computes `σ = Auth(Hb, zb, {Ha, G1*i}, "I" || "R" || G1*i || X_i || γ)`.
 5. Computes `k = SHA3((G1*i) * r || X_i^x_r)` and securely erases `r` and `x_r`.
@@ -539,7 +539,7 @@ In any event, calculate the first set of keys `R0, Cs0_0, Cr0_0 = calculate_ratc
 
 If `ratchet_flag` is `true`:  
   * Securely forget `our_dh`, increment `i`, reset `j`, and set `our_dh` to a new DH key pair which you generate. The new DH key pair should be generated with: **TODO**.
-  * Derive new set of keys `R`, `Cs_ij` `Cr_ij` from private part of `our_dh` and public part of `their_dh`:  
+  * Derive new set of keys `R`, `Cs_ij` `Cr_ij` from secret part of `our_dh` and public part of `their_dh`:
     `Ri, Cs_i_j, Cs_i_j = calculate_ratchet_keys(Ri-1 || ECDH(our_dh, their_dh))`
   * Set `ratchet_flag` to false.
 
@@ -668,7 +668,7 @@ their_dh an ephemeral public key
 #### When you send a Data Message:
 
 1. If ratchet_flag is true, first ratchet:
-    1. Derive new pair of `R`, `Cs_0`, `Cr_0` from private part of `our_dh` and public part of `their_dh`.
+    1. Derive new pair of `R`, `Cs_0`, `Cr_0` from secret part of `our_dh` and public part of `their_dh`.
     2. Securely forget `our_dh`, increment `i`, and set `our_dh` to a new DH key pair which you generate.
     3. Set `ratchet_flag` to false.
 
