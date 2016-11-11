@@ -4,18 +4,19 @@
 
 ### Context
 
-Currently, OTRv3 support its previous versions, user should configure their
-policy to tell the protocol if they wanna to allow previous versions or not.
-When an user wanna to have a conversation with someone, its should send a query
-message telling which versions its supports. This message is send as plaintext
-and can be intercepted and changed without the user been notified.
+Currently, OTRv3 supports its previous versions by allowing the user to configure
+their version policy to tell the protocol if they allow previous versions or not.
+When a user want to have a conversation with someone, they should send a query
+message telling which versions they support. This message is sent as plaintext
+at the beginning of the protocol and can be intercepted and changed by a MITM.
 
-As we are updating OTR to provide cryptographic primitives with a higher security
-level and to provide more deniability, at same time we don't wanna to foce all
-users to upgrade now so if two parties are stabilishing a conversation and both
-of them support versions 3 and 4, how OTR can ensure that they are going to
-talk in the highest version? How to provide cryptographic agility without leave
-user in a sensible position?
+With this attack, how can OTR ensure that participants will talk in the highest
+version? OTR4 seeks to solve this problem.
+
+Since we are updating OTR to upgrade the cryptographic primitives with higher security
+and to provide more deniability, at same time we want version 4 to be compatible with
+version 3. So how do we provide cryptographic agility and leave user in a sensible
+position? OTR4 also tries to address backwards compatibility.
 
 ### Decision
 
