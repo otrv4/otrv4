@@ -108,7 +108,7 @@ Threats that an OTR conversation does not mitigate:
 
 Integer variables are in lower case (x, y). Points and other variables are in upper case (P, Q).
 
-Addition and subtraction of elliptic curve points A and B is A + B and A - B. Scalar multiplication of an integer a with an elliptic curve point B yields a new point C = a*B.
+Addition and subtraction of elliptic curve points A and B is A + B and A - B. Addition of a point to other point generates another point. Scalar multiplication of an integer (scalar) with an elliptic curve point B yields a new point C = a*B.
 
 The concatenation of byte sequences x and P is x || P. In this case, x and P represent a fixed-length byte sequence encoding the respective values. See section "Data types" for encoding and decoding details.
 
@@ -548,6 +548,24 @@ Finally:
 
 #### Calculating the root key, sending chain key, receiving chain key and secure session id
 
+TODO: where to move this?
+
+```
+EC_shared_key = (G1*i)*r (POINT)
+  The shared EC key.
+DH_shared_key = (g^x_i)^x_r (MPI)
+  The shared 3072-DH key.
+```
+
+```
+calculate_shared_secret(EC_shared_key, DH_shared_key):
+   serialized_EC_secret = serialize_point(EC_shared_key)
+   serialized_DH_secret = serialize_MPI(DH_shared_key)
+   secret = SHA3-256(serialized_EC_secret, serialized_DH_shared_key) // TODO: 256?
+```
+
+*** end of todo **
+
 ```
 calculate_ratchet_keys(secret):
   R  = SHA3-256(0x00 || secret)
@@ -559,10 +577,6 @@ calculate_ratchet_keys(secret):
 
   return R, Cs, Cr
 ```
-
-This is done by:
-
-TODO: specify how to compute the share secret: serialize point and hash it with the MPI: SHA3-256(serializedECkey(POINT) || DHkey)
 
 Both side will compare their public keys to choose a chain key for sending and receiving:
 
