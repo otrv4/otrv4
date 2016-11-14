@@ -248,7 +248,7 @@ Auth message (AUTH):
 OTRv4 introduces a new type of public-key:
 
 ```
-OTR public authentication Cramer-Shoup key (PUBKEY):
+OTR public authentication Cramer-Shoup key (CRAMER-SHOUP-PUBKEY):
 
     Pubkey type (SHORT)
       Cramer-Shoup public keys have type 0x0010
@@ -318,10 +318,37 @@ PKv || sign( SKm, PKv )
 
 PKe || sign( SKm, PKe )
 
-3. The version, version expiration and the signature of both signed by the
+4. The version, version expiration and the signature of both signed by the
    secret version signing key:
 
 Version || Vers.Expiry || sign( SKv, Version || Vers.Expiry )
+
+#### Advertisement Data Type
+
+Version Advertisement (ADV):
+  Master signing key (MASTER-SIGN-PUBKEY)
+  Version signing key (VERSION-SIGN-PUBKEY)
+  Signature of Version signing key (SIG)
+  Cramer Shoup signing key (CRAMER-SHOUP-PUBKEY)
+  Signature of Cramer Shoup public key (SIG)
+  Version (VER)
+  Version Expiration (VER-EXP)
+  Signature of version and version expiration (SIG)
+
+Version (VER):
+  A string corresponding to the user's supported OTR versions. The format is
+  described in OTR version 3 under the section "OTR Query Messages".
+
+Version Expiration (VER-EXP):
+  This is a 4 byte value that contains the date that this advertisement will
+  expire.
+
+TODO: the 3 below are waiting on the decision of what kind of signature scheme we
+are using
+
+Master signing key (MASTER-SIGN-PUBKEY):
+Version signing key (VERSION-SIGN-PUBKEY):
+Signature (SIG):
 
 ### Deniable Authenticated Key Exchange (DAKE)
 
