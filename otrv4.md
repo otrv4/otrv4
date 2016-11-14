@@ -29,9 +29,6 @@ TODO: Write this section when we have fleshed out the other sections of the spec
 
 ## High Level Overview
 
-Off The Record messaging (OTR) is a messaging protocol that achieves forward-secrecy
-and deniability.
-
 The high level flow of this protocol will be:
 
     Alice                                            Bob
