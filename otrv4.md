@@ -5,6 +5,35 @@ in a way that provides the same security as a private in person conversation, wh
 can overhear what is being said, and no one (not even the conversation participants) can prove what
 was said, or even that the two participants spoke to each other at all.
 
+OTR works on top of an existing messaging protocol, like XMPP, with capabilities of sending and receiving messages to and from a peer. A messaging client which does not support OTR will present received messages to the user and will send messages typed by the user to the other peer, like the following diagram:
+
+```
+# Receiving messages
+while received = messaging.receive()
+  client.display(received)
+
+# Sending messages
+while to_send = client.message_to_send()
+  messaging.send(to_send)
+```
+
+A messaging client which supports OTR will forward messages to the OTR implementation before presenting received messages to the user and before sending messages to the other peer, like the following diagram:
+
+```
+# Receiving messages
+while received = messaging.receive():
+  to_send, received = otr.receive(received)
+  client.display(received)
+
+  for each message in to_send:
+    messaging.send(message)
+
+# Sending messages
+while to_send = client.message_to_send()
+  for each message in otr.send(to_send):
+    messaging.send(message)
+```
+
 ## Table of Contents
 
 1. [Main Changes over Version 3](#main-changes-over-version-3)
@@ -37,37 +66,6 @@ The high level flow of this protocol will be:
                                       <-------------  OTR v4 is supported
     Establish Conversation with DAKE  <------------>  Establish Conversation with DAKE
     Exchange Data Messages            <------------>  Exchange Data Messages
-
-TODO: Should we mention the protocol API? This was confusing to me when I first implemented OTR. Example:
-
-OTR works on top of an existing messaging protocol, like XMPP, with capabilities of sending and receiving messages to and from a peer. A messaging client which does not support OTR will present received messages to the user and will send messages typed by the user to the other peer, like the following diagram:
-
-```
-# Receiving messages
-while received = messaging.receive()
-  client.display(received)
-
-# Sending messages
-while to_send = client.message_to_send()
-  messaging.send(to_send)
-```
-
-A messaging client which supports OTR will forward messages to the OTR implementation before presenting received messages to the user and before sending messages to the other peer, like the following diagram:
-
-```
-# Receiving messages
-while received = messaging.receive():
-  to_send, received = otr.receive(received)
-  client.display(received)
-
-  for each message in to_send:
-    messaging.send(message)
-
-# Sending messages
-while to_send = client.message_to_send()
-  for each message in otr.send(to_send):
-    messaging.send(message)
-```
 
 ## Assumptions
 
