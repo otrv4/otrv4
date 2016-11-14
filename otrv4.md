@@ -1,9 +1,9 @@
 # OTR version 4
 
 The following messaging protocol provides way for two people to have a conversation over a network
-in a way that provides the same security as a private in person conversation, where no external party
+in a way that provides the same security as a private, in-person conversation. No external party
 can overhear what is being said, and no one (not even the conversation participants) can prove what
-was said, or even that the two participants spoke to each other at all.
+was said or that the two participants spoke to each other at all.
 
 OTR works on top of an existing messaging protocol, like XMPP, with capabilities of sending and receiving messages to and from a peer. A messaging client which does not support OTR will present received messages to the user and will send messages typed by the user to the other peer, like the following diagram:
 
