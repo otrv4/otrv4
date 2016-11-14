@@ -145,14 +145,10 @@ TODO: If we use u-coordinate for encoding according to XEdDSA, do we need to con
 
 ### 3072 Diffie-Hellman Parameters
 
-TODO: where to move this? Check this. 
-
 For the Diffie-Hellman group computations, the group is the one defined in RFC 3526[1] with 3072-bit modulus (hex, big-endian):
 
 ```
    Prime is: 2^3072 - 2^3008 - 1 + 2^64 * { [2^2942 pi] + 1690314 }
-
-   g3: 2
  
    Hex value:
    FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1
@@ -171,6 +167,8 @@ For the Diffie-Hellman group computations, the group is the one defined in RFC 3
    F12FFA06 D98A0864 D8760273 3EC86A64 521F2B18 177B200C
    BBE11757 7A615D6C 770988C0 BAD946E2 08E24FA0 74E5AB31
    43DB5BFC E0FD108E 4B82D120 A93AD2CA FFFFFFFF FFFFFFFF
+   
+   Generator g3: 2
    
 ```
 
@@ -397,8 +395,8 @@ This is the first message of the DAKE. Bob sends it to Alice to commit to a choi
   * secret key `i` a random element from `Z_q` (446 bits).
   * public key `G1*i`
 2. Generates an ephemeral DH private key pair:
-  * secret key `x_i` TODO: what size in bits, how? What is the prime to do (mod p)?
-  * and a public key `X_* = g3 ^ x_*`. TODO: what is the generator?
+  * secret key `x_i` TODO: what size in bits, how? 
+  * and a public key `X_i = g3 ^ x_i`. 
 
 A pre-key is an OTR message encoded as:
 
@@ -441,8 +439,8 @@ A valid DRE-Auth message is generated as follows:
   * secret key `r` a random element from `Z_q` (446 bits).
   * public key `G1*r`
 2. Generates an ephemeral DH private key pair:
-  * secret key `x_r` TODO: what size in bits, how? What is the prime to do (mod p)?
-  * and a public key `X_r = g ^ x_r`. TODO: what is the generator?
+  * secret key `x_r` TODO: what size in bits, how? 
+  * and a public key `X_r = g3 ^ x_r`.
 3. Generate `m = "I" || "R" || G1*i || G1*r || X_i || X_r`. TODO: What should be "I" and "R"?
 4. Compute `DREnc(pubA, pubB, m)` and serialize it as a DRE-M value in the variable `γ`.
 5. Compute `σ = Auth(Hb, zb, {Ha, G1*i}, "I" || "R" || G1*i || X_i || γ)`.
