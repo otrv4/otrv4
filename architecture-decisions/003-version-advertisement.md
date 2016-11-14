@@ -23,36 +23,41 @@ without to put user in a sensible position?
 We will keep  the use of query message for OTRv3 compability and also to work as
 kind of ping message.
 
-We will use this version advertisement in two ways, one is publishing it in a
-public server so when a person wanna to chat with someone using OTR, they can
-check peer's compability and version support. Also, we should have this
-information public to provide initiator's participation deniability.
+We introduce the concept of a Version Advertisement, which contains the versions
+supported by your client, the expiration date of the advertisement, a signature of
+the supported versions and the expiration date, and the public keys used to establish
+trust with the signature.
+
+We recommend publishing this version advertisement for two reasons, one is so when
+a person wants to chat with someone using OTR, they can double check the peer's
+compatibility and version support. Two, having this signed information public will
+provide participation deniability for both parties despite the usage of signed messages
+in the OTR conversation.
 
 We will prioritise high versions, so in the case when user receives 2 different
 version advertisement from server, the conversation should initalize in the
 higer version supported by both.
 
-As query message does not have any data to validate if the version advertised
-is true and belongs to the person that sends it, we are going to have ZKPK
-signed version advertisement attached to DAKE messages (field one and field
-two), so users can validate if this version was signed by the person
-who belongs to.
+Since the query message does not have any data to validate if the version advertised
+belongs to the person that sends it, we are going to have a signature of the version
+advertisement and expiration attached to DAKE messages (field one and field
+two), so users can validate if this version and expiration were signed by a key they trust.
 
-To provide revogation and to prevent people from using obsolete versions, we will
-have a medium (6 months) expiration date attached to each version advertisement.
-Clients and user also are able to define the expiration if they wanna.
+To provide revocation and to prevent people from using obsolete versions, we will
+have a minimum (6 months) expiration date attached to each version advertisement.
+Clients and user may redefine the version expiration if desired.
 
-To request version advertisement is not mandatory for all conversations but is
-the only way to have an idea about what the other peer supports.
+Requesting version advertisements from the server is not mandatory for all conversations,
+but is the only way to try to verify whether a user only supports version 3 or not.
 
-And alse as the idea is to protect user from version downgrade and not to provide
-identification, if a user is going to engage in a conversation and its receive
-an advertisemente where does not belong to it but its suuport the same version,
-we will not abort the conversation.
+And also the goal is to protect the user from version downgrade and not to prove
+identification, if a user is going to engage in a conversation and they receive
+an advertisement that does not belong to a key they trust but its suuport the same
+version, we will not abort the conversation.
 
-To reduce downgrade possibility, if user receives query message requesting
-conversation in version 3, we should checks peer compability by requesting
-version advertisement to server.
+To reduce downgrade possibility, if the user receives a query message requesting
+a conversation in version 3, we should check the peer's version support by requesting
+a version advertisement from the server.
 
 ### Consequences
 
