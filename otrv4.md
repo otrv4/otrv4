@@ -429,8 +429,8 @@ Sender Instance tag (INT)
   The instance tag of the person sending this message.
 Receiver Instance tag (INT)
   The instance tag of the intended recipient. For a pre-key message this will often be 0, since the other party may not have identified their instance tag yet.
-Initiator's identifier (DATA)
-  TODO: This can be the fingerprint or something else.
+Sender's Version Advertisement (ADV)
+  This is described in the section above on Creating a Version Advertisement
 G1*i (POINT)
   The ephemeral public D-H key.
 X_i (MPI)
@@ -477,8 +477,8 @@ Sender Instance tag (INT)
   The instance tag of the person sending this message.
 Receiver Instance tag (INT)
   The instance tag of the intended recipient.
-Receiver's identifier (DATA)
-  This can be the fingerprint or something else.
+Receiver's Version Advertisement (ADV)
+  This is described in the section above on Creating a Version Advertisement
 γ (DRE-M)
   The Dual-receiver encrypted value.
 σ (AUTH)
