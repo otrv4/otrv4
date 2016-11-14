@@ -143,6 +143,39 @@ An integer modulo p is a "field element". An integer modulo q is a a "scalar" (a
 
 TODO: If we use u-coordinate for encoding according to XEdDSA, do we need to consider the sign byte when hashing to a field element (the first byte)? Simply clearing seems to be the simplest solution.
 
+### 3072 Diffie-Hellman Parameters
+
+TODO: where to move this? Check this. 
+
+For the Diffie-Hellman group computations, the group is the one defined in RFC 3526 with 3072-bit modulus (hex, big-endian):
+
+```
+   Prime is: 2^3072 - 2^3008 - 1 + 2^64 * { [2^2942 pi] + 1690314 }
+
+   g3: 2
+ 
+   Hex value:
+   FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1
+   29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD
+   EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245
+   E485B576 625E7EC6 F44C42E9 A637ED6B 0BFF5CB6 F406B7ED
+   EE386BFB 5A899FA5 AE9F2411 7C4B1FE6 49286651 ECE45B3D
+   C2007CB8 A163BF05 98DA4836 1C55D39A 69163FA8 FD24CF5F
+   83655D23 DCA3AD96 1C62F356 208552BB 9ED52907 7096966D
+   670C354E 4ABC9804 F1746C08 CA18217C 32905E46 2E36CE3B
+   E39E772C 180E8603 9B2783A2 EC07A28F B5C55DF0 6F4C52C9
+   DE2BCBF6 95581718 3995497C EA956AE5 15D22618 98FA0510
+   15728E5A 8AAAC42D AD33170D 04507A33 A85521AB DF1CBA64
+   ECFB8504 58DBEF0A 8AEA7157 5D060C7D B3970F85 A6E1E4C7
+   ABF5AE8C DB0933D7 1E8C94E0 4A25619D CEE3D226 1AD2EE6B
+   F12FFA06 D98A0864 D8760273 3EC86A64 521F2B18 177B200C
+   BBE11757 7A615D6C 770988C0 BAD946E2 08E24FA0 74E5AB31
+   43DB5BFC E0FD108E 4B82D120 A93AD2CA FFFFFFFF FFFFFFFF
+   
+```
+
+Note that this means that whenever you see a Diffie-Hellman exponentiation in this document, it always means that the exponentiation is done modulo the above 3072-bit number.
+
 
 ### OTR messages
 
@@ -312,10 +345,11 @@ Alice long-term Cramer-Shoup key-pair is `SKa = (x1a, x2a, y1a, y2a, za)` and `P
 Bob long-term Cramer-Shoup key-pair is `SKb = (x1b, x2b, y1b, y2b, zb)` and `PKb = (Cb, Db, Hb)`.  
 Both key pairs are generated with `DRGen()`.  
 
+```
 x_*: 3072-bit DH secret key  
 X_*: 3072-bit DH public key  
 X_*^x_*: mix-key, a 3072-bit shared secret computed from a DH exchange
-
+```
 
 #### Overview
 
@@ -331,14 +365,14 @@ Query Message or Whitespace Tag ------->
 **Alice:**
 
 1. Generates an ephemeral ECDH secret key `i` and a public key `G1*i`.
-2. Generates an ephemeral DH secret key `x_i` and a public key `X_i`.
+2. Generates an ephemeral DH secret key `x_i` and a public key `X_i = g3^x_i`.
 3. Sends Bob `ψ1 = ("I", G1*i, X_i)`.
 
 
 **Bob:**
 
 1. Generates an ephemeral ECDH secret key `r` and public key `G1*r`.
-2. Generates an ephemeral DH secret key `x_r` and a public key `X_r`.
+2. Generates an ephemeral DH secret key `x_r` and a public key `X_r = g3^x_r`.
 3. Computes `γ = DREnc(PKb, PKa, m)`, being `m = "I" || "R" || G1*i || G1*r || X_i || X_r`.
 4. Computes `σ = Auth(Hb, zb, {Ha, G1*i}, "I" || "R" || G1*i || X_i || γ)`.
 5. Computes `k = SHA3((G1*i) * r || X_i^x_r)` and securely erases `r` and `x_r`.
@@ -364,7 +398,7 @@ This is the first message of the DAKE. Bob sends it to Alice to commit to a choi
   * public key `G1*i`
 2. Generates an ephemeral DH private key pair:
   * secret key `x_i` TODO: what size in bits, how? What is the prime to do (mod p)?
-  * and a public key `X_i = g ^ x_i`. TODO: what is the generator?
+  * and a public key `X_* = g3 ^ x_*`. TODO: what is the generator?
 
 A pre-key is an OTR message encoded as:
 
