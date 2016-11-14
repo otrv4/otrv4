@@ -395,7 +395,7 @@ This is the first message of the DAKE. Bob sends it to Alice to commit to a choi
   * secret key `i` a random element from `Z_q` (446 bits).
   * public key `G1*i`
 2. Generates an ephemeral DH private key pair:
-  * secret key `x_i` TODO: what size in bits, how? 
+  * secret key `x_i` (448 bits). // TODO: confirm this size. 
   * and a public key `X_i = g3 ^ x_i`. 
 
 A pre-key is an OTR message encoded as:
@@ -439,8 +439,8 @@ A valid DRE-Auth message is generated as follows:
   * secret key `r` a random element from `Z_q` (446 bits).
   * public key `G1*r`
 2. Generates an ephemeral DH private key pair:
-  * secret key `x_r` TODO: what size in bits, how? 
-  * and a public key `X_r = g3 ^ x_r`.
+  * secret key `x_r` (448 bits). // TODO: confirm this size. 
+  * and a public key `X_r = g3 ^ x_r`. 
 3. Generate `m = "I" || "R" || G1*i || G1*r || X_i || X_r`. TODO: What should be "I" and "R"?
 4. Compute `DREnc(pubA, pubB, m)` and serialize it as a DRE-M value in the variable `γ`.
 5. Compute `σ = Auth(Hb, zb, {Ha, G1*i}, "I" || "R" || G1*i || X_i || γ)`.
