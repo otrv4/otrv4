@@ -136,8 +136,6 @@ Number of bits in q (|q|)
 
 An integer modulo p is a "field element". An integer modulo q is a a "scalar" (also a value on Z_q), and is considered a MPI for encoding and decoding purposes.
 
-TODO: If we use u-coordinate for encoding according to XEdDSA, do we need to consider the sign byte when hashing to a field element (the first byte)? Simply clearing seems to be the simplest solution.
-
 ### 3072 Diffie-Hellman Parameters
 
 For the Diffie-Hellman group computations, the group is the one defined in RFC 3526[1] with 3072-bit modulus (hex, big-endian):
