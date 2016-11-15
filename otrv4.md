@@ -300,7 +300,7 @@ about what versions they support.
 #### Overview
 
 To create a version advertisement, both Alice and Bob generate three sets
-of keys (signing keys are based on Ed448):
+of keys:
 
 1. One master signing set: PKm, SKm
 2. One version signing set: PKv, SKv
@@ -308,13 +308,16 @@ of keys (signing keys are based on Ed448):
 
 They use these keys to create the 4 parts of the version advertisement.
 
-1. The public master signing key: PKm
+1. The public master signing key:
+
+PKm
+
 2. The public version signing key and a signature of it by the secret master
    signing key:
 
 PKv || sign( SKm, PKv )
 
-3. The public DRE key and a signature of it by the secret master signing key:
+3. The Cramer-Shoup public key and a signature of it by the secret master signing key:
 
 PKe || sign( SKm, PKe )
 
@@ -328,12 +331,12 @@ Version || Vers.Expiry || sign( SKv, Version || Vers.Expiry )
 Version Advertisement (ADV):
   Master signing key (MASTER-SIGN-PUBKEY)
   Version signing key (VERSION-SIGN-PUBKEY)
-  Signature of Version signing key (SIG)
-  Cramer Shoup signing key (CRAMER-SHOUP-PUBKEY)
-  Signature of Cramer Shoup public key (SIG)
+  Signature of version signing key by the master signing key (SIG)
   Version (VER)
   Version Expiration (VER-EXP)
-  Signature of version and version expiration (SIG)
+  Signature of version and version expiration by the version signing key (SIG)
+  Cramer Shoup signing key (CRAMER-SHOUP-PUBKEY)
+  Signature of Cramer-Shoup public key by the master signing key (SIG)
 
 Version (VER):
   A string corresponding to the user's supported OTR versions. The format is
