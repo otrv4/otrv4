@@ -437,18 +437,6 @@ X_i (MPI)
   The ephemeral public D-H key. TODO: Do they have the same name?
 ```
 
-This message has length (TODO: this can be removed):
-
-```
-LEN(Header) + LEN(Identifier) + LEN(Point)
-  = 13 + 184 + 56 = 253 bytes  
-
-LEN(Header) = 4 + 1 + 4 + 4 = 13 bytes  
-
-If Identifier is the public key,  
-  Len(Identifier) = 4 + 3*Len(MPI) = 4 + 3*(4 + 56) = 184 bytes + Len(MPI)
-```
-
 #### DRE-Auth message
 
 This is the second message of the DAKE. Alice sends it to Bob to commit to a choice of her D-H key and acknowledgement of Bob's D-H key. The long-term public key and D-H public keys are encrypted with Dual-receiver encryption and authenticated with an Non-interactive Zero-knowledge proof of knowledge.
@@ -483,19 +471,6 @@ Receiver's Version Advertisement (ADV)
   The Dual-receiver encrypted value.
 σ (AUTH)
   The Auth value.
-```
-
-This message has length (TODO: this can be removed):
-
-```
-LEN(HEADER) + LEN(Identifier) + LEN(γ) + LEN(σ)
-  = 13 + 184 + 1164 + 360 = 1721 bytes.
-
-LEN(γ) = 8 * LEN(Point) + 3 * LEN(MPI) + LEN(nonce) + LEN(φ) = 1164 bytes
-  8*56 + 3*60 + 24 + 512 = 1164 bytes
-  LEN(φ) = 32 + LEN(m) = 32 + 184 + 184 + 56 + 56 = 512 bytes  
-
-LEN(σ) = 6 * LEN(MPI) = 360 bytes
 ```
 
 ### Requesting conversation with older OTR version
