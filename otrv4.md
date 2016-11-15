@@ -1008,7 +1008,11 @@ This indicates that you have already sent a Pre-key message to your corresponden
 
 Regardless of authstate value, you should:
 
-(TODO: Explain how to process and verify this message briefly). If everything checks out:
+  * Verify that the master signing key in the version advertisement is trusted
+  * Verify that the point G1*i received in the pre-key message is on curve 448
+  * Verify that the X_i D-H public key is from the correct group
+
+If everything checks out:
 
   * Reply with a DRE Auth Message
   * Compute the Diffie-Hellman shared secret `K = (G1*i)*r`.
@@ -1021,13 +1025,19 @@ Regardless of authstate value, you should:
   * If there is a recent stored message, encrypt it and send it as a Data Message. (TODO: does it apply?)
 
 
-#### Receiving a DRE Auth message
+#### Receiving a DRE-Auth message
 
 If the message is version 4 and `ALLOW_V4` is not set, ignore this message. Otherwise:
 
 If authstate is `AUTHSTATE_AWAITING_DRE_AUTH`:
 
-(TODO: Explain how to process and verify this message briefly). If everything checks out:
+  * Verify that the peer's master signing key in the version advertisement is
+    trusted
+  * If the auth σ is valid, decrypt the DRE message and verify:
+    * that the point G1*r received in the pre-key message is on curve 448
+    * that the X_r D-H public key is from the correct group
+
+If everything checks out:
 
   * Compute the Diffie-Hellman shared secret `K = (G1*r)*i`.
   * Transition authstate to `AUTHSTATE_NONE`.
