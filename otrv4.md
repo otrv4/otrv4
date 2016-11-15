@@ -42,7 +42,7 @@ while to_send = client.message_to_send()
 4. [Security Properties](#security-properties)
 5. [OTR Conversation Initialization](#otr-conversation-initialization)
   1. [Version Advertisement](#version-advertisement)
-  2. [Creating a Version Advertisement](#creating-version-advertisement)
+  2. [Creating a Version Advertisement](#creating-a-version-advertisement)
   3. [Deniable Authenticated Key Exchange (DAKE)](#deniable-authenticated-key-exchange-dake)
 6. [Requesting conversation with older OTR version](#requesting-conversation-with-older-otr-version)
 7. [Data exchange](#data-exchange)
@@ -387,7 +387,7 @@ Query Message or Whitespace Tag ------->
 
 1. Generates an ephemeral ECDH secret key `i` and a public key `G1*i`.
 2. Generates an ephemeral DH secret key `x_i` and a public key `X_i = g3^x_i`.
-3. Sends Bob `ψ1 = ("I", G1*i, X_i)`.
+3. Sends Bob a pre-key message `ψ1 = ("I", G1*i, X_i)`.
 
 
 **Bob:**
@@ -397,7 +397,7 @@ Query Message or Whitespace Tag ------->
 3. Computes `γ = DREnc(PKb, PKa, m)`, being `m = "I" || "R" || G1*i || G1*r || X_i || X_r`.
 4. Computes `σ = Auth(Hb, zb, {Ha, G1*i}, "I" || "R" || G1*i || X_i || γ)`.
 5. Computes `k = SHA3((G1*i) * r || X_i^x_r)` and securely erases `r` and `x_r`.
-6. Sends Alice `ψ2 = ("R", γ, σ)`.
+6. Sends Alice a DRE-Auth Message `ψ2 = ("R", γ, σ)`.
 
 **Alice:**
 
@@ -414,10 +414,12 @@ Query Message or Whitespace Tag ------->
 
 This is the first message of the DAKE. Bob sends it to Alice to commit to a choice of D-H key. A valid Pre-key message is generated as follows:
 
-1. Choose a random ephemeral D-H key pair:
+1. Create a version advertisement. How to do this is detailed [here]
+   (#creating-a-version-advertisement)
+2. Choose a random ephemeral ECDH key pair:
   * secret key `i` a random element from `Z_q` (446 bits).
   * public key `G1*i`
-2. Generates an ephemeral DH private key pair:
+3. Generates an ephemeral D-H private key pair:
   * secret key `x_i` (448 bits). // TODO: confirm this size. 
   * and a public key `X_i = g3 ^ x_i`. 
 
@@ -435,9 +437,9 @@ Receiver Instance tag (INT)
 Sender's Version Advertisement (ADV)
   This is described in the section above on Creating a Version Advertisement
 G1*i (POINT)
-  The ephemeral public D-H key.
+  The ephemeral public ECDH key.
 X_i (MPI)
-  The ephemeral public D-H key. TODO: Do they have the same name?
+  The ephemeral public D-H key.
 ```
 
 #### DRE-Auth message
@@ -446,15 +448,19 @@ This is the second message of the DAKE. Alice sends it to Bob to commit to a cho
 
 A valid DRE-Auth message is generated as follows:
 
-1. Choose a random ephemeral D-H key pair:
+1. Create a version advertisement. How to do this is detailed [here]
+   (#creating-a-version-advertisement)
+2. Choose a random ephemeral ECDH key pair:
   * secret key `r` a random element from `Z_q` (446 bits).
   * public key `G1*r`
-2. Generates an ephemeral DH private key pair:
+3. Generates an ephemeral D-H private key pair:
   * secret key `x_r` (448 bits). // TODO: confirm this size. 
   * and a public key `X_r = g3 ^ x_r`. 
-3. Generate `m = "I" || "R" || G1*i || G1*r || X_i || X_r`. TODO: What should be "I" and "R"?
-4. Compute `DREnc(pubA, pubB, m)` and serialize it as a DRE-M value in the variable `γ`.
-5. Compute `σ = Auth(Hb, zb, {Ha, G1*i}, "I" || "R" || G1*i || X_i || γ)`.
+4. Generate `m = "Am" || "Bm" || G1*i || G1*r || X_i || X_r`, where "Am" is Alice's
+   master signing key which was transmitted to Bob in the version advertisement
+   of the Pre-Key Message. "Bm" Is Bob's master signing key.
+5. Compute `DREnc(pubA, pubB, m)` and serialize it as a DRE-M value in the variable `γ`.
+6. Compute `σ = Auth(Hb, zb, {Ha, G1*i}, "I" || "R" || G1*i || X_i || γ)`.
 
 
 A DRE-Auth is an OTR message encoded as:
