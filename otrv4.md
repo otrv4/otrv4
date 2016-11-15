@@ -259,7 +259,7 @@ OTR public authentication Cramer-Shoup key (CRAMER-SHOUP-PUBKEY):
       (c, d, h) are the Cramer-Shoup public key parameters
 ```
 
-OTR public keys have fingerprints, which are hex strings that serve as identifiers for the public key. The fingerprint is calculated by taking the SHA-1 hash of the byte-level representation of the public key.
+OTR public keys have fingerprints, which are hex strings that serve as identifiers for the public key. The fingerprint is calculated by taking the SHA3-256 hash of the byte-level representation of the public key.
 
 
 ## OTR Conversation Initialization

@@ -54,6 +54,8 @@ SHA3-512(key || secret) when a keyed cryptographic hash function is expected,
 and use the construct SHA3-512(counter || secret) every time multiple keys need
 to be derived from the same secret.
 
+We will use the SHA3-256 hash function for generating fingerprints for long-lived, public keys. SHA3-256 has a security strength of 256 bits against preimage attacks. However, it only has a security strength of 128 bits against collision attacks. We choose SHA3-256 instead of SHA3-512 for the operation of generating fingerprints because the output from SHA3-512 is much larger. 
+
 ### Consequences
 
 One may see the choice of cryptographic primitives as a consequence of the
