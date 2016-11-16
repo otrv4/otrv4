@@ -1019,7 +1019,7 @@ If everything checks out:
     * Set `ratchet_flag` as `false`.
     * Set `our_ecdh` as our ephemeral key pair from the DAKE (`r`, `G1*r`).
     * Calculate the first set of keys `R0, Cs0_0, Cr0_0 = calculate_ratchet_keys(K)`
-  * If there is a recent stored message, encrypt it and send it as a Data Message. (TODO: does it apply?)
+  * If there is a recent stored message, encrypt it and send it as a Data Message.
 
 
 #### Receiving a DRE-Auth message
@@ -1522,7 +1522,7 @@ Let `{C1, D1, H1} = PK1` and `{C2, D2, H2} = PK2`
     - `Ei = (Hi*ki) + K`
   2. Compute `αi = HashToScalar(U1i || U2i || Ei)`.
   3. Compute `Vi = Ci*ki + Di*(ki * αi)`
-3. Compute `K_enc = SHA3-256(K)`. TODO: we do this for key compression (K == 446 bits, K_enc = 256).
+3. Compute `K_enc = SHA3-256(K)`. K is compressed from 446 bits to 256 bits because XSalsa20 has a maximum key size of 256.
 4. Pick a random 24 bytes `nonce` and compute `φ = XSalsa20-Poly1305_K_enc(m, nonce)`
 5. Generate a NIZKPK:
   1. for i ∈ {1, 2}:
@@ -1570,7 +1570,7 @@ TODO: How to say that `i` is 1 or 2 depending if it is the corresponding secret 
     - `T3 = U1i*y1i`
     - `T4 = U2i*y2i`
   6. Verify `T1 + T2 + (T3 + T4)*αi ≟ Vi`.
-3. Recover secret key `K_enc = SHA3-256(Ei - U1i*zi)`.TODO: we do this for key compression (K == 446 bits, K_enc = 256).
+3. Recover secret key `K_enc = SHA3-256(Ei - U1i*zi)`. K is compressed from 446 bits to 256 bits because XSalsa20 has a maximum key size of 256.
 4. Decrypt `m = XSalsa20-Poly1305_K_enc(φ, nonce)`.
 
 ### ROM Authentication
