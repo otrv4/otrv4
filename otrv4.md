@@ -542,8 +542,8 @@ In any event, calculate the first set of keys `R0, Cs0_0, Cr0_0 = calculate_ratc
 
 #### When you send a Data Message:
 
-If `ratchet_flag` is `true`:
-  * Securely forget `our_ecdh`, increment `i`, reset `j`, and set `our_ecdh` to a new DH key pair which you generate. The new DH key pair should be generated with: **TODO**.
+If `ratchet_flag` is `true`:  
+  * Securely delete `our_ecdh`, increment `i`, reset `j`, and set `our_ecdh` to a new DH key pair which you generate. The new DH key pair should be generated with: **TODO**.
   * Derive new set of keys `R`, `Cs_ij` `Cr_ij` from secret part of `our_ecdh` and public part of `their_ecdh`:
     `Ri, Cs_i_j, Cs_i_j = calculate_ratchet_keys(Ri-1 || ECDH(our_ecdh, their_ecdh))`
   * Set `ratchet_flag` to false.
@@ -842,9 +842,6 @@ An OTR client maintains separate state for every correspondent. For example, Ali
 conversation with Bob, while having an unprotected conversation with Charlie. This state consists of two
 main state variables, as well as some other information (such as encryption keys).
 The two main state variables are:
-
-TODO: backward compatiblity with OTRv3?
-
 
 ### Message state
 
@@ -1533,7 +1530,7 @@ Let `{C1, D1, H1} = PK1` and `{C2, D2, H2} = PK2`
       - `T3i = (Ci + Di*αi)*ti`
   2. Compute `T4 = H1*t1 - H2*t2`.
   3. Compute
-    - `gV = G1 || G2 || q` (TODO: Do we really need to send this if they are part of the group definition)
+    - `gV = G1 || G2 || q`
     - `pV = C1 || D1 || H1 || C2 || D2 || H2`
     - `eV = U11 || U21 || E1 || V1 || α1 || U12 || U22 || E2 || V2 || α2`
     - `zV = T11 || T21 || T31 || T12 || T22 || T32 || T4`
@@ -1545,8 +1542,7 @@ Let `{C1, D1, H1} = PK1` and `{C2, D2, H2} = PK2`
 #### Dual Receiver Decryption: DRDec(PK1, PK2, SKi, γ):
 
 Let `{C1, D1, H1} = PK1`, `{C2, D2, H2} = PK2` and `{x1i, x2i, y1i, y2i, zi} = SKi`.
-
-TODO: How to say that `i` is 1 or 2 depending if it is the corresponding secret key of either 1 or 2.
+SKi is the secret key of the person decrypting the message.
 
 1. Parse `γ` to retrieve components
   `(U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2, nonce, φ) = γ`.
@@ -1558,7 +1554,7 @@ TODO: How to say that `i` is 1 or 2 depending if it is the corresponding secret 
     4. `T3j = (Cj + Dj*αj)*nj + Vj*l`
   2. Compute `T4 = H1*n1 - H2*n2 + (E1-E2)*l`
   3. Compute
-    - `gV = G1 || G2 || q` (TODO: Do we really need to get this from here if they are part of the group definition)
+    - `gV = G1 || G2 || q`
     - `pV = C1 || D1 || H1 || C2 || D2 || H2`
     - `eV = U11 || U21 || E1 || V1 || α1 || U12 || U22 || E2 || V2 || α2`
     - `zV = T11 || T21 || T31 || T12 || T22 || T32 || T4`
