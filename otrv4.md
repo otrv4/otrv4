@@ -206,7 +206,7 @@ Nonce (NONCE):
   24 byte (192-bit) one time use nonce created for use with XSalsa20 encryption
 
 ED448 points (POINT):
-  TODO: We need to choose a point serialization format for ed448 points
+  56 byte unsigned value, big-endian
 ```
 
 ### DRE messages and Auth NIZKPK
