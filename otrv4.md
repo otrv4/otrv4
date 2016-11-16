@@ -584,10 +584,7 @@ Finally:
   * Set `ratchet_flag` to `true`.  
   * Set `their_ecdh` as pubDHRs from the message.
 
-
-#### Calculating the root key, sending chain key, receiving chain key and secure session id
-
-TODO: where to move this?
+#### Calculating the shared secret, root key, sending chain key, receiving chain key and secure session id
 
 ```
 EC_shared_key = (G1*i)*r (POINT)
@@ -600,17 +597,16 @@ DH_shared_key = (g^x_i)^x_r (MPI)
 calculate_shared_secret(EC_shared_key, DH_shared_key):
    serialized_EC_secret = serialize_point(EC_shared_key)
    serialized_DH_secret = serialize_MPI(DH_shared_key)
-   secret = SHA3-256(serialized_EC_secret, serialized_DH_shared_key) // TODO: 256?
+   secret = SHA3-256(serialized_EC_secret, serialized_DH_shared_key) 
 ```
-
-*** end of todo **
 
 ```
 calculate_ratchet_keys(secret):
   R  = SHA3-256(0x00 || secret)
   Ca = SHA3-256(0x01 || secret)
   Cb = SHA3-256(0x02 || secret)
-  64-bit ssid = SHA(0x03 || secret) // TODO: how to generate this
+  64-bit ssid = SHA-256(0x03 || R, Ca, Cb). Let ssid be the first 
+     64 bits of this function.
 
   Cs, Cr = decide_between(Ca, Cb)
 
