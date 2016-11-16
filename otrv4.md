@@ -142,7 +142,7 @@ For the Diffie-Hellman group computations, the group is the one defined in RFC 3
 
 ```
    Prime is: 2^3072 - 2^3008 - 1 + 2^64 * { [2^2942 pi] + 1690314 }
- 
+
    Hex value:
    FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1
    29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD
@@ -160,9 +160,9 @@ For the Diffie-Hellman group computations, the group is the one defined in RFC 3
    F12FFA06 D98A0864 D8760273 3EC86A64 521F2B18 177B200C
    BBE11757 7A615D6C 770988C0 BAD946E2 08E24FA0 74E5AB31
    43DB5BFC E0FD108E 4B82D120 A93AD2CA FFFFFFFF FFFFFFFF
-   
+
    Generator g3: 2
-   
+
 ```
 
 Note that this means that whenever you see a Diffie-Hellman exponentiation in this document, it always means that the exponentiation is done modulo the above 3072-bit number.
@@ -178,19 +178,19 @@ Although Data messages have a different format in OTRv4, they use the same forma
 
 OTRv4 defines additional TLV record types:
 
-* Type 10: SMP Abort Message  
+* Type 10: SMP Abort Message
   If the user cancels SMP prematurely or encounters an error in the protocol and cannot continue, you may send a message (possibly with empty human-readable part) with this TLV type to instruct the other party's client to abort the protocol. The associated length should be zero and the associated value should be empty. If you receive a TLV of this type, you should change the SMP state to SMP_EXPECT1 (see below).
 
-* Type 11: SMPv2 Message 1  
+* Type 11: SMPv2 Message 1
   The value represents an initiating message of the Socialist Millionaires' Protocol, described below.
 
-* Type 12: SMPv2 Message 2  
+* Type 12: SMPv2 Message 2
   The value represents the second message in an instance of SMPv2.
 
-* Type 13: SMPv2 Message 3  
+* Type 13: SMPv2 Message 3
   The value represents the third message in an instance of SMPv2.
 
-* Type 14: SMPv2 Message 4  
+* Type 14: SMPv2 Message 4
   The value represents the final message in an instance of SMPv2.
 
 ### Data types
@@ -361,13 +361,13 @@ another while also allowing a level of participation deniability.
 This process is based on the Spawn protocol[2], which utilizes Dual Receiver
 Encryption (DRE) and a NIZKPK for authentication (Auth).
 
-Alice long-term Cramer-Shoup key-pair is `SKa = (x1a, x2a, y1a, y2a, za)` and `PKa = (Ca, Da, Ha)`.  
-Bob long-term Cramer-Shoup key-pair is `SKb = (x1b, x2b, y1b, y2b, zb)` and `PKb = (Cb, Db, Hb)`.  
-Both key pairs are generated with `DRGen()`.  
+Alice long-term Cramer-Shoup key-pair is `SKa = (x1a, x2a, y1a, y2a, za)` and `PKa = (Ca, Da, Ha)`.
+Bob long-term Cramer-Shoup key-pair is `SKb = (x1b, x2b, y1b, y2b, zb)` and `PKb = (Cb, Db, Hb)`.
+Both key pairs are generated with `DRGen()`.
 
 ```
-x_*: 3072-bit DH secret key  
-X_*: 3072-bit DH public key  
+x_*: 3072-bit DH secret key
+X_*: 3072-bit DH public key
 X_*^x_*: mix-key, a 3072-bit shared secret computed from a DH exchange
 ```
 
@@ -419,8 +419,8 @@ This is the first message of the DAKE. Bob sends it to Alice to commit to a choi
   * secret key `i` a random element from `Z_q` (446 bits).
   * public key `G1*i`
 3. Generates an ephemeral D-H private key pair:
-  * secret key `x_i` (448 bits). // TODO: confirm this size. 
-  * and a public key `X_i = g3 ^ x_i`. 
+  * secret key `x_i` (448 bits). // TODO: confirm this size.
+  * and a public key `X_i = g3 ^ x_i`.
 
 A pre-key is an OTR message encoded as:
 
@@ -453,8 +453,8 @@ A valid DRE-Auth message is generated as follows:
   * secret key `r` a random element from `Z_q` (446 bits).
   * public key `G1*r`
 3. Generates an ephemeral D-H private key pair:
-  * secret key `x_r` (448 bits). // TODO: confirm this size. 
-  * and a public key `X_r = g3 ^ x_r`. 
+  * secret key `x_r` (448 bits). // TODO: confirm this size.
+  * and a public key `X_r = g3 ^ x_r`.
 4. Generate `m = "Am" || "Bm" || G1*i || G1*r || X_i || X_r`, where "Am" is Alice's
    master signing key which was transmitted to Bob in the version advertisement
    of the Pre-Key Message. "Bm" Is Bob's master signing key.
@@ -542,18 +542,18 @@ In any event, calculate the first set of keys `R0, Cs0_0, Cr0_0 = calculate_ratc
 
 #### When you send a Data Message:
 
-If `ratchet_flag` is `true`:  
+If `ratchet_flag` is `true`:
   * Securely forget `our_ecdh`, increment `i`, reset `j`, and set `our_ecdh` to a new DH key pair which you generate. The new DH key pair should be generated with: **TODO**.
   * Derive new set of keys `R`, `Cs_ij` `Cr_ij` from secret part of `our_ecdh` and public part of `their_ecdh`:
     `Ri, Cs_i_j, Cs_i_j = calculate_ratchet_keys(Ri-1 || ECDH(our_ecdh, their_ecdh))`
   * Set `ratchet_flag` to false.
 
-Otherwise:  
-  * Derive the next sending Chain Key `Cs_i_j+1 = SHA3-256(Cs_i_j)`.  
+Otherwise:
+  * Derive the next sending Chain Key `Cs_i_j+1 = SHA3-256(Cs_i_j)`.
   * Increment `j`.
 
-In any event, calculate:  
-  * `MKenc = SHA3-256(0x00 || Cs_i_j)`  
+In any event, calculate:
+  * `MKenc = SHA3-256(0x00 || Cs_i_j)`
   * `MKmac = SHA3-256(0x01 || Cs_i_j)`
 
 Use the "encryption key" (`MKenc`) to encrypt the message, and the "mac key" (`MKmac`) to calculate its MAC.
@@ -576,8 +576,8 @@ You may need to use receiving chain keys older than `message_id-1` to calculate 
 Use the "mac key" (`MKmac`) to verify the MAC on the message. If it does not verify, reject the message.
 If the MAC verifies, decrypt the message using the "encryption key" (`MKenc`).
 
-Finally:  
-  * Set `ratchet_flag` to `true`.  
+Finally:
+  * Set `ratchet_flag` to `true`.
   * Set `their_ecdh` as pubDHRs from the message.
 
 #### Calculating the shared secret, root key, sending chain key, receiving chain key and secure session id
@@ -593,7 +593,7 @@ DH_shared_key = (g^x_i)^x_r (MPI)
 calculate_shared_secret(EC_shared_key, DH_shared_key):
    serialized_EC_secret = serialize_point(EC_shared_key)
    serialized_DH_secret = serialize_MPI(DH_shared_key)
-   secret = SHA3-256(serialized_EC_secret, serialized_DH_shared_key) 
+   secret = SHA3-256(serialized_EC_secret, serialized_DH_shared_key)
 ```
 
 ```
@@ -601,7 +601,7 @@ calculate_ratchet_keys(secret):
   R  = SHA3-256(0x00 || secret)
   Ca = SHA3-256(0x01 || secret)
   Cb = SHA3-256(0x02 || secret)
-  64-bit ssid = SHA-256(0x03 || R, Ca, Cb). Let ssid be the first 
+  64-bit ssid = SHA-256(0x03 || R, Ca, Cb). Let ssid be the first
      64 bits of this function.
 
   Cs, Cr = decide_between(Ca, Cb)
@@ -912,19 +912,19 @@ Note that it is possible for UIs simply to offer the old "combinations" of optio
 
 There are ten actions an OTRv4 client must handle:
 
-User actions:  
-  * User requests to start an OTR conversation  
-  * User requests to end an OTR conversation  
-  * User types a message to be sent  
+User actions:
+  * User requests to start an OTR conversation
+  * User requests to end an OTR conversation
+  * User types a message to be sent
 
-Received messages:  
-  * Plaintext without the whitespace tag  
-  * Plaintext with the whitespace tag  
-  * Query Message  
-  * Error Message  
-  * Pre-key message  
-  * DRE Auth message  
-  * Data Message  
+Received messages:
+  * Plaintext without the whitespace tag
+  * Plaintext with the whitespace tag
+  * Query Message
+  * Error Message
+  * Pre-key message
+  * DRE Auth message
+  * Data Message
 
 
 The following sections will outline what actions to take in each case. They all assume that at least one of `ALLOW_V3` or `ALLOW_V4` is set; if not, then OTR is completely disabled, and no special handling of messages should be done at all. Version 1 and 2 messages are out of the scope of this specification.
@@ -1203,7 +1203,7 @@ If everything is done correctly, then `Rab` should hold the value of `Pa - Pb` t
 The secret information x and y compared during this protocol contains not only information entered by the users, but also information unique to the conversation in which SMP takes place. Specifically, the format is:
 
 ```
-Version (BYTE)  
+Version (BYTE)
   The version of SMP used. The version described here is 2.
 
 Initiator fingerprint (20 BYTEs)
@@ -1421,10 +1421,10 @@ Set smpstate to `SMPSTATE_EXPECT1` and send a SMP abort to Alice.
 
 If smpstate is `SMPSTATE_EXPECT1`:
 
-* Verify Alice's zero-knowledge proofs for G2a and G3a:  
+* Verify Alice's zero-knowledge proofs for G2a and G3a:
   1. Check that both `G2a` and `G3a` are points in the curve.
-  2. Check that `c2 = HashToScalar(1 || G*d2 + G2a*c2)`.  
-  3. Check that `c3 = HashToScalar(2 || G*d3 + G3a*c3)`.  
+  2. Check that `c2 = HashToScalar(1 || G*d2 + G2a*c2)`.
+  3. Check that `c3 = HashToScalar(2 || G*d3 + G3a*c3)`.
 * Create a SMP message 2 and send it to Alice.
 * Set smpstate to `SMPSTATE_EXPECT3`.
 
@@ -1467,7 +1467,7 @@ If smpstate is `SMPSTATE_EXPECT3`:
 
 #### Receiving a SMP message 4
 
-If smpstate is not `SMPSTATE_EXPECT4`:  
+If smpstate is not `SMPSTATE_EXPECT4`:
 Set smpstate to `SMPSTATE_EXPECT1` and send a type 6 TLV (SMP abort) to Bob.
 
 If smpstate is SMPSTATE_EXPECT4:
@@ -1489,8 +1489,8 @@ Set smpstate to `SMPSTATE_EXPECT1`, as no more messages are expected from Bob.
 
 The DRE scheme consists of three functions:
 
-`PK, SK = DRGen()`, a key generation function.  
-`γ = DREnc(PK1, PK2, m)`, an encryption function.  
+`PK, SK = DRGen()`, a key generation function.
+`γ = DREnc(PK1, PK2, m)`, an encryption function.
 `m = DRDec(PK1, PK2, SKi, γ)`, a decryption function.
 
 #### Domain parameters
@@ -1577,7 +1577,7 @@ TODO: How to say that `i` is 1 or 2 depending if it is the corresponding secret 
 
 The Authentication scheme consists of two functions:
 
-`σ = Auth(A_2, a_2, {A_1, A_3}, m)`, an authentication function.  
+`σ = Auth(A_2, a_2, {A_1, A_3}, m)`, an authentication function.
 `Verif({A_1, A_2, A_3}, σ, m)`, a verification function.
 
 #### Domain parameters
@@ -1588,7 +1588,7 @@ G = (501459341212218748317573362239202803024229898883658122912772232650473550786
 
 #### Authentication: Auth(A2, a2, {A1, A3}, m):
 
-A2 is the public value associated with a2, that is, `A2 = G*a2`.  
+A2 is the public value associated with a2, that is, `A2 = G*a2`.
 m is the message to authenticate.
 
 1. Pick random values `t1, c2, c3, r2, r3` in Z_q.
@@ -1618,7 +1618,7 @@ d is an array of bytes.
 
 ## References
 
-1. M. Kojo. "More Modular Exponential (MODP) Diffie-Hellman groups for Internet Key Exchange (IKE)" https://www.ietf.org/rfc/rfc3526.txt2. 
+1. M. Kojo. "More Modular Exponential (MODP) Diffie-Hellman groups for Internet Key Exchange (IKE)" https://www.ietf.org/rfc/rfc3526.txt2.
 2. N. Unger, I. Goldberg. "Improved Techniques for Implementing Strongly Deniable Authenticated Key Exchanges." http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf
 3. "Off-the-Record Messaging Protocol version 3" https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html
 4. M. Hamburg. "Ed448-Goldilocks, a new elliptic curve." http://csrc.nist.gov/groups/ST/ecc-workshop-2015/papers/session7-hamburg-michael.pdf
