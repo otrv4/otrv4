@@ -325,6 +325,18 @@ PKe || sign( SKm, PKe )
 
 Version || Vers.Expiry || sign( SKv, Version || Vers.Expiry )
 
+Then this version advertisement is published in a public place, like a server.
+
+#### Version Advertisement Expiration Policy
+
+The user establishes a version advertisement expiration policy. In this policy,
+the user configures how often the version advertisement expires. The next
+advertisement should be published before expiration.
+
+If the advertisement is not published and if the only publicly available
+advertisement is expired, then this puts the user's participation deniability
+at risk.
+
 #### Advertisement Data Type
 
 Version Advertisement (ADV):
