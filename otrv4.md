@@ -202,6 +202,9 @@ OTRv4 defines additional TLV record types:
 OTRv4 uses the same data types as specified in OTRv3 (bytes, shorts, ints, MPIs, and DATA) with the addition of:
 
 ```
+Nonce (NONCE):
+  24 byte (192-bit) one time use nonce created for use with XSalsa20 encryption
+
 ED448 points (POINT):
   TODO: We need to choose a point serialization format for ed448 points
 ```
@@ -224,7 +227,7 @@ Dual-receiver encrypted message (DRE-M):
   l (MPI)
   n1 (MPI)
   n2 (MPI)
-  nonce (DATA)
+  nonce (NONCE)
   φ (DATA)
     Where (U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2, nonce, φ) = DREnc(pubA, pubB, m)
 ```
@@ -715,10 +718,11 @@ their_ecdh an ephemeral public key
     MKmac = SHA3-256(0x01 || Cs_j)
     ```
 
-5. Use the Enc key to encrypt the message with Xsalsa20, and the MAC key to calculate its mactag with SHA3-256. TO DO: we are missing the nonce of XSalsa20
+5. Use the Enc key to encrypt the message with XSalsa20, and the MAC key to calculate its mactag with SHA3-256.
 
     ```
-    ciphertext = Xsalsa20_Enc(MKenc, m)
+    nonce = generateNonce()
+    ciphertext = Xsalsa20_Enc(MKenc, nonce, m)
     mactag = SHA3-256(MKmac || ciphertext)
     msg = ciphertext || mactag
     ```
@@ -778,7 +782,7 @@ A receiver can reveal a MAC key in the following case:
 - the receiver has discarded associated message keys
 - the receiver has discarded the chain key that can be used to compute the message keys (chain keys from previous ratchets might be stored to compute message keys for skipped or delayed messages)
 
-### Packet format
+### Data Message format
 
 ```
 Protocol version (SHORT)
@@ -818,15 +822,16 @@ pubDHRs (MPI)
 
     The *next* ratchet [i.e. i+1] public key for the sender
 
+Nonce (NONCE)
+
+    The nonce used with XSalsa20 to create the encrypted message contained in
+    this packet
+
 Encrypted message (DATA)
 
     Using the appropriate encryption key (see below) derived from the sender's and recipient's DH public keys
-    (with the keyids given in this message), perform Xsalsa20 encryption of the message.
-    The initial counter is a 16-byte value whose first 8 bytes are the above "top half of counter init" value,
-    and whose last 8 bytes are all 0x00.
-    TODO: update this
-    Note that counter mode does not change the length of the message, so no message padding needs to be done.
-    If you *want* to do message padding (to disguise the length of your message), use the above TLV of type 0.
+    (with the keyids given in this message), perform XSalsa20 encryption of the message. The nonce used for this
+    operation is also included in the header of the data message packet
 
 Authenticator (MAC)
 
