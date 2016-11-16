@@ -193,10 +193,6 @@ OTRv4 defines additional TLV record types:
 * Type 14: SMPv2 Message 4  
   The value represents the final message in an instance of SMPv2.
 
-* Type 15: SMPv2 Message 1Q  
-  Like a SMPv2 Message 1, but whose value begins with a NUL-terminated user-specified question.
-
-
 ### Data types
 
 OTRv4 uses the same data types as specified in OTRv3 (bytes, shorts, ints, MPIs, and DATA) with the addition of:
@@ -1250,31 +1246,10 @@ SMP message 1 is sent by Alice to begin a DH exchange to determine two new gener
 The SMPv2 message 1 is a TLV type 11 with the following data:
 
 ```
-G2a (POINT)
-  Alice's half of the DH exchange to determine G2.
-
-c2 (MPI), d2 (MPI)
-  A zero-knowledge proof that Alice knows the value associated with her transmitted value G2a.
-
-G3a (POINT)
-  Alice's half of the DH exchange to determine G3.
-
-c3 (MPI), d3 (MPI)
-  A zero-knowledge proof that Alice knows the value associated with her transmitted value G3a.
-```
-
-
-#### SMP message 1Q
-
-TODO: What about merge message 1 and 1Q in SMP v2 by making the question a required field in the message structure but optional to the user?
-
-A SMP Message 1Q is the same as the SMP message 1, but is preceded by a user-specified question, which is associated with the user-specified portion of the secret.
-
-The SMP message 1Q is a TLV type 15 with the following data:
-
-```
 question (DATA)
   A user-specified question, which is associated with the user-specified portion of the secret.
+  If there is no question input from the user, the length of this is 0 and the
+  data is NULL.
 
 G2a (POINT)
   Alice's half of the DH exchange to determine G2.
