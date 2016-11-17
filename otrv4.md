@@ -534,9 +534,11 @@ The previously mentioned keys are affected by these events:
 
 #### When you start a new DAKE
 
-* Generates a new ephemeral D-H key-pair: Alice generates `(i, G1*i)` and Bob generates `(r, G1*r)`.
+* Generates a new ephemeral EC-D-H key-pair: Alice generates `(i, G1*i)` and Bob generates `(r, G1*r)`. The `EC_shared_key` is `(G1*i)*r`.
+* Generates a new ephemeral 3072-D-H key-pair: Alice generates `(x_i, g3^x_i)` and Bob generates `(x_r, g3^x_r)`. The `DH_shared_key` is `(g3^x_i)^x_r`. 
+* `K` is interpreted as `K = calculate_shared_secret(EC_shared_key, DH_shared_key)`. 
 
-
+// TODO: update this with mix key
 #### Upon completing the DAKE
 
 The AKE is considered to be completed when either:
@@ -549,15 +551,15 @@ The AKE is considered to be completed when either:
   * Set `our_ecdh` as our ephemeral public key from the DAKE (`i`, `G1*i`).
   * Set `their_ecdh` as the their ephemeral public key from the DAKE (`G1*r`).
 
-In any event, calculate the first set of keys `R0, Cs0_0, Cr0_0 = calculate_ratchet_keys(K)`.
+In any event, calculate the first set of keys and the session id`R0, Cs0_0, Cr0_0, ssi = calculate_ratchet_keys(K)`.
 
 
 #### When you send a Data Message:
 
 If `ratchet_flag` is `true`:  
-  * Securely delete `our_ecdh`, increment `i`, reset `j`, and set `our_ecdh` to a new DH key pair which you generate. The new DH key pair should be generated with: **TODO**.
+  * Securely delete `our_ecdh`, increment `i`, reset `j`, and set `our_ecdh` to a new DH key pair which you generate. The new DH key pair should be generated with: **TODO**.  
   * Derive new set of keys `R`, `Cs_ij` `Cr_ij` from secret part of `our_ecdh` and public part of `their_ecdh`:
-    `Ri, Cs_i_j, Cs_i_j = calculate_ratchet_keys(Ri-1 || ECDH(our_ecdh, their_ecdh))`
+    `Ri, Cs_i_j, Cs_i_j = calculate_ratchet_keys(Ri-1 || ECDH(our_ecdh, their_ecdh))`. //TODO: this should be a new function, this does not derive session id. How to deffirentiate this?
   * Set `ratchet_flag` to false.
 
 Otherwise:
@@ -613,8 +615,8 @@ calculate_ratchet_keys(secret):
   R  = SHA3-256(0x00 || secret)
   Ca = SHA3-256(0x01 || secret)
   Cb = SHA3-256(0x02 || secret)
-  64-bit ssid = SHA-256(0x03 || R, Ca, Cb). Let ssid be the first
-     64 bits of this function.
+  64-bit ssid = SHA-256(0x03 || R, Ca OR Cb). Let ssid be the first
+     64 bits of this function. // TODO: securely delete the rest?
 
   Cs, Cr = decide_between(Ca, Cb)
 
