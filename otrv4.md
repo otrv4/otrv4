@@ -523,7 +523,7 @@ k as Previously received message id
 R_i as Root key
 Cs_i_j as Sending Chain key
 Cr_i_k as Receiving Chain key
-our_ecdh an ECDH ephemeral key pair //TODO: this should be a new function, this does not derive session id. How to differentiate this?
+our_ecdh an ECDH ephemeral key pair
 their_ecdh an ECDH ephemeral public key
 our_dh a DH ephemeral key pair
 their_dh a DH ephemeral public key
