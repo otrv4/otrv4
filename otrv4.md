@@ -523,17 +523,16 @@ i as Current ratchet id
 j as Previous sent message id
 k as Previous received message id
 
-Ri as Root key
-Csi_j as Sending Chain key
-Cri_k as Receiving Chain key
-our_ecdh an ECDH ephemeral key pair
+R_i as Root key
+Cs_i_j as Sending Chain key
+Cr_i_k as Receiving Chain key
+our_ecdh an ECDH ephemeral key pair //TODO: this should be a new function, this does not derive session id. How to differentiate this?
 their_ecdh an ECDH ephemeral public key
 our_dh a DH ephemeral key pair
 their_dh a DH ephemeral public key
 
 (NOTE: our_* contains both a public and private key, whereas their_* contains only a public key)
 ```
-
 The previously mentioned keys are affected by these events:
 
 #### When you start a new DAKE
@@ -557,7 +556,7 @@ The AKE is considered to be completed when either:
   * Set `our_dh` as our DH ephemeral key pair from the DAKE (`x_i`, `g3^x_i`).
   * Set `their_dh` as their DH ephemeral public key from the DAKE (`g3^x_r`).
 
-In any event, calculate the first set of keys and the session id`R0, Cs0_0, Cr0_0, ssi = calculate_ratchet_keys(K)`.
+In any event, calculate the first set of keys and the session id`R_0, Cs_0_0, Cr_0_0, ssi = calculate_ratchet_keys(K)`.
 
 
 #### When you send a Data Message:
@@ -566,8 +565,8 @@ If `ratchet_flag` is `true`:
   * Securely forget `our_ecdh` and `our_dh`, increment `i`, reset `j`, set `our_ecdh` and `our_dh` to a new ECDH and DH key pair respectively which you generate.
   * The new ECDH key pair should be generated with: **TODO**.
   * The new DH key pair should be generated with: **TODO**.
-  * Derive new set of keys `R`, `Cs_ij` `Cr_ij` from secret part of `our_ecdh`, public part of `their_ecdh`, secret part of `our_dh`, and public part of `their_dh`:
-    `R_i, Cs_i_j, Cs_i_j = calculate_ratchet_keys(R_(i-1) || ECDH(our_ecdh, their_ecdh) || DH(our_dh, their_dh))` //TODO: this should be a new function, this does not derive session id. How to deffirentiate this?
+  * Derive new set of keys `R_i`, `Cs_i_j` `Cr_i_j` from `our_ecdh.secret`, `their_ecdh.public`, `our_dh.secret`, and `their_dh.public`:
+    `R_i, Cs_i_j, Cs_i_j = calculate_ratchet_keys(R_(i-1) || ECDH(our_ecdh.secret, their_ecdh.public) || DH(our_dh.secret, their_dh.public))` //TODO: this should be a new function, this does not derive session id. How to deffirentiate this?
   * Set `ratchet_flag` to false.
 
 Otherwise:
@@ -693,35 +692,15 @@ Verify MAC, Decrypt message 1_1
 
 The Double Ratchet Algorithm is a key management algorithm that was developed by Trevor Perrin and Moxie Marlinspike. After an initial key exchange it manages the ongoing renewal and maintenance of short-lived session keys. It combines a cryptographic ratchet based on Diffie–Hellman key exchange and a ratchet based on a key derivation function.
 
-For each correspondent, keep track of:
-
-```
-ratchet_flag whether we should ratchet before sending the next message
-i as Current ratchet id
-j as Previous sent message id
-k as Previous received message id
-
-R_i as Root key
-Cs_i_j as Sending Chain key
-Cr_i_k as Receiving Chain key
-our_ecdh an ECDH ephemeral key pair //TODO: this should be a new function, this does not derive session id. How to deffirentiate this?
-their_ecdh an ECDH ephemeral public key
-our_dh a DH ephemeral key pair
-their_dh a DH ephemeral public key
-
-(NOTE: our_* contains both a public and private key, whereas their_* contains only a public key)
-```
-
 #### When you send a Data Message:
 
 1. If ratchet_flag is true, first perform a ratchet:
     1. Derive new `R_i`, `Cs_i_0`, and `Cr_i_0` from secret part of `our_ecdh` and public part of `their_ecdh`.
-    2. Securely forget `our_ecdh`, increment `i`, and set `our_ecdh` to a new DH key pair which you generate.
+    2. Securely forget `our_ecdh`, increment `i`, and set `our_ecdh` to a new ECDH key pair which you generate.
     3. Set `ratchet_flag` to false.
 
     ```
     our_ecdh = {public: pubECDHa, secret: secECDHa} = generateECDHPair()
-    our_dh = {public: pubDHa, secret: secDHa} = generateDHPair()
 
     R_i, Ca_i_0, Cb_i_0 = calculate_ratchet_keys(R_(i-1) || ECDH(our_ecdh.secret, their_ecdh.public) || DH(our_dh.secret, their_dh.public)))
 
@@ -731,15 +710,14 @@ their_dh a DH ephemeral public key
 
 2. Set the `ratchet_id` to `i`.
 3. Set the ECDH pubkey in the Data message to `our_ecdh.public`.
-3. Set the DH pubkey in the Data message to `our_dh.public`.
-4. Increment `j`, and use `Cs_j` to derive the Enc and MAC key.
+3. Increment `j`, and use `Cs_j` to derive the Enc and MAC key.
 
     ```
     MKenc = SHA3-256(0x00 || Cs_j)
     MKmac = SHA3-256(0x01 || Cs_j)
     ```
 
-5. Use the Enc key to encrypt the message with XSalsa20, and the MAC key to calculate its mactag with SHA3-256.
+4. Use the Enc key to encrypt the message with XSalsa20, and the MAC key to calculate its mactag with SHA3-256.
 
     ```
     nonce = generateNonce()
@@ -748,7 +726,7 @@ their_dh a DH ephemeral public key
     msg = ciphertext || mactag
     ```
 
-6. Derive the next sending Chain Key
+5. Derive the next sending Chain Key
 
     ```
     Cs_j+1 = SHA3-256(Cs_j)
@@ -1044,7 +1022,7 @@ If everything checks out:
   * Initialize the double ratcheting:
     * Set `ratchet_flag` as `false`.
     * Set `our_ecdh` as our ephemeral key pair from the DAKE (`r`, `G1*r`).
-    * Calculate the first set of keys `R0, Cs0_0, Cr0_0 = calculate_ratchet_keys(K)`
+    * Calculate the first set of keys `R_0, Cs_0_0, Cr_0_0 = calculate_ratchet_keys(K)`
   * If there is a recent stored message, encrypt it and send it as a Data Message.
 
 
@@ -1067,9 +1045,9 @@ If everything checks out:
   * Transition msgstate to `MSGSTATE_ENCRYPTED`.
   * Initialize the double ratcheting:
     * Set `ratchet_flag` as `true`.
-    * Set `our_ecdh` as our ephemeral public key from the DAKE (`i`, `G1*i`).
-    * Set `their_ecdh` as the their ephemeral public key from the DAKE (`G1*r`).
-    * Calculate the first set of keys `R0, Cs0_0, Cr0_0 = calculate_ratchet_keys(K)`
+    * Set `our_ecdh` as our ephemeral keypair from the DAKE (`i`, `G1*i`).
+    * Set `their_ecdh` as their ephemeral public key from the DAKE (`G1*r`).
+    * Calculate the first set of keys `R_0, Cs_0_0, Cr_0_0 = calculate_ratchet_keys(K)`
   * If there is a recent stored message, encrypt it and send it as a Data Message.
 
 Otherwise, ignore the message.
