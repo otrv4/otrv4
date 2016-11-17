@@ -680,7 +680,7 @@ Verify MAC, Decrypt message 1_1
 
 ### The double ratcheting
 
-TODO: The double ratchet does ...
+The Double Ratchet Algorithm is a key management algorithm that was developed by Trevor Perrin and Moxie Marlinspike. After an initial key exchange it manages the ongoing renewal and maintenance of short-lived session keys. It combines a cryptographic ratchet based on Diffie–Hellman key exchange and a ratchet based on a key derivation function.
 
 For each correspondent, keep track of:
 
