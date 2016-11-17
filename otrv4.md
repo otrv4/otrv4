@@ -103,13 +103,13 @@ Threats that an OTR conversation does not mitigate:
 
 Integer variables are in lower case (x, y). Points and other variables are in upper case (P, Q).
 
-Addition and subtraction of elliptic curve points A and B is A + B and A - B. Addition of a point to other point generates another point. Scalar multiplication of an integer (scalar) with an elliptic curve point B yields a new point C = a*B.
+Addition and subtraction of elliptic curve points A and B is A + B and A - B. Addition of a point to other point generates another point. Scalar multiplication of an integer (scalar) with an elliptic curve point B yields a new point C = a * B.
 
-The concatenation of byte sequences x and P is x || P. In this case, x and P represent a fixed-length byte sequence encoding the respective values. See section "Data types" for encoding and decoding details.
+The concatenation of byte sequences x and P is x || P. In this case, x and P represent a fixed-length byte sequence encoding the respective values. See section [Data types](#data-types) for encoding and decoding details.
 
 ### Elliptic Curve Parameters
 
-OTRv4 uses the Curve448 elliptic curve[4][5], which defines the following parameters:
+OTRv4 uses the [Ed448-Goldilocks][4] [elliptic curve][5], which defines the following parameters:
 
 ```
 Base point (B)
@@ -138,7 +138,7 @@ An integer modulo p is a "field element". An integer modulo q is a a "scalar" (a
 
 ### 3072 Diffie-Hellman Parameters
 
-For the Diffie-Hellman group computations, the group is the one defined in RFC 3526[1] with 3072-bit modulus (hex, big-endian):
+For the Diffie-Hellman group computations, the group is the one defined in [RFC 3526][1] with 3072-bit modulus (hex, big-endian):
 
 ```
    Prime is: 2^3072 - 2^3008 - 1 + 2^64 * { [2^2942 pi] + 1690314 }
@@ -370,7 +370,7 @@ This section outlines the flow of the Deniable Authenticated Key Exchange, which
 is a way for two parties to mutually agree upon a shared key and authenticate one
 another while also allowing a level of participation deniability.
 
-This process is based on the Spawn protocol[2], which utilizes Dual Receiver
+This process is based on the [Spawn protocol][2], which utilizes Dual Receiver
 Encryption (DRE) and a NIZKPK for authentication (Auth).
 
 Alice long-term Cramer-Shoup key-pair is `SKa = (x1a, x2a, y1a, y2a, za)` and `PKa = (Ca, Da, Ha)`.
@@ -497,7 +497,7 @@ Receiver's Version Advertisement (ADV)
 
 Bob might respond to Alice's request or notify of willingness to start a
 conversation with a version lower then version 4. If this is the
-case the protocol falls back to OTR version 3[3].
+case the protocol falls back to [OTR version 3][3].
 
 Note: OTR version 4 is the latest version to support previous versions.
 
@@ -1621,8 +1621,8 @@ d is an array of bytes.
 
 ## References
 
-1. M. Kojo. "More Modular Exponential (MODP) Diffie-Hellman groups for Internet Key Exchange (IKE)" https://www.ietf.org/rfc/rfc3526.txt2.
-2. N. Unger, I. Goldberg. "Improved Techniques for Implementing Strongly Deniable Authenticated Key Exchanges." http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf
-3. "Off-the-Record Messaging Protocol version 3" https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html
-4. M. Hamburg. "Ed448-Goldilocks, a new elliptic curve." http://csrc.nist.gov/groups/ST/ecc-workshop-2015/papers/session7-hamburg-michael.pdf
-5. A. Langley, M. Hamburg, and S. Turner, “Elliptic Curves for Security.” Internet Engineering Task Force; RFC 7748 (Informational); IETF, Jan-2016. http://www.ietf.org/rfc/rfc7748.txt
+[1]: https://www.ietf.org/rfc/rfc3526.txt2 "M. Kojo: More Modular Exponential (MODP) Diffie-Hellman groups for Internet Key Exchange (IKE)"
+[2]: http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf "N. Unger, I. Goldberg: Improved Techniques for Implementing Strongly Deniable Authenticated Key Exchanges"
+[3]: https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html "Off-the-Record Messaging Protocol version 3"
+[4]: http://csrc.nist.gov/groups/ST/ecc-workshop-2015/papers/session7-hamburg-michael.pdf "M. Hamburg: Ed448-Goldilocks, a new elliptic curve"
+[5]: http://www.ietf.org/rfc/rfc7748.txt "A. Langley, M. Hamburg, and S. Turner: Elliptic Curves for Security.” Internet Engineering Task Force; RFC 7748 (Informational); IETF, Jan-2016"
