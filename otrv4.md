@@ -288,6 +288,12 @@ supports and is willing to use.
 Once Bob has decided to start the conversation in response to Alice's request,
 he will initiate an interactive, deniable, authenticated key exchange DAKE.
 
+### Requesting conversation with older OTR version
+
+Bob might respond to Alice's request or notify of willingness to start a
+conversation using OTRv3. If this is the case and Alice supports the version 3,
+the protocol falls back to OTRv3 [3].
+
 ### Version Advertisement
 
 OTR4 introduces mandatory version advertisement to resist version rollback. In
@@ -493,15 +499,6 @@ Receiver's Version Advertisement (ADV)
   The Auth value.
 ```
 
-### Requesting conversation with older OTR version
-
-Bob might respond to Alice's request or notify of willingness to start a
-conversation with a version lower then version 4. If this is the
-case the protocol falls back to [OTR version 3][3].
-
-Note: OTR version 4 is the latest version to support previous versions.
-
-
 ## Key management
 
 In the DAKE, OTRv4 makes use of long-term Cramer-Shoup keys and ephemeral D-H keys.
@@ -520,8 +517,8 @@ In order to manage keys, each correspondent keeps track of:
 ```
 ratchet_flag whether we should rotate the root key before sending the next message
 i as Current ratchet id
-j as Previous sent message id
-k as Previous received message id
+j as Previously sent message id
+k as Previously received message id
 
 R_i as Root key
 Cs_i_j as Sending Chain key
@@ -551,65 +548,26 @@ The AKE is considered to be completed when either:
   * Set `our_dh` as our DH ephemeral key pair from the DAKE (`x_r`, `g3^x_r`).
 2. Alice receives and verifies the DRE Auth message. In this case:
   * Set `ratchet_flag` as `true`.
-  * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`i`, `G1*i`).
-  * Set `their_ecdh` as their ECDH ephemeral public key from the DAKE (`G1*r`).
+  * Set `our_ecdh` as our ephemeral public key from the DAKE (`i`, `G1*i`).
+  * Set `their_ecdh` as the their ephemeral public key from the DAKE (`G1*r`).
   * Set `our_dh` as our DH ephemeral key pair from the DAKE (`x_i`, `g3^x_i`).
   * Set `their_dh` as their DH ephemeral public key from the DAKE (`g3^x_r`).
+3. In any event, calculate the first set of keys with `R0, Cs0_0, Cr0_0, SSID = calculate_ratchet_keys_and_ssid(K)`.
 
-In any event, calculate the first set of keys and the session id`R_0, Cs_0_0, Cr_0_0, ssi = calculate_ratchet_keys(K)`.
+#### Calculating Keys
 
-
-#### When you send a Data Message:
-
-If `ratchet_flag` is `true`:  
-  * Securely forget `our_ecdh` and `our_dh`, increment `i`, reset `j`, set `our_ecdh` and `our_dh` to a new ECDH and DH key pair respectively which you generate.
-  * The new ECDH key pair should be generated with: **TODO**.
-  * The new DH key pair should be generated with: **TODO**.
-  * Derive new set of keys `R_i`, `Cs_i_j` `Cr_i_j` from `our_ecdh.secret`, `their_ecdh.public`, `our_dh.secret`, and `their_dh.public`:
-    `R_i, Cs_i_j, Cs_i_j = calculate_ratchet_keys(R_(i-1) || ECDH(our_ecdh.secret, their_ecdh.public) || DH(our_dh.secret, their_dh.public))` //TODO: this should be a new function, this does not derive session id. How to deffirentiate this?
-  * Set `ratchet_flag` to false.
-
-Otherwise:
-  * Derive the next sending Chain Key `Cs_i_(j+1) = SHA3-256(Cs_i_j)`.
-  * Increment `j`.
-
-In any event, calculate:
-  * `MKenc = SHA3-256(0x00 || Cs_i_j)`
-  * `MKmac = SHA3-256(0x01 || Cs_i_j)`
-
-Use the "encryption key" (`MKenc`) to encrypt the message, and the "mac key" (`MKmac`) to calculate its MAC.
-
-
-#### When you receive a Data Message:
-
-Use the `message_id` from the message to compute the Receiving Chain key (since `k`) and calculate `MKenc` and `Mkmac`:
-
+##### ECDH and DH Shared Secrets
 ```
-for recId = k+1; recId <= message_id; recId++:
-  Cr_i_recId = SHA3-256(Cr_i_recId-1)
+pubECDH, secretECDH = newECDH()
 
-MKenc = SHA3-256(0x00 || Cr_message_id)
-MKmac = SHA3-256(0x01 || Cr_message_id)
-```
-
-You may need to use receiving chain keys older than `message_id-1` to calculate the current if you have missed previous messages.
-
-Use the "mac key" (`MKmac`) to verify the MAC on the message. If it does not verify, reject the message.
-If the MAC verifies, decrypt the message using the "encryption key" (`MKenc`).
-
-Finally:
-  * Set `ratchet_flag` to `true`.
-  * Set `their_ecdh` as pubDHRs from the message.
-
-#### Calculating the shared secret, root key, sending chain key, receiving chain key and secure session id
-
-```
 EC_shared_key = (G1*i)*r (POINT)
   The shared EC key.
+
 DH_shared_key = (g^x_i)^x_r (MPI)
   The shared 3072-DH key.
 ```
 
+##### Mixed Secret: Mixing ECDH and DH Shared Secrets
 ```
 calculate_shared_secret(EC_shared_key, DH_shared_key):
    serialized_EC_secret = serialize_point(EC_shared_key)
@@ -617,33 +575,53 @@ calculate_shared_secret(EC_shared_key, DH_shared_key):
    secret = SHA3-256(serialized_EC_secret, serialized_DH_shared_key)
 ```
 
+##### Double Ratchet Keys and Secure Session ID
 ```
-calculate_ratchet_keys(secret):
+calculate_ratchet_keys_and_ssid(secret):
   R  = SHA3-256(0x00 || secret)
   Ca = SHA3-256(0x01 || secret)
   Cb = SHA3-256(0x02 || secret)
-  64-bit ssid = SHA-256(0x03 || R, Ca OR Cb). Let ssid be the first
-     64 bits of this function. // TODO: securely delete the rest?
-
+  SSID = SHA3-256(0x03 || R, Ca, Cb)
+    Let SSID be the first 64 bits of this function. Discard the rest of the bits.
   Cs, Cr = decide_between(Ca, Cb)
-
-  return R, Cs, Cr
+  return R, Cs, Cr, SSID
 ```
 
-Both side will compare their public keys to choose a chain key for sending and receiving:
+##### Double Ratchet Keys Only
+```
+calculate_ratchet_keys_only(secret):
+  R  = SHA3-256(0x00 || secret)
+  Ca = SHA3-256(0x01 || secret)
+  Cb = SHA3-256(0x02 || secret)
+  Cs, Cr = decide_between(Ca, Cb)
+  return R, Cs, Cr
 
-- Alice (and similarly for Bob) determines if she is the "low" end or the "high" end of this ratchet.
-If Alice's ephemeral D-H public key is numerically greater than Bob's public key, then she is the "high" end.
-Otherwise, she is the "low" end.
-- Alice selects the chain keys for sending and receiving:
-  - If she is the "high" end, use Ca as the sending chain key, Cb as the receiving chain key.
-  - If she is the "low" end, use Cb as the sending chain key, Ca as the receiving chain key.
+```
+
+##### Deciding Between Chain Keys
+
+```
+decide_between(Ca, Cb):
+    Both sides will compare their public keys to choose a chain key for sending and receiving:
+    - Alice (and similarly for Bob) determines if she is the "low" end or the "high" end of this ratchet.
+    If Alice's ephemeral D-H public key is numerically greater than Bob's public key, then she is the "high" end.
+    Otherwise, she is the "low" end.
+    - Alice selects the chain keys for sending and receiving:
+      - If she is the "high" end, use Ca as the sending chain key (Cs), Cb as the receiving chain key (Cr).
+      - If she is the "low" end, use Cb as the sending chain key (Cs), Ca as the receiving chain key (Cr).
+      return Cs, Cr
+```
 
 
 ## Data Exchange
 
 This section describes how each participant will use the Double Ratchet
 algorithm to exchange data initialized with the shared secret established in the DAKE.
+The Double Ratchet Algorithm is a key management algorithm that was developed by Trevor
+Perrin and Moxie Marlinspike. After an initial key exchange it manages the ongoing renewal
+and maintenance of short-lived session keys. It combines a cryptographic ratchet based on
+Diffie–Hellman key exchange and a ratchet based on a key derivation function.
+
 
 To perform a new ratchet means to rotate the root key and chain key to use a new D-H key pair.
 A ratchet represents a group of data messages which are encrypted by keys derived from the
@@ -688,86 +666,58 @@ Derive Enc-key & MAC-key
 Verify MAC, Decrypt message 1_1
 ```
 
-### The double ratcheting
-
-The Double Ratchet Algorithm is a key management algorithm that was developed by Trevor Perrin and Moxie Marlinspike. After an initial key exchange it manages the ongoing renewal and maintenance of short-lived session keys. It combines a cryptographic ratchet based on Diffie–Hellman key exchange and a ratchet based on a key derivation function.
-
 #### When you send a Data Message:
 
-1. If ratchet_flag is true, first perform a ratchet:
-    1. Derive new `R_i`, `Cs_i_0`, and `Cr_i_0` from secret part of `our_ecdh` and public part of `their_ecdh`.
-    2. Securely forget `our_ecdh`, increment `i`, and set `our_ecdh` to a new ECDH key pair which you generate.
-    3. Set `ratchet_flag` to false.
+If `ratchet_flag` is `true`:
+  * Securely delete `our_next_public_ECDH_key`, increment the current ratchet ID `i`,
+    reset the previously sent message ID `j` to 0, and set `our_next_public_ECDH_key`
+    to a new DH key pair which you generate with [newECDH()](#ECDH-and-DH-Shared-Secrets)
+  * Derive new set of keys `R_i`, `Cs_i_j` `Cr_i_j` from `our_ecdh.secret`, `their_ecdh.public`, `our_dh.secret`, and `their_dh.public`:
+    `R_i, Cs_i_j, Cs_i_j = calculate_ratchet_keys(R_(i-1) || ECDH(our_ecdh.secret, their_ecdh.public) || DH(our_dh.secret, their_dh.public))`
+  * Set `ratchet_flag` to false.
 
-    ```
-    our_ecdh = {public: pubECDHa, secret: secECDHa} = generateECDHPair()
+Otherwise:
+  * Derive the next sending Chain Key `Cs_i_j+1 = SHA3-256(Cs_i_j)`.
+  * Increment previously sent message ID `j`.
 
-    R_i, Ca_i_0, Cb_i_0 = calculate_ratchet_keys(R_(i-1) || ECDH(our_ecdh.secret, their_ecdh.public) || DH(our_dh.secret, their_dh.public)))
+In any event, calculate the encryption key (`MKenc`) and the mac key (`MKmac`):
+  * `MKenc = SHA3-256(0x00 || Cs_i_j)`
+  * `MKmac = SHA3-256(0x01 || Cs_i_j)`
 
-    i = i+1
-    ratchet_flag = false
-    ```
-
-2. Set the `ratchet_id` to `i`.
-3. Set the ECDH pubkey in the Data message to `our_ecdh.public`.
-3. Increment `j`, and use `Cs_j` to derive the Enc and MAC key.
-
-    ```
-    MKenc = SHA3-256(0x00 || Cs_j)
-    MKmac = SHA3-256(0x01 || Cs_j)
-    ```
-
-4. Use the Enc key to encrypt the message with XSalsa20, and the MAC key to calculate its mactag with SHA3-256.
-
-    ```
-    nonce = generateNonce()
-    ciphertext = Xsalsa20_Enc(MKenc, nonce, m)
-    mactag = SHA3-256(MKmac || ciphertext)
-    msg = ciphertext || mactag
-    ```
-
-5. Derive the next sending Chain Key
-
-    ```
-    Cs_j+1 = SHA3-256(Cs_j)
-    ```
+Use the encryption key to encrypt the message, and the mac key to calculate its MAC.
+  * Nonce = generateNonce()
+  * Encrypted_message = XSalsa20_Enc(MKenc, Nonce, m)
+  * Authenticator = SHA3-256(MKmac || Encrypted_message)
 
 #### When you receive a Data Message:
 
-1. If the ratchet_id is not larger than `i`, reject the message.
-2. If the message_id is not larger than `k`, reject the message.
-3. Use the `message_id` to compute the Receiving Chain key `Cr_message_id`.
+Reject messages with ratchet_id less than the current ratchet_id and message_id
+less than the current expected message_id.
 
-    ```
-    Cr_message_id = SHA3-256(Cr_message_id-1)
-    ```
+Use the message ID to compute the receiving chain key (since the previously received message ID) and calculate encryption and mac keys.
 
-4. Use the `Cr_message_id` to derive the Enc and MAC key.
+```
+k = Previously received message id
 
-    ```
-    MKenc = SHA3-256(0x00 || Cs_j)
-    MKmac = SHA3-256(0x01 || Cs_j)
-    ```
+for recId = k+1; recId <= message_id; recId++:
+  Cr_i_recId = SHA3-256(Cr_i_recId-1)
 
-5. Use the MAC key to verify the mactag on the message with SHA3-256. If it does not verify, reject the message.
+MKenc = SHA3-256(0x00 || Cr_message_id)
+MKmac = SHA3-256(0x01 || Cr_message_id)
+```
 
-    ```
-    ciphertext, mactag = msg
-    verify(mactag == SHA3-256(MKmac || ciphertext))
-    ```
+You may need to use receiving chain keys older than `message_id-1` to calculate the
+current if you did not receive previous messages. For example, your peer sends you
+data messages 1, 2, and 3, but you only receive 1 and 3. In that case you would use
+the chain key for message 1 to derive the chain key for message 3.
 
-6. Decrypt the message using the Enc key with Xsalsa20.
+Use the "mac key" (`MKmac`) to verify the MAC on the message. If the message verification
+fails, reject the message. If the MAC verifies, decrypt the message using the "encryption key"
+(`MKenc`).
 
-    ```
-    m = Xsalsa20_Dec(MKenc, ciphertext)
-    ```
-
-7. Set k to `message_id`, set `ratchet_flag` to true, set `their_ecdh` as `pubDHRs` of the message.
-
-    ```
-    k = message_id
-    ratchet_flag = true
-    ```
+Finally:
+  * Set `ratchet_flag` to `true`.
+  * Set `their_ecdh` as the Next Public ECDH key from the message.
 
 ### Revealing MAC Keys
 
@@ -817,9 +767,9 @@ Ratchet id ratchet_id (INT)
 Message id message_id (INT)
     Must be strictly greater than 0, and increment by 1 with each message
 
-pubDHRs (MPI)
+Next Public ECDH Key (MPI)
 
-    The *next* ratchet [i.e. i+1] public key for the sender
+    The *next* ratchet [i.e. i+1] ECDH public key for the sender
 
 Nonce (NONCE)
 
@@ -1217,7 +1167,7 @@ Responder fingerprint (20 BYTEs)
   The fingerprint that the party that did not initiate SMP is using in the current conversation.
 
 Secure Session ID
-  The ssid described above.
+  The SSID described above.
 
 User-specified secret (DATA)
   The input string given by the user at runtime.
