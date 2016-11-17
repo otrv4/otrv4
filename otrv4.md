@@ -526,8 +526,12 @@ k as Previous received message id
 Ri as Root key
 Csi_j as Sending Chain key
 Cri_k as Receiving Chain key
-our_ecdh an ephemeral key pair
-their_ecdh an ephemeral public key
+our_ecdh an ECDH ephemeral key pair
+their_ecdh an ECDH ephemeral public key
+our_dh a DH ephemeral key pair
+their_dh a DH ephemeral public key
+
+(NOTE: our_* contains both a public and private key, whereas their_* contains only a public key)
 ```
 
 The previously mentioned keys are affected by these events:
@@ -535,21 +539,23 @@ The previously mentioned keys are affected by these events:
 #### When you start a new DAKE
 
 * Generates a new ephemeral EC-D-H key-pair: Alice generates `(i, G1*i)` and Bob generates `(r, G1*r)`. The `EC_shared_key` is `(G1*i)*r`.
-* Generates a new ephemeral 3072-D-H key-pair: Alice generates `(x_i, g3^x_i)` and Bob generates `(x_r, g3^x_r)`. The `DH_shared_key` is `(g3^x_i)^x_r`. 
+* Generates a new ephemeral 3072-D-H key-pair: Alice generates `(x_i, g3^x_i)` and Bob generates `(x_r, g3^x_r)`. The `mix_key` is `(g3^x_i)^x_r`.
 * `K` is interpreted as `K = calculate_shared_secret(EC_shared_key, DH_shared_key)`. 
 
-// TODO: update this with mix key
 #### Upon completing the DAKE
 
 The AKE is considered to be completed when either:
 
 1. Bob sends the DRE Auth message. In this case:
   * Set `ratchet_flag` as `false`.
-  * Set `our_ecdh` as our ephemeral key pair from the DAKE (`r`, `G1*r`).
+  * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`r`, `G1*r`).
+  * Set `our_dh` as our DH ephemeral key pair from the DAKE (`x_r`, `g3^x_r`).
 2. Alice receives and verifies the DRE Auth message. In this case:
   * Set `ratchet_flag` as `true`.
-  * Set `our_ecdh` as our ephemeral public key from the DAKE (`i`, `G1*i`).
-  * Set `their_ecdh` as the their ephemeral public key from the DAKE (`G1*r`).
+  * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`i`, `G1*i`).
+  * Set `their_ecdh` as their ECDH ephemeral public key from the DAKE (`G1*r`).
+  * Set `our_dh` as our DH ephemeral key pair from the DAKE (`x_i`, `g3^x_i`).
+  * Set `their_dh` as their DH ephemeral public key from the DAKE (`g3^x_r`).
 
 In any event, calculate the first set of keys and the session id`R0, Cs0_0, Cr0_0, ssi = calculate_ratchet_keys(K)`.
 
@@ -557,13 +563,15 @@ In any event, calculate the first set of keys and the session id`R0, Cs0_0, Cr0_
 #### When you send a Data Message:
 
 If `ratchet_flag` is `true`:  
-  * Securely delete `our_ecdh`, increment `i`, reset `j`, and set `our_ecdh` to a new DH key pair which you generate. The new DH key pair should be generated with: **TODO**.  
-  * Derive new set of keys `R`, `Cs_ij` `Cr_ij` from secret part of `our_ecdh` and public part of `their_ecdh`:
-    `Ri, Cs_i_j, Cs_i_j = calculate_ratchet_keys(Ri-1 || ECDH(our_ecdh, their_ecdh))`. //TODO: this should be a new function, this does not derive session id. How to deffirentiate this?
+  * Securely forget `our_ecdh` and `our_dh`, increment `i`, reset `j`, set `our_ecdh` and `our_dh` to a new ECDH and DH key pair respectively which you generate.
+  * The new ECDH key pair should be generated with: **TODO**.
+  * The new DH key pair should be generated with: **TODO**.
+  * Derive new set of keys `R`, `Cs_ij` `Cr_ij` from secret part of `our_ecdh`, public part of `their_ecdh`, secret part of `our_dh`, and public part of `their_dh`:
+    `R_i, Cs_i_j, Cs_i_j = calculate_ratchet_keys(R_(i-1) || ECDH(our_ecdh, their_ecdh) || DH(our_dh, their_dh))` //TODO: this should be a new function, this does not derive session id. How to deffirentiate this?
   * Set `ratchet_flag` to false.
 
 Otherwise:
-  * Derive the next sending Chain Key `Cs_i_j+1 = SHA3-256(Cs_i_j)`.
+  * Derive the next sending Chain Key `Cs_i_(j+1) = SHA3-256(Cs_i_j)`.
   * Increment `j`.
 
 In any event, calculate:
@@ -650,7 +658,8 @@ still useful to effect key rotations.)
 Alice                                                                           Bob
 -----------------------------------------------------------------------------------
 Initialize root key, chain keys                        Initialize root key, chain keys
-Generate DH, pubDHa, privDHa                           Generate DH, pubDHb, privDHb
+Generate ECDH, pubECDHa, secECDHa                      Generate ECDH, pubECDHb, secECDHb
+Generate DH, pubDHa, secDHa                            Generate DH, pubDHb, secDHb
 Send data message 0_0            -------------------->
 Send data message 0_1            -------------------->
 
@@ -692,31 +701,37 @@ i as Current ratchet id
 j as Previous sent message id
 k as Previous received message id
 
-Ri as Root key
-Csi_j as Sending Chain key
-Cri_k as Receiving Chain key
-our_ecdh an ephemeral key pair
-their_ecdh an ephemeral public key
+R_i as Root key
+Cs_i_j as Sending Chain key
+Cr_i_k as Receiving Chain key
+our_ecdh an ECDH ephemeral key pair //TODO: this should be a new function, this does not derive session id. How to deffirentiate this?
+their_ecdh an ECDH ephemeral public key
+our_dh a DH ephemeral key pair
+their_dh a DH ephemeral public key
+
+(NOTE: our_* contains both a public and private key, whereas their_* contains only a public key)
 ```
 
 #### When you send a Data Message:
 
-1. If ratchet_flag is true, first ratchet:
-    1. Derive new pair of `R`, `Cs_0`, `Cr_0` from secret part of `our_ecdh` and public part of `their_ecdh`.
+1. If ratchet_flag is true, first perform a ratchet:
+    1. Derive new `R_i`, `Cs_i_0`, and `Cr_i_0` from secret part of `our_ecdh` and public part of `their_ecdh`.
     2. Securely forget `our_ecdh`, increment `i`, and set `our_ecdh` to a new DH key pair which you generate.
     3. Set `ratchet_flag` to false.
 
     ```
-    our_ecdh = {pubDHa, privDHa} = generateECDH()
+    our_ecdh = {public: pubECDHa, secret: secECDHa} = generateECDHPair()
+    our_dh = {public: pubDHa, secret: secDHa} = generateDHPair()
 
-    R1, Ca1_0, Cb1_0 = calculate_ratchet_keys(R0 || ECDH(our_ecdh, their_ecdh))
+    R_i, Ca_i_0, Cb_i_0 = calculate_ratchet_keys(R_(i-1) || ECDH(our_ecdh.secret, their_ecdh.public) || DH(our_dh.secret, their_dh.public)))
 
     i = i+1
     ratchet_flag = false
     ```
 
 2. Set the `ratchet_id` to `i`.
-3. Set the DH pubkey in the Data message to the public part of `our_ecdh`.
+3. Set the ECDH pubkey in the Data message to `our_ecdh.public`.
+3. Set the DH pubkey in the Data message to `our_dh.public`.
 4. Increment `j`, and use `Cs_j` to derive the Enc and MAC key.
 
     ```
