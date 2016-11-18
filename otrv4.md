@@ -173,7 +173,7 @@ Note that this means that whenever you see a Diffie-Hellman exponentiation in th
 
 OTRv4 has the same message formats as OTRv3 without compatibility with version 2. It means query messages, whitespace tags, error messages, encoding and fragmentation is performed as specified in OTRv3.
 
-The fragmentation format is the same as for OTRv3. That means you can't tell the difference between a 3 and 4 protocol message from the fragmented pieces - you will have to wait until after reassembly to finalize how to deal with a message. For details, see [fragmentation section][3] in OTRv3 documentation.
+The fragmentation format is the same as for OTRv3. You will have to wait until after reassembly to finalize how to deal with a message. For details, see [fragmentation section][3] in OTRv3 documentation.
 
 Although Data Messages have a different format in OTRv4, they use the same format for TLV (type/length/value) records. OTRv4 supports the same TLV record types from OTRv3, with the exception of SMP (version 1) TLVs (types 2-7).
 
