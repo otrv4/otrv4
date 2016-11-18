@@ -40,12 +40,13 @@ while to_send = client.message_to_send()
 2. [High Level Overview](#high-level-overview)
 3. [Assumptions](#assumptions)
 4. [Security Properties](#security-properties)
-5. [OTR Conversation Initialization](#otr-conversation-initialization)
+5. [Preliminaries](#preliminaries)
+6. [OTR Conversation Initialization](#otr-conversation-initialization)
   1. [Version Advertisement](#version-advertisement)
   2. [Creating a Version Advertisement](#creating-a-version-advertisement)
   3. [Deniable Authenticated Key Exchange (DAKE)](#deniable-authenticated-key-exchange-dake)
-6. [Requesting conversation with older OTR version](#requesting-conversation-with-older-otr-version)
-7. [Data exchange](#data-exchange)
+7. [Requesting conversation with older OTR version](#requesting-conversation-with-older-otr-version)
+8. [Data exchange](#data-exchange)
 9. [The protocol state machine](#the-protocol-state-machine)
 10. [Socialist Millionaires' Protocol (SMP) version 2](#socialist-millionaires-protocol-smp-version-2)
 11. [Appendices](#appendices)
@@ -266,7 +267,7 @@ OTR public keys have fingerprints, which are hex strings that serve as identifie
 
 ## OTR Conversation Initialization
 
-OTR4 conversations are established by an deniable authenticated key exchange
+OTRv4 conversations are established by an deniable authenticated key exchange
 protocol (DAKE).
 
 There are two ways Alice can inform Bob that she is willing to use the OTR
@@ -299,7 +300,7 @@ the protocol falls back to OTRv3 [3].
 
 ### Version Advertisement
 
-OTR4 introduces mandatory version advertisement to resist version rollback. In
+OTRv4 introduces mandatory version advertisement to resist version rollback. In
 both cases, both parties will include in the DAKE authenticated information
 about what versions they support.
 
@@ -379,13 +380,16 @@ This section outlines the flow of the Deniable Authenticated Key Exchange, which
 is a way for two parties to mutually agree upon a shared key and authenticate one
 another while also allowing a level of participation deniability.
 
-This process is based on the [Spawn protocol][2], which utilizes Dual Receiver
-Encryption (DRE) and a NIZKPK for authentication (Auth).
+This process is based on the [Spawn protocol][2], which utilizes dual-receiver
+encryption (DRE) and a non-interactive zero-knowledge proofs of knowledge (NIZKPK)
+for authentication (Auth).
 
 Alice long-term Cramer-Shoup key-pair is `SKa = (x1a, x2a, y1a, y2a, za)` and `PKa = (Ca, Da, Ha)`.
 Bob long-term Cramer-Shoup key-pair is `SKb = (x1b, x2b, y1b, y2b, zb)` and `PKb = (Cb, Db, Hb)`.
 Both key pairs are generated with `DRGen()`.
 
+
+TODO: x/X is the better name? Also, this is integer/point?
 ```
 x_*: 3072-bit DH secret key
 X_*: 3072-bit DH public key
@@ -434,8 +438,7 @@ Query Message or Whitespace Tag ------->
 
 This is the first message of the DAKE. Bob sends it to Alice to commit to a choice of D-H key. A valid Pre-key message is generated as follows:
 
-1. Create a version advertisement. How to do this is detailed [here]
-   (#creating-a-version-advertisement)
+1. Create a version advertisement. How to do this is detailed [here](#creating-a-version-advertisement)
 2. Choose a random ephemeral ECDH key pair:
   * secret key `i` a random element from `Z_q` (446 bits).
   * public key `G1*i`
@@ -455,7 +458,7 @@ Sender Instance tag (INT)
 Receiver Instance tag (INT)
   The instance tag of the intended recipient. For a pre-key message this will often be 0, since the other party may not have identified their instance tag yet.
 Sender's Version Advertisement (ADV)
-  This is described in the section above on Creating a Version Advertisement
+  This is described in the section above on [Creating a Version Advertisement](#creating-a-version-advertisement)
 G1*i (POINT)
   The ephemeral public ECDH key.
 X_i (MPI)
@@ -464,12 +467,11 @@ X_i (MPI)
 
 #### DRE-Auth message
 
-This is the second message of the DAKE. Alice sends it to Bob to commit to a choice of her D-H key and acknowledgement of Bob's D-H key. The long-term public key and D-H public keys are encrypted with Dual-receiver encryption and authenticated with an Non-interactive Zero-knowledge proof of knowledge.
+This is the second message of the DAKE. Alice sends it to Bob to commit to a choice of her D-H key and acknowledgement of Bob's D-H key. The long-term public key and D-H public keys are encrypted with DRE and authenticated with an NIZKPK.
 
 A valid DRE-Auth message is generated as follows:
 
-1. Create a version advertisement. How to do this is detailed [here]
-   (#creating-a-version-advertisement)
+1. Create a version advertisement. How to do this is detailed [here](#creating-a-version-advertisement)
 2. Choose a random ephemeral ECDH key pair:
   * secret key `r` a random element from `Z_q` (446 bits).
   * public key `G1*r`
@@ -495,7 +497,7 @@ Sender Instance tag (INT)
 Receiver Instance tag (INT)
   The instance tag of the intended recipient.
 Receiver's Version Advertisement (ADV)
-  This is described in the section above on Creating a Version Advertisement
+  This is described in the section above on [Creating a Version Advertisement](#creating-a-version-advertisement)
 γ (DRE-M)
   The Dual-receiver encrypted value.
 σ (AUTH)
@@ -506,7 +508,7 @@ Receiver's Version Advertisement (ADV)
 
 In the DAKE, OTRv4 makes use of long-term Cramer-Shoup keys and ephemeral D-H keys.
 
-For exchanging conversation messages, OTRv4 uses a key structure, and key-rotation strategy, inspired on the "Double Ratchet" spec. The goal is to provide forward secrecy even in the advent of not receiving messages from the other participant for a considerable amount of time.
+For exchanging conversation messages, OTRv4 uses a key structure, and key-rotation strategy, inspired on the [Double Ratchet][6] spec. The goal is to provide forward secrecy even in the advent of not receiving messages from the other participant for a considerable amount of time.
 
 The messages are encrypted and authenticated using a set of receiving (and sending) MAC and encryption keys, derived from sending (and receiving) chain keys.
 
@@ -1320,7 +1322,7 @@ This main state variable for SMP controls what SMP-specific TLVs will be accepte
 
 ```
 SMPSTATE_EXPECT1
-  This state indicates that only SMP message 1 or SMP message should be accepted. This is the default state when SMP has not yet begun. This state is also reached whenever an error occurs or SMP is aborted, and the protocol must be restarted from the beginning.
+  This state indicates that only SMP message 1 or SMP message 1Q should be accepted. This is the default state when SMP has not yet begun. This state is also reached whenever an error occurs or SMP is aborted, and the protocol must be restarted from the beginning.
 
 SMPSTATE_EXPECT2
   This state indicates that only SMP message 2 should be accepted.
@@ -1506,7 +1508,7 @@ SKi is the secret key of the person decrypting the message.
 
 1. Parse `γ` to retrieve components
   `(U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2, nonce, φ) = γ`.
-2. Verify NIZKPKi:
+2. Verify NIZKPK:
   1. for j ∈ {1, 2} compute:
     1. `αj = HashToScalar(U1j || U2j || Ej)`
     2. `T1j = G1*nj + U1j*l`
@@ -1579,3 +1581,4 @@ d is an array of bytes.
 [3]: https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html "Off-the-Record Messaging Protocol version 3"
 [4]: http://csrc.nist.gov/groups/ST/ecc-workshop-2015/papers/session7-hamburg-michael.pdf "M. Hamburg: Ed448-Goldilocks, a new elliptic curve"
 [5]: http://www.ietf.org/rfc/rfc7748.txt "A. Langley, M. Hamburg, and S. Turner: Elliptic Curves for Security.” Internet Engineering Task Force; RFC 7748 (Informational); IETF, Jan-2016"
+[6]: https://github.com/trevp/double_ratchet/wiki "T. Perrin: Double Ratchet Algorithm"
