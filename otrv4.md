@@ -134,7 +134,7 @@ Number of bits in q (|q|)
   446 bits
 ```
 
-An integer modulo p is a "field element". An integer modulo q is a a "scalar" (also a value on Z_q), and is considered a MPI for encoding and decoding purposes.
+An integer modulo p is a "field element". An integer modulo q is a "scalar" (also a value on Z_q), and is considered a MPI for encoding and decoding purposes.
 
 ### 3072 Diffie-Hellman Parameters
 
@@ -172,14 +172,14 @@ Note that this means that whenever you see a Diffie-Hellman exponentiation in th
 
 OTRv4 has the same message formats as OTRv3 without compatibility with version 2. It means query messages, whitespace tags, error messages, encoding and fragmentation is performed as specified in OTRv3.
 
-Fragmentation is should be implemented to be strictly compatible with OTRv3 (have "|" as separators and always have instance tags).
+The fragmentation format is the same as for OTRv3. That means you can't tell the difference between a 3 and 4 protocol message from the fragmented pieces - you will have to wait until after reassembly to finalize how to deal with a message. For details, see [fragmentation section][3] in OTRv3 documentation.
 
-Although Data messages have a different format in OTRv4, they use the same format for TLV (type/length/value) records. OTRv4 supports the same TLV record types from OTRv3, with the exception of SMP (version 1) TLVs (types 2-7).
+Although Data Messages have a different format in OTRv4, they use the same format for TLV (type/length/value) records. OTRv4 supports the same TLV record types from OTRv3, with the exception of SMP (version 1) TLVs (types 2-7).
 
 OTRv4 defines additional TLV record types:
 
 * Type 10: SMP Abort Message
-  If the user cancels SMP prematurely or encounters an error in the protocol and cannot continue, you may send a message (possibly with empty human-readable part) with this TLV type to instruct the other party's client to abort the protocol. The associated length should be zero and the associated value should be empty. If you receive a TLV of this type, you should change the SMP state to SMP_EXPECT1 (see below).
+  If the user cancels SMP prematurely or encounters an error in the protocol and cannot continue, you may send a message (possibly with empty human-readable part) with this TLV type to instruct the other party's client to abort the protocol. The associated length should be zero and the associated value should be empty. If you receive a TLV of this type, you should change the SMP state to SMPSTATE_EXPECT1 (see below).
 
 * Type 11: SMPv2 Message 1
   The value represents an initiating message of the Socialist Millionaires' Protocol, described below.
@@ -192,6 +192,9 @@ OTRv4 defines additional TLV record types:
 
 * Type 14: SMPv2 Message 4
   The value represents the final message in an instance of SMPv2.
+
+* Type 15: SMPv2 Message 1Q
+  Like a SMPv2 Message 1, but whose value begins with a NUL-terminated user-specified question.
 
 ### Data types
 
@@ -536,7 +539,7 @@ The previously mentioned keys are affected by these events:
 
 * Generates a new ephemeral EC-D-H key-pair: Alice generates `(i, G1*i)` and Bob generates `(r, G1*r)`. The `EC_shared_key` is `(G1*i)*r`.
 * Generates a new ephemeral 3072-D-H key-pair: Alice generates `(x_i, g3^x_i)` and Bob generates `(x_r, g3^x_r)`. The `mix_key` is `(g3^x_i)^x_r`.
-* `K` is interpreted as `K = calculate_shared_secret(EC_shared_key, DH_shared_key)`. 
+* `K` is interpreted as `K = calculate_shared_secret(EC_shared_key, DH_shared_key)`.
 
 #### Upon completing the DAKE
 
@@ -1569,7 +1572,7 @@ d is an array of bytes.
 1. Compute `h = SHA3-512(d)` as an unsigned value, big-endian.
 2. Return `h (mod q)`
 
-## References
+<!--- References -->
 
 [1]: https://www.ietf.org/rfc/rfc3526.txt2 "M. Kojo: More Modular Exponential (MODP) Diffie-Hellman groups for Internet Key Exchange (IKE)"
 [2]: http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf "N. Unger, I. Goldberg: Improved Techniques for Implementing Strongly Deniable Authenticated Key Exchanges"
