@@ -42,8 +42,8 @@ while to_send = client.message_to_send()
 4. [Security Properties](#security-properties)
 5. [Preliminaries](#preliminaries)
 6. [OTR Conversation Initialization](#otr-conversation-initialization)
-  1. [Version Advertisement](#version-advertisement)
-  2. [Creating a Version Advertisement](#creating-a-version-advertisement)
+  1. [User Profile](#user-profile)
+  2. [Creating a Profile](#creating-a-profile)
   3. [Deniable Authenticated Key Exchange (DAKE)](#deniable-authenticated-key-exchange-dake)
 7. [Requesting conversation with older OTR version](#requesting-conversation-with-older-otr-version)
 8. [Data exchange](#data-exchange)
@@ -298,81 +298,63 @@ Bob might respond to Alice's request or notify of willingness to start a
 conversation using OTRv3. If this is the case and Alice supports the version 3,
 the protocol falls back to OTRv3 [3].
 
-### Version Advertisement
+## User Profile
 
-OTRv4 introduces mandatory version advertisement to resist version rollback. In
-both cases, both parties will include in the DAKE authenticated information
-about what versions they support.
+OTRv4 introduces mandatory user profile publication. The user profile contains
+a Cramer-Shoup long term public key, signed supported version information, and a signed
+profile expiration date. Both parties will include the user profile in the beginning
+of the DAKE. The frequency of the user profile publication is determined by its
+expiration and renewal policy.
 
-### Creating a Version Advertisement
+### Creating a User Profile
 
-#### Overview
+To create a user profile, both Alice and Bob generate:
 
-To create a version advertisement, both Alice and Bob generate three sets
-of keys:
+1. Cramer-Shoup key-pair: PK, SK
+2. Supported version information string in the same format as OTRv3 Query Messages
+3. Profile Expiration
 
-1. One master signing set: PKm, SKm
-2. One version signing set: PKv, SKv
-3. One set for Dual Receiver Encryption (DRE): PKe, SKe
+One of the Cramer-Shoup secret key values (z) is used to create signatures
+of the entire profile. This is created using the Ed448 signature algorithm as
+documented in [4].
 
-They use these keys to create the 4 parts of the version advertisement.
+The user profile components are as follows:
 
-1. The public master signing key:
+1. PK
+2. version_info
+3. profile_expiration
+4. profile_sig = sign( PK, version_info, profile_expiration )
+5. transition_sig = sign( otrv3_DSA_fingerprint )
 
-PKm
+Then this profile should be published in a public place, like an untrusted server.
 
-2. The public version signing key and a signature of it by the secret master
-   signing key:
+#### Renewing a Profile
 
-PKv || sign( SKm, PKv )
-
-3. The Cramer-Shoup public key and a signature of it by the secret master signing key:
-
-PKe || sign( SKm, PKe )
-
-4. The version, version expiration and the signature of both signed by the
-   secret version signing key:
-
-Version || Vers.Expiry || sign( SKv, Version || Vers.Expiry )
-
-Then this version advertisement is published in a public place, like a server.
-
-#### Version Advertisement Expiration Policy
-
-The user establishes a version advertisement expiration policy. In this policy,
-the user configures how often the version advertisement expires. The next
-advertisement should be published before expiration.
-
-If the advertisement is not published and if the only publicly available
-advertisement is expired, then this puts the user's participation deniability
+If a renewed profile is not published and if the only publicly available
+profile is expired, then this puts the user's participation deniability
 at risk.
 
-#### Advertisement Data Type
+Before the profile expires, the user must publish an updated profile with a new
+expiration date. The user establishes the frequency of expiration.
 
-Version Advertisement (ADV):
-  Master signing key (MASTER-SIGN-PUBKEY)
-  Version signing key (VERSION-SIGN-PUBKEY)
-  Signature of version signing key by the master signing key (SIG)
+#### User Profile Data Type
+
+User Profile (USER-PROF):
+  Cramer-Shoup key (CRAMER-SHOUP-PUBKEY)
   Version (VER)
   Version Expiration (VER-EXP)
-  Signature of version and version expiration by the version signing key (SIG)
-  Cramer Shoup signing key (CRAMER-SHOUP-PUBKEY)
-  Signature of Cramer-Shoup public key by the master signing key (SIG)
+  Signature of profile (SIG)
 
 Version (VER):
   A string corresponding to the user's supported OTR versions. The format is
   described in OTR version 3 under the section "OTR Query Messages".
 
 Version Expiration (VER-EXP):
-  This is a 4 byte value that contains the date that this advertisement will
-  expire.
+  4 byte value that contains the date that this profile will expire.
 
-TODO: the 3 below are waiting on the decision of what kind of signature scheme we
-are using
-
-Master signing key (MASTER-SIGN-PUBKEY):
-Version signing key (VERSION-SIGN-PUBKEY):
-Signature (SIG):
+Signature of profile (MPI):
+  4 byte unsigned len (896 bits), big-endian
+  len byte unsigned value, big-endian
 
 ### Deniable Authenticated Key Exchange (DAKE)
 
@@ -438,7 +420,7 @@ Query Message or Whitespace Tag ------->
 
 This is the first message of the DAKE. Bob sends it to Alice to commit to a choice of D-H key. A valid Pre-key message is generated as follows:
 
-1. Create a version advertisement. How to do this is detailed [here](#creating-a-version-advertisement)
+1. Create a user profile. How to do this is detailed [here](#creating-a-profile)
 2. Choose a random ephemeral ECDH key pair:
   * secret key `i` a random element from `Z_q` (446 bits).
   * public key `G1*i`
@@ -457,8 +439,9 @@ Sender Instance tag (INT)
   The instance tag of the person sending this message.
 Receiver Instance tag (INT)
   The instance tag of the intended recipient. For a pre-key message this will often be 0, since the other party may not have identified their instance tag yet.
-Sender's Version Advertisement (ADV)
-  This is described in the section above on [Creating a Version Advertisement](#creating-a-version-advertisement)
+Sender's User Profile (USER-PROF)
+  This is described in the section above on [Creating a User Profile]
+  (#creating-a-user-profile)
 G1*i (POINT)
   The ephemeral public ECDH key.
 X_i (MPI)
@@ -471,7 +454,8 @@ This is the second message of the DAKE. Alice sends it to Bob to commit to a cho
 
 A valid DRE-Auth message is generated as follows:
 
-1. Create a version advertisement. How to do this is detailed [here](#creating-a-version-advertisement)
+1. Create a user profile. How to do this is detailed [here]
+   (#creating-a-profile)
 2. Choose a random ephemeral ECDH key pair:
   * secret key `r` a random element from `Z_q` (446 bits).
   * public key `G1*r`
@@ -479,7 +463,7 @@ A valid DRE-Auth message is generated as follows:
   * secret key `x_r` (448 bits). // TODO: confirm this size.
   * and a public key `X_r = g3 ^ x_r`.
 4. Generate `m = "Am" || "Bm" || G1*i || G1*r || X_i || X_r`, where "Am" is Alice's
-   master signing key which was transmitted to Bob in the version advertisement
+   master signing key which was transmitted to Bob in her user profile
    of the Pre-Key Message. "Bm" Is Bob's master signing key.
 5. Compute `DREnc(pubA, pubB, m)` and serialize it as a DRE-M value in the variable `γ`.
 6. Compute `σ = Auth(Hb, zb, {Ha, G1*i}, "I" || "R" || G1*i || X_i || γ)`.
@@ -496,8 +480,9 @@ Sender Instance tag (INT)
   The instance tag of the person sending this message.
 Receiver Instance tag (INT)
   The instance tag of the intended recipient.
-Receiver's Version Advertisement (ADV)
-  This is described in the section above on [Creating a Version Advertisement](#creating-a-version-advertisement)
+Receiver's User Profile (USER-PROF)
+  This is described in the section above on [Creating a User
+  Profile](#creating-a-user-profile)
 γ (DRE-M)
   The Dual-receiver encrypted value.
 σ (AUTH)
@@ -964,7 +949,9 @@ This indicates that you have already sent a Pre-key message to your corresponden
 
 Regardless of authstate value, you should:
 
-  * Verify that the master signing key in the version advertisement is trusted
+  * Verify that the Cramer-Shoup public key is trusted
+  * Verify that the profile signature is valid
+  * Verify that the profile is not expired
   * Verify that the point G1*i received in the pre-key message is on curve 448
   * Verify that the X_i D-H public key is from the correct group
 
@@ -987,8 +974,9 @@ If the message is version 4 and `ALLOW_V4` is not set, ignore this message. Othe
 
 If authstate is `AUTHSTATE_AWAITING_DRE_AUTH`:
 
-  * Verify that the peer's master signing key in the version advertisement is
-    trusted
+  * Verify that the Cramer-Shoup public key is trusted
+  * Verify that the profile signature is valid
+  * Verify that the profile is not expired
   * If the auth σ is valid, decrypt the DRE message and verify:
     * that the point G1*r received in the pre-key message is on curve 448
     * that the X_r D-H public key is from the correct group
@@ -1579,6 +1567,6 @@ d is an array of bytes.
 [1]: https://www.ietf.org/rfc/rfc3526.txt2 "M. Kojo: More Modular Exponential (MODP) Diffie-Hellman groups for Internet Key Exchange (IKE)"
 [2]: http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf "N. Unger, I. Goldberg: Improved Techniques for Implementing Strongly Deniable Authenticated Key Exchanges"
 [3]: https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html "Off-the-Record Messaging Protocol version 3"
-[4]: http://csrc.nist.gov/groups/ST/ecc-workshop-2015/papers/session7-hamburg-michael.pdf "M. Hamburg: Ed448-Goldilocks, a new elliptic curve"
+[4]: https://mikehamburg.com/papers/goldilocks/goldilocks.pdfi "M. Hamburg: Ed448-Goldilocks, a new elliptic curve"
 [5]: http://www.ietf.org/rfc/rfc7748.txt "A. Langley, M. Hamburg, and S. Turner: Elliptic Curves for Security.” Internet Engineering Task Force; RFC 7748 (Informational); IETF, Jan-2016"
 [6]: https://github.com/trevp/double_ratchet/wiki "T. Perrin: Double Ratchet Algorithm"
