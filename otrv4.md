@@ -370,15 +370,19 @@ Alice long-term Cramer-Shoup key-pair is `SKa = (x1a, x2a, y1a, y2a, za)` and `P
 Bob long-term Cramer-Shoup key-pair is `SKb = (x1b, x2b, y1b, y2b, zb)` and `PKb = (Cb, Db, Hb)`.
 Both key pairs are generated with `DRGen()`.
 
-
 TODO: x/X is the better name? Also, this is integer/point?
-```
-x_*: 3072-bit DH secret key
-X_*: 3072-bit DH public key
-X_*^x_*: mix-key, a 3072-bit shared secret computed from a DH exchange
-```
 
 #### Overview
+
+```
+a, b: 3072-bit DH secret key
+A, B: 3072-bit DH public key = g3^a, g3^b
+K_dh: mix-key, a 3072-bit shared secret computed from a DH exchange = A^b, B^a
+
+x, y: ECDH secret key
+X, Y: ECDH public key = g1*x, g1*y
+K_ecdh: a shared secret computed from an ECDH exchange = X*y, Y*x
+```
 
 ```
 Alice (I)                                Bob (R)
@@ -391,30 +395,30 @@ Query Message or Whitespace Tag ------->
 
 **Alice:**
 
-1. Generates an ephemeral ECDH secret key `i` and a public key `G1*i`.
-2. Generates an ephemeral DH secret key `x_i` and a public key `X_i = g3^x_i`.
-3. Sends Bob a pre-key message `ψ1 = ("I", G1*i, X_i)`.
+1. Generates an ephemeral ECDH secret key `x` and a public key `X`.
+2. Generates an ephemeral DH secret key `a` and a public key `A`.
+3. Sends Bob a pre-key message `ψ1 = ("I", X, A)`.
 
 
 **Bob:**
 
-1. Generates an ephemeral ECDH secret key `r` and public key `G1*r`.
-2. Generates an ephemeral DH secret key `x_r` and a public key `X_r = g3^x_r`.
-3. Computes `γ = DREnc(PKb, PKa, m)`, being `m = "I" || "R" || G1*i || G1*r || X_i || X_r`.
-4. Computes `σ = Auth(Hb, zb, {Ha, G1*i}, "I" || "R" || G1*i || X_i || γ)`.
-5. Computes `k = SHA3((G1*i) * r || X_i^x_r)` and securely erases `r` and `x_r`.
+1. Generates an ephemeral ECDH secret key `y` and a public key `Y`.
+2. Generates an ephemeral DH secret key `b` and a public key `B`.
+3. Computes `γ = DREnc(PKb, PKa, m)`, being `m = "I" || "R" || X || Y || A || B`.
+4. Computes `σ = Auth(Hb, zb, {Ha, X}, "I" || "R" || X || A || γ)`.
+5. Computes `k = SHA3(K_ecdh || K_dh)` and securely erases `y` and `b`.
 6. Sends Alice a DRE-Auth Message `ψ2 = ("R", γ, σ)`.
 
 **Alice:**
 
-1. Verifies `Verif({Ha, Hb, G1*i}, σ, “I” || “R” || G1*i || X_i || γ)`.
+1. Verifies `Verif({Ha, Hb, X}, σ, “I” || “R” || X || A || γ)`.
 2. Decrypts `m = DRDec(PKa, PKb, SKa, γ)`.
 3. Verifies the following properties of the decrypted message `m`:
   1. The message is of the correct form (e.g., the fields are of the expected length)
   2. Alice's identifier is the first one listed
   3. Bob's identifier is the second one listed, and it matches the identifier transmitted outside of the ciphertext
-  4. `(G1*i, X_i)` is a prekey that Alice previously sent and remains unused
-4. Computes `k = SHA3((G1*r) * i || X_r^x_i)` and securely erases `i` and `x_i`.
+  4. `(X, A)` is a prekey that Alice previously sent and remains unused
+4. Computes `k = SHA3(K_ecdh || K_dh)` and securely erases `x` and `a`.
 
 #### Pre-key message
 
@@ -422,11 +426,11 @@ This is the first message of the DAKE. Bob sends it to Alice to commit to a choi
 
 1. Create a user profile. How to do this is detailed [here](#creating-a-profile)
 2. Choose a random ephemeral ECDH key pair:
-  * secret key `i` a random element from `Z_q` (446 bits).
-  * public key `G1*i`
-3. Generates an ephemeral D-H private key pair:
-  * secret key `x_i` (448 bits). // TODO: confirm this size.
-  * and a public key `X_i = g3 ^ x_i`.
+  * secret key `x` a random element from `Z_q` (446 bits).
+  * public key `X`
+3. Generates an ephemeral D-H secret key pair:
+  * secret key `a` (448 bits). // TODO: confirm this size.
+  * and a public key `A = g3 ^ a`.
 
 A pre-key is an OTR message encoded as:
 
@@ -442,9 +446,9 @@ Receiver Instance tag (INT)
 Sender's User Profile (USER-PROF)
   This is described in the section above on [Creating a User Profile]
   (#creating-a-user-profile)
-G1*i (POINT)
+X (POINT)
   The ephemeral public ECDH key.
-X_i (MPI)
+A (MPI)
   The ephemeral public D-H key.
 ```
 
@@ -457,6 +461,7 @@ A valid DRE-Auth message is generated as follows:
 1. Create a user profile. How to do this is detailed [here]
    (#creating-a-profile)
 2. Choose a random ephemeral ECDH key pair:
+<<<<<<< HEAD
   * secret key `r` a random element from `Z_q` (446 bits).
   * public key `G1*r`
 3. Generates an ephemeral D-H private key pair:
@@ -464,9 +469,18 @@ A valid DRE-Auth message is generated as follows:
   * and a public key `X_r = g3 ^ x_r`.
 4. Generate `m = "Am" || "Bm" || G1*i || G1*r || X_i || X_r`, where "Am" is Alice's
    master signing key which was transmitted to Bob in her user profile
+=======
+  * secret key `y` a random element from `Z_q` (446 bits).
+  * public key `Y`
+3. Generates an ephemeral D-H secret key pair:
+  * secret key `b` (448 bits). // TODO: confirm this size.
+  * and a public key `B = g3 ^ b`.
+4. Generate `m = "Am" || "Bm" || X || Y || A || B`, where "Am" is Alice's
+   master signing key which was transmitted to Bob in the version advertisement
+>>>>>>> Rename uses of DH and ECDH computation and keys to be consistent, rename references of private keys to secret keys
    of the Pre-Key Message. "Bm" Is Bob's master signing key.
 5. Compute `DREnc(pubA, pubB, m)` and serialize it as a DRE-M value in the variable `γ`.
-6. Compute `σ = Auth(Hb, zb, {Ha, G1*i}, "I" || "R" || G1*i || X_i || γ)`.
+6. Compute `σ = Auth(Hb, zb, {Ha, X}, "I" || "R" || X || A || γ)`.
 
 
 A DRE-Auth is an OTR message encoded as:
@@ -518,14 +532,14 @@ their_ecdh an ECDH ephemeral public key
 our_dh a DH ephemeral key pair
 their_dh a DH ephemeral public key
 
-(NOTE: our_* contains both a public and private key, whereas their_* contains only a public key)
+(NOTE: our_* contains both a public and secret key, whereas their_* contains only a public key)
 ```
 The previously mentioned keys are affected by these events:
 
 #### When you start a new DAKE
 
-* Generates a new ephemeral EC-D-H key-pair: Alice generates `(i, G1*i)` and Bob generates `(r, G1*r)`. The `EC_shared_key` is `(G1*i)*r`.
-* Generates a new ephemeral 3072-D-H key-pair: Alice generates `(x_i, g3^x_i)` and Bob generates `(x_r, g3^x_r)`. The `mix_key` is `(g3^x_i)^x_r`.
+* Generates a new ephemeral ECDH key pair: Alice generates `(x, X)` and Bob generates `(y, Y)`. The `EC_shared_key` is `K_ecdh`.
+* Generates a new ephemeral 3072-bit DH key pair: Alice generates `(a, A)` and Bob generates `(b, B)`. The `mix_key` is `K_dh`.
 * `K` is interpreted as `K = calculate_shared_secret(EC_shared_key, DH_shared_key)`.
 
 #### Upon completing the DAKE
@@ -534,15 +548,15 @@ The AKE is considered to be completed when either:
 
 1. Bob sends the DRE Auth message. In this case:
   * Set `ratchet_flag` as `false`.
-  * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`r`, `G1*r`).
-  * Set `our_dh` as our DH ephemeral key pair from the DAKE (`x_r`, `g3^x_r`).
+  * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`y`, `Y`).
+  * Set `our_dh` as our DH ephemeral key pair from the DAKE (`b`, `B`).
 2. Alice receives and verifies the DRE Auth message. In this case:
   * Set `ratchet_flag` as `true`.
-  * Set `our_ecdh` as our ephemeral public key from the DAKE (`i`, `G1*i`).
-  * Set `their_ecdh` as the their ephemeral public key from the DAKE (`G1*r`).
-  * Set `our_dh` as our DH ephemeral key pair from the DAKE (`x_i`, `g3^x_i`).
-  * Set `their_dh` as their DH ephemeral public key from the DAKE (`g3^x_r`).
-3. In any event, calculate the first set of keys with `R0, Cs0_0, Cr0_0, SSID = calculate_ratchet_keys_and_ssid(K)`.
+  * Set `our_ecdh` as our ephemeral public key from the DAKE (`x`, `X`).
+  * Set `their_ecdh` as the their ephemeral public key from the DAKE (`Y`).
+  * Set `our_dh` as our DH ephemeral key pair from the DAKE (`a`, `A`).
+  * Set `their_dh` as their DH ephemeral public key from the DAKE (`B`).
+3. In any event, calculate the first set of keys with `R_0, Cs_0_0, Cr_0_0, SSID = calculate_ratchet_keys_and_ssid(K)`.
 
 #### Calculating Keys
 
@@ -550,11 +564,11 @@ The AKE is considered to be completed when either:
 ```
 pubECDH, secretECDH = newECDH()
 
-EC_shared_key = (G1*i)*r (POINT)
-  The shared EC key.
+EC_shared_key = (g*x)*y (POINT)
+  The shared ECDH key.
 
-DH_shared_key = (g^x_i)^x_r (MPI)
-  The shared 3072-DH key.
+DH_shared_key = (g^x)^y (MPI)
+  The shared 3072-bit DH key.
 ```
 
 ##### Mixed Secret: Mixing ECDH and DH Shared Secrets
@@ -625,11 +639,10 @@ still useful to effect key rotations.)
 Alice                                                                           Bob
 -----------------------------------------------------------------------------------
 Initialize root key, chain keys                        Initialize root key, chain keys
-Generate ECDH, pubECDHa, secECDHa                      Generate ECDH, pubECDHb, secECDHb
-Generate DH, pubDHa, secDHa                            Generate DH, pubDHb, secDHb
+Generate K_ecdh, X, x                                  Generate K_ecdh, Y, y
+Generate K_dh, A, a                                    Generate K_dh, B, b
 Send data message 0_0            -------------------->
 Send data message 0_1            -------------------->
-
 
                                                        Receive data message 0_0
                                                        Recover receiving chain key 0_0
@@ -949,21 +962,26 @@ This indicates that you have already sent a Pre-key message to your corresponden
 
 Regardless of authstate value, you should:
 
+<<<<<<< HEAD
   * Verify that the Cramer-Shoup public key is trusted
   * Verify that the profile signature is valid
   * Verify that the profile is not expired
   * Verify that the point G1*i received in the pre-key message is on curve 448
+=======
+  * Verify that the master signing key in the version advertisement is trusted
+  * Verify that the point X received in the pre-key message is on curve 448
+>>>>>>> Rename uses of DH and ECDH computation and keys to be consistent, rename references of private keys to secret keys
   * Verify that the X_i D-H public key is from the correct group
 
 If everything checks out:
 
   * Reply with a DRE Auth Message
-  * Compute the Diffie-Hellman shared secret `K = (G1*i)*r`.
+  * Compute the ECDH shared secret K_ecdh = (g1*x)*y
   * Transition authstate to `AUTHSTATE_NONE`.
   * Transition msgstate to `MSGSTATE_ENCRYPTED`.
   * Initialize the double ratcheting:
     * Set `ratchet_flag` as `false`.
-    * Set `our_ecdh` as our ephemeral key pair from the DAKE (`r`, `G1*r`).
+    * Set `our_ecdh` as our ephemeral key pair from the DAKE (`y`, `Y`).
     * Calculate the first set of keys `R_0, Cs_0_0, Cr_0_0 = calculate_ratchet_keys(K)`
   * If there is a recent stored message, encrypt it and send it as a Data Message.
 
@@ -978,18 +996,18 @@ If authstate is `AUTHSTATE_AWAITING_DRE_AUTH`:
   * Verify that the profile signature is valid
   * Verify that the profile is not expired
   * If the auth σ is valid, decrypt the DRE message and verify:
-    * that the point G1*r received in the pre-key message is on curve 448
-    * that the X_r D-H public key is from the correct group
+    * that the point Y received in the pre-key message is on curve 448
+    * that the B DH public key is from the correct group
 
 If everything checks out:
 
-  * Compute the Diffie-Hellman shared secret `K = (G1*r)*i`.
+  * Compute the ECDH shared secret `K_ecdh = (g1*y)*x`.
   * Transition authstate to `AUTHSTATE_NONE`.
   * Transition msgstate to `MSGSTATE_ENCRYPTED`.
   * Initialize the double ratcheting:
     * Set `ratchet_flag` as `true`.
-    * Set `our_ecdh` as our ephemeral keypair from the DAKE (`i`, `G1*i`).
-    * Set `their_ecdh` as their ephemeral public key from the DAKE (`G1*r`).
+    * Set `our_ecdh` as our ephemeral keypair from the DAKE (`x`, `X`).
+    * Set `their_ecdh` as their ephemeral public key from the DAKE (`Y`).
     * Calculate the first set of keys `R_0, Cs_0_0, Cr_0_0 = calculate_ratchet_keys(K)`
   * If there is a recent stored message, encrypt it and send it as a Data Message.
 
