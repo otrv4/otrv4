@@ -461,23 +461,13 @@ A valid DRE-Auth message is generated as follows:
 1. Create a user profile. How to do this is detailed [here]
    (#creating-a-profile)
 2. Choose a random ephemeral ECDH key pair:
-<<<<<<< HEAD
-  * secret key `r` a random element from `Z_q` (446 bits).
-  * public key `G1*r`
-3. Generates an ephemeral D-H private key pair:
-  * secret key `x_r` (448 bits). // TODO: confirm this size.
-  * and a public key `X_r = g3 ^ x_r`.
-4. Generate `m = "Am" || "Bm" || G1*i || G1*r || X_i || X_r`, where "Am" is Alice's
-   master signing key which was transmitted to Bob in her user profile
-=======
   * secret key `y` a random element from `Z_q` (446 bits).
   * public key `Y`
 3. Generates an ephemeral D-H secret key pair:
   * secret key `b` (448 bits). // TODO: confirm this size.
   * and a public key `B = g3 ^ b`.
 4. Generate `m = "Am" || "Bm" || X || Y || A || B`, where "Am" is Alice's
-   master signing key which was transmitted to Bob in the version advertisement
->>>>>>> Rename uses of DH and ECDH computation and keys to be consistent, rename references of private keys to secret keys
+   master signing key which was transmitted to Bob in her user profile
    of the Pre-Key Message. "Bm" Is Bob's master signing key.
 5. Compute `DREnc(pubA, pubB, m)` and serialize it as a DRE-M value in the variable `γ`.
 6. Compute `σ = Auth(Hb, zb, {Ha, X}, "I" || "R" || X || A || γ)`.
@@ -962,16 +952,11 @@ This indicates that you have already sent a Pre-key message to your corresponden
 
 Regardless of authstate value, you should:
 
-<<<<<<< HEAD
   * Verify that the Cramer-Shoup public key is trusted
   * Verify that the profile signature is valid
   * Verify that the profile is not expired
-  * Verify that the point G1*i received in the pre-key message is on curve 448
-=======
-  * Verify that the master signing key in the version advertisement is trusted
   * Verify that the point X received in the pre-key message is on curve 448
->>>>>>> Rename uses of DH and ECDH computation and keys to be consistent, rename references of private keys to secret keys
-  * Verify that the X_i D-H public key is from the correct group
+  * Verify that the A D-H public key is from the correct group
 
 If everything checks out:
 
