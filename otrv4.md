@@ -602,8 +602,8 @@ The DAKE is considered to be completed when either:
   * Set `their_ecdh` as the their ephemeral public key from the DAKE (`Y`).
   * Set `our_dh` as our DH ephemeral key pair from the DAKE (`a`, `A`).
   * Set `their_dh` as their DH ephemeral public key from the DAKE (`B`).
-3. In any event, calculate the first set of keys with `R_0, Cs_0_0, Cr_0_0 = calculate_ratchet_keys(K)`.
-4. For a session, calculate the SSID also from shared secret, SSID = `SHA3-256(0x03 || K)`.
+3. For a session, calculate the SSID from shared secret, Let SSID be the first 64 bits of `SHA3-256(0x00 || K)`.
+4. In any event, calculate the first set of keys with `R_0, Cs_0_0, Cr_0_0 = calculate_ratchet_keys(K)`.
 
 #### Peer's Trusted and Untrusted Keys
 
@@ -641,9 +641,9 @@ calculate_shared_secret(EC_shared_key, DH_shared_key):
 
 ```
 calculate_ratchet_keys(secret):
-  R  = SHA3-512(0x00 || secret)
-  Ca = SHA3-512(0x01 || secret)
-  Cb = SHA3-512(0x02 || secret)
+  R  = SHA3-512(0x01 || secret)
+  Ca = SHA3-512(0x02 || secret)
+  Cb = SHA3-512(0x03 || secret)
   return R, decide_between_chain_keys(Ca, Cb)
 ```
 
