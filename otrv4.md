@@ -998,6 +998,8 @@ Otherwise, if the query message offers OTR version 3 and `ALLOW_V3` is set:
 
   * Display the message to the user.
   * If `ERROR_START_DAKE` is set, reply with a Query Message.
+  * TODO: Should all state machines be reset?
+  * TODO: Should authstate and msgstate be reset?
 
 #### Receiving a Pre-key message
 
