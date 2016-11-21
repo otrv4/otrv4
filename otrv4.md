@@ -241,7 +241,7 @@ and DATA) with the addition of:
 
 ```
 Nonce (NONCE):
-  24 byte (192-bit) one time use nonce created for use with XSalsa20 encryption
+  24 byte (192-bit) one time use nonce to use with XSalsa20 encryption
 
 ED448 points (POINT):
   56 byte unsigned value, big-endian
@@ -336,22 +336,17 @@ he will initiate an interactive, deniable, authenticated key exchange DAKE.
 ### Requesting conversation with older OTR version
 
 Bob might respond to Alice's request or notify of willingness to start a
-conversation using OTRv3. If this is the case and Alice supports the version 3,
-the protocol falls back to OTRv3 [3].
+conversation using OTRv3. If this is the case and Alice supports the version 3, the protocol falls back to OTRv3 [3].
 
 ## User Profile
 
-OTRv4 introduces mandatory user profile publication. The user profile contains a
-Cramer-Shoup long term public key, signed supported version information, and a
-signed profile expiration date. Both parties will include the user profile in
-the beginning of the DAKE. The frequency of the user profile publication is
-determined by its expiration and renewal policy.
+OTRv4 introduces mandatory user profile publication. The user profile contains the Cramer-Shoup long term public key, signed supported version information, and a signed profile expiration date. Both parties will include the user profile in the beginning of the DAKE. The frequency of the user profile publication is determined by its expiration and renewal policy.
 
 ### Creating a User Profile
 
 To create a user profile, both Alice and Bob generate:
 
-1. Cramer-Shoup key-pair: PK, SK
+1. The Cramer-Shoup key-pair: PK, SK
 2. Supported version information string in the same format as OTRv3 Query Messages
 3. Profile Expiration
 
@@ -395,8 +390,8 @@ Version Expiration (VER-EXP):
   4 byte value that contains the date that this profile will expire.
 
 Signature of profile (MPI):
-  4 byte unsigned len (896 bits), big-endian
-  len byte unsigned value, big-endian
+  4 byte unsigned length, big-endian
+  112 byte (896 bits) unsigned, big-endian
 ```
 
 ### Deniable Authenticated Key Exchange (DAKE)
@@ -488,8 +483,7 @@ Sender Instance tag (INT)
 Receiver Instance tag (INT)
   The instance tag of the intended recipient. For a pre-key message this will often be 0, since the other party may not have identified their instance tag yet.
 Sender's User Profile (USER-PROF)
-  This is described in the section above on [Creating a User Profile]
-  (#creating-a-user-profile)
+  This is described in the section 'Creating a User Profile'.
 X (POINT)
   The ephemeral public ECDH key.
 A (MPI)
@@ -531,8 +525,7 @@ Sender Instance tag (INT)
 Receiver Instance tag (INT)
   The instance tag of the intended recipient.
 Receiver's User Profile (USER-PROF)
-  This is described in the section above on [Creating a User
-  Profile](#creating-a-user-profile)
+  This is described in the section 'Creating a User Profile'.
 γ (DRE-M)
   The Dual-receiver encrypted value.
 σ (AUTH)
