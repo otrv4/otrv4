@@ -418,7 +418,7 @@ A, B: DH public key
 K_dh: mix-key, a shared secret computed from a DH exchange = A^b, B^a
 
 x, y: ECDH secret key
-X, Y: ECDH public key = g1*x, g1*y
+X, Y: ECDH public key = G1*x, G1*y
 K_ecdh: a shared secret computed from an ECDH exchange = X*y, Y*x
 ```
 
@@ -1031,10 +1031,20 @@ This indicates that you have already sent a Pre-key message to your
 correspondent, but that she either didn't receive it, or just didn't receive it
 yet, and has sent you one as well.
 
-  * Ignore your previously sent pre-key (by forgetting the ephemeral keys `i`
-    and `G1^i`).
+The symmetry will be broken by comparing the hashed `X` you sent in your pre-key
+message with the one you received, considered as X-byte unsigned big-endian
+values.
 
-Regardless of `authstate` value, you should:
+If yours is the lower hash value:
+  * Ignore the incoming pre-key message.
+    (TODO: OTRv3 would resend your pre-key message in this case. Should we?)
+
+Otherwise:
+  * Forget your old `X` value that you sent earlier, and pretend you're in
+     `AUTHSTATE_NONE`; i.e. generate a new `y` and `Y` values.
+
+Regardless of `authstate` value, if you haven't ignored the incoming pre-key
+message, you should:
 
   * Verify that the profile signature is valid.
   * Verify that the profile is not expired.
