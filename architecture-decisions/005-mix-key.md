@@ -39,10 +39,10 @@ n equals to two but might be adjusted depending on performance.
 
 ### Algorithm
 
-Definitions
-==========
+#### Definitions
 
-Mix key (X_i)
+*Mix key (X_i)*
+
 A mix key is a key that is added to the key derivation function used
 to produce new root and chains keys. A mix key can be produced through
 a DH function and through a key derivation function, both of which
@@ -51,7 +51,8 @@ Table 2: Comparable strengths in NIST’s Recommendation for Key
 Management, page 53
 (http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-57pt1r4.pdf).
 
-DH function - DH(x, g^y)
+*DH function - DH(x, g^y)*
+
 This function produces a 3072 bits long key by computing the
 exponentiation of g^y to the power of x.
 
@@ -59,8 +60,7 @@ Key Derivation Function - SHA3(Y)
 This function produces a 3072 bits long key by computing a SHA3 value
 from Y; where Y is a 3072 bits long key.
 
-Considerations
-============
+#### Considerations
 
 Transmitting the 3072-bit DH public key will increase the time to
 exchange messages. To mitigate this the key won’t be transmitted every
@@ -74,8 +74,7 @@ pseudo-code implementation below.
 The mix key X_i is to be mixed in at the root level with the ECDH
 key.
 
-Implementation
-============
+#### Implementation
 
 Alice's DH keypair = (a_i, A_i)
 Bob's DH keypair = (b_i, B_i)
@@ -88,8 +87,7 @@ n is the number of root key derivations before performing a new DH
 computation. The interim root key derivations will use a mix key that
 is a KDF of a previous mix key.
 
-When n is configured to equal 3
-===============================
+_When n is configured to equal 3_
 
 Alice                                                              Bob
 -----------------------------------------------------------------------------------------------------------------------
