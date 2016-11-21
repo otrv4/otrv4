@@ -577,7 +577,7 @@ The previously mentioned keys are affected by these events:
 
 * Generates a new ephemeral ECDH key pair: Alice generates `(x, X)` and Bob generates `(y, Y)`. The `EC_shared_key` is `K_ecdh`.
 * Generates a new ephemeral 3072-bit DH key pair: Alice generates `(a, A)` and Bob generates `(b, B)`. The `mix_key` is `K_dh`.
-* `K` is interpreted as `K = calculate_shared_secret(EC_shared_key, DH_shared_key)`.
+* `K` is interpreted as `K = calculate_shared_secret(K_ecdh, K_dh)`.
 
 #### Upon completing the DAKE
 
@@ -593,7 +593,7 @@ The DAKE is considered to be completed when either:
   * Set `their_ecdh` as the their ephemeral public key from the DAKE (`Y`).
   * Set `our_dh` as our DH ephemeral key pair from the DAKE (`a`, `A`).
   * Set `their_dh` as their DH ephemeral public key from the DAKE (`B`).
-3. For a session, calculate the SSID from shared secret, Let SSID be the first 64 bits of `SHA3-256(0x00 || K)`.
+3. For a session, calculate the SSID from shared secret: let SSID be the first 64 bits of `SHA3-256(0x00 || K)`.
 4. In any event, calculate the first set of keys with `R_0, Cs_0_0, Cr_0_0 = calculate_ratchet_keys(K)`.
 
 #### Peer's Trusted and Untrusted Keys
@@ -789,13 +789,15 @@ Receiver Instance tag (INT)
 
 Flags (BYTE)
 
-    The bitwise-OR of the flags for this message. Usually you should set this to 0x00. The only currently defined flag is:
+    The bitwise-OR of the flags for this message. Usually you should 
+    set this to 0x00. The only currently defined flag is:
 
     IGNORE_UNREADABLE (0x01)
 
-        If you receive a Data Message with this flag set, and you are unable to decrypt the message or verify
-        the MAC (because, for example, you don't have the right keys), just ignore the message instead of producing
-        some kind of error or notification to the user.
+        If you receive a Data Message with this flag set, and you are 
+        unable to decrypt the message or verify the MAC (because, for
+        example, you don't have the right keys), just ignore the message
+        instead of producing some kind of error or notification to the user.
 
 Ratchet id ratchet_id (INT)
 
@@ -815,14 +817,15 @@ Nonce (NONCE)
 
 Encrypted message (DATA)
 
-    Using the appropriate encryption key (see below) derived from the sender's and recipient's DH public keys
-    (with the keyids given in this message), perform XSalsa20 encryption of the message. The nonce used for this
-    operation is also included in the header of the data message packet
+    Using the appropriate encryption key (see below) derived from the
+    sender's and recipient's DH public keys (with the keyids given in this
+    message), perform XSalsa20 encryption of the message. The nonce used for
+    this operation is also included in the header of the data message packet
 
 Authenticator (MAC)
 
-    The SHA3 MAC, using the appropriate MAC key (see below) of everything from the Protocol version to the end
-    of the encrypted message
+    The SHA3 MAC, using the appropriate MAC key (see below) of everything
+    from the Protocol version to the end of the encrypted message
 
 Old MAC keys to be revealed (DATA)
 
@@ -846,15 +849,28 @@ typed by the user. It can take one of three values:
 ```
 MSGSTATE_PLAINTEXT
     This state indicates that outgoing messages are sent without encryption.
-    This is the state that is used before an OTR conversation is initiated. This is the initial state, and the only way to subsequently enter this state is for the user to explicitly request to do so via some UI operation.
+    This is the state that is used before an OTR conversation is initiated.
+    This is the initial state, and the only way to subsequently enter this
+    state is for the user to explicitly request to do so via some UI 
+    operation.
 
 MSGSTATE_ENCRYPTED
     This state indicates that outgoing messages are sent encrypted.
-    This is the state that is used during an OTR conversation. The only way to enter this state is for the authentication state machine (below) to successfully complete.
+    This is the state that is used during an OTR conversation. The only way 
+    to enter this state is for the authentication state machine (below) to 
+    successfully complete.
 
 MSGSTATE_FINISHED
     This state indicates that outgoing messages are not delivered at all.
-    This state is entered only when the other party indicates he has terminated his side of the OTR conversation. For example, if Alice and Bob are having an OTR conversation, and Bob instructs his OTR client to end its private session with Alice (for example, by logging out), Alice will be notified of this, and her client will switch to MSGSTATE_FINISHED mode. This prevents Alice from accidentally sending a message to Bob in plaintext. (Consider what happens if Alice was in the middle of typing a private message to Bob when he suddenly logs out, just as Alice hits Enter.)
+    This state is entered only when the other party indicates he has 
+    terminated his side of the OTR conversation. For example, if Alice and 
+    Bob are having an OTR conversation, and Bob instructs his OTR client to 
+    end its private session with Alice (for example, by logging out), Alice 
+    will be notified of this, and her client will switch to MSGSTATE_FINISHED 
+    mode. This prevents Alice from accidentally sending a message to Bob in 
+    plaintext. (Consider what happens if Alice was in the middle of typing a 
+    private message to Bob when he suddenly logs out, just as Alice hits 
+    Enter.)
 ```
 
 
@@ -864,11 +880,13 @@ The authentication state variable, `authstate`, can take one of four values:
 
 ```
 AUTHSTATE_NONE
-    This state indicates that the authentication protocol is not currently in progress. This is the initial state.
+    This state indicates that the authentication protocol is not currently in 
+    progress. This is the initial state.
 
 AUTHSTATE_AWAITING_DRE_AUTH
 
-    After Bob initiates the authentication protocol by sending Alice the Pre-key Message, he enters this state to await Alice's reply.
+    After Bob initiates the authentication protocol by sending Alice the Pre-
+    key Message, he enters this state to await Alice's reply.
 ```
 
 
@@ -878,8 +896,7 @@ OTR clients can set different policies for different correspondents. For
 example, Alice could set up her client so that it speaks only OTR version 4,
 except with Charlie, who she knows has only an old client; so that it will
 opportunistically start an OTR conversation whenever it detects the
-correspondent supports it; or so that it refuses to send non-encrypted messages
-to Bob, ever.
+correspondent supports it; or so that it refuses to send non-encrypted messages to Bob, ever.
 
 The policies that can be set (on a global or per-correspondent basis) are any
 combination of the following boolean flags:
