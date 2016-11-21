@@ -3,11 +3,10 @@
 **Status**: proposed
 
 ### Context
-
-Because of potential classical and known post-quantum weaknesses in
-ECDH, we need to find a way to add a second mechanism to increase the
-steps to take for an attacker who’s trying to read messages and MACs
-in a transcript after the conversation has finished.
+Because of potential classical weaknesses, and the potential of
+quantum computers arriving earlier than predicted, we want an
+additional mechanism that would protect against post-conversation
+decryption of transcripts using those weaknesses.
 
 We believe this can be achieved by mixing another key obtained from a
 Diffie-Hellman exchange into the KDFs. This additional key will be
@@ -230,8 +229,7 @@ the following reasons:
 
 Using a 3072 DH function to produce the mix key charges data messages
 with extra key material 56 bytes long that may cause some transport
-protocols to fragment these messages. Since messages might be lost,
-fragmented messages are more likely to be incomplete.
+protocols to fragment these messages.
 
 [1](http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf)
 [2](https://eprint.iacr.org/2011/506.pdf)
