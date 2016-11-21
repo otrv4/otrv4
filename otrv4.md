@@ -603,7 +603,7 @@ The DAKE is considered to be completed when either:
   * Set `our_dh` as our DH ephemeral key pair from the DAKE (`a`, `A`).
   * Set `their_dh` as their DH ephemeral public key from the DAKE (`B`).
 3. In any event, calculate the first set of keys with `R_0, Cs_0_0, Cr_0_0 = calculate_ratchet_keys(K)`.
-4. For a session, calculate the SSID also from shared secret, SSID = `SHA3-512(0x03 || R, Ca, Cb)`.
+4. For a session, calculate the SSID also from shared secret, SSID = `SHA3-256(0x03 || K)`.
 
 #### Peer's Trusted and Untrusted Keys
 
@@ -723,7 +723,7 @@ Otherwise:
   * Increment previously sent message ID `j`.
 
 In any event, calculate the encryption key (`MKenc`) and the mac key (`MKmac`):
-  * `MKenc = SHA3-512(0x00 || Cs_i_j)`
+  * `MKenc = SHA3-256(0x00 || Cs_i_j)`
   * `MKmac = SHA3-512(0x01 || Cs_i_j)`
 
 Use the encryption key to encrypt the message, and the mac key to calculate its MAC.
@@ -744,7 +744,7 @@ k = Previously received message id
 for recId = k+1; recId <= message_id; recId++:
   Cr_i_recId = SHA3-512(Cr_i_recId-1)
 
-MKenc = SHA3-512(0x00 || Cr_message_id)
+MKenc = SHA3-256(0x00 || Cr_message_id)
 MKmac = SHA3-512(0x01 || Cr_message_id)
 ```
 
