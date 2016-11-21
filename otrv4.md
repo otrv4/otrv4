@@ -603,7 +603,7 @@ The DAKE is considered to be completed when either:
   * Set `our_dh` as our DH ephemeral key pair from the DAKE (`a`, `A`).
   * Set `their_dh` as their DH ephemeral public key from the DAKE (`B`).
 3. In any event, calculate the first set of keys with `R_0, Cs_0_0, Cr_0_0 = calculate_ratchet_keys(K)`.
-4. For a session, calculate the SSID also from shared secret, SSID = `SHA3-256(0x03 || R, Ca, Cb)`.
+4. For a session, calculate the SSID also from shared secret, SSID = `SHA3-512(0x03 || R, Ca, Cb)`.
 
 #### Peer's Trusted and Untrusted Keys
 
@@ -633,16 +633,16 @@ DH_shared_key = (g^x)^y (MPI)
 calculate_shared_secret(EC_shared_key, DH_shared_key):
    serialized_EC_secret = serialize_point(EC_shared_key)
    serialized_DH_secret = serialize_MPI(DH_shared_key)
-   secret = SHA3-256(serialized_EC_secret, serialized_DH_shared_key)
+   secret = SHA3-512(serialized_EC_secret, serialized_DH_shared_key)
 ```
 
 ##### Calculate Double Ratchet Keys
 
 ```
 calculate_ratchet_keys(secret):
-  R  = SHA3-256(0x00 || secret)
-  Ca = SHA3-256(0x01 || secret)
-  Cb = SHA3-256(0x02 || secret)
+  R  = SHA3-512(0x00 || secret)
+  Ca = SHA3-512(0x01 || secret)
+  Cb = SHA3-512(0x02 || secret)
   return R, decide_between_chain_keys(Ca, Cb)
 ```
 
@@ -722,13 +722,13 @@ Otherwise:
   * Increment previously sent message ID `j`.
 
 In any event, calculate the encryption key (`MKenc`) and the mac key (`MKmac`):
-  * `MKenc = SHA3-256(0x00 || Cs_i_j)`
-  * `MKmac = SHA3-256(0x01 || Cs_i_j)`
+  * `MKenc = SHA3-512(0x00 || Cs_i_j)`
+  * `MKmac = SHA3-512(0x01 || Cs_i_j)`
 
 Use the encryption key to encrypt the message, and the mac key to calculate its MAC.
   * Nonce = generateNonce()
   * Encrypted_message = XSalsa20_Enc(MKenc, Nonce, m)
-  * Authenticator = SHA3-256(MKmac || Encrypted_message)
+  * Authenticator = SHA3-512(MKmac || Encrypted_message)
 
 #### When you receive a Data Message:
 
@@ -741,10 +741,10 @@ Use the message ID to compute the receiving chain key (since the previously rece
 k = Previously received message id
 
 for recId = k+1; recId <= message_id; recId++:
-  Cr_i_recId = SHA3-256(Cr_i_recId-1)
+  Cr_i_recId = SHA3-512(Cr_i_recId-1)
 
-MKenc = SHA3-256(0x00 || Cr_message_id)
-MKmac = SHA3-256(0x01 || Cr_message_id)
+MKenc = SHA3-512(0x00 || Cr_message_id)
+MKmac = SHA3-512(0x01 || Cr_message_id)
 ```
 
 You may need to use receiving chain keys older than `message_id-1` to calculate
@@ -1536,7 +1536,7 @@ If smpstate is SMPSTATE_EXPECT4:
 
 * Verify Bob's zero-knowledge proof for R_b:
    1. Check that `R_b` is `>= 2` and `<= modulus-2`.
-   2. Check that `cR = SHA3-256(8, g1*D7 g3_b*cR, (Q_a / Q_b)*D7 + R_b*cR)`.
+   2. Check that `cR = SHA3-512(8, g1*D7 g3_b*cR, (Q_a / Q_b)*D7 + R_b*cR)`.
 
 * Check whether the protocol was successful:
     1. `Compute R_a_b = R_b*a3`.
@@ -1585,7 +1585,7 @@ Let `{C1, D1, H1} = PK1` and `{C2, D2, H2} = PK2`
     - `Ei = (Hi*ki) + K`
   2. Compute `αi = HashToScalar(U1i || U2i || Ei)`.
   3. Compute `Vi = Ci*ki + Di*(ki * αi)`
-3. Compute `K_enc = SHA3-256(K)`. K is compressed from 446 bits to 256 bits because XSalsa20 has a maximum key size of 256.
+3. Compute `K_enc = SHA3-512(K)`. K is compressed from 446 bits to 256 bits because XSalsa20 has a maximum key size of 256.
 4. Pick a random 24 bytes `nonce` and compute `φ = XSalsa20-Poly1305_K_enc(m, nonce)`
 5. Generate a NIZKPK:
   1. for i ∈ {1, 2}:
@@ -1632,7 +1632,7 @@ SKi is the secret key of the person decrypting the message.
     - `T3 = U1i*y1i`
     - `T4 = U2i*y2i`
   6. Verify `T1 + T2 + (T3 + T4)*αi ≟ Vi`.
-3. Recover secret key `K_enc = SHA3-256(Ei - U1i*zi)`. K is compressed from 446 bits to 256 bits because XSalsa20 has a maximum key size of 256.
+3. Recover secret key `K_enc = SHA3-512(Ei - U1i*zi)`. K is compressed from 446 bits to 256 bits because XSalsa20 has a maximum key size of 256.
 4. Decrypt `m = XSalsa20-Poly1305_K_enc(φ, nonce)`.
 
 ### ROM Authentication
