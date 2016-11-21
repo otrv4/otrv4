@@ -50,14 +50,13 @@ Table 2: Comparable strengths in NIST’s Recommendation for Key
 Management, page 53
 (http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-57pt1r4.pdf).
 
-*DH function - DH(x, g^y)*
+*DH function - DH(x, Y)*
 
-This function produces a 3072 bits long key by computing the
-exponentiation of g^y to the power of x.
+Given x, a private key, and Y a public key, generates a shared secret value in the 3072-bit group defined in [RFC-3526](https://www.ietf.org/rfc/rfc3526.txt).
 
-Key Derivation Function - SHA3(Y)
-This function produces a 3072 bits long key by computing a SHA3 value
-from Y; where Y is a 3072 bits long key.
+*Key Derivation Function - SHA3(Y)*
+
+Given Y, generates a 3072 bits long string using a SHA3-384 algorithm.
 
 #### Considerations
 
