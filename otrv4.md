@@ -1121,14 +1121,21 @@ If `msgstate` is `MSGSTATE_FINISHED`:
   * Transition `msgstate` to `MSGSTATE_PLAINTEXT`.
 
 
+#### Implementation notes (OR Considerations for networks which allow multiple devices)
+
+* When using a transport network that allows multiple devices to be
+  simultaneously logged in with the same peer identifier, make sure to identify
+  the other participant by its device-specific identifier and not only the
+  peer identifier (for example, using XMPP full JID instead of bare JID).
+  Doing so allows establishing an OTR channel at the same time with multiple
+  devices from the other participant at the cost of how to expose this to
+  the message client (for example, XMPP clients can decide to reply only to
+  the device you have more recently received a message from).
+
+
 #### Things to consider
 
-* FROM OTRv3: On some networks, like AIM, if your correspondent is logged in
-  multiple times, each of his clients will send a Pre-key Message in response to
-  a Query Message; resending the same DRE-Auth Message in response to each of
-  those messages would prevent compounded confusion, since each of his clients
-  will see each of the DRE-Auth Messages you send. [And the problem gets even
-  worse if you are each logged in multiple times.]
+TODO: This whole section is a big TODO.
 
 * How can we address the problem of multiple Query Messages received while the
   DAKE is in progress?
