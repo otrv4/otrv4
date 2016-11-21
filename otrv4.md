@@ -1165,7 +1165,23 @@ Example: Alice has `REQUIRE_ENCRYPTION`.
 |                            | Forget Ka??            |
 ```
 
-Messages may be lost.
+Note this can also happen regardless of `REQUIRE_ENCRYPTION`: Alice only needs
+to send a new Query Message after an OTRv4 channel is established.
+
+In the current protocol messages from the previous conversation (which existed
+before the new DAKE has finished) may be lost if received after the ψ2b is sent
+(or received). This happens because we reset ratched-id to 0 after the DAKE is
+complete.
+
+Handling a new DAKE as a new D-H ratchet (and simply incrementing j) should fix
+this by applying the same approach as OTRv3: a new DAKE is considered simply as
+a new key exchange.
+
+Another suggested alternative is breaking the OTR channel (by reseting the
+`msgstate` variable) at the moment you engage in a new DAKE (a new ψ1 is either
+sent of received). This can lead to problems of sending messages unencrypted
+unless all the participants have the `REQUIRE_ENCRYPTION` policy.
+
 
 ## Socialist Millionaires Protocol (SMP) version 2
 
