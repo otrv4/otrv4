@@ -1025,8 +1025,7 @@ If everything checks out:
   * Compute the ECDH shared secret `K_ecdh = (g1*x)*y`
   * Transition authstate to `AUTHSTATE_NONE`.
   * Transition msgstate to `MSGSTATE_ENCRYPTED`.
-  * Initialize the double ratcheting:
-    * Calculate the first set of keys `R_0, Cs_0_0, Cr_0_0 = calculate_ratchet_keys(K)`
+  * Initialize the double ratcheting.
   * If there is a recent stored message, encrypt it and send it as a Data Message.
 
 
@@ -1049,8 +1048,7 @@ If everything checks out:
   * Compute the ECDH shared secret `K_ecdh = (g1*y)*x`.
   * Transition authstate to `AUTHSTATE_NONE`.
   * Transition msgstate to `MSGSTATE_ENCRYPTED`.
-  * Initialize the double ratcheting:
-    * Calculate the first set of keys `R_0, Cs_0_0, Cr_0_0 = calculate_ratchet_keys(K)`
+  * Initialize the double ratcheting.
   * If there is a recent stored message, encrypt it and send it as a Data Message.
 
 Otherwise, ignore the message.
