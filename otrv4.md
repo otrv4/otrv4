@@ -1067,6 +1067,8 @@ If `msgstate` is `MSGSTATE_PLAINTEXT`:
 
   * If `REQUIRE_ENCRYPTION` is set:
     * Store the plaintext message for possible retransmission, and send a Query Message.
+    * TODO: How are going to handle subsequent occurences of this case?
+      Should we simply flood the user with Query Messages until the DAKE ends?
   * Otherwise:
     * If `SEND_WHITESPACE_TAG` is set, and you have not received a plaintext message from this correspondent since last entering `MSGSTATE_PLAINTEXT`, attach the whitespace tag to the message. Send the (possibly modified) message as plaintext.
 
