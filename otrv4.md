@@ -1069,6 +1069,7 @@ Otherwise, ignore the message. This may cause the sender to be in an invalid
 sends the next data message - which won't be possible to be decrypted and will
 be replied with an OTR error message.
 
+
 #### User types a message to be sent
 
 If `msgstate` is `MSGSTATE_PLAINTEXT`:
@@ -1096,7 +1097,7 @@ If `msgstate` is `MSGSTATE_ENCRYPTED`:
 Verify the information in the message. If the verification succeeds:
 
   * Decrypt the message and display the human-readable part (if non-empty) to the user.
-  * PUT RATCHET EXPLANATION HERE! HAHA!
+  * TODO: PUT RATCHET EXPLANATION HERE! HAHA!
   * If you have not sent a message to this correspondent in some (configurable) time, send a "heartbeat" message.
 
 If the received message contains a TLV type 1, forget all encryption keys for
