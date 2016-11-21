@@ -605,6 +605,15 @@ The DAKE is considered to be completed when either:
 3. In any event, calculate the first set of keys with `R_0, Cs_0_0, Cr_0_0 = calculate_ratchet_keys(K)`.
 4. For a session, calculate the SSID also from shared secret, SSID = `SHA3-256(0x03 || R, Ca, Cb)`.
 
+#### Peer's Trusted and Untrusted Keys
+
+As in OTRv3, once a key is verified, it is saved as trusted. Then after the DAKE
+finishes, the public key will be identified as trusted or untrusted. If the public key
+is not trusted, the user will be prompted to verify it. Otherwise they are not.
+
+The user may decide to continue the conversation without verifying the new
+public key.
+
 #### Calculating Keys
 
 ##### ECDH and DH Shared Secrets
@@ -1015,7 +1024,6 @@ yet, and has sent you one as well.
 
 Regardless of authstate value, you should:
 
-  * Verify that the Cramer-Shoup public key is trusted.
   * Verify that the profile signature is valid.
   * Verify that the profile is not expired.
   * Verify that the point X received in the pre-key message is on curve 448.
