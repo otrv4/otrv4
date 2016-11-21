@@ -16,14 +16,14 @@ The security level of the protocol can be roughly estimated as the smallest
 security level among all the cryptographic primitives in use, and in general,
 there's an inverse relation between security level and speed.
 
-For this reason, the cryptographic primitives must be chosen to have roughly
-the same security level above the target security level.
+For this reason, the cryptographic primitives must be chosen to have roughly the
+same security level above the target security level.
 
 Because OTRv4 is an open standard, we want to use crypto primitives with no
 intellectual-property claims.
 
-Finally, we want to make the protocol easy to implement and we favor having
-a small number of cryptographic primitives with implementations in various
+Finally, we want to make the protocol easy to implement and we favor having a
+small number of cryptographic primitives with implementations in various
 programming languages.
 
 In this context, two options were evaluated:
@@ -44,8 +44,9 @@ We will use ed448 as DH group for the extra security it provides.
 We will use SHA3-512 as cryptographic hash function.
 
 We will use XSalsa as stream cipher because it is faster than AES, is immune to
-timing attacks, and it's safe to randomly generate its longer nonce. XSalsa will 
-be used with the following parameters: 20 rounds, 192-bits nonce, and 256-bit key.
+timing attacks, and it's safe to randomly generate its longer nonce. XSalsa will
+be used with the following parameters: 20 rounds, 192-bits nonce, and 256-bit
+key.
 
 We will use Poly-1305 for message authentication.
 
@@ -55,11 +56,14 @@ and use the construct SHA3-512(counter || secret) to provide cryptographic
 domain separation every time multiple keys need to be derived from the same
 secret.
 
-We will use the SHA3-256 hash function for generating fingerprints for long-lived, public keys. SHA3-256 has a security strength of 256 bits against preimage attacks. However, it only has a security strength of 128 bits against collision attacks. We choose SHA3-256 instead of SHA3-512 for the operation of generating fingerprints because the output from SHA3-512 is much larger. 
+We will use the SHA3-256 hash function for generating fingerprints for
+long-lived, public keys. SHA3-256 has a security strength of 256 bits against
+preimage attacks. However, it only has a security strength of 128 bits against
+collision attacks. We choose SHA3-256 instead of SHA3-512 for the operation of
+generating fingerprints because the output from SHA3-512 is much larger.
 
 ### Consequences
 
 One may see the choice of cryptographic primitives as a consequence of the
 decision of targeting ~224-bit security. In this case, move all the previous
 paragraphs about individual crypto primitives to this section.
-
