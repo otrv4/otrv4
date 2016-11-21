@@ -16,7 +16,7 @@ messages typed by the user to the other peer, like the following diagram:
 while received = messaging.receive()
   client.display(received)
 
-# Sending messages
+# Sending messages
 while to_send = client.message_to_send()
   messaging.send(to_send)
 ```
@@ -34,7 +34,7 @@ while received = messaging.receive():
   for each message in to_send:
     messaging.send(message)
 
-# Sending messages
+# Sending messages
 while to_send = client.message_to_send()
   for each message in otr.send(to_send):
     messaging.send(message)
@@ -110,7 +110,7 @@ Threats that an OTR conversation does not mitigate:
 * An active attacker may perform a Denial of Service attack but not learn the
   contents of messages.
 
-## Preliminaries
+## Preliminaries
 
 ### Notation
 
@@ -952,7 +952,7 @@ specified.
 Send an OTR Query Message to the correspondent.
 
 
-#### Receiving plaintext without the whitespace tag
+#### Receiving plaintext without the whitespace tag
 
 If msgstate is `MSGSTATE_PLAINTEXT`:
 
@@ -963,7 +963,7 @@ If msgstate is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
 
   * Display the message to the user, but warn him that the message was received unencrypted.
 
-#### Receiving plaintext with the whitespace tag
+#### Receiving plaintext with the whitespace tag
 
 If msgstate is `MSGSTATE_PLAINTEXT`:
 
@@ -989,7 +989,7 @@ If the tag offers OTR version 3 and `ALLOW_V3` is set:
   * The protocol proceeds as specified in OTRv3.
 
 
-#### Receiving a Query Message
+#### Receiving a Query Message
 
 If the query message offers OTR version 4 and `ALLOW_V4` is set:
 
@@ -1141,14 +1141,14 @@ Example: Alice has `REQUIRE_ENCRYPTION`.
 
 ```
 | Alice                      | Bob                    |
-| Types "Hi", Sends Q1       |                        |
+| Types "Hi", Sends Q1       |                        |
 |                            | Receives Q1, Sends ψ1a |
 | Types "Hey", Sends Q2      |                        |
 | Receives ψ1a, Sends ψ2a    |                        |
 | Sends ENC(Ka, "Hi")        |                        |
 | Sends ENC(Ka, "Hey")       |                        |
 |                            | Receives Q2, Sends ψ1b |
-| Types "Yes", ENC(Ka, "Yes")|                        |
+| Types "Yes", ENC(Ka, "Yes")|                        |
 |                            | Receives ψ2a           |
 |                            | Receives ENC(Ka, "Hi") |
 |                            | Receives ENC(Ka, "Hey")|
@@ -1157,7 +1157,7 @@ Example: Alice has `REQUIRE_ENCRYPTION`.
 | Forget Ka??                |                        |
 | Receive ENC(Ka, "Hello")   |                        |
 | Can't dec if Ka is gone!!  |                        |
-| Types "Yo", ENC(Kb, "Yo")  |                        |
+| Types "Yo", ENC(Kb, "Yo")  |                        |
 |                            | Receives ψ2b           |
 |                            | Forget Ka??            |
 ```
@@ -1360,7 +1360,7 @@ is generated as follows:
 1. Pick random values `r4`, `r5`, `r6` and `r7` in `Z_q`. These will be used to add a blinding factor to the final results, and to generate zero-knowledge proofs that this message was created honestly.
 2. Compute `G2 = G2b*a2` and `G3 = G3b*a3`.
 3. Compute `Pa = G3*r4` and `Qa = G*r4 + G2*x`.
-4. Generate a zero-knowledge proof that `Pa` and `Qa` were created according to the protocol by setting `cP = HashToScalar(6 || G3*r5 || G*r5 + G2*r6)`, `d5 = r5 - r4 * cP mod q` and `d6 = r6 - x * cP mod q`.
+4. Generate a zero-knowledge proof that `Pa` and `Qa` were created according to the protocol by setting `cP = HashToScalar(6 || G3*r5 || G*r5 + G2*r6)`, `d5 = r5 - r4 * cP mod q` and `d6 = r6 - x * cP mod q`.
 5. Compute `Ra = (Qa - Qb) * a3`.
 6. Generate a zero-knowledge proof that `Ra` was created according to the protocol by setting `cR = HashToScalar(7 || G*r7 || (Qa - Qb)*r7)` and `d7 = r7 - a3 * cR mod q`.
 7. Store the values of `G3b`, `Pa - Pb`, `Qa - Qb` and `Ra` for use later in the protocol.
