@@ -1061,11 +1061,10 @@ If everything checks out:
   * Initialize the double ratcheting.
   * If there is a recent stored message, encrypt it and send it as a Data Message.
 
-Otherwise, ignore the message.
-
-TODO: I want to double check this. We can't ignore the message, otherwise the
-sender will think it has a valid encrypted channel. This will happen if Alice
-sends a Querry Message to Bob who has 2 OTRv4 clients online ate the same time.
+Otherwise, ignore the message. This may cause the sender to be in an invalid
+msgstate equals `MSGSTATE_ENCRYPTED`, but it can be detected as soon as she
+sends the next data message - which won't be possible to be decrypted and will
+be replied with an OTR error message.
 
 #### User types a message to be sent
 
