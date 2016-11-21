@@ -590,6 +590,8 @@ The previously mentioned keys are affected by these events:
 
 #### Upon completing the DAKE
 
+//TODO should we mention this again?
+
 The DAKE is considered to be completed when either:
 
 1. Bob sends the DRE-Auth message. In this case:
@@ -649,7 +651,7 @@ calculate_ratchet_keys_only(secret):
 ```
 
 ##### Deciding Between Chain Keys
-
+//TODO: it seems we don't need this if we use initiator/receiver to identify, so do we really need this?
 ```
 decide_between(Ca, Cb):
     Both sides will compare their public keys to choose a chain key for sending and receiving:
@@ -1041,6 +1043,7 @@ If everything checks out:
   * Compute the ECDH shared secret `K_ecdh = (g1*x)*y`
   * Transition authstate to `AUTHSTATE_NONE`.
   * Transition msgstate to `MSGSTATE_ENCRYPTED`.
+//TODO should we mention this here?
   * Initialize the double ratcheting:
     * Set `initiator` as `false`.
     * Set `our_ecdh` as our ephemeral key pair from the DAKE (`y`, `Y`).
@@ -1067,6 +1070,7 @@ If everything checks out:
   * Compute the ECDH shared secret `K_ecdh = (g1*y)*x`.
   * Transition authstate to `AUTHSTATE_NONE`.
   * Transition msgstate to `MSGSTATE_ENCRYPTED`.
+//TODO should we mention this here?
   * Initialize the double ratcheting:
     * Set `initiator` as `true`.
     * Set `our_ecdh` as our ephemeral keypair from the DAKE (`x`, `X`).
