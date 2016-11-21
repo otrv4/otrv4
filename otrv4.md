@@ -592,11 +592,11 @@ The previously mentioned keys are affected by these events:
 
 The DAKE is considered to be completed when either:
 
-1. Bob sends the DRE Auth message. In this case:
+1. Bob sends the DRE-Auth message. In this case:
   * Set `initiator` as `false`.
   * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`y`, `Y`).
   * Set `our_dh` as our DH ephemeral key pair from the DAKE (`b`, `B`).
-2. Alice receives and verifies the DRE Auth message. In this case:
+2. Alice receives and verifies the DRE-Auth message. In this case:
   * Set `initiator` as `true`.
   * Set `our_ecdh` as our ephemeral public key from the DAKE (`x`, `X`).
   * Set `their_ecdh` as the their ephemeral public key from the DAKE (`Y`).
@@ -938,7 +938,7 @@ Received messages:
   * Query Message
   * Error Message
   * Pre-key message
-  * DRE Auth message
+  * DRE-Auth message
   * Data Message
 
 
@@ -1037,7 +1037,7 @@ Regardless of authstate value, you should:
 
 If everything checks out:
 
-  * Reply with a DRE Auth Message
+  * Reply with a DRE-Auth Message
   * Compute the ECDH shared secret `K_ecdh = (g1*x)*y`
   * Transition authstate to `AUTHSTATE_NONE`.
   * Transition msgstate to `MSGSTATE_ENCRYPTED`.
@@ -1142,9 +1142,9 @@ If msgstate is `MSGSTATE_FINISHED`:
 
 * FROM OTRv3: On some networks, like AIM, if your correspondent is logged in
   multiple times, each of his clients will send a Pre-key Message in response to
-  a Query Message; resending the same DRE Auth Message in response to each of
+  a Query Message; resending the same DRE-Auth Message in response to each of
   those messages would prevent compounded confusion, since each of his clients
-  will see each of the DRE Auth Messages you send. [And the problem gets even
+  will see each of the DRE-Auth Messages you send. [And the problem gets even
   worse if you are each logged in multiple times.]
 
 * How can we address the problem of multiple Query Messages received while the
