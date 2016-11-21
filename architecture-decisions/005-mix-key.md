@@ -1,8 +1,6 @@
 ## ADR 3: Mix Keys
 
-
 **Status**: proposed
-
 
 ### Context
 
@@ -16,6 +14,7 @@ Diffie-Hellman exchange into the KDFs. This additional key will be
 referred to as “mix key”.
 
 This proposal specifies
+
 1. adding an extra key to mix in with the ECDH key when deriving a new
 root key.
 2. an algorithm for ratcheting and deriving this mix key.
@@ -30,6 +29,7 @@ trying to protect against ECC weaknesses and SIDH[2] relies on ECC. So
 this will instead be just a DH exchange.
 
 The options for ratcheting/re-deriving this mix key are:
+
 1. Obtain every mix key from a DH function which requires the other party
 to contribute to the computation every time we require one.
 2. Obtain a mix key from a DH functions which requires the other party to
@@ -88,7 +88,7 @@ computation. The interim root key derivations will use a mix key that
 is a KDF of a previous mix key.
 
 _When n is configured to equal 3_
-
+```
 Alice                                                              Bob
 -----------------------------------------------------------------------------------------------------------------------
 Increases ratchet_id by one
@@ -113,17 +113,17 @@ Sends data_message_0_1 ----------------------------------------->
                        <----------------------------------------   Sends data_message_1_0
                                                                    Encrypts data message with Cr_1_0
                        <----------------------------------------   Sends data_message_1_0
-
-Alice or Bob sends the first message in a ratchet (/a first reply)
+```
+**Alice or Bob sends the first message in a ratchet (/a first reply)**
 
 The ratchet identifier increases every time a greater ratchet_id is
 received or a new message is being sent and signals the machine to
-ratchet i.e. ratchet_id += 1
+ratchet i.e. `ratchet_id += 1`
 
-Alice needs to generate new keys when ratchet_id % 6 == 3 and Bob when
-ratchet_id % 6 == 0 (see diagram below)
+Alice needs to generate new keys when `ratchet_id % 6 == 3` and Bob when
+`ratchet_id % 6 == 0` (see diagram below)
 
-If ratchet_id % 6 == 3 || ratchet_id % 6 == 0 
+If `ratchet_id % 6 == 3 || ratchet_id % 6 == 0`
 Generate new public and secret keys
 Any party that has computed a new mix key K_i using the DH function
 should send the new public key to the other party for further key
@@ -132,34 +132,34 @@ computation.
 (NOTE: K_i is calculated only when the first message of the ratchet is
 to be sent or received, i.e. when the ratchet_id is increased)
 
-if ratchet_id % 3 == 0
-    Compute the new mix key from a new DH computation e.g. K_i =
-    DH(our_DH.secret, their_DH.public)
+if `ratchet_id % 3 == 0`
+    Compute the new mix key from a new DH computation e.g. `K_i =
+    DH(our_DH.secret, their_DH.public)`
 otherwise
-    Compute the new mix key K_i = KDF(K_(i-1))
+    Compute the new mix key `K_i = KDF(K_(i-1))`
 
-Alice or Bob send a follow-up message
+**Alice or Bob send a follow-up message**
 
 In case of dropped messages, when a new public key has been generated
 and sent for a first message in a ratchet, all follow up messages in
 that ratchet will also need the public key to ensure the other party
 receives it.
 
-If ratchet_id % 6 == 3 || ratchet_id % 6 == 0 
+If `ratchet_id % 6 == 3 || ratchet_id % 6 == 0`
     Send public key
 
-Alice or Bob receive a first message in a ratchet
+**Alice or Bob receive a first message in a ratchet**
 
-The ratchet_id will need to be increased,  so ratchet_id += 1 
+The ratchet_id will need to be increased,  so `ratchet_id += 1`
 
-If ratchet_id % 6 == 3 || ratchet_id % 6 == 0 
+If `ratchet_id % 6 == 3 || ratchet_id % 6 == 0`
     A new public key should be attached to the message, if it is not,
     reject the message.
     
-Otherwise, compute the new mix key from a new DH computation e.g. K_i
-= DH(our_DH.secret, their_DH.public)
+Otherwise, compute the new mix key from a new DH computation e.g. `K_i
+= DH(our_DH.secret, their_DH.public)`
 
-Alice or Bob receive a follow up message
+**Alice or Bob receive a follow up message**
 
 If the ratchet_id is not greater than the current state of ratchet_id,
 then this is not a new ratchet. In this case there is no further
@@ -172,21 +172,20 @@ DAKE. If Bob sends the first message then the root key derived from
 X_0 will be used and then will continue as in the diagram below.
 
 If Alice sends the first message:
-
-        Alice                 ratchet_id        public_key           Bob
+```
+    Alice                 ratchet_id        public_key           Bob
 ------------------------------------------------------------------------------------------------------------
 
-K_1 = SHA3(K_0)             -----1----------------------->            K_1 = SHA3(K_0)
-K_2 = SHA3(K_1)            <----2------------------------            K_2 = SHA3(K_1)     
-K_3 = DH(a_1, B_0)       -----3------------A_1------>            K_3 = DH(b_0, A_1)
-K_4 = SHA3(K_3)            <----4------------------------            K_4 = SHA3(K_3)     
+K_1 = SHA3(K_0)         -----1----------------------->            K_1 = SHA3(K_0)
+K_2 = SHA3(K_1)         <----2------------------------            K_2 = SHA3(K_1)     
+K_3 = DH(a_1, B_0)      -----3------------A_1------>            K_3 = DH(b_0, A_1)
+K_4 = SHA3(K_3)         <----4------------------------            K_4 = SHA3(K_3)     
 K_5 = SHA3(K_4)         -----5----------------------->            K_5 = SHA3(K_4)   
-K_6 = DH(a_1, B_1)        <-----6------------B_1-------            K_6 = DH(b_1, A_1)
-K_7 = SHA3(K_6)           -----7----------------------->            K_7 = SHA3(K_6)     
-K_8 = SHA3(K_7)          <----8------------------------            K_8 = SHA3(K_7)     
-K_9 = DH(a_2, B_1)       -----9------------A_2------>            K_9 = DH(b_1, A_2)
-
-
+K_6 = DH(a_1, B_1)      <----6------------B_1-------            K_6 = DH(b_1, A_1)
+K_7 = SHA3(K_6)         -----7----------------------->            K_7 = SHA3(K_6)     
+K_8 = SHA3(K_7)         <----8------------------------            K_8 = SHA3(K_7)     
+K_9 = DH(a_2, B_1)      -----9------------A_2------>            K_9 = DH(b_1, A_2)
+```
 This diagram describes when public keys should be sent and when Alice
 and Bob should compute the mix key from a SHA3 or a new Diffie Hellman
 computation.
@@ -198,12 +197,14 @@ g equals 2 and exponents a and b 3072 bits long over “Intel Core i7
 2.2GHz”
 
 | Operation | Repeat times | Time per Operation |
-| ComputeShareSecret | 2000 | 22.198064 ms/op |
+| --------- | ------------ | ------------------ |
+| ComputeSharedSecret | 2000 | 22.198064 ms/op |
 | KeyGeneration | 1000 | 31.607442 ms/op |
 
 ### Decision
 
 We’ve decide to use a 3072-bit key produced by
+
 1. a DH function which takes as argument the other party’s exponent
    through a data message and produces a mix key.
 2. a KDF function which takes as argument the previous mix key to
@@ -211,6 +212,7 @@ We’ve decide to use a 3072-bit key produced by
 
 The DH function will run every n times; n is equals three because of
 the following reasons:
+
 1. It is a small number so a particular key can only be compromised
    for a maximum of 2*n ratchets. This mean the maximum ratchets will
    be 6.
