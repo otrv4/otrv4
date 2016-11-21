@@ -1020,19 +1020,20 @@ This indicates that you have already sent a Pre-key message to your
 correspondent, but that she either didn't receive it, or just didn't receive it
 yet, and has sent you one as well.
 
-  * Ignore your previously sent pre-key (by forgetting the ephemeral keys `i` and `G1^i`).
+  * Ignore your previously sent pre-key (by forgetting the ephemeral keys `i`
+    and `G1^i`).
 
 Regardless of authstate value, you should:
 
   * Verify that the profile signature is valid.
   * Verify that the profile is not expired.
   * Verify that the point X received in the pre-key message is on curve 448.
-  * Verify that the A D-H public key is from the correct group.
+  * Verify that the D-H public key is from the correct group.
 
 If everything checks out:
 
-  * Reply with a DRE-Auth Message
-  * Compute the ECDH shared secret `K_ecdh = (g1*x)*y`
+  * Reply with a DRE-Auth Message.
+  * Compute the ECDH shared secret `K_ecdh = (g1*x)*y`.
   * Transition authstate to `AUTHSTATE_NONE`.
   * Transition msgstate to `MSGSTATE_ENCRYPTED`.
   * Initialize the double ratcheting.
@@ -1046,16 +1047,15 @@ Otherwise:
 
 If authstate is `AUTHSTATE_AWAITING_DRE_AUTH`:
 
-  * Verify that the Cramer-Shoup public key is trusted
-  * Verify that the profile signature is valid
-  * Verify that the profile is not expired
+  * Verify that the profile signature is valid.
+  * Verify that the profile is not expired.
   * If the auth σ is valid, decrypt the DRE message and verify:
-    * that the point Y received in the pre-key message is on curve 448
-    * that the B DH public key is from the correct group
+    * that the point Y received in the pre-key message is on curve 448.
+    * that the B DH public key is from the correct group.
 
 If everything checks out:
 
-  * Compute the ECDH shared secret `K_ecdh = (g1*y)*x`.
+  * Compute the ECDH shared secret `K_ecdh = (G1*y)*x`.
   * Transition authstate to `AUTHSTATE_NONE`.
   * Transition msgstate to `MSGSTATE_ENCRYPTED`.
   * Initialize the double ratcheting.
