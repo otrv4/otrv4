@@ -590,25 +590,25 @@ The previously mentioned keys are affected by these events:
 
 #### Upon completing the DAKE
 
-//TODO should we mention this again?
-
 The DAKE is considered to be completed when either:
 
 1. Bob sends the DRE-Auth message. In this case:
-  * Set `initiator` as `false`.
   * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`y`, `Y`).
+  * Set `their_ecdh` as the their ephemeral public key from the DAKE (`X`).
   * Set `our_dh` as our DH ephemeral key pair from the DAKE (`b`, `B`).
+  * Set `their_dh` as their DH ephemeral public key from the DAKE (`A`).
 2. Alice receives and verifies the DRE-Auth message. In this case:
-  * Set `initiator` as `true`.
   * Set `our_ecdh` as our ephemeral public key from the DAKE (`x`, `X`).
   * Set `their_ecdh` as the their ephemeral public key from the DAKE (`Y`).
   * Set `our_dh` as our DH ephemeral key pair from the DAKE (`a`, `A`).
   * Set `their_dh` as their DH ephemeral public key from the DAKE (`B`).
-3. In any event, calculate the first set of keys with `R_0, Cs_0_0, Cr_0_0, SSID = calculate_ratchet_keys_and_ssid(K)`.
+3. In any event, calculate the first set of keys with `R_0, Cs_0_0, Cr_0_0 = calculate_ratchet_keys(K)`.
+4. For a session, calculate the SSID also from shared secret, SSID = `SHA3-256(0x03 || R, Ca, Cb)`.
 
 #### Calculating Keys
 
 ##### ECDH and DH Shared Secrets
+
 ```
 pubECDH, secretECDH = newECDH()
 
@@ -627,43 +627,25 @@ calculate_shared_secret(EC_shared_key, DH_shared_key):
    secret = SHA3-256(serialized_EC_secret, serialized_DH_shared_key)
 ```
 
-##### Double Ratchet Keys and Secure Session ID
+##### Calculate Double Ratchet Keys
+
 ```
-calculate_ratchet_keys_and_ssid(secret):
+calculate_ratchet_keys(secret):
   R  = SHA3-256(0x00 || secret)
   Ca = SHA3-256(0x01 || secret)
   Cb = SHA3-256(0x02 || secret)
-  SSID = SHA3-256(0x03 || R, Ca, Cb)
-    Let SSID be the first 64 bits of this function. Discard the rest of the bits.
-  Cs, Cr = decide_between(Ca, Cb)
-  return R, Cs, Cr, SSID
+  return R, decide_between_chain_keys(Ca, Cb)
 ```
 
-##### Double Ratchet Keys Only
-```
-calculate_ratchet_keys_only(secret):
-  R  = SHA3-256(0x00 || secret)
-  Ca = SHA3-256(0x01 || secret)
-  Cb = SHA3-256(0x02 || secret)
-  Cs, Cr = decide_between(Ca, Cb)
-  return R, Cs, Cr
+##### Decide Between Chain Keys
 
-```
-
-##### Deciding Between Chain Keys
-//TODO: it seems we don't need this if we use initiator/receiver to identify, so do we really need this?
-```
-decide_between(Ca, Cb):
-    Both sides will compare their public keys to choose a chain key for sending and receiving:
-    - Alice (and similarly for Bob) determines if she is the "low" end or the "high" end of this ratchet.
-    If Alice's ephemeral D-H public key is numerically greater than Bob's public key, then she is the "high" end.
-    Otherwise, she is the "low" end.
-    - Alice selects the chain keys for sending and receiving:
-      - If she is the "high" end, use Ca as the sending chain key (Cs), Cb as the receiving chain key (Cr).
-      - If she is the "low" end, use Cb as the sending chain key (Cs), Ca as the receiving chain key (Cr).
-      return Cs, Cr
-```
-
+Both sides will compare their public keys to choose a chain key for sending and receiving:
+- Alice (and similarly for Bob) determines if she is the "low" end or the "high" end of this ratchet.
+If Alice's ephemeral D-H public key is numerically greater than Bob's public key, then she is the "high" end.
+Otherwise, she is the "low" end.
+- Alice selects the chain keys for sending and receiving:
+  - If she is the "high" end, set `initiator` as `true`, use Ca as the sending chain key (Cs), Cb as the receiving chain key (Cr).
+  - If she is the "low" end, set `initiator` as `false`, use Cb as the sending chain key (Cs), Ca as the receiving chain key (Cr).
 
 ## Data Exchange
 
@@ -727,7 +709,7 @@ If `j == 0` and (`i > 0` or `initiator` is `true`) :
     `R_i, Cs_i_j, Cs_i_j = calculate_ratchet_keys(R_(i-1) || ECDH(our_ecdh.secret, their_ecdh.public) || DH(our_dh.secret, their_dh.public))`
 
 Otherwise:
-  * Derive the next sending Chain Key `Cs_i_j+1 = SHA3-256(Cs_i_j)`.
+  * Derive the next sending Chain Key `Cs_i_j+1 = SHA3-384(Cs_i_j)`.
   * Increment previously sent message ID `j`.
 
 In any event, calculate the encryption key (`MKenc`) and the mac key (`MKmac`):
@@ -1043,10 +1025,7 @@ If everything checks out:
   * Compute the ECDH shared secret `K_ecdh = (g1*x)*y`
   * Transition authstate to `AUTHSTATE_NONE`.
   * Transition msgstate to `MSGSTATE_ENCRYPTED`.
-//TODO should we mention this here?
   * Initialize the double ratcheting:
-    * Set `initiator` as `false`.
-    * Set `our_ecdh` as our ephemeral key pair from the DAKE (`y`, `Y`).
     * Calculate the first set of keys `R_0, Cs_0_0, Cr_0_0 = calculate_ratchet_keys(K)`
   * If there is a recent stored message, encrypt it and send it as a Data Message.
 
@@ -1070,11 +1049,7 @@ If everything checks out:
   * Compute the ECDH shared secret `K_ecdh = (g1*y)*x`.
   * Transition authstate to `AUTHSTATE_NONE`.
   * Transition msgstate to `MSGSTATE_ENCRYPTED`.
-//TODO should we mention this here?
   * Initialize the double ratcheting:
-    * Set `initiator` as `true`.
-    * Set `our_ecdh` as our ephemeral keypair from the DAKE (`x`, `X`).
-    * Set `their_ecdh` as their ephemeral public key from the DAKE (`Y`).
     * Calculate the first set of keys `R_0, Cs_0_0, Cr_0_0 = calculate_ratchet_keys(K)`
   * If there is a recent stored message, encrypt it and send it as a Data Message.
 
