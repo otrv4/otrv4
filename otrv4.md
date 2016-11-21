@@ -413,9 +413,9 @@ y1b, y2b, zb)` and `PKb = (Cb, Db, Hb)`. Both key pairs are generated with
 #### Overview
 
 ```
-a, b: 3072-bit DH secret key
-A, B: 3072-bit DH public key = g3^a, g3^b
-K_dh: mix-key, a 3072-bit shared secret computed from a DH exchange = A^b, B^a
+a, b: DH secret key
+A, B: DH public key
+K_dh: mix-key, a shared secret computed from a DH exchange = A^b, B^a
 
 x, y: ECDH secret key
 X, Y: ECDH public key = g1*x, g1*y
@@ -506,9 +506,7 @@ A valid DRE-Auth message is generated as follows:
 3. Generates an ephemeral D-H secret key pair:
   * secret key `b` (448 bits). // TODO: confirm this size.
   * and a public key `B = g3 ^ b`.
-4. Generate `m = "Am" || "Bm" || X || Y || A || B`, where "Am" is Alice's
-   master signing key which was transmitted to Bob in her user profile
-   of the Pre-Key Message. "Bm" Is Bob's master signing key.
+4. Generate `m = X || Y || A || B`
 5. Compute `DREnc(pubA, pubB, m)` and serialize it as a DRE-M value in the variable `γ`.
 6. Compute `σ = Auth(Hb, zb, {Ha, X}, "I" || "R" || X || A || γ)`.
 
