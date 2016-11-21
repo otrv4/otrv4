@@ -629,6 +629,7 @@ DH_shared_key = (g^x)^y (MPI)
 ```
 
 ##### Mixed Secret: Mixing ECDH and DH Shared Secrets
+
 ```
 calculate_shared_secret(EC_shared_key, DH_shared_key):
    serialized_EC_secret = serialize_point(EC_shared_key)
@@ -848,7 +849,7 @@ variables are:
 
 ### Message state
 
-The message state variable, msgstate, controls what happens to outgoing messages
+The message state variable, `msgstate`, controls what happens to outgoing messages
 typed by the user. It can take one of three values:
 
 ```
@@ -954,23 +955,23 @@ Send an OTR Query Message to the correspondent.
 
 #### Receiving plaintext without the whitespace tag
 
-If msgstate is `MSGSTATE_PLAINTEXT`:
+If `msgstate` is `MSGSTATE_PLAINTEXT`:
 
   * Simply display the message to the user.
   * If `REQUIRE_ENCRYPTION` is set, warn him that the message was received unencrypted.
 
-If msgstate is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
+If `msgstate` is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
 
   * Display the message to the user, but warn him that the message was received unencrypted.
 
 #### Receiving plaintext with the whitespace tag
 
-If msgstate is `MSGSTATE_PLAINTEXT`:
+If `msgstate` is `MSGSTATE_PLAINTEXT`:
 
   * Remove the whitespace tag and display the message to the user.
   * If `REQUIRE_ENCRYPTION` is set, warn him that the message was received unencrypted.
 
-If msgstate is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
+If `msgstate` is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
 
   * Remove the whitespace tag and display the message to the user.
   * Warn him that the message was received unencrypted.
@@ -980,12 +981,12 @@ In any event, if `WHITESPACE_START_DAKE` is set:
 If the tag offers OTR version 4 and `ALLOW_V4` is set:
 
   * Send a version Pre-key Message.
-  * Transition authstate to `AUTHSTATE_AWAITING_DRE_AUTH`.
+  * Transition `authstate` to `AUTHSTATE_AWAITING_DRE_AUTH`.
 
 If the tag offers OTR version 3 and `ALLOW_V3` is set:
 
   * Send a version 3 D-H Commit Message
-  * Transition authstate to `AUTHSTATE_AWAITING_DHKEY`.
+  * Transition `authstate` to `AUTHSTATE_AWAITING_DHKEY`.
   * The protocol proceeds as specified in OTRv3.
 
 
@@ -994,12 +995,12 @@ If the tag offers OTR version 3 and `ALLOW_V3` is set:
 If the query message offers OTR version 4 and `ALLOW_V4` is set:
 
   * Send a Pre-key Message
-  * Transition authstate to `AUTHSTATE_AWAITING_DRE_AUTH`.
+  * Transition `authstate` to `AUTHSTATE_AWAITING_DRE_AUTH`.
 
 Otherwise, if the query message offers OTR version 3 and `ALLOW_V3` is set:
 
   * Send a version 3 D-H Commit Message.
-  * Transition authstate to `AUTHSTATE_AWAITING_DHKEY`.
+  * Transition `authstate` to `AUTHSTATE_AWAITING_DHKEY`.
   * The protocol proceeds as specified in OTRv3.
 
 
@@ -1008,13 +1009,13 @@ Otherwise, if the query message offers OTR version 3 and `ALLOW_V3` is set:
   * Display the message to the user.
   * If `ERROR_START_DAKE` is set, reply with a Query Message.
   * TODO: Should all state machines be reset?
-  * TODO: Should authstate and msgstate be reset?
+  * TODO: Should `authstate` and `msgstate` be reset?
 
 #### Receiving a Pre-key message
 
 If the message is version 4 and `ALLOW_V4` is not set, ignore this message. Otherwise:
 
-If authstate is `AUTHSTATE_AWAITING_DRE_AUTH`:
+If `authstate` is `AUTHSTATE_AWAITING_DRE_AUTH`:
 
 This indicates that you have already sent a Pre-key message to your
 correspondent, but that she either didn't receive it, or just didn't receive it
@@ -1023,7 +1024,7 @@ yet, and has sent you one as well.
   * Ignore your previously sent pre-key (by forgetting the ephemeral keys `i`
     and `G1^i`).
 
-Regardless of authstate value, you should:
+Regardless of `authstate` value, you should:
 
   * Verify that the profile signature is valid.
   * Verify that the profile is not expired.
@@ -1034,8 +1035,8 @@ If everything checks out:
 
   * Reply with a DRE-Auth Message.
   * Compute the ECDH shared secret `K_ecdh = (g1*x)*y`.
-  * Transition authstate to `AUTHSTATE_NONE`.
-  * Transition msgstate to `MSGSTATE_ENCRYPTED`.
+  * Transition `authstate` to `AUTHSTATE_NONE`.
+  * Transition `msgstate` to `MSGSTATE_ENCRYPTED`.
   * Initialize the double ratcheting.
   * If there is a recent stored message, encrypt it and send it as a Data Message.
 
@@ -1045,7 +1046,7 @@ If everything checks out:
 If the message is version 4 and `ALLOW_V4` is not set, ignore this message.
 Otherwise:
 
-If authstate is `AUTHSTATE_AWAITING_DRE_AUTH`:
+If `authstate` is `AUTHSTATE_AWAITING_DRE_AUTH`:
 
   * Verify that the profile signature is valid.
   * Verify that the profile is not expired.
@@ -1056,31 +1057,31 @@ If authstate is `AUTHSTATE_AWAITING_DRE_AUTH`:
 If everything checks out:
 
   * Compute the ECDH shared secret `K_ecdh = (G1*y)*x`.
-  * Transition authstate to `AUTHSTATE_NONE`.
-  * Transition msgstate to `MSGSTATE_ENCRYPTED`.
+  * Transition `authstate` to `AUTHSTATE_NONE`.
+  * Transition `msgstate` to `MSGSTATE_ENCRYPTED`.
   * Initialize the double ratcheting.
   * If there is a recent stored message, encrypt it and send it as a Data Message.
 
 Otherwise, ignore the message. This may cause the sender to be in an invalid
-msgstate equals `MSGSTATE_ENCRYPTED`, but it can be detected as soon as she
+`msgstate` equals `MSGSTATE_ENCRYPTED`, but it can be detected as soon as she
 sends the next data message - which won't be possible to be decrypted and will
 be replied with an OTR error message.
 
 #### User types a message to be sent
 
-If msgstate is `MSGSTATE_PLAINTEXT`:
+If `msgstate` is `MSGSTATE_PLAINTEXT`:
 
   * If `REQUIRE_ENCRYPTION` is set:
     * Store the plaintext message for possible retransmission, and send a Query Message.
   * Otherwise:
     * If `SEND_WHITESPACE_TAG` is set, and you have not received a plaintext message from this correspondent since last entering `MSGSTATE_PLAINTEXT`, attach the whitespace tag to the message. Send the (possibly modified) message as plaintext.
 
-If msgstate is `MSGSTATE_ENCRYPTED`:
+If `msgstate` is `MSGSTATE_ENCRYPTED`:
 
   * Encrypt the message, and send it as a Data Message.
   * Store the plaintext message for possible retransmission.
 
-If msgstate is `MSGSTATE_FINISHED`:
+If `msgstate` is `MSGSTATE_FINISHED`:
 
   * Inform the user that the message cannot be sent at this time.
   * Store the plaintext message for possible retransmission.
@@ -1088,7 +1089,7 @@ If msgstate is `MSGSTATE_FINISHED`:
 
 #### Receiving a Data Message
 
-If msgstate is `MSGSTATE_ENCRYPTED`:
+If `msgstate` is `MSGSTATE_ENCRYPTED`:
 
 Verify the information in the message. If the verification succeeds:
 
@@ -1097,12 +1098,12 @@ Verify the information in the message. If the verification succeeds:
   * If you have not sent a message to this correspondent in some (configurable) time, send a "heartbeat" message.
 
 If the received message contains a TLV type 1, forget all encryption keys for
-this correspondent, and transition msgstate to `MSGSTATE_FINISHED`.
+this correspondent, and transition `msgstate` to `MSGSTATE_FINISHED`.
 
 Otherwise, inform the user that an unreadable encrypted message was received,
 and reply with an Error Message.
 
-If msgstate is `MSGSTATE_PLAINTEXT` or `MSGSTATE_FINISHED`:
+If `msgstate` is `MSGSTATE_PLAINTEXT` or `MSGSTATE_FINISHED`:
 
 Inform the user that an unreadable encrypted message was received, and reply
 with an Error Message.
@@ -1110,18 +1111,18 @@ with an Error Message.
 
 #### User requests to end an OTR conversation
 
-If msgstate is `MSGSTATE_PLAINTEXT`:
+If `msgstate` is `MSGSTATE_PLAINTEXT`:
 
   * Do nothing.
 
-If msgstate is `MSGSTATE_ENCRYPTED`:
+If `msgstate` is `MSGSTATE_ENCRYPTED`:
 
   * Send a Data Message containing a TLV type 1.
-  * Transition msgstate to `MSGSTATE_PLAINTEXT`.
+  * Transition `msgstate` to `MSGSTATE_PLAINTEXT`.
 
-If msgstate is `MSGSTATE_FINISHED`:
+If `msgstate` is `MSGSTATE_FINISHED`:
 
-  * Transition msgstate to `MSGSTATE_PLAINTEXT`.
+  * Transition `msgstate` to `MSGSTATE_PLAINTEXT`.
 
 
 #### Things to consider
