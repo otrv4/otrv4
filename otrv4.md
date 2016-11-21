@@ -590,7 +590,7 @@ The previously mentioned keys are affected by these events:
 
 #### Upon completing the DAKE
 
-The AKE is considered to be completed when either:
+The DAKE is considered to be completed when either:
 
 1. Bob sends the DRE Auth message. In this case:
   * Set `initiator` as `false`.
@@ -912,11 +912,11 @@ REQUIRE_ENCRYPTION
 SEND_WHITESPACE_TAG
   Advertise your support of OTR using the whitespace tag.
 
-WHITESPACE_START_AKE
-  Start the OTR AKE when you receive a whitespace tag.
+WHITESPACE_START_DAKE
+  Start the OTR DAKE when you receive a whitespace tag.
 
-ERROR_START_AKE
-  Start the OTR AKE when you receive an OTR Error Message.
+ERROR_START_DAKE
+  Start the OTR DAKE when you receive an OTR Error Message.
 ```
 
 Note that it is possible for UIs simply to offer the old "combinations" of
@@ -982,7 +982,7 @@ If msgstate is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
   * Remove the whitespace tag and display the message to the user.
   * Warn him that the message was received unencrypted.
 
-In any event, if `WHITESPACE_START_AKE` is set:
+In any event, if `WHITESPACE_START_DAKE` is set:
 
 If the tag offers OTR version 4 and `ALLOW_V4` is set:
 
@@ -1013,7 +1013,7 @@ Otherwise, if the query message offers OTR version 3 and `ALLOW_V3` is set:
 #### Receiving an Error Message
 
   * Display the message to the user.
-  * If `ERROR_START_AKE` is set, reply with a Query Message.
+  * If `ERROR_START_DAKE` is set, reply with a Query Message.
 
 #### Receiving a Pre-key message
 
@@ -1148,7 +1148,7 @@ If msgstate is `MSGSTATE_FINISHED`:
   worse if you are each logged in multiple times.]
 
 * How can we address the problem of multiple Query Messages received while the
-  AKE is in progress?
+  DAKE is in progress?
 
 Example: Alice has `REQUIRE_ENCRYPTION`.
 
