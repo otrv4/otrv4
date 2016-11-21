@@ -565,7 +565,7 @@ OTRv4 keys are rotated in two levels:
 In order to manage keys, each correspondent keeps track of:
 
 ```
-ratchet_flag whether we should rotate the root key before sending the next message
+initiator who should rotate the root key before sending the first message
 i as Current ratchet id
 j as Previously sent message id
 k as Previously received message id
@@ -593,11 +593,11 @@ The previously mentioned keys are affected by these events:
 The AKE is considered to be completed when either:
 
 1. Bob sends the DRE Auth message. In this case:
-  * Set `ratchet_flag` as `false`.
+  * Set `initiator` as `false`.
   * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`y`, `Y`).
   * Set `our_dh` as our DH ephemeral key pair from the DAKE (`b`, `B`).
 2. Alice receives and verifies the DRE Auth message. In this case:
-  * Set `ratchet_flag` as `true`.
+  * Set `initiator` as `true`.
   * Set `our_ecdh` as our ephemeral public key from the DAKE (`x`, `X`).
   * Set `their_ecdh` as the their ephemeral public key from the DAKE (`Y`).
   * Set `our_dh` as our DH ephemeral key pair from the DAKE (`a`, `A`).
@@ -717,13 +717,12 @@ Verify MAC, Decrypt message 1_1
 
 #### When you send a Data Message:
 
-If `ratchet_flag` is `true`:
+If `j == 0` and (`i > 0` or `initiator` is `true`) :
   * Securely delete `our_next_public_ECDH_key`, increment the current ratchet ID `i`,
     reset the previously sent message ID `j` to 0, and set `our_next_public_ECDH_key`
     to a new DH key pair which you generate with [newECDH()](#ECDH-and-DH-Shared-Secrets)
   * Derive new set of keys `R_i`, `Cs_i_j` `Cr_i_j` from `our_ecdh.secret`, `their_ecdh.public`, `our_dh.secret`, and `their_dh.public`:
     `R_i, Cs_i_j, Cs_i_j = calculate_ratchet_keys(R_(i-1) || ECDH(our_ecdh.secret, their_ecdh.public) || DH(our_dh.secret, their_dh.public))`
-  * Set `ratchet_flag` to false.
 
 Otherwise:
   * Derive the next sending Chain Key `Cs_i_j+1 = SHA3-256(Cs_i_j)`.
@@ -740,8 +739,8 @@ Use the encryption key to encrypt the message, and the mac key to calculate its 
 
 #### When you receive a Data Message:
 
-Reject messages with ratchet_id less than the current ratchet_id and message_id
-less than the current expected message_id.
+Reject messages with ratchet_id less than the i-1 or greater than i+1
+Reject messages with message_id less than the k.
 
 Use the message ID to compute the receiving chain key (since the previously received message ID) and calculate encryption and mac keys.
 
@@ -765,7 +764,7 @@ verification fails, reject the message. If the MAC verifies, decrypt the message
 using the "encryption key" (`MKenc`).
 
 Finally:
-  * Set `ratchet_flag` to `true`.
+  * Set `j` to `0`.
   * Set `their_ecdh` as the Next Public ECDH key from the message.
 
 ### Revealing MAC Keys
@@ -1016,7 +1015,7 @@ Otherwise, if the query message offers OTR version 3 and `ALLOW_V3` is set:
   * Display the message to the user.
   * If `ERROR_START_AKE` is set, reply with a Query Message.
 
-#### Receiving a Pre-key message
+#### Receiving a Pre-key message
 
 If the message is version 4 and `ALLOW_V4` is not set, ignore this message. Otherwise:
 
@@ -1043,7 +1042,7 @@ If everything checks out:
   * Transition authstate to `AUTHSTATE_NONE`.
   * Transition msgstate to `MSGSTATE_ENCRYPTED`.
   * Initialize the double ratcheting:
-    * Set `ratchet_flag` as `false`.
+    * Set `initiator` as `false`.
     * Set `our_ecdh` as our ephemeral key pair from the DAKE (`y`, `Y`).
     * Calculate the first set of keys `R_0, Cs_0_0, Cr_0_0 = calculate_ratchet_keys(K)`
   * If there is a recent stored message, encrypt it and send it as a Data Message.
@@ -1069,7 +1068,7 @@ If everything checks out:
   * Transition authstate to `AUTHSTATE_NONE`.
   * Transition msgstate to `MSGSTATE_ENCRYPTED`.
   * Initialize the double ratcheting:
-    * Set `ratchet_flag` as `true`.
+    * Set `initiator` as `true`.
     * Set `our_ecdh` as our ephemeral keypair from the DAKE (`x`, `X`).
     * Set `their_ecdh` as their ephemeral public key from the DAKE (`Y`).
     * Calculate the first set of keys `R_0, Cs_0_0, Cr_0_0 = calculate_ratchet_keys(K)`
@@ -1699,4 +1698,4 @@ d is an array of bytes.
 [3]: https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html "Off-the-Record Messaging Protocol version 3"
 [4]: https://mikehamburg.com/papers/goldilocks/goldilocks.pdfi "M. Hamburg: Ed448-Goldilocks, a new elliptic curve"
 [5]: http://www.ietf.org/rfc/rfc7748.txt "A. Langley, M. Hamburg, and S. Turner: Elliptic Curves for Security.” Internet Engineering Task Force; RFC 7748 (Informational); IETF, Jan-2016"
-[6]: https://github.com/trevp/double_ratchet/wiki "T. Perrin: Double Ratchet Algorithm"
+[6]: https://whispersystems.org/docs/specifications/doubleratchet "Trevor Perrin (editor), Moxie Marlinspike: The Double Ratchet Algorithm"
