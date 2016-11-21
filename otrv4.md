@@ -1,11 +1,15 @@
 # OTR version 4
 
-The following messaging protocol provides way for two people to have a conversation over a network
-in a way that provides the same security as a private, in-person conversation. No external party
-can overhear what is being said, and no one (not even the conversation participants) can prove what
-was said or that the two participants spoke to each other at all.
+The following messaging protocol provides way for two people to have a
+conversation over a network in a way that provides the same security as a
+private, in-person conversation. No external party can overhear what is being
+said, and no one (not even the conversation participants) can prove what was
+said or that the two participants spoke to each other at all.
 
-OTR works on top of an existing messaging protocol, like XMPP, with capabilities of sending and receiving messages to and from a peer. A messaging client which does not support OTR will present received messages to the user and will send messages typed by the user to the other peer, like the following diagram:
+OTR works on top of an existing messaging protocol, like XMPP, with capabilities
+of sending and receiving messages to and from a peer. A messaging client which
+does not support OTR will present received messages to the user and will send
+messages typed by the user to the other peer, like the following diagram:
 
 ```
 # Receiving messages
@@ -17,7 +21,9 @@ while to_send = client.message_to_send()
   messaging.send(to_send)
 ```
 
-A messaging client which supports OTR will forward messages to the OTR implementation before presenting received messages to the user and before sending messages to the other peer, like the following diagram:
+A messaging client which supports OTR will forward messages to the OTR
+implementation before presenting received messages to the user and before
+sending messages to the other peer, like the following diagram:
 
 ```
 # Receiving messages
@@ -55,7 +61,8 @@ while to_send = client.message_to_send()
 
 ## Main Changes over Version 3
 
-TODO: Write this section when we have fleshed out the other sections of the spec and decide what is important to highlight here
+TODO: Write this section when we have fleshed out the other sections of the spec
+and decide what is important to highlight here
 
 ## High Level Overview
 
@@ -72,18 +79,22 @@ The high level flow of this protocol will be:
 
 Both participants are online at the start of a conversation.
 
-Messages in a conversation will be exchanged over an insecure channel, where an attacker can eavesdrop or interfere with the messages.
+Messages in a conversation will be exchanged over an insecure channel, where an
+attacker can eavesdrop or interfere with the messages.
 
-We assume a network model which provides in-order delivery of messages, but some messages may not be delivered.
+We assume a network model which provides in-order delivery of messages, but some
+messages may not be delivered.
 
 ## Security Properties
 
-In an off the record conversation, both sides can verify the identity of the other participant
-(but cannot transfer this knowledge to a third party). Participants can converse with the assurance
-that their conversation will not be read or modified by a hostile third party.
+In an off the record conversation, both sides can verify the identity of the
+other participant (but cannot transfer this knowledge to a third party).
+Participants can converse with the assurance that their conversation will not be
+read or modified by a hostile third party.
 
-To resemble an in-person conversation means that both ends can deny that they have participated in
-said conversation. Both ends can also deny having sent one or many of the exchanged messages in the conversation.
+To resemble an in-person conversation means that both ends can deny that they
+have participated in said conversation. Both ends can also deny having sent one
+or many of the exchanged messages in the conversation.
 
 ### DAKE properties
  * Mutual authentication
@@ -96,21 +107,29 @@ said conversation. Both ends can also deny having sent one or many of the exchan
  * Message deniability
 
 Threats that an OTR conversation does not mitigate:
-* An active attacker may perform a Denial of Service attack but not learn the contents of messages.
+* An active attacker may perform a Denial of Service attack but not learn the
+  contents of messages.
 
 ## Preliminaries
 
 ### Notation
 
-Integer variables are in lower case (x, y). Points and other variables are in upper case (P, Q).
+Integer variables are in lower case (x, y). Points and other variables are in
+upper case (P, Q).
 
-Addition and subtraction of elliptic curve points A and B is A + B and A - B. Addition of a point to other point generates another point. Scalar multiplication of an integer (scalar) with an elliptic curve point B yields a new point C = a * B.
+Addition and subtraction of elliptic curve points A and B is A + B and A - B.
+Addition of a point to other point generates another point. Scalar
+multiplication of an integer (scalar) with an elliptic curve point B yields a
+new point C = a * B.
 
-The concatenation of byte sequences x and P is x || P. In this case, x and P represent a fixed-length byte sequence encoding the respective values. See section [Data types](#data-types) for encoding and decoding details.
+The concatenation of byte sequences x and P is x || P. In this case, x and P
+represent a fixed-length byte sequence encoding the respective values. See
+section [Data types](#data-types) for encoding and decoding details.
 
 ### Elliptic Curve Parameters
 
-OTRv4 uses the [Ed448-Goldilocks][4] [elliptic curve][5], which defines the following parameters:
+OTRv4 uses the [Ed448-Goldilocks][4] [elliptic curve][5], which defines the
+following parameters:
 
 ```
 Base point (B)
@@ -135,11 +154,14 @@ Number of bits in q (|q|)
   446 bits
 ```
 
-An integer modulo p is a "field element". An integer modulo q is a "scalar" (also a value on Z_q), and is considered a MPI for encoding and decoding purposes.
+An integer modulo p is a "field element". An integer modulo q is a "scalar"
+(also a value on Z_q), and is considered a MPI for encoding and decoding
+purposes.
 
 ### 3072 Diffie-Hellman Parameters
 
-For the Diffie-Hellman group computations, the group is the one defined in [RFC 3526][1] with 3072-bit modulus (hex, big-endian):
+For the Diffie-Hellman group computations, the group is the one defined in [RFC
+3526][1] with 3072-bit modulus (hex, big-endian):
 
 ```
    Prime is: 2^3072 - 2^3008 - 1 + 2^64 * { [2^2942 pi] + 1690314 }
@@ -166,24 +188,38 @@ For the Diffie-Hellman group computations, the group is the one defined in [RFC 
 
 ```
 
-Note that this means that whenever you see a Diffie-Hellman exponentiation in this document, it always means that the exponentiation is done modulo the above 3072-bit number.
+Note that this means that whenever you see a Diffie-Hellman exponentiation in
+this document, it always means that the exponentiation is done modulo the above
+3072-bit number.
 
 
 ### OTR messages
 
-OTRv4 has the same message formats as OTRv3 without compatibility with version 2. It means query messages, whitespace tags, error messages, encoding and fragmentation is performed as specified in OTRv3.
+OTRv4 has the same message formats as OTRv3 without compatibility with version
+2. It means query messages, whitespace tags, error messages, encoding and
+fragmentation is performed as specified in OTRv3.
 
-The fragmentation format is the same as for OTRv3. You will have to wait until after reassembly to finalize how to deal with a message. For details, see [fragmentation section][3] in OTRv3 documentation.
+The fragmentation format is the same as for OTRv3. You will have to wait until
+after reassembly to finalize how to deal with a message. For details, see
+[fragmentation section][3] in OTRv3 documentation.
 
-Although Data Messages have a different format in OTRv4, they use the same format for TLV (type/length/value) records. OTRv4 supports the same TLV record types from OTRv3, with the exception of SMP (version 1) TLVs (types 2-7).
+Although Data Messages have a different format in OTRv4, they use the same
+format for TLV (type/length/value) records. OTRv4 supports the same TLV record
+types from OTRv3, with the exception of SMP (version 1) TLVs (types 2-7).
 
 OTRv4 defines additional TLV record types:
 
 * Type 10: SMP Abort Message
-  If the user cancels SMP prematurely or encounters an error in the protocol and cannot continue, you may send a message (possibly with empty human-readable part) with this TLV type to instruct the other party's client to abort the protocol. The associated length should be zero and the associated value should be empty. If you receive a TLV of this type, you should change the SMP state to SMPSTATE_EXPECT1 (see below).
+  If the user cancels SMP prematurely or encounters an error in the protocol and
+  cannot continue, you may send a message (possibly with empty human-readable
+  part) with this TLV type to instruct the other party's client to abort the
+  protocol. The associated length should be zero and the associated value should
+  be empty. If you receive a TLV of this type, you should change the SMP state
+  to SMPSTATE_EXPECT1 (see below).
 
 * Type 11: SMPv2 Message 1
-  The value represents an initiating message of the Socialist Millionaires' Protocol, described below.
+  The value represents an initiating message of the Socialist Millionaires'
+  Protocol, described below.
 
 * Type 12: SMPv2 Message 2
   The value represents the second message in an instance of SMPv2.
@@ -195,11 +231,13 @@ OTRv4 defines additional TLV record types:
   The value represents the final message in an instance of SMPv2.
 
 * Type 15: SMPv2 Message 1Q
-  Like a SMPv2 Message 1, but whose value begins with a NUL-terminated user-specified question.
+  Like a SMPv2 Message 1, but whose value begins with a NUL-terminated
+  user-specified question.
 
 ### Data types
 
-OTRv4 uses the same data types as specified in OTRv3 (bytes, shorts, ints, MPIs, and DATA) with the addition of:
+OTRv4 uses the same data types as specified in OTRv3 (bytes, shorts, ints, MPIs,
+and DATA) with the addition of:
 
 ```
 Nonce (NONCE):
@@ -232,7 +270,8 @@ Dual-receiver encrypted message (DRE-M):
     Where (U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2, nonce, φ) = DREnc(pubA, pubB, m)
 ```
 
-And an Auth non-interactive zero-knowledge proof of knowledge is serialized as follows:
+An Auth non-interactive zero-knowledge proof of knowledge is serialized as
+follows:
 
 ```
 Auth message (AUTH):
@@ -262,7 +301,9 @@ OTR public authentication Cramer-Shoup key (CRAMER-SHOUP-PUBKEY):
       (c, d, h) are the Cramer-Shoup public key parameters
 ```
 
-OTR public keys have fingerprints, which are hex strings that serve as identifiers for the public key. The fingerprint is calculated by taking the SHA3-256 hash of the byte-level representation of the public key.
+OTR public keys have fingerprints, which are hex strings that serve as
+identifiers for the public key. The fingerprint is calculated by taking the
+SHA3-256 hash of the byte-level representation of the public key.
 
 
 ## OTR Conversation Initialization
@@ -274,8 +315,8 @@ There are two ways Alice can inform Bob that she is willing to use the OTR
 protocol to speak with him in an interactive setting: by sending him the OTR
 Query Message, or by including a special "tag" consisting of whitespace
 characters in one of her messages to him. Each method also includes a way for
-Alice to communicate to Bob which versions of the OTR protocol she is willing
-to speak with him.
+Alice to communicate to Bob which versions of the OTR protocol she is willing to
+speak with him.
 
 The semantics of the interactive OTR Query Message are that Alice is requesting
 that Bob start an OTR conversation with her (if he is willing and able to do
@@ -283,8 +324,8 @@ so). The semantics of the whitespace tag are that Alice is opportunistically
 indicating to Bob that she is willing to have an OTR conversation with him.
 
 For example, if Bob has a policy of "only use OTR when it's explicitly
-requested", then he would start an OTR conversation upon receiving an OTR
-Query Message, but would not upon receiving the whitespace tag.
+requested", then he would start an OTR conversation upon receiving an OTR Query
+Message, but would not upon receiving the whitespace tag.
 
 Both the OTR Query Message and Whitespace tag include the OTR versions Alice
 supports and is willing to use.
@@ -300,11 +341,11 @@ the protocol falls back to OTRv3 [3].
 
 ## User Profile
 
-OTRv4 introduces mandatory user profile publication. The user profile contains
-a Cramer-Shoup long term public key, signed supported version information, and a signed
-profile expiration date. Both parties will include the user profile in the beginning
-of the DAKE. The frequency of the user profile publication is determined by its
-expiration and renewal policy.
+OTRv4 introduces mandatory user profile publication. The user profile contains a
+Cramer-Shoup long term public key, signed supported version information, and a
+signed profile expiration date. Both parties will include the user profile in
+the beginning of the DAKE. The frequency of the user profile publication is
+determined by its expiration and renewal policy.
 
 ### Creating a User Profile
 
@@ -314,8 +355,8 @@ To create a user profile, both Alice and Bob generate:
 2. Supported version information string in the same format as OTRv3 Query Messages
 3. Profile Expiration
 
-One of the Cramer-Shoup secret key values (z) is used to create signatures
-of the entire profile. This is created using the Ed448 signature algorithm as
+One of the Cramer-Shoup secret key values (z) is used to create signatures of
+the entire profile. This is created using the Ed448 signature algorithm as
 documented in [4].
 
 The user profile components are as follows:
@@ -326,19 +367,20 @@ The user profile components are as follows:
 4. profile_sig = sign( PK, version_info, profile_expiration )
 5. transition_sig = sign( otrv3_DSA_fingerprint )
 
-Then this profile should be published in a public place, like an untrusted server.
+Then this profile should be published in a public place, like an untrusted
+server.
 
 #### Renewing a Profile
 
-If a renewed profile is not published and if the only publicly available
-profile is expired, then this puts the user's participation deniability
-at risk.
+If a renewed profile is not published and if the only publicly available profile
+is expired, then this puts the user's participation deniability at risk.
 
 Before the profile expires, the user must publish an updated profile with a new
 expiration date. The user establishes the frequency of expiration.
 
 #### User Profile Data Type
 
+```
 User Profile (USER-PROF):
   Cramer-Shoup key (CRAMER-SHOUP-PUBKEY)
   Version (VER)
@@ -355,22 +397,23 @@ Version Expiration (VER-EXP):
 Signature of profile (MPI):
   4 byte unsigned len (896 bits), big-endian
   len byte unsigned value, big-endian
+```
 
 ### Deniable Authenticated Key Exchange (DAKE)
 
 This section outlines the flow of the Deniable Authenticated Key Exchange, which
-is a way for two parties to mutually agree upon a shared key and authenticate one
-another while also allowing a level of participation deniability.
+is a way for two parties to mutually agree upon a shared key and authenticate
+one another while also allowing a level of participation deniability.
 
 This process is based on the [Spawn protocol][2], which utilizes dual-receiver
-encryption (DRE) and a non-interactive zero-knowledge proofs of knowledge (NIZKPK)
-for authentication (Auth).
+encryption (DRE) and a non-interactive zero-knowledge proofs of knowledge
+(NIZKPK) for authentication (Auth).
 
-Alice long-term Cramer-Shoup key-pair is `SKa = (x1a, x2a, y1a, y2a, za)` and `PKa = (Ca, Da, Ha)`.
-Bob long-term Cramer-Shoup key-pair is `SKb = (x1b, x2b, y1b, y2b, zb)` and `PKb = (Cb, Db, Hb)`.
-Both key pairs are generated with `DRGen()`.
+Alice long-term Cramer-Shoup key-pair is `SKa = (x1a, x2a, y1a, y2a, za)` and
+`PKa = (Ca, Da, Ha)`. Bob long-term Cramer-Shoup key-pair is `SKb = (x1b, x2b,
+y1b, y2b, zb)` and `PKb = (Cb, Db, Hb)`. Both key pairs are generated with
+`DRGen()`.
 
-TODO: x/X is the better name? Also, this is integer/point?
 
 #### Overview
 
@@ -422,7 +465,8 @@ Query Message or Whitespace Tag ------->
 
 #### Pre-key message
 
-This is the first message of the DAKE. Bob sends it to Alice to commit to a choice of D-H key. A valid Pre-key message is generated as follows:
+This is the first message of the DAKE. Bob sends it to Alice to commit to a
+choice of D-H key. A valid Pre-key message is generated as follows:
 
 1. Create a user profile. How to do this is detailed [here](#creating-a-profile)
 2. Choose a random ephemeral ECDH key pair:
@@ -454,7 +498,9 @@ A (MPI)
 
 #### DRE-Auth message
 
-This is the second message of the DAKE. Alice sends it to Bob to commit to a choice of her D-H key and acknowledgement of Bob's D-H key. The long-term public key and D-H public keys are encrypted with DRE and authenticated with an NIZKPK.
+This is the second message of the DAKE. Alice sends it to Bob to commit to a
+choice of her D-H key and acknowledgement of Bob's D-H key. The long-term public
+key and D-H public keys are encrypted with DRE and authenticated with an NIZKPK.
 
 A valid DRE-Auth message is generated as follows:
 
@@ -495,16 +541,26 @@ Receiver's User Profile (USER-PROF)
 
 ## Key management
 
-In the DAKE, OTRv4 makes use of long-term Cramer-Shoup keys and ephemeral D-H keys.
+In the DAKE, OTRv4 makes use of long-term Cramer-Shoup keys and ephemeral D-H
+keys.
 
-For exchanging conversation messages, OTRv4 uses a key structure, and key-rotation strategy, inspired on the [Double Ratchet][6] spec. The goal is to provide forward secrecy even in the advent of not receiving messages from the other participant for a considerable amount of time.
+For exchanging conversation messages, OTRv4 uses a key structure, and
+key-rotation strategy, inspired on the [Double Ratchet][6] spec. The goal is to
+provide forward secrecy even in the advent of not receiving messages from the
+other participant for a considerable amount of time.
 
-The messages are encrypted and authenticated using a set of receiving (and sending) MAC and encryption keys, derived from sending (and receiving) chain keys.
+The messages are encrypted and authenticated using a set of receiving (and
+sending) MAC and encryption keys, derived from sending (and receiving) chain
+keys.
 
 OTRv4 keys are rotated in two levels:
 
-1. Root level: every time a new D-H key is advertised/acknowledged a new root key is derived, as long as new initial sending and receiving chain keys.
-2. Chain level: every time a new message needs to be sent before an acknowledgement is received, the sending chain key is rotated, being derived from the previous sending chain key.
+1. Root level: every time a new D-H key is advertised/acknowledged a new root
+   key is derived, as long as new initial sending and receiving chain keys.
+
+2. Chain level: every time a new message needs to be sent before an
+   acknowledgement is received, the sending chain key is rotated, being derived
+   from the previous sending chain key.
 
 In order to manage keys, each correspondent keeps track of:
 
@@ -610,20 +666,20 @@ decide_between(Ca, Cb):
 ## Data Exchange
 
 This section describes how each participant will use the Double Ratchet
-algorithm to exchange data initialized with the shared secret established in the DAKE.
-The Double Ratchet Algorithm is a key management algorithm that was developed by Trevor
-Perrin and Moxie Marlinspike. After an initial key exchange it manages the ongoing renewal
-and maintenance of short-lived session keys. It combines a cryptographic ratchet based on
-Diffie–Hellman key exchange and a ratchet based on a key derivation function.
+algorithm to exchange data initialized with the shared secret established in the
+DAKE. The Double Ratchet Algorithm is a key management algorithm that was
+developed by Trevor Perrin and Moxie Marlinspike. After an initial key exchange
+it manages the ongoing renewal and maintenance of short-lived session keys. It
+combines a cryptographic ratchet based on Diffie–Hellman key exchange and a
+ratchet based on a key derivation function.
 
+To perform a new ratchet means to rotate the root key and chain key to use a new
+D-H key pair. A ratchet represents a group of data messages which are encrypted
+by keys derived from the same D-H key pair.
 
-To perform a new ratchet means to rotate the root key and chain key to use a new D-H key pair.
-A ratchet represents a group of data messages which are encrypted by keys derived from the
-same D-H key pair.
-
-A message with an empty human-readable part (the plaintext is of zero length, or starts
-with a NUL) is a "heartbeat" packet, and should not be displayed to the user. (But it's
-still useful to effect key rotations.)
+A message with an empty human-readable part (the plaintext is of zero length, or
+starts with a NUL) is a "heartbeat" packet, and should not be displayed to the
+user. (But it's still useful to effect key rotations.)
 
 ```
 Alice                                                                           Bob
@@ -699,14 +755,14 @@ MKenc = SHA3-256(0x00 || Cr_message_id)
 MKmac = SHA3-256(0x01 || Cr_message_id)
 ```
 
-You may need to use receiving chain keys older than `message_id-1` to calculate the
-current if you did not receive previous messages. For example, your peer sends you
-data messages 1, 2, and 3, but you only receive 1 and 3. In that case you would use
-the chain key for message 1 to derive the chain key for message 3.
+You may need to use receiving chain keys older than `message_id-1` to calculate
+the current if you did not receive previous messages. For example, your peer
+sends you data messages 1, 2, and 3, but you only receive 1 and 3. In that case
+you would use the chain key for message 1 to derive the chain key for message 3.
 
-Use the "mac key" (`MKmac`) to verify the MAC on the message. If the message verification
-fails, reject the message. If the MAC verifies, decrypt the message using the "encryption key"
-(`MKenc`).
+Use the "mac key" (`MKmac`) to verify the MAC on the message. If the message
+verification fails, reject the message. If the MAC verifies, decrypt the message
+using the "encryption key" (`MKenc`).
 
 Finally:
   * Set `ratchet_flag` to `true`.
@@ -714,9 +770,13 @@ Finally:
 
 ### Revealing MAC Keys
 
-We reveal old MAC keys to provide forgeability of messages. Old MAC keys are keys for messages that have already been received, therefore will no longer be used to verify the authenticity of a message.
+We reveal old MAC keys to provide forgeability of messages. Old MAC keys are
+keys for messages that have already been received, therefore will no longer be
+used to verify the authenticity of a message.
 
-MAC keys are revealed with data messages. They are also revealed with heartbeat messages (data messages that encode a plaintext of zero length) if the receiver has not sent a message in a configurable amount of time.
+MAC keys are revealed with data messages. They are also revealed with heartbeat
+messages (data messages that encode a plaintext of zero length) if the receiver
+has not sent a message in a configurable amount of time.
 
 A receiver can reveal a MAC key in the following case:
 
@@ -788,14 +848,16 @@ Old MAC keys to be revealed (DATA)
 
 ## The protocol state machine
 
-An OTR client maintains separate state for every correspondent. For example, Alice may have an active OTR
-conversation with Bob, while having an unprotected conversation with Charlie. This state consists of two
-main state variables, as well as some other information (such as encryption keys).
-The two main state variables are:
+An OTR client maintains separate state for every correspondent. For example,
+Alice may have an active OTR conversation with Bob, while having an unprotected
+conversation with Charlie. This state consists of two main state variables, as
+well as some other information (such as encryption keys). The two main state
+variables are:
 
 ### Message state
 
-The message state variable, msgstate, controls what happens to outgoing messages typed by the user. It can take one of three values:
+The message state variable, msgstate, controls what happens to outgoing messages
+typed by the user. It can take one of three values:
 
 ```
 MSGSTATE_PLAINTEXT
@@ -828,9 +890,15 @@ AUTHSTATE_AWAITING_DRE_AUTH
 
 ### Policies
 
-OTR clients can set different policies for different correspondents. For example, Alice could set up her client so that it speaks only OTR version 4, except with Charlie, who she knows has only an old client; so that it will opportunistically start an OTR conversation whenever it detects the correspondent supports it; or so that it refuses to send non-encrypted messages to Bob, ever.
+OTR clients can set different policies for different correspondents. For
+example, Alice could set up her client so that it speaks only OTR version 4,
+except with Charlie, who she knows has only an old client; so that it will
+opportunistically start an OTR conversation whenever it detects the
+correspondent supports it; or so that it refuses to send non-encrypted messages
+to Bob, ever.
 
-The policies that can be set (on a global or per-correspondent basis) are any combination of the following boolean flags:
+The policies that can be set (on a global or per-correspondent basis) are any
+combination of the following boolean flags:
 
 ```
 ALLOW_V3
@@ -852,7 +920,8 @@ ERROR_START_AKE
   Start the OTR AKE when you receive an OTR Error Message.
 ```
 
-Note that it is possible for UIs simply to offer the old "combinations" of options, and not ask about each one separately.
+Note that it is possible for UIs simply to offer the old "combinations" of
+options, and not ask about each one separately.
 
 
 ### State transitions
@@ -874,9 +943,16 @@ Received messages:
   * Data Message
 
 
-The following sections will outline what actions to take in each case. They all assume that at least one of `ALLOW_V3` or `ALLOW_V4` is set; if not, then OTR is completely disabled, and no special handling of messages should be done at all. Version 1 and 2 messages are out of the scope of this specification.
+The following sections will outline what actions to take in each case. They all
+assume that at least one of `ALLOW_V3` or `ALLOW_V4` is set; if not, then OTR is
+completely disabled, and no special handling of messages should be done at all.
+Version 1 and 2 messages are out of the scope of this specification.
 
-For version 3 and 4 messages, someone receiving a message with a recipient instance tag specified that does not equal their own should discard the message and optionally warn the user. The exception here is the D-H Commit Message where the recipient instance tag may be 0, indicating that no particular instance is specified.
+For version 3 and 4 messages, someone receiving a message with a recipient
+instance tag specified that does not equal their own should discard the message
+and optionally warn the user. The exception here is the D-H Commit Message where
+the recipient instance tag may be 0, indicating that no particular instance is
+specified.
 
 
 #### User requests to start an OTR conversation
@@ -946,22 +1022,24 @@ If the message is version 4 and `ALLOW_V4` is not set, ignore this message. Othe
 
 If authstate is `AUTHSTATE_AWAITING_DRE_AUTH`:
 
-This indicates that you have already sent a Pre-key message to your correspondent, but that she either didn't receive it, or just didn't receive it yet, and has sent you one as well.
+This indicates that you have already sent a Pre-key message to your
+correspondent, but that she either didn't receive it, or just didn't receive it
+yet, and has sent you one as well.
 
   * Ignore your previously sent pre-key (by forgetting the ephemeral keys `i` and `G1^i`).
 
 Regardless of authstate value, you should:
 
-  * Verify that the Cramer-Shoup public key is trusted
-  * Verify that the profile signature is valid
-  * Verify that the profile is not expired
-  * Verify that the point X received in the pre-key message is on curve 448
-  * Verify that the A D-H public key is from the correct group
+  * Verify that the Cramer-Shoup public key is trusted.
+  * Verify that the profile signature is valid.
+  * Verify that the profile is not expired.
+  * Verify that the point X received in the pre-key message is on curve 448.
+  * Verify that the A D-H public key is from the correct group.
 
 If everything checks out:
 
   * Reply with a DRE Auth Message
-  * Compute the ECDH shared secret K_ecdh = (g1*x)*y
+  * Compute the ECDH shared secret `K_ecdh = (g1*x)*y`
   * Transition authstate to `AUTHSTATE_NONE`.
   * Transition msgstate to `MSGSTATE_ENCRYPTED`.
   * Initialize the double ratcheting:
@@ -973,7 +1051,8 @@ If everything checks out:
 
 #### Receiving a DRE-Auth message
 
-If the message is version 4 and `ALLOW_V4` is not set, ignore this message. Otherwise:
+If the message is version 4 and `ALLOW_V4` is not set, ignore this message.
+Otherwise:
 
 If authstate is `AUTHSTATE_AWAITING_DRE_AUTH`:
 
@@ -998,6 +1077,9 @@ If everything checks out:
 
 Otherwise, ignore the message.
 
+TODO: I want to double check this. We can't ignore the message, otherwise the
+sender will think it has a valid encrypted channel. This will happen if Alice
+sends a Querry Message to Bob who has 2 OTRv4 clients online ate the same time.
 
 #### User types a message to be sent
 
@@ -1029,13 +1111,16 @@ Verify the information in the message. If the verification succeeds:
   * PUT RATCHET EXPLANATION HERE! HAHA!
   * If you have not sent a message to this correspondent in some (configurable) time, send a "heartbeat" message.
 
-If the received message contains a TLV type 1, forget all encryption keys for this correspondent, and transition msgstate to `MSGSTATE_FINISHED`.
+If the received message contains a TLV type 1, forget all encryption keys for
+this correspondent, and transition msgstate to `MSGSTATE_FINISHED`.
 
-Otherwise, inform the user that an unreadable encrypted message was received, and reply with an Error Message.
+Otherwise, inform the user that an unreadable encrypted message was received,
+and reply with an Error Message.
 
 If msgstate is `MSGSTATE_PLAINTEXT` or `MSGSTATE_FINISHED`:
 
-Inform the user that an unreadable encrypted message was received, and reply with an Error Message.
+Inform the user that an unreadable encrypted message was received, and reply
+with an Error Message.
 
 
 #### User requests to end an OTR conversation
@@ -1056,9 +1141,15 @@ If msgstate is `MSGSTATE_FINISHED`:
 
 #### Things to consider
 
-* FROM OTRv3: On some networks, like AIM, if your correspondent is logged in multiple times, each of his clients will send a Pre-key Message in response to a Query Message; resending the same DRE Auth Message in response to each of those messages would prevent compounded confusion, since each of his clients will see each of the DRE Auth Messages you send. [And the problem gets even worse if you are each logged in multiple times.]
+* FROM OTRv3: On some networks, like AIM, if your correspondent is logged in
+  multiple times, each of his clients will send a Pre-key Message in response to
+  a Query Message; resending the same DRE Auth Message in response to each of
+  those messages would prevent compounded confusion, since each of his clients
+  will see each of the DRE Auth Messages you send. [And the problem gets even
+  worse if you are each logged in multiple times.]
 
-* How can we address the problem of multiple Query Messages received while the AKE is in progress?
+* How can we address the problem of multiple Query Messages received while the
+  AKE is in progress?
 
 Example: Alice has `REQUIRE_ENCRYPTION`.
 
@@ -1089,9 +1180,16 @@ Messages may be lost.
 
 ## Socialist Millionaires Protocol (SMP) version 2
 
-The Socialist Millionaires' Protocol allows two parties with secret information `x` and `y` respectively to check whether `x == y` without revealing any additional information about the secrets. The protocol used by OTR is based on the work of Boudot, Schoenmakers and Traore (2001). A full justification for its use in OTR is made by Alexander and Goldberg, in a paper published in 2007. The following is a technical account of what is transmitted during the course of the protocol.
+The Socialist Millionaires' Protocol allows two parties with secret information
+`x` and `y` respectively to check whether `x == y` without revealing any
+additional information about the secrets. The protocol used by OTR is based on
+the work of Boudot, Schoenmakers and Traore (2001). A full justification for its
+use in OTR is made by Alexander and Goldberg, in a paper published in 2007. The
+following is a technical account of what is transmitted during the course of the
+protocol.
 
-While data messages are being exchanged, either Alice or Bob may run SMP to detect impersonation or man-in-the-middle attacks.
+While data messages are being exchanged, either Alice or Bob may run SMP to
+detect impersonation or man-in-the-middle attacks.
 
 We reuse the previously defined generator in Cramer-Shoup of DRE:
 
@@ -1145,12 +1243,18 @@ Assuming that Alice begins the exchange:
 * Computes `Rab = Rb*a3`.
 * Checks whether `Rab == Pa - Pb`.
 
-If everything is done correctly, then `Rab` should hold the value of `Pa - Pb` times `(G2*a3*b3)*(x - y)`, which means that the test at the end of the protocol will only succeed if `x == y`. Further, since `G2*a3*b3` is a random number not known to any party, if `x` is not equal to `y`, no other information is revealed.
+If everything is done correctly, then `Rab` should hold the value of `Pa - Pb`
+times `(G2*a3*b3)*(x - y)`, which means that the test at the end of the protocol
+will only succeed if `x == y`. Further, since `G2*a3*b3` is a random number not
+known to any party, if `x` is not equal to `y`, no other information is
+revealed.
 
 
 ### Secret Information
 
-The secret information x and y compared during this protocol contains not only information entered by the users, but also information unique to the conversation in which SMP takes place. Specifically, the format is:
+The secret information x and y compared during this protocol contains not only
+information entered by the users, but also information unique to the
+conversation in which SMP takes place. Specifically, the format is:
 
 ```
 Version (BYTE)
@@ -1169,12 +1273,16 @@ User-specified secret (DATA)
   The input string given by the user at runtime.
 ```
 
-Then the HashToScalar() of the above becomes the actual secret (x or y) to be used in SMP. The additional fields insure that not only do both parties know the same secret input string, but no man-in-the-middle is capable of reading their communication either.
+Then the HashToScalar() of the above becomes the actual secret (`x` or `y`) to
+be used in SMP. The additional fields insure that not only do both parties know
+the same secret input string, but no man-in-the-middle is capable of reading
+their communication either.
 
 
 ### SMPv2 messages
 
-SMPv2 messages are sent as TLVs in data messages. For backwards compatibility with SMP version 1, the TLV type for SMPv2 messages start at 10 (decimal).
+SMPv2 messages are sent as TLVs in data messages. For backwards compatibility
+with SMP version 1, the TLV type for SMPv2 messages start at 10 (decimal).
 
 #### SMPv2 Abort message
 
@@ -1182,7 +1290,8 @@ A SMP abort message is a type 10 TLV with no data.
 
 #### SMPv2 message 1
 
-SMP message 1 is sent by Alice to begin a DH exchange to determine two new generators, `g2` and `g3`. A valid  SMP message 1 is generated as follows:
+SMP message 1 is sent by Alice to begin a DH exchange to determine two new
+generators, `g2` and `g3`. A valid  SMP message 1 is generated as follows:
 
 1. Determine her secret input `x`, which is to be compared to Bob's secret `y`, as specified in the "Secret Information" section.
 2. Pick random values `a2` and `a3` in `Z_q`. These will be Alice's exponents for the DH exchange to pick generators.
@@ -1217,7 +1326,9 @@ c3 (MPI), d3 (MPI)
 
 #### SMP message 2
 
-SMP message 2 is sent by Bob to complete the DH exchange to determine the new generators, g2 and g3. It also begins the construction of the values used in the final comparison of the protocol. A valid SMP message 2 is generated as follows:
+SMP message 2 is sent by Bob to complete the DH exchange to determine the new
+generators, g2 and g3. It also begins the construction of the values used in the
+final comparison of the protocol. A valid SMP message 2 is generated as follows:
 
 1. Determine Bob's secret input `y`, which is to be compared to Alice's secret `x`.
 2. Pick random values `b2` and `b3` in `Z_q`. These will used during the DH exchange to pick generators.
@@ -1256,7 +1367,9 @@ cP (MPI), d5 (MPI), d6 (MPI)
 
 #### SMP message 3
 
-SMP message 3 is Alice's final message in the SMP exchange. It has the last of the information required by Bob to determine if `x = y`. A valid SMP message 1 is generated as follows:
+SMP message 3 is Alice's final message in the SMP exchange. It has the last of
+the information required by Bob to determine if `x = y`. A valid SMP message 1
+is generated as follows:
 
 1. Pick random values `r4`, `r5`, `r6` and `r7` in `Z_q`. These will be used to add a blinding factor to the final results, and to generate zero-knowledge proofs that this message was created honestly.
 2. Compute `G2 = G2b*a2` and `G3 = G3b*a3`.
@@ -1285,7 +1398,9 @@ cR (MPI), d7 (MPI)
 
 #### SMP message 4
 
-SMP message 4 is Bob's final message in the SMP exchange. It has the last of the information required by Alice to determine if `x = y`. A valid SMP message 4 is generated as follows:
+SMP message 4 is Bob's final message in the SMP exchange. It has the last of the
+information required by Alice to determine if `x = y`. A valid SMP message 4 is
+generated as follows:
 
 1. Pick a random value `r7` in `Z_q`. This will be used to generate Bob's final zero-knowledge proof that this message was created honestly.
 2. Compute `Rb = (Qa - Qb) * b3`.
@@ -1304,12 +1419,18 @@ cR (MPI), d7 (MPI)
 
 ### The SMP state machine
 
-Whenever the OTR message state machine has `MSGSTATE_ENCRYPTED` set (see below), the SMP state machine may progress. If at any point `MSGSTATE_ENCRYPTED` becomes unset, SMP must abandon its state and return to its initial setup. The SMP state consists of one main variable, as well as information from the partial computations at each protocol step.
+Whenever the OTR message state machine has `MSGSTATE_ENCRYPTED` set (see below),
+the SMP state machine may progress. If at any point `MSGSTATE_ENCRYPTED` becomes
+unset, SMP must abandon its state and return to its initial setup. The SMP state
+consists of one main variable, as well as information from the partial
+computations at each protocol step.
 
 
 #### Expected Message
 
-This main state variable for SMP controls what SMP-specific TLVs will be accepted. This variable has no effect on type 0 or type 1 TLVs, which are always allowed. smpstate can take one of four values:
+This main state variable for SMP controls what SMP-specific TLVs will be
+accepted. This variable has no effect on type 0 or type 1 TLVs, which are always
+allowed. smpstate can take one of four values:
 
 ```
 SMPSTATE_EXPECT1
@@ -1343,14 +1464,18 @@ Received TLVs:
   SMP Abort Message
 ```
 
-The following sections outline what is to be done in each case. They all assume that `MSGSTATE_ENCRYPTED` is set. For simplicity, they also assume that Alice has begun SMP, and Bob is responding to her.
+The following sections outline what is to be done in each case. They all assume
+that `MSGSTATE_ENCRYPTED` is set. For simplicity, they also assume that Alice
+has begun SMP, and Bob is responding to her.
 
 
 #### User requests to begin SMP
 
 If smpstate is not set to `SMPSTATE_EXPECT1`:
 
-SMP is already underway. If you wish to restart SMP, send a SMP abort to the other party and then proceed as if smpstate was `SMPSTATE_EXPECT1`. Otherwise, you may simply continue the current SMP instance.
+SMP is already underway. If you wish to restart SMP, send a SMP abort to the
+other party and then proceed as if smpstate was `SMPSTATE_EXPECT1`. Otherwise,
+you may simply continue the current SMP instance.
 
 If smpstate is set to `SMPSTATE_EXPECT1`:
 
@@ -1360,7 +1485,8 @@ If smpstate is set to `SMPSTATE_EXPECT1`:
 
 #### User requests to abort SMP
 
-In all cases, send a TLV with SMP abort to the correspondent and set smpstate to `SMPSTATE_EXPECT1`.
+In all cases, send a TLV with SMP abort to the correspondent and set smpstate to
+`SMPSTATE_EXPECT1`.
 
 
 #### Receiving a SMP message 1
@@ -1445,7 +1571,8 @@ The DRE scheme consists of three functions:
 
 #### Domain parameters
 
-The Cramer-Shoup scheme uses a group (G, q, G1, G2). This is a group with the same q as Curve 448. The generators G1 and G2 are:
+The Cramer-Shoup scheme uses a group (G, q, G1, G2). This is a group with the
+same q as Curve 448. The generators G1 and G2 are:
 
 G1 = (501459341212218748317573362239202803024229898883658122912772232650473550786782902904842340270909267251001424253087988710625934010181862, 44731490761556280255905446185238890493953420277155459539681908020022814852045473906622513423589000065035233481733743985973099897904160)
 
