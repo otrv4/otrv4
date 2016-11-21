@@ -964,6 +964,7 @@ If `msgstate` is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
 
   * Display the message to the user, but warn him that the message was received unencrypted.
 
+
 #### Receiving plaintext with the whitespace tag
 
 If `msgstate` is `MSGSTATE_PLAINTEXT`:
@@ -1011,6 +1012,7 @@ Otherwise, if the query message offers OTR version 3 and `ALLOW_V3` is set:
   * TODO: Should all state machines be reset?
   * TODO: Should `authstate` and `msgstate` be reset?
 
+
 #### Receiving a Pre-key message
 
 If the message is version 4 and `ALLOW_V4` is not set, ignore this message. Otherwise:
@@ -1034,7 +1036,7 @@ Regardless of `authstate` value, you should:
 If everything checks out:
 
   * Reply with a DRE-Auth Message.
-  * Compute the ECDH shared secret `K_ecdh = (g1*x)*y`.
+  * Compute the ECDH shared secret `K_ecdh = (G1*x)*y`.
   * Transition `authstate` to `AUTHSTATE_NONE`.
   * Transition `msgstate` to `MSGSTATE_ENCRYPTED`.
   * Initialize the double ratcheting.
