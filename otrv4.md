@@ -444,7 +444,7 @@ Query Message or Whitespace Tag ------->
 2. Generates an ephemeral DH secret key `b` and a public key `B`.
 3. Computes `γ = DREnc(PKb, PKa, m)`, being `m = "I" || "R" || X || Y || A || B`.
 4. Computes `σ = Auth(Hb, zb, {Ha, X}, "I" || "R" || X || A || γ)`.
-5. Computes `k = SHA3(K_ecdh || K_dh)` and securely erases `y` and `b`.
+5. Computes `k = SHA3-512(K_ecdh || SHA3-256(K_dh))` and securely erases `y` and `b`.
 6. Sends Alice a DRE-Auth Message `ψ2 = ("R", γ, σ)`.
 
 **Alice:**
@@ -456,7 +456,7 @@ Query Message or Whitespace Tag ------->
   2. Alice's identifier is the first one listed
   3. Bob's identifier is the second one listed, and it matches the identifier transmitted outside of the ciphertext
   4. `(X, A)` is a prekey that Alice previously sent and remains unused
-4. Computes `k = SHA3(K_ecdh || K_dh)` and securely erases `x` and `a`.
+4. Computes `k = SHA3-512(K_ecdh || SHA3-256(K_dh))` and securely erases `x` and `a`.
 
 #### Pre-key message
 
@@ -706,11 +706,16 @@ If `j == 0` and (`i > 0` or `initiator` is `true`) :
   * Securely delete `our_next_public_ECDH_key`, increment the current ratchet ID `i`,
     reset the previously sent message ID `j` to 0, and set `our_next_public_ECDH_key`
     to a new DH key pair which you generate with [newECDH()](#ECDH-and-DH-Shared-Secrets)
-  * Derive new set of keys `R_i`, `Cs_i_j` `Cr_i_j` from `our_ecdh.secret`, `their_ecdh.public`, `our_dh.secret`, and `their_dh.public`:
-    `R_i, Cs_i_j, Cs_i_j = calculate_ratchet_keys(R_(i-1) || ECDH(our_ecdh.secret, their_ecdh.public) || DH(our_dh.secret, their_dh.public))`
+  * If `i % 3 == 0` and `i != 0` :
+    * Derive new set of keys `R_i`, `Cs_i_j` `Cr_i_j` from `our_ecdh.secret`, `their_ecdh.public`, `our_dh.secret`, and `their_dh.public`:
+      `R_i, Cs_i_j, Cs_i_j = calculate_ratchet_keys(R_(i-1) || ECDH(our_ecdh.secret, their_ecdh.public) || DH(our_dh.secret, their_dh.public))`
+  * Otherwise
+    * Derive `DH_shared_key = SHA3-256(DH_shared_key)`
+    * Derive new set of keys `R_i`, `Cs_i_j` `Cr_i_j` from `our_ecdh.secret`, `their_ecdh.public` and `DH_shared_key`:
+      `R_i, Cs_i_j, Cs_i_j = calculate_ratchet_keys(R_(i-1) || ECDH(our_ecdh.secret, their_ecdh.public) || SHA3-256(DH_shared_key))`
 
 Otherwise:
-  * Derive the next sending Chain Key `Cs_i_j+1 = SHA3-384(Cs_i_j)`.
+  * Derive the next sending Chain Key `Cs_i_j+1 = SHA3-512(Cs_i_j)`.
   * Increment previously sent message ID `j`.
 
 In any event, calculate the encryption key (`MKenc`) and the mac key (`MKmac`):
