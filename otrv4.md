@@ -1297,10 +1297,10 @@ conversation in which SMP takes place. Specifically, the format is:
 Version (BYTE)
   The version of SMP used. The version described here is 2.
 
-Initiator fingerprint (20 BYTEs)
+Initiator fingerprint (32 BYTEs)
   The fingerprint that the party initiating SMP is using in the current conversation.
 
-Responder fingerprint (20 BYTEs)
+Responder fingerprint (32 BYTEs)
   The fingerprint that the party that did not initiate SMP is using in the current conversation.
 
 Secure Session ID
