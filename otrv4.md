@@ -320,6 +320,53 @@ their_dh a DH ephemeral public key
 ```
 The previously mentioned keys are affected by these events:
 
+#### When you start a new DAKE
+
+The DAKE is considered to start when either:
+
+1. Bob sends the pre-key message. In this case:
+  * Generate a new ephemeral ECDH key pair `(y, Y)`.
+  * Generate a new ephemeral 3072-bit DH key pair: `(b, B)`.
+  * Set `prev_our_ecdh` as your current ECDH key pair (`our_ecdh`), if you have it.
+  * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`(y, Y)`).
+  * Set `our_dh` as our DH ephemeral key pair from the DAKE (`b`, `B`).
+  * Set `j = 1` because the pre-key message is considered the first in this DH ratchet.
+  * Increase ratchet id `i = i + 1`.
+
+
+2. Alice receives the pre-key message. In this case:
+  * Generate a new ephemeral ECDH key pair `(x, X)`.
+  * Generate a new ephemeral 3072-bit DH key pair: `(a, A)`.
+  * Set `prev_our_ecdh` as your current ECDH key pair (`our_ecdh`), if you have it.
+  * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`(x, X)`).
+  * Set `our_dh` as our DH ephemeral key pair from the DAKE (`a`, `A`).
+  * Set `their_ecdh` as their ECDH ephemeral public key from the DAKE (`Y`).
+  * Set `their_dh` as their DH ephemeral public key from the DAKE (`B`).
+  * Increase ratchet id `i = i + 1`.
+  * Reply with a DRE-Auth message.
+
+
+#### After you complete the DAKE
+
+The DAKE is considered to be completed when either:
+
+1. Alice sends the DRE-Auth message. In this case:
+  * Set `j = 0` to cause a DH-ratchet the next time a msg is sent.
+  * Increase ratchet id `i = i + 1`.
+
+2. Bob receives and verifies the DRE-Auth message. In this case:
+  * Set `their_ecdh` as their ECDH ephemeral public key from the DAKE (`X`).
+  * Set `their_dh` as their DH ephemeral public key from the DAKE (`A`).
+  * Increase ratchet id `i = i + 1`.
+
+Regardless of who you are:
+
+* Calculate `K = calculate_shared_secret(K_ecdh, K_dh)`, where `K_dh` is the `mix_key`
+  and `K_ecdh` is the `EC_shared_key`.
+* Calculate the SSID from shared secret: let SSID be the first 64 bits of `SHA3-256(0x00 || K)`.
+* Calculate the first set of keys with `R_i, Cs_i_0, Cr_i_0 = calculate_ratchet_keys(K)`.
+
+
 #### Peer's Trusted and Untrusted Keys
 
 As in OTRv3, once a key is verified, it is saved as trusted. Then after the DAKE
