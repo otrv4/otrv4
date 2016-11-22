@@ -349,6 +349,9 @@ To create a user profile, both Alice and Bob generate:
 1. The Cramer-Shoup key-pair: PK, SK
 2. Supported version information string in the same format as OTRv3 Query Messages
 3. Profile Expiration
+4. (optional) Transition signatures are signatures of the DSA fingerprints related
+   to the keys used for version 3. This is only used if the user supports
+   version 3 and 4.
 
 One of the Cramer-Shoup secret key values (z) is used to create signatures of
 the entire profile. This is created using the Ed448 signature algorithm as
@@ -360,7 +363,8 @@ The user profile components are as follows:
 2. version_info
 3. profile_expiration
 4. profile_sig = sign( PK, version_info, profile_expiration )
-5. transition_sig = sign( otrv3_DSA_fingerprint )
+5. (optional) fingerprints
+6. (optional) fingerprint_sig = sign( otrv3_DSA_fingerprint ) (1 per fingerprint)
 
 Then this profile should be published in a public place, like an untrusted
 server.
@@ -381,6 +385,7 @@ User Profile (USER-PROF):
   Version (VER)
   Version Expiration (VER-EXP)
   Signature of profile (SIG)
+  Transitional Fingerprints (TRANSITION-FP)
 
 Version (VER):
   A string corresponding to the user's supported OTR versions. The format is
@@ -390,8 +395,14 @@ Version Expiration (VER-EXP):
   4 byte value that contains the date that this profile will expire.
 
 Signature of profile (MPI):
-  4 byte unsigned length, big-endian
-  112 byte (896 bits) unsigned, big-endian
+  4 byte unsigned length of signature, big-endian
+  112 byte (896 bits) unsigned signature, big-endian
+
+Transitional Fingerprints (TRANSITION-FP)
+  1 byte unsigned number of fingerprints, big-endian
+  20 byte (160 bits) unsigned fingerprint, big-endian for each
+  112 byte (896 bits) unsigned signature, big-endian for each
+
 ```
 
 ### Deniable Authenticated Key Exchange (DAKE)
