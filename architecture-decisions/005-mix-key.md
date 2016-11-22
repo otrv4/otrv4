@@ -55,7 +55,7 @@ in the 3072-bit group defined in [RFC-3526](https://www.ietf.org/rfc/rfc3526.txt
 
 *Key Derivation Function - SHA3(Y)*
 
-Given Y, generates a 3072-bit long string using the SHA3-384 algorithm.
+Given Y, generates a 3072-bit long string using the SHA3-256 algorithm.
 
 #### Considerations
 

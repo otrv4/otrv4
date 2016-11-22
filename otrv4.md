@@ -1,44 +1,11 @@
 # OTR version 4
 
 The following messaging protocol provides way for two people to have a
-conversation over a network in a way that provides the same security as a
-private, in-person conversation. No external party can overhear what is being
-said, and no one (not even the conversation participants) can prove what was
-said or that the two participants spoke to each other at all.
-
-OTR works on top of an existing messaging protocol, like XMPP, with capabilities
-of sending and receiving messages to and from a peer. A messaging client which
-does not support OTR will present received messages to the user and will send
-messages typed by the user to the other peer, like the following diagram:
-
-```
-# Receiving messages
-while received = messaging.receive()
-  client.display(received)
-
-# Sending messages
-while to_send = client.message_to_send()
-  messaging.send(to_send)
-```
-
-A messaging client which supports OTR will forward messages to the OTR
-implementation before presenting received messages to the user and before
-sending messages to the other peer, like the following diagram:
-
-```
-# Receiving messages
-while received = messaging.receive():
-  to_send, received = otr.receive(received)
-  client.display(received)
-
-  for each message in to_send:
-    messaging.send(message)
-
-# Sending messages
-while to_send = client.message_to_send()
-  for each message in otr.send(to_send):
-    messaging.send(message)
-```
+conversation over a network with the same security as a private, in-person
+conversation. No external party can overhear what is being said, and no one
+(not even the conversation participants) can prove what was said or that the
+two participants spoke to each other at all. OTR works on top of an existing
+messaging protocol, like XMPP.
 
 ## Table of Contents
 
@@ -88,22 +55,23 @@ messages may not be delivered.
 ## Security Properties
 
 In an off the record conversation, both sides can verify the identity of the
-other participant (but cannot transfer this knowledge to a third party).
+other participant but cannot transfer this knowledge to a third party.
 Participants can converse with the assurance that their conversation will not be
 read or modified by a hostile third party.
 
 To resemble an in-person conversation means that both ends can deny that they
-have participated in said conversation. Both ends can also deny having sent one
-or many of the exchanged messages in the conversation.
+have participated in that conversation. Both can also deny having sent any
+of the exchanged messages in the conversation.
 
-### DAKE properties
+### Deniable Authenticated Key Exchange (DAKE) properties
  * Mutual authentication
  * Participation repudiation for both initiator and receiver
 
 ### Conversation properties
  * Confidentiality
  * Integrity
- * Forward secrecy
+ * Data Message Forward Secrecy, handling the case where OTR4 transcripts exist
+   and elliptic curve cryptography has been broken
  * Message deniability
 
 Threats that an OTR conversation does not mitigate:
@@ -112,15 +80,18 @@ Threats that an OTR conversation does not mitigate:
 
 ## Preliminaries
 
+This section contains information needed to understand the parameters and
+arithmetic used.
+
 ### Notation
 
 Integer variables are in lower case (x, y). Points and other variables are in
 upper case (P, Q).
 
-Addition and subtraction of elliptic curve points A and B is A + B and A - B.
+Addition and subtraction of elliptic curve points A and B are A + B and A - B.
 Addition of a point to other point generates another point. Scalar
 multiplication of an integer (scalar) with an elliptic curve point B yields a
-new point C = a * B.
+new point: C = a * B.
 
 The concatenation of byte sequences x and P is x || P. In this case, x and P
 represent a fixed-length byte sequence encoding the respective values. See
@@ -193,10 +164,10 @@ this document, it always means that the exponentiation is done modulo the above
 3072-bit number.
 
 
-### OTR messages
+### TLV Types
 
-OTRv4 has the same message formats as OTRv3 without compatibility with version
-2. It means query messages, whitespace tags, error messages, encoding and
+OTRv4 has the same message formats as OTRv3 without compatibility with version 2.
+This means that query messages, whitespace tags, error messages, encoding and
 fragmentation is performed as specified in OTRv3.
 
 The fragmentation format is the same as for OTRv3. You will have to wait until
@@ -241,7 +212,7 @@ and DATA) with the addition of:
 
 ```
 Nonce (NONCE):
-  24 byte (192-bit) one time use nonce to use with XSalsa20 encryption
+  24 byte (192-bit) one time use nonce for XSalsa20 encryption
 
 ED448 points (POINT):
   56 byte unsigned value, big-endian
@@ -312,7 +283,7 @@ OTRv4 conversations are established by an deniable authenticated key exchange
 protocol (DAKE).
 
 There are two ways Alice can inform Bob that she is willing to use the OTR
-protocol to speak with him in an interactive setting: by sending him the OTR
+protocol to speak with him in an interactive setting: by sending him an OTR
 Query Message, or by including a special "tag" consisting of whitespace
 characters in one of her messages to him. Each method also includes a way for
 Alice to communicate to Bob which versions of the OTR protocol she is willing to
@@ -331,30 +302,35 @@ Both the OTR Query Message and Whitespace tag include the OTR versions Alice
 supports and is willing to use.
 
 Once Bob has decided to start the conversation in response to Alice's request,
-he will initiate an interactive, deniable, authenticated key exchange DAKE.
+he will initiate an interactive DAKE.
 
 ### Requesting conversation with older OTR version
 
-Bob might respond to Alice's request or notify of willingness to start a
-conversation using OTRv3. If this is the case and Alice supports the version 3, the protocol falls back to OTRv3 [3].
+Bob might respond to Alice's request or notification of willingness to start a
+conversation using OTRv3. If this is the case and Alice supports the version 3,
+the protocol falls back to OTRv3 [3].
 
 ## User Profile
 
-OTRv4 introduces mandatory user profile publication. The user profile contains the Cramer-Shoup long term public key, signed supported version information, and a signed profile expiration date. Both parties will include the user profile in the beginning of the DAKE. The frequency of the user profile publication is determined by its expiration and renewal policy.
+OTRv4 introduces mandatory user profile publication. The user profile contains the
+Cramer-Shoup long term public key, signed supported version information, and a signed
+profile expiration date. Both parties will include the user profile in the beginning
+of the DAKE. The frequency of the user profile publication is determined by its
+expiration and renewal policy.
 
 ### Creating a User Profile
 
 To create a user profile, both Alice and Bob generate:
 
 1. The Cramer-Shoup key-pair: PK, SK
-2. Supported version information string in the same format as OTRv3 Query Messages
+2. Supported version information string in the same format as OTRv3 Query Messages [3]
 3. Profile Expiration
 4. (optional) Transition signatures are signatures of the DSA fingerprints related
    to the keys used for version 3. This is only used if the user supports
    version 3 and 4.
 
-One of the Cramer-Shoup secret key values (z) is used to create signatures of
-the entire profile. This is created using the Ed448 signature algorithm as
+One of the Cramer-Shoup secret key values (z) and its generator (g3) is used to create
+signatures of the entire profile. This is created using the Ed448 signature algorithm as
 documented in [4].
 
 The user profile components are as follows:
@@ -412,7 +388,7 @@ is a way for two parties to mutually agree upon a shared key and authenticate
 one another while also allowing a level of participation deniability.
 
 This process is based on the [Spawn protocol][2], which utilizes dual-receiver
-encryption (DRE) and a non-interactive zero-knowledge proofs of knowledge
+encryption (DRE) and a non-interactive zero-knowledge proof of knowledge
 (NIZKPK) for authentication (Auth).
 
 Alice long-term Cramer-Shoup key-pair is `SKa = (x1a, x2a, y1a, y2a, za)` and
@@ -465,21 +441,22 @@ Query Message or Whitespace Tag ------->
 3. Verifies the following properties of the decrypted message `m`:
   1. The message is of the correct form (e.g., the fields are of the expected length)
   2. Alice's identifier is the first one listed
-  3. Bob's identifier is the second one listed, and it matches the identifier transmitted outside of the ciphertext
+  3. Bob's identifier is the second one listed, and it matches the identifier
+     transmitted outside of the ciphertext
   4. `(X, A)` is a prekey that Alice previously sent and remains unused
 4. Computes `k = SHA3-512(K_ecdh || SHA3-256(K_dh))` and securely erases `x` and `a`.
 
 #### Pre-key message
 
 This is the first message of the DAKE. Bob sends it to Alice to commit to a
-choice of D-H key. A valid Pre-key message is generated as follows:
+choice of D-H and ECDH key. A valid Pre-key message is generated as follows:
 
 1. Create a user profile. How to do this is detailed [here](#creating-a-profile)
 2. Choose a random ephemeral ECDH key pair:
   * secret key `x` a random element from `Z_q` (446 bits).
   * public key `X`
 3. Generates an ephemeral D-H secret key pair:
-  * secret key `a` (448 bits). // TODO: confirm this size.
+  * secret key `a` (448 bits).
   * and a public key `A = g3 ^ a`.
 
 A pre-key is an OTR message encoded as:
@@ -492,7 +469,8 @@ Message type (BYTE)
 Sender Instance tag (INT)
   The instance tag of the person sending this message.
 Receiver Instance tag (INT)
-  The instance tag of the intended recipient. For a pre-key message this will often be 0, since the other party may not have identified their instance tag yet.
+  The instance tag of the intended recipient. For a pre-key message this will often be 0,
+  since the other party may not have identified their instance tag yet.
 Sender's User Profile (USER-PROF)
   This is described in the section 'Creating a User Profile'.
 X (POINT)
@@ -515,7 +493,7 @@ A valid DRE-Auth message is generated as follows:
   * secret key `y` a random element from `Z_q` (446 bits).
   * public key `Y`
 3. Generates an ephemeral D-H secret key pair:
-  * secret key `b` (448 bits). // TODO: confirm this size.
+  * secret key `b` (448 bits).
   * and a public key `B = g3 ^ b`.
 4. Generate `m = X || Y || A || B`
 5. Compute `DREnc(pubA, pubB, m)` and serialize it as a DRE-M value in the variable `γ`.
@@ -547,12 +525,12 @@ In the DAKE, OTRv4 makes use of long-term Cramer-Shoup keys and ephemeral D-H
 keys.
 
 For exchanging conversation messages, OTRv4 uses a key structure, and
-key-rotation strategy, inspired on the [Double Ratchet][6] spec. The goal is to
-provide forward secrecy even in the advent of not receiving messages from the
+key-rotation strategy, inspired on the [Double Ratchet] spec [6]. The goal is to
+provide forward secrecy even in the event of not receiving messages from the
 other participant for a considerable amount of time.
 
-The messages are encrypted and authenticated using a set of receiving (and
-sending) MAC and encryption keys, derived from sending (and receiving) chain
+The messages are encrypted and authenticated using a set of receiving and
+sending MAC and encryption keys, derived from the sending and receiving chain
 keys.
 
 OTRv4 keys are rotated in two levels:
@@ -567,7 +545,7 @@ OTRv4 keys are rotated in two levels:
 In order to manage keys, each correspondent keeps track of:
 
 ```
-initiator who should rotate the root key before sending the first message
+Initiator of the first root key rotation before sending the first message
 i as Current ratchet id
 j as Previously sent message id
 k as Previously received message id
@@ -580,14 +558,14 @@ their_ecdh an ECDH ephemeral public key
 our_dh a DH ephemeral key pair
 their_dh a DH ephemeral public key
 
-(NOTE: our_* contains both a public and secret key, whereas their_* contains only a public key)
+(NOTE: our\_\* contains both a public and secret key, whereas their\_\* contains only a public key)
 ```
 The previously mentioned keys are affected by these events:
 
 #### When you start a new DAKE
 
-* Generates a new ephemeral ECDH key pair: Alice generates `(x, X)` and Bob generates `(y, Y)`. The `EC_shared_key` is `K_ecdh`.
-* Generates a new ephemeral 3072-bit DH key pair: Alice generates `(a, A)` and Bob generates `(b, B)`. The `mix_key` is `K_dh`.
+* Generate a new ephemeral ECDH key pair: Alice generates `(x, X)` and Bob generates `(y, Y)`. The `EC_shared_key` is `K_ecdh`.
+* Generate a new ephemeral 3072-bit DH key pair: Alice generates `(a, A)` and Bob generates `(b, B)`. The `mix_key` is `K_dh`.
 * `K` is interpreted as `K = calculate_shared_secret(K_ecdh, K_dh)`.
 
 #### Upon completing the DAKE
@@ -604,7 +582,7 @@ The DAKE is considered to be completed when either:
   * Set `their_ecdh` as the their ephemeral public key from the DAKE (`Y`).
   * Set `our_dh` as our DH ephemeral key pair from the DAKE (`a`, `A`).
   * Set `their_dh` as their DH ephemeral public key from the DAKE (`B`).
-3. For a session, calculate the SSID from shared secret: let SSID be the first 64 bits of `SHA3-256(0x00 || K)`.
+3. For a session, calculate the SSID from shared secret: let the SSID be the first 64 bits of `SHA3-256(0x00 || K)`.
 4. In any event, calculate the first set of keys with `R_0, Cs_0_0, Cr_0_0 = calculate_ratchet_keys(K)`.
 
 #### Peer's Trusted and Untrusted Keys
@@ -617,6 +595,8 @@ The user may decide to continue the conversation without verifying the new
 public key.
 
 #### Calculating Keys
+
+This section describes the functions used to create the keys used in OTRv4.
 
 ##### ECDH and DH Shared Secrets
 
@@ -782,7 +762,9 @@ A receiver can reveal a MAC key in the following case:
 
 - the receiver has received a message and has verified the message's authenticity
 - the receiver has discarded associated message keys
-- the receiver has discarded the chain key that can be used to compute the message keys (chain keys from previous ratchets might be stored to compute message keys for skipped or delayed messages)
+- the receiver has discarded the chain key that can be used to compute the message
+keys (chain keys from previous ratchets might be stored to compute message keys for
+skipped or delayed messages)
 
 ### Data Message format
 
@@ -805,12 +787,12 @@ Receiver Instance tag (INT)
 
 Flags (BYTE)
 
-    The bitwise-OR of the flags for this message. Usually you should 
+    The bitwise-OR of the flags for this message. Usually you should
     set this to 0x00. The only currently defined flag is:
 
     IGNORE_UNREADABLE (0x01)
 
-        If you receive a Data Message with this flag set, and you are 
+        If you receive a Data Message with this flag set, and you are
         unable to decrypt the message or verify the MAC (because, for
         example, you don't have the right keys), just ignore the message
         instead of producing some kind of error or notification to the user.
@@ -867,7 +849,7 @@ MSGSTATE_PLAINTEXT
     This state indicates that outgoing messages are sent without encryption.
     This is the state that is used before an OTR conversation is initiated.
     This is the initial state, and the only way to subsequently enter this
-    state is for the user to explicitly request to do so via some UI 
+    state is for the user to explicitly request to do so via a UI
     operation.
 
 MSGSTATE_ENCRYPTED
