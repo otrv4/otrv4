@@ -277,6 +277,104 @@ identifiers for the public key. The fingerprint is calculated by taking the
 SHA3-256 hash of the byte-level representation of the public key.
 
 
+## Key management
+
+In the DAKE, OTRv4 makes use of long-term Cramer-Shoup keys and ephemeral D-H
+keys.
+
+For exchanging conversation messages, OTRv4 uses a key structure, and
+key-rotation strategy, inspired on the [Double Ratchet] spec [6]. The goal is to
+provide forward secrecy even in the event of not receiving messages from the
+other participant for a considerable amount of time.
+
+The messages are encrypted and authenticated using a set of receiving and
+sending MAC and encryption keys, derived from the sending and receiving chain
+keys.
+
+OTRv4 keys are rotated in two levels:
+
+1. Root level: every time a new D-H key is advertised/acknowledged a new root
+   key is derived, as long as new initial sending and receiving chain keys.
+
+2. Chain level: every time a new message needs to be sent before an
+   acknowledgement is received, the sending chain key is rotated, being derived
+   from the previous sending chain key.
+
+In order to manage keys, each correspondent keeps track of:
+
+```
+Initiator of the first root key rotation before sending the first message
+i as Current ratchet id
+j as Previously sent message id
+k as Previously received message id
+
+R_i as Root key
+Cs_i_j as Sending Chain key
+Cr_i_k as Receiving Chain key
+our_ecdh an ECDH ephemeral key pair
+their_ecdh an ECDH ephemeral public key
+our_dh a DH ephemeral key pair
+their_dh a DH ephemeral public key
+
+(NOTE: our\_\* contains both a public and secret key, whereas their\_\* contains only a public key)
+```
+The previously mentioned keys are affected by these events:
+
+#### Peer's Trusted and Untrusted Keys
+
+As in OTRv3, once a key is verified, it is saved as trusted. Then after the DAKE
+finishes, the public key will be identified as trusted or untrusted. If the public key
+is not trusted, the user will be prompted to verify it. Otherwise they are not.
+
+The user may decide to continue the conversation without verifying the new
+public key.
+
+#### Calculating Keys
+
+This section describes the functions used to create the keys used in OTRv4.
+
+##### ECDH and DH Shared Secrets
+
+```
+pubECDH, secretECDH = newECDH()
+
+EC_shared_key = (G1*x)*y (POINT)
+  The shared ECDH key.
+
+DH_shared_key = (g^x)^y (MPI)
+  The shared 3072-bit DH key.
+```
+
+##### Mixed Secret: Mixing ECDH and DH Shared Secrets
+
+```
+calculate_shared_secret(EC_shared_key, DH_shared_key):
+   serialized_EC_secret = serialize_point(EC_shared_key)
+   serialized_DH_secret = serialize_MPI(DH_shared_key)
+   secret = SHA3-512(serialized_EC_secret, serialized_DH_shared_key)
+```
+
+##### Calculate Double Ratchet Keys
+
+```
+calculate_ratchet_keys(secret):
+  R  = SHA3-512(0x01 || secret)
+  Ca = SHA3-512(0x02 || secret)
+  Cb = SHA3-512(0x03 || secret)
+  return R, decide_between_chain_keys(Ca, Cb)
+```
+
+##### Decide Between Chain Keys
+
+Both sides will compare their public keys to choose a chain key for sending and receiving:
+- Alice (and similarly for Bob) determines if she is the "low" end or the "high" end of this ratchet.
+If Alice's ephemeral D-H public key is numerically greater than Bob's public key, then she is the "high" end.
+Otherwise, she is the "low" end.
+- Alice selects the chain keys for sending and receiving:
+  - If she is the "high" end, set `initiator` as `true`, use Ca as the sending chain key (Cs), Cb as the receiving chain key (Cr).
+  - If she is the "low" end, set `initiator` as `false`, use Cb as the sending chain key (Cs), Ca as the receiving chain key (Cr).
+
+
 ## OTR Conversation Initialization
 
 OTRv4 conversations are established by an deniable authenticated key exchange
@@ -519,149 +617,6 @@ Receiver's User Profile (USER-PROF)
   The Auth value.
 ```
 
-## Key management
-
-In the DAKE, OTRv4 makes use of long-term Cramer-Shoup keys and ephemeral D-H
-keys.
-
-For exchanging conversation messages, OTRv4 uses a key structure, and
-key-rotation strategy, inspired on the [Double Ratchet] spec [6]. The goal is to
-provide forward secrecy even in the event of not receiving messages from the
-other participant for a considerable amount of time.
-
-The messages are encrypted and authenticated using a set of receiving and
-sending MAC and encryption keys, derived from the sending and receiving chain
-keys.
-
-OTRv4 keys are rotated in two levels:
-
-1. Root level: every time a new D-H key is advertised/acknowledged a new root
-   key is derived, as long as new initial sending and receiving chain keys.
-
-2. Chain level: every time a new message needs to be sent before an
-   acknowledgement is received, the sending chain key is rotated, being derived
-   from the previous sending chain key.
-
-In order to manage keys, each correspondent keeps track of:
-
-```
-Initiator of the first root key rotation before sending the first message
-i as Current ratchet id
-j as Previously sent message id
-k as Previously received message id
-
-R_i as Root key
-Cs_i_j as Sending Chain key
-Cr_i_k as Receiving Chain key
-our_ecdh an ECDH ephemeral key pair
-their_ecdh an ECDH ephemeral public key
-our_dh a DH ephemeral key pair
-their_dh a DH ephemeral public key
-
-(NOTE: our\_\* contains both a public and secret key, whereas their\_\* contains only a public key)
-```
-The previously mentioned keys are affected by these events:
-
-#### When you start a new DAKE
-
-The DAKE is considered to start when either:
-
-1. Bob sends the pre-key message. In this case:
-  * Generate a new ephemeral ECDH key pair `(y, Y)`.
-  * Generate a new ephemeral 3072-bit DH key pair: `(b, B)`.
-  * Set `prev_our_ecdh` as your current ECDH key pair (`our_ecdh`), if you have it.
-  * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`(y, Y)`).
-  * Set `our_dh` as our DH ephemeral key pair from the DAKE (`b`, `B`).
-  * Set `j = 1` because the pre-key message is considered the first in this DH ratchet.
-  * Increase ratchet id `i = i + 1`.
-
-
-2. Alice receives the pre-key message. In this case:
-  * Generate a new ephemeral ECDH key pair `(x, X)`.
-  * Generate a new ephemeral 3072-bit DH key pair: `(a, A)`.
-  * Set `prev_our_ecdh` as your current ECDH key pair (`our_ecdh`), if you have it.
-  * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`(x, X)`).
-  * Set `our_dh` as our DH ephemeral key pair from the DAKE (`a`, `A`).
-  * Set `their_ecdh` as their ECDH ephemeral public key from the DAKE (`Y`).
-  * Set `their_dh` as their DH ephemeral public key from the DAKE (`B`).
-  * Increase ratchet id `i = i + 1`.
-  * Reply with a DRE-Auth message.
-
-
-#### After you complete the DAKE
-
-The DAKE is considered to be completed when either:
-
-1. Alice sends the DRE-Auth message. In this case:
-  * Set `j = 0` to cause a DH-ratchet the next time a msg is sent.
-  * Increase ratchet id `i = i + 1`.
-
-2. Bob receives and verifies the DRE-Auth message. In this case:
-  * Set `their_ecdh` as their ECDH ephemeral public key from the DAKE (`X`).
-  * Set `their_dh` as their DH ephemeral public key from the DAKE (`A`).
-  * Increase ratchet id `i = i + 1`.
-
-Regardless of who you are:
-
-* Calculate `K = calculate_shared_secret(K_ecdh, K_dh)`, where `K_dh` is the `mix_key`
-  and `K_ecdh` is the `EC_shared_key`.
-* Calculate the SSID from shared secret: let SSID be the first 64 bits of `SHA3-256(0x00 || K)`.
-* Calculate the first set of keys with `R_i, Cs_i_0, Cr_i_0 = calculate_ratchet_keys(K)`.
-
-
-#### Peer's Trusted and Untrusted Keys
-
-As in OTRv3, once a key is verified, it is saved as trusted. Then after the DAKE
-finishes, the public key will be identified as trusted or untrusted. If the public key
-is not trusted, the user will be prompted to verify it. Otherwise they are not.
-
-The user may decide to continue the conversation without verifying the new
-public key.
-
-#### Calculating Keys
-
-This section describes the functions used to create the keys used in OTRv4.
-
-##### ECDH and DH Shared Secrets
-
-```
-pubECDH, secretECDH = newECDH()
-
-EC_shared_key = (G1*x)*y (POINT)
-  The shared ECDH key.
-
-DH_shared_key = (g^x)^y (MPI)
-  The shared 3072-bit DH key.
-```
-
-##### Mixed Secret: Mixing ECDH and DH Shared Secrets
-
-```
-calculate_shared_secret(EC_shared_key, DH_shared_key):
-   serialized_EC_secret = serialize_point(EC_shared_key)
-   serialized_DH_secret = serialize_MPI(DH_shared_key)
-   secret = SHA3-512(serialized_EC_secret, serialized_DH_shared_key)
-```
-
-##### Calculate Double Ratchet Keys
-
-```
-calculate_ratchet_keys(secret):
-  R  = SHA3-512(0x01 || secret)
-  Ca = SHA3-512(0x02 || secret)
-  Cb = SHA3-512(0x03 || secret)
-  return R, decide_between_chain_keys(Ca, Cb)
-```
-
-##### Decide Between Chain Keys
-
-Both sides will compare their public keys to choose a chain key for sending and receiving:
-- Alice (and similarly for Bob) determines if she is the "low" end or the "high" end of this ratchet.
-If Alice's ephemeral D-H public key is numerically greater than Bob's public key, then she is the "high" end.
-Otherwise, she is the "low" end.
-- Alice selects the chain keys for sending and receiving:
-  - If she is the "high" end, set `initiator` as `true`, use Ca as the sending chain key (Cs), Cb as the receiving chain key (Cr).
-  - If she is the "low" end, set `initiator` as `false`, use Cb as the sending chain key (Cs), Ca as the receiving chain key (Cr).
 
 ## Data Exchange
 
