@@ -398,10 +398,10 @@ dh_shared_secret = (g3^x)^y mod p (MPI)
 #### Mixed Secret: Mixing ECDH and DH Shared Secrets
 
 ```
-calculate_shared_secret(ecdh_shared_secret, dh_shared_secret):
+calculate_shared_secret(ecdh_shared_secret, mix_key):
    serialized_EC_secret = serialize_point(ecdh_shared_secret)
-   serialized_DH_secret = serialize_MPI(dh_shared_secret)
-   return SHA3-512(serialized_EC_secret, serialized_DH_shared_key)
+   serialized_mix_key = serialize_MPI(mix_key)
+   return SHA3-512(serialized_EC_secret, serialized_mix_key)
 ```
 
 #### Calculate Double Ratchet Keys
