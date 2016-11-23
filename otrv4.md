@@ -38,7 +38,6 @@ The high level flow of this protocol will be:
     Alice                                            Bob
     --------------------------------------------------------------------------------
     Request OTR conversation          ------------->
-                                      <-------------  OTR v4 is supported
     Establish Conversation with DAKE  <------------>  Establish Conversation with DAKE
     Exchange Data Messages            <------------>  Exchange Data Messages
 
