@@ -881,12 +881,15 @@ used to verify the authenticity of a message.
 
 MAC keys are revealed with data messages. They are also revealed with heartbeat
 messages (data messages that encode a plaintext of zero length) if the receiver
-has not sent a message in a configurable amount of time.
+has not sent a message in a configurable amount of time. Put them (as a set
+of concatenated 20-byte values) into the "Old MAC keys to be revealed"
+section of the next Data Message you send. 
 
 A receiver can reveal a MAC key in the following case:
 
 - the receiver has received a message and has verified the message's authenticity
 - the receiver has discarded associated message keys
+
 
 ### Data Message format
 
