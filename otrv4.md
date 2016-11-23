@@ -347,6 +347,31 @@ public key.
 
 This section describes the functions used to create the keys used in OTRv4.
 
+#### Ratcheting the ECDH keys
+
+The participant invoking this is moving into a new ECDH ratchet. The next data
+message will advertise a new ratchet (`i + 1`) from the receiver perspective.
+
+When you ratchet the ECDH keys, you:
+
+* Securely delete `our_ecdh`.
+* Generate a new ECDH key pair and assign it to `our_ecdh`. See [newECDH()](#ECDH-and-DH-Shared-Secrets).
+* Increment the current ratchet ID `i = i +1`.
+* Reset the previously sent message ID `j = 0`.
+
+#### Ratcheting the DH keys
+
+If `i % 3 == 0` and `i != 0`:
+
+  * Securely delete `our_dh`.
+  * Generate a new DH key pair and assign it to `our_dh`. See [newDH()](#ECDH-and-DH-Shared-Secrets).
+  * Calculate a new `DH_shared_key = DH(our_dh.secret, their_dh)`.
+
+Otherwise:
+
+  * Derive a new `DH_shared_key = SHA3-256(DH_shared_key)`.
+
+
 #### ECDH and DH Shared Secrets
 
 ```
@@ -758,30 +783,9 @@ Verify MAC, Decrypt message 1_1
 
 #### When you send a Data Message:
 
-TODO: Can we explain what we are doing and then show how to manage the variables to do it?
-I feel like I have no idea what we mean when we do the ifs, for example.
-TODO: Where this `our_next_public_ECDH_key` comes from?
-
 If `j == 0` and (`i > 0` or `initiator` is `true`):
-
-  * Securely delete `our_ecdh`. Generate a new ECDH key pair and assign it to
-    `our_ecdh`. See [newECDH()](#ECDH-and-DH-Shared-Secrets).
-  * Increment the current ratchet ID `i = i +1`.
-  * Reset the previously sent message ID `j = 0`.
-
-  * If `i % 3 == 0` and `i != 0`:
-
-    * Securely delete `our_dh`. Generate a new DH key pair and assign it to
-      `our_dh`. See [newDH()](#ECDH-and-DH-Shared-Secrets).
-    * Calculate a new `DH_shared_key = DH(our_dh.secret, their_dh)`.
-    * TODO: There is no logic to help not sending `our_dh` in the data message
-      after receiving a new ratchet from the other participant.
-      We can achieve this by checking the `i` or using a different variable.
-
-  * Otherwise:
-
-    * Derive a new `DH_shared_key = SHA3-256(DH_shared_key)`.
-
+  * Ratchet the ECDH keys. See "Ratcheting the ECDH keys" section.
+  * Ratchet the DH keys. See "Ratcheting the DH keys" section.
   * Derive new set of keys `R[i], Cs[i][j], Cr[i][j]`:
 
   ```
