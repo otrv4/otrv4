@@ -605,7 +605,7 @@ Query Message or Whitespace Tag ------->
 2. Generates an ephemeral DH secret key `b` and a public key `B`.
 3. Computes `γ = DREnc(PKb, PKa, m)`, being `m = "I" || "R" || X || Y || A || B`.
 4. Computes `σ = Auth(Hb, zb, {Ha, X}, "I" || "R" || X || A || γ)`.
-5. Computes `k = SHA3-512(K_ecdh || SHA3-384(K_dh))` and securely erases `y` and `b`.
+5. Computes root level keys (`R`, `Cs`, and `Cr`).
 6. Sends Alice a DRE-Auth Message `ψ2 = ("R", γ, σ)`.
 
 **Alice:**
@@ -618,8 +618,7 @@ Query Message or Whitespace Tag ------->
   3. Bob's identifier is the second one listed, and it matches the identifier
      transmitted outside of the ciphertext
   4. `(X, A)` is a prekey that Alice previously sent and remains unused
-4. Computes `k = SHA3-512(K_ecdh || SHA3-384(K_dh))` and securely erases `x` and `a`.
-
+4. Computes root level keys (`R`, `Cs`, and `Cr`).
 
 #### When you start a new DAKE
 
@@ -662,8 +661,9 @@ The DAKE is considered to be completed when either:
 
 Regardless of who you are:
 
-* Calculate `K = calculate_shared_secret(K_ecdh, K_dh)`, where `K_dh` is the `mix_key`
-  and `K_ecdh` is the `ecdh_shared_secret`.
+* Calculate `K_ecdh` and `K_dh`. TODO: is this our_* or K_*.
+* Securely erase `our_ecdh.private` and `our_dh` key pair.
+* Calculate `K = calculate_shared_secret(K_ecdh, K_dh)`.
 * Calculate the SSID from shared secret: let SSID be the first 64 bits of `SHA3-256(0x00 || K)`.
 * Calculate the first set of keys with `R_i, Cs_i_0, Cr_i_0 = calculate_ratchet_keys(K)`.
 
@@ -842,6 +842,8 @@ delivered out of order.
 TODO: Why do we reject messages with ratchet_id < i-1 if we dont do anything with
 messages with ratchet_id i-1? Now, we should do (for allowing receiving messages)
 from the previous session when a new DAKE has just finished.
+
+TODO: We need to be able to decrypt messages from the previous ratchet (yesterday's discussion).
 
 Use the message `ID` to compute the receiving chain key and calculate encryption and mac keys.
 
