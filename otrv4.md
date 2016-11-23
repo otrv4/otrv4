@@ -290,7 +290,7 @@ The messages are encrypted and authenticated using a set of receiving and
 sending MAC and encryption keys, derived from the sending and receiving chain
 keys.
 
-OTRv4 keys are rotated in two levels:
+OTRv4 keys are rotated in three different levels:
 
 1. Root level: every time a new D-H key is advertised/acknowledged a new root
    key is derived, as long as new initial sending and receiving chain keys.
@@ -299,8 +299,9 @@ OTRv4 keys are rotated in two levels:
    acknowledgement is received, the sending chain key is rotated, being derived
    from the previous sending chain key.
 
-TODO: everything up to here in this section may need to be updated to use the same terms as
-the new double ratchet spec. We may also need to add a 3rd level of ratchet (our mix key).
+3. Mix key level: every third time a party has gone through three chain
+   level rotations, the mix key is rotated and the resulting DH public
+   key should be adevertised / acknowledged.
 
 In order to manage keys, each correspondent keeps track of:
 
@@ -321,6 +322,7 @@ Keys variables:
   our_dh: our DH ephemeral key pair
   their_dh: their DH ephemeral public key
   DH_shared_key: the shared secret previously computed.
+  macs_to_reveal[]: MAC keys pending to be revealed.
 ```
 
 The previously mentioned variables are affected by these events:
@@ -819,7 +821,7 @@ In any event:
 
 #### When you receive a Data Message:
 
-Reject messages with `ratchet_id` less than the `i-1` or greater than `i+1`
+Reject messages with `ratchet_id` less than the `i-1` or greater than `i+1`.
 Reject messages with `message_id` less than the `k`.
 
 This is to enforce rejecting messages delivered out of order.
@@ -843,10 +845,11 @@ verification fails, reject the message. If the MAC verifies, decrypt the message
 using the "encryption key" (`MKenc`).
 
 Finally:
-  * TODO: should the MAC key be marked as ready to be revealed?
   * Set `j = 0` to indicate a new DH-ratchet should happen next time you send a message.
   * Set `their_ecdh` as the "Next Public ECDH key" from the message.
-  * Set `their_dh` as the "Next Public DH Key" from the message, if it is not NULL.
+  * Set `their_dh` as the "Next Public DH Key" from the message, if it
+    is not NULL.
+  * Add the MAC key to list of pending MAC keys to be revealed.
 
 
 ### Revealing MAC Keys
