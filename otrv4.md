@@ -388,7 +388,7 @@ Otherwise:
 ```
 pubECDH, secretECDH = newECDH()
 
-EC_shared_key = (G1*x)*y (POINT)
+ecdh_shared_secret = (G1*x)*y (POINT)
   The shared ECDH key.
 
 dh_shared_secret = (g3^x)^y mod p (MPI)
@@ -398,8 +398,8 @@ dh_shared_secret = (g3^x)^y mod p (MPI)
 #### Mixed Secret: Mixing ECDH and DH Shared Secrets
 
 ```
-calculate_shared_secret(EC_shared_key, dh_shared_secret):
-   serialized_EC_secret = serialize_point(EC_shared_key)
+calculate_shared_secret(ecdh_shared_secret, dh_shared_secret):
+   serialized_EC_secret = serialize_point(ecdh_shared_secret)
    serialized_DH_secret = serialize_MPI(dh_shared_secret)
    return SHA3-512(serialized_EC_secret, serialized_DH_shared_key)
 ```
@@ -663,7 +663,7 @@ The DAKE is considered to be completed when either:
 Regardless of who you are:
 
 * Calculate `K = calculate_shared_secret(K_ecdh, K_dh)`, where `K_dh` is the `mix_key`
-  and `K_ecdh` is the `EC_shared_key`.
+  and `K_ecdh` is the `ecdh_shared_secret`.
 * Calculate the SSID from shared secret: let SSID be the first 64 bits of `SHA3-256(0x00 || K)`.
 * Calculate the first set of keys with `R_i, Cs_i_0, Cr_i_0 = calculate_ratchet_keys(K)`.
 
