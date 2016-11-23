@@ -764,14 +764,19 @@ TODO: Where this `our_next_public_ECDH_key` comes from?
 
 If `j == 0` and (`i > 0` or `initiator` is `true`):
 
-  * TODO: there is some confusion with our_ecdh, our_dh, and our_next_public_*.
-  * Securely delete `our_next_public_ECDH_key`. (TODO: Why is not this `our_ecdh`?)
-  * Increment the current ratchet ID `i`.
-  * Reset the previously sent message ID `j` to 0.
-  * Set `our_next_public_ECDH_key` to a new DH key pair which you generate with [newECDH()](#ECDH-and-DH-Shared-Secrets)
+  * Securely delete `our_ecdh`. Generate a new ECDH key pair and assign it to
+    `our_ecdh`. See [newECDH()](#ECDH-and-DH-Shared-Secrets).
+  * Increment the current ratchet ID `i = i +1`.
+  * Reset the previously sent message ID `j = 0`.
+
   * If `i % 3 == 0` and `i != 0`:
 
+    * Securely delete `our_dh`. Generate a new DH key pair and assign it to
+      `our_dh`. See [newDH()](#ECDH-and-DH-Shared-Secrets).
     * Calculate a new `DH_shared_key = DH(our_dh.secret, their_dh)`.
+    * TODO: There is no logic to help not sending `our_dh` in the data message
+      after receiving a new ratchet from the other participant.
+      We can achieve this by checking the `i` or using a different variable.
 
   * Otherwise:
 
@@ -832,6 +837,7 @@ using the "encryption key" (`MKenc`).
 Finally:
   * Set `j = 0` to indicate a new DH-ratchet should happen next time you send a message.
   * Set `their_ecdh` as the "Next Public ECDH key" from the message.
+  * Set `their_dh` as the "Next Public DH Key" from the message, if it is not NULL.
 
 
 ### Revealing MAC Keys
@@ -893,11 +899,15 @@ Message id message_id (INT)
     Must be strictly greater than 0, and increment by 1 with each message.
     This should receive the value of j variable.
 
-Next Public ECDH Key (MPI)
+Next Public ECDH Key (POINT)
 
-    The *next* ratchet [i.e. i+1] ECDH public key for the sender.
-    TODO: Should this should receive the value of our_ecdh variable?
-    OR Should we have a new our_next_ecdh?
+    The sender's current ratchet ECDH public key for the sender.
+    This should receive the value of our_ecdh.public_key variable.
+
+Next Public DH Key (MPI)
+
+    This should receive the value of our_dh.public_key variable.
+    You should send a NULL value if i % 3 != 0.
 
 Nonce (NONCE)
 
