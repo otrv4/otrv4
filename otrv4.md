@@ -328,8 +328,8 @@ Keys variables:
   their_ecdh: their ECDH ephemeral public key.
   our_dh: our DH ephemeral key pair
   their_dh: their DH ephemeral public key
-  DH_shared_key: the shared secret previously computed.
-  macs_to_reveal[]: MAC keys pending to be revealed.
+  dh_shared_secret: the shared secret previously computed.
+  macs_to_reveal: MAC keys pending to be revealed.
 ```
 
 The previously mentioned variables are affected by these events:
@@ -373,16 +373,15 @@ When you ratchet the ECDH keys, you:
 The rotation of the DH keys does not take place in every ratchet but
 every third.
 
-Given that `i` is a bigger than zero and a multiple of three:
+If `i` is bigger than zero and a multiple of three:
 
   * Securely delete `our_dh`.
   * Generate a new DH key pair and assign it to `our_dh`. See [newDH()](#ECDH-and-DH-Shared-Secrets).
-  * Calculate a new `DH_shared_key = DH(our_dh.secret, their_dh)`.
+  * Calculate a new `dh_shared_secret = SHA3-256(DH(our_dh.secret, their_dh))`.
 
 Otherwise:
 
-  * Derive a new `DH_shared_key = SHA3-384(DH_shared_key)`.
-
+  * Derive a new `dh_shared_secret = SHA3-256(dh_shared_secret)`.
 
 #### ECDH and DH Shared Secrets
 
@@ -392,17 +391,17 @@ pubECDH, secretECDH = newECDH()
 EC_shared_key = (G1*x)*y (POINT)
   The shared ECDH key.
 
-DH_shared_key = (g3^x)^y (MPI)
+dh_shared_secret = (g3^x)^y mod p (MPI)
   The shared 3072-bit DH key.
 ```
 
 #### Mixed Secret: Mixing ECDH and DH Shared Secrets
 
 ```
-calculate_shared_secret(EC_shared_key, DH_shared_key):
+calculate_shared_secret(EC_shared_key, dh_shared_secret):
    serialized_EC_secret = serialize_point(EC_shared_key)
-   serialized_DH_secret = serialize_MPI(DH_shared_key)
-   secret = SHA3-512(serialized_EC_secret, serialized_DH_shared_key)
+   serialized_DH_secret = serialize_MPI(dh_shared_secret)
+   return SHA3-512(serialized_EC_secret, serialized_DH_shared_key)
 ```
 
 #### Calculate Double Ratchet Keys
@@ -792,20 +791,21 @@ Verify MAC, Decrypt message 1_1
 In order to send a data message a key to encrypt the message is
 required. This key will be derived from a previous chain key and if
 the message's counter `j` has been reset to zero keys should be
-rotated. Also this derivation takes into account a DH key, refered to
+rotated. Also this derivation takes into account a DH key, referred to
 as a mix key, which is rotated every third ratchet.
 
 Given a new ratchet begins and either this ratchet is not the first or
 you are the initiator:
+
   * Ratchet the ECDH keys. See "Ratcheting the ECDH keys" section.
   * Ratchet the DH keys. See "Ratcheting the DH keys" section.
-  * Derive new set of keys `R[i], Cs[i][j], Cr[i][j]`:
-  * If chain keys and message encryption keys exist from the previous
-    ratchet, securely delete them.
+  * Derive new set of keys `R[i], Cs[i][j], Cr[i][j]`.
+  * If root or chain keys exist from the previous ratchet, securely delete them.
 
   ```
-  mixed = ECDH(our_ecdh.secret, their_ecdh) || DH_shared_key
-  R[i], Cs[i][j], Cs[i][j] = calculate_ratchet_keys(R[i-1] || mixed)`
+  mixed = ECDH(our_ecdh.secret, their_ecdh) || dh_shared_secret
+  R[i], Cs[i][j], Cr[i][j] = calculate_ratchet_keys(R[i-1] || mixed)
+  delete(R[i-1], Cs[i-1], Cr[i-1])
   ```
 
 Otherwise:
@@ -858,6 +858,7 @@ Use the "mac key" (`MKmac`) to verify the MAC on the message.
 If the message verification fails, reject the message.
 
 Otherwise:
+
   * Decrypt the message using the "encryption key" (`MKenc`) and securely delete MKenc.
   * delete_unnecessary_chain_keys()
   * Set `j = 0` to indicate a new DH-ratchet should happen next time you send a message.
@@ -1466,7 +1467,7 @@ SMP message 1 is sent by Alice to begin a DH exchange to determine two new
 generators, `g2` and `g3`. A valid  SMP message 1 is generated as follows:
 
 1. Determine her secret input `x`, which is to be compared to Bob's secret `y`, as specified in the "Secret Information" section.
-2. Pick random values `a2` and `a3` (448 bits) in `Z_q`. These will be Alice's exponents for the DH exchange to pick generators. 
+2. Pick random values `a2` and `a3` (448 bits) in `Z_q`. These will be Alice's exponents for the DH exchange to pick generators.
 3. Pick random values `r2` and `r3` (448 bits) in `Z_q`. These will be used to generate zero-knowledge proofs that this message was created according to the protocol.
 4. Compute `G2a = G*a2` and `G3a = G*a3`.
 5. Generate a zero-knowledge proof that the value a2 is known by setting `c2 = HashToScalar(1 || G*r2)` and `d2 = r2 - a2 * c2 mod q`.
