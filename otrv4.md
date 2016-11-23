@@ -318,6 +318,7 @@ Keys variables:
   their_ecdh: their ECDH ephemeral public key.
   our_dh: our DH ephemeral key pair
   their_dh: their DH ephemeral public key
+  DH_shared_key: the shared secret previously computed.
 ```
 
 The previously mentioned variables are affected by these events:
@@ -386,6 +387,16 @@ Otherwise, she is the "low" end.
   - If she is the "low" end, set `initiator` as `false`, use Cb as the sending chain key (Cs), Ca as the receiving chain key (Cr).
 
 TODO: we can not set the initiator as a side effect of deciding who will use each key, but we can use the same condition to decide who will be initiator. This may be a problem because every time I talk to Bob I will have the same condition.
+
+
+### Encryption and MAC keys
+
+```
+encription_and_mac_keys(chain_key):
+  enc = SHA3-256(0x00 || chain_key)
+  mac = SHA3-512(0x01 || chain_key)
+  return enc, mac
+```
 
 ## OTR Conversation Initialization
 
@@ -732,32 +743,52 @@ Verify MAC, Decrypt message 1_1
 
 #### When you send a Data Message:
 
+TODO: Can we explain what we are doing and then show how to manage the variables to do it?
+I feel like I have no idea what we mean when we do the ifs, for example.
 TODO: Where this `our_next_public_ECDH_key` comes from?
 
-If `j == 0` and (`i > 0` or `initiator` is `true`) :
-  * Securely delete `our_next_public_ECDH_key`, increment the current ratchet ID `i`,
-    reset the previously sent message ID `j` to 0, and set `our_next_public_ECDH_key`
-    to a new DH key pair which you generate with [newECDH()](#ECDH-and-DH-Shared-Secrets)
-  * If `i % 3 == 0` and `i != 0` :
-    * Derive new set of keys `R_i`, `Cs_i_j` `Cr_i_j` from `our_ecdh.secret`, `their_ecdh.public`, `our_dh.secret`, and `their_dh.public`:
-      `R_i, Cs_i_j, Cs_i_j = calculate_ratchet_keys(R_(i-1) || ECDH(our_ecdh.secret, their_ecdh.public) || DH(our_dh.secret, their_dh.public))`
-  * Otherwise
-    * Derive `DH_shared_key = SHA3-256(DH_shared_key)`
-    * Derive new set of keys `R_i`, `Cs_i_j` `Cr_i_j` from `our_ecdh.secret`, `their_ecdh.public` and `DH_shared_key`:
-      `R_i, Cs_i_j, Cs_i_j = calculate_ratchet_keys(R_(i-1) || ECDH(our_ecdh.secret, their_ecdh.public) || SHA3-256(DH_shared_key))`
+If `j == 0` and (`i > 0` or `initiator` is `true`):
+
+  * Securely delete `our_next_public_ECDH_key`. (TODO: Why is not this `our_ecdh`?)
+  * Increment the current ratchet ID `i`.
+  * Reset the previously sent message ID `j` to 0.
+  * Set `our_next_public_ECDH_key` to a new DH key pair which you generate with [newECDH()](#ECDH-and-DH-Shared-Secrets)
+  * If `i % 3 == 0` and `i != 0`:
+
+    * Calculate a new `DH_shared_key = DH(our_dh.secret, their_dh)`.
+
+  * Otherwise:
+
+    * Derive a new `DH_shared_key = SHA3-256(DH_shared_key)`.
+
+  * Derive new set of keys `R[i], Cs[i][j], Cr[i][j]`:
+
+  ```
+  mixed = ECDH(our_ecdh.secret, their_ecdh) || DH_shared_key
+  R[i], Cs[i][j], Cs[i][j] = calculate_ratchet_keys(R[i-1] || mixed)`
+  ```
 
 Otherwise:
-  * Derive the next sending Chain Key `Cs_i_j+1 = SHA3-512(Cs_i_j)`.
-  * Increment previously sent message ID `j`.
 
-In any event, calculate the encryption key (`MKenc`) and the mac key (`MKmac`):
-  * `MKenc = SHA3-256(0x00 || Cs_i_j)`
-  * `MKmac = SHA3-512(0x01 || Cs_i_j)`
+  * Increment previously sent message ID `j = j+1`.
+  * Derive the next sending Chain Key `Cs[i][j] = SHA3-512(Cs[i][j-1])`.
 
-Use the encryption key to encrypt the message, and the mac key to calculate its MAC.
-  * Nonce = generateNonce()
-  * Encrypted_message = XSalsa20_Enc(MKenc, Nonce, m)
-  * Authenticator = SHA3-512(MKmac || Encrypted_message)
+In any event:
+
+1. Calculate the encryption key (`MKenc`) and the mac key (`MKmac`):
+
+   ```
+   MKenc, MKmac = encription_and_mac_keys(Cs[i][j])
+   ```
+
+2. Use the encryption key to encrypt the message, and the mac key to calculate its MAC:
+
+   ```
+   Nonce = generateNonce()
+   Encrypted_message = XSalsa20_Enc(MKenc, Nonce, m)
+   Authenticator = SHA3-512(MKmac || Encrypted_message)
+   ```
+
 
 #### When you receive a Data Message:
 
