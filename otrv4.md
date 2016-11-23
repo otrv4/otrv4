@@ -307,7 +307,7 @@ OTRv4 keys are rotated in three different levels:
    acknowledgement is received, the sending chain key is rotated, being derived
    from the previous sending chain key.
 
-3. Mix key level: every third time a party has gone through three chain
+3. Mix key level: every third time a party has gone through three root level
    level rotations, the mix key is rotated and the resulting DH public
    key should be adevertised / acknowledged.
 
@@ -416,7 +416,7 @@ calculate_ratchet_keys(secret):
   return R, decide_between_chain_keys(Ca, Cb)
 ```
 
-##### Decide Between Chain Keys
+#### Decide Between Chain Keys
 
 Both sides will compare their public keys to choose a chain key for sending and receiving:
 - Alice (and similarly for Bob) determines if she is the "low" end or the "high" end of this ratchet.
@@ -452,7 +452,7 @@ delete_unnecessary_chain_keys(chain_key_storage):
 When you send or receive data messages you need to calculate the message keys:
 
 ```
-encription_and_mac_keys(chain_key):
+calculate_encription_and_mac_keys(chain_key):
   enc = SHA3-256(0x00 || chain_key)
   mac = SHA3-512(0x01 || chain_key)
   return enc, mac
@@ -819,7 +819,7 @@ In any event:
 1. Calculate the encryption key (`MKenc`) and the mac key (`MKmac`):
 
    ```
-   MKenc, MKmac = encription_and_mac_keys(Cs[i][j])
+   MKenc, MKmac = calculate_encription_and_mac_keys(Cs[i][j])
    ```
 
 2. Use the encryption key to encrypt the message, and the mac key to calculate its MAC:
@@ -837,9 +837,8 @@ In any event:
 #### When you receive a Data Message:
 
 Reject messages with `ratchet_id` less than the `i-1` or greater than `i+1`.
-Reject messages with `message_id` less than the `k`.
-
-This is to enforce rejecting messages delivered out of order.
+Reject messages with `message_id` less than the `k`. This is to enforce rejecting messages
+delivered out of order.
 
 TODO: Why do we reject messages with ratchet_id < i-1 if we dont do anything with
 messages with ratchet_id i-1? Now, we should do (for allowing receiving messages)
@@ -852,7 +851,7 @@ TODO: Why this code always uses the current ratchet_id and totally ignores the
 ratchet_id from the message?
 //k = is the previously received message id
 recover_receiving_chain_keys(i, k, message_id)
-MKenc, MKmac = encription_and_mac_keys(Cr, i, message_id)
+MKenc, MKmac = calculate_encription_and_mac_keys(Cr, i, message_id)
 ```
 
 Use the "mac key" (`MKmac`) to verify the MAC on the message.
