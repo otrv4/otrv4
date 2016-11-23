@@ -1416,6 +1416,23 @@ be used in SMP. The additional fields insure that not only do both parties know
 the same secret input string, but no man-in-the-middle is capable of reading
 their communication either.
 
+### SMP Hash function
+
+In the following actions, there are many places where a SHA512 hash of an integer followed by one or two MPIs is taken. The input to this hash function is:
+
+```
+Version (BYTE)
+  This distinguishes calls to the hash function at different points in the
+  protocol, to prevent Alice from replaying Bob's zero knowledge proofs or
+  vice versa.
+
+First MPI (MPI)
+  The first MPI given as input, serialized in the usual way.
+
+Second MPI (MPI)
+  The second MPI given as input, if present, serialized in the usual way. If
+  only one MPI is given as input, this field is simply omitted.
+```
 
 ### SMPv2 messages
 
@@ -1432,7 +1449,7 @@ SMP message 1 is sent by Alice to begin a DH exchange to determine two new
 generators, `g2` and `g3`. A valid  SMP message 1 is generated as follows:
 
 1. Determine her secret input `x`, which is to be compared to Bob's secret `y`, as specified in the "Secret Information" section.
-2. Pick random values `a2` and `a3` in `Z_q`. These will be Alice's exponents for the DH exchange to pick generators.
+2. Pick random values `a2` and `a3` in `Z_q`. These will be Alice's exponents for the DH exchange to pick generators. // TODO: what is the size of this?
 3. Pick random values `r2` and `r3` in `Z_q`. These will be used to generate zero-knowledge proofs that this message was created according to the protocol.
 4. Compute `G2a = G*a2` and `G3a = G*a3`.
 5. Generate a zero-knowledge proof that the value a2 is known by setting `c2 = HashToScalar(1 || G*r2)` and `d2 = r2 - a2 * c2 mod q`.
