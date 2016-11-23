@@ -36,8 +36,8 @@ reason to do this is that the publication allows two parties to send the signed 
 Profile during the DAKE. Since this signed profile is public information, it does not
 damage the participation deniability in the conversation. As a side affect, it is possible
 for the receiver of a Query Message that contains versions lower than four to check
-for a User Profile and thus detect a downgrade attack for older versions. Requesting
-version advertisements from the server is not mandatory for all conversations,
+for a User Profile and thus detect a downgrade attack for older versions.
+Requesting user profile from the server is not mandatory for all conversations,
 but is the only way to try to verify whether a user only supports version 3 or not.
 
 Although it is possible to check for a version publication, this does not stop an
@@ -48,21 +48,21 @@ On the other hand, the user profile will protect against version rollback attack
 OTR versions four and up.
 
 We will prioritise high versions, so in the case when user receives 2 different
-version advertisement from server, the conversation should initialize in the
+user profile from server, the conversation should initialize in the
 higher version supported by both.
 
 To provide revocation and to prevent people from using obsolete versions, we will
-have a minimum (6 months) expiration date attached to each version advertisement.
+have a minimum (6 months) expiration date attached to each user profile.
 Clients and user may redefine the version expiration if desired.
 
 And also the goal is to protect the user from version downgrade and not to prove
 identification, if a user is going to engage in a conversation and they receive
-an advertisement that does not belong to a key they trust but its support the same
+an user profile that does not belong to a key they trust but its support the same
 version, aborting the conversation is not necessary.
 
 To reduce downgrade possibility, if the user receives a query message requesting
 a conversation in version 3, we should check the peer's version support by requesting
-a version advertisement from the server.
+a user profile from the server.
 
 In the spec, we mention using the Cramer-Shoup secret value "z" and corresponding
 public value with Mike Hamburg's Ed448 signature algorithm as detailed in his [paper]
@@ -77,8 +77,8 @@ here: https://github.com/twstrike/ed448.
 As OTRv4 upgrades are not to fix any security issue on OTRv3, is acceptable for
 users to chat using version 3, but is preferable to use 4 if both support it.
 
-We will support a conversation on version 3 if we don't find any version
-advertisement and user allow it in its policy.
+We will support a conversation on version 3 if we don't find any user profile
+and user allow it in its policy.
 
 Because of the decision to use the Ed448 signature algorithm, OTRv4 will use the "z"
 value for the NIZKPK (Auth())in the DAKE and for the Ed448 signature. We would appreciate
