@@ -389,7 +389,19 @@ Otherwise, she is the "low" end.
 TODO: we can not set the initiator as a side effect of deciding who will use each key, but we can use the same condition to decide who will be initiator. This may be a problem because every time I talk to Bob I will have the same condition.
 
 
+### Deriving new chain keys
+
+When you send or receive data messages you may need to derive new chain key:
+
+```
+derive_chain_key(C, i, j):
+  C[i][j] = SHA3-512(C[i][j-1])
+```
+
+
 ### Encryption and MAC keys
+
+When you send or receive data messages you need to calculate the message keys:
 
 ```
 encription_and_mac_keys(chain_key):
@@ -397,6 +409,22 @@ encription_and_mac_keys(chain_key):
   mac = SHA3-512(0x01 || chain_key)
   return enc, mac
 ```
+
+
+### Recovering past chain keys
+
+When receiving a data message, you may need to use receiving chain keys older
+than `message_id-1` to calculate the current if you did not receive previous
+messages. For example, your peer sends you data messages 1, 2, and 3, but you
+only receive 1 and 3. In that case you would use the chain key for message 1 to
+derive the chain key for message 3.
+
+```
+recover_receiving_chain_keys(i, k, message_id):
+  for recId = k+1; recId <= message_id; recId++:
+    derive_chain_key(Cr, i, recId)
+```
+
 
 ## OTR Conversation Initialization
 
@@ -751,7 +779,7 @@ If `j == 0` and (`i > 0` or `initiator` is `true`):
 Otherwise:
 
   * Increment previously sent message ID `j = j+1`.
-  * Derive the next sending Chain Key `Cs[i][j] = SHA3-512(Cs[i][j-1])`.
+  * Derive the next sending Chain Key `derive_chain_key(Cs, i, j)`.
 
 In any event:
 
@@ -781,21 +809,12 @@ from the previous session when a new DAKE has just finished.
 
 Use the message `ID` to compute the receiving chain key and calculate encryption and mac keys.
 
-You may need to use receiving chain keys older than `message_id-1` to calculate
-the current if you did not receive previous messages. For example, your peer
-sends you data messages 1, 2, and 3, but you only receive 1 and 3. In that case
-you would use the chain key for message 1 to derive the chain key for message 3.
-
-
 ```
 TODO: Why this code always uses the current ratchet_id and totally ignores the
 ratchet_id from the message?
 //k = is the previously received message id
-
-for recId = k+1; recId <= message_id; recId++:
-  Cr[i][recId] = SHA3-512(Cr[i][recId-1])
-
-MKenc, MKmac = encription_and_mac_keys(Cr[i][message_id])
+recover_receiving_chain_keys(i, k, message_id)
+MKenc, MKmac = encription_and_mac_keys(Cr, i, message_id)
 ```
 
 Use the "mac key" (`MKmac`) to verify the MAC on the message. If the message
