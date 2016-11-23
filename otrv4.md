@@ -441,8 +441,13 @@ derive_chain_key(C, i, j):
   C[i][j] = SHA3-512(C[i][j-1])
 ```
 
+### Delete unnecessary chain keys
 
-### Encryption and MAC keys
+delete_unnecessary_chain_keys(chain_key_storage):
+  if a chain key has already been used to derive message keys and the chain
+  key after it, delete it
+
+### Calculate Encryption and MAC keys
 
 When you send or receive data messages you need to calculate the message keys:
 
@@ -796,6 +801,8 @@ you are the initiator:
   * Ratchet the ECDH keys. See "Ratcheting the ECDH keys" section.
   * Ratchet the DH keys. See "Ratcheting the DH keys" section.
   * Derive new set of keys `R[i], Cs[i][j], Cr[i][j]`:
+  * If chain keys and message encryption keys exist from the previous
+    ratchet, securely delete them.
 
   ```
   mixed = ECDH(our_ecdh.secret, their_ecdh) || DH_shared_key
@@ -848,16 +855,18 @@ recover_receiving_chain_keys(i, k, message_id)
 MKenc, MKmac = encription_and_mac_keys(Cr, i, message_id)
 ```
 
-Use the "mac key" (`MKmac`) to verify the MAC on the message. If the message
-verification fails, reject the message. If the MAC verifies, decrypt the message
-using the "encryption key" (`MKenc`).
+Use the "mac key" (`MKmac`) to verify the MAC on the message.
 
-Finally:
+If the message verification fails, reject the message.
+
+Otherwise:
+  * Decrypt the message using the "encryption key" (`MKenc`) and securely delete MKenc.
+  * delete_unnecessary_chain_keys()
   * Set `j = 0` to indicate a new DH-ratchet should happen next time you send a message.
   * Set `their_ecdh` as the "Next Public ECDH key" from the message.
   * Set `their_dh` as the "Next Public DH Key" from the message, if it
     is not NULL.
-  * Add the MAC key to list of pending MAC keys to be revealed.
+  * Add the MKmac key to list of pending MAC keys to be revealed.
 
 
 ### Revealing MAC Keys
@@ -874,10 +883,6 @@ A receiver can reveal a MAC key in the following case:
 
 - the receiver has received a message and has verified the message's authenticity
 - the receiver has discarded associated message keys
-- the receiver has discarded the chain key that can be used to compute the message
-keys (chain keys from previous ratchets might be stored to compute message keys for
-skipped or delayed messages).
-  TODO: WHEN IS A CHAIN KEY DISCARDED?
 
 ### Data Message format
 
