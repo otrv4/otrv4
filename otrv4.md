@@ -749,6 +749,7 @@ TODO: Where this `our_next_public_ECDH_key` comes from?
 
 If `j == 0` and (`i > 0` or `initiator` is `true`):
 
+  * TODO: there is some confusion with our_ecdh, our_dh, and our_next_public_*.
   * Securely delete `our_next_public_ECDH_key`. (TODO: Why is not this `our_ecdh`?)
   * Increment the current ratchet ID `i`.
   * Reset the previously sent message ID `j` to 0.
@@ -792,33 +793,40 @@ In any event:
 
 #### When you receive a Data Message:
 
-Reject messages with ratchet_id less than the i-1 or greater than i+1
-Reject messages with message_id less than the k.
+Reject messages with `ratchet_id` less than the `i-1` or greater than `i+1`
+Reject messages with `message_id` less than the `k`.
 
-Use the message ID to compute the receiving chain key (since the previously received message ID) and calculate encryption and mac keys.
+TODO: Why do we reject messages with ratchet_id < i-1 if we dont do anything with
+messages with ratchet_id i-1? Now, we should do (for allowing receiving messages)
+from the previous session when a new DAKE has just finished.
 
-```
-k = Previously received message id
-
-for recId = k+1; recId <= message_id; recId++:
-  Cr_i_recId = SHA3-512(Cr_i_recId-1)
-
-MKenc = SHA3-256(0x00 || Cr_message_id)
-MKmac = SHA3-512(0x01 || Cr_message_id)
-```
+Use the message `ID` to compute the receiving chain key and calculate encryption and mac keys.
 
 You may need to use receiving chain keys older than `message_id-1` to calculate
 the current if you did not receive previous messages. For example, your peer
 sends you data messages 1, 2, and 3, but you only receive 1 and 3. In that case
 you would use the chain key for message 1 to derive the chain key for message 3.
 
+
+```
+TODO: Why this code always uses the current ratchet_id and totally ignores the
+ratchet_id from the message?
+//k = is the previously received message id
+
+for recId = k+1; recId <= message_id; recId++:
+  Cr[i][recId] = SHA3-512(Cr[i][recId-1])
+
+MKenc, MKmac = encription_and_mac_keys(Cr[i][message_id])
+```
+
 Use the "mac key" (`MKmac`) to verify the MAC on the message. If the message
 verification fails, reject the message. If the MAC verifies, decrypt the message
 using the "encryption key" (`MKenc`).
 
 Finally:
-  * Set `j` to `0`.
-  * Set `their_ecdh` as the Next Public ECDH key from the message.
+  * Set `j = 0` to indicate a new DH-ratchet should happen next time you send a message.
+  * Set `their_ecdh` as the "Next Public ECDH key" from the message.
+
 
 ### Revealing MAC Keys
 
