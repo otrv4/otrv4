@@ -370,7 +370,7 @@ When you ratchet the ECDH keys, you:
 
 #### Ratcheting the DH keys
 
-The rotation of the DH keys does not take place in every ratchet but
+The rotation of the DH keys does not happen every ratchet but
 every third.
 
 If `i` is bigger than zero and a multiple of three:
@@ -487,7 +487,7 @@ profile expiration date. Both parties will include the user profile in the begin
 of the DAKE. The frequency of the user profile publication is determined by its
 expiration and renewal policy.
 
-### Creating a User Profile
+### Creating an User Profile
 
 To create a user profile, both Alice and Bob generate:
 
@@ -498,7 +498,7 @@ To create a user profile, both Alice and Bob generate:
    to the keys used for version 3. This is only used if the user supports
    version 3 and 4.
 
-One of the Cramer-Shoup secret key values (z) and its generator (g3) is used to create
+One of the Cramer-Shoup secret key values (z) and its generator (g1) is used to create
 signatures of the entire profile. This is created using the Ed448 signature algorithm as
 documented in [4].
 
