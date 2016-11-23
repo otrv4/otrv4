@@ -1245,7 +1245,7 @@ If `msgstate` is `MSGSTATE_ENCRYPTED`:
 Verify the information in the message. If the verification succeeds:
 
   * Decrypt the message and display the human-readable part (if non-empty) to the user.
-  * TODO: PUT RATCHET EXPLANATION HERE! HAHA!
+  * Rotate root, chain and mix keys as appropiate.
   * If you have not sent a message to this correspondent in some (configurable) time, send a "heartbeat" message.
 
 If the received message contains a TLV type 1, forget all encryption keys for
