@@ -810,11 +810,16 @@ In any event:
    Authenticator = SHA3-512(MKmac || Encrypted_message)
    ```
 
+3. Forget and reveal MAC keys. The conditions for revealing MAC keys is in the
+   "Revealing MAC keys" section.
+
 
 #### When you receive a Data Message:
 
 Reject messages with `ratchet_id` less than the `i-1` or greater than `i+1`
 Reject messages with `message_id` less than the `k`.
+
+This is to enforce rejecting messages delivered out of order.
 
 TODO: Why do we reject messages with ratchet_id < i-1 if we dont do anything with
 messages with ratchet_id i-1? Now, we should do (for allowing receiving messages)
@@ -835,6 +840,7 @@ verification fails, reject the message. If the MAC verifies, decrypt the message
 using the "encryption key" (`MKenc`).
 
 Finally:
+  * TODO: should the MAC key be marked as ready to be revealed?
   * Set `j = 0` to indicate a new DH-ratchet should happen next time you send a message.
   * Set `their_ecdh` as the "Next Public ECDH key" from the message.
   * Set `their_dh` as the "Next Public DH Key" from the message, if it is not NULL.
@@ -856,7 +862,8 @@ A receiver can reveal a MAC key in the following case:
 - the receiver has discarded associated message keys
 - the receiver has discarded the chain key that can be used to compute the message
 keys (chain keys from previous ratchets might be stored to compute message keys for
-skipped or delayed messages)
+skipped or delayed messages).
+  TODO: WHEN IS A CHAIN KEY DISCARDED?
 
 ### Data Message format
 
