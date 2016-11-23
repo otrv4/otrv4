@@ -733,22 +733,11 @@ Receiver's User Profile (USER-PROF)
 
 This section describes how each participant will use the Double Ratchet
 algorithm to exchange data initialized with the shared secret established in the
-DAKE. The Double Ratchet Algorithm is a key management algorithm that was
-developed by Trevor Perrin and Moxie Marlinspike. After an initial key exchange
-it manages the ongoing renewal and maintenance of short-lived session keys. It
-combines a cryptographic ratchet based on Diffie–Hellman key exchange and a
-ratchet based on a key derivation function.
-
-To perform a new ratchet means to rotate the root key and chain key to use a new
-D-H key pair. A ratchet represents a group of data messages which are encrypted
-by keys derived from the same D-H key pair.
+DAKE.
 
 A message with an empty human-readable part (the plaintext is of zero length, or
 starts with a NUL) is a "heartbeat" packet, and should not be displayed to the
 user. (But it's still useful to effect key rotations.)
-
-TODO: this previous paragraphs may need to be merged with the security level section
-and only explain here the minimum.
 
 ```
 Alice                                                                           Bob
