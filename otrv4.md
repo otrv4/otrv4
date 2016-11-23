@@ -299,6 +299,9 @@ OTRv4 keys are rotated in two levels:
    acknowledgement is received, the sending chain key is rotated, being derived
    from the previous sending chain key.
 
+TODO: everything up to here in this section may need to be updated to use the same terms as
+the new double ratchet spec. We may also need to add a 3rd level of ratchet (our mix key).
+
 In order to manage keys, each correspondent keeps track of:
 
 ```
@@ -387,6 +390,9 @@ Otherwise, she is the "low" end.
 
 TODO: we can not set the initiator as a side effect of deciding who will use each key, but we can use the same condition to decide who will be initiator. This may be a problem because every time I talk to Bob I will have the same condition.
 
+TODO: this may change who is sender/receiver while a new DAKE is in progress.
+Probably not a problem because I think we only generate new R[i] after the DAKE completes.
+REVIEW THIS!
 
 ### Deriving new chain keys
 
@@ -713,6 +719,9 @@ A message with an empty human-readable part (the plaintext is of zero length, or
 starts with a NUL) is a "heartbeat" packet, and should not be displayed to the
 user. (But it's still useful to effect key rotations.)
 
+TODO: this previous paragraphs may need to be merged with the security level section
+and only explain here the minimum.
+
 ```
 Alice                                                                           Bob
 -----------------------------------------------------------------------------------
@@ -876,31 +885,36 @@ Flags (BYTE)
 
 Ratchet id ratchet_id (INT)
 
-    Must be strictly greater than 0, and increment by 1 with each ratchet
+    Must be strictly greater than 0, and increment by 1 with each ratchet.
+    This should receive the value of i variable.
 
 Message id message_id (INT)
-    Must be strictly greater than 0, and increment by 1 with each message
+
+    Must be strictly greater than 0, and increment by 1 with each message.
+    This should receive the value of j variable.
 
 Next Public ECDH Key (MPI)
 
-    The *next* ratchet [i.e. i+1] ECDH public key for the sender
+    The *next* ratchet [i.e. i+1] ECDH public key for the sender.
+    TODO: Should this should receive the value of our_ecdh variable?
+    OR Should we have a new our_next_ecdh?
 
 Nonce (NONCE)
 
     The nonce used with XSalsa20 to create the encrypted message contained in
-    this packet
+    this packet.
 
 Encrypted message (DATA)
 
     Using the appropriate encryption key (see below) derived from the
     sender's and recipient's DH public keys (with the keyids given in this
     message), perform XSalsa20 encryption of the message. The nonce used for
-    this operation is also included in the header of the data message packet
+    this operation is also included in the header of the data message packet.
 
 Authenticator (MAC)
 
     The SHA3 MAC, using the appropriate MAC key (see below) of everything
-    from the Protocol version to the end of the encrypted message
+    from the Protocol version to the end of the encrypted message.
 
 Old MAC keys to be revealed (DATA)
 
