@@ -361,7 +361,10 @@ When you ratchet the ECDH keys, you:
 
 #### Ratcheting the DH keys
 
-If `i % 3 == 0` and `i != 0`:
+The rotation of the DH keys does not take place in every ratchet but
+every third.
+
+Given that `i` is a bigger than zero and a multiple of three:
 
   * Securely delete `our_dh`.
   * Generate a new DH key pair and assign it to `our_dh`. See [newDH()](#ECDH-and-DH-Shared-Secrets).
@@ -369,7 +372,7 @@ If `i % 3 == 0` and `i != 0`:
 
 Otherwise:
 
-  * Derive a new `DH_shared_key = SHA3-256(DH_shared_key)`.
+  * Derive a new `DH_shared_key = SHA3-384(DH_shared_key)`.
 
 
 #### ECDH and DH Shared Secrets
@@ -589,7 +592,7 @@ Query Message or Whitespace Tag ------->
 2. Generates an ephemeral DH secret key `b` and a public key `B`.
 3. Computes `γ = DREnc(PKb, PKa, m)`, being `m = "I" || "R" || X || Y || A || B`.
 4. Computes `σ = Auth(Hb, zb, {Ha, X}, "I" || "R" || X || A || γ)`.
-5. Computes `k = SHA3-512(K_ecdh || SHA3-256(K_dh))` and securely erases `y` and `b`.
+5. Computes `k = SHA3-512(K_ecdh || SHA3-384(K_dh))` and securely erases `y` and `b`.
 6. Sends Alice a DRE-Auth Message `ψ2 = ("R", γ, σ)`.
 
 **Alice:**
@@ -602,7 +605,7 @@ Query Message or Whitespace Tag ------->
   3. Bob's identifier is the second one listed, and it matches the identifier
      transmitted outside of the ciphertext
   4. `(X, A)` is a prekey that Alice previously sent and remains unused
-4. Computes `k = SHA3-512(K_ecdh || SHA3-256(K_dh))` and securely erases `x` and `a`.
+4. Computes `k = SHA3-512(K_ecdh || SHA3-384(K_dh))` and securely erases `x` and `a`.
 
 
 #### When you start a new DAKE
@@ -783,7 +786,14 @@ Verify MAC, Decrypt message 1_1
 
 #### When you send a Data Message:
 
-If `j == 0` and (`i > 0` or `initiator` is `true`):
+In order to send a data message a key to encrypt the message is
+required. This key will be derived from a previous chain key and if
+the message's counter `j` has been reset to zero keys should be
+rotated. Also this derivation takes into account a DH key, refered to
+as a mix key, which is rotated every third ratchet.
+
+Given a new ratchet begins and either this ratchet is not the first or
+you are the initiator:
   * Ratchet the ECDH keys. See "Ratcheting the ECDH keys" section.
   * Ratchet the DH keys. See "Ratcheting the DH keys" section.
   * Derive new set of keys `R[i], Cs[i][j], Cr[i][j]`:
