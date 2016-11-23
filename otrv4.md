@@ -450,7 +450,7 @@ delete_unnecessary_chain_keys(chain_key_storage):
 When you send or receive data messages you need to calculate the message keys:
 
 ```
-calculate_encription_and_mac_keys(chain_key):
+calculate_encryption_and_mac_keys(chain_key):
   enc = SHA3-256(0x00 || chain_key)
   mac = SHA3-512(0x01 || chain_key)
   return enc, mac
@@ -818,7 +818,7 @@ In any event:
 1. Calculate the encryption key (`MKenc`) and the mac key (`MKmac`):
 
    ```
-   MKenc, MKmac = calculate_encription_and_mac_keys(Cs[i][j])
+   MKenc, MKmac = calculate_encryption_and_mac_keys(Cs[i][j])
    ```
 
 2. Use the encryption key to encrypt the message, and the mac key to calculate its MAC:
@@ -850,7 +850,7 @@ TODO: Why this code always uses the current ratchet_id and totally ignores the
 ratchet_id from the message?
 //k = is the previously received message id
 recover_receiving_chain_keys(i, k, message_id)
-MKenc, MKmac = calculate_encription_and_mac_keys(Cr, i, message_id)
+MKenc, MKmac = calculate_encryption_and_mac_keys(Cr, i, message_id)
 ```
 
 Use the "mac key" (`MKmac`) to verify the MAC on the message.
