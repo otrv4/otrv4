@@ -675,10 +675,10 @@ choice of D-H and ECDH key. A valid Pre-key message is generated as follows:
 
 1. Create a user profile. How to do this is detailed [here](#creating-a-profile)
 2. Choose a random ephemeral ECDH key pair:
-  * secret key `x` a random element from `Z_q` (446 bits).
+  * secret key `x` a random element from `Z_q` (448 bits).
   * public key `X`
 3. Generates an ephemeral D-H secret key pair:
-  * secret key `a` (448 bits).
+  * secret key `a` (640 bits).
   * and a public key `A = g3 ^ a`.
 
 A pre-key is an OTR message encoded as:
@@ -712,10 +712,10 @@ A valid DRE-Auth message is generated as follows:
 1. Create a user profile. How to do this is detailed [here]
    (#creating-a-profile)
 2. Choose a random ephemeral ECDH key pair:
-  * secret key `y` a random element from `Z_q` (446 bits).
+  * secret key `y` a random element from `Z_q` (448 bits).
   * public key `Y`
 3. Generates an ephemeral D-H secret key pair:
-  * secret key `b` (448 bits).
+  * secret key `b` (640 bits).
   * and a public key `B = g3 ^ b`.
 4. Generate `m = X || Y || A || B`
 5. Compute `DREnc(pubA, pubB, m)` and serialize it as a DRE-M value in the variable `γ`.
