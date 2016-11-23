@@ -1453,8 +1453,8 @@ SMP message 1 is sent by Alice to begin a DH exchange to determine two new
 generators, `g2` and `g3`. A valid  SMP message 1 is generated as follows:
 
 1. Determine her secret input `x`, which is to be compared to Bob's secret `y`, as specified in the "Secret Information" section.
-2. Pick random values `a2` and `a3` in `Z_q`. These will be Alice's exponents for the DH exchange to pick generators. // TODO: what is the size of this?
-3. Pick random values `r2` and `r3` in `Z_q`. These will be used to generate zero-knowledge proofs that this message was created according to the protocol.
+2. Pick random values `a2` and `a3` (448 bits) in `Z_q`. These will be Alice's exponents for the DH exchange to pick generators. 
+3. Pick random values `r2` and `r3` (448 bits) in `Z_q`. These will be used to generate zero-knowledge proofs that this message was created according to the protocol.
 4. Compute `G2a = G*a2` and `G3a = G*a3`.
 5. Generate a zero-knowledge proof that the value a2 is known by setting `c2 = HashToScalar(1 || G*r2)` and `d2 = r2 - a2 * c2 mod q`.
 6. Generate a zero-knowledge proof that the value a3 is known by setting `c3 = HashToScalar(2 || G*r3)` and `d3 = r3 - a3 * c3 mod q`.
@@ -1490,8 +1490,8 @@ generators, g2 and g3. It also begins the construction of the values used in the
 final comparison of the protocol. A valid SMP message 2 is generated as follows:
 
 1. Determine Bob's secret input `y`, which is to be compared to Alice's secret `x`.
-2. Pick random values `b2` and `b3` in `Z_q`. These will used during the DH exchange to pick generators.
-3. Pick random values `r2`, `r3`, `r4`, `r5` and `r6` in `Z_q`. These will be used to add a blinding factor to the final results, and to generate zero-knowledge proofs that this message was created honestly.
+2. Pick random values `b2` and `b3` (448 bits) in `Z_q`. These will used during the DH exchange to pick generators.
+3. Pick random values `r2`, `r3`, `r4`, `r5` and `r6` (448 bits) in `Z_q`. These will be used to add a blinding factor to the final results, and to generate zero-knowledge proofs that this message was created honestly.
 4. Compute `G2b = G*b2` and `G3b = G*b3`.
 5. Generate a zero-knowledge proof that the value `b2` is known by setting `c2 = HashToScalar(3 || G*r2)` and `d2 = r2 - b2 * c2 mod q`.
 6. Generate a zero-knowledge proof that the value `b3` is known by setting `c3 = HashToScalar(4 || G*r3)` and `d3 = r3 - b3 * c3 mod q`.
@@ -1530,7 +1530,7 @@ SMP message 3 is Alice's final message in the SMP exchange. It has the last of
 the information required by Bob to determine if `x = y`. A valid SMP message 1
 is generated as follows:
 
-1. Pick random values `r4`, `r5`, `r6` and `r7` in `Z_q`. These will be used to add a blinding factor to the final results, and to generate zero-knowledge proofs that this message was created honestly.
+1. Pick random values `r4`, `r5`, `r6` and `r7` (448 bits) in `Z_q`. These will be used to add a blinding factor to the final results, and to generate zero-knowledge proofs that this message was created honestly.
 2. Compute `G2 = G2b*a2` and `G3 = G3b*a3`.
 3. Compute `Pa = G3*r4` and `Qa = G*r4 + G2*x`.
 4. Generate a zero-knowledge proof that `Pa` and `Qa` were created according to the protocol by setting `cP = HashToScalar(6 || G3*r5 || G*r5 + G2*r6)`, `d5 = r5 - r4 * cP mod q` and `d6 = r6 - x * cP mod q`.
@@ -1561,7 +1561,7 @@ SMP message 4 is Bob's final message in the SMP exchange. It has the last of the
 information required by Alice to determine if `x = y`. A valid SMP message 4 is
 generated as follows:
 
-1. Pick a random value `r7` in `Z_q`. This will be used to generate Bob's final zero-knowledge proof that this message was created honestly.
+1. Pick a random value `r7` (448 bits) in `Z_q`. This will be used to generate Bob's final zero-knowledge proof that this message was created honestly.
 2. Compute `Rb = (Qa - Qb) * b3`.
 3. Generate a zero-knowledge proof that `Rb` was created according to the protocol by setting `cR = HashToScalar(8 || G*r7 || (Qa - Qb)*r7)` and `d7 = r7 - b3 * cR mod q`.
 
