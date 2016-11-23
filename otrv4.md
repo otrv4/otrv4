@@ -28,8 +28,16 @@ messaging protocol, like XMPP.
 
 ## Main Changes over Version 3
 
-TODO: Write this section when we have fleshed out the other sections of the spec
-and decide what is important to highlight here
+- Improvements on security and privacy
+  - Security level raised to 224 bits.
+  - Preserving forward secrecy in the Diffie-Hellman key exchanges in
+case of post-quantum computations being feasible.
+- Most of the cryptographic primitives and protocols have been updated.
+  - (Deniable) Authenticated Key Exchange, SPAWN.
+  - Dual Receiver Encryption, Cramer-Shoup.
+  - Key management, Double Ratchet Algorithm.
+- SMP protocol
+  - TODO
 
 ## High Level Overview
 
