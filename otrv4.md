@@ -213,8 +213,8 @@ OTRv4 defines additional TLV record types:
 
 ### Data types
 
-OTRv4 uses the same data types as specified in OTRv3 (bytes, shorts, ints, MPIs,
-and DATA) with the addition of:
+OTRv4 uses almost the same data types as specified in OTRv3 (bytes, shorts, ints, MPIs,
+and DATA) except for CTR and MAC, and with the addition of:
 
 ```
 Nonce (NONCE):
@@ -457,13 +457,14 @@ When receiving a data message, you may need to use receiving chain keys older
 than `message_id-1` to calculate the current if you did not receive previous
 messages. For example, your peer sends you data messages 1, 2, and 3, but you
 only receive 1 and 3. In that case you would use the chain key for message 1 to
-derive the chain key for message 3.
+derive the chain key for message 3. // TODO: is message_id a state variable too?
 
 ```
 recover_receiving_chain_keys(i, k, message_id):
   for recId = k+1; recId <= message_id; recId++:
     derive_chain_key(Cr, i, recId)
 ```
+// TODO: is there a better name for recId? 
 
 
 ## OTR Conversation Initialization
