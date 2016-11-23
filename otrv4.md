@@ -1761,7 +1761,7 @@ G2 = (11781216126343694673728248434331006466518053535701637341687908214793940427
 
 #### Dual Receiver Key Generation: DRGen()
 
-1. Pick random values `x1, x2, y1, y2, z` in Z_q.
+1. Pick random values `x1, x2, y1, y2, z` in Z_q (56 bytes each).
 2. Compute group elements
   - `C = G1*x1 + G2*x2`
   - `D = G1*y1 + G2*y2`
