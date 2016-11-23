@@ -439,12 +439,6 @@ derive_chain_key(C, i, j):
   C[i][j] = SHA3-512(C[i][j-1])
 ```
 
-### Delete unnecessary chain keys
-
-delete_unnecessary_chain_keys(chain_key_storage):
-  if a chain key has already been used to derive message keys and the chain
-  key after it, delete it
-
 ### Calculate Encryption and MAC keys
 
 When you send or receive data messages you need to calculate the message keys:
@@ -670,7 +664,7 @@ Regardless of who you are:
 * Securely erase `our_ecdh.private` and `our_dh` key pair.
 * Calculate `K = calculate_shared_secret(K_ecdh, K_dh)`.
 * Calculate the SSID from shared secret: let SSID be the first 64 bits of `SHA3-256(0x00 || K)`.
-* Calculate the first set of keys with `R_i, Cs_i_0, Cr_i_0 = calculate_ratchet_keys(K)`.
+* Calculate the first set of keys with `R[i], Cs[i][0], Cr[i][0] = calculate_ratchet_keys(K)`.
 
 
 #### Pre-key message
@@ -805,18 +799,21 @@ you are the initiator:
   * Ratchet the ECDH keys. See "Ratcheting the ECDH keys" section.
   * Ratchet the DH keys. See "Ratcheting the DH keys" section.
   * Derive new set of keys `R[i], Cs[i][j], Cr[i][j]`.
-  * If root or chain keys exist from the previous ratchet, securely delete them.
+  * Securely delete the root key and all chain keys from the ratchet `i-2`.
 
   ```
   mixed = ECDH(our_ecdh.secret, their_ecdh) || dh_shared_secret
   R[i], Cs[i][j], Cr[i][j] = calculate_ratchet_keys(R[i-1] || mixed)
-  delete(R[i-1], Cs[i-1], Cr[i-1])
+  delete(R[i-2])
+  delete(Cs[i-2])
+  delete(Cr[i-2])
   ```
 
 Otherwise:
 
   * Increment previously sent message ID `j = j+1`.
   * Derive the next sending Chain Key `derive_chain_key(Cs, i, j)`.
+  * Securely delete `Cs[i][j-1]`.
 
 In any event:
 
@@ -867,7 +864,7 @@ If the message verification fails, reject the message.
 Otherwise:
 
   * Decrypt the message using the "encryption key" (`MKenc`) and securely delete MKenc.
-  * delete_unnecessary_chain_keys()
+  * Securely delete receiving chain keys older than `message_id-1`.
   * Set `j = 0` to indicate a new DH-ratchet should happen next time you send a message.
   * Set `their_ecdh` as the "Next Public ECDH key" from the message.
   * Set `their_dh` as the "Next Public DH Key" from the message, if it
