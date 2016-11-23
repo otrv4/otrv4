@@ -303,71 +303,35 @@ OTRv4 keys are rotated in two levels:
 In order to manage keys, each correspondent keeps track of:
 
 ```
-Initiator of the first root key rotation before sending the first message
-i as Current ratchet id
-j as Previously sent message id
-k as Previously received message id
+State variables:
+  initiator: the participant who should perform the first root key rotation after the DAKE completes.
+  i: the current ratchet id.
+  j: the previously sent message id (TODO: sometimes it's the id of the next message to be sent).
+  k: the previously received message id.
 
-R_i as Root key
-Cs_i_j as Sending Chain key
-Cr_i_k as Receiving Chain key
-our_ecdh an ECDH ephemeral key pair
-their_ecdh an ECDH ephemeral public key
-our_dh a DH ephemeral key pair
-their_dh a DH ephemeral public key
-
-(NOTE: our\_\* contains both a public and secret key, whereas their\_\* contains only a public key)
+Keys variables:
+  R[i]: the Root key for the ratchet i.
+  Cs[i][j]: the sending chain key for the message j in the ratchet i.
+  Cr[i][k]: the receiving chain key for the message k in the ratchet i.
+  our_previous_ecdh: our previous ECDH ephemeral key pair.
+  our_ecdh: our current ECDH ephemeral key pair.
+  their_ecdh: their ECDH ephemeral public key.
+  our_dh: our DH ephemeral key pair
+  their_dh: their DH ephemeral public key
 ```
-The previously mentioned keys are affected by these events:
 
-#### When you start a new DAKE
+The previously mentioned variables are affected by these events:
 
-The DAKE is considered to start when either:
+* When you send a DAKE message (starting a new DAKE).
+* Upon completing the DAKE.
+* When you send a Data Message.
+* When you receive a Data Message.
 
-1. Bob sends the pre-key message. In this case:
-  * Generate a new ephemeral ECDH key pair `(y, Y)`.
-  * Generate a new ephemeral 3072-bit DH key pair: `(b, B)`.
-  * Set `prev_our_ecdh` as your current ECDH key pair (`our_ecdh`), if you have it.
-  * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`(y, Y)`).
-  * Set `our_dh` as our DH ephemeral key pair from the DAKE (`b`, `B`).
-  * Set `j = 1` because the pre-key message is considered the first in this DH ratchet.
-  * Increase ratchet id `i = i + 1`.
+More details on how these variables are affected will be provided in the
+following sections.
 
 
-2. Alice receives the pre-key message. In this case:
-  * Generate a new ephemeral ECDH key pair `(x, X)`.
-  * Generate a new ephemeral 3072-bit DH key pair: `(a, A)`.
-  * Set `prev_our_ecdh` as your current ECDH key pair (`our_ecdh`), if you have it.
-  * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`(x, X)`).
-  * Set `our_dh` as our DH ephemeral key pair from the DAKE (`a`, `A`).
-  * Set `their_ecdh` as their ECDH ephemeral public key from the DAKE (`Y`).
-  * Set `their_dh` as their DH ephemeral public key from the DAKE (`B`).
-  * Increase ratchet id `i = i + 1`.
-  * Reply with a DRE-Auth message.
-
-
-#### After you complete the DAKE
-
-The DAKE is considered to be completed when either:
-
-1. Alice sends the DRE-Auth message. In this case:
-  * Set `j = 0` to cause a DH-ratchet the next time a msg is sent.
-  * Increase ratchet id `i = i + 1`.
-
-2. Bob receives and verifies the DRE-Auth message. In this case:
-  * Set `their_ecdh` as their ECDH ephemeral public key from the DAKE (`X`).
-  * Set `their_dh` as their DH ephemeral public key from the DAKE (`A`).
-  * Increase ratchet id `i = i + 1`.
-
-Regardless of who you are:
-
-* Calculate `K = calculate_shared_secret(K_ecdh, K_dh)`, where `K_dh` is the `mix_key`
-  and `K_ecdh` is the `EC_shared_key`.
-* Calculate the SSID from shared secret: let SSID be the first 64 bits of `SHA3-256(0x00 || K)`.
-* Calculate the first set of keys with `R_i, Cs_i_0, Cr_i_0 = calculate_ratchet_keys(K)`.
-
-
-#### Peer's Trusted and Untrusted Keys
+### Peer's Trusted and Untrusted Keys
 
 As in OTRv3, once a key is verified, it is saved as trusted. Then after the DAKE
 finishes, the public key will be identified as trusted or untrusted. If the public key
@@ -376,11 +340,11 @@ is not trusted, the user will be prompted to verify it. Otherwise they are not.
 The user may decide to continue the conversation without verifying the new
 public key.
 
-#### Calculating Keys
+### Calculating Keys
 
 This section describes the functions used to create the keys used in OTRv4.
 
-##### ECDH and DH Shared Secrets
+#### ECDH and DH Shared Secrets
 
 ```
 pubECDH, secretECDH = newECDH()
@@ -388,11 +352,11 @@ pubECDH, secretECDH = newECDH()
 EC_shared_key = (G1*x)*y (POINT)
   The shared ECDH key.
 
-DH_shared_key = (g^x)^y (MPI)
+DH_shared_key = (g3^x)^y (MPI)
   The shared 3072-bit DH key.
 ```
 
-##### Mixed Secret: Mixing ECDH and DH Shared Secrets
+#### Mixed Secret: Mixing ECDH and DH Shared Secrets
 
 ```
 calculate_shared_secret(EC_shared_key, DH_shared_key):
@@ -401,7 +365,7 @@ calculate_shared_secret(EC_shared_key, DH_shared_key):
    secret = SHA3-512(serialized_EC_secret, serialized_DH_shared_key)
 ```
 
-##### Calculate Double Ratchet Keys
+#### Calculate Double Ratchet Keys
 
 ```
 calculate_ratchet_keys(secret):
@@ -421,6 +385,7 @@ Otherwise, she is the "low" end.
   - If she is the "high" end, set `initiator` as `true`, use Ca as the sending chain key (Cs), Cb as the receiving chain key (Cr).
   - If she is the "low" end, set `initiator` as `false`, use Cb as the sending chain key (Cs), Ca as the receiving chain key (Cr).
 
+TODO: we can not set the initiator as a side effect of deciding who will use each key, but we can use the same condition to decide who will be initiator. This may be a problem because every time I talk to Bob I will have the same condition.
 
 ## OTR Conversation Initialization
 
@@ -591,6 +556,54 @@ Query Message or Whitespace Tag ------->
   4. `(X, A)` is a prekey that Alice previously sent and remains unused
 4. Computes `k = SHA3-512(K_ecdh || SHA3-256(K_dh))` and securely erases `x` and `a`.
 
+
+#### When you start a new DAKE
+
+The DAKE is considered to start when either:
+
+1. Bob sends the pre-key message. In this case:
+  * Generate a new ephemeral ECDH key pair `(y, Y)`.
+  * Generate a new ephemeral 3072-bit DH key pair: `(b, B)`.
+  * Set `prev_our_ecdh` as your current ECDH key pair (`our_ecdh`), if you have it.
+  * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`(y, Y)`).
+  * Set `our_dh` as our DH ephemeral key pair from the DAKE (`b`, `B`).
+  * Set `j = 1` because the pre-key message is considered the first in this DH ratchet.
+  * Increase ratchet id `i = i + 1`.
+
+
+2. Alice receives the pre-key message. In this case:
+  * Generate a new ephemeral ECDH key pair `(x, X)`.
+  * Generate a new ephemeral 3072-bit DH key pair: `(a, A)`.
+  * Set `prev_our_ecdh` as your current ECDH key pair (`our_ecdh`), if you have it.
+  * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`(x, X)`).
+  * Set `our_dh` as our DH ephemeral key pair from the DAKE (`a`, `A`).
+  * Set `their_ecdh` as their ECDH ephemeral public key from the DAKE (`Y`).
+  * Set `their_dh` as their DH ephemeral public key from the DAKE (`B`).
+  * Increase ratchet id `i = i + 1`.
+  * Reply with a DRE-Auth message.
+
+
+#### After you complete the DAKE
+
+The DAKE is considered to be completed when either:
+
+1. Alice sends the DRE-Auth message. In this case:
+  * Set `j = 0` to cause a DH-ratchet the next time a msg is sent.
+  * Increase ratchet id `i = i + 1`.
+
+2. Bob receives and verifies the DRE-Auth message. In this case:
+  * Set `their_ecdh` as their ECDH ephemeral public key from the DAKE (`X`).
+  * Set `their_dh` as their DH ephemeral public key from the DAKE (`A`).
+  * Increase ratchet id `i = i + 1`.
+
+Regardless of who you are:
+
+* Calculate `K = calculate_shared_secret(K_ecdh, K_dh)`, where `K_dh` is the `mix_key`
+  and `K_ecdh` is the `EC_shared_key`.
+* Calculate the SSID from shared secret: let SSID be the first 64 bits of `SHA3-256(0x00 || K)`.
+* Calculate the first set of keys with `R_i, Cs_i_0, Cr_i_0 = calculate_ratchet_keys(K)`.
+
+
 #### Pre-key message
 
 This is the first message of the DAKE. Bob sends it to Alice to commit to a
@@ -718,6 +731,8 @@ Verify MAC, Decrypt message 1_1
 ```
 
 #### When you send a Data Message:
+
+TODO: Where this `our_next_public_ECDH_key` comes from?
 
 If `j == 0` and (`i > 0` or `initiator` is `true`) :
   * Securely delete `our_next_public_ECDH_key`, increment the current ratchet ID `i`,
