@@ -400,32 +400,11 @@ encription_and_mac_keys(chain_key):
 
 ## OTR Conversation Initialization
 
-OTRv4 conversations are established by an deniable authenticated key exchange
-protocol (DAKE).
+OTRv4 will keep conversation initialization through a Query Message or
+whitespace tag, as discussed in OTRv3 [3]. After this, the conversation
+is authenticated using a deniable, authenticated, key exchange (DAKE).
 
-There are two ways Alice can inform Bob that she is willing to use the OTR
-protocol to speak with him in an interactive setting: by sending him an OTR
-Query Message, or by including a special "tag" consisting of whitespace
-characters in one of her messages to him. Each method also includes a way for
-Alice to communicate to Bob which versions of the OTR protocol she is willing to
-speak with him.
-
-The semantics of the interactive OTR Query Message are that Alice is requesting
-that Bob start an OTR conversation with her (if he is willing and able to do
-so). The semantics of the whitespace tag are that Alice is opportunistically
-indicating to Bob that she is willing to have an OTR conversation with him.
-
-For example, if Bob has a policy of "only use OTR when it's explicitly
-requested", then he would start an OTR conversation upon receiving an OTR Query
-Message, but would not upon receiving the whitespace tag.
-
-Both the OTR Query Message and Whitespace tag include the OTR versions Alice
-supports and is willing to use.
-
-Once Bob has decided to start the conversation in response to Alice's request,
-he will initiate an interactive DAKE.
-
-### Requesting conversation with older OTR version
+### Requesting conversation with older OTR versions
 
 Bob might respond to Alice's request or notification of willingness to start a
 conversation using OTRv3. If this is the case and Alice supports the version 3,
