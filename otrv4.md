@@ -592,32 +592,37 @@ Query Message or Whitespace Tag ------->
                                          Verify & Decrypt (ψ2)
 ```
 
-**Alice:**
-
-1. Generates an ephemeral ECDH secret key `x` and a public key `X`.
-2. Generates an ephemeral DH secret key `a` and a public key `A`.
-3. Sends Bob a pre-key message `ψ1 = ("I", X, A)`.
-
+Bob will be initiating the DAKE with Alice.
 
 **Bob:**
 
 1. Generates an ephemeral ECDH secret key `y` and a public key `Y`.
 2. Generates an ephemeral DH secret key `b` and a public key `B`.
-3. Computes `γ = DREnc(PKb, PKa, m)`, being `m = "I" || "R" || X || Y || A || B`.
-4. Computes `σ = Auth(Hb, zb, {Ha, X}, "I" || "R" || X || A || γ)`.
-5. Computes root level keys (`R`, `Cs`, and `Cr`).
-6. Sends Alice a DRE-Auth Message `ψ2 = ("R", γ, σ)`.
+3. Sends Alice a pre-key message `ψ1 = ("I", Y, B)`.
+
 
 **Alice:**
 
-1. Verifies `Verif({Ha, Hb, X}, σ, “I” || “R” || X || A || γ)`.
-2. Decrypts `m = DRDec(PKa, PKb, SKa, γ)`.
+1. Generates an ephemeral ECDH secret key `x` and a public key `X`.
+2. Generates an ephemeral DH secret key `a` and a public key `A`.
+3. Computes `γ = DREnc(PKa, PKb, m)`, being `m = "I" || "R" || Y || X || B || A`.
+   TODO: "I" and "R" should be the profile.
+4. Computes `σ = Auth(Ha, za, {Hb, Y}, "I" || "R" || Y || B || γ)`.
+   TODO: "I" and "R" should be the profile.
+5. Computes root level keys (`R`, `Cs`, and `Cr`).
+6. Sends Alice a DRE-Auth Message `ψ2 = ("R", γ, σ)`.
+
+**Bob:**
+
+1. Verifies `Verif({Hb, Ha, Y}, σ, “I” || “R” || Y || B || γ)`.
+   TODO: "I" and "R" should be the profile.
+2. Decrypts `m = DRDec(PKb, PKa, SKb, γ)`.
 3. Verifies the following properties of the decrypted message `m`:
   1. The message is of the correct form (e.g., the fields are of the expected length)
   2. Alice's identifier is the first one listed
   3. Bob's identifier is the second one listed, and it matches the identifier
      transmitted outside of the ciphertext
-  4. `(X, A)` is a prekey that Alice previously sent and remains unused
+  4. `(Y, B)` is a prekey that Bob previously sent and remains unused.
 4. Computes root level keys (`R`, `Cs`, and `Cr`).
 
 #### When you start a new DAKE
