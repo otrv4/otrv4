@@ -1,11 +1,11 @@
 # OTR version 4
 
-The following messaging protocol (TODO: is it really a messageing protocol?)
-provides a way for two people to have a conversation over a network with the
-same security expectations as a private, in-person conversation. No external
-party can overhear what is being said, and no one (not even the participants)
-can prove what was said or that the two participants spoke to each other at
-all. OTR works on top of an existing messaging protocol, like XMPP.
+This protocol provides a way for two people to have a conversation over a
+network with the same security expectations as a private, in-person
+conversation. No external party can overhear what is being said, and no
+one (not even the participants) can prove what was said or that the two
+participants spoke to each other at all. OTR works on top of an existing
+messaging protocol, like XMPP.
 
 ## Table of Contents
 
@@ -29,9 +29,9 @@ all. OTR works on top of an existing messaging protocol, like XMPP.
 ## Main Changes over Version 3
 
 - Improvements on security and privacy
-  - Security level raised to 224 bits.
-  - Preserving forward secrecy in the Diffie-Hellman key exchanges in
-case of post-quantum computations being feasible. (TODO: weird)
+  - Security level raised to 224 bits based on elliptic curve cryptography
+  - Additional protection against transcript decryption in the case of
+    elliptic curve compromise
 - The cryptographic primitives and protocols have been updated.
   - Deniable Authenticated Key Exchange using SPAWN.
   - Key management using the Double Ratchet Algorithm.
