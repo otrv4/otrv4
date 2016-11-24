@@ -16,7 +16,7 @@ messaging protocol, like XMPP.
 5. [Preliminaries](#preliminaries)
 6. [OTR Conversation Initialization](#otr-conversation-initialization)
   1. [User Profile](#user-profile)
-  2. [Creating a User Profile](#creating-a-user-profile)
+  2. [Creating an User Profile](#creating-an-user-profile)
   3. [Deniable Authenticated Key Exchange (DAKE)](#deniable-authenticated-key-exchange-dake)
 7. [Requesting conversation with older OTR version](#requesting-conversation-with-older-otr-version)
 8. [Data exchange](#data-exchange)
@@ -1118,9 +1118,8 @@ Otherwise, if the query message offers OTR version 3 and `ALLOW_V3` is set:
 
   * Display the message to the user.
   * If `ERROR_START_DAKE` is set, reply with a Query Message.
-  * TODO: Should all state machines be reset?
-  * TODO: Should `authstate` and `msgstate` be reset?
-
+  * All state machines should be reset
+  * Reset `msgstate` to `MSGSTATE_PLAINTEXT` and `authstate` to `AUTHSTATE_NONE`
 
 #### Receiving a Pre-key message
 
