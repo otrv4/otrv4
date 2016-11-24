@@ -319,7 +319,7 @@ In order to manage keys, each correspondent keeps track of:
 State variables:
   initiator: the participant who should perform the first root key rotation after the DAKE completes.
   i: the current ratchet id.
-  j: the previously sent message id (TODO: sometimes it's the id of the next message to be sent).
+  j: the previously sent message id
   k: the previously received message id.
 
 Keys variables:
