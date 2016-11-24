@@ -173,7 +173,7 @@ and DATA) except for CTR and MAC, and with the addition of:
 
 ```
 Nonce (NONCE):
-  24 byte (192-bit) one time use nonce for XSalsa20 encryption  (TODO: this is incsonsistent, and doesn't describe that it's a byte array)
+  24 byte data
 
 ED448 point (POINT):
   56 byte unsigned value, big-endian
