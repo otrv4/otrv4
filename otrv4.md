@@ -37,7 +37,10 @@ case of post-quantum computations being feasible.
   - Dual Receiver Encryption, Cramer-Shoup.
   - Key management, Double Ratchet Algorithm.
 - SMP protocol
-  - TODO
+  - Upgraded the cryptographic primitives to use ECC based on Edwards
+    448.
+  - Added new TLVs to keep compatibility for the previos SMP protocol.
+
 
 ## High Level Overview
 
