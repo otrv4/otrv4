@@ -562,9 +562,9 @@ Transitional Fingerprints (TRANSITION-FP)
 
 This section outlines the flow of the Deniable Authenticated Key Exchange, which
 is a way for two parties to mutually agree upon a shared key and authenticate
-one another while also allowing a level of participation deniability.
+one another while also providing participation deniability.
 
-This process is based on the [Spawn protocol][2], which utilizes dual-receiver
+This protocol is derived from the [Spawn protocol][2], which uses dual-receiver
 encryption (DRE) and a non-interactive zero-knowledge proof of knowledge
 (NIZKPK) for authentication (Auth).
 
@@ -573,7 +573,7 @@ Alice long-term Cramer-Shoup key-pair is `SKa = (x1a, x2a, y1a, y2a, za)` and
 y1b, y2b, zb)` and `PKb = (Cb, Db, Hb)`. Both key pairs are generated with
 `DRGen()`.
 
-
+(TODO: it might be useful to specify that the DH and ECDH keys are ephemeral)
 #### Overview
 
 ```
@@ -616,7 +616,7 @@ Bob will be initiating the DAKE with Alice.
 6. Sends Alice a DRE-Auth Message `ψ2 = ("R", γ, σ)`.
 
 **Bob:**
-
+(TODO: I still hate "Verif")
 1. Verifies `Verif({Hb, Ha, Y}, σ, “Prof_B” || “Prof_A” || Y || B || γ)`.
 2. Decrypts `m = DRDec(PKb, PKa, SKb, γ)`.
 3. Verifies the following properties of the decrypted message `m`:
@@ -627,8 +627,11 @@ Bob will be initiating the DAKE with Alice.
   4. `(Y, B)` is a prekey that Bob previously sent and remains unused.
 4. Computes root level keys (`R`, `Cs`, and `Cr`).
 
+(TODO: what happens if any of the verifications fails?)
+
 #### When you start a new DAKE
 
+(TODO: what is different here, compared to these descriptions in the previous section?)
 The DAKE is considered to start when either:
 
 1. Bob sends the pre-key message. In this case:
