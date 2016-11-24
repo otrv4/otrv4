@@ -250,14 +250,14 @@ difference in the context of OTRv4.
 OTRv4 retains the Diffie-Hellman Ratchet [7] and Symmetric Key Ratchet [8] from
 the algorithm.
 
-OTRv4 adds a new 3072 Diffie-Hellman keys called the Mix Key. In addition,
+OTRv4 adds new 3072 Diffie-Hellman keys called the Mix Key Pair. In addition,
 another Diffie-Hellman Ratchet and Key Symmetric Ratchet is added for the Mix
 Key alone. These were added to protect transcripts of data messages in the case
 that elliptic curve cryptography is broken. During the DAKE, both parties agree
 upon the first set of 3072 Diffie-Hellman keys. Then every third Diffie-Hellman
 Ratchet in the Double Ratchet, a new 3072 key is agreed upon. Between each
-Diffie-Hellman Mix Key Ratchet, both sides will conduct a Symmetric Ratchet of
-the Mix Key.
+Diffie-Hellman Mix Key Ratchet, both sides will conduct a Symmetric Mix Key
+Ratchet.
 
 In order to manage keys, each correspondent keeps track of:
 
