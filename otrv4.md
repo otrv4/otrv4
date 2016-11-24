@@ -242,33 +242,22 @@ SHA3-256 hash of the byte-level representation of the public key.
 In the DAKE, OTRv4 makes use of long-term Cramer-Shoup keys and ephemeral D-H
 keys.
 
-For exchanging data messages, OTRv4 uses a key structure and
-key rotation strategy inspired by the [Double Ratchet] algorithm [6]. The goal is to
-provide forward secrecy even in the event of not receiving messages from the
-other participant for a considerable amount of time.
+For exchanging data messages, OTRv4 uses a key structure and key rotation
+strategy with the [Double Ratchet] algorithm [6] at its core. As a result we
+will use many of the terms within the Double Ratchet domain to describe the
+difference in the context of OTRv4.
 
-The messages are encrypted and authenticated using a set of receiving and
-sending MAC and encryption keys, derived from the sending and receiving chain
-keys.
+OTRv4 retains the Diffie-Hellman Ratchet [7] and Symmetric Key Ratchet [8] from
+the algorithm.
 
-OTRv4 keys are rotated in three different levels:
-
-1. Root level: every time a new D-H key is advertised/acknowledged a new root
-   key is derived, as long as new initial sending and receiving chain keys.
-(TODO: I have no idea what this sentence means)
-
-
-2. Chain level: every time a new message needs to be sent before an
-   acknowledgement is received, the sending chain key is rotated, being derived
-   from the previous sending chain key.
-(TODO: the acknowledgment part in the middle here is quite confusing)
-
-
-3. Mix key level: every third time a party has gone through three root level
-   level rotations, the mix key is rotated and the resulting DH public
-   key should be adevertised / acknowledged.
-(TODO: this one is very confusing too)
-
+OTRv4 adds a new 3072 Diffie-Hellman keys called the Mix Key. In addition,
+another Diffie-Hellman Ratchet and Key Symmetric Ratchet is added for the Mix
+Key alone. These were added to protect transcripts of data messages in the case
+that elliptic curve cryptography is broken. During the DAKE, both parties agree
+upon the first set of 3072 Diffie-Hellman keys. Then every third Diffie-Hellman
+Ratchet in the Double Ratchet, a new 3072 key is agreed upon. Between each
+Diffie-Hellman Mix Key Ratchet, both sides will conduct a Symmetric Ratchet of
+the Mix Key.
 
 In order to manage keys, each correspondent keeps track of:
 
@@ -1733,3 +1722,4 @@ d is an array of bytes.
 [4]: https://mikehamburg.com/papers/goldilocks/goldilocks.pdf "M. Hamburg: Ed448-Goldilocks, a new elliptic curve"
 [5]: http://www.ietf.org/rfc/rfc7748.txt "A. Langley, M. Hamburg, and S. Turner: Elliptic Curves for Security.” Internet Engineering Task Force; RFC 7748 (Informational); IETF, Jan-2016"
 [6]: https://whispersystems.org/docs/specifications/doubleratchet "Trevor Perrin (editor), Moxie Marlinspike: The Double Ratchet Algorithm"
+[7]: https://whispersystems.org/docs/specifications/doubleratchet/#diffie-hellman-ratchet
