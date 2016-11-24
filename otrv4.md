@@ -92,22 +92,22 @@ transfer this knowledge to someone else.
 Threats that OTR does not mitigate:
 * An active attacker can perform Denial of Service attacks to reduce availability.
 
-## Preliminaries
+## Notation and parameters
 
 This section contains information needed to understand the parameters and
 arithmetic used.
 
 ### Notation
 
-Integer variables are in lower case (x, y). Points and other variables are in
-upper case (P, Q).
+Scalars are in lower case, such as `x` or `y`. Points and other variables are in
+upper case, such as `P` or `Q`.
 
-Addition and subtraction of elliptic curve points A and B are A + B and A - B.
-Addition of a point to other point generates another point. Scalar
-multiplication of an integer (scalar) with an elliptic curve point B yields a
-new point: C = a * B.
+Addition and subtraction of elliptic curve points `A` and `B` are `A + B` and `A - B`.
+Addition of a point to another point generates a third point. Scalar
+multiplication with a scalar `a` with an elliptic curve point `B` yields a
+new point: `C = a * B`.
 
-The concatenation of byte sequences x and P is x || P. In this case, x and P
+The concatenation of byte sequences `I` and `J` is `I || J`. In this case, `I` and `J`
 represent a fixed-length byte sequence encoding the respective values. See
 section [Data types](#data-types) for encoding and decoding details.
 
@@ -118,13 +118,16 @@ following parameters:
 
 ```
 Base point (B)
-  (x=117812161263436946737282484343310064665180535357016373416879082147939404277809514858788439644911793978499419995990477371552926308078495, y=19)
+  (x=11781216126343694673728248434331006466518053535701637341687908214793
+     9404277809514858788439644911793978499419995990477371552926308078495,
+   y=19)
 
 Cofactor (c)
   4
 
 Identity point (I)
-  (x=0, y=1)
+  (x=0,
+   y=1)
 
 Field prime (p)
   2^448 - 2^224 - 1
@@ -139,9 +142,8 @@ Number of bits in q (|q|)
   446 bits
 ```
 
-An integer modulo p is a "field element". An integer modulo q is a "scalar"
-(also a value on Z_q), and is considered a MPI for encoding and decoding
-purposes.
+A scalar modulo `p` is a "field element", and should be encoded and decoded
+using the rules for MPIs.
 
 ### 3072 Diffie-Hellman Parameters
 
