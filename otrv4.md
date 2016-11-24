@@ -463,38 +463,48 @@ recover_receiving_chain_keys(i, j, k):
 ```
 
 
-## OTR Conversation Initialization
+## Conversation Initialization
 
-OTRv4 will keep conversation initialization through a Query Message or
-whitespace tag, as discussed in OTRv3 [3]. After this, the conversation
-is authenticated using a deniable, authenticated, key exchange (DAKE).
+OTRv4 will initialize athrough a Query message or a whitespace tag, as discussed
+in OTRv3 [3]. After this, the conversation is authenticated using a deniable
+authenticated key exchange (DAKE). The conversation can also be started directly
+with the first message of the DAKE, without a Query message or a whitespace tag.
 
 ### Requesting conversation with older OTR versions
 
 Bob might respond to Alice's request or notification of willingness to start a
 conversation using OTRv3. If this is the case and Alice supports the version 3,
 the protocol falls back to OTRv3 [3].
+(TODO: what happens otherwise?)
+
 
 ## User Profile
 
 OTRv4 introduces mandatory user profile publication. The user profile contains the
-Cramer-Shoup long term public key, signed supported version information, and a signed
+Cramer-Shoup long term public key, signed version support information, and a signed
 profile expiration date. Both parties will include the user profile in the beginning
 of the DAKE. The frequency of the user profile publication is determined by its
 expiration and renewal policy.
 
+(TODO: IT HAS to be published in a public space as well)
+
+
 ### Creating an User Profile
+
+(TODO: why is Bob necessary here? The user profile creation doesn't happen during a conversation, right?)
 
 To create a user profile, both Alice and Bob generate:
 
 1. The Cramer-Shoup key-pair: PK, SK
-2. Supported version information string in the same format as OTRv3 Query Messages [3]
-3. Profile Expiration
+2. Version support information string in the same format as OTRv3 Query Messages [3]
+3. Profile Expiration  (TODO: what format?)
 4. (optional) Transition signatures are signatures of the DSA fingerprints related
    to the keys used for version 3. This is only used if the user supports
    version 3 and 4.
+(TODO: this is incorrect, it's supposed to be a signature generated USING the DSA key, of the new cramer shoup fingerprint)
 
-One of the Cramer-Shoup secret key values (z) and its generator (g1) is used to create
+
+One of the Cramer-Shoup secret key values (`z`) and its generator (`g1`) is used to create
 signatures of the entire profile. This is created using the Ed448 signature algorithm as
 documented in [4].
 
@@ -506,6 +516,7 @@ The user profile components are as follows:
 4. profile_sig = sign( PK, version_info, profile_expiration )
 5. (optional) fingerprints
 6. (optional) fingerprint_sig = sign( otrv3_DSA_fingerprint ) (1 per fingerprint)
+(TODO: why have this both here and in the data type below?)
 
 Then this profile should be published in a public place, like an untrusted
 server.
@@ -513,10 +524,11 @@ server.
 #### Renewing a Profile
 
 If a renewed profile is not published and if the only publicly available profile
-is expired, then this puts the user's participation deniability at risk.
+is expired, this puts the user's participation deniability at risk.
 
 Before the profile expires, the user must publish an updated profile with a new
-expiration date. The user establishes the frequency of expiration.
+expiration date. The client establishes the frequency of expiration - this can
+be configurable. A recommended value is two weeks.
 
 #### User Profile Data Type
 
@@ -531,19 +543,19 @@ User Profile (USER-PROF):
 Version (VER):
   A string corresponding to the user's supported OTR versions. The format is
   described in OTR version 3 under the section "OTR Query Messages".
+  (TODO: this needs to have some length encoding or something)
 
 Version Expiration (VER-EXP):
   4 byte value that contains the date that this profile will expire.
+  (TODO: this needs to be specified)
 
 Signature of profile (MPI):
-  4 byte unsigned length of signature, big-endian
-  112 byte (896 bits) unsigned signature, big-endian
 
 Transitional Fingerprints (TRANSITION-FP)
   1 byte unsigned number of fingerprints, big-endian
   20 byte (160 bits) unsigned fingerprint, big-endian for each
   112 byte (896 bits) unsigned signature, big-endian for each
-
+(TODO: the above is incorrect, since the transitional fingerprint was misunderstood)
 ```
 
 ### Deniable Authenticated Key Exchange (DAKE)
