@@ -167,46 +167,7 @@ the above group, the operation should also be done module the above prime.
 
 ### TLV Types
 
-(TODO: this paragraph should not be here)
-OTRv4 has the same message formats as OTRv3 without compatibility with version 2.
-This means that query messages, whitespace tags, error messages, encoding and
-fragmentation is performed as specified in OTRv3.
-
-(TODO: this paragraph should not be here)
-The fragmentation format is the same as for OTRv3. You will have to wait until
-after reassembly to finalize how to deal with a message. For details, see
-[fragmentation section][3] in OTRv3 documentation.
-
-Although Data Messages have a different format in OTRv4, they use the same
-format for TLV (type/length/value) records. OTRv4 supports the same TLV record
-types from OTRv3, with the exception of SMP (version 1) TLVs (types 2-7).
-
-OTRv4 defines additional TLV record types:
-
-* Type 10: SMP Abort Message
-  If the user cancels SMP prematurely or encounters an error in the protocol and
-  cannot continue, you may send a message (possibly with empty human-readable
-  part) with this TLV type to instruct the other party's client to abort the
-  protocol. The associated length should be zero and the associated value should
-  be empty. If you receive a TLV of this type, you should change the SMP state
-  to SMPSTATE_EXPECT1 (see below).
-
-* Type 11: SMPv2 Message 1
-  The value represents an initiating message of the Socialist Millionaires'
-  Protocol, described below.
-
-* Type 12: SMPv2 Message 2
-  The value represents the second message in an instance of SMPv2.
-
-* Type 13: SMPv2 Message 3
-  The value represents the third message in an instance of SMPv2.
-
-* Type 14: SMPv2 Message 4
-  The value represents the final message in an instance of SMPv2.
-
-* Type 15: SMPv2 Message 1Q
-  Like a SMPv2 Message 1, but whose value begins with a NUL-terminated
-  user-specified question.
+OTRv4 supports the same TLV record types from OTRv3.
 
 ### Data types
 
@@ -1352,22 +1313,24 @@ sent of received). This can lead to problems of sending messages unencrypted
 unless all the participants have the `REQUIRE_ENCRYPTION` policy.
 
 
-## Socialist Millionaires Protocol (SMP) version 2
+## Socialist Millionaires Protocol (SMP)
 
-The Socialist Millionaires' Protocol allows two parties with secret information
-`x` and `y` respectively to check whether `x == y` without revealing any
-additional information about the secrets. The protocol used by OTR is based on
-the work of Boudot, Schoenmakers and Traore (2001). A full justification for its
-use in OTR is made by Alexander and Goldberg, in a paper published in 2007. The
-following is a technical account of what is transmitted during the course of the
-protocol.
+SMP in version 4 shares the same TLVs and flow as SMP in OTRv3 with the
+following exceptions.
 
-While data messages are being exchanged, either Alice or Bob may run SMP to
-detect impersonation or man-in-the-middle attacks.
+OTRv4 uses Ed448 as the cryptographic primative. This changes the way values
+are serialized and how they are computed. OTRv4 also reuses the SMP Message 1Q
+with TLV type 7 for situations where a user question is sent and when it is not
+sent. In cases where the question is not present, the user-speicified DATA
+portion of the secret has length 0 and value NUL. Lastly, OTRv4 creates
+fingerprints using SHA3-256. Thus the size of the fingerprint in the "Secret
+Information" section of OTRv3 [3] should be 32 bytes in size.
 
-We reuse the previously defined generator in Cramer-Shoup of DRE:
+To define the SMP values under Ed448, we reuse the previously defined generator
+for Cramer-Shoup:
 
-`G = (501459341212218748317573362239202803024229898883658122912772232650473550786782902904842340270909267251001424253087988710625934010181862, 44731490761556280255905446185238890493953420277155459539681908020022814852045473906622513423589000065035233481733743985973099897904160)`
+`G = (501459341212218748317573362239202803024229898883658122912772232650473550786782902904842340270909267251001424253087988710625934010181862,
+44731490761556280255905446185238890493953420277155459539681908020022814852045473906622513423589000065035233481733743985973099897904160)`
 
 ### Overview
 
@@ -1423,38 +1386,10 @@ will only succeed if `x == y`. Further, since `G2*a3*b3` is a random number not
 known to any party, if `x` is not equal to `y`, no other information is
 revealed.
 
-
-### Secret Information
-
-The secret information x and y compared during this protocol contains not only
-information entered by the users, but also information unique to the
-conversation in which SMP takes place. Specifically, the format is:
-
-```
-Version (BYTE)
-  The version of SMP used. The version described here is 2.
-
-Initiator fingerprint (32 BYTEs)
-  The fingerprint that the party initiating SMP is using in the current conversation.
-
-Responder fingerprint (32 BYTEs)
-  The fingerprint that the party that did not initiate SMP is using in the current conversation.
-
-Secure Session ID
-  The SSID described above.
-
-User-specified secret (DATA)
-  The input string given by the user at runtime.
-```
-
-Then the HashToScalar() of the above becomes the actual secret (`x` or `y`) to
-be used in SMP. The additional fields insure that not only do both parties know
-the same secret input string, but no man-in-the-middle is capable of reading
-their communication either.
-
 ### SMP Hash function
 
-In the following actions, there are many places where a SHA512 hash of an integer followed by one or two MPIs is taken. The input to this hash function is:
+In the following actions, there are many places where a SHA3-512 hash of an
+integer followed by one or two MPIs is taken. The input to this hash function is:
 
 ```
 Version (BYTE)
@@ -1470,18 +1405,9 @@ Second MPI (MPI)
   only one MPI is given as input, this field is simply omitted.
 ```
 
-### SMPv2 messages
+#### SMP message 1Q
 
-SMPv2 messages are sent as TLVs in data messages. For backwards compatibility
-with SMP version 1, the TLV type for SMPv2 messages start at 10 (decimal).
-
-#### SMPv2 Abort message
-
-A SMP abort message is a type 10 TLV with no data.
-
-#### SMPv2 message 1
-
-SMP message 1 is sent by Alice to begin a DH exchange to determine two new
+SMP message 1Q is sent by Alice to begin a DH exchange to determine two new
 generators, `g2` and `g3`. A valid  SMP message 1 is generated as follows:
 
 1. Determine her secret input `x`, which is to be compared to Bob's secret `y`, as specified in the "Secret Information" section.
@@ -1493,7 +1419,7 @@ generators, `g2` and `g3`. A valid  SMP message 1 is generated as follows:
 7. Store the values of `x`, `a2` and `a3` for use later in the protocol.
 
 
-The SMPv2 message 1 is a TLV type 11 with the following data:
+The SMP message 1Q has the following data:
 
 ```
 question (DATA)
@@ -1533,7 +1459,7 @@ final comparison of the protocol. A valid SMP message 2 is generated as follows:
 10. Store the values of `G3a`, `G2`, `G3`, `b3`, `Pb` and `Qb` for use later in the protocol.
 
 
-The SMP message 2 is a TLV type 12 with the following data:
+The SMP message 2 has the following data:
 
 ```
 G2b (POINT)
@@ -1570,7 +1496,7 @@ is generated as follows:
 6. Generate a zero-knowledge proof that `Ra` was created according to the protocol by setting `cR = HashToScalar(7 || G*r7 || (Qa - Qb)*r7)` and `d7 = r7 - a3 * cR mod q`.
 7. Store the values of `G3b`, `Pa - Pb`, `Qa - Qb` and `Ra` for use later in the protocol.
 
-The SMP message 3 is a TLV type 13 with the following data:
+The SMP message 3 has the following data:
 
 ```
 Pa (POINT), Qa (POINT)
@@ -1597,7 +1523,7 @@ generated as follows:
 2. Compute `Rb = (Qa - Qb) * b3`.
 3. Generate a zero-knowledge proof that `Rb` was created according to the protocol by setting `cR = HashToScalar(8 || G*r7 || (Qa - Qb)*r7)` and `d7 = r7 - b3 * cR mod q`.
 
-The SMP message 4 is a TLV type 14 with the following data:
+The SMP message 4 has the following data:
 
 ```
 Rb (POINT)
@@ -1607,78 +1533,10 @@ cR (MPI), d7 (MPI)
   A zero-knowledge proof that Rb was created according to the protocol given above.
 ```
 
-
 ### The SMP state machine
 
-Whenever the OTR message state machine has `MSGSTATE_ENCRYPTED` set (see below),
-the SMP state machine may progress. If at any point `MSGSTATE_ENCRYPTED` becomes
-unset, SMP must abandon its state and return to its initial setup. The SMP state
-consists of one main variable, as well as information from the partial
-computations at each protocol step.
-
-
-#### Expected Message
-
-This main state variable for SMP controls what SMP-specific TLVs will be
-accepted. This variable has no effect on type 0 or type 1 TLVs, which are always
-allowed. smpstate can take one of four values:
-
-```
-SMPSTATE_EXPECT1
-  This state indicates that only SMP message 1 or SMP message 1Q should be accepted. This is the default state when SMP has not yet begun. This state is also reached whenever an error occurs or SMP is aborted, and the protocol must be restarted from the beginning.
-
-SMPSTATE_EXPECT2
-  This state indicates that only SMP message 2 should be accepted.
-
-SMPSTATE_EXPECT3
-  This state indicates that only SMP message 3 should be accepted.
-
-SMPSTATE_EXPECT4
-  This state indicates that only SMP message 4 should be accepted.
-```
-
-
-#### State Transitions
-
-There are 7 actions that an OTR client must handle to support SMP version 2:
-
-```
-User actions:
-  User requests to begin SMP
-  User requests to abort SMP
-
-Received TLVs:
-  SMP Message 1
-  SMP Message 2
-  SMP Message 3
-  SMP Message 4
-  SMP Abort Message
-```
-
-The following sections outline what is to be done in each case. They all assume
-that `MSGSTATE_ENCRYPTED` is set. For simplicity, they also assume that Alice
-has begun SMP, and Bob is responding to her.
-
-
-#### User requests to begin SMP
-
-If smpstate is not set to `SMPSTATE_EXPECT1`:
-
-SMP is already underway. If you wish to restart SMP, send a SMP abort to the
-other party and then proceed as if smpstate was `SMPSTATE_EXPECT1`. Otherwise,
-you may simply continue the current SMP instance.
-
-If smpstate is set to `SMPSTATE_EXPECT1`:
-
-* Send SMP message 1.
-* Set smpstate to `SMPSTATE_EXPECT2`.
-
-
-#### User requests to abort SMP
-
-In all cases, send a TLV with SMP abort to the correspondent and set smpstate to
-`SMPSTATE_EXPECT1`.
-
+OTRv4 does not change the state machine for SMP. But the following sections
+detail how values are computed differently during some states.
 
 #### Receiving a SMP message 1
 
@@ -1709,7 +1567,7 @@ If smpstate is `SMPSTATE_EXPECT2`:
     2. Check that `c2 = HashToScalar(3 || G*d2 + G2b*c2)`.
     3. Check that `c3 = HashToScalar(4 || G*d3 + G3b*c3)`.
     4. Check that `cP = HashToScalar(5 || G3*d5 + Pb*cP || G*d5 + G2*d6 + Qb*cP)`.
-* Create a type SMP message 3 and send it to Bob.
+* Create SMP message 3 and send it to Bob.
 * Set smpstate to `SMPSTATE_EXPECT4`.
 
 
@@ -1739,13 +1597,13 @@ Set smpstate to `SMPSTATE_EXPECT1` and send a type 6 TLV (SMP abort) to Bob.
 
 If smpstate is SMPSTATE_EXPECT4:
 
-* Verify Bob's zero-knowledge proof for R_b:
-   1. Check that `R_b` is `>= 2` and `<= modulus-2`.
-   2. Check that `cR = SHA3-512(8, g1*D7 g3_b*cR, (Q_a / Q_b)*D7 + R_b*cR)`.
+* Verify Bob's zero-knowledge proof for Rb:
+   1. Check that `Rb` is `>= 2` and `<= modulus-2`.
+   2. Check that `cR = HashToScalar(8 || G1*d7 G3*cR || (Qa / Qb)*d7 + Rb*cR)`.
 
 * Check whether the protocol was successful:
-    1. `Compute R_a_b = R_b*a3`.
-    2. Determine if `x = y` by checking the equivalent condition that `(P_a / P_b) = R_a_b`.
+    1. `Compute Rab = Rb*a3`.
+    2. Determine if `x = y` by checking the equivalent condition that `(Pa / Pb) = Rab`.
 
 Set smpstate to `SMPSTATE_EXPECT1`, as no more messages are expected from Bob.
 
