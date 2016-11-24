@@ -456,18 +456,20 @@ calculate_encryption_and_mac_keys(chain_key):
 
 ### Recovering past chain keys
 
-When receiving a data message, you may need to use receiving chain keys older
-than `message_id-1` to calculate the current if you did not receive previous
-messages. For example, your peer sends you data messages 1, 2, and 3, but you
-only receive 1 and 3. In that case you would use the chain key for message 1 to
-derive the chain key for message 3. // TODO: is message_id a state variable too?
+When receiving a data message, you may need to use receiving chain
+keys where the message id is older than `j - 1` to calculate the
+current if you did not receive previous messages. For example, your
+peer sends you data messages with ids `j = 1, j = 2, j = 3`, but you only
+receive messages with ids `j = 1, j = 3`. In that case you would use the
+chain key for message id `j = 1` to derive the chain key for message
+`j = 3`.
 
 ```
-recover_receiving_chain_keys(i, k, message_id):
-  for recId = k+1; recId <= message_id; recId++:
-    derive_chain_key(Cr, i, recId)
+recover_receiving_chain_keys(i, j, k):
+  do
+    derive_chain_key(Cr, i, k)
+  while(k <= j)
 ```
-// TODO: is there a better name for recId? 
 
 
 ## OTR Conversation Initialization
