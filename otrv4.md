@@ -31,7 +31,7 @@ messaging protocol, like XMPP.
 - Improvements on security and privacy
   - Security level raised to 224 bits based on elliptic curve cryptography
   - Additional protection against transcript decryption in the case of
-    elliptic curve compromise
+    elliptic curve cryptography compromise
 - The cryptographic primitives and protocols have been updated.
   - Deniable Authenticated Key Exchange using SPAWN.
   - Key management using the Double Ratchet Algorithm.
@@ -65,10 +65,10 @@ messages may not be delivered.
 
 ## Security Properties
 
-In an OTR conversation, both sides can verify the identity of the
+In an OTRv4 conversation, both sides can verify the identity of the
 other participant but cannot transfer this knowledge to a third party.
 
-Once an OTR channel has been created, all messages transmitted through this
+Once an OTRv4 channel has been created, all messages transmitted through this
 channel are confidential and integrity protected.
 
 Both parties can deny that they have participated in a conversation. They can
@@ -76,21 +76,8 @@ also deny having sent any of the exchanged messages in the conversation. The
 respective party can be certain of the authenticity of the messages but cannot
 transfer this knowledge to someone else.
 
-(TODO: I still think the below is completely confusing)
-
-### Deniable Authenticated Key Exchange (DAKE) properties
- * Mutual authentication
- * Participation repudiation for both initiator and receiver
-
-### Conversation properties
- * Confidentiality
- * Integrity
- * Data Message Forward Secrecy, handling the case where OTR4 transcripts exist
-   and elliptic curve cryptography has been broken
- * Message deniability
-
-Threats that OTR does not mitigate:
-* An active attacker can perform Denial of Service attacks to reduce availability.
+On the other hand, OTRv4 does not protect against an active attacker performing
+Denial of Service attacks to reduce availability.
 
 ## Notation and parameters
 
