@@ -148,12 +148,12 @@ using the rules for MPIs.
 ### 3072 Diffie-Hellman Parameters
 
 For the Diffie-Hellman group computations, the group is the one defined in [RFC
-3526][1] with 3072-bit modulus (hex, big-endian):
+3526][1] with a 3072-bit modulus (hex, big-endian):
 
 ```
-Prime is: 2^3072 - 2^3008 - 1 + 2^64 * { [2^2942 pi] + 1690314 }
+Prime: 2^3072 - 2^3008 - 1 + 2^64 * { [2^2942 pi] + 1690314 }
 
-Hex value:
+Value:
 FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1
 29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD
 EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245
@@ -174,17 +174,18 @@ BBE11757 7A615D6C 770988C0 BAD946E2 08E24FA0 74E5AB31
 Generator g3: 2
 ```
 
-Note that this means that whenever you see a Diffie-Hellman exponentiation in
-this document, it always means that the exponentiation is done modulo the above
-3072-bit number.
+Note that this means that whenever you see an operation on a field element from
+the above group, the operation should also be done module the above prime.
 
 
 ### TLV Types
 
+(TODO: this paragraph should not be here)
 OTRv4 has the same message formats as OTRv3 without compatibility with version 2.
 This means that query messages, whitespace tags, error messages, encoding and
 fragmentation is performed as specified in OTRv3.
 
+(TODO: this paragraph should not be here)
 The fragmentation format is the same as for OTRv3. You will have to wait until
 after reassembly to finalize how to deal with a message. For details, see
 [fragmentation section][3] in OTRv3 documentation.
@@ -227,15 +228,15 @@ and DATA) except for CTR and MAC, and with the addition of:
 
 ```
 Nonce (NONCE):
-  24 byte (192-bit) one time use nonce for XSalsa20 encryption
+  24 byte (192-bit) one time use nonce for XSalsa20 encryption  (TODO: this is incsonsistent, and doesn't describe that it's a byte array)
 
-ED448 points (POINT):
+ED448 point (POINT):
   56 byte unsigned value, big-endian
 ```
 
 ### DRE messages and Auth NIZKPK
 
-A Dual-receiver encrypted message is serialized as follows:
+A dual-receiver encrypted message is serialized as follows:
 
 ```
 Dual-receiver encrypted message (DRE-M):
@@ -274,6 +275,8 @@ Auth message (AUTH):
 ### Public keys and fingerprints
 
 OTRv4 introduces a new type of public-key:
+
+(TODO: these parameters should all be upper case)
 
 ```
 OTR public authentication Cramer-Shoup key (CRAMER-SHOUP-PUBKEY):
