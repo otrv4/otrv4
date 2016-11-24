@@ -426,20 +426,16 @@ the protocol falls back to OTRv3 [3].
 
 ## User Profile
 
-OTRv4 introduces mandatory user profile publication. The user profile contains the
-Cramer-Shoup long term public key, signed version support information, and a signed
-profile expiration date. Both parties will include the user profile in the beginning
-of the DAKE. The frequency of the user profile publication is determined by its
-expiration and renewal policy.
-
-(TODO: IT HAS to be published in a public space as well)
+OTRv4 introduces mandatory user profile publication in a public place. The user
+profile contains the Cramer-Shoup long term public key, signed version support
+information, and a signed profile expiration date. Both parties will include
+the user profile in the beginning of the DAKE. The frequency of the user
+profile publication is determined by its expiration and renewal policy.
 
 
 ### Creating an User Profile
 
-(TODO: why is Bob necessary here? The user profile creation doesn't happen during a conversation, right?)
-
-To create a user profile, both Alice and Bob generate:
+To create a user profile:
 
 1. The Cramer-Shoup key-pair: PK, SK
 2. Version support information string in the same format as OTRv3 Query Messages [3]
@@ -483,8 +479,8 @@ User Profile (USER-PROF):
   Cramer-Shoup key (CRAMER-SHOUP-PUBKEY)
   Version (VER)
   Version Expiration (VER-EXP)
-  Signature of profile (SIG)
-  Transitional Fingerprints (TRANSITION-FP)
+  Signature of profile by Cramer-Shoup key (MPI)
+  Signature of profile by OTRv3 DSA key (MPI)
 
 Version (VER):
   A string corresponding to the user's supported OTR versions. The format is
@@ -495,13 +491,11 @@ Version Expiration (VER-EXP):
   4 byte value that contains the date that this profile will expire.
   (TODO: this needs to be specified)
 
-Signature of profile (MPI):
+Signature of profile by the Cramer-Shoup Key (MPI)
 
-Transitional Fingerprints (TRANSITION-FP)
-  1 byte unsigned number of fingerprints, big-endian
-  20 byte (160 bits) unsigned fingerprint, big-endian for each
-  112 byte (896 bits) unsigned signature, big-endian for each
-(TODO: the above is incorrect, since the transitional fingerprint was misunderstood)
+Signature of the profile by the user's version 3 DSA key (MPI):
+  Transitional signature to enable contacts that trust the users version 3 DSA
+  key to trust the user's profile in version 4.
 ```
 
 ### Deniable Authenticated Key Exchange (DAKE)
