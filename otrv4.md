@@ -1,9 +1,11 @@
 # OTR version 4
 
-The following messaging protocol (TODO: is it really a messageing protocol?) provides a way for two people to have a conversation over a
-network with the same security expectations as a private, in-person conversation. No external party can overhear what is being said, and no
-one (not even the participants) can prove what was said or that the two participants spoke to each other at all. OTR works on top of an
-existing messaging protocol, like XMPP.
+The following messaging protocol (TODO: is it really a messageing protocol?)
+provides a way for two people to have a conversation over a network with the
+same security expectations as a private, in-person conversation. No external
+party can overhear what is being said, and no one (not even the participants)
+can prove what was said or that the two participants spoke to each other at
+all. OTR works on top of an existing messaging protocol, like XMPP.
 
 ## Table of Contents
 
@@ -36,12 +38,12 @@ case of post-quantum computations being feasible. (TODO: weird)
 - SMP
   - Upgraded the cryptographic primitives to use ECC based on the Edwards
     448 curve (Goldilocks).
-  - Added new TLVs to keep compatibility for the previous SMP protocol.
+  - Added new TLVs to keep compatibility for the previous SMP protocol. (TODO: WAT WAT WAT)
 
 
 ## High Level Overview
 
-The high level flow of this protocol will be:
+The high level flow of the protocol looks like this:
 
     Alice                                            Bob
     --------------------------------------------------------------------------------
@@ -49,26 +51,32 @@ The high level flow of this protocol will be:
     Establish Conversation with DAKE  <------------>  Establish Conversation with DAKE
     Exchange Data Messages            <------------>  Exchange Data Messages
 
+The initial step to request an OTR conversation is optional and will not always be present.
+
 ## Assumptions
 
 Both participants are online at the start of a conversation.
 
-Messages in a conversation will be exchanged over an insecure channel, where an
-attacker can eavesdrop or interfere with the messages.
+Messages in a conversation can be exchanged over an insecure channel, where an
+attacker can eavesdrop or interfere with the encrypted messages.
 
 We assume a network model which provides in-order delivery of messages, but some
 messages may not be delivered.
 
 ## Security Properties
 
-In an off the record conversation, both sides can verify the identity of the
+In an OTR conversation, both sides can verify the identity of the
 other participant but cannot transfer this knowledge to a third party.
-Participants can converse with the assurance that their conversation will not be
-read or modified by a hostile third party.
 
-To resemble an in-person conversation means that both ends can deny that they
-have participated in that conversation. Both can also deny having sent any
-of the exchanged messages in the conversation.
+Once an OTR channel has been created, all messages transmitted through this
+channel are confidential and integrity protected.
+
+Both parties can deny that they have participated in a conversation. They can
+also deny having sent any of the exchanged messages in the conversation. The
+respective party can be certain of the authenticity of the messages but cannot
+transfer this knowledge to someone else.
+
+(TODO: I still think the below is completely confusing)
 
 ### Deniable Authenticated Key Exchange (DAKE) properties
  * Mutual authentication
@@ -81,9 +89,8 @@ of the exchanged messages in the conversation.
    and elliptic curve cryptography has been broken
  * Message deniability
 
-Threats that an OTR conversation does not mitigate:
-* An active attacker may perform a Denial of Service attack but not learn the
-  contents of messages.
+Threats that OTR does not mitigate:
+* An active attacker can perform Denial of Service attacks to reduce availability.
 
 ## Preliminaries
 
