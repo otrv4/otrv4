@@ -287,8 +287,8 @@ SHA3-256 hash of the byte-level representation of the public key.
 In the DAKE, OTRv4 makes use of long-term Cramer-Shoup keys and ephemeral D-H
 keys.
 
-For exchanging conversation messages, OTRv4 uses a key structure, and
-key-rotation strategy, inspired on the [Double Ratchet] spec [6]. The goal is to
+For exchanging data messages, OTRv4 uses a key structure and
+key rotation strategy inspired by the [Double Ratchet] algorithm [6]. The goal is to
 provide forward secrecy even in the event of not receiving messages from the
 other participant for a considerable amount of time.
 
@@ -300,25 +300,33 @@ OTRv4 keys are rotated in three different levels:
 
 1. Root level: every time a new D-H key is advertised/acknowledged a new root
    key is derived, as long as new initial sending and receiving chain keys.
+(TODO: I have no idea what this sentence means)
+
 
 2. Chain level: every time a new message needs to be sent before an
    acknowledgement is received, the sending chain key is rotated, being derived
    from the previous sending chain key.
+(TODO: the acknowledgment part in the middle here is quite confusing)
+
 
 3. Mix key level: every third time a party has gone through three root level
    level rotations, the mix key is rotated and the resulting DH public
    key should be adevertised / acknowledged.
+(TODO: this one is very confusing too)
+
 
 In order to manage keys, each correspondent keeps track of:
 
+(TODO: the below should be consistent with our naming conventions, uppercase/lowercase)
+(TODO: we probably need to defined the word ratchet somewhere, or at least how it's used here)
 ```
 State variables:
   initiator: the participant who should perform the first root key rotation after the DAKE completes.
   i: the current ratchet id.
-  j: the previously sent message id
-  k: the previously received message id.
+  j: the last sent message id
+  k: the last received message id.
 
-Keys variables:
+Key variables:
   R[i]: the Root key for the ratchet i.
   Cs[i][j]: the sending chain key for the message j in the ratchet i.
   Cr[i][k]: the receiving chain key for the message k in the ratchet i.
@@ -337,24 +345,14 @@ The previously mentioned variables are affected by these events:
 * Upon completing the DAKE.
 * When you send a Data Message.
 * When you receive a Data Message.
-
-More details on how these variables are affected will be provided in the
-following sections.
-
-
-### Peer's Trusted and Untrusted Keys
-
-As in OTRv3, once a key is verified, it is saved as trusted. Then after the DAKE
-finishes, the public key will be identified as trusted or untrusted. If the public key
-is not trusted, the user will be prompted to verify it. Otherwise they are not.
-
-The user may decide to continue the conversation without verifying the new
-public key.
+(TODO: what about other messages? End conversation messages for example?)
 
 ### Calculating Keys
 
-This section describes the functions used to create the keys used in OTRv4.
+This section describes the functions used to manage the key material.
 
+
+(TODO: what happens if you ratchet without sending any messages? Are we deleting key material we need?)
 #### Ratcheting the ECDH keys
 
 The participant invoking this is moving into a new ECDH ratchet. The next data
@@ -365,8 +363,9 @@ When you ratchet the ECDH keys, you:
 * Securely delete `our_ecdh`.
 * Generate a new ECDH key pair and assign it to `our_ecdh`. See [newECDH()](#ECDH-and-DH-Shared-Secrets).
 * Increment the current ratchet ID `i = i +1`.
-* Reset the previously sent message ID `j = 0`.
+* Reset the last sent message ID `j = 0`.
 
+(TODO: what happens if you ratchet without sending any messages? Are we deleting key material we need?)
 #### Ratcheting the DH keys
 
 The rotation of the DH keys does not happen every ratchet but
@@ -395,7 +394,7 @@ dh_shared_secret = (g3^x)^y mod p (MPI)
 ```
 
 #### Mixed Secret: Mixing ECDH and DH Shared Secrets
-
+(TODO: this is using mix_key instead of dh_shared_secret)
 ```
 calculate_shared_secret(ecdh_shared_secret, mix_key):
    serialized_EC_secret = serialize_point(ecdh_shared_secret)
@@ -414,7 +413,7 @@ calculate_ratchet_keys(secret):
 ```
 
 #### Decide Between Chain Keys
-
+(TODO: this uses the "initiator" flag which shouldn't exist anymore)
 Both sides will compare their public keys to choose a chain key for sending and receiving:
 - Alice (and similarly for Bob) determines if she is the "low" end or the "high" end of this ratchet.
 If Alice's ephemeral D-H public key is numerically greater than Bob's public key, then she is the "high" end.
@@ -425,14 +424,10 @@ Otherwise, she is the "low" end.
 
 TODO: we can not set the initiator as a side effect of deciding who will use each key, but we can use the same condition to decide who will be initiator. This may be a problem because every time I talk to Bob I will have the same condition.
 
-TODO: this may change who is sender/receiver while a new DAKE is in progress.
-Probably not a problem because I think we only generate new R[i] after the DAKE completes.
-REVIEW THIS!
-
 ### Deriving new chain keys
 
-When you send or receive data messages you may need to derive new chain key:
-
+When you send or receive data messages you need to derive a new chain key:
+(TODO: this doesn't take into account the first time, when the chain key is derived from the ratchet key. We might need to define it for those circumstances)
 ```
 derive_chain_key(C, i, j):
   C[i][j] = SHA3-512(C[i][j-1])
@@ -459,7 +454,7 @@ peer sends you data messages with ids `j = 1, j = 2, j = 3`, but you only
 receive messages with ids `j = 1, j = 3`. In that case you would use the
 chain key for message id `j = 1` to derive the chain key for message
 `j = 3`.
-
+(TODO: this loop doesn't update k)
 ```
 recover_receiving_chain_keys(i, j, k):
   do
@@ -812,7 +807,7 @@ you are the initiator:
 
 Otherwise:
 
-  * Increment previously sent message ID `j = j+1`.
+  * Increment last sent message ID `j = j+1`.
   * Derive the next sending Chain Key `derive_chain_key(Cs, i, j)`.
   * Securely delete `Cs[i][j-1]`.
 
@@ -853,7 +848,7 @@ Use the message `ID` to compute the receiving chain key and calculate encryption
 ```
 TODO: Why this code always uses the current ratchet_id and totally ignores the
 ratchet_id from the message?
-//k = is the previously received message id
+//k = is the last received message id
 recover_receiving_chain_keys(i, k, message_id)
 MKenc, MKmac = calculate_encryption_and_mac_keys(Cr, i, message_id)
 ```
