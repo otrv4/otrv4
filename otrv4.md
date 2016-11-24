@@ -38,8 +38,6 @@ messaging protocol, like XMPP.
 - SMP
   - Upgraded the cryptographic primitives to use ECC based on the Edwards
     448 curve (Goldilocks).
-  - Added new TLVs to keep compatibility for the previous SMP protocol. (TODO: WAT WAT WAT)
-
 
 ## High Level Overview
 
