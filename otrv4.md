@@ -1142,7 +1142,7 @@ If everything checks out:
 
   * Reply with a DRE-Auth Message.
   * Compute the ECDH shared secret `K_ecdh = (G1*x)*y`.
-  * Compute the DH shared secret `K_dh = (g3*a)*b`
+  * Compute the DH shared secret `K_dh = (g3*a)*b`.
   * Transition `authstate` to `AUTHSTATE_NONE`.
   * Transition `msgstate` to `MSGSTATE_ENCRYPTED`.
   * Initialize the double ratcheting.
@@ -1165,6 +1165,7 @@ If `authstate` is `AUTHSTATE_AWAITING_DRE_AUTH`:
 If everything verifies:
 
   * Compute the ECDH shared secret `K_ecdh = (G1*y)*x`.
+  * Compute the DH shared secret `K_dh = (g3*b)*a`.
   * Transition `authstate` to `AUTHSTATE_NONE`.
   * Transition `msgstate` to `MSGSTATE_ENCRYPTED`.
   * Initialize the double ratcheting.
@@ -1173,32 +1174,32 @@ If everything verifies:
 Otherwise:
 
   * Ignore the message. This may cause the sender to be in an invalid
-`msgstate` equals `MSGSTATE_ENCRYPTED`, but it can be detected as soon as she
-sends the next data message - which won't be possible to be decrypted and will
-be replied with an OTR error message.
-
+`msgstate` equals `MSGSTATE_ENCRYPTED`. This can be detected as soon as she tries
+to send a next data message as it would not be possible to decrypt it and an OTR error
+message will be replied. 
 
 #### User types a message to be sent
 
 If `msgstate` is `MSGSTATE_PLAINTEXT`:
 
   * If `REQUIRE_ENCRYPTION` is set:
-    * Store the plaintext message for possible retransmission, and send a Query Message.
+    * Store the plaintext message for possible retransmission and send a Query Message.
     * TODO: How are going to handle subsequent occurences of this case?
       Should we simply flood the user with Query Messages until the DAKE ends?
   * Otherwise:
-    * If `SEND_WHITESPACE_TAG` is set, and you have not received a plaintext message from this correspondent since last entering `MSGSTATE_PLAINTEXT`, attach the whitespace tag to the message. Send the (possibly modified) message as plaintext.
+    * If `SEND_WHITESPACE_TAG` is set, and you have not received a plaintext message from this correspondent since last entering `MSGSTATE_PLAINTEXT`, attach the whitespace tag to the message. Send the (possibly modified) message as plaintext. // TODO: does this mean we should keep a log on this state machine transitions?
 
 If `msgstate` is `MSGSTATE_ENCRYPTED`:
 
   * Encrypt the message, and send it as a Data Message.
-  * Store the plaintext message for possible retransmission.
 
 If `msgstate` is `MSGSTATE_FINISHED`:
 
   * Inform the user that the message cannot be sent at this time.
   * Store the plaintext message for possible retransmission.
-
+  * Return to `MSGSTATE_PLAINTEXT`
+  * Return to `AUTHSTATE_NONE`
+  * Send Query Message.
 
 #### Receiving a Data Message
 
@@ -1206,21 +1207,22 @@ If `msgstate` is `MSGSTATE_ENCRYPTED`:
 
 Verify the information in the message. If the verification succeeds:
 
-  * Decrypt the message and display the human-readable part (if non-empty) to the user.
+  * Decrypt the message and display the human-readable part (if non-empty) to the user. // TODO: if empty what does it mean?
   * Rotate root, chain and mix keys as appropiate.
-  * If you have not sent a message to this correspondent in some (configurable) time, send a "heartbeat" message.
+  * If you have not sent a message to this correspondent in some (configurable) time, send a "heartbeat" message. // TODO: what is the configurable time?
 
-If the received message contains a TLV type 1, forget all encryption keys for
-this correspondent, and transition `msgstate` to `MSGSTATE_FINISHED`.
+If the received message contains a TLV type 1:
+  
+  * Forget all encryption keys for this correspondent, and transition `msgstate` to `MSGSTATE_FINISHED`.
 
-Otherwise, inform the user that an unreadable encrypted message was received,
-and reply with an Error Message.
+Otherwise: 
+  
+  * Inform the user that an unreadable encrypted message was received, and reply with an Error Message.
 
 If `msgstate` is `MSGSTATE_PLAINTEXT` or `MSGSTATE_FINISHED`:
 
-Inform the user that an unreadable encrypted message was received, and reply
+   * Inform the user that an unreadable encrypted message was received, and reply
 with an Error Message.
-
 
 #### User requests to end an OTR conversation
 
@@ -1236,7 +1238,6 @@ If `msgstate` is `MSGSTATE_ENCRYPTED`:
 If `msgstate` is `MSGSTATE_FINISHED`:
 
   * Transition `msgstate` to `MSGSTATE_PLAINTEXT`.
-
 
 #### Implementation notes (OR Considerations for networks which allow multiple devices)
 
