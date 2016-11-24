@@ -16,7 +16,7 @@ messaging protocol, like XMPP.
 5. [Preliminaries](#preliminaries)
 6. [OTR Conversation Initialization](#otr-conversation-initialization)
   1. [User Profile](#user-profile)
-  2. [Creating a Profile](#creating-a-profile)
+  2. [Creating a User Profile](#creating-a-user-profile)
   3. [Deniable Authenticated Key Exchange (DAKE)](#deniable-authenticated-key-exchange-dake)
 7. [Requesting conversation with older OTR version](#requesting-conversation-with-older-otr-version)
 8. [Data exchange](#data-exchange)
@@ -593,24 +593,23 @@ Bob will be initiating the DAKE with Alice.
 
 1. Generates an ephemeral ECDH secret key `y` and a public key `Y`.
 2. Generates an ephemeral DH secret key `b` and a public key `B`.
-3. Sends Alice a pre-key message `ψ1 = ("I", Y, B)`.
+3. Sends Alice a pre-key message `ψ1 = ("Prof_B", Y, B)`. Prof_B is
+   Bob's User Profile.
 
 
 **Alice:**
 
 1. Generates an ephemeral ECDH secret key `x` and a public key `X`.
 2. Generates an ephemeral DH secret key `a` and a public key `A`.
-3. Computes `γ = DREnc(PKa, PKb, m)`, being `m = "I" || "R" || Y || X || B || A`.
-   TODO: "I" and "R" should be the profile.
-4. Computes `σ = Auth(Ha, za, {Hb, Y}, "I" || "R" || Y || B || γ)`.
-   TODO: "I" and "R" should be the profile.
+3. Computes `γ = DREnc(PKa, PKb, m)`, being `m = "Prof_B" || "Prof_A" || Y || X || B || A`.
+   Prof_A is Alice's User Profile.
+4. Computes `σ = Auth(Ha, za, {Hb, Y}, "Prof_B" || "Prof_A" || Y || B || γ)`.
 5. Computes root level keys (`R`, `Cs`, and `Cr`).
 6. Sends Alice a DRE-Auth Message `ψ2 = ("R", γ, σ)`.
 
 **Bob:**
 
-1. Verifies `Verif({Hb, Ha, Y}, σ, “I” || “R” || Y || B || γ)`.
-   TODO: "I" and "R" should be the profile.
+1. Verifies `Verif({Hb, Ha, Y}, σ, “Prof_B” || “Prof_A” || Y || B || γ)`.
 2. Decrypts `m = DRDec(PKb, PKa, SKb, γ)`.
 3. Verifies the following properties of the decrypted message `m`:
   1. The message is of the correct form (e.g., the fields are of the expected length)
@@ -673,7 +672,7 @@ Regardless of who you are:
 This is the first message of the DAKE. Bob sends it to Alice to commit to a
 choice of D-H and ECDH key. A valid Pre-key message is generated as follows:
 
-1. Create a user profile. How to do this is detailed [here](#creating-a-profile)
+1. Create a user profile. How to do this is detailed [here](#creating-a-user-profile)
 2. Choose a random ephemeral ECDH key pair:
   * secret key `x` a random element from `Z_q` (448 bits).
   * public key `X`
@@ -710,7 +709,7 @@ key and D-H public keys are encrypted with DRE and authenticated with an NIZKPK.
 A valid DRE-Auth message is generated as follows:
 
 1. Create a user profile. How to do this is detailed [here]
-   (#creating-a-profile)
+   (#creating-a-user-profile)
 2. Choose a random ephemeral ECDH key pair:
   * secret key `y` a random element from `Z_q` (448 bits).
   * public key `Y`
@@ -719,7 +718,7 @@ A valid DRE-Auth message is generated as follows:
   * and a public key `B = g3 ^ b`.
 4. Generate `m = X || Y || A || B`
 5. Compute `DREnc(pubA, pubB, m)` and serialize it as a DRE-M value in the variable `γ`.
-6. Compute `σ = Auth(Hb, zb, {Ha, X}, "I" || "R" || X || A || γ)`.
+6. Compute `σ = Auth(Hb, zb, {Ha, X}, "Prof_B" || "Prof_A" || X || A || γ)`.
 
 
 A DRE-Auth is an OTR message encoded as:
