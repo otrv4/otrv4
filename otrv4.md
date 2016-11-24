@@ -950,34 +950,31 @@ typed by the user. It can take one of three values:
 ```
 MSGSTATE_PLAINTEXT
     This state indicates that outgoing messages are sent without encryption.
-    This is the state that is used before an OTR conversation is initiated.
-    This is the initial state, and the only way to subsequently enter this
-    state is for the user to explicitly request to do so via a UI
-    operation.
+    and it is used before an OTR conversation is initiated. It is the initial
+    state, and the only way to subsequently enter this state is for the user
+    to explicitly request it via an UI operation.
 
 MSGSTATE_ENCRYPTED
-    This state indicates that outgoing messages are sent encrypted.
-    This is the state that is used during an OTR conversation. The only way
-    to enter this state is for the authentication state machine (below) to
-    successfully complete.
+    This state indicates that outgoing messages are sent encrypted and it is
+    used during an OTR conversation. The only way to enter this state is for 
+    the authentication state machine (below) to be successfully completed.
 
 MSGSTATE_FINISHED
     This state indicates that outgoing messages are not delivered at all.
-    This state is entered only when the other party indicates he has
-    terminated his side of the OTR conversation. For example, if Alice and
-    Bob are having an OTR conversation, and Bob instructs his OTR client to
-    end its private session with Alice (for example, by logging out), Alice
-    will be notified of this, and her client will switch to MSGSTATE_FINISHED
-    mode. This prevents Alice from accidentally sending a message to Bob in
-    plaintext. (Consider what happens if Alice was in the middle of typing a
-    private message to Bob when he suddenly logs out, just as Alice hits
-    Enter.)
+    It is entered only when the other party indicates his side of the OTR
+    conversation has finished. For example, if Alice and Bob are having an OTR
+    conversation, and Bob instructs his OTR client to end its private session
+    with Alice (by logging out, for example), Alice will be notified of this,
+    and her client will switch to MSGSTATE_FINISHED mode. This prevents Alice
+    from accidentally sending a message to Bob in plaintext (consider what 
+    happens if Alice was in the middle of typing a private message to Bob when
+    he suddenly logs out, just as Alice hits Enter).
 ```
-
 
 ### Authentication state
 
-The authentication state variable, `authstate`, can take one of four values:
+The authentication state variable, `authstate`, controls the aunthentication 
+mechanism. It can take one of two values:
 
 ```
 AUTHSTATE_NONE
@@ -985,22 +982,21 @@ AUTHSTATE_NONE
     progress. This is the initial state.
 
 AUTHSTATE_AWAITING_DRE_AUTH
-
     After Bob initiates the authentication protocol by sending Alice the Pre-
-    key Message, he enters this state to await Alice's reply.
+    key Message, he enters this state until Alice replies.
 ```
-
 
 ### Policies
 
 OTR clients can set different policies for different correspondents. For
-example, Alice could set up her client so that it speaks only OTR version 4,
-except with Charlie, who she knows has only an old client; so that it will
-opportunistically start an OTR conversation whenever it detects the
-correspondent supports it; or so that it refuses to send non-encrypted messages to Bob, ever.
+example, Alice could set up her client so that it speaks version 4 of the OTR
+protocol. Nevertheless, she may also add an exception for Charlie, who she knows
+talks through a client that runs an old version of the protocol. Therefore, the client
+will start the appropiate OTR conversation in correspondace with the other side,
+or will refuse to send non-encrypted messages to Bob.
 
 The policies that can be set (on a global or per-correspondent basis) are any
-combination of the following boolean flags:
+combination of the these boolean flags:
 
 ```
 ALLOW_V3
@@ -1015,22 +1011,23 @@ REQUIRE_ENCRYPTION
 SEND_WHITESPACE_TAG
   Advertise your support of OTR using the whitespace tag.
 
+// TODO: why?
 WHITESPACE_START_DAKE
   Start the OTR DAKE when you receive a whitespace tag.
 
+// TODO: why?
 ERROR_START_DAKE
   Start the OTR DAKE when you receive an OTR Error Message.
 ```
-
-Note that it is possible for UIs simply to offer the old "combinations" of
-options, and not ask about each one separately.
-
+// TODO: elaborate on this.
+It is possible for UIs to simply offer old "combinations" of options, and not
+ask for them separately.
 
 ### State transitions
 
-There are ten actions an OTRv4 client must handle:
+An OTRv4 client must handle these ten events:
 
-User actions:
+User events:
   * User requests to start an OTR conversation
   * User requests to end an OTR conversation
   * User types a message to be sent
@@ -1044,42 +1041,39 @@ Received messages:
   * DRE-Auth message
   * Data Message
 
+The following sections will outline which actions to take for each case. They all
+assume that at least `ALLOW_V3` or `ALLOW_V4` is set; if not, then OTR is completely
+disabled and no special handling of messages should be done. Version 1 and 2 messages
+are out of the scope of this specification.
 
-The following sections will outline what actions to take in each case. They all
-assume that at least one of `ALLOW_V3` or `ALLOW_V4` is set; if not, then OTR is
-completely disabled, and no special handling of messages should be done at all.
-Version 1 and 2 messages are out of the scope of this specification.
+For version 3 and 4 messages, if the receiving instance tag is not equal to its own, 
+the message should be discarded and the user optionally warned. 
 
-For version 3 and 4 messages, someone receiving a message with a recipient
-instance tag specified that does not equal their own should discard the message
-and optionally warn the user. The exception here is the D-H Commit Message where
-the recipient instance tag may be 0, indicating that no particular instance is
-specified.
-
+The exception here is the D-H Commit Message where the recipient instance tag may be 0,
+which indicates that no particular instance is specified.
 
 #### User requests to start an OTR conversation
 
-Send an OTR Query Message to the correspondent.
-
+* Send an OTR Query Message to the correspondent.
 
 #### Receiving plaintext without the whitespace tag
 
 If `msgstate` is `MSGSTATE_PLAINTEXT`:
 
   * Simply display the message to the user.
-  * If `REQUIRE_ENCRYPTION` is set, warn him that the message was received unencrypted.
+  * If `REQUIRE_ENCRYPTION` is set, warn the user that the message was received unencrypted.
 
 If `msgstate` is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
 
-  * Display the message to the user, but warn him that the message was received unencrypted.
-
+  * Display the message to the user.
+  * Warn the user that the message was received unencrypted.
 
 #### Receiving plaintext with the whitespace tag
 
 If `msgstate` is `MSGSTATE_PLAINTEXT`:
 
   * Remove the whitespace tag and display the message to the user.
-  * If `REQUIRE_ENCRYPTION` is set, warn him that the message was received unencrypted.
+  * If `REQUIRE_ENCRYPTION` is set, warn the user that the message was received unencrypted.
 
 If `msgstate` is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
 
@@ -1090,15 +1084,12 @@ In any event, if `WHITESPACE_START_DAKE` is set:
 
 If the tag offers OTR version 4 and `ALLOW_V4` is set:
 
-  * Send a version Pre-key Message.
+  * Send a pre-key Message.
   * Transition `authstate` to `AUTHSTATE_AWAITING_DRE_AUTH`.
 
 If the tag offers OTR version 3 and `ALLOW_V3` is set:
 
-  * Send a version 3 D-H Commit Message
-  * Transition `authstate` to `AUTHSTATE_AWAITING_DHKEY`.
   * The protocol proceeds as specified in OTRv3.
-
 
 #### Receiving a Query Message
 
@@ -1107,47 +1098,43 @@ If the query message offers OTR version 4 and `ALLOW_V4` is set:
   * Send a Pre-key Message
   * Transition `authstate` to `AUTHSTATE_AWAITING_DRE_AUTH`.
 
-Otherwise, if the query message offers OTR version 3 and `ALLOW_V3` is set:
+If the query message offers OTR version 3 and `ALLOW_V3` is set:
 
-  * Send a version 3 D-H Commit Message.
-  * Transition `authstate` to `AUTHSTATE_AWAITING_DHKEY`.
   * The protocol proceeds as specified in OTRv3.
-
 
 #### Receiving an Error Message
 
   * Display the message to the user.
   * If `ERROR_START_DAKE` is set, reply with a Query Message.
-  * All state machines should be reset
   * Reset `msgstate` to `MSGSTATE_PLAINTEXT` and `authstate` to `AUTHSTATE_NONE`
 
 #### Receiving a Pre-key message
 
-If the message is version 4 and `ALLOW_V4` is not set, ignore this message. Otherwise:
+If the message is version 4 and `ALLOW_V4` is not set
+  
+  * Ignore this message. 
 
 If `authstate` is `AUTHSTATE_AWAITING_DRE_AUTH`:
 
-This indicates that you have already sent a Pre-key message to your
-correspondent, but that she either didn't receive it, or just didn't receive it
-yet, and has sent you one as well.
+This indicates that you have sent a Pre-key message to your correspondent and that
+either she didn't receive it or didn't receive it yet; but has sent you one as well.
 
-The symmetry will be broken by comparing the hashed `X` you sent in your pre-key
-message with the one you received, considered as X-byte unsigned big-endian
-values.
+The symmetry will be broken by comparing the hashed X you sent in your pre-key with
+the one you received, considered as 32-byte unsigned big-endian values.
 
 If yours is the lower hash value:
+  
   * Ignore the incoming pre-key message.
-    (TODO: OTRv3 would resend your pre-key message in this case. Should we?)
 
 Otherwise:
-  * Forget your old `X` value that you sent earlier, and pretend you're in
-     `AUTHSTATE_NONE`; i.e. generate a new `y` and `Y` values.
+  
+  * Forget your old `X` value that you sent earlier.
 
 Regardless of `authstate` value, if you haven't ignored the incoming pre-key
 message, you should:
 
-  * Verify that the profile signature is valid.
-  * Verify that the profile is not expired.
+  * Verify that the user profile signature is valid.
+  * Verify that the user profile is not expired.
   * Verify that the point X received in the pre-key message is on curve 448.
   * Verify that the D-H public key is from the correct group.
 
@@ -1155,16 +1142,17 @@ If everything checks out:
 
   * Reply with a DRE-Auth Message.
   * Compute the ECDH shared secret `K_ecdh = (G1*x)*y`.
+  * Compute the DH shared secret `K_dh = (g3*a)*b`
   * Transition `authstate` to `AUTHSTATE_NONE`.
   * Transition `msgstate` to `MSGSTATE_ENCRYPTED`.
   * Initialize the double ratcheting.
-  * If there is a recent stored message, encrypt it and send it as a Data Message.
-
+  * If there is an stored message, encrypt it and send it as a Data Message.
 
 #### Receiving a DRE-Auth message
 
-If the message is version 4 and `ALLOW_V4` is not set, ignore this message.
-Otherwise:
+If the message is version 4 and `ALLOW_V4` is not set
+
+  * Ignore this message.
 
 If `authstate` is `AUTHSTATE_AWAITING_DRE_AUTH`:
 
@@ -1174,15 +1162,17 @@ If `authstate` is `AUTHSTATE_AWAITING_DRE_AUTH`:
     * that the point Y received in the pre-key message is on curve 448.
     * that the B DH public key is from the correct group.
 
-If everything checks out:
+If everything verifies:
 
   * Compute the ECDH shared secret `K_ecdh = (G1*y)*x`.
   * Transition `authstate` to `AUTHSTATE_NONE`.
   * Transition `msgstate` to `MSGSTATE_ENCRYPTED`.
   * Initialize the double ratcheting.
-  * If there is a recent stored message, encrypt it and send it as a Data Message.
+  * If there is an stored message, encrypt it and send it as a Data Message.
 
-Otherwise, ignore the message. This may cause the sender to be in an invalid
+Otherwise:
+
+  * Ignore the message. This may cause the sender to be in an invalid
 `msgstate` equals `MSGSTATE_ENCRYPTED`, but it can be detected as soon as she
 sends the next data message - which won't be possible to be decrypted and will
 be replied with an OTR error message.
