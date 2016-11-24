@@ -28,14 +28,14 @@ messaging protocol, like XMPP.
 
 ## Main Changes over Version 3
 
-- Improvements on security and privacy
+- Improvements on security and privacy:
   - Security level raised to 224 bits based on elliptic curve cryptography
   - Additional protection against transcript decryption in the case of
     elliptic curve cryptography compromise
-- The cryptographic primitives and protocols have been updated.
+- The cryptographic primitives and protocols have been updated:
   - Deniable Authenticated Key Exchange using SPAWN.
   - Key management using the Double Ratchet Algorithm.
-- SMP
+- SMP:
   - Upgraded the cryptographic primitives to use ECC based on the Edwards
     448 curve (Goldilocks).
 
@@ -162,7 +162,6 @@ Generator g3: 2
 Note that this means that whenever you see an operation on a field element from
 the above group, the operation should also be done module the above prime.
 
-
 ### TLV Types
 
 OTRv4 supports the same TLV record types from OTRv3.
@@ -222,24 +221,21 @@ Auth message (AUTH):
 
 OTRv4 introduces a new type of public-key:
 
-(TODO: these parameters should all be upper case)
-
 ```
 OTR public authentication Cramer-Shoup key (CRAMER-SHOUP-PUBKEY):
 
     Pubkey type (SHORT)
       Cramer-Shoup public keys have type 0x0010
 
-    c (MPI)
-    d (MPI)
-    h (MPI)
-      (c, d, h) are the Cramer-Shoup public key parameters
+    C (POINT)
+    D (POINT)
+    H (POINT)
+      (C, D, H) are the Cramer-Shoup public key parameters
 ```
 
 OTR public keys have fingerprints, which are hex strings that serve as
 identifiers for the public key. The fingerprint is calculated by taking the
 SHA3-256 hash of the byte-level representation of the public key.
-
 
 ## Key management
 
