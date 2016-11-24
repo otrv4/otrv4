@@ -1,11 +1,9 @@
 # OTR version 4
 
-The following messaging protocol provides way for two people to have a
-conversation over a network with the same security as a private, in-person
-conversation. No external party can overhear what is being said, and no one
-(not even the conversation participants) can prove what was said or that the
-two participants spoke to each other at all. OTR works on top of an existing
-messaging protocol, like XMPP.
+The following messaging protocol (TODO: is it really a messageing protocol?) provides a way for two people to have a conversation over a
+network with the same security expectations as a private, in-person conversation. No external party can overhear what is being said, and no
+one (not even the participants) can prove what was said or that the two participants spoke to each other at all. OTR works on top of an
+existing messaging protocol, like XMPP.
 
 ## Table of Contents
 
@@ -31,15 +29,14 @@ messaging protocol, like XMPP.
 - Improvements on security and privacy
   - Security level raised to 224 bits.
   - Preserving forward secrecy in the Diffie-Hellman key exchanges in
-case of post-quantum computations being feasible.
-- Most of the cryptographic primitives and protocols have been updated.
-  - (Deniable) Authenticated Key Exchange, SPAWN.
-  - Dual Receiver Encryption, Cramer-Shoup.
-  - Key management, Double Ratchet Algorithm.
-- SMP protocol
-  - Upgraded the cryptographic primitives to use ECC based on Edwards
-    448.
-  - Added new TLVs to keep compatibility for the previos SMP protocol.
+case of post-quantum computations being feasible. (TODO: weird)
+- The cryptographic primitives and protocols have been updated.
+  - Deniable Authenticated Key Exchange using SPAWN.
+  - Key management using the Double Ratchet Algorithm.
+- SMP
+  - Upgraded the cryptographic primitives to use ECC based on the Edwards
+    448 curve (Goldilocks).
+  - Added new TLVs to keep compatibility for the previous SMP protocol.
 
 
 ## High Level Overview
