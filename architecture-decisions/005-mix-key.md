@@ -67,12 +67,9 @@ exchange messages. To mitigate this, the key won’t be transmitted every
 time the root and chain keys are changed. Instead, this key will be
 computed with a DH function every third time and the interim keys will
 be derived from previous mix key. When generating new DH keys, the
-public key will be sent in every message of that ratchet in case of
-dropped messages.  This should be clear when looking at the
-pseudo-code implementation below.
+public key will be sent in every message of that ratchet.
 
-The mix key X_i is to be mixed in at the root level with the ECDH
-key.
+The mix key is to be mixed in at the root level with the ECDH key.
 
 #### Implementation
 
@@ -248,9 +245,9 @@ From the NIST paper (reference?):
 
 ### Consequences
 
-Using a 3072 DH function to produce the mix key charges data message encryption
-with 56 bytes of extra key material that may cause some transport protocols to
-fragment these messages.
+Using a 3072 DH function to produce the mix key extends data messages
+size in 56 bytes of extra key material that may cause some transport
+protocols to fragment these messages.
 
 [1](http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf)
 [2](https://eprint.iacr.org/2011/506.pdf)
