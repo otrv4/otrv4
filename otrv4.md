@@ -79,8 +79,8 @@ Denial of Service attacks to reduce availability.
 
 ## Notation and parameters
 
-This section contains information needed to understand the parameters and
-arithmetic used.
+This section contains information needed to understand the parameters, variables
+and arithmetic used.
 
 ### Notation
 
@@ -268,7 +268,7 @@ Ratchet.
 In order to manage keys, each correspondent keeps track of:
 
 As the ratchet moves forward through its keys, its state is kept with the
-following identification values:
+following values:
 
 (TODO: the below should be consistent with our naming conventions, uppercase/lowercase)
 ```
@@ -279,16 +279,15 @@ State variables:
   k: the last received message id.
 
 Key variables:
-  R[i]: the Root key for the ratchet i.
-  Cs[i][j]: the sending chain key for the message j in the ratchet i.
-  Cr[i][k]: the receiving chain key for the message k in the ratchet i.
-  our_previous_ecdh: our previous ECDH ephemeral key pair.
-  our_ecdh: our current ECDH ephemeral key pair.
-  their_ecdh: their ECDH ephemeral public key.
-  our_dh: our DH ephemeral key pair
-  their_dh: their DH ephemeral public key
-  dh_shared_secret: the shared secret previously computed.
-  macs_to_reveal: MAC keys pending to be revealed.
+  `root[i]`: the Root key for the ratchet i.
+  `chain_s[i][j]`: the sending chain key for the message j in the ratchet i.
+  `chain_r[i][k]`: the receiving chain key for the message k in the ratchet i.
+  `our_ecdh`: our current ECDH ephemeral key pair.
+  `their_ecdh`: their ECDH ephemeral public key.
+  `our_dh`: our DH ephemeral key pair
+  `their_dh`: their DH ephemeral public key
+  `dh_shared_secret`: the shared secret previously computed.
+  `macs_to_reveal`: MAC keys pending to be revealed.
 ```
 
 The previously mentioned variables are affected by these events:
@@ -370,9 +369,10 @@ calculate_shared_secret(K_ecdh, K_dh):
 
 ```
 calculate_ratchet_keys(K):
-  R  = SHA3-512(0x01 || K)
-  Ca = SHA3-512(0x02 || K)
-  Cb = SHA3-512(0x03 || K)
+  n = ratchet_id you are creating keys for
+  root[n] = SHA3-512(0x01 || K)
+  chain_s[n] = SHA3-512(0x02 || K)
+  chain_r[n] = SHA3-512(0x03 || K)
   return R, decide_between_chain_keys(Ca, Cb)
 ```
 
@@ -383,8 +383,8 @@ Both sides will compare their public keys to choose a chain key for sending and 
 If Alice's ephemeral ECDH public key is numerically greater than Bob's public key, then she is the "high" end.
 Otherwise, she is the "low" end.
 - Alice selects the chain keys for sending and receiving:
-  - If she is the "high" end, set `initiator` as `true`, use Ca as the sending chain key (Cs), Cb as the receiving chain key (Cr).
-  - If she is the "low" end, set `initiator` as `false`, use Cb as the sending chain key (Cs), Ca as the receiving chain key (Cr).
+  - If she is the "high" end, set `initiator` as `true`, use Ca as the sending chain key (`chain_s`), Cb as the receiving chain key (`chain_r`).
+  - If she is the "low" end, set `initiator` as `false`, use Cb as the sending chain key (`chain_s`), Ca as the receiving chain key (`chain_r`).
 
 TODO: +@juniorz we can not set the initiator as a side effect of deciding who will use each key, but we can use the same condition to decide who will be initiator. This may be a problem because every time I talk to Bob I will have the same condition.
 
@@ -421,7 +421,7 @@ chain key for message id `j = 1` to derive the chain key for message
 ```
 recover_receiving_chain_keys(i, j, k):
   do
-    derive_chain_key(Cr, i, k)
+    derive_chain_key(chain_r, i, k)
   while(k <= j)
 ```
 
@@ -533,7 +533,7 @@ K_ecdh: a shared secret computed from an ECDH exchange = X*y, Y*x
 ```
 
 ```
-Alice (I)                                Bob (R)
+Alice                                    Bob
 ---------------------------------------------------
 Query Message or Whitespace Tag ------->
                                 <------- Prekey (ψ1)
@@ -557,7 +557,7 @@ Bob will be initiating the DAKE with Alice.
 3. Computes `γ = DREnc(PKa, PKb, m)`, being `m = "Prof_B" || "Prof_A" || Y || X || B || A`.
    Prof_A is Alice's User Profile.
 4. Computes `σ = Auth(Ha, za, {Hb, Y}, "Prof_B" || "Prof_A" || Y || B || γ)`.
-5. Computes root level keys (`R`, `Cs`, and `Cr`).
+5. Computes root level keys (`root[0]`, `chain_s`, and `chain_r`).
 6. Sends Alice a DRE-Auth Message `ψ2 = ("R", γ, σ)`.
 
 **Bob:**
@@ -570,7 +570,7 @@ Bob will be initiating the DAKE with Alice.
   3. Bob's identifier is the second one listed, and it matches the identifier
      transmitted outside of the ciphertext
   4. `(Y, B)` is a prekey that Bob previously sent and remains unused.
-4. Computes root level keys (`R`, `Cs`, and `Cr`).
+4. Computes root level keys (`root[0]`, `chain_s`, and `chain_r`).
 
 (TODO: what happens if any of the verifications fails?)
 
@@ -619,7 +619,7 @@ Regardless of who you are:
 * Securely erase `our_ecdh.private` and `our_dh` key pair.
 * Calculate `K = calculate_shared_secret(K_ecdh, K_dh)`.
 * Calculate the SSID from shared secret: let SSID be the first 64 bits of `SHA3-256(0x00 || K)`.
-* Calculate the first set of keys with `R[i], Cs[i][0], Cr[i][0] = calculate_ratchet_keys(K)`.
+* Calculate the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = calculate_ratchet_keys(K)`.
 
 
 #### Pre-key message
@@ -760,31 +760,31 @@ you are the initiator:
 
   * Ratchet the ECDH keys. See "Ratcheting the ECDH keys" section.
   * Ratchet the DH keys. See "Ratcheting the DH keys" section.
-  * Derive new set of keys `R[i], Cs[i][j], Cr[i][j]`.
+  * Derive new set of keys `root[i], chain_s[i][j], chain_r[i][j]`.
   * Securely delete the root key and all chain keys from the ratchet `i-2`.
 
   ```
   K_ecdh = ECDH()
   K_dh = DH(i)
   K = calculate_shared_secret(K_ecdh, K_dh)
-  R[i], Cs[i][j], Cr[i][j] = calculate_ratchet_keys(R[i-1] || K)
-  delete(R[i-2]) // TODO: why do we need to work on indexes previous to last ratchet?
-  delete(Cs[i-2]) // TODO: why - 2?
-  delete(Cr[i-2]) // TODO: why - 2?
+  root[i], chain_s[i][j], chain_r[i][j] = calculate_ratchet_keys(root[i-1] || K)
+  delete(root[i-2]) // TODO: why do we need to work on indexes previous to last ratchet?
+  delete(chain_s[i-2]) // TODO: why - 2?
+  delete(chain_r[i-2]) // TODO: why - 2?
   ```
 
 Otherwise:
 
   * Increment last sent message ID `j = j+1`.
-  * Derive the next sending Chain Key `derive_chain_key(Cs, i, j)`.
-  * Securely delete `Cs[i][j-1]`.
+  * Derive the next sending Chain Key `derive_chain_key(chain_s, i, j)`.
+  * Securely delete `chain_s[i][j-1]`.
 
 In any event:
 
 1. Calculate the encryption key (`MKenc`) and the mac key (`MKmac`):
 
    ```
-   MKenc, MKmac = calculate_encryption_and_mac_keys(Cs[i][j])
+   MKenc, MKmac = calculate_encryption_and_mac_keys(chain_s[i][j])
    ```
 
 2. Use the encryption key to encrypt the message, and the mac key to calculate its MAC:
@@ -820,7 +820,7 @@ TODO: Why this code always uses the current ratchet_id and totally ignores the
 ratchet_id from the message?
 //k = is the last received message id
 recover_receiving_chain_keys(i, k, message_id)
-MKenc, MKmac = calculate_encryption_and_mac_keys(Cr, i, message_id)
+MKenc, MKmac = calculate_encryption_and_mac_keys(chain_r, i, message_id)
 ```
 
 Use the "mac key" (`MKmac`) to verify the MAC on the message.
@@ -1330,6 +1330,9 @@ for Cramer-Shoup:
 
 `G = (501459341212218748317573362239202803024229898883658122912772232650473550786782902904842340270909267251001424253087988710625934010181862,
 44731490761556280255905446185238890493953420277155459539681908020022814852045473906622513423589000065035233481733743985973099897904160)`
+
+TODO: Use the correct annotations for this (upper case for points, lower case
+for integers)
 
 ### Overview
 
