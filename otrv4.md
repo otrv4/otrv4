@@ -448,30 +448,18 @@ profile publication is determined by its expiration and renewal policy.
 
 ### Creating an User Profile
 
-To create a user profile:
+To create a user profile, assemble:
 
-1. The Cramer-Shoup key-pair: PK, SK
-2. Version support information string in the same format as OTRv3 Query Messages [3]
+1. Cramer-Shoup key-pair: PK, SK
+2. Version support information string in the same format as OTRv3 Query
+   Messages [3]
 3. Profile Expiration  (TODO: what format?)
-4. (optional) Transition signatures are signatures of the DSA fingerprints related
-   to the keys used for version 3. This is only used if the user supports
-   version 3 and 4.
-(TODO: this is incorrect, it's supposed to be a signature generated USING the DSA key, of the new cramer shoup fingerprint)
+4. (optional) Transition signature is a signature of the profile by the users
+   version 3 DSA key. This is only used if the user supports version 3 and 4.
 
-
-One of the Cramer-Shoup secret key values (`z`) and its generator (`g1`) is used to create
-signatures of the entire profile. This is created using the Ed448 signature algorithm as
-documented in [4].
-
-The user profile components are as follows:
-
-1. PK
-2. version_info
-3. profile_expiration
-4. profile_sig = sign( PK, version_info, profile_expiration )
-5. (optional) fingerprints
-6. (optional) fingerprint_sig = sign( otrv3_DSA_fingerprint ) (1 per fingerprint)
-(TODO: why have this both here and in the data type below?)
+One of the Cramer-Shoup secret key values (`z`) and its generator (`g1`) is
+used to create signatures of the entire profile. This is created using the
+Ed448 signature algorithm as documented in [4].
 
 Then this profile should be published in a public place, like an untrusted
 server.
@@ -506,7 +494,7 @@ Version Expiration (VER-EXP):
 
 Signature of profile by the Cramer-Shoup Key (MPI)
 
-Signature of the profile by the user's version 3 DSA key (MPI):
+(optional) Signature of the profile by the user's version 3 DSA key (MPI):
   Transitional signature to enable contacts that trust the users version 3 DSA
   key to trust the user's profile in version 4.
 ```
