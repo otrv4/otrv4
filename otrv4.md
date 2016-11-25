@@ -312,58 +312,53 @@ This section describes the functions used to manage the key material.
 The participant invoking this is moving into a new ECDH ratchet. The next data
 message will advertise a new ratchet (`i + 1`) from the receiver perspective.
 
-When you ratchet the ECDH keys, you:
+When you ratchet the ECDH keys:
 
 * Securely delete `our_ecdh`.
-* Generate a new ECDH key pair and assign it to `our_ecdh`. See [ECDH()](#ECDH-and-DH-Shared-Secrets).
-* Increment the current ratchet id `i = i +1`.
-* Reset the last sent message id `j = 0`.
+* Generate a new ECDH key pair and assign it to `our_ecdh = generateECDH()`. See [generateECDH()](#ECDH-and-DH-Shared-Secrets).
+* Increment the current ratchet id (`i`) by 1.
+* Reset the next sent message id (`j`) to 0.
 
-(TODO: what happens if you ratchet without sending any messages? Are we deleting key material we need?)
+(TODO: what happens if you ratchet without sending any messages? Are we deleting key material we need?) 
 
-#### Ratcheting the DH keys
+#### Calculating the DH shared secret
 
-The rotation of the DH keys does not happen every ratchet but
-every third.
-
-If `i` is bigger than zero and a multiple of three:
+If this ratchet is a multiple of three:
 
   * Securely delete `our_dh`.
-  * Calculate a new DH key pair `K_dh = DH(i, their_dh.public)` and assign it to `our_dh`. See [DH(i)](#ECDH-and-DH-Shared-Secrets).
+  * Generate a new DH key pair and assign it to `our_dh = generateDH()`. See [generateDH()](#ECDH-and-DH-Shared-Secrets).
+  * Calculate a `dh_shared_secret = SHA3-256(DH(our_dh, their_dh)`.
 
 Otherwise:
 
-  * Derive a new hashed DH `K_dh = DH(i, their_dh.public)`.
+  * Derive a `dh_shared_secret = SHA3-256(dh_shared_secret)`.
 
-```
-DH(their_dh.public, i):
-  if i % 3 == 0
-    a = randomInG3()
-    K_dh = exp(their_dh.public, a)
-  otherwise
-    SHA3-256(our_dh)
-```
 
 #### ECDH and DH Shared Secrets
 
 ```
-pubECDH, secretECDH = ECDH()
-pubDH, secretDH = DH()
+generateECDH()
+   pick a random value r from Z_q
+   return pubECDH = G2 * r, secretECDH = r
 
+generateDH()
+   pick a random value r (640 bits)
+   return pubDH = g3 ^ r, secretDH = r
+ 
 K_ecdh = (G1*x)*y (POINT)
   The shared ECDH key.
 
-K_dh = (g3^a)^b mod p (MPI)
+k_dh = (g3^a)^b mod p (MPI)
   The shared 3072-bit DH key.
 ```
 
 #### Mixing ECDH and DH Shared Secrets
 
 ```
-calculate_shared_secret(K_ecdh, K_dh):
+calculate_shared_secret(K_ecdh, k_dh):
    serialized_K_ecdh = serialize_point(K_ecdh)
-   serialized_K_dh = serialize_MPI(K_dh)
-   K = SHA3-512(serialized_K_ecdh, serialized_K_dh)
+   serialized_k_dh = serialize_MPI(k_dh)
+   K = SHA3-512(serialized_K_ecdh, serialized_k_dh)
    return K
 ```
 
@@ -522,7 +517,7 @@ y1b, y2b, zb)` and `PKb = (Cb, Db, Hb)`. Both key pairs are generated with
 ```
 a, b: DH ephemeral secret key
 A, B: DH ephemeral public key
-K_dh: mix-key, a shared secret computed from a DH exchange = A^b, B^a
+k_dh: mix-key, a shared secret computed from a DH exchange = A^b, B^a
 
 x, y: ECDH ephemeral secret key
 X, Y: ECDH ephemeral public key = G1*x, G1*y
@@ -612,9 +607,9 @@ The DAKE is considered to be completed when either:
 
 Regardless of who you are:
 
-* Calculate `K_ecdh` and `K_dh`. TODO: is this our_* or K_*.
+* Calculate `our_ecdh` and `our_dh`.
 * Securely erase `our_ecdh.private` and `our_dh` key pair.
-* Calculate `K = calculate_shared_secret(K_ecdh, K_dh)`.
+* Calculate `K = calculate_shared_secret(K_ecdh, k_dh)`. // TODO: is this public and private? 
 * Calculate the SSID from shared secret: let SSID be the first 64 bits of `SHA3-256(0x00 || K)`.
 * Calculate the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = calculate_ratchet_keys(K)`.
 
@@ -713,7 +708,7 @@ Alice                                                                           
 -----------------------------------------------------------------------------------
 Initialize root key, chain keys                        Initialize root key, chain keys
 Generate K_ecdh, X, x                                  Generate K_ecdh, Y, y
-Generate K_dh, A, a                                    Generate K_dh, B, b
+Generate k_dh, A, a                                    Generate k_dh, B, b
 Send data message 0_0            -------------------->
 Send data message 0_1            -------------------->
 
@@ -814,32 +809,21 @@ It is also used to [reveal old MAC keys](#revealing-mac-eys).
 In order to send a data message a key to encrypt the message is
 required. This key will be derived from a previous chain key and if
 the message's counter `j` has been reset to zero keys should be
-rotated. Also this derivation takes into account a DH key, referred to
-as a mix key, which is rotated every third ratchet.
-(TODO: the above paragraph is pretty complicated and hard to understand)
+rotated.
 
-Given a new ratchet begins and either this ratchet is not the first or
-you are the initiator:
-(TODO: And this one)
+Given a new ratchet:
 
   * Ratchet the ECDH keys. See "Ratcheting the ECDH keys" section.
-  * Ratchet the DH keys. See "Ratcheting the DH keys" section.
-  * Derive new set of keys `root[i], chain_s[i][j], chain_r[i][j]`.
+  * Calculate ECDH secret by using our_ecdh and their_ecdh. 
+  * Calculate the `dh_shared_secret`.
+  * Calculate the mix key by `ECDH(our_ecdh, their_ecdh) || dh_shared_secret`
+  * Derive new set of keys root[i], chain_s[i][j], chain_r[i][j]` from mix key.
   * Securely delete the root key and all chain keys from the ratchet `i-2`.
-
-  ```
-  K_ecdh = ECDH()
-  K_dh = DH(i)
-  K = calculate_shared_secret(K_ecdh, K_dh)
-  root[i], chain_s[i][j], chain_r[i][j] = calculate_ratchet_keys(root[i-1] || K)
-  delete(root[i-2]) // TODO: why do we need to work on indexes previous to last ratchet?
-  delete(chain_s[i-2]) // TODO: why - 2?
-  delete(chain_r[i-2]) // TODO: why - 2?
-  ```
+  * Securely delete mixed key and dh_shared_secret. 
 
 Otherwise:
 
-  * Increment last sent message ID `j = j+1`.
+  * Increment last sent message ID ``j = j+1`.
   * Derive the next sending Chain Key `derive_chain_key(chain_s, i, j)`.
   * Securely delete `chain_s[i][j-1]`.
 
@@ -1220,7 +1204,7 @@ If everything checks out:
 
   * Reply with a DRE-Auth Message.
   * Compute the ECDH shared secret `K_ecdh = (G1*x)*y`.
-  * Compute the DH shared secret `K_dh = (g3*a)*b`.
+  * Compute the DH shared secret `k_dh = (g3*a)*b`.
   * Transition `authstate` to `AUTHSTATE_NONE`.
   * Transition `msgstate` to `MSGSTATE_ENCRYPTED`.
   * Initialize the double ratcheting.
@@ -1243,7 +1227,7 @@ If `authstate` is `AUTHSTATE_AWAITING_DRE_AUTH`:
 If everything verifies:
 
   * Compute the ECDH shared secret `K_ecdh = (G1*y)*x`.
-  * Compute the DH shared secret `K_dh = (g3*b)*a`.
+  * Compute the DH shared secret `k_dh = (g3*b)*a`.
   * Transition `authstate` to `AUTHSTATE_NONE`.
   * Transition `msgstate` to `MSGSTATE_ENCRYPTED`.
   * Initialize the double ratcheting.
