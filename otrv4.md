@@ -459,23 +459,22 @@ To create a user profile, assemble:
 3. Profile Expiration: This is the date the profile expires. It contains the
    amount of seconds from the epoch to the expiration date. Its format is the
    same as the "date-time" described in section 5.6 of RFC3339 [8].
-4. Profile Signature by the Cramer-Shoup key
+4. Profile Signature: One of the Cramer-Shoup secret key values (`z`) and its
+   generator (`G1`) is used to create signatures of the entire profile. This is
+   created using the Ed448 signature algorithm as documented in [4].
 5. (optional) Transition Signature of the profile by the user's OTRv3 DSA key.
    Transitional signature to enable contacts that trust the user's version 3
    DSA key to trust the user's profile in version 4. This is only used if the
    user supports version 3 and 4.
 
-One of the Cramer-Shoup secret key values (`z`) and its generator (`G1`) is
-used to create signatures of the entire profile. This is created using the
-Ed448 signature algorithm as documented in [4].
-
-Then this profile should be published in a public place, like an untrusted
+Then this profile must be published in a public place, like an untrusted
 server.
 
 #### Renewing a Profile
 
-If a renewed profile is not published and if the only publicly available profile
-is expired, this puts the user's participation deniability at risk.
+If a renewed profile is not published in a public place, and if the only
+publicly available profile is expired, this puts the user's participation
+deniability at risk.
 
 Before the profile expires, the user must publish an updated profile with a new
 expiration date. The client establishes the frequency of expiration - this can
