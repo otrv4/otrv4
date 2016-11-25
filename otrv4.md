@@ -454,15 +454,18 @@ profile publication is determined by its expiration and renewal policy.
 
 To create a user profile, assemble:
 
-1. Cramer-Shoup key-pair: PK, SK
-2. Version support information: string in the same format as OTRv3 Query
-   Messages [3]
-3. Profile Expiration  (TODO: what format?)
-4. Profile Signature: signature of the profile using the Cramer-Shoup
-   secret key
-5. (optional) Transition Signature: signature of the profile by the user's
-   version 3 DSA secret key. This is only used if the user supports version 3
-   and 4.
+1. Cramer-Shoup key-pair
+2. Version: a string corresponding to the user's supported OTR versions.
+   The format is described in OTRv3 under the section "OTR Query Messages".
+   [3]
+3. Profile Expiration: This is the date the profile expires. It contains the
+   amount of seconds from the epoch to the expiration date. Its format is the
+   same as the "date-time" described in section 5.6 of RFC3339 [8].
+4. Profile Signature by the Cramer-Shoup key
+5. (optional) Transition Signature of the profile by the user's OTRv3 DSA key.
+   Transitional signature to enable contacts that trust the user's version 3
+   DSA key to trust the user's profile in version 4. This is only used if the
+   user supports version 3 and 4.
 
 One of the Cramer-Shoup secret key values (`z`) and its generator (`G1`) is
 used to create signatures of the entire profile. This is created using the
@@ -486,24 +489,17 @@ be configurable. A recommended value is two weeks.
 User Profile (USER-PROF):
   Cramer-Shoup key (CRAMER-SHOUP-PUBKEY)
   Version (VER)
-  Version Expiration (VER-EXP)
-  Signature of profile by Cramer-Shoup key (MPI)
-  Signature of profile by OTRv3 DSA key (MPI)
+  Version Expiration (PROF-EXP)
+  Profile Signature (MPI)
+  (optional) Transitional Signature (MPI)
 
 Version (VER):
-  A string corresponding to the user's supported OTR versions. The format is
-  described in OTR version 3 under the section "OTR Query Messages".
-  (TODO: this needs to have some length encoding or something)
+  1 byte unsigned len, big-endian
+  len byte unsigned value, big-endian
 
-Version Expiration (VER-EXP):
-  4 byte value that contains the date that this profile will expire.
-  (TODO: this needs to be specified)
+Version Expiration (PROF-EXP):
+  64-bit signed value, big-endian
 
-Signature of profile by the Cramer-Shoup Key (MPI)
-
-(optional) Signature of the profile by the user's version 3 DSA key (MPI):
-  Transitional signature to enable contacts that trust the user's version 3 DSA
-  key to trust the user's profile in version 4.
 ```
 
 ### Deniable Authenticated Key Exchange (DAKE)
@@ -1752,3 +1748,4 @@ d is an array of bytes.
 [5]: http://www.ietf.org/rfc/rfc7748.txt "A. Langley, M. Hamburg, and S. Turner: Elliptic Curves for Security.” Internet Engineering Task Force; RFC 7748 (Informational); IETF, Jan-2016"
 [6]: https://whispersystems.org/docs/specifications/doubleratchet "Trevor Perrin (editor), Moxie Marlinspike: The Double Ratchet Algorithm"
 [7]: https://whispersystems.org/docs/specifications/doubleratchet/#diffie-hellman-ratchet
+[8]: https://tools.ietf.org/html/rfc3339
