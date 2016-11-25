@@ -21,6 +21,8 @@ messaging protocol, like XMPP.
 7. [Requesting conversation with older OTR version](#requesting-conversation-with-older-otr-version)
 8. [Data exchange](#data-exchange)
   1. [Data Message](#data-message)
+  2. [Revealing MAC Keys](#revealing-mac-keys)
+  3. [Fragmentation](#fragmentation)
 9. [The protocol state machine](#the-protocol-state-machine)
 10. [Socialist Millionaires' Protocol (SMP) version 2](#socialist-millionaires-protocol-smp-version-2)
 11. [Appendices](#appendices)
@@ -918,6 +920,87 @@ A receiver can reveal a MAC key in the following case:
 - the receiver has received a message and has verified the message's authenticity
 - the receiver has discarded associated message keys
 (TODO: is this an AND or an OR condition?)
+
+### Fragmentation
+
+Some networks may have a maximum message size that is too small to contain an
+encoded OTR message. In that event, the sender may choose to split the message
+into a number of fragments. This section describes the format of the fragments.
+
+OTRv4 has the same message fragmentation as OTRv3 without compatibility with version 2.
+This means that fragmentation is performed in OTRv4 in the same why as specified in OTRv3,
+format is the same so you will have to wait until after reassembly to finalize
+how to deal with a message.
+
+All OTRv4 clients must be able to assemble received fragments, but performing
+fragmentation on outgoing messages is optional.
+
+#### Transmitting Fragments
+
+If you have information about the maximum size of message you are able to send
+(the different IM networks have different limits), you can fragment an encoded
+OTR message as follows:
+
+  * Start with the OTR message as you would normally transmit it. For example, a
+Data M  essage would start with `?OTR:AAQD` and end with ".".
+  * Break it up into sufficiently small pieces. Let the number of pieces be `total`,
+and the pieces be piece[1],piece[2],...,piece[total].
+  * Transmit `total` OTRv4 fragmented messages with the following structure:
+
+    ?OTR|sender_instance|receiver_instance,index,total,piece[index],
+
+The message should begin with `?OTR|` and ends with `,`.
+
+Note that `index` and `total` are unsigned short ints (2 bytes), and each has a
+maximum value of 65535. Also, each `piece[index]` must be non-empty.
+The instance tags, `index` and `total` values may have leading zeroes.
+
+Note that fragments are not themselves messages that can be fragmented: you
+can't fragment a fragment.
+
+####Receiving Fragments:
+
+If you receive a message containing `?OTR|` (note that you'll need to check for
+this before_ checking for any of the other `?OTR:` markers):
+
+  * Parse it, extracting instance tags, `index`, `total`, and piece.
+  * Discard illegal fragment, if:
+    * the recipient's own instance tag does not match the listed receiver instance
+tag, and the listed receiver instance tag is not zero, should discard the message
+and optionally pass along a warning for the user.
+    * index is 0
+    * total is 0
+    * index bigger than total
+
+  * If this is the first fragment:
+    * Forget any stored fragment you may have
+    * Store piece
+    * Store index and total
+  * If this is the following fragment (same stored total and index==index+1):
+    * Append piece to stored pice.
+    * Store index and total
+  * Otherwise:
+    * Forget any stored fragment you may have
+    * Forget stored piece
+    * Forget stored index and total
+
+After this, if stored total is bigger than 0 stored index is equal to stored total,
+treat piece as the received message.
+
+If you receive a non-OTR message, or an unfragmented message, forget any stored
+value you may have (piece, total and, index).
+
+For example, here is a Data Message we would like to transmit over a network with
+an unreasonably small maximum message size:
+
+    ?OTR:AAQD--here-is-my-very-long-message.
+
+We could fragment this message into (for example) three pieces:
+
+    ?OTR|5a73a599|27e31597,00001,00003,?OTR:AAQD--here,
+    ?OTR|5a73a599|27e31597,00002,00003,is-my-very-long,
+    ?OTR|5a73a599|27e31597,00003,00003,-message,
+
 
 ## The protocol state machine
 
