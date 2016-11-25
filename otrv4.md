@@ -753,6 +753,7 @@ It is also used to [reveal old MAC keys](#revealing-mac-eys).
 
 #### Data Message format
 
+<code>
     Protocol version (SHORT)
 
         The version number of this protocol is 0x0004.
@@ -822,6 +823,8 @@ It is also used to [reveal old MAC keys](#revealing-mac-eys).
     Old MAC keys to be revealed (DATA)
 
         See [Revealing MAC Keys](#revealing-mac-keys)
+
+</code>
 
 #### When you send a Data Message:
 
