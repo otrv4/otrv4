@@ -20,6 +20,7 @@ messaging protocol, like XMPP.
   3. [Deniable Authenticated Key Exchange (DAKE)](#deniable-authenticated-key-exchange-dake)
 7. [Requesting conversation with older OTR version](#requesting-conversation-with-older-otr-version)
 8. [Data exchange](#data-exchange)
+  1. [Data Message](#data-message)
 9. [The protocol state machine](#the-protocol-state-machine)
 10. [Socialist Millionaires' Protocol (SMP) version 2](#socialist-millionaires-protocol-smp-version-2)
 11. [Appendices](#appendices)
@@ -347,7 +348,7 @@ DH(their_dh.public, i):
 ```
 pubECDH, secretECDH = ECDH()
 pubDH, secretDH = DH()
- 
+
 K_ecdh = (G1*x)*y (POINT)
   The shared ECDH key.
 
@@ -356,7 +357,7 @@ K_dh = (g3^a)^b mod p (MPI)
 ```
 
 #### Mixing ECDH and DH Shared Secrets
-  
+
 ```
 calculate_shared_secret(K_ecdh, K_dh):
    serialized_K_ecdh = serialize_point(K_ecdh)
@@ -653,7 +654,7 @@ Sender's User Profile (USER-PROF)
 X (POINT)
   The ephemeral public ECDH key.
 A (MPI)
-  The ephemeral public DH key. Note that even though this is in uppercase, this is NOT a POINT. 
+  The ephemeral public DH key. Note that even though this is in uppercase, this is NOT a POINT.
 ```
 
 #### DRE-Auth message
@@ -694,7 +695,7 @@ Receiver's User Profile (USER-PROF)
 Y (POINT)
   The ephemeral public ECDH key.
 B (MPI)
-  The ephemeral public DH key. Note that even though this is in uppercase, this is NOT a POINT. 
+  The ephemeral public DH key. Note that even though this is in uppercase, this is NOT a POINT.
 γ (DRE-M)
   The Dual-receiver encrypted value.
 σ (AUTH)
@@ -704,8 +705,8 @@ B (MPI)
 ## Data Exchange
 
 This section describes how each participant will use the Double Ratchet
-algorithm to exchange data initialized with the shared secret established in the
-DAKE.
+algorithm to exchange [data message](#data-message) initialized with the shared
+secret established in the DAKE.
 
 A message with an empty human-readable part (the plaintext is of zero length, or
 starts with a NUL) is a "heartbeat" packet, and should not be displayed to the
@@ -745,121 +746,12 @@ Derive Enc-key & MAC-key
 Verify MAC, Decrypt message 1_1
 ```
 
-#### When you send a Data Message:
+### Data Message
 
-In order to send a data message a key to encrypt the message is
-required. This key will be derived from a previous chain key and if
-the message's counter `j` has been reset to zero keys should be
-rotated. Also this derivation takes into account a DH key, referred to
-as a mix key, which is rotated every third ratchet.
-(TODO: the above paragraph is pretty complicated and hard to understand)
+This message is used to transmit a private message to the correspondent.
+It is also used to [reveal old MAC keys](#revealing-mac-eys).
 
-Given a new ratchet begins and either this ratchet is not the first or
-you are the initiator:
-(TODO: And this one)
-
-  * Ratchet the ECDH keys. See "Ratcheting the ECDH keys" section.
-  * Ratchet the DH keys. See "Ratcheting the DH keys" section.
-  * Derive new set of keys `root[i], chain_s[i][j], chain_r[i][j]`.
-  * Securely delete the root key and all chain keys from the ratchet `i-2`.
-
-  ```
-  K_ecdh = ECDH()
-  K_dh = DH(i)
-  K = calculate_shared_secret(K_ecdh, K_dh)
-  root[i], chain_s[i][j], chain_r[i][j] = calculate_ratchet_keys(root[i-1] || K)
-  delete(root[i-2]) // TODO: why do we need to work on indexes previous to last ratchet?
-  delete(chain_s[i-2]) // TODO: why - 2?
-  delete(chain_r[i-2]) // TODO: why - 2?
-  ```
-
-Otherwise:
-
-  * Increment last sent message ID `j = j+1`.
-  * Derive the next sending Chain Key `derive_chain_key(chain_s, i, j)`.
-  * Securely delete `chain_s[i][j-1]`.
-
-In any event:
-
-1. Calculate the encryption key (`MKenc`) and the mac key (`MKmac`):
-
-   ```
-   MKenc, MKmac = calculate_encryption_and_mac_keys(chain_s[i][j])
-   ```
-
-2. Use the encryption key to encrypt the message, and the mac key to calculate its MAC:
-
-   ```
-   Nonce = generateNonce()
-   Encrypted_message = XSalsa20_Enc(MKenc, Nonce, m)
-   Authenticator = SHA3-512(MKmac || Encrypted_message)
-   ```
-
-3. Forget and reveal MAC keys. The conditions for revealing MAC keys is in the
-   "Revealing MAC keys" section.
-
-
-#### When you receive a Data Message:
-
-Reject messages with `ratchet_id` less than the `i-1` or greater than `i+1`.
-Reject messages with `message_id` less than the `k`. This is to enforce rejecting messages
-delivered out of order.
-
-TODO: Why do we reject messages with ratchet_id < i-1 if we dont do anything with
-messages with ratchet_id i-1? Now, we should do (for allowing receiving messages)
-from the previous session when a new DAKE has just finished.
-
-(TODO: what does reject mean)
-
-TODO: We need to be able to decrypt messages from the previous ratchet (yesterday's discussion).
-
-Use the message `ID` to compute the receiving chain key and calculate encryption and mac keys.
-
-```
-TODO: Why this code always uses the current ratchet_id and totally ignores the
-ratchet_id from the message?
-//k = is the last received message id
-recover_receiving_chain_keys(i, k, message_id)
-MKenc, MKmac = calculate_encryption_and_mac_keys(chain_r, i, message_id)
-```
-
-Use the "mac key" (`MKmac`) to verify the MAC on the message.
-
-If the message verification fails, reject the message.
-
-Otherwise:
-
-  * Decrypt the message using the "encryption key" (`MKenc`) and securely delete MKenc.
-  * Securely delete receiving chain keys older than `message_id-1`.
-  * Set `j = 0` to indicate a new DH-ratchet should happen next time you send a message.
-  * Set `their_ecdh` as the "Next Public ECDH key" from the message.
-  * Set `their_dh` as the "Next Public DH Key" from the message, if it
-    is not NULL.
-  * Add the MKmac key to list of pending MAC keys to be revealed.
-
-
-### Revealing MAC Keys
-
-We reveal old MAC keys to provide forgeability of messages. Old MAC keys are
-keys for messages that have already been received, therefore will no longer be
-used to verify the authenticity of a message.
-
-MAC keys are revealed with data messages. They are also revealed with heartbeat
-messages (data messages that encode a plaintext of zero length) if the receiver
-has not sent a message in a configurable amount of time. Put them (as a set
-of concatenated 20-byte values) into the "Old MAC keys to be revealed"
-section of the next Data Message you send.
-(TODO: our mac keys are not 20-bytes anymore)
-
-
-A receiver can reveal a MAC key in the following case:
-
-- the receiver has received a message and has verified the message's authenticity
-- the receiver has discarded associated message keys
-(TODO: is this an AND or an OR condition?)
-
-
-### Data Message format
+#### Data Message format
 
 ```
 Protocol version (SHORT)
@@ -930,8 +822,121 @@ Authenticator (MAC)
 
 Old MAC keys to be revealed (DATA)
 
-    See "Revealing MAC Keys"
+    See [Revealing MAC Keys](#revealing-mac-keys)
 ```
+
+#### When you send a Data Message:
+
+In order to send a data message a key to encrypt the message is
+required. This key will be derived from a previous chain key and if
+the message's counter `j` has been reset to zero keys should be
+rotated. Also this derivation takes into account a DH key, referred to
+as a mix key, which is rotated every third ratchet.
+(TODO: the above paragraph is pretty complicated and hard to understand)
+
+Given a new ratchet begins and either this ratchet is not the first or
+you are the initiator:
+(TODO: And this one)
+
+  * Ratchet the ECDH keys. See "Ratcheting the ECDH keys" section.
+  * Ratchet the DH keys. See "Ratcheting the DH keys" section.
+  * Derive new set of keys `root[i], chain_s[i][j], chain_r[i][j]`.
+  * Securely delete the root key and all chain keys from the ratchet `i-2`.
+
+  ```
+  K_ecdh = ECDH()
+  K_dh = DH(i)
+  K = calculate_shared_secret(K_ecdh, K_dh)
+  root[i], chain_s[i][j], chain_r[i][j] = calculate_ratchet_keys(root[i-1] || K)
+  delete(root[i-2]) // TODO: why do we need to work on indexes previous to last ratchet?
+  delete(chain_s[i-2]) // TODO: why - 2?
+  delete(chain_r[i-2]) // TODO: why - 2?
+  ```
+
+Otherwise:
+
+  * Increment last sent message ID `j = j+1`.
+  * Derive the next sending Chain Key `derive_chain_key(chain_s, i, j)`.
+  * Securely delete `chain_s[i][j-1]`.
+
+In any event:
+
+1. Calculate the encryption key (`MKenc`) and the mac key (`MKmac`):
+
+   ```
+   MKenc, MKmac = calculate_encryption_and_mac_keys(chain_s[i][j])
+   ```
+
+2. Use the encryption key to encrypt the message, and the mac key to calculate its MAC:
+
+   ```
+   Nonce = generateNonce()
+   Encrypted_message = XSalsa20_Enc(MKenc, Nonce, m)
+   Authenticator = SHA3-512(MKmac || Encrypted_message)
+   ```
+
+3. Forget and reveal MAC keys. The conditions for revealing MAC keys is in the
+   [Revealing MAC keys](#revealing-mac-keys) section.
+
+
+#### When you receive a Data Message:
+
+Reject messages with `ratchet_id` less than the `i-1` or greater than `i+1`.
+Reject messages with `message_id` less than the `k`. This is to enforce rejecting messages
+delivered out of order.
+
+TODO: Why do we reject messages with ratchet_id < i-1 if we dont do anything with
+messages with ratchet_id i-1? Now, we should do (for allowing receiving messages)
+from the previous session when a new DAKE has just finished.
+
+(TODO: what does reject mean)
+
+TODO: We need to be able to decrypt messages from the previous ratchet (yesterday's discussion).
+
+Use the message `ID` to compute the receiving chain key and calculate encryption and mac keys.
+
+```
+TODO: Why this code always uses the current ratchet_id and totally ignores the
+ratchet_id from the message?
+//k = is the last received message id
+recover_receiving_chain_keys(i, k, message_id)
+MKenc, MKmac = calculate_encryption_and_mac_keys(chain_r, i, message_id)
+```
+
+Use the "mac key" (`MKmac`) to verify the MAC on the message.
+
+If the message verification fails, reject the message.
+
+Otherwise:
+
+  * Decrypt the message using the "encryption key" (`MKenc`) and securely delete MKenc.
+  * Securely delete receiving chain keys older than `message_id-1`.
+  * Set `j = 0` to indicate a new DH-ratchet should happen next time you send a message.
+  * Set `their_ecdh` as the "Next Public ECDH key" from the message.
+  * Set `their_dh` as the "Next Public DH Key" from the message, if it
+    is not NULL.
+  * Add the MKmac key to list of pending MAC keys to be revealed.
+
+
+### Revealing MAC Keys
+
+We reveal old MAC keys to provide forgeability of messages. Old MAC keys are
+keys for messages that have already been received, therefore will no longer be
+used to verify the authenticity of a message.
+
+MAC keys are revealed with data messages. They are also revealed with heartbeat
+messages (data messages that encode a plaintext of zero length) if the receiver
+has not sent a message in a configurable amount of time. Put them (as a set
+of concatenated 20-byte values) into the "Old MAC keys to be revealed"
+section of the next Data Message you send.
+(TODO: our mac keys are not 20-bytes anymore)
+
+
+A receiver can reveal a MAC key in the following case:
+
+- the receiver has received a message and has verified the message's authenticity
+- the receiver has discarded associated message keys
+(TODO: is this an AND or an OR condition?)
 
 ## The protocol state machine
 
@@ -960,7 +965,7 @@ MSGSTATE_PLAINTEXT
 
 MSGSTATE_ENCRYPTED
     This state indicates that outgoing messages are sent encrypted and it is
-    used during an OTR conversation. The only way to enter this state is for 
+    used during an OTR conversation. The only way to enter this state is for
     the authentication state machine (below) to be successfully completed.
 
 MSGSTATE_FINISHED
@@ -970,14 +975,14 @@ MSGSTATE_FINISHED
     conversation, and Bob instructs his OTR client to end its private session
     with Alice (by logging out, for example), Alice will be notified of this,
     and her client will switch to MSGSTATE_FINISHED mode. This prevents Alice
-    from accidentally sending a message to Bob in plaintext (consider what 
+    from accidentally sending a message to Bob in plaintext (consider what
     happens if Alice was in the middle of typing a private message to Bob when
     he suddenly logs out, just as Alice hits Enter).
 ```
 
 ### Authentication state
 
-The authentication state variable, `authstate`, controls the aunthentication 
+The authentication state variable, `authstate`, controls the aunthentication
 mechanism. It can take one of two values:
 
 ```
@@ -1052,8 +1057,8 @@ assume that at least `ALLOW_V3` or `ALLOW_V4` is set; if not, then OTR is comple
 disabled and no special handling of messages should be done. Version 1 and 2 messages
 are out of the scope of this specification.
 
-For version 3 and 4 messages, if the receiving instance tag is not equal to its own, 
-the message should be discarded and the user optionally warned. 
+For version 3 and 4 messages, if the receiving instance tag is not equal to its own,
+the message should be discarded and the user optionally warned.
 
 The exception here is the DH Commit Message where the recipient instance tag may be 0,
 which indicates that no particular instance is specified.
@@ -1117,8 +1122,8 @@ If the query message offers OTR version 3 and `ALLOW_V3` is set:
 #### Receiving a Pre-key message
 
 If the message is version 4 and `ALLOW_V4` is not set
-  
-  * Ignore this message. 
+
+  * Ignore this message.
 
 If `authstate` is `AUTHSTATE_AWAITING_DRE_AUTH`:
 
@@ -1129,11 +1134,11 @@ The symmetry will be broken by comparing the hashed X you sent in your pre-key w
 the one you received, considered as 32-byte unsigned big-endian values.
 
 If yours is the lower hash value:
-  
+
   * Ignore the incoming pre-key message.
 
 Otherwise:
-  
+
   * Forget your old `X` value that you sent earlier.
 
 Regardless of `authstate` value, if you haven't ignored the incoming pre-key
@@ -1182,7 +1187,7 @@ Otherwise:
   * Ignore the message. This may cause the sender to be in an invalid
 `msgstate` equals `MSGSTATE_ENCRYPTED`. This can be detected as soon as she tries
 to send a next data message as it would not be possible to decrypt it and an OTR error
-message will be replied. 
+message will be replied.
 
 #### User types a message to be sent
 
@@ -1222,7 +1227,7 @@ If the received message contains a TLV type 1:
 
   * Forget all encryption keys for this correspondent, and transition `msgstate` to `MSGSTATE_FINISHED`.
 
-Otherwise: 
+Otherwise:
 (TODO: this otherwise seems to be if the data message doesn't contain TLV type 1, which is incorrect)
 
   * Inform the user that an unreadable encrypted message was received, and reply with an Error Message.
