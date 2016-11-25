@@ -319,8 +319,6 @@ When you ratchet the ECDH keys:
 * Increment the current ratchet id (`i`) by 1.
 * Reset the next sent message id (`j`) to 0.
 
-(TODO: what happens if you ratchet without sending any messages? Are we deleting key material we need?) 
-
 #### Calculating the DH shared secret
 
 If this ratchet is a multiple of three:
@@ -344,7 +342,7 @@ generateECDH()
 generateDH()
    pick a random value r (640 bits)
    return pubDH = g3 ^ r, secretDH = r
- 
+
 K_ecdh = (G1*x)*y (POINT)
   The shared ECDH key.
 
@@ -374,7 +372,7 @@ calculate_ratchet_keys(K):
 ```
 
 #### Decide Between Chain Keys
-(TODO: this uses the "initiator" flag which shouldn't exist anymore)
+
 Both sides will compare their public keys to choose a chain key for sending and receiving:
 - Alice (and similarly for Bob) determines if she is the "low" end or the "high" end of this ratchet.
 If Alice's ephemeral ECDH public key is numerically greater than Bob's public key, then she is the "high" end.
@@ -383,12 +381,18 @@ Otherwise, she is the "low" end.
   - If she is the "high" end, set `initiator` as `true`, use Ca as the sending chain key (`chain_s`), Cb as the receiving chain key (`chain_r`).
   - If she is the "low" end, set `initiator` as `false`, use Cb as the sending chain key (`chain_s`), Ca as the receiving chain key (`chain_r`).
 
-TODO: +@juniorz we can not set the initiator as a side effect of deciding who will use each key, but we can use the same condition to decide who will be initiator. This may be a problem because every time I talk to Bob I will have the same condition.
+```
+decide_between_chain_keys(Ca, Cb):
+  if compare(our_ecdh.public, their_ecdh) > 0
+    return Ca, Cb
+  else
+    return Cb, Ca
+```
 
 ### Deriving new chain keys
 
-When you send or receive data messages you need to derive a new chain key:
-(TODO: this doesn't take into account the first time, when the chain key is derived from the ratchet key. We might need to define it for those circumstances)
+When you send or receive data messages you need to retrieve the chain key:
+
 ```
 derive_chain_key(C, i, j):
   C[i][j] = SHA3-512(C[i][j-1])
@@ -407,21 +411,7 @@ calculate_encryption_and_mac_keys(chain_key):
 
 ### Recovering past chain keys
 
-When receiving a data message, you may need to use receiving chain
-keys where the message id is older than `j - 1` to calculate the
-current if you did not receive previous messages. For example, your
-peer sends you data messages with ids `j = 1, j = 2, j = 3`, but you only
-receive messages with ids `j = 1, j = 3`. In that case you would use the
-chain key for message id `j = 1` to derive the chain key for message
-`j = 3`.
-(TODO: this loop doesn't update k)
-```
-recover_receiving_chain_keys(i, j, k):
-  do
-    derive_chain_key(chain_r, i, k)
-  while(k <= j)
-```
-
+//TODO: recover chain
 
 ## Conversation Initialization
 
@@ -768,12 +758,10 @@ It is also used to [reveal old MAC keys](#revealing-mac-eys).
             instead of producing some kind of error or notification to the user.
 
     Ratchet id ratchet_id (INT)
-    (TODO: why duplicated?)
         Must be strictly greater than 0, and increment by 1 with each ratchet.
         This should be set as sender's i.
 
     Message id message_id (INT)
-    (TODO: why duplicated?)
         Must be strictly greater than 0, and increment by 1 with each message.
         This should be set with sender's j.
 
@@ -814,12 +802,12 @@ rotated.
 Given a new ratchet:
 
   * Ratchet the ECDH keys. See "Ratcheting the ECDH keys" section.
-  * Calculate ECDH secret by using our_ecdh and their_ecdh. 
+  * Calculate ECDH secret by using our_ecdh and their_ecdh.
   * Calculate the `dh_shared_secret`.
   * Calculate the mix key by `ECDH(our_ecdh, their_ecdh) || dh_shared_secret`
   * Derive new set of keys root[i], chain_s[i][j], chain_r[i][j]` from mix key.
   * Securely delete the root key and all chain keys from the ratchet `i-2`.
-  * Securely delete mixed key and dh_shared_secret. 
+  * Securely delete mixed key and dh_shared_secret.
 
 Otherwise:
 
@@ -849,26 +837,10 @@ In any event:
 
 #### When you receive a Data Message:
 
-Reject messages with `ratchet_id` less than the `i-1` or greater than `i+1`.
-Reject messages with `message_id` less than the `k`. This is to enforce rejecting messages
-delivered out of order.
-
-TODO: Why do we reject messages with ratchet_id < i-1 if we dont do anything with
-messages with ratchet_id i-1? Now, we should do (for allowing receiving messages)
-from the previous session when a new DAKE has just finished.
-
-(TODO: what does reject mean)
-
-TODO: We need to be able to decrypt messages from the previous ratchet (yesterday's discussion).
-
-Use the message `ID` to compute the receiving chain key and calculate encryption and mac keys.
+Use the `message_id` to compute the receiving chain key and calculate encryption and mac keys.
 
 ```
-TODO: Why this code always uses the current ratchet_id and totally ignores the
-ratchet_id from the message?
-//k = is the last received message id
-recover_receiving_chain_keys(i, k, message_id)
-MKenc, MKmac = calculate_encryption_and_mac_keys(chain_r, i, message_id)
+MKenc, MKmac = calculate_encryption_and_mac_keys(chain_r[ratchet_id][message_id])
 ```
 
 Use the "mac key" (`MKmac`) to verify the MAC on the message.
