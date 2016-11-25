@@ -366,8 +366,8 @@ calculate_shared_secret(K_ecdh, k_dh):
 calculate_ratchet_keys(K):
   n = ratchet_id you are creating keys for
   root[n] = SHA3-512(0x01 || K)
-  chain_s[n] = SHA3-512(0x02 || K)
-  chain_r[n] = SHA3-512(0x03 || K)
+  chain_s[n][0] = SHA3-512(0x02 || K)
+  chain_r[n][0] = SHA3-512(0x03 || K)
   return R, decide_between_chain_keys(Ca, Cb)
 ```
 
@@ -381,37 +381,43 @@ Otherwise, she is the "low" end.
   - If she is the "high" end, set `initiator` as `true`, use Ca as the sending chain key (`chain_s`), Cb as the receiving chain key (`chain_r`).
   - If she is the "low" end, set `initiator` as `false`, use Cb as the sending chain key (`chain_s`), Ca as the receiving chain key (`chain_r`).
 
-```
-decide_between_chain_keys(Ca, Cb):
-  if compare(our_ecdh.public, their_ecdh) > 0
-    return Ca, Cb
-  else
-    return Cb, Ca
-```
+    ```
+    decide_between_chain_keys(Ca, Cb):
+      if compare(our_ecdh.public, their_ecdh) > 0
+        return Ca, Cb
+      else
+        return Cb, Ca
+    ```
 
 ### Deriving new chain keys
 
-When you send or receive data messages you need to retrieve the chain key:
+When you send data messages you need to derive the chain key:
 
-```
-derive_chain_key(C, i, j):
-  C[i][j] = SHA3-512(C[i][j-1])
-```
+    ```
+    derive_chain_key(C, i, j):
+      C[i][j] = SHA3-512(C[i][j-1])
+    ```
+
+### Retrieve chain keys
+
+When you receive data messages you need to retrieve the chain key:
+
+    ```
+    retrieve_chain_key(C, i, k):
+      if C[i][k] not exist:
+          C[i][k] = SHA3-512(retrieve_chain_key(C, i, k-1))
+    ```
 
 ### Calculate Encryption and MAC keys
 
 When you send or receive data messages you need to calculate the message keys:
 
-```
-calculate_encryption_and_mac_keys(chain_key):
-  enc = SHA3-256(0x00 || chain_key)
-  mac = SHA3-512(0x01 || chain_key)
-  return enc, mac
-```
-
-### Recovering past chain keys
-
-//TODO: recover chain
+    ```
+    derive_enc_mac_keys(chain_key):
+      Kenc = SHA3-256(0x00 || chain_key)
+      Kmac = SHA3-512(0x01 || chain_key)
+      return MKenc, Kmac
+    ```
 
 ## Conversation Initialization
 
@@ -820,7 +826,7 @@ In any event:
 1. Calculate the encryption key (`MKenc`) and the mac key (`MKmac`):
 
    ```
-   MKenc, MKmac = calculate_encryption_and_mac_keys(chain_s[i][j])
+   MKenc, MKmac = derive_enc_mac_keys(chain_s[i][j])
    ```
 
 2. Use the encryption key to encrypt the message, and the mac key to calculate its MAC:
@@ -839,9 +845,10 @@ In any event:
 
 Use the `message_id` to compute the receiving chain key and calculate encryption and mac keys.
 
-```
-MKenc, MKmac = calculate_encryption_and_mac_keys(chain_r[ratchet_id][message_id])
-```
+   ```
+   retrieve_chain_key(chain_r, ratchet_id, message_id)
+   MKenc, MKmac = derive_enc_mac_keys(chain_r[ratchet_id][message_id])
+   ```
 
 Use the "mac key" (`MKmac`) to verify the MAC on the message.
 
