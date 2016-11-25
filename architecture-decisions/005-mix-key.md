@@ -1,4 +1,4 @@
-## ADR 3: Mix Keys
+## ADR 5: Mix Keys
 
 **Status**: proposed
 
