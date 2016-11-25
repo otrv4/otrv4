@@ -753,77 +753,75 @@ It is also used to [reveal old MAC keys](#revealing-mac-eys).
 
 #### Data Message format
 
-```
-Protocol version (SHORT)
+    Protocol version (SHORT)
 
-    The version number of this protocol is 0x0004.
+        The version number of this protocol is 0x0004.
 
-Message type (BYTE)
+    Message type (BYTE)
 
-    The Data Message has type 0x03.
+        The Data Message has type 0x03.
 
-Sender Instance tag (INT)
+    Sender Instance tag (INT)
 
-    The instance tag of the person sending this message.
+        The instance tag of the person sending this message.
 
-Receiver Instance tag (INT)
+    Receiver Instance tag (INT)
 
-    The instance tag of the intended recipient.
+        The instance tag of the intended recipient.
 
-Flags (BYTE)
+    Flags (BYTE)
 
-    The bitwise-OR of the flags for this message. Usually you should
-    set this to 0x00. The only currently defined flag is:
+        The bitwise-OR of the flags for this message. Usually you should
+        set this to 0x00. The only currently defined flag is:
 
-    IGNORE_UNREADABLE (0x01)
+        IGNORE_UNREADABLE (0x01)
 
-        If you receive a Data Message with this flag set, and you are
-        unable to decrypt the message or verify the MAC (because, for
-        example, you don't have the right keys), just ignore the message
-        instead of producing some kind of error or notification to the user.
+            If you receive a Data Message with this flag set, and you are
+            unable to decrypt the message or verify the MAC (because, for
+            example, you don't have the right keys), just ignore the message
+            instead of producing some kind of error or notification to the user.
 
-Ratchet id ratchet_id (INT)
-(TODO: why duplicated?)
-    Must be strictly greater than 0, and increment by 1 with each ratchet.
-    This should receive the value of i variable.
+    Ratchet id ratchet_id (INT)
+    (TODO: why duplicated?)
+        Must be strictly greater than 0, and increment by 1 with each ratchet.
+        This should receive the value of i variable.
 
-Message id message_id (INT)
-(TODO: why duplicated?)
+    Message id message_id (INT)
+    (TODO: why duplicated?)
 
-    Must be strictly greater than 0, and increment by 1 with each message.
-    This should receive the value of j variable.
+        Must be strictly greater than 0, and increment by 1 with each message.
+        This should receive the value of j variable.
 
-Next Public ECDH Key (POINT)
-(TODO: this description is weird, and the difference between current and next is also confusing)
-    The sender's current ratchet ECDH public key for the sender.
-    This should contain the value of our_ecdh.public_key variable.
+    Next Public ECDH Key (POINT)
+    (TODO: this description is weird, and the difference between current and next is also confusing)
+        The sender's current ratchet ECDH public key for the sender.
+        This should contain the value of our_ecdh.public_key variable.
 
-Next Public DH Key (MPI)
-(TODO: this description is weird, and the difference between current and next is also confusing)
-    This should contain the value of our_dh.public_key variable.
-    You should send a NULL value if i % 3 != 0.
+    Next Public DH Key (MPI)
+    (TODO: this description is weird, and the difference between current and next is also confusing)
+        This should contain the value of our_dh.public_key variable.
+        You should send a NULL value if i % 3 != 0.
 
-Nonce (NONCE)
+    Nonce (NONCE)
 
-    The nonce used with XSalsa20 to create the encrypted message contained in
-    this packet.
+        The nonce used with XSalsa20 to create the encrypted message contained in
+        this packet.
 
-Encrypted message (DATA)
+    Encrypted message (DATA)
 
-    Using the appropriate encryption key (see below) derived from the
-    sender's and recipient's DH public keys (with the keyids given in this
-    message), perform XSalsa20 encryption of the message. The nonce used for
-    this operation is also included in the header of the data message packet.
+        Using the appropriate encryption key (see below) derived from the
+        sender's and recipient's DH public keys (with the keyids given in this
+        message), perform XSalsa20 encryption of the message. The nonce used for
+        this operation is also included in the header of the data message packet.
 
-Authenticator (MAC)
+    Authenticator (MAC)
 
-    The SHA3 MAC, using the appropriate MAC key (see below) of everything
-    from the Protocol version to the end of the encrypted message.
+        The SHA3 MAC, using the appropriate MAC key (see below) of everything
+        from the Protocol version to the end of the encrypted message.
 
-Old MAC keys to be revealed (DATA)
+    Old MAC keys to be revealed (DATA)
 
-    See [Revealing MAC Keys](#revealing-mac-keys)
-```
+        See [Revealing MAC Keys](#revealing-mac-keys)
 
 #### When you send a Data Message:
 
