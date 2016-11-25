@@ -306,9 +306,9 @@ message will advertise a new ratchet (`i + 1`) from the receiver perspective.
 When you ratchet the ECDH keys, you:
 
 * Securely delete `our_ecdh`.
-* Generate a new ECDH key pair and assign it to `our_ecdh`. See [newECDH()](#ECDH-and-DH-Shared-Secrets).
-* Increment the current ratchet ID `i = i +1`.
-* Reset the last sent message ID `j = 0`.
+* Generate a new ECDH key pair and assign it to `our_ecdh`. See [ECDH()](#ECDH-and-DH-Shared-Secrets).
+* Increment the current ratchet id `i = i +1`.
+* Reset the last sent message id `j = 0`.
 
 (TODO: what happens if you ratchet without sending any messages? Are we deleting key material we need?)
 
@@ -320,41 +320,51 @@ every third.
 If `i` is bigger than zero and a multiple of three:
 
   * Securely delete `our_dh`.
-  * Generate a new DH key pair and assign it to `our_dh`. See [newDH()](#ECDH-and-DH-Shared-Secrets).
-  * Calculate a new `dh_shared_secret = SHA3-256(DH(our_dh.secret, their_dh))`.
+  * Calculate a new DH key pair `K_dh = DH(i, their_dh.public)` and assign it to `our_dh`. See [DH(i)](#ECDH-and-DH-Shared-Secrets).
 
 Otherwise:
 
-  * Derive a new `dh_shared_secret = SHA3-256(dh_shared_secret)`.
+  * Derive a new hashed DH `K_dh = DH(i, their_dh.public)`.
+
+```
+DH(their_dh.public, i):
+  if i % 3 == 0
+    a = randomInG3()
+    K_dh = exp(their_dh.public, a)
+  otherwise
+    SHA3-256(our_dh)
+```
 
 #### ECDH and DH Shared Secrets
 
 ```
-pubECDH, secretECDH = newECDH()
-
-ecdh_shared_secret = (G1*x)*y (POINT)
+pubECDH, secretECDH = ECDH()
+pubDH, secretDH = DH()
+ 
+K_ecdh = (G1*x)*y (POINT)
   The shared ECDH key.
 
-dh_shared_secret = (g3^x)^y mod p (MPI)
+K_dh = (g3^a)^b mod p (MPI)
   The shared 3072-bit DH key.
 ```
 
-#### Mixed Secret: Mixing ECDH and DH Shared Secrets
-(TODO: this is using mix_key instead of dh_shared_secret)
+#### Mixing ECDH and DH Shared Secrets
+  
 ```
-calculate_shared_secret(ecdh_shared_secret, mix_key):
-   serialized_EC_secret = serialize_point(ecdh_shared_secret)
-   serialized_mix_key = serialize_MPI(mix_key)
-   return SHA3-512(serialized_EC_secret, serialized_mix_key)
+calculate_shared_secret(K_ecdh, K_dh):
+   serialized_K_ecdh = serialize_point(K_ecdh)
+   serialized_K_dh = serialize_MPI(K_dh)
+   K = SHA3-512(serialized_K_ecdh, serialized_K_dh)
+   return K
 ```
 
 #### Calculate Double Ratchet Keys
 
 ```
-calculate_ratchet_keys(secret):
-  R  = SHA3-512(0x01 || secret)
-  Ca = SHA3-512(0x02 || secret)
-  Cb = SHA3-512(0x03 || secret)
+calculate_ratchet_keys(K):
+  R  = SHA3-512(0x01 || K)
+  Ca = SHA3-512(0x02 || K)
+  Cb = SHA3-512(0x03 || K)
   return R, decide_between_chain_keys(Ca, Cb)
 ```
 
@@ -362,13 +372,13 @@ calculate_ratchet_keys(secret):
 (TODO: this uses the "initiator" flag which shouldn't exist anymore)
 Both sides will compare their public keys to choose a chain key for sending and receiving:
 - Alice (and similarly for Bob) determines if she is the "low" end or the "high" end of this ratchet.
-If Alice's ephemeral D-H public key is numerically greater than Bob's public key, then she is the "high" end.
+If Alice's ephemeral ECDH public key is numerically greater than Bob's public key, then she is the "high" end.
 Otherwise, she is the "low" end.
 - Alice selects the chain keys for sending and receiving:
   - If she is the "high" end, set `initiator` as `true`, use Ca as the sending chain key (Cs), Cb as the receiving chain key (Cr).
   - If she is the "low" end, set `initiator` as `false`, use Cb as the sending chain key (Cs), Ca as the receiving chain key (Cr).
 
-TODO: we can not set the initiator as a side effect of deciding who will use each key, but we can use the same condition to decide who will be initiator. This may be a problem because every time I talk to Bob I will have the same condition.
+TODO: +@juniorz we can not set the initiator as a side effect of deciding who will use each key, but we can use the same condition to decide who will be initiator. This may be a problem because every time I talk to Bob I will have the same condition.
 
 ### Deriving new chain keys
 
@@ -390,7 +400,6 @@ calculate_encryption_and_mac_keys(chain_key):
   return enc, mac
 ```
 
-
 ### Recovering past chain keys
 
 When receiving a data message, you may need to use receiving chain
@@ -411,7 +420,7 @@ recover_receiving_chain_keys(i, j, k):
 
 ## Conversation Initialization
 
-OTRv4 will initialize athrough a Query message or a whitespace tag, as discussed
+OTRv4 will initialize through a Query message or a whitespace tag, as discussed
 in OTRv3 [3]. After this, the conversation is authenticated using a deniable
 authenticated key exchange (DAKE). The conversation can also be started directly
 with the first message of the DAKE, without a Query message or a whitespace tag.
@@ -422,7 +431,6 @@ Bob might respond to Alice's request or notification of willingness to start a
 conversation using OTRv3. If this is the case and Alice supports the version 3,
 the protocol falls back to OTRv3 [3].
 (TODO: what happens otherwise?)
-
 
 ## User Profile
 
@@ -517,8 +525,6 @@ y1b, y2b, zb)` and `PKb = (Cb, Db, Hb)`. Both key pairs are generated with
 
 ```
 a, b: DH ephemeral secret key
-// TODO: following the notation, this seems to imply that A and B are points. 
-// These names should be changed. 
 A, B: DH ephemeral public key
 K_dh: mix-key, a shared secret computed from a DH exchange = A^b, B^a
 
@@ -556,8 +562,8 @@ Bob will be initiating the DAKE with Alice.
 6. Sends Alice a DRE-Auth Message `ψ2 = ("R", γ, σ)`.
 
 **Bob:**
-(TODO: I still hate "Verif")
-1. Verifies `Verif({Hb, Ha, Y}, σ, “Prof_B” || “Prof_A” || Y || B || γ)`.
+
+1. Verifies `Verify({Hb, Ha, Y}, σ, “Prof_B” || “Prof_A” || Y || B || γ)`.
 2. Decrypts `m = DRDec(PKb, PKa, SKb, γ)`.
 3. Verifies the following properties of the decrypted message `m`:
   1. The message is of the correct form (e.g., the fields are of the expected length)
@@ -648,7 +654,7 @@ Sender's User Profile (USER-PROF)
 X (POINT)
   The ephemeral public ECDH key.
 A (MPI)
-  The ephemeral public D-H key.
+  The ephemeral public D-H key. Note that even though this is in uppercase, this is NOT a POINT. 
 ```
 
 #### DRE-Auth message
@@ -686,6 +692,10 @@ Receiver Instance tag (INT)
   The instance tag of the intended recipient.
 Receiver's User Profile (USER-PROF)
   This is described in the section 'Creating a User Profile'.
+Y (POINT)
+  The ephemeral public ECDH key.
+B (MPI)
+  The ephemeral public D-H key. Note that even though this is in uppercase, this is NOT a POINT. 
 γ (DRE-M)
   The Dual-receiver encrypted value.
 σ (AUTH)
@@ -755,11 +765,13 @@ you are the initiator:
   * Securely delete the root key and all chain keys from the ratchet `i-2`.
 
   ```
-  mixed = ECDH(our_ecdh.secret, their_ecdh) || dh_shared_secret
-  R[i], Cs[i][j], Cr[i][j] = calculate_ratchet_keys(R[i-1] || mixed)
-  delete(R[i-2])
-  delete(Cs[i-2])
-  delete(Cr[i-2])
+  K_ecdh = ECDH()
+  K_dh = DH(i)
+  K = calculate_shared_secret(K_ecdh, K_dh)
+  R[i], Cs[i][j], Cr[i][j] = calculate_ratchet_keys(R[i-1] || K)
+  delete(R[i-2]) // TODO: why do we need to work on indexes previous to last ratchet?
+  delete(Cs[i-2]) // TODO: why - 2?
+  delete(Cr[i-2]) // TODO: why - 2?
   ```
 
 Otherwise:
@@ -1131,7 +1143,7 @@ message, you should:
   * Verify that the user profile signature is valid.
   * Verify that the user profile is not expired.
   * Verify that the point X received in the pre-key message is on curve 448.
-  * Verify that the D-H public key is from the correct group.
+  * Verify that the DH public key is from the correct group.
 
 If everything checks out:
 
