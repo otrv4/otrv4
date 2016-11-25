@@ -1,6 +1,7 @@
 ## ADR 1: Security Level
 
 **Status**: proposed
+(TODO: do we need a status here)
 
 ### Context
 
@@ -16,8 +17,8 @@ The security level of the protocol can be roughly estimated as the smallest
 security level among all the cryptographic primitives in use, and in general,
 there's an inverse relation between security level and speed.
 
-For this reason, the cryptographic primitives must be chosen to have roughly the
-same security level above the target security level.
+For this reason, the cryptographic primitives should be chosen to have roughly the
+same security level close to the target security level.
 
 Because OTRv4 is an open standard, we want to use crypto primitives with no
 intellectual-property claims.
@@ -28,29 +29,31 @@ programming languages.
 
 In this context, two options were evaluated:
 
-- ~128-bit security (ed25519)
-- ~224-bit security (ed448)
+- ~128-bit security
+- ~224-bit security
 
 ### Decision
 
 We will design OTRv4 with a target security level of ~224-bits.
 
-After evaluating both security levels, the main decision is wheter to use curve
+After evaluating both security levels, the main decision is whether to use curve
 25519 or curve 448. Although curve 448 doesn't have as much published
 cryptanalysis as curve 25519, it is built using the same methodology as 25519.
 
 We will use ed448 as DH group for the extra security it provides.
 
-We will use SHA3-512 as cryptographic hash function.
+We will use SHA3-512 as the cryptographic hash function. Since the security
+level of a hash in general is half the size of the output (because of the
+birthday paradox), this gives us an expected level of 256.
 
-We will use XSalsa as stream cipher because it is faster than AES, is immune to
-timing attacks, and it's safe to randomly generate its longer nonce. XSalsa will
-be used with the following parameters: 20 rounds, 192-bits nonce, and 256-bit
-key.
+We will use XSalsa as the stream cipher because it is faster than AES, is immune
+to timing attacks, and it's safe to randomly generate the nonce (since it's
+significantly larger). XSalsa will be used with the following parameters: 20
+rounds, 192-bits nonces, and 256-bit keys.
 
 We will use Poly-1305 for message authentication.
 
-We will use SHA3-512 as key derivation function. We use the construct
+We will use SHA3-512 as a key derivation function. We use the construct
 SHA3-512(key || secret) when a keyed cryptographic hash function is expected,
 and use the construct SHA3-512(counter || secret) to provide cryptographic
 domain separation every time multiple keys need to be derived from the same
@@ -58,9 +61,11 @@ secret.
 
 We will use the SHA3-256 hash function for generating fingerprints for
 long-lived, public keys. SHA3-256 has a security strength of 256 bits against
-preimage attacks. However, it only has a security strength of 128 bits against
-collision attacks. We choose SHA3-256 instead of SHA3-512 for the operation of
-generating fingerprints because the output from SHA3-512 is much larger.
+preimage attacks. (TODO: I think the previous sentence is wrong. Preimage
+attacks are also subject to birthday paradox, right?) However, it only has a
+security strength of 128 bits against collision attacks. We choose SHA3-256
+instead of SHA3-512 for the operation of generating fingerprints because the
+output from SHA3-512 is much larger.
 
 ### Consequences
 
