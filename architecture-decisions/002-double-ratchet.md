@@ -5,14 +5,15 @@
 ### Context
 
 In older OTR versions, in data message exchange, the key management is controlled
-by a "three step ratchet" which behaves as[1]:
+by a "three step ratchet" which behaves as:
+(TODO: the sentence above could be smoother)
 
 1. Alice sends an encrypted message to Bob, and "advertises" her next Diffie-Hellamn
    key pubA.
 2. Bob sends an encrypted message to Alice, and "acknowledges" her next Diffie-Hellman
    key, and advertises his next Diffie-Hellman key pubB.
 3. Alice sends a message to Bob, using her advertised key privA, and acknowledged
-   hey pubB.
+   key pubB.
 
 In [1], the Double Ratchet Algorithm is introduced, which allows for:
 
