@@ -239,7 +239,7 @@ SHA3-256 hash of the byte-level representation of the public key.
 
 ## Key management
 
-In the DAKE, OTRv4 makes use of long-term Cramer-Shoup keys and ephemeral D-H
+In the DAKE, OTRv4 makes use of long-term Cramer-Shoup keys and ephemeral DH
 keys.
 
 For exchanging data messages, OTRv4 uses a key structure and key rotation
@@ -626,13 +626,13 @@ Regardless of who you are:
 #### Pre-key message
 
 This is the first message of the DAKE. Bob sends it to Alice to commit to a
-choice of D-H and ECDH key. A valid Pre-key message is generated as follows:
+choice of DH and ECDH key. A valid Pre-key message is generated as follows:
 
 1. Create a user profile. How to do this is detailed [here](#creating-a-user-profile)
 2. Choose a random ephemeral ECDH key pair:
   * secret key `x` a random element from `Z_q` (448 bits).
   * public key `X`
-3. Generates an ephemeral D-H secret key pair:
+3. Generates an ephemeral DH secret key pair:
   * secret key `a` (640 bits).
   * and a public key `A = g3 ^ a`.
 
@@ -654,14 +654,14 @@ Sender's User Profile (USER-PROF)
 X (POINT)
   The ephemeral public ECDH key.
 A (MPI)
-  The ephemeral public D-H key. Note that even though this is in uppercase, this is NOT a POINT. 
+  The ephemeral public DH key. Note that even though this is in uppercase, this is NOT a POINT. 
 ```
 
 #### DRE-Auth message
 
 This is the second message of the DAKE. Alice sends it to Bob to commit to a
-choice of her D-H key and acknowledgement of Bob's D-H key. The long-term public
-key and D-H public keys are encrypted with DRE and authenticated with an NIZKPK.
+choice of her DH key and acknowledgement of Bob's DH key. The long-term public
+key and DH public keys are encrypted with DRE and authenticated with an NIZKPK.
 
 A valid DRE-Auth message is generated as follows:
 
@@ -670,7 +670,7 @@ A valid DRE-Auth message is generated as follows:
 2. Choose a random ephemeral ECDH key pair:
   * secret key `y` a random element from `Z_q` (448 bits).
   * public key `Y`
-3. Generates an ephemeral D-H secret key pair:
+3. Generates an ephemeral DH secret key pair:
   * secret key `b` (640 bits).
   * and a public key `B = g3 ^ b`.
 4. Generate `m = X || Y || A || B`
@@ -695,7 +695,7 @@ Receiver's User Profile (USER-PROF)
 Y (POINT)
   The ephemeral public ECDH key.
 B (MPI)
-  The ephemeral public D-H key. Note that even though this is in uppercase, this is NOT a POINT. 
+  The ephemeral public DH key. Note that even though this is in uppercase, this is NOT a POINT. 
 γ (DRE-M)
   The Dual-receiver encrypted value.
 σ (AUTH)
@@ -1056,7 +1056,7 @@ are out of the scope of this specification.
 For version 3 and 4 messages, if the receiving instance tag is not equal to its own, 
 the message should be discarded and the user optionally warned. 
 
-The exception here is the D-H Commit Message where the recipient instance tag may be 0,
+The exception here is the DH Commit Message where the recipient instance tag may be 0,
 which indicates that no particular instance is specified.
 
 #### User requests to start an OTR conversation
@@ -1301,7 +1301,7 @@ before the new DAKE has finished) may be lost if received after the ψ2b is sent
 (or received). This happens because we reset ratched-id to 0 after the DAKE is
 complete.
 
-Handling a new DAKE as a new D-H ratchet (and simply incrementing j) should fix
+Handling a new DAKE as a new DH ratchet (and simply incrementing j) should fix
 this by applying the same approach as OTRv3: a new DAKE is considered simply as
 a new key exchange.
 
