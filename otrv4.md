@@ -71,7 +71,7 @@ In an OTRv4 conversation, both sides can verify the identity of the
 other participant but cannot transfer this knowledge to a third party.
 
 Once an OTRv4 channel has been created, all messages transmitted through this
-channel are confidential and integrity protected.
+channel are confidential and integrity is protected.
 
 Both parties can deny that they have participated in a conversation. They can
 also deny having sent any of the exchanged messages in the conversation. The
@@ -164,7 +164,7 @@ Generator g3: 2
 ```
 
 Note that this means that whenever you see an operation on a field element from
-the above group, the operation should also be done module the above prime.
+the above group, the operation should be done modulo the above prime.
 
 ### TLV Types
 
@@ -231,8 +231,8 @@ OTRv4 introduces a new type of public-key:
 ```
 OTR public authentication Cramer-Shoup key (CRAMER-SHOUP-PUBKEY):
 
-    Pubkey type (SHORT)
-      Cramer-Shoup public keys have type 0x0010
+  Pubkey type (SHORT)
+    Cramer-Shoup public keys have type 0x0010
 
     C (POINT)
     D (POINT)
@@ -240,7 +240,7 @@ OTR public authentication Cramer-Shoup key (CRAMER-SHOUP-PUBKEY):
       (C, D, H) are the Cramer-Shoup public key parameters
 ```
 
-OTR public keys have fingerprints, which are hex strings that serve as
+OTRv4 public keys have fingerprints, which are hex strings that serve as
 identifiers for the public key. The fingerprint is calculated by taking the
 SHA3-256 hash of the byte-level representation of the public key.
 
@@ -290,6 +290,7 @@ Key variables:
   `their_ecdh`: their ECDH ephemeral public key.
   `our_dh`: our DH ephemeral key pair
   `their_dh`: their DH ephemeral public key
+  `dh_shared_secret`: the shared secret previously computed.
 ```
 
 The previously mentioned variables are affected by these events:
@@ -331,17 +332,16 @@ Otherwise:
 
   * Derive a `dh_shared_secret = SHA3-256(dh_shared_secret)`.
 
-
 #### ECDH and DH Shared Secrets
 
 ```
 generateECDH()
-   pick a random value r from Z_q
-   return pubECDH = G2 * r, secretECDH = r
+  pick a random value r from Z_q
+  return pubECDH = G2 * r, secretECDH = r
 
 generateDH()
-   pick a random value r (640 bits)
-   return pubDH = g3 ^ r, secretDH = r
+  pick a random value r (640 bits)
+  return pubDH = g3 ^ r, secretDH = r
 
 K_ecdh = (G1*x)*y (POINT)
   The shared ECDH key.
@@ -354,17 +354,17 @@ k_dh = (g3^a)^b mod p (MPI)
 
 ```
 calculate_shared_secret(K_ecdh, k_dh):
-   serialized_K_ecdh = serialize_point(K_ecdh)
-   serialized_k_dh = serialize_MPI(k_dh)
-   K = SHA3-512(serialized_K_ecdh, serialized_k_dh)
-   return K
+  serialized_K_ecdh = serialize_point(K_ecdh)
+  serialized_k_dh = serialize_MPI(k_dh)
+  K = SHA3-512(serialized_K_ecdh, serialized_k_dh)
+  return K
 ```
 
 #### Calculate Double Ratchet Keys
 
 ```
 calculate_ratchet_keys(K):
-  n = ratchet_id you are creating keys for
+  n = the ratchet_id you are creating keys for
   root[n] = SHA3-512(0x01 || K)
   chain_s[n][0] = SHA3-512(0x02 || K)
   chain_r[n][0] = SHA3-512(0x03 || K)
@@ -374,56 +374,58 @@ calculate_ratchet_keys(K):
 #### Decide Between Chain Keys
 
 Both sides will compare their public keys to choose a chain key for sending and receiving:
-- Alice (and similarly for Bob) determines if she is the "low" end or the "high" end of this ratchet.
+- Alice (and similarly, Bob) determines if she is the "low" end or the "high" end of this ratchet.
 If Alice's ephemeral ECDH public key is numerically greater than Bob's public key, then she is the "high" end.
 Otherwise, she is the "low" end.
 - Alice selects the chain keys for sending and receiving:
-  - If she is the "high" end, set `initiator` as `true`, use Ca as the sending chain key (`chain_s`), Cb as the receiving chain key (`chain_r`).
-  - If she is the "low" end, set `initiator` as `false`, use Cb as the sending chain key (`chain_s`), Ca as the receiving chain key (`chain_r`).
+  - If she is the "high" end, set `initiator` as `true`, use Ca as the sending
+  chain key (`chain_s`) and Cb as the receiving chain key (`chain_r`).
+  - If she is the "low" end, set `initiator` as `false`, use Cb as the sending
+  chain key (`chain_s`) and Ca as the receiving chain key (`chain_r`).
 
-    ```
-    decide_between_chain_keys(Ca, Cb):
-      if compare(our_ecdh.public, their_ecdh) > 0
-        return Ca, Cb
-      else
-        return Cb, Ca
-    ```
+```
+decide_between_chain_keys(Ca, Cb):
+  if compare(our_ecdh.public, their_ecdh) > 0
+    return Ca, Cb
+  else
+    return Cb, Ca
+```
 
 ### Deriving new chain keys
 
-When you send data messages you need to derive the chain key:
+When sending data messages, you must derive the chain key:
 
-    ```
-    derive_chain_key(C, i, j):
-      C[i][j] = SHA3-512(C[i][j-1])
-    ```
+```
+derive_chain_key(C, i, j):
+  C[i][j] = SHA3-512(C[i][j-1])
+```
 
 ### Retrieve chain keys
 
-When you receive data messages you need to retrieve the chain key:
+When receiving data messages, you must retrieve the chain key:
 
-    ```
-    retrieve_chain_key(C, i, k):
-      if C[i][k] not exist:
-          C[i][k] = SHA3-512(retrieve_chain_key(C, i, k-1))
-    ```
+```
+retrieve_chain_key(C, i, k):
+  if C[i][k] not exist:
+  C[i][k] = SHA3-512(retrieve_chain_key(C, i, k-1))
+```
 
 ### Calculate Encryption and MAC keys
 
-When you send or receive data messages you need to calculate the message keys:
+When sending or receiving data messages, you must calculate the message keys:
 
-    ```
-    derive_enc_mac_keys(chain_key):
-      Kenc = SHA3-256(0x00 || chain_key)
-      Kmac = SHA3-512(0x01 || chain_key)
-      return MKenc, Kmac
-    ```
+```
+derive_enc_mac_keys(chain_key):
+  Kenc = SHA3-256(0x00 || chain_key)
+  Kmac = SHA3-512(0x01 || chain_key)
+  return MKenc, Kmac
+```
 
 ## Conversation Initialization
 
 OTRv4 will initialize through a Query message or a whitespace tag, as discussed
 in OTRv3 [3]. After this, the conversation is authenticated using a deniable
-authenticated key exchange (DAKE). The conversation can also be started directly
+authenticated key exchange (DAKE). The conversation can also start directly
 with the first message of the DAKE, without a Query message or a whitespace tag.
 
 ### Requesting conversation with older OTR versions
@@ -441,7 +443,6 @@ information, and a signed profile expiration date. Both parties will include
 the user profile in the beginning of the DAKE. The frequency of the user
 profile publication is determined by its expiration and renewal policy.
 
-
 ### Creating an User Profile
 
 To create a user profile, assemble:
@@ -454,10 +455,10 @@ To create a user profile, assemble:
    amount of seconds from the epoch to the expiration date. Its format is the
    same as the "date-time" described in section 5.6 of RFC3339 [8].
 4. Profile Signature: One of the Cramer-Shoup secret key values (`z`) and its
-   generator (`G1`) is used to create signatures of the entire profile. This is
+   generator (`G1`) is used to create signatures of the entire profile. It is
    created using the Ed448 signature algorithm as documented in [4].
-5. (optional) Transition Signature of the profile by the user's OTRv3 DSA key.
-   Transitional signature to enable contacts that trust the user's version 3
+5. (optional) Transition Signature of the profile by the user's OTRv3 DSA key:
+   A transitional signature that enables contacts that trust user's version 3
    DSA key to trust the user's profile in version 4. This is only used if the
    user supports version 3 and 4.
 
@@ -467,8 +468,7 @@ server.
 #### Renewing a Profile
 
 If a renewed profile is not published in a public place, and if the only
-publicly available profile is expired, this puts the user's participation
-deniability at risk.
+publicly available profile is expired, the user's participation deniability is at risk.
 
 Before the profile expires, the user must publish an updated profile with a new
 expiration date. The client establishes the frequency of expiration - this can
@@ -490,7 +490,6 @@ Version (VER):
 
 Version Expiration (PROF-EXP):
   64-bit signed value, big-endian
-
 ```
 
 ### Deniable Authenticated Key Exchange (DAKE)
@@ -505,7 +504,7 @@ encryption (DRE) and a non-interactive zero-knowledge proof of knowledge
 
 Alice long-term Cramer-Shoup key-pair is `SKa = (x1a, x2a, y1a, y2a, za)` and
 `PKa = (Ca, Da, Ha)`. Bob long-term Cramer-Shoup key-pair is `SKb = (x1b, x2b,
-y1b, y2b, zb)` and `PKb = (Cb, Db, Hb)`. Both key pairs are generated with
+y1b, y2b, zb)` and `PKb = (Cb, Db, Hb)`. Both key pairs are generated by
 `DRGen()`.
 
 #### Overview
@@ -576,7 +575,6 @@ The DAKE is considered to start when either:
   * Set `j = 1` because the pre-key message is considered the first in this DH ratchet.
   * Increase ratchet id `i = i + 1`.
 
-
 2. Alice receives the pre-key message. In this case:
   * Generate a new ephemeral ECDH key pair `(x, X)`.
   * Generate a new ephemeral 3072-bit DH key pair: `(a, A)`.
@@ -606,22 +604,21 @@ Regardless of who you are:
 * Calculate `our_ecdh` and `our_dh`.
 * Securely erase `our_ecdh.private` and `our_dh` key pair.
 * Calculate `K = calculate_shared_secret(K_ecdh, k_dh)`. // TODO: is this public and private? 
-* Calculate the SSID from shared secret: let SSID be the first 64 bits of `SHA3-256(0x00 || K)`.
+* Calculate the SSID from shared secret: it is the first 64 bits of `SHA3-256(0x00 || K)`.
 * Calculate the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = calculate_ratchet_keys(K)`.
-
 
 #### Pre-key message
 
 This is the first message of the DAKE. Bob sends it to Alice to commit to a
 choice of DH and ECDH key. A valid Pre-key message is generated as follows:
 
-1. Create a user profile. How to do this is detailed [here](#creating-a-user-profile)
+1. Create a user profile, as detailed [here](#creating-a-user-profile)
 2. Choose a random ephemeral ECDH key pair:
-  * secret key `x` a random element from `Z_q` (448 bits).
+  * secret key `x`, which is a random element from `Z_q` (448 bits).
   * public key `X`
 3. Generates an ephemeral DH secret key pair:
   * secret key `a` (640 bits).
-  * and a public key `A = g3 ^ a`.
+  * public key `A = g3 ^ a`.
 
 A pre-key is an OTR message encoded as:
 
@@ -634,10 +631,10 @@ Message type (BYTE)
 Sender Instance tag (INT)
   The instance tag of the person sending this message.
 Receiver Instance tag (INT)
-  The instance tag of the intended recipient. For a pre-key message this will often be 0,
-  since the other party may not have identified their instance tag yet.
+  The instance tag of the intended recipient. For a pre-key message, this will often be 0
+  since the other party may not have identified its instance tag yet.
 Sender's User Profile (USER-PROF)
-  This is described in the section 'Creating a User Profile'.
+  As described in the section 'Creating a User Profile'.
 X (POINT)
   The ephemeral public ECDH key.
 A (MPI)
@@ -647,22 +644,24 @@ A (MPI)
 #### DRE-Auth message
 
 This is the second message of the DAKE. Alice sends it to Bob to commit to a
-choice of her DH key and acknowledgement of Bob's DH key. The long-term public
-key and DH public keys are encrypted with DRE and authenticated with an NIZKPK.
+choice of her ECDH ephemeral key and her DH ephemeral key, and acknowledgement
+of Bob's ECDH ephemeral key and DH ephemeral key. The ECDH ephemeral public keys
+and DH ephemeral public keys are encrypted with DRE and authenticated with a
+NIZKPK.
 
 A valid DRE-Auth message is generated as follows:
 
-1. Create a user profile. How to do this is detailed [here]
+1. Create an user profile, as detailed [here]
    (#creating-a-user-profile)
 2. Choose a random ephemeral ECDH key pair:
-  * secret key `y` a random element from `Z_q` (448 bits).
+  * secret key `y`, which is a random element from `Z_q` (448 bits).
   * public key `Y`
 3. Generates an ephemeral DH secret key pair:
   * secret key `b` (640 bits).
-  * and a public key `B = g3 ^ b`.
+  * public key `B = g3 ^ b`.
 4. Generate `m = X || Y || A || B`
-5. Compute `DREnc(pubA, pubB, m)` and serialize it as a DRE-M value in the variable `γ`.
-6. Compute `σ = Auth(Hb, zb, {Ha, X}, "Prof_B" || "Prof_A" || X || A || γ)`.
+5. Compute `DREnc(PKa, PKb, m)` and serialize it as a DRE-M value in the variable `γ`.
+6. Compute `σ = Auth(Ha, za, {Hb, Y}, "Prof_B" || "Prof_A" || Y || B || γ)`.
 (TODO: this above Auth invocation is incorrect. It seems to miss Hb in the list of receivers. Compare from the paper:
 Auth(hR , zR , {hI , hR , g1^i }, "Prof_B" || "Prof_A" || X || A || γ))
 
