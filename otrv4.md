@@ -753,25 +753,19 @@ It is also used to [reveal old MAC keys](#revealing-mac-eys).
 
 #### Data Message format
 
-<code>
     Protocol version (SHORT)
-
         The version number of this protocol is 0x0004.
 
     Message type (BYTE)
-
         The Data Message has type 0x03.
 
     Sender Instance tag (INT)
-
         The instance tag of the person sending this message.
 
     Receiver Instance tag (INT)
-
         The instance tag of the intended recipient.
 
     Flags (BYTE)
-
         The bitwise-OR of the flags for this message. Usually you should
         set this to 0x00. The only currently defined flag is:
 
@@ -785,13 +779,12 @@ It is also used to [reveal old MAC keys](#revealing-mac-eys).
     Ratchet id ratchet_id (INT)
     (TODO: why duplicated?)
         Must be strictly greater than 0, and increment by 1 with each ratchet.
-        This should receive the value of i variable.
+        This should be set as sender's i.
 
     Message id message_id (INT)
     (TODO: why duplicated?)
-
         Must be strictly greater than 0, and increment by 1 with each message.
-        This should receive the value of j variable.
+        This should be set with sender's j.
 
     Next Public ECDH Key (POINT)
     (TODO: this description is weird, and the difference between current and next is also confusing)
@@ -804,27 +797,21 @@ It is also used to [reveal old MAC keys](#revealing-mac-eys).
         You should send a NULL value if i % 3 != 0.
 
     Nonce (NONCE)
-
         The nonce used with XSalsa20 to create the encrypted message contained in
         this packet.
 
     Encrypted message (DATA)
-
         Using the appropriate encryption key (see below) derived from the
         sender's and recipient's DH public keys (with the keyids given in this
         message), perform XSalsa20 encryption of the message. The nonce used for
         this operation is also included in the header of the data message packet.
 
     Authenticator (MAC)
-
         The SHA3 MAC, using the appropriate MAC key (see below) of everything
         from the Protocol version to the end of the encrypted message.
 
     Old MAC keys to be revealed (DATA)
-
-        See [Revealing MAC Keys](#revealing-mac-keys)
-
-</code>
+        See Revealing MAC Keys section
 
 #### When you send a Data Message:
 
