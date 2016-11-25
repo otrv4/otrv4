@@ -677,7 +677,7 @@ Sender Instance tag (INT)
 Receiver Instance tag (INT)
   The instance tag of the intended recipient.
 Receiver's User Profile (USER-PROF)
-  This is described in the section 'Creating a User Profile'.
+  As described in the section 'Creating a User Profile'.
 Y (POINT)
   The ephemeral public ECDH key.
 B (MPI)
@@ -691,12 +691,12 @@ B (MPI)
 ## Data Exchange
 
 This section describes how each participant will use the Double Ratchet
-algorithm to exchange [data message](#data-message) initialized with the shared
+algorithm to exchange [data messages](#data-message) initialized with the shared
 secret established in the DAKE.
 
 A message with an empty human-readable part (the plaintext is of zero length, or
 starts with a NUL) is a "heartbeat" packet, and should not be displayed to the
-user. (But it's still useful to effect key rotations.)
+user (but it is still useful for key rotations).
 
 ```
 Alice                                                                           Bob
@@ -740,69 +740,68 @@ It is also used to [reveal old MAC keys](#revealing-mac-eys).
 #### Data Message format
 
     Protocol version (SHORT)
-        The version number of this protocol is 0x0004.
+      The version number of this protocol is 0x0004.
 
     Message type (BYTE)
-        The Data Message has type 0x03.
+      The Data Message has type 0x03.
 
     Sender Instance tag (INT)
-        The instance tag of the person sending this message.
+      The instance tag of the person sending this message.
 
     Receiver Instance tag (INT)
-        The instance tag of the intended recipient.
+      The instance tag of the intended recipient.
 
     Flags (BYTE)
-        The bitwise-OR of the flags for this message. Usually you should
-        set this to 0x00. The only currently defined flag is:
+      The bitwise-OR of the flags for this message. Usually you should
+      set this to 0x00. The only currently defined flag is:
 
-        IGNORE_UNREADABLE (0x01)
+      IGNORE_UNREADABLE (0x01)
 
-            If you receive a Data Message with this flag set, and you are
-            unable to decrypt the message or verify the MAC (because, for
-            example, you don't have the right keys), just ignore the message
-            instead of producing some kind of error or notification to the user.
+        If you receive a Data Message with this flag set, and you are
+        unable to decrypt the message or verify the MAC (because, for
+        example, you don't have the right keys), just ignore the message
+        instead of producing an error or a notification to the user.
 
     Ratchet id ratchet_id (INT)
-        Must be strictly greater than 0, and increment by 1 with each ratchet.
-        This should be set as sender's i.
+      Must be strictly greater than 0, and increment by 1 with each ratchet.
+      This should be set as sender's i.
 
     Message id message_id (INT)
-        Must be strictly greater than 0, and increment by 1 with each message.
-        This should be set with sender's j.
+      Must be strictly greater than 0, and increment by 1 with each message.
+      This should be set with sender's j.
 
     Next Public ECDH Key (POINT)
     (TODO: this description is weird, and the difference between current and next is also confusing)
-        The sender's current ratchet ECDH public key for the sender.
-        This should contain the value of our_ecdh.public_key variable.
+      The sender's current ratchet ECDH public key.
+      This should contain the value of our_ecdh.public_key variable.
 
     Next Public DH Key (MPI)
     (TODO: this description is weird, and the difference between current and next is also confusing)
-        This should contain the value of our_dh.public_key variable.
-        You should send a NULL value if i % 3 != 0.
+      This should contain the value of our_dh.public_key variable.
+      You should send a NULL value if i % 3 != 0.
 
     Nonce (NONCE)
-        The nonce used with XSalsa20 to create the encrypted message contained in
-        this packet.
+      The nonce used with XSalsa20 to create the encrypted message contained in
+      this packet.
 
     Encrypted message (DATA)
-        Using the appropriate encryption key (see below) derived from the
-        sender's and recipient's DH public keys (with the keyids given in this
-        message), perform XSalsa20 encryption of the message. The nonce used for
-        this operation is also included in the header of the data message packet.
+      Using the appropriate encryption key (see below) derived from the
+      sender's and recipient's DH public keys (with the keyids given in this
+      message), perform XSalsa20 encryption of the message. The nonce used for
+      this operation is also included in the header of the data message packet.
 
     Authenticator (MAC)
-        The SHA3 MAC, using the appropriate MAC key (see below) of everything
-        from the Protocol version to the end of the encrypted message.
+      The SHA3 MAC with the appropriate MAC key (see below) for everything:
+      from the protocol version to the end of the encrypted message.
 
     Old MAC keys to be revealed (DATA)
-        See Revealing MAC Keys section
+      See Revealing MAC Keys section
 
 #### When you send a Data Message:
 
-In order to send a data message a key to encrypt the message is
-required. This key will be derived from a previous chain key and if
-the message's counter `j` has been reset to zero keys should be
-rotated.
+In order to send a data message, is required a key to encrypt it. This key
+will be derived from the previous chain key and, if the message's counter `j`
+has been reset to zero, keys should be rotated.
 
 Given a new ratchet:
 
@@ -817,7 +816,7 @@ Given a new ratchet:
 Otherwise:
 
   * Increment last sent message ID ``j = j+1`.
-  * Derive the next sending Chain Key `derive_chain_key(chain_s, i, j)`.
+  * Derive the next sending chain Key `derive_chain_key(chain_s, i, j)`.
   * Securely delete `chain_s[i][j-1]`.
 
 In any event:
@@ -828,7 +827,7 @@ In any event:
    MKenc, MKmac = derive_enc_mac_keys(chain_s[i][j])
    ```
 
-2. Use the encryption key to encrypt the message, and the mac key to calculate its MAC:
+2. Use the encryption key to encrypt the message and the mac key to calculate its MAC:
 
    ```
    Nonce = generateNonce()
@@ -836,18 +835,17 @@ In any event:
    Authenticator = SHA3-512(MKmac || Encrypted_message)
    ```
 
-3. Forget and reveal MAC keys. The conditions for revealing MAC keys is in the
-   [Revealing MAC keys](#revealing-mac-keys) section.
-
+3. Forget and reveal MAC keys. The conditions for revealing MAC keys is stated
+in the [Revealing MAC keys](#revealing-mac-keys) section.
 
 #### When you receive a Data Message:
 
 Use the `message_id` to compute the receiving chain key and calculate encryption and mac keys.
 
-   ```
-   retrieve_chain_key(chain_r, ratchet_id, message_id)
-   MKenc, MKmac = derive_enc_mac_keys(chain_r[ratchet_id][message_id])
-   ```
+```
+  retrieve_chain_key(chain_r, ratchet_id, message_id)
+  MKenc, MKmac = derive_enc_mac_keys(chain_r[ratchet_id][message_id])
+```
 
 Use the "mac key" (`MKmac`) to verify the MAC on the message.
 
@@ -863,20 +861,18 @@ Otherwise:
     is not NULL.
   * Add the MKmac key to list of pending MAC keys to be revealed.
 
-
 ### Revealing MAC Keys
 
 We reveal old MAC keys to provide forgeability of messages. Old MAC keys are
-keys for messages that have already been received, therefore will no longer be
-used to verify the authenticity of a message.
+keys for already received messages and, therefore, will no longer be
+used to verify the authenticity of the message.
 
 MAC keys are revealed with data messages. They are also revealed with heartbeat
 messages (data messages that encode a plaintext of zero length) if the receiver
 has not sent a message in a configurable amount of time. Put them (as a set
-of concatenated 20-byte values) into the "Old MAC keys to be revealed"
-section of the next Data Message you send.
-(TODO: our mac keys are not 20-bytes anymore)
-
+of concatenated 64-byte values) into the "Old MAC keys to be revealed" section
+of the next Data Message you send.
+(TODO: confirm this size)
 
 A receiver can reveal a MAC key in the following case:
 
