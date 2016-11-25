@@ -948,7 +948,7 @@ can't fragment a fragment.
 ####Receiving Fragments:
 
 If you receive a message containing `?OTR|` (note that you'll need to check for
-this before_ checking for any of the other `?OTR:` markers):
+this _before_ checking for any of the other `?OTR:` markers):
 
   * Parse it, extracting instance tags, `index`, `total`, and piece.
   * Discard illegal fragment, if:
