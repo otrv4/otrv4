@@ -3,13 +3,14 @@
 **Status**: proposed
 
 ### Context
-Because of potential classical weaknesses, and the potential of
-quantum computers arriving earlier than predicted, we want an
-additional mechanism that would protect against post-conversation
-decryption of transcripts using those weaknesses.
+
+Because of potential weaknesses in elliptic curves, and the potential of quantum
+computers arriving earlier than predicted we want an additional mechanism that
+would protect against post-conversation decryption of transcripts using those
+weaknesses.
 
 We believe this can be achieved by mixing another key obtained from a
-Diffie-Hellman exchange into the KDFs. This additional key will be
+Diffie-Hellman exchange into the key material. This additional key will be
 referred to as “mix key”.
 
 This proposal specifies:
@@ -21,11 +22,11 @@ root key.
 This proposal does not change the Double Ratchet algorithm, with the
 exception of how to derive root keys.
 
-The first 3072-bit DH key agreement would take place in the DAKE.
-See Nik Unger's paper[1], which specifies Transitionally
-Secure Spawn. The exception to this entry in the paper is that we are
-trying to protect against ECC weaknesses, and SIDH[2] relies on ECC. So
-this will instead be just a DH exchange.
+The first 3072-bit DH key agreement takes place in the DAKE.  See Nik Unger's
+paper[1], which specifies Transitionally Secure Spawn. The difference to this
+entry in the paper is that we are trying to protect against elliptic curve
+weaknesses, and SIDH[2] relies on ECC. So this will instead use a classic Diffie
+Hellman key exchange.
 
 The options for ratcheting/re-deriving this mix key are:
 
@@ -34,7 +35,7 @@ to contribute to the computation.
 2. Obtain a mix key with DH functions which requires the other party to
 contribute to the computation every n times. Between these derivations,
 the mix keys are obtained using a KDF that is seeded with the last DH
-key; n = 3 but might be adjusted depending on performance.
+key; We propose n = 3, but this can be adjusted depending on performance.
 
 ### Algorithm
 
