@@ -177,6 +177,9 @@ Nonce (NONCE):
 
 ED448 point (POINT):
   56 byte unsigned value, big-endian
+
+User Profile(USER-PROF):
+  Detailed in ["User Profile Data Type" section](#user-profile-data-type)
 ```
 
 ### DRE messages and Auth NIZKPK
@@ -451,13 +454,16 @@ profile publication is determined by its expiration and renewal policy.
 To create a user profile, assemble:
 
 1. Cramer-Shoup key-pair: PK, SK
-2. Version support information string in the same format as OTRv3 Query
+2. Version support information: string in the same format as OTRv3 Query
    Messages [3]
 3. Profile Expiration  (TODO: what format?)
-4. (optional) Transition signature is a signature of the profile by the users
-   version 3 DSA key. This is only used if the user supports version 3 and 4.
+4. Profile Signature: signature of the profile using the Cramer-Shoup
+   secret key
+5. (optional) Transition Signature: signature of the profile by the user's
+   version 3 DSA secret key. This is only used if the user supports version 3
+   and 4.
 
-One of the Cramer-Shoup secret key values (`z`) and its generator (`g1`) is
+One of the Cramer-Shoup secret key values (`z`) and its generator (`G1`) is
 used to create signatures of the entire profile. This is created using the
 Ed448 signature algorithm as documented in [4].
 
@@ -495,7 +501,7 @@ Version Expiration (VER-EXP):
 Signature of profile by the Cramer-Shoup Key (MPI)
 
 (optional) Signature of the profile by the user's version 3 DSA key (MPI):
-  Transitional signature to enable contacts that trust the users version 3 DSA
+  Transitional signature to enable contacts that trust the user's version 3 DSA
   key to trust the user's profile in version 4.
 ```
 
