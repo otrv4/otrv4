@@ -287,8 +287,6 @@ Key variables:
   `their_ecdh`: their ECDH ephemeral public key.
   `our_dh`: our DH ephemeral key pair
   `their_dh`: their DH ephemeral public key
-  `dh_shared_secret`: the shared secret previously computed.
-  `macs_to_reveal`: MAC keys pending to be revealed.
 ```
 
 The previously mentioned variables are affected by these events:
