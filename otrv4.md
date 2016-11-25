@@ -14,18 +14,19 @@ messaging protocol, like XMPP.
 3. [Assumptions](#assumptions)
 4. [Security Properties](#security-properties)
 5. [Preliminaries](#preliminaries)
-6. [OTR Conversation Initialization](#otr-conversation-initialization)
+6. [Conversation Initialization](#conversation-initialization)
   1. [User Profile](#user-profile)
   2. [Creating an User Profile](#creating-an-user-profile)
   3. [Deniable Authenticated Key Exchange (DAKE)](#deniable-authenticated-key-exchange-dake)
-7. [Requesting conversation with older OTR version](#requesting-conversation-with-older-otr-version)
+7. [Requesting conversation with older OTR versions](#requesting-conversation-with-older-otr-versions)
 8. [Data exchange](#data-exchange)
   1. [Data Message](#data-message)
   2. [Revealing MAC Keys](#revealing-mac-keys)
   3. [Fragmentation](#fragmentation)
 9. [The protocol state machine](#the-protocol-state-machine)
-10. [Socialist Millionaires' Protocol (SMP) version 2](#socialist-millionaires-protocol-smp-version-2)
-11. [Appendices](#appendices)
+10. [Socialist Millionaires' Protocol (SMP)](#socialist-millionaires-protocol-smp)
+
+[Appendices](#appendices)
   1. [ROM DRE](#rom-dre)
   2. [ROM Authentication](#rom-authentication)
 
@@ -942,12 +943,14 @@ If you have information about the maximum size of message you are able to send
 OTR message as follows:
 
   * Start with the OTR message as you would normally transmit it. For example, a
-Data M  essage would start with `?OTR:AAQD` and end with ".".
+Data M  essage would start with `?OTR:AAQD` and end with `.`.
   * Break it up into sufficiently small pieces. Let the number of pieces be `total`,
 and the pieces be piece[1],piece[2],...,piece[total].
   * Transmit `total` OTRv4 fragmented messages with the following structure:
 
-    ?OTR|sender_instance|receiver_instance,index,total,piece[index],
+```
+?OTR|sender_instance|receiver_instance,index,total,piece[index],
+```
 
 The message should begin with `?OTR|` and ends with `,`.
 
