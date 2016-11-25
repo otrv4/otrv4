@@ -632,6 +632,7 @@ choice of D-H and ECDH key. A valid Pre-key message is generated as follows:
 
 A pre-key is an OTR message encoded as:
 
+(TODO: we should check the message types and see if we can create good encodings for the Base64, just like we have for OTRv3)
 ```
 Protocol version (SHORT)
   The version number of this protocol is 0x0004.
@@ -669,7 +670,8 @@ A valid DRE-Auth message is generated as follows:
 4. Generate `m = X || Y || A || B`
 5. Compute `DREnc(pubA, pubB, m)` and serialize it as a DRE-M value in the variable `γ`.
 6. Compute `σ = Auth(Hb, zb, {Ha, X}, "Prof_B" || "Prof_A" || X || A || γ)`.
-
+(TODO: this above Auth invocation is incorrect. It seems to miss Hb in the list of receivers. Compare from the paper:
+Auth(hR , zR , {hI , hR , g1^i }, "Prof_B" || "Prof_A" || X || A || γ))
 
 A DRE-Auth is an OTR message encoded as:
 
@@ -741,9 +743,11 @@ required. This key will be derived from a previous chain key and if
 the message's counter `j` has been reset to zero keys should be
 rotated. Also this derivation takes into account a DH key, referred to
 as a mix key, which is rotated every third ratchet.
+(TODO: the above paragraph is pretty complicated and hard to understand)
 
 Given a new ratchet begins and either this ratchet is not the first or
 you are the initiator:
+(TODO: And this one)
 
   * Ratchet the ECDH keys. See "Ratcheting the ECDH keys" section.
   * Ratchet the DH keys. See "Ratcheting the DH keys" section.
@@ -794,6 +798,8 @@ TODO: Why do we reject messages with ratchet_id < i-1 if we dont do anything wit
 messages with ratchet_id i-1? Now, we should do (for allowing receiving messages)
 from the previous session when a new DAKE has just finished.
 
+(TODO: what does reject mean)
+
 TODO: We need to be able to decrypt messages from the previous ratchet (yesterday's discussion).
 
 Use the message `ID` to compute the receiving chain key and calculate encryption and mac keys.
@@ -831,12 +837,16 @@ MAC keys are revealed with data messages. They are also revealed with heartbeat
 messages (data messages that encode a plaintext of zero length) if the receiver
 has not sent a message in a configurable amount of time. Put them (as a set
 of concatenated 20-byte values) into the "Old MAC keys to be revealed"
-section of the next Data Message you send. 
+section of the next Data Message you send.
+(TODO: our mac keys are not 20-bytes anymore)
+
 
 A receiver can reveal a MAC key in the following case:
 
 - the receiver has received a message and has verified the message's authenticity
 - the receiver has discarded associated message keys
+(TODO: is this an AND or an OR condition?)
+
 
 ### Data Message format
 
@@ -870,23 +880,24 @@ Flags (BYTE)
         instead of producing some kind of error or notification to the user.
 
 Ratchet id ratchet_id (INT)
-
+(TODO: why duplicated?)
     Must be strictly greater than 0, and increment by 1 with each ratchet.
     This should receive the value of i variable.
 
 Message id message_id (INT)
+(TODO: why duplicated?)
 
     Must be strictly greater than 0, and increment by 1 with each message.
     This should receive the value of j variable.
 
 Next Public ECDH Key (POINT)
-
+(TODO: this description is weird, and the difference between current and next is also confusing)
     The sender's current ratchet ECDH public key for the sender.
-    This should receive the value of our_ecdh.public_key variable.
+    This should contain the value of our_ecdh.public_key variable.
 
 Next Public DH Key (MPI)
-
-    This should receive the value of our_dh.public_key variable.
+(TODO: this description is weird, and the difference between current and next is also confusing)
+    This should contain the value of our_dh.public_key variable.
     You should send a NULL value if i % 3 != 0.
 
 Nonce (NONCE)
@@ -919,10 +930,15 @@ conversation with Charlie. This state consists of two main state variables, as
 well as some other information (such as encryption keys). The two main state
 variables are:
 
+(TODO: the whole "unprotected conversation" is very strange)
+
+
 ### Message state
 
 The message state variable, `msgstate`, controls what happens to outgoing messages
 typed by the user. It can take one of three values:
+(TODO: this way of talking about msgstate is very implementation specific. Do we need it? Can we express it in less "computery" terms?)
+
 
 ```
 MSGSTATE_PLAINTEXT
@@ -964,6 +980,8 @@ AUTHSTATE_AWAITING_DRE_AUTH
 ```
 
 ### Policies
+(TODO: why are policies inside of the state machine??)
+(TODO: do these policies belong in the spec? They seem to be implementation specific. Maybe we can have an implementation suggestions section instead?)
 
 OTR clients can set different policies for different correspondents. For
 example, Alice could set up her client so that it speaks version 4 of the OTR
@@ -1015,6 +1033,8 @@ Received messages:
   * Pre-key message
   * DRE-Auth message
   * Data Message
+
+(TODO: maybe we should also mention that we need to handle the case of any OTRv3 message arriving)
 
 The following sections will outline which actions to take for each case. They all
 assume that at least `ALLOW_V3` or `ALLOW_V4` is set; if not, then OTR is completely
@@ -1187,11 +1207,13 @@ Verify the information in the message. If the verification succeeds:
   * If you have not sent a message to this correspondent in some (configurable) time, send a "heartbeat" message. // TODO: what is the configurable time?
 
 If the received message contains a TLV type 1:
-  
+(TODO: in what order should TLVs be processed? Should we end the conversation immediately, or do other things first?)
+
   * Forget all encryption keys for this correspondent, and transition `msgstate` to `MSGSTATE_FINISHED`.
 
 Otherwise: 
-  
+(TODO: this otherwise seems to be if the data message doesn't contain TLV type 1, which is incorrect)
+
   * Inform the user that an unreadable encrypted message was received, and reply with an Error Message.
 
 If `msgstate` is `MSGSTATE_PLAINTEXT` or `MSGSTATE_FINISHED`:
@@ -1213,6 +1235,8 @@ If `msgstate` is `MSGSTATE_ENCRYPTED`:
 If `msgstate` is `MSGSTATE_FINISHED`:
 
   * Transition `msgstate` to `MSGSTATE_PLAINTEXT`.
+(TODO: is this correct? I thought ending an OTR conversation should always transition to finished?)
+
 
 #### Implementation notes (OR Considerations for networks which allow multiple devices)
 
@@ -1288,6 +1312,8 @@ portion of the secret has length 0 and value NUL. Lastly, OTRv4 creates
 fingerprints using SHA3-256. Thus, the size of the fingerprint in the "Secret
 Information" section of OTRv3 [3] should be 32 bytes in size.
 
+(TODO: the section on the question and TLV type 7 is weird)
+
 To define the SMP values under Ed448, we reuse the previously defined generator
 for Cramer-Shoup:
 
@@ -1352,6 +1378,7 @@ revealed.
 
 In the following actions, there are many places where a SHA3-512 hash of an
 integer followed by one or two MPIs is taken. The input to this hash function is:
+(TODO: is it 512 or 256? The above section said 256)
 
 ```
 Version (BYTE)
@@ -1576,7 +1603,9 @@ Set smpstate to `SMPSTATE_EXPECT1`, as no more messages are expected from Bob.
 The DRE scheme consists of three functions:
 
 `PK, SK = DRGen()`, a key generation function.
+
 `γ = DREnc(PK1, PK2, m)`, an encryption function.
+
 `m = DRDec(PK1, PK2, SKi, γ)`, a decryption function.
 
 #### Domain parameters
@@ -1587,6 +1616,8 @@ same q as Curve 448. The generators G1 and G2 are:
 G1 = (501459341212218748317573362239202803024229898883658122912772232650473550786782902904842340270909267251001424253087988710625934010181862, 44731490761556280255905446185238890493953420277155459539681908020022814852045473906622513423589000065035233481733743985973099897904160)
 
 G2 = (117812161263436946737282484343310064665180535357016373416879082147939404277809514858788439644911793978499419995990477371552926308078495, 19)
+
+(TODO: we need to specify how these values were generated)
 
 #### Dual Receiver Key Generation: DRGen()
 
@@ -1610,6 +1641,7 @@ Let `{C1, D1, H1} = PK1` and `{C2, D2, H2} = PK2`
   2. Compute `αi = HashToScalar(U1i || U2i || Ei)`.
   3. Compute `Vi = Ci*ki + Di*(ki * αi)`
 3. Compute `K_enc = SHA3-512(K)`. K is compressed from 446 bits to 256 bits because XSalsa20 has a maximum key size of 256.
+(TODO: is the above correct? Shouldn't it be SHA3-256 in that case?)
 4. Pick a random 24 bytes `nonce` and compute `φ = XSalsa20-Poly1305_K_enc(m, nonce)`
 5. Generate a NIZKPK:
   1. for i ∈ {1, 2}:
@@ -1664,8 +1696,10 @@ SKi is the secret key of the person decrypting the message.
 The Authentication scheme consists of two functions:
 
 `σ = Auth(A_2, a_2, {A_1, A_3}, m)`, an authentication function.
+
 `Verif({A_1, A_2, A_3}, σ, m)`, a verification function.
 
+(TODO: the above Auth invocation is incorrect, we need to give it three public keys)
 #### Domain parameters
 
 We reuse the previously defined generator in Cramer-Shoup of DRE:
