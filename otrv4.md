@@ -297,6 +297,7 @@ This section describes the functions used to manage the key material.
 
 
 (TODO: what happens if you ratchet without sending any messages? Are we deleting key material we need?)
+
 #### Ratcheting the ECDH keys
 
 The participant invoking this is moving into a new ECDH ratchet. The next data
@@ -310,6 +311,7 @@ When you ratchet the ECDH keys, you:
 * Reset the last sent message ID `j = 0`.
 
 (TODO: what happens if you ratchet without sending any messages? Are we deleting key material we need?)
+
 #### Ratcheting the DH keys
 
 The rotation of the DH keys does not happen every ratchet but
@@ -504,9 +506,9 @@ Transitional Fingerprints (TRANSITION-FP)
 
 ### Deniable Authenticated Key Exchange (DAKE)
 
-This section outlines the flow of the Deniable Authenticated Key Exchange, which
-is a way for two parties to mutually agree upon a shared key and authenticate
-one another while also providing participation deniability.
+This section outlines the flow of the Deniable Authenticated Key Exchange. This is a
+way to mutually agree upon a shared key for the two parties and authenticate one another
+while providing participation deniability.
 
 This protocol is derived from the [Spawn protocol][2], which uses dual-receiver
 encryption (DRE) and a non-interactive zero-knowledge proof of knowledge
@@ -517,16 +519,17 @@ Alice long-term Cramer-Shoup key-pair is `SKa = (x1a, x2a, y1a, y2a, za)` and
 y1b, y2b, zb)` and `PKb = (Cb, Db, Hb)`. Both key pairs are generated with
 `DRGen()`.
 
-(TODO: it might be useful to specify that the DH and ECDH keys are ephemeral)
 #### Overview
 
 ```
-a, b: DH secret key
-A, B: DH public key
+a, b: DH ephemeral secret key
+// TODO: following the notation, this seems to imply that A and B are points. 
+// These names should be changed. 
+A, B: DH ephemeral public key
 K_dh: mix-key, a shared secret computed from a DH exchange = A^b, B^a
 
-x, y: ECDH secret key
-X, Y: ECDH public key = G1*x, G1*y
+x, y: ECDH ephemeral secret key
+X, Y: ECDH ephemeral public key = G1*x, G1*y
 K_ecdh: a shared secret computed from an ECDH exchange = X*y, Y*x
 ```
 
@@ -547,7 +550,6 @@ Bob will be initiating the DAKE with Alice.
 2. Generates an ephemeral DH secret key `b` and a public key `B`.
 3. Sends Alice a pre-key message `ψ1 = ("Prof_B", Y, B)`. Prof_B is
    Bob's User Profile.
-
 
 **Alice:**
 
@@ -598,7 +600,6 @@ The DAKE is considered to start when either:
   * Set `their_dh` as their DH ephemeral public key from the DAKE (`B`).
   * Increase ratchet id `i = i + 1`.
   * Reply with a DRE-Auth message.
-
 
 #### After you complete the DAKE
 
@@ -694,7 +695,6 @@ Receiver's User Profile (USER-PROF)
 σ (AUTH)
   The Auth value.
 ```
-
 
 ## Data Exchange
 
@@ -844,7 +844,6 @@ A receiver can reveal a MAC key in the following case:
 - the receiver has received a message and has verified the message's authenticity
 - the receiver has discarded associated message keys
 
-
 ### Data Message format
 
 ```
@@ -917,7 +916,6 @@ Old MAC keys to be revealed (DATA)
 
     See "Revealing MAC Keys"
 ```
-
 
 ## The protocol state machine
 
@@ -996,11 +994,9 @@ REQUIRE_ENCRYPTION
 SEND_WHITESPACE_TAG
   Advertise your support of OTR using the whitespace tag.
 
-// TODO: why?
 WHITESPACE_START_DAKE
   Start the OTR DAKE when you receive a whitespace tag.
 
-// TODO: why?
 ERROR_START_DAKE
   Start the OTR DAKE when you receive an OTR Error Message.
 ```
@@ -1235,7 +1231,6 @@ If `msgstate` is `MSGSTATE_FINISHED`:
   the message client (for example, XMPP clients can decide to reply only to
   the device you have more recently received a message from).
 
-
 #### Things to consider
 
 TODO: This whole section is a big TODO.
@@ -1296,7 +1291,7 @@ are serialized and how they are computed. OTRv4 also reuses the SMP Message 1Q
 with TLV type 7 for situations where a user question is sent and when it is not
 sent. In cases where the question is not present, the user-speicified DATA
 portion of the secret has length 0 and value NUL. Lastly, OTRv4 creates
-fingerprints using SHA3-256. Thus the size of the fingerprint in the "Secret
+fingerprints using SHA3-256. Thus, the size of the fingerprint in the "Secret
 Information" section of OTRv3 [3] should be 32 bytes in size.
 
 To define the SMP values under Ed448, we reuse the previously defined generator
@@ -1579,7 +1574,6 @@ If smpstate is SMPSTATE_EXPECT4:
     2. Determine if `x = y` by checking the equivalent condition that `(Pa / Pb) = Rab`.
 
 Set smpstate to `SMPSTATE_EXPECT1`, as no more messages are expected from Bob.
-
 
 ## Appendices
 
