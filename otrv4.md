@@ -245,7 +245,10 @@ keys.
 For exchanging data messages, OTRv4 uses a key structure and key rotation
 strategy with the [Double Ratchet] algorithm [6] at its core. As a result we
 will use many of the terms within the Double Ratchet domain to describe the
-difference in the context of OTRv4.
+difference in the context of OTRv4. A cryptographic ratchet is a one way
+mechanism for deriving new cryptographic keys from previous keys. New keys
+cannot be used to calculate the old keys. Its name comes from the mechanical
+ratchet.
 
 OTRv4 retains the Diffie-Hellman Ratchet [7] and Symmetric Key Ratchet [8] from
 the algorithm.
@@ -261,8 +264,10 @@ Ratchet.
 
 In order to manage keys, each correspondent keeps track of:
 
+As the ratchet moves forward through its keys, its state is kept with the
+following identification values:
+
 (TODO: the below should be consistent with our naming conventions, uppercase/lowercase)
-(TODO: we probably need to defined the word ratchet somewhere, or at least how it's used here)
 ```
 State variables:
   initiator: the participant who should perform the first root key rotation after the DAKE completes.
