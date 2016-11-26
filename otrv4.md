@@ -799,23 +799,23 @@ It is also used to [reveal old MAC keys](#revealing-mac-eys).
 
 #### When you send a Data Message:
 
-In order to send a data message, is required a key to encrypt it. This key
+In order to send a data message, a key is required to encrypt it. This key
 will be derived from the previous chain key and, if the message's counter `j`
 has been reset to zero, keys should be rotated.
 
 Given a new ratchet:
 
   * Ratchet the ECDH keys. See "Ratcheting the ECDH keys" section.
-  * Calculate ECDH secret by using our_ecdh and their_ecdh.
+  * Calculate ECDH secret by using `our_ecdh` and `their_ecdh`.
   * Calculate the `dh_shared_secret`.
-  * Calculate the mix key by `ECDH(our_ecdh, their_ecdh) || dh_shared_secret`
-  * Derive new set of keys root[i], chain_s[i][j], chain_r[i][j]` from mix key.
+  * Calculate the `mix key` by `ECDH(our_ecdh, their_ecdh) || dh_shared_secret`
+  * Derive new set of keys `root[i]`, `chain_s[i][j]`, `chain_r[i][j]` from `mix key`.
   * Securely delete the root key and all chain keys from the ratchet `i-2`.
-  * Securely delete mixed key and dh_shared_secret.
+  * Securely delete the `mix key` and the `dh_shared_secret`.
 
 Otherwise:
 
-  * Increment last sent message ID ``j = j+1`.
+  * Increment last sent message ID `j = j+1`.
   * Derive the next sending chain Key `derive_chain_key(chain_s, i, j)`.
   * Securely delete `chain_s[i][j-1]`.
 
@@ -840,22 +840,22 @@ in the [Revealing MAC keys](#revealing-mac-keys) section.
 
 #### When you receive a Data Message:
 
-Use the `message_id` to compute the receiving chain key and calculate encryption and mac keys.
+Use the `message_id` to compute the receiving chain key, and calculate encryption and mac keys.
 
 ```
   retrieve_chain_key(chain_r, ratchet_id, message_id)
   MKenc, MKmac = derive_enc_mac_keys(chain_r[ratchet_id][message_id])
 ```
 
-Use the "mac key" (`MKmac`) to verify the MAC on the message.
+Use the "mac key" (`MKmac`) to verify the MAC of the message.
 
 If the message verification fails, reject the message.
 
 Otherwise:
 
-  * Decrypt the message using the "encryption key" (`MKenc`) and securely delete MKenc.
+  * Decrypt the message using the "encryption key" (`MKenc`) and securely delete it.
   * Securely delete receiving chain keys older than `message_id-1`.
-  * Set `j = 0` to indicate a new DH-ratchet should happen next time you send a message.
+  * Set `j = 0` to indicate that a new DH-ratchet should happen the next time you send a message.
   * Set `their_ecdh` as the "Next Public ECDH key" from the message.
   * Set `their_dh` as the "Next Public DH Key" from the message, if it
     is not NULL.
@@ -882,104 +882,101 @@ A receiver can reveal a MAC key in the following case:
 
 ### Fragmentation
 
-Some networks may have a maximum message size that is too small to contain an
+Some networks may have a `maximum message size` that is too small to contain an
 encoded OTR message. In that event, the sender may choose to split the message
 into a number of fragments. This section describes the format of the fragments.
 
 OTRv4 has the same message fragmentation as OTRv3 without compatibility with version 2.
-This means that fragmentation is performed in OTRv4 in the same why as specified in OTRv3,
-format is the same so you will have to wait until after reassembly to finalize
-how to deal with a message.
+This means that fragmentation is performed in OTRv4 in the same why as specified in OTRv3:
+the format is the same so you will have to wait for reassembly to finalize,
+to deal with a message.
 
 All OTRv4 clients must be able to assemble received fragments, but performing
 fragmentation on outgoing messages is optional.
 
 #### Transmitting Fragments
 
-If you have information about the maximum size of message you are able to send
+If you have information about the `maximum message size` you are able to send
 (the different IM networks have different limits), you can fragment an encoded
 OTR message as follows:
 
   * Start with the OTR message as you would normally transmit it. For example, a
-Data M  essage would start with `?OTR:AAQD` and end with `.`.
-  * Break it up into sufficiently small pieces. Let the number of pieces be `total`,
-and the pieces be piece\[1\],piece\[2\],...,piece[total].
+Data Message would start with `?OTR:AAQD` and end with `.`.
+  * Break it up into sufficiently small pieces. Let this number of pieces be `total`,
+and the pieces be `piece\[1\],piece\[2\],...,piece[total]`.
   * Transmit `total` OTRv4 fragmented messages with the following structure:
 
-```
-?OTR|sender_instance|receiver_instance,index,total,piece[index],
-```
+  ```
+  ?OTR|sender_instance|receiver_instance,index,total,piece[index],
+  ```
 
-The message should begin with `?OTR|` and ends with `,`.
+The message should begin with `?OTR|` and end with `,`.
 
 Note that `index` and `total` are unsigned short ints (2 bytes), and each has a
 maximum value of 65535. Also, each `piece[index]` must be non-empty.
 The instance tags, `index` and `total` values may have leading zeroes.
 
-Note that fragments are not themselves messages that can be fragmented: you
-can't fragment a fragment.
+Note that fragments are not messages that can be fragmented: you can't fragment
+a fragment.
 
 ####Receiving Fragments:
 
 If you receive a message containing `?OTR|` (note that you'll need to check for
 this _before_ checking for any of the other `?OTR:` markers):
 
-  * Parse it, extracting instance tags, `index`, `total`, and piece.
+  * Parse it, extracting instance tags, `index`, `total`, and `piece[index]`.
   * Discard illegal fragment, if:
-    * the recipient's own instance tag does not match the listed receiver instance
-tag, and the listed receiver instance tag is not zero, should discard the message
-and optionally pass along a warning for the user.
-    * index is 0
-    * total is 0
-    * index bigger than total
+       * the recipient's own instance tag does not match the listed receiver instance tag
+       * and the listed receiver instance tag is not zero, 
+    * then, discard the message and optionally pass a warning to the user.
+    * `index` is 0
+    * `total` is 0
+    * `index` is bigger than total
 
   * If this is the first fragment:
     * Forget any stored fragment you may have
-    * Store piece
-    * Store index and total
-  * If this is the following fragment (same stored total and index==index+1):
-    * Append piece to stored pice.
-    * Store index and total
+    * Store `piece`
+    * Store `index` and `total`
+  
+  * If this is the following fragment (same stored `total` and `index==index+1`):
+    * Append `piece` to stored `piece`
+    * Store `index` and `total`
+
   * Otherwise:
     * Forget any stored fragment you may have
-    * Forget stored piece
-    * Forget stored index and total
+    * Forget stored `piece`
+    * Forget stored `index` and `total`
 
-After this, if stored total is bigger than 0 stored index is equal to stored total,
+After this, if stored `total` is bigger than 0 and stored `index` is equal to stored `total`,
 treat piece as the received message.
 
 If you receive a non-OTR message, or an unfragmented message, forget any stored
-value you may have (piece, total and, index).
+value you may have (`piece`, `total` and, `index`).
 
 For example, here is a Data Message we would like to transmit over a network with
-an unreasonably small maximum message size:
+an unreasonably small `maximum message size`:
 
     ?OTR:AAQD--here-is-my-very-long-message.
 
-We could fragment this message into (for example) three pieces:
+We could fragment this message into three pieces:
 
     ?OTR|5a73a599|27e31597,00001,00003,?OTR:AAQD--here,
     ?OTR|5a73a599|27e31597,00002,00003,is-my-very-long,
     ?OTR|5a73a599|27e31597,00003,00003,-message,
 
-
 ## The protocol state machine
 
 An OTR client maintains separate state for every correspondent. For example,
-Alice may have an active OTR conversation with Bob, while having an unprotected
-conversation with Charlie. This state consists of two main state variables, as
-well as some other information (such as encryption keys). The two main state
-variables are:
-
-(TODO: the whole "unprotected conversation" is very strange)
-
+Alice may have an active OTR conversation with Bob, while having an insecure
+conversation with Charlie. This state machine consists of two main state
+variables, as well as some other information (such as encryption keys). The two
+main state variables are:
 
 ### Message state
 
-The message state variable, `msgstate`, controls what happens to outgoing messages
-typed by the user. It can take one of three values:
+The message state variable, `msgstate`, controls what happens to outgoing
+messages typed by the user. It can take one of three values:
 (TODO: this way of talking about msgstate is very implementation specific. Do we need it? Can we express it in less "computery" terms?)
-
 
 ```
 MSGSTATE_PLAINTEXT
@@ -1027,9 +1024,9 @@ AUTHSTATE_AWAITING_DRE_AUTH
 OTR clients can set different policies for different correspondents. For
 example, Alice could set up her client so that it speaks version 4 of the OTR
 protocol. Nevertheless, she may also add an exception for Charlie, who she knows
-talks through a client that runs an old version of the protocol. Therefore, the client
-will start the appropiate OTR conversation in correspondace with the other side,
-or will refuse to send non-encrypted messages to Bob.
+talks through a client that runs an old version of the protocol. Therefore, the
+client will start the appropiate OTR conversation in correspondace with the
+other side, or will refuse to send non-encrypted messages to Bob.
 
 The policies that can be set (on a global or per-correspondent basis) are any
 combination of the these boolean flags:
@@ -1077,16 +1074,16 @@ Received messages:
 
 (TODO: maybe we should also mention that we need to handle the case of any OTRv3 message arriving)
 
-The following sections will outline which actions to take for each case. They all
-assume that at least `ALLOW_V3` or `ALLOW_V4` is set; if not, then OTR is completely
-disabled and no special handling of messages should be done. Version 1 and 2 messages
-are out of the scope of this specification.
+The following sections will outline which actions to take for each case. They
+all assume that at least `ALLOW_V3` or `ALLOW_V4` is set; if not, then OTR is
+completely disabled and no special handling of messages should be done. Version
+1 and 2 messages are out of the scope of this specification.
 
-For version 3 and 4 messages, if the receiving instance tag is not equal to its own,
-the message should be discarded and the user optionally warned.
+For version 3 and 4 messages, if the receiving instance tag is not equal to its
+own, the message should be discarded and the user optionally warned.
 
-The exception here is the DH Commit Message where the recipient instance tag may be 0,
-which indicates that no particular instance is specified.
+The exception here is the DH Commit Message where the recipient instance tag may
+be 0, which indicates that no particular instance is specified.
 
 #### User requests to start an OTR conversation
 
@@ -1097,7 +1094,8 @@ which indicates that no particular instance is specified.
 If `msgstate` is `MSGSTATE_PLAINTEXT`:
 
   * Simply display the message to the user.
-  * If `REQUIRE_ENCRYPTION` is set, warn the user that the message was received unencrypted.
+  * If `REQUIRE_ENCRYPTION` is set, warn the user that the message was received
+    unencrypted.
 
 If `msgstate` is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
 
@@ -1109,7 +1107,8 @@ If `msgstate` is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
 If `msgstate` is `MSGSTATE_PLAINTEXT`:
 
   * Remove the whitespace tag and display the message to the user.
-  * If `REQUIRE_ENCRYPTION` is set, warn the user that the message was received unencrypted.
+  * If `REQUIRE_ENCRYPTION` is set, warn the user that the message was received
+    unencrypted.
 
 If `msgstate` is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
 
@@ -1152,11 +1151,11 @@ If the message is version 4 and `ALLOW_V4` is not set
 
 If `authstate` is `AUTHSTATE_AWAITING_DRE_AUTH`:
 
-This indicates that you have sent a Pre-key message to your correspondent and that
-either she didn't receive it or didn't receive it yet; but has sent you one as well.
+This indicates that you have sent a Pre-key message to your correspondent and that either she didn't receive it or didn't receive it yet; but has sent you one
+as well.
 
-The symmetry will be broken by comparing the hashed X you sent in your pre-key with
-the one you received, considered as 32-byte unsigned big-endian values.
+The symmetry will be broken by comparing the hashed `X` you sent in your pre-key
+with the one you received, considered as 32-byte unsigned big-endian values.
 
 If yours is the lower hash value:
 
@@ -1171,7 +1170,7 @@ message, you should:
 
   * Verify that the user profile signature is valid.
   * Verify that the user profile is not expired.
-  * Verify that the point X received in the pre-key message is on curve 448.
+  * Verify that the point `X` received in the pre-key message is on curve 448.
   * Verify that the DH public key is from the correct group.
 
 If everything checks out:
@@ -1210,9 +1209,9 @@ If everything verifies:
 Otherwise:
 
   * Ignore the message. This may cause the sender to be in an invalid
-`msgstate` equals `MSGSTATE_ENCRYPTED`. This can be detected as soon as she tries
-to send a next data message as it would not be possible to decrypt it and an OTR error
-message will be replied.
+  `msgstate` equals `MSGSTATE_ENCRYPTED`. This can be detected as soon as she
+  tries to send a next data message as it would not be possible to decrypt it
+  and an OTR error message will be replied.
 
 #### User types a message to be sent
 
@@ -1259,8 +1258,7 @@ Otherwise:
 
 If `msgstate` is `MSGSTATE_PLAINTEXT` or `MSGSTATE_FINISHED`:
 
-   * Inform the user that an unreadable encrypted message was received, and reply
-with an Error Message.
+   * Inform the user that an unreadable encrypted message was received, and reply with an Error Message.
 
 #### User requests to end an OTR conversation
 
@@ -1277,7 +1275,6 @@ If `msgstate` is `MSGSTATE_FINISHED`:
 
   * Transition `msgstate` to `MSGSTATE_PLAINTEXT`.
 (TODO: is this correct? I thought ending an OTR conversation should always transition to finished?)
-
 
 #### Implementation notes (OR Considerations for networks which allow multiple devices)
 
@@ -1514,7 +1511,6 @@ cP (MPI), d5 (MPI), d6 (MPI)
   A zero-knowledge proof that Pb and Qb were created according to the protocol given above.
 ```
 
-
 #### SMP message 3
 
 SMP message 3 is Alice's final message in the SMP exchange. It has the last of
@@ -1544,7 +1540,6 @@ Ra (POINT)
 cR (MPI), d7 (MPI)
   A zero-knowledge proof that Ra was created according to the protocol given above.
 ```
-
 
 #### SMP message 4
 
@@ -1586,7 +1581,6 @@ If smpstate is `SMPSTATE_EXPECT1`:
 * Create a SMP message 2 and send it to Alice.
 * Set smpstate to `SMPSTATE_EXPECT3`.
 
-
 #### Receiving a SMP message 2
 
 If smpstate is not `SMPSTATE_EXPECT2`:
@@ -1602,7 +1596,6 @@ If smpstate is `SMPSTATE_EXPECT2`:
     4. Check that `cP = HashToScalar(5 || G3*d5 + Pb*cP || G*d5 + G2*d6 + Qb*cP)`.
 * Create SMP message 3 and send it to Bob.
 * Set smpstate to `SMPSTATE_EXPECT4`.
-
 
 #### Receiving a SMP message 3
 
@@ -1621,7 +1614,6 @@ If smpstate is `SMPSTATE_EXPECT3`:
   1. Compute `Rab = Ra*b3`.
   2. Determine if `x = y` by checking the equivalent condition that `Pa - Pb = Rab`.
 * Set smpstate to `SMPSTATE_EXPECT1`, as no more messages are expected from Alice.
-
 
 #### Receiving a SMP message 4
 
@@ -1654,13 +1646,18 @@ The DRE scheme consists of three functions:
 
 #### Domain parameters
 
-The Cramer-Shoup scheme uses a group (G, q, G1, G2). This is a group with the
-same q as Curve 448. The generators G1 and G2 are:
+The Cramer-Shoup scheme uses a group (`G`, `q`, `G1`, `G2`). This is a group with the same `q` as Curve 448. The generators `G1` and `G2` are:
 
-G1 = (501459341212218748317573362239202803024229898883658122912772232650473550786782902904842340270909267251001424253087988710625934010181862, 44731490761556280255905446185238890493953420277155459539681908020022814852045473906622513423589000065035233481733743985973099897904160)
+```
+G1 = (5014593412122187483175733622392028030242298988836581229127722326504735507
+86782902904842340270909267251001424253087988710625934010181862,
+4473149076155628025590544618523889049395342027715545953968190802002281485204547
+3906622513423589000065035233481733743985973099897904160)
 
-G2 = (117812161263436946737282484343310064665180535357016373416879082147939404277809514858788439644911793978499419995990477371552926308078495, 19)
+G2 = (1178121612634369467372824843433100646651805353570163734168790821479394042
+77809514858788439644911793978499419995990477371552926308078495, 19)
 
+```
 (TODO: we need to specify how these values were generated)
 
 #### Dual Receiver Key Generation: DRGen()
@@ -1684,8 +1681,7 @@ Let `{C1, D1, H1} = PK1` and `{C2, D2, H2} = PK2`
     - `Ei = (Hi*ki) + K`
   2. Compute `αi = HashToScalar(U1i || U2i || Ei)`.
   3. Compute `Vi = Ci*ki + Di*(ki * αi)`
-3. Compute `K_enc = SHA3-512(K)`. K is compressed from 446 bits to 256 bits because XSalsa20 has a maximum key size of 256.
-(TODO: is the above correct? Shouldn't it be SHA3-256 in that case?)
+3. Compute `K_enc = SHA3-256(K)`. K is compressed from 446 bits to 256 bits because XSalsa20 has a maximum key size of 256.
 4. Pick a random 24 bytes `nonce` and compute `φ = XSalsa20-Poly1305_K_enc(m, nonce)`
 5. Generate a NIZKPK:
   1. for i ∈ {1, 2}:
@@ -1732,7 +1728,7 @@ SKi is the secret key of the person decrypting the message.
     - `T3 = U1i*y1i`
     - `T4 = U2i*y2i`
   6. Verify `T1 + T2 + (T3 + T4)*αi ≟ Vi`.
-3. Recover secret key `K_enc = SHA3-512(Ei - U1i*zi)`. K is compressed from 446 bits to 256 bits because XSalsa20 has a maximum key size of 256.
+3. Recover secret key `K_enc = SHA3-256(Ei - U1i*zi)`. K is compressed from 446 bits to 256 bits because XSalsa20 has a maximum key size of 256.
 4. Decrypt `m = XSalsa20-Poly1305_K_enc(φ, nonce)`.
 
 ### ROM Authentication
@@ -1741,14 +1737,19 @@ The Authentication scheme consists of two functions:
 
 `σ = Auth(A_2, a_2, {A_1, A_3}, m)`, an authentication function.
 
-`Verif({A_1, A_2, A_3}, σ, m)`, a verification function.
+`Verify({A_1, A_2, A_3}, σ, m)`, a verification function.
 
 (TODO: the above Auth invocation is incorrect, we need to give it three public keys)
 #### Domain parameters
 
 We reuse the previously defined generator in Cramer-Shoup of DRE:
 
-G = (501459341212218748317573362239202803024229898883658122912772232650473550786782902904842340270909267251001424253087988710625934010181862, 44731490761556280255905446185238890493953420277155459539681908020022814852045473906622513423589000065035233481733743985973099897904160).
+```
+G = (501459341212218748317573362239202803024229898883658122912772232650473550786
+782902904842340270909267251001424253087988710625934010181862,
+44731490761556280255905446185238890493953420277155459539681908020022814852045473
+906622513423589000065035233481733743985973099897904160).
+```
 
 #### Authentication: Auth(A2, a2, {A1, A3}, m):
 
@@ -1764,7 +1765,7 @@ m is the message to authenticate.
 7. Compute `r1 = t1 - c1 * a2 (mod q)`.
 8. Send `σ = (c1, r1, c2, r2, c3, r3)`.
 
-#### Verification: Verif({A1, A2, A3}, σ, m)
+#### Verification: Verify({A1, A2, A3}, σ, m)
 
 1. Parse σ to retrive components `(c1, r1, c2, r2, c3, r3)`.
 2. Compute `T1 = G*r1 + A1*c1`
