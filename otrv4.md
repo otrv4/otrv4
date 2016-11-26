@@ -1418,8 +1418,8 @@ revealed.
 ### SMP Hash function
 
 In the following actions, there are many places where a SHA3-512 hash of an
-integer followed by one or two MPIs is taken. The input to this hash function is:
-(TODO: is it 512 or 256? The above section said 256)
+integer followed by one or two MPIs is taken. This is defined as `HashToScalar(d)`.
+The input to this hash function is:
 
 ```
 Version (BYTE)
