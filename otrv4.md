@@ -13,7 +13,7 @@ messaging protocol, like XMPP.
 2. [High Level Overview](#high-level-overview)
 3. [Assumptions](#assumptions)
 4. [Security Properties](#security-properties)
-5. [Preliminaries](#preliminaries)
+5. [Notation and parameters](#notation-and-parameters)
 6. [Conversation Initialization](#conversation-initialization)
   1. [User Profile](#user-profile)
   2. [Creating an User Profile](#creating-an-user-profile)
