@@ -872,7 +872,6 @@ messages (data messages that encode a plaintext of zero length) if the receiver
 has not sent a message in a configurable amount of time. Put them (as a set
 of concatenated 64-byte values) into the "Old MAC keys to be revealed" section
 of the next Data Message you send.
-(TODO: confirm this size)
 
 A receiver can reveal a MAC key in the following case:
 
