@@ -1252,17 +1252,16 @@ If `msgstate` is `MSGSTATE_PLAINTEXT` or `MSGSTATE_FINISHED`:
 
 If `msgstate` is `MSGSTATE_PLAINTEXT`:
 
-  * Do nothing.
+  * Transition `msgstate` to `MSGSTATE_FINISHED`.
 
 If `msgstate` is `MSGSTATE_ENCRYPTED`:
 
   * Send a Data Message containing a TLV type 1.
-  * Transition `msgstate` to `MSGSTATE_PLAINTEXT`.
+  * Transition `msgstate` to `MSGSTATE_FINISHED`.
 
 If `msgstate` is `MSGSTATE_FINISHED`:
 
-  * Transition `msgstate` to `MSGSTATE_PLAINTEXT`.
-(TODO: is this correct? I thought ending an OTR conversation should always transition to finished?)
+  * Do nothing. 
 
 #### Implementation notes (OR Considerations for networks which allow multiple devices)
 
