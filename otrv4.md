@@ -1174,7 +1174,7 @@ If everything checks out:
   * Reply with a DRE-Auth Message.
   * Compute the ECDH shared secret `K_ecdh = (G1*x)*y`.
   * Compute the DH shared secret `k_dh = (g3*a)*b`.
-  * Compute the mix key `mix_key = SHA3_256(k_dh)`.
+  * Compute the mix key `mix_key = SHA3-256(k_dh)`.
   * Transition `authstate` to `AUTHSTATE_NONE`.
   * Transition `msgstate` to `MSGSTATE_ENCRYPTED`.
   * Initialize the double ratcheting.
@@ -1198,7 +1198,7 @@ If everything verifies:
 
   * Compute the ECDH shared secret `K_ecdh = (G1*y)*x`.
   * Compute the DH shared secret `k_dh = (g3*b)*a`.
-  * Compute the mix key `mix_key = SHA3_256(k_dh)`.
+  * Compute the mix key `mix_key = SHA3-256(k_dh)`.
   * Transition `authstate` to `AUTHSTATE_NONE`.
   * Transition `msgstate` to `MSGSTATE_ENCRYPTED`.
   * Initialize the double ratcheting.
