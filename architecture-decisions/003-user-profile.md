@@ -52,16 +52,16 @@ OTRv4 and higher.
 If more than one valid user profile is available from the server, the one with
 the latest expiry will take priority.
 
-The signature should be generated using the Cramer-Shoup secret value `z` and corresponding
+The signature should be generated using the Cramer-Shoup secret value `z` and the corresponding
 public value with Mike Hamburg's Ed448 signature algorithm as detailed in his [paper]
 (https://mikehamburg.com/papers/goldilocks/goldilocks.pdf).
 
-We chose this because we are using the Ed448 curve in the rest of OTRv4, and
+We chose this curve because we are using the Ed448 in the rest of OTRv4, and
 there are at least two implementations available for different platforms.
 
 ### Consequences
 
-As OTRv4 upgrades are not to fix any known security issue on OTRv3, it is
+As OTRv4 upgrades do not fix any known security issue on OTRv3, it is
 acceptable for users to chat using version 3, but is preferable to use 4 if both
 support it.
 
@@ -70,5 +70,5 @@ and user allow it in its policy.
 
 Because of the decision to use the Ed448 signature algorithm, OTRv4 will use the
 `z` value for the NIZKPK (Auth()) in the DAKE and for the Ed448 signature. It is
-unclear if this is a security risk in this context.
+unclear if this is a security risk in this context. //TODO: Clarify this
 
