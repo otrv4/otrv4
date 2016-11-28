@@ -988,9 +988,6 @@ WHITESPACE_START_DAKE
 ERROR_START_DAKE
   Start the OTR DAKE when you receive an OTR Error Message.
 ```
-// TODO: elaborate on this.
-It is possible for UIs to simply offer old "combinations" of options, and not
-ask for them separately.
 
 ## The protocol state machine
 
