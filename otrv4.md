@@ -534,6 +534,7 @@ Bob will be initiating the DAKE with Alice.
 
 1. Generates an ephemeral ECDH secret key `y` and a public key `Y`.
 2. Generates an ephemeral 3072-bit DH secret key `b` and a public key `B`.
+
     ```Details
     * Set `prev_our_ecdh` as your current ECDH key pair (`our_ecdh`), if you have it.
     * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`(y, Y)`).
@@ -552,6 +553,7 @@ Bob will be initiating the DAKE with Alice.
    Prof_A is Alice's User Profile.
 4. Computes `σ = Auth(Ha, za, {Ha, Hb, Y}, "Prof_B" || "Prof_A" || Y || B || γ)`.
 5. Computes root level keys (`root[0]`, `chain_s`, and `chain_r`).
+
     ```Details
     * Set `prev_our_ecdh` as your current ECDH key pair (`our_ecdh`), if you have it.
     * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`(x, X)`).
@@ -562,6 +564,7 @@ Bob will be initiating the DAKE with Alice.
     ```
 6. Sends Alice a DRE-Auth Message `ψ2 = ("R", γ, σ)`.
 7. At this point, the DAKE is complete for Alice and she:
+
     ```Details
     * Set `j = 0` to cause a DH-ratchet the next time a msg is sent.
     * Increase ratchet id `i = i + 1`.
