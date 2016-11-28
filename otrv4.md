@@ -971,7 +971,7 @@ main state variables are:
 ### Message state
 
 This machine models the transitions a message would make as a response
-to user input. It can go through the follwing three states:
+to user input. It can go through the following three states:
 
 ```
 MSGSTATE_PLAINTEXT
