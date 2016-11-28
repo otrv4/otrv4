@@ -958,7 +958,6 @@ We could fragment this message into three pieces:
     ?OTR|5a73a599|27e31597,00003,00003,-message,
 
 ## Policies
-(TODO: do these policies belong in the spec? They seem to be implementation specific. Maybe we can have an implementation suggestions section instead?)
 
 OTR clients can set different policies for different correspondents. For
 example, Alice could set up her client so that it speaks version 4 of the OTR
