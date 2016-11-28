@@ -433,7 +433,7 @@ with the first message of the DAKE, without a Query message or a whitespace tag.
 Bob might respond to Alice's request or notification of willingness to start a
 conversation using OTRv3. If this is the case and Alice supports the version 3,
 the protocol falls back to OTRv3 [3]. If Alice does not support version 3, then
-the protocol aborts.
+this message is ignored.
 
 ## User Profile
 
