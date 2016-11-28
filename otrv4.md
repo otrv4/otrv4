@@ -533,77 +533,68 @@ Bob will be initiating the DAKE with Alice.
 **Bob:**
 
 1. Generates an ephemeral ECDH secret key `y` and a public key `Y`.
-2. Generates an ephemeral DH secret key `b` and a public key `B`.
+2. Generates an ephemeral 3072-bit DH secret key `b` and a public key `B`.
+    ```Details
+    * Set `prev_our_ecdh` as your current ECDH key pair (`our_ecdh`), if you have it.
+    * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`(y, Y)`).
+    * Set `our_dh` as our DH ephemeral key pair from the DAKE (`b`, `B`).
+    * Set `j = 1` because the pre-key message is considered the first in this DH ratchet.
+    * Increase ratchet id `i = i + 1`.
+    ```
 3. Sends Alice a pre-key message `ψ1 = ("Prof_B", Y, B)`. Prof_B is
    Bob's User Profile.
 
 **Alice:**
 
 1. Generates an ephemeral ECDH secret key `x` and a public key `X`.
-2. Generates an ephemeral DH secret key `a` and a public key `A`.
+2. Generates an ephemeral 3072-bit DH secret key `a` and a public key `A`.
 3. Computes `γ = DREnc(PKa, PKb, m)`, being `m = "Prof_B" || "Prof_A" || Y || X || B || A`.
    Prof_A is Alice's User Profile.
 4. Computes `σ = Auth(Ha, za, {Hb, Y}, "Prof_B" || "Prof_A" || Y || B || γ)`.
 5. Computes root level keys (`root[0]`, `chain_s`, and `chain_r`).
+    ```Details
+    * Set `prev_our_ecdh` as your current ECDH key pair (`our_ecdh`), if you have it.
+    * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`(x, X)`).
+    * Set `our_dh` as our DH ephemeral key pair from the DAKE (`a`, `A`).
+    * Set `their_ecdh` as their ECDH ephemeral public key from the DAKE (`Y`).
+    * Set `their_dh` as their DH ephemeral public key from the DAKE (`B`).
+    * Increase ratchet id `i = i + 1`.
+    ```
 6. Sends Alice a DRE-Auth Message `ψ2 = ("R", γ, σ)`.
+7. At this point, the DAKE is complete for Alice and she:
+    ```Details
+    * Set `j = 0` to cause a DH-ratchet the next time a msg is sent.
+    * Increase ratchet id `i = i + 1`.
+    ```
 
 **Bob:**
 
 1. Verifies `Verify({Hb, Ha, Y}, σ, “Prof_B” || “Prof_A” || Y || B || γ)`.
 2. Decrypts `m = DRDec(PKb, PKa, SKb, γ)`.
 3. Verifies the following properties of the decrypted message `m`:
-  1. The message is of the correct form (e.g., the fields are of the expected length)
+  1. The message is of the correct form (e.g., the fields are of the expected length).
+     If any of the verifications fail, the message is ignored.
   2. Alice's identifier is the first one listed
   3. Bob's identifier is the second one listed, and it matches the identifier
      transmitted outside of the ciphertext
   4. `(Y, B)` is a prekey that Bob previously sent and remains unused.
 4. Computes root level keys (`root[0]`, `chain_s`, and `chain_r`).
+5. At this point, the DAKE is complete for Bob and he:
+    ```Details
+    * Set `their_ecdh` as their ECDH ephemeral public key from the DAKE (`X`).
+    * Set `their_dh` as their DH ephemeral public key from the DAKE (`A`).
+    * Increase ratchet id `i = i + 1`.
+    ```
 
-(TODO: what happens if any of the verifications fails?)
-
-#### When you start a new DAKE
-
-(TODO: what is different here, compared to these descriptions in the previous section?)
-The DAKE is considered to start when either:
-
-1. Bob sends the pre-key message. In this case:
-  * Generate a new ephemeral ECDH key pair `(y, Y)`.
-  * Generate a new ephemeral 3072-bit DH key pair: `(b, B)`.
-  * Set `prev_our_ecdh` as your current ECDH key pair (`our_ecdh`), if you have it.
-  * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`(y, Y)`).
-  * Set `our_dh` as our DH ephemeral key pair from the DAKE (`b`, `B`).
-  * Set `j = 1` because the pre-key message is considered the first in this DH ratchet.
-  * Increase ratchet id `i = i + 1`.
-
-2. Alice receives the pre-key message. In this case:
-  * Generate a new ephemeral ECDH key pair `(x, X)`.
-  * Generate a new ephemeral 3072-bit DH key pair: `(a, A)`.
-  * Set `prev_our_ecdh` as your current ECDH key pair (`our_ecdh`), if you have it.
-  * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`(x, X)`).
-  * Set `our_dh` as our DH ephemeral key pair from the DAKE (`a`, `A`).
-  * Set `their_ecdh` as their ECDH ephemeral public key from the DAKE (`Y`).
-  * Set `their_dh` as their DH ephemeral public key from the DAKE (`B`).
-  * Increase ratchet id `i = i + 1`.
-  * Reply with a DRE-Auth message.
-
-#### After you complete the DAKE
-
-The DAKE is considered to be completed when either:
-
-1. Alice sends the DRE-Auth message. In this case:
-  * Set `j = 0` to cause a DH-ratchet the next time a msg is sent.
-  * Increase ratchet id `i = i + 1`.
-
-2. Bob receives and verifies the DRE-Auth message. In this case:
-  * Set `their_ecdh` as their ECDH ephemeral public key from the DAKE (`X`).
-  * Set `their_dh` as their DH ephemeral public key from the DAKE (`A`).
-  * Increase ratchet id `i = i + 1`.
+#### After completing the DAKE
 
 Regardless of who you are:
 
 * Calculate `our_ecdh` and `our_dh`.
 * Securely erase `our_ecdh.private` and `our_dh` key pair.
-* Calculate `K = calculate_shared_secret(K_ecdh, k_dh)`. // TODO: is this public and private? 
+* Calculate the ECDH shared secret `K_ecdh = (G1*x)*y`.
+* Calculate the DH shared secret `k_dh = (g3*a)*b`.
+* Calculate `K = calculate_shared_secret(K_ecdh, k_dh)`.
 * Calculate the SSID from shared secret: it is the first 64 bits of `SHA3-256(0x00 || K)`.
 * Calculate the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = calculate_ratchet_keys(K)`.
 
