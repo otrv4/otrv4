@@ -274,7 +274,6 @@ In order to manage keys, each correspondent keeps track of:
 As the ratchet moves forward through its keys, its state is kept with the
 following values:
 
-(TODO: the below should be consistent with our naming conventions, uppercase/lowercase)
 ```
 State variables:
   initiator: the participant who should perform the first root key rotation after the DAKE completes.
@@ -334,7 +333,7 @@ Otherwise:
 ```
 generateECDH()
   pick a random value r from Z_q
-  return pubECDH = G2 * r, secretECDH = r
+  return pubECDH = G1 * r, secretECDH = r
 
 generateDH()
   pick a random value r (640 bits)
