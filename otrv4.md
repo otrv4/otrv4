@@ -957,6 +957,42 @@ We could fragment this message into three pieces:
     ?OTR|5a73a599|27e31597,00002,00003,is-my-very-long,
     ?OTR|5a73a599|27e31597,00003,00003,-message,
 
+## Policies
+(TODO: do these policies belong in the spec? They seem to be implementation specific. Maybe we can have an implementation suggestions section instead?)
+
+OTR clients can set different policies for different correspondents. For
+example, Alice could set up her client so that it speaks version 4 of the OTR
+protocol. Nevertheless, she may also add an exception for Charlie, who she knows
+talks through a client that runs an old version of the protocol. Therefore, the
+client will start the appropiate OTR conversation in correspondace with the
+other side, or will refuse to send non-encrypted messages to Bob.
+
+The policies that can be set (on a global or per-correspondent basis) are any
+combination of the these boolean flags:
+
+```
+ALLOW_V3
+  Allow version 3 of the OTR protocol to be used.
+
+ALLOW_V4
+  Allow version 4 of the OTR protocol to be used.
+
+REQUIRE_ENCRYPTION
+  Refuse to send unencrypted messages.
+
+SEND_WHITESPACE_TAG
+  Advertise your support of OTR using the whitespace tag.
+
+WHITESPACE_START_DAKE
+  Start the OTR DAKE when you receive a whitespace tag.
+
+ERROR_START_DAKE
+  Start the OTR DAKE when you receive an OTR Error Message.
+```
+// TODO: elaborate on this.
+It is possible for UIs to simply offer old "combinations" of options, and not
+ask for them separately.
+
 ## The protocol state machine
 
 An OTR client maintains separate state for every correspondent. For example,
@@ -1008,43 +1044,6 @@ AUTHSTATE_AWAITING_DRE_AUTH
     After Bob initiates the authentication protocol by sending Alice the Pre-
     key Message, he enters this state until Alice replies.
 ```
-
-### Policies
-(TODO: why are policies inside of the state machine??)
-(TODO: do these policies belong in the spec? They seem to be implementation specific. Maybe we can have an implementation suggestions section instead?)
-
-OTR clients can set different policies for different correspondents. For
-example, Alice could set up her client so that it speaks version 4 of the OTR
-protocol. Nevertheless, she may also add an exception for Charlie, who she knows
-talks through a client that runs an old version of the protocol. Therefore, the
-client will start the appropiate OTR conversation in correspondace with the
-other side, or will refuse to send non-encrypted messages to Bob.
-
-The policies that can be set (on a global or per-correspondent basis) are any
-combination of the these boolean flags:
-
-```
-ALLOW_V3
-  Allow version 3 of the OTR protocol to be used.
-
-ALLOW_V4
-  Allow version 4 of the OTR protocol to be used.
-
-REQUIRE_ENCRYPTION
-  Refuse to send unencrypted messages.
-
-SEND_WHITESPACE_TAG
-  Advertise your support of OTR using the whitespace tag.
-
-WHITESPACE_START_DAKE
-  Start the OTR DAKE when you receive a whitespace tag.
-
-ERROR_START_DAKE
-  Start the OTR DAKE when you receive an OTR Error Message.
-```
-// TODO: elaborate on this.
-It is possible for UIs to simply offer old "combinations" of options, and not
-ask for them separately.
 
 ### State transitions
 
