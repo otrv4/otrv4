@@ -4,8 +4,8 @@
 
 ### Context
 
-Because of potential weaknesses in elliptic curves, and the potential of quantum
-computers arriving earlier than predicted we want an additional mechanism that
+Because of potential weaknesses in elliptic curves and the potential of quantum
+computers arriving earlier than predicted, we want an additional mechanism that
 would protect against post-conversation decryption of transcripts using those
 weaknesses.
 
@@ -19,23 +19,23 @@ This proposal specifies:
 root key.
 2. An algorithm for ratcheting and deriving this mix key.
 
-This proposal does not change the Double Ratchet algorithm, with the
+This proposal does not change the Double Ratchet algorithm with the
 exception of how to derive root keys.
 
 The first 3072-bit DH key agreement takes place in the DAKE.  See Nik Unger's
 paper[1], which specifies Transitionally Secure Spawn. The difference to this
 entry in the paper is that we are trying to protect against elliptic curve
-weaknesses, and SIDH[2] relies on ECC. So this will instead use a classic Diffie
-Hellman key exchange.
+weaknesses, and SIDH[2] is specific for postquantum resistance. So this will
+instead use a classic Diffie Hellman key exchange.
 
 The options for ratcheting/re-deriving this mix key are:
 
-1. Obtain every mix key from a DH function which requires the other party
-to contribute to the computation.
+1. Obtain every mix key from a DH function which requires the other party to
+contribute to the computation.
 2. Obtain a mix key with DH functions which requires the other party to
 contribute to the computation every n times. Between these derivations,
 the mix keys are obtained using a KDF that is seeded with the last DH
-key; We propose n = 3, but this can be adjusted depending on performance.
+key. We propose n = 3, but this can be adjusted depending on performance.
 
 ### Algorithm
 
@@ -51,14 +51,15 @@ Management, page 53
 
 *DH function - DH(x, Y)*
 
+// TODO: should this be updated to the new generateDH()?
 Given x, a private key, and Y, a public key, generates a shared secret value
 in the 3072-bit group defined in [RFC-3526](https://www.ietf.org/rfc/rfc3526.txt).
 
 *Key Derivation Function - SHA3(Y)*
 
-Given Y, generates a 3072-bit long string using the SHA3-256 algorithm. This is
+Given Y, generates a 3072-bit long string using the SHA3-256 algorithm This is
 used even when a DH shared secret is calculated (reducing from 3072 to 256 bits)
-because we want to keep this value with a constant size.
+because we want to keep this value with a constant size. //TODO: a 3072 bit long with SHA-256? Not clear.
 
 #### Considerations
 
@@ -74,8 +75,10 @@ The mix key is to be mixed in at the root level with the ECDH key.
 #### Implementation
 
 Alice's DH keypair = (a_i, A_i)
+
 Bob's DH keypair = (b_i, B_i)
-Mix key = X_i
+
+Mix key = X_i //TODO: the mix key is X? Isn't X the ECDH ephemeral public key?
 
 Every root key derivation requires both an ECDH key and a mix key. For
 the purposes of this explanation, we will only discuss the mix key.
@@ -118,34 +121,39 @@ ratchet_id is received or a new message is being sent and signals
 the machine to ratchet i.e. `ratchet_id += 1`
 
 If `ratchet_id % 3 == 0 && sending the first message of a new ratchet`
-    Compute the new mix key from a new DH computation e.g. `K_i =
+
+  * Compute the new mix key from a new DH computation e.g. `K_i =
         DH(our_DH.secret, their_DH.public)`
-    Send the new mix key K_i public key to the other party for further key computation.
+  * Send the new mix key K_i public key to the other party for further key computation. // TODO: wasn't mix key X?
 
 Otherwise
-    Compute the new mix key `K_i = KDF(K_(i-1))`
+
+  * Compute the new mix key `K_i = KDF(K_(i-1))`
 
 **Alice or Bob send a follow-up message**
 
 When a new public key has been generated and sent in the first message
 in a ratchet, all follow up messages in that ratchet will also need
-the public key to ensure the other party receives it.
+the public key to ensure that the other party receives it.
 
 If `ratchet_id % 6 == 3 || ratchet_id % 6 == 0`
-    Send public key
+
+   * Send public key
 
 **Alice or Bob receive the first message in a ratchet**
 
 The ratchet_id will need to be increased, so `ratchet_id += 1`
 
 If `ratchet_id % 6 == 3 || ratchet_id % 6 == 0`
-    A new public key should be attached to the message, if it is not,
+
+   * A new public key should be attached to the message. If it is not,
     reject the message.
 
 Otherwise:
-    Compute the new mix key from a new DH computation e.g.
+
+   * Compute the new mix key from a new DH computation e.g.
         `K_i = DH(our_DH.secret, their_DH.public)`
-    Use K_i to decrypt the received message.
+   * Use K_i to decrypt the received message.
 
 **Alice or Bob receive a follow up message**
 
@@ -163,6 +171,7 @@ Both parties share knowledge of X_0, which is a mix key established in
 the DAKE.
 
 Given
+
     Alice's DH keypair = (a_i, A_i)
     Bob's DH keypair = (b_i, B_i)
 
@@ -203,7 +212,7 @@ We’ve decide to use a 3072-bit key produced by
 2. a KDF function which takes as argument the previous mix key to
    produce a new one.
 
-The DH function will run every n times; n = 3 because of the following reasons:
+The DH function will run every n = 3 times because of the following reasons:
 
 1. It is a small number so a particular key can only be compromised
    for a maximum of 2\*n ratchets. This means that the maximum ratchets
@@ -218,7 +227,7 @@ The DH function will run every n times; n = 3 because of the following reasons:
    mix key computed from a new DH function on even numbers of
    ratchet_ids so only Bob would be the sender at these times.
 
-From the NIST paper (reference?):
+From the IETF paper, RFC 3526[4]:
 
 * Prime is: 2^3072 - 2^3008 - 1 + 2^64 * { [2^2942 pi] + 1690314 }
 * Hex value:
@@ -252,3 +261,4 @@ protocols to fragment these messages.
 [1](http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf)
 [2](https://eprint.iacr.org/2011/506.pdf)
 [3](https://whispersystems.org/blog/advanced-ratcheting/)
+[4](https://www.ietf.org/rfc/rfc3526.txt)
