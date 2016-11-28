@@ -871,9 +871,10 @@ has not sent a message in a configurable amount of time. Put them (as a set
 of concatenated 64-byte values) into the "Old MAC keys to be revealed" section
 of the next Data Message you send.
 
-A receiver can reveal a MAC key in the cases where the receiver has received a
-message and has verified the message's authenticity or the receiver has
-discarded associated message keys.
+A receiver add a MAC key to `Old MAC keys to be revealed` in both following cases:
+
+- the receiver has received a message and has verified the message's authenticity
+- the receiver has discarded associated message keys
 
 ### Fragmentation
 
