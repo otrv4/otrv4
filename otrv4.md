@@ -1055,6 +1055,7 @@ User events:
   * User types a message to be sent
 
 Received messages:
+  * OTRv3 Specific Messages
   * Plaintext without the whitespace tag
   * Plaintext with the whitespace tag
   * Query Message
@@ -1062,8 +1063,6 @@ Received messages:
   * Pre-key message
   * DRE-Auth message
   * Data Message
-
-(TODO: maybe we should also mention that we need to handle the case of any OTRv3 message arriving)
 
 The following sections will outline which actions to take for each case. They
 all assume that at least `ALLOW_V3` or `ALLOW_V4` is set; if not, then OTR is
@@ -1075,6 +1074,11 @@ own, the message should be discarded and the user optionally warned.
 
 The exception here is the DH Commit Message where the recipient instance tag may
 be 0, which indicates that no particular instance is specified.
+
+#### Receiving OTRv3 Specific Messages
+
+If an OTRv3 D-H commit message arrives and you support OTRv3, you may start
+OTRv3. All other OTRv3 specific messages are ignored.
 
 #### User requests to start an OTR conversation
 
