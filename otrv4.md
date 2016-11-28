@@ -1236,25 +1236,20 @@ If `msgstate` is `MSGSTATE_FINISHED`:
 #### Receiving a Data Message
 
 If `msgstate` is `MSGSTATE_ENCRYPTED`:
-
-Verify the information in the message. If the verification succeeds:
-
-  * Decrypt the message and display the human-readable part (if it contains any) to the user.
-  * Rotate root, chain and mix keys as appropriate
-  * If you have not sent a message to this correspondent in some (configurable) time, send a "heartbeat" message.
-
-If the received message contains a TLV type 1:
+  Verify the information in the message.
+  If the verification succeeds:
+    * Decrypt the message and display the human-readable part (if it contains
+      any) to the user.
+    * Rotate root, chain and mix keys as appropriate
+    * If you have not sent a message to this correspondent in some
+      (configurable) time, send a "heartbeat" message.
+    * If the received message contains a TLV type 1 forget all encryption keys
+      for this correspondent, and transition `msgstate` to `MSGSTATE_FINISHED`.
 (TODO: in what order should TLVs be processed? Should we end the conversation immediately, or do other things first?)
-
-  * Forget all encryption keys for this correspondent, and transition `msgstate` to `MSGSTATE_FINISHED`.
-
-Otherwise:
-(TODO: this otherwise seems to be if the data message doesn't contain TLV type 1, which is incorrect)
-
-  * Inform the user that an unreadable encrypted message was received, and reply with an Error Message.
+  Otherwise:
+    Inform the user that an unreadable encrypted message was received, and reply with an Error Message.
 
 If `msgstate` is `MSGSTATE_PLAINTEXT` or `MSGSTATE_FINISHED`:
-
    * Inform the user that an unreadable encrypted message was received, and reply with an Error Message.
 
 #### User requests to end an OTR conversation
