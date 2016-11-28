@@ -1216,8 +1216,7 @@ Otherwise:
 If `msgstate` is `MSGSTATE_PLAINTEXT`:
 
   * If `REQUIRE_ENCRYPTION` is set:
-    * Store the plaintext message for possible retransmission and send a Query Message.
-    * TODO: How are going to handle subsequent occurrence of this case?
+    * Store plaintext messages for possible retransmission and send a Query Message.
       Should we simply flood the user with Query Messages until the DAKE ends?
   * Otherwise:
     * If `SEND_WHITESPACE_TAG` is set and you have not received a plaintext message from this correspondent, attach the whitespace tag to the message. Send the (possibly modified) message as plaintext. 
@@ -1260,18 +1259,7 @@ If `msgstate` is `MSGSTATE_PLAINTEXT` or `MSGSTATE_FINISHED`:
 
 #### User requests to end an OTR conversation
 
-If `msgstate` is `MSGSTATE_PLAINTEXT`:
-
-  * Transition `msgstate` to `MSGSTATE_FINISHED`.
-
-If `msgstate` is `MSGSTATE_ENCRYPTED`:
-
-  * Send a Data Message containing a TLV type 1.
-  * Transition `msgstate` to `MSGSTATE_FINISHED`.
-
-If `msgstate` is `MSGSTATE_FINISHED`:
-
-  * Do nothing. 
+Follow the instructions from the same section in OTRv3 [3].
 
 #### Implementation notes (OR Considerations for networks which allow multiple devices)
 
@@ -1339,18 +1327,18 @@ unless all the participants have the `REQUIRE_ENCRYPTION` policy.
 SMP in version 4 shares the same TLVs and flow as SMP in OTRv3 with the
 following exceptions.
 
-OTRv4 uses Ed448 as the cryptographic primative. This changes the way values
-are serialized and how they are computed. OTRv4 also reuses the SMP Message 1Q
-with TLV type 7 for situations where a user question is sent and when it is not
-sent. In cases where the question is not present, the user-speicified DATA
-portion of the secret has length 0 and value NULL. Lastly, OTRv4 creates
-fingerprints using SHA3-256. Thus, the size of the fingerprint in the "Secret
-Information" section of OTRv3 [3] should be 32 bytes in size.
+In OTRv3, SMP Message 1 is used when a user does not specify an SMP question.
+SMP Message 1Q is used when they do. OTRv4 is simplified to use only SMP Message
+1Q for both cases. When a question is not present, the user specified question
+section has length 0 and value NULL.
 
-(TODO: the section on the question and TLV type 7 is weird)
+OTRv4 creates fingerprints using SHA3-256, which increases their size. Thus,
+the size of the fingerprint in the "Secret Information" section of OTRv3 [3]
+should be 32 bytes in size.
 
-To define the SMP values under Ed448, we reuse the previously defined generator
-for Cramer-Shoup:
+Lastly, OTRv4 uses Ed448 as the cryptographic primative. This changes the way
+values are serialized and how they are computed. To define the SMP values under
+Ed448, we reuse the previously defined generator for Cramer-Shoup:
 
 `G = (501459341212218748317573362239202803024229898883658122912772232650473550786782902904842340270909267251001424253087988710625934010181862,
 44731490761556280255905446185238890493953420277155459539681908020022814852045473906622513423589000065035233481733743985973099897904160)`
