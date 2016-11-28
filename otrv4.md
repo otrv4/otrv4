@@ -1350,9 +1350,6 @@ for Cramer-Shoup:
 `G = (501459341212218748317573362239202803024229898883658122912772232650473550786782902904842340270909267251001424253087988710625934010181862,
 44731490761556280255905446185238890493953420277155459539681908020022814852045473906622513423589000065035233481733743985973099897904160)`
 
-TODO: Use the correct annotations for this (upper case for points, lower case
-for integers)
-
 ### Overview
 
 Assuming that Alice begins the exchange:
@@ -1374,27 +1371,27 @@ Assuming that Alice begins the exchange:
 * Computes `c3 = HashToScalar(4 || G*r3)` and `d3 = r3 - b3 * c3`.
 * Computes `G2 = G2a*b2` and `G3 = G3a*b3`.
 * Computes `Pb = G3*r4` and `Qb = G*r4 + G2*y`, where y is the 'actual secret'.
-* Comoutes `cP = HashToScalar(5 || G3*r5 || G*r5 + G2*r6)`, `d5 = r5 - r4 * cP` and `d6 = r6 - y * cP`.
-* Sends Alice a SMP message 2 with `G2b`, `c2`, `d2`, `G3b`, `c3`, `d3`, `Pb`, `Qb`, `cP`, `d5` and `d6`.
+* Computes `cp = HashToScalar(5 || G3*r5 || G*r5 + G2*r6)`, `d5 = r5 - r4 * cp` and `d6 = r6 - y * cp`.
+* Sends Alice a SMP message 2 with `G2b`, `c2`, `d2`, `G3b`, `c3`, `d3`, `Pb`, `Qb`, `cp`, `d5` and `d6`.
 
 **Alice:**
 
 * Computes `G2 = G2b*a2` and `G3 = G3b*a3`.
 * Picks random values `r4`, `r5`, `r6` and `r7`.
 * Computes `Pa = G3*r4` and `Qa = G1*r4 + G2*x`, where x is the 'actual secret'.
-* Coumputes `cP = HashToScalar(6 || G3*r5 || G*r5 + G2*r6)`, `d5 = r5 - r4 * cP` and `d6 = r6 - x * cP`.
+* Computes `cp = HashToScalar(6 || G3*r5 || G*r5 + G2*r6)`, `d5 = r5 - r4 * cp` and `d6 = r6 - x * cp`.
 * Computes `Ra = (Qa - Qb)*a3`.
-* Computes `cR = HashToScalar(7 || G*r7 || (Qa - Qb)*r7)` and `d7 = r7 - a3 * cR`.
-* Sends Bob a SMP message 3 with `Pa`, `Qa`, `cP`, `d5`, `d6`, `Ra`, `cR` and `d7`.
+* Computes `cr = HashToScalar(7 || G*r7 || (Qa - Qb)*r7)` and `d7 = r7 - a3 * cr`.
+* Sends Bob a SMP message 3 with `Pa`, `Qa`, `cp`, `d5`, `d6`, `Ra`, `cr` and `d7`.
 
 **Bob:**
 
 * Picks a random value `r7`.
 * Computes `Rb = (Qa - Qb)*b3`.
 * Computes `Rab = Ra*b3`.
-* Computes `cR = HashToScalar(8 || G*r7 || (Qa - Qb)*r7)` and `d7 = r7 - b3 * cR`.
+* Computes `cr = HashToScalar(8 || G*r7 || (Qa - Qb)*r7)` and `d7 = r7 - b3 * cr`.
 * Checks whether `Rab == Pa - Pb`.
-* Sends Alice a SMP message 4 with `Rb`, `cR`, `d7`.
+* Sends Alice a SMP message 4 with `Rb`, `cr`, `d7`.
 
 **Alice:**
 
@@ -1436,8 +1433,10 @@ generators, `g2` and `g3`. A valid  SMP message 1 is generated as follows:
 2. Pick random values `a2` and `a3` (448 bits) in `Z_q`. These will be Alice's exponents for the DH exchange to pick generators.
 3. Pick random values `r2` and `r3` (448 bits) in `Z_q`. These will be used to generate zero-knowledge proofs that this message was created according to the protocol.
 4. Compute `G2a = G*a2` and `G3a = G*a3`.
-5. Generate a zero-knowledge proof that the value a2 is known by setting `c2 = HashToScalar(1 || G*r2)` and `d2 = r2 - a2 * c2 mod q`.
-6. Generate a zero-knowledge proof that the value a3 is known by setting `c3 = HashToScalar(2 || G*r3)` and `d3 = r3 - a3 * c3 mod q`.
+5. Generate a zero-knowledge proof that the value `a2` is known by setting 
+`c2 = HashToScalar(1 || G*r2)` and `d2 = r2 - a2 * c2 mod q`.
+6. Generate a zero-knowledge proof that the value `a3` is known by setting 
+`c3 = HashToScalar(2 || G*r3)` and `d3 = r3 - a3 * c3 mod q`.
 7. Store the values of `x`, `a2` and `a3` for use later in the protocol.
 
 
@@ -1477,7 +1476,8 @@ final comparison of the protocol. A valid SMP message 2 is generated as follows:
 6. Generate a zero-knowledge proof that the value `b3` is known by setting `c3 = HashToScalar(4 || G*r3)` and `d3 = r3 - b3 * c3 mod q`.
 7. Compute `G2 = G2a*b2` and `G3 = G3a*b3`.
 8. Compute `Pb = G3*r4` and `Qb = G*r4 + G2*y`.
-9. Generate a zero-knowledge proof that `Pb` and `Qb` were created according to the protocol by setting `cP = HashToScalar(5 || G3*r5 || G*r5 + G2*r6)`, `d5 = r5 - r4 * cP mod q` and `d6 = r6 - y * cP mod q`.
+9. Generate a zero-knowledge proof that `Pb` and `Qb` were created according to the protocol
+by setting `cp = HashToScalar(5 || G3*r5 || G*r5 + G2*r6)`, `d5 = r5 - r4 * cp mod q` and `d6 = r6 - y * cp mod q`.
 10. Store the values of `G3a`, `G2`, `G3`, `b3`, `Pb` and `Qb` for use later in the protocol.
 
 
@@ -1499,7 +1499,7 @@ c3 (MPI), d3 (MPI)
 Pb (POINT), Qb (POINT)
   These values are used in the final comparison to determine if Alice and Bob share the same secret.
 
-cP (MPI), d5 (MPI), d6 (MPI)
+cp (MPI), d5 (MPI), d6 (MPI)
   A zero-knowledge proof that Pb and Qb were created according to the protocol given above.
 ```
 
@@ -1512,9 +1512,11 @@ is generated as follows:
 1. Pick random values `r4`, `r5`, `r6` and `r7` (448 bits) in `Z_q`. These will be used to add a blinding factor to the final results, and to generate zero-knowledge proofs that this message was created honestly.
 2. Compute `G2 = G2b*a2` and `G3 = G3b*a3`.
 3. Compute `Pa = G3*r4` and `Qa = G*r4 + G2*x`.
-4. Generate a zero-knowledge proof that `Pa` and `Qa` were created according to the protocol by setting `cP = HashToScalar(6 || G3*r5 || G*r5 + G2*r6)`, `d5 = r5 - r4 * cP mod q` and `d6 = r6 - x * cP mod q`.
+4. Generate a zero-knowledge proof that `Pa` and `Qa` were created according to the protocol
+by setting `cp = HashToScalar(6 || G3*r5 || G*r5 + G2*r6)`, `d5 = r5 - r4 * cp mod q` and `d6 = r6 - x * cp mod q`.
 5. Compute `Ra = (Qa - Qb) * a3`.
-6. Generate a zero-knowledge proof that `Ra` was created according to the protocol by setting `cR = HashToScalar(7 || G*r7 || (Qa - Qb)*r7)` and `d7 = r7 - a3 * cR mod q`.
+6. Generate a zero-knowledge proof that `Ra` was created according to the protocol by setting
+`cr = HashToScalar(7 || G*r7 || (Qa - Qb)*r7)` and `d7 = r7 - a3 * cr mod q`.
 7. Store the values of `G3b`, `Pa - Pb`, `Qa - Qb` and `Ra` for use later in the protocol.
 
 The SMP message 3 has the following data:
@@ -1523,13 +1525,13 @@ The SMP message 3 has the following data:
 Pa (POINT), Qa (POINT)
   These values are used in the final comparison to determine if Alice and Bob share the same secret.
 
-cP (MPI), d5 (MPI), d6 (MPI)
+cp (MPI), d5 (MPI), d6 (MPI)
   A zero-knowledge proof that Pa and Qa were created according to the protocol given above.
 
 Ra (POINT)
   This value is used in the final comparison to determine if Alice and Bob share the same secret.
 
-cR (MPI), d7 (MPI)
+cr (MPI), d7 (MPI)
   A zero-knowledge proof that Ra was created according to the protocol given above.
 ```
 
@@ -1541,7 +1543,8 @@ generated as follows:
 
 1. Pick a random value `r7` (448 bits) in `Z_q`. This will be used to generate Bob's final zero-knowledge proof that this message was created honestly.
 2. Compute `Rb = (Qa - Qb) * b3`.
-3. Generate a zero-knowledge proof that `Rb` was created according to the protocol by setting `cR = HashToScalar(8 || G*r7 || (Qa - Qb)*r7)` and `d7 = r7 - b3 * cR mod q`.
+3. Generate a zero-knowledge proof that `Rb` was created according to the protocol by setting
+	`cr = HashToScalar(8 || G*r7 || (Qa - Qb)*r7)` and `d7 = r7 - b3 * cr mod q`.
 
 The SMP message 4 has the following data:
 
@@ -1549,7 +1552,7 @@ The SMP message 4 has the following data:
 Rb (POINT)
   This value is used in the final comparison to determine if Alice and Bob share the same secret.
 
-cR (MPI), d7 (MPI)
+cr (MPI), d7 (MPI)
   A zero-knowledge proof that Rb was created according to the protocol given above.
 ```
 
@@ -1585,7 +1588,7 @@ If smpstate is `SMPSTATE_EXPECT2`:
     1. Check that `G2b`, `G3b`, `Pb` and `Qb` are points in the curve.
     2. Check that `c2 = HashToScalar(3 || G*d2 + G2b*c2)`.
     3. Check that `c3 = HashToScalar(4 || G*d3 + G3b*c3)`.
-    4. Check that `cP = HashToScalar(5 || G3*d5 + Pb*cP || G*d5 + G2*d6 + Qb*cP)`.
+    4. Check that `cp = HashToScalar(5 || G3*d5 + Pb*cp || G*d5 + G2*d6 + Qb*cp)`.
 * Create SMP message 3 and send it to Bob.
 * Set smpstate to `SMPSTATE_EXPECT4`.
 
@@ -1599,8 +1602,8 @@ If smpstate is `SMPSTATE_EXPECT3`:
 
 * Verify Alice's zero-knowledge proofs for `Pa`, `Qa` and `Ra`:
   1. Check that `Pa`, `Qa` and `Ra` are points in the curve.
-  2. Check that `cP = HashToScalar(6 || G3*d5 + Pa*cP || G*d5 + G2*d6 + Qa*cP)`.
-  3. Check that `cR = HashToScalar(7 || G*d7 + G3a*cR || (Qa - Qb)*d7 + Ra*cR)`.
+  2. Check that `cp = HashToScalar(6 || G3*d5 + Pa*cp || G*d5 + G2*d6 + Qa*cp)`.
+  3. Check that `cr = HashToScalar(7 || G*d7 + G3a*cr || (Qa - Qb)*d7 + Ra*cr)`.
 * Create a SMP message 4 and send it to Alice.
 * Check whether the protocol was successful:
   1. Compute `Rab = Ra*b3`.
@@ -1616,7 +1619,7 @@ If smpstate is SMPSTATE_EXPECT4:
 
 * Verify Bob's zero-knowledge proof for Rb:
    1. Check that `Rb` is `>= 2` and `<= modulus-2`.
-   2. Check that `cR = HashToScalar(8 || G1*d7 G3*cR || (Qa / Qb)*d7 + Rb*cR)`.
+   2. Check that `cr = HashToScalar(8 || G1*d7 G3*cr || (Qa / Qb)*d7 + Rb*cr)`.
 
 * Check whether the protocol was successful:
     1. `Compute Rab = Rb*a3`.
