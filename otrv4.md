@@ -970,9 +970,8 @@ main state variables are:
 
 ### Message state
 
-The message state variable, `msgstate`, controls what happens to outgoing
-messages typed by the user. It can take one of three values:
-(TODO: this way of talking about msgstate is very implementation specific. Do we need it? Can we express it in less "computery" terms?)
+This machine models the transitions a message would make as a response
+to user input. It can go through the follwing three states:
 
 ```
 MSGSTATE_PLAINTEXT
