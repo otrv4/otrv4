@@ -763,14 +763,16 @@ It is also used to [reveal old MAC keys](#revealing-mac-eys).
       This should be set with sender's j.
 
     Public ECDH Key (POINT)
-      The sender's current ratchet ECDH public key.
-      This should contain the value of our_ecdh.public_key variable.
+      This is the public part of the ECDH key used to encrypt and decrypt the
+      data message. For the sender of this message, this is their
+      `our_ecdh.public_key` value. For the receiver of this message, it is
+      used as`their_ecdh`.
 
     Public DH Key (MPI)
-      The sender's current ratchet DH public key.
-      This should contain the value of our_dh.public_key variable.
-      You should send a NULL value if i % 3 != 0.
-      NULL is 4 bytes length as 0x00000000
+      This is the public part of the DH key used to encrypt and decrypt the
+      data message. For the sender of this message, it is our_dh.public_key
+      value. For the receiver of this message, it is used as their_dh. If this
+      value is empty, its length is zero and its value is NULL.
 
     Nonce (NONCE)
       The nonce used with XSalsa20 to create the encrypted message contained in
@@ -797,9 +799,13 @@ has been reset to zero, keys should be rotated.
 
 Given a new ratchet:
 
-  * Ratchet the ECDH keys. See "Ratcheting the ECDH keys" section.
+  * Ratchet the ECDH keys. See "Ratcheting the ECDH keys" section. The new ECDH
+    public key created by the sender this process will be the "Public ECDH Key"
+    for the message
   * Calculate ECDH secret by using `our_ecdh` and `their_ecdh`.
-  * Calculate the `dh_shared_secret`.
+  * [Calculate the DH shared secret](#calculate-the-dh-shared-secret) `dh_shared_secret`.
+    If a new public DH key is created in this process, that will be the "Public
+    DH Key" for the message. If it is not created, then this is will be NULL.
   * Calculate the `mix key` by `ECDH(our_ecdh, their_ecdh) || dh_shared_secret`
   * Derive new set of keys `root[i]`, `chain_s[i][j]`, `chain_r[i][j]` from `mix key`.
   * Securely delete the root key and all chain keys from the ratchet `i-2`.
@@ -848,8 +854,8 @@ Otherwise:
   * Decrypt the message using the "encryption key" (`MKenc`) and securely delete it.
   * Securely delete receiving chain keys older than `message_id-1`.
   * Set `j = 0` to indicate that a new DH-ratchet should happen the next time you send a message.
-  * Set `their_ecdh` as the "Next Public ECDH key" from the message.
-  * Set `their_dh` as the "Next Public DH Key" from the message, if it
+  * Set `their_ecdh` as the "Public ECDH key" from the message.
+  * Set `their_dh` as the "Public DH Key" from the message, if it
     is not NULL.
   * Add the MKmac key to list of pending MAC keys to be revealed.
 
