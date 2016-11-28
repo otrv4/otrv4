@@ -652,7 +652,7 @@ A valid DRE-Auth message is generated as follows:
   * public key `B = g3 ^ b`.
 4. Generate `m = X || Y || A || B`
 5. Compute `DREnc(PKa, PKb, m)` and serialize it as a DRE-M value in the variable `γ`.
-6. Compute `σ = Auth(Ha, za, {Ha, Hb, Y}, "Prof_B" || "Prof_A" || Y || B || γ)`.
+6. Compute `σ = Auth(Ha, za, {Hb, Ha, Y}, "Prof_B" || "Prof_A" || Y || B || γ)`.
 
 A DRE-Auth is an OTR message encoded as:
 
@@ -1139,7 +1139,8 @@ If the message is version 4 and `ALLOW_V4` is not set
 
 If `authstate` is `AUTHSTATE_AWAITING_DRE_AUTH`:
 
-This indicates that you have sent a Pre-key message to your correspondent and that either she didn't receive it or didn't receive it yet; but has sent you one
+This indicates that you have sent a Pre-key message to your correspondent and
+that either she didn't receive it or didn't receive it yet; but has sent you one
 as well.
 
 The symmetry will be broken by comparing the hashed `X` you sent in your pre-key
@@ -1727,7 +1728,6 @@ The Authentication scheme consists of two functions:
 
 `Verify({A_1, A_2, A_3}, σ, m)`, a verification function.
 
-(TODO: the above Auth invocation is incorrect, we need to give it three public keys)
 #### Domain parameters
 
 We reuse the previously defined generator in Cramer-Shoup of DRE:
