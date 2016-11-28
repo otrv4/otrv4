@@ -1646,7 +1646,9 @@ G2 = (1178121612634369467372824843433100646651805353570163734168790821479394042
 77809514858788439644911793978499419995990477371552926308078495, 19)
 
 ```
-(TODO: we need to specify how these values were generated)
+
+These generators were created with an implementation [9] based on code by
+Daniel J. Bernstein [10].
 
 #### Dual Receiver Key Generation: DRGen()
 
@@ -1778,3 +1780,5 @@ d is an array of bytes.
 [6]: https://whispersystems.org/docs/specifications/doubleratchet "Trevor Perrin (editor), Moxie Marlinspike: The Double Ratchet Algorithm"
 [7]: https://whispersystems.org/docs/specifications/doubleratchet/#diffie-hellman-ratchet
 [8]: https://tools.ietf.org/html/rfc3339
+[9]: https://github.com/twstrike/otrv4/blob/master/gen_gens_ed448.py
+[10]: https://ed25519.cr.yp.to/python/ed25519.py
