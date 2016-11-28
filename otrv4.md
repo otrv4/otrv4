@@ -299,14 +299,14 @@ The previously mentioned variables are affected by these events:
 * Upon completing the DAKE.
 * When you send a Data Message.
 * When you receive a Data Message.
-(TODO: what about other messages? End conversation messages for example?)
+
+TODO: what happens to state machine When you receive a Query message
+TODO: what happens to state machine When you receive an End conversation message
+TODO: what happens to state machine When you receive an Error message
 
 ### Calculating Keys
 
 This section describes the functions used to manage the key material.
-
-
-(TODO: what happens if you ratchet without sending any messages? Are we deleting key material we need?)
 
 #### Ratcheting the ECDH keys
 
@@ -432,8 +432,8 @@ with the first message of the DAKE, without a Query message or a whitespace tag.
 
 Bob might respond to Alice's request or notification of willingness to start a
 conversation using OTRv3. If this is the case and Alice supports the version 3,
-the protocol falls back to OTRv3 [3].
-(TODO: what happens otherwise?)
+the protocol falls back to OTRv3 [3]. If Alice does not support version 3, then
+the protocol aborts.
 
 ## User Profile
 
