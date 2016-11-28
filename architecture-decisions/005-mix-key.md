@@ -39,7 +39,7 @@ key. We propose n = 3, but this can be adjusted depending on performance.
 
 ### Algorithm
 
-*Mix key = A_i, a_i*
+*k_dh = A_i, a_i*
 
 A mix key is a key that is added to the key derivation function used
 to produce new root and chains keys. A mix key can be produced through
@@ -49,15 +49,19 @@ according to Table 2: Comparable strengths in NIST’s Recommendation for Key
 Management, page 53
 (http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-57pt1r4.pdf).
 
+*generateDH function - generateDH()*
+
+Generates a `A_i` and a `a_i`.
+
 *DH function - DH(a_i, B_i)*
 
-Given a_i, a private key, and B_i, a public key, generates a shared secret
-value: `dh_shared_secret`. 
+Given `a_i`, a private key, and `B_i`, a public key, generates a shared secret value: `k_dh`.
 
-*Key Derivation Function - SHA3-256(dh_shared_secret)*
+*Key Derivation Function - SHA3-256(k_dh)*
 
-Given `dh_shared_secret`, generates a 256 bit SHA3-256 algorithm. This is used
-even when a DH shared secret is calculated (reducing it to 256 bits) because we want to keep this value with a constant size. // what?
+Given `k_dh`, generates a 256 bit SHA3-256 algorithm. This is used
+even when a DH shared secret is calculated (reducing it to 256 bits) because we
+want to keep this value with a constant size. This generates the value `mix_key`.
 
 #### Considerations
 
@@ -65,18 +69,18 @@ Transmitting the 3072-bit DH public key will increase the time to
 exchange messages. To mitigate this, the key won’t be transmitted every
 time the root and chain keys are changed. Instead, this key will be
 computed with a DH function every third time and the interim keys will
-be derived from previous mix key. When generating new DH keys, the
+be derived from previous `mix_key`. When generating new DH keys, the
 public key will be sent in every message of that ratchet.
 
 The mix key is to be mixed in at the root level with the ECDH key.
 
 #### Implementation
 
-Alice's DH keypair = (a_i, A_i)
+Alice's DH keypair = `(a_i, A_i)`
 
-Bob's DH keypair = (b_i, B_i)
+Bob's DH keypair = `(b_i, B_i)`
 
-Mix key = X_i //TODO: the mix key is X? Isn't X the ECDH ephemeral public key?
+`mix_key` = it will be referred as `M_i` for ease.
 
 Every root key derivation requires both an ECDH key and a mix key. For
 the purposes of this explanation, we will only discuss the mix key.
@@ -91,20 +95,20 @@ Alice                                                              Bob
 -----------------------------------------------------------------------------------------------------------------------
 Increases ratchet_id by one
 Derives a new mix key from the one obtained in DAKE
-    X_1 = pubDHa, secDHa = KDF(X_0)
-Mixes X_1 into the KDF to generate root and chain keys
-    R_1, Cs_0_1, Cr_0_1 = KDF(R_0, ECDH_1 || X_1)
+    M_1 = pubDHa, secDHa = KDF(M_0)
+Mixes M_1 into the KDF to generate root and chain keys
+    R_1, Cs_0_1, Cr_0_1 = KDF(R_0, ECDH_1 || M_1)
 Encrypts data message with Cs_0_1
 Sends data_message_0_0 ----------------------------------------->
 Encrypts data message with key derived from Cs_0_1
 Sends data_message_0_1 ----------------------------------------->
                                                                    Derives a new mix key from the one obtained in DAKE
-                                                                       X_1 = pubDHa, secDHa = KDF(X_0)
+                                                                       M_1 = pubDHa, secDHa = KDF(M_0)
                                                                    Mixes DH_1 into the KDF to generate root and chain keys
                                                                        R_1, Cs_0_1, Cr_0_1 = KDF(pubECDHa, secECDHa || secDHa)
                                                                    Decrypts received message(s) with Cs_0_1
                                                                    Derives a new mix key from the one obtained in DAKE
-                                                                       X_2 = pubDHa, secDHa = KDF(X_1)
+                                                                       M_2 = pubDHa, secDHa = KDF(M_1)
                                                                    Mixes DH_2 into the KDF to generate root and chain keys
                                                                        R_1, Cs_1_0, Cr_1_0 = KDF(pubECDHa, secECDHa || secDHa)
                                                                    Encrypts data message with Cr_1_0
@@ -112,6 +116,7 @@ Sends data_message_0_1 ----------------------------------------->
                                                                    Encrypts data message with key derived from Cr_1_0
                        <----------------------------------------   Sends data_message_1_1
 ```
+
 **Alice or Bob sends the first message in a ratchet (a first reply)**
 
 The ratchet identifier ratchet_id increases every time a greater
@@ -120,13 +125,13 @@ the machine to ratchet i.e. `ratchet_id += 1`
 
 If `ratchet_id % 3 == 0 && sending the first message of a new ratchet`
 
-  * Compute the new mix key from a new DH computation e.g. `K_i =
-        DH(our_DH.secret, their_DH.public)`
-  * Send the new mix key K_i public key to the other party for further key computation. // TODO: wasn't mix key X?
+  * Compute the new mix key from a new DH computation e.g. `M_i =
+        SHA3-256(DH(our_DH.secret, their_DH.public))`
+  * Send the new `mix_key`'s public key to the other party for further key computation.
 
 Otherwise
 
-  * Compute the new mix key `K_i = KDF(K_(i-1))`
+  * Compute the new mix key `M_i = SHA3-256(M_(i-1))`
 
 **Alice or Bob send a follow-up message**
 
@@ -150,8 +155,8 @@ If `ratchet_id % 6 == 3 || ratchet_id % 6 == 0`
 Otherwise:
 
    * Compute the new mix key from a new DH computation e.g.
-        `K_i = DH(our_DH.secret, their_DH.public)`
-   * Use K_i to decrypt the received message.
+        `M_i = SHA3-256(DH(our_DH.secret, their_DH.public))`
+   * Use `M_i` to decrypt the received message.
 
 **Alice or Bob receive a follow up message**
 
@@ -162,10 +167,10 @@ action to be taken for the mix key.
 **Diagram: Pattern of DH computations and key derivations in a conversation**
 
 This diagram describes when public keys should be sent and when Alice
-and Bob should compute the mix key from a SHA3 or a new Diffie Hellman
+and Bob should compute the `mix_key` from a SHA3 or a new Diffie Hellman
 computation.
 
-Both parties share knowledge of X_0, which is a mix key established in
+Both parties share knowledge of `M_0`, which is a `mix_key` established in
 the DAKE.
 
 Given
@@ -179,15 +184,15 @@ If Alice sends the first message:
     Alice                 ratchet_id        public_key           Bob
 ---------------------------------------------------------------------------------------
 
-K_1 = SHA3(K_0)            -----1----------------------->     K_1 = SHA3(K_0)
-K_2 = SHA3(K_1)            <----2------------------------     K_2 = SHA3(K_1)
-K_3 = SHA3(DH(a_1, B_0))   -----3--------------A_1------>     K_3 = SHA3(DH(b_0, A_1))
-K_4 = SHA3(K_3)            <----4------------------------     K_4 = SHA3(K_3)
-K_5 = SHA3(K_4)            -----5----------------------->     K_5 = SHA3(K_4)
-K_6 = SHA3(DH(a_1, B_1))   <----6--------------B_1-------     K_6 = SHA3(DH(b_1, A_1))
-K_7 = SHA3(K_6)            -----7----------------------->     K_7 = SHA3(K_6)
-K_8 = SHA3(K_7)            <----8------------------------     K_8 = SHA3(K_7)
-K_9 = SHA3(DH(a_2, B_1))   -----9--------------A_2------>     K_9 = SHA3(DH(b_1, A_2))
+M_1 = SHA3(M_0)            -----1----------------------->     M_1 = SHA3(M_0)
+M_2 = SHA3(M_1)            <----2------------------------     M_2 = SHA3(M_1)
+M_3 = SHA3(DH(a_1, B_0))   -----3--------------A_1------>     M_3 = SHA3(DH(b_0, A_1))
+M_4 = SHA3(M_3)            <----4------------------------     M_4 = SHA3(M_3)
+M_5 = SHA3(M_4)            -----5----------------------->     M_5 = SHA3(M_4)
+M_6 = SHA3(DH(a_1, B_1))   <----6--------------B_1-------     M_6 = SHA3(DH(b_1, A_1))
+M_7 = SHA3(M_6)            -----7----------------------->     M_7 = SHA3(M_6)
+M_8 = SHA3(M_7)            <----8------------------------     M_8 = SHA3(M_7)
+M_9 = SHA3(DH(a_2, B_1))   -----9--------------A_2------>     M_9 = SHA3(DH(b_1, A_2))
 ```
 
 ### Performance
@@ -207,7 +212,7 @@ We’ve decide to use a 3072-bit key produced by
 
 1. a DH function which takes as argument the other party’s exponent
    through a data message and produces a mix key.
-2. a KDF function which takes as argument the previous mix key to
+2. a KDF (SHA3-256) function which takes as argument the previous mix key to
    produce a new one.
 
 The DH function will run every n = 3 times because of the following reasons:
