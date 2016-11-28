@@ -60,12 +60,9 @@ domain separation every time multiple keys need to be derived from the same
 secret.
 
 We will use the SHA3-256 hash function for generating fingerprints for
-long-lived, public keys. SHA3-256 has a security strength of 256 bits against
-preimage attacks. (TODO: I think the previous sentence is wrong. Preimage
-attacks are also subject to birthday paradox, right?) However, it only has a
-security strength of 128 bits against collision attacks. We choose SHA3-256
-instead of SHA3-512 for the operation of generating fingerprints because the
-output from SHA3-512 is much larger.
+long-lived, public keys. SHA3-256 has a security strength of 128 bits. We choose
+SHA3-256 instead of SHA3-512 for the operation of generating fingerprints
+because the output from SHA3-512 is much larger.
 
 ### Consequences
 
