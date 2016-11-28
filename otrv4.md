@@ -687,7 +687,7 @@ algorithm to exchange [data messages](#data-message) initialized with the shared
 secret established in the DAKE.
 
 A message with an empty human-readable part (the plaintext is of zero length, or
-starts with a NUL) is a "heartbeat" packet, and should not be displayed to the
+starts with a NULL) is a "heartbeat" packet, and should not be displayed to the
 user (but it is still useful for key rotations).
 
 ```
@@ -1344,7 +1344,7 @@ OTRv4 uses Ed448 as the cryptographic primative. This changes the way values
 are serialized and how they are computed. OTRv4 also reuses the SMP Message 1Q
 with TLV type 7 for situations where a user question is sent and when it is not
 sent. In cases where the question is not present, the user-speicified DATA
-portion of the secret has length 0 and value NUL. Lastly, OTRv4 creates
+portion of the secret has length 0 and value NULL. Lastly, OTRv4 creates
 fingerprints using SHA3-256. Thus, the size of the fingerprint in the "Secret
 Information" section of OTRv3 [3] should be 32 bytes in size.
 
