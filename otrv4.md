@@ -618,12 +618,11 @@ choice of DH and ECDH key. A valid Pre-key message is generated as follows:
 
 A pre-key is an OTR message encoded as:
 
-(TODO: we should check the message types and see if we can create good encodings for the Base64, just like we have for OTRv3)
 ```
 Protocol version (SHORT)
   The version number of this protocol is 0x0004.
 Message type (BYTE)
-  The message has type 0x01.
+  The message has type 0x0F.
 Sender Instance tag (INT)
   The instance tag of the person sending this message.
 Receiver Instance tag (INT)
@@ -665,7 +664,7 @@ A DRE-Auth is an OTR message encoded as:
 Protocol version (SHORT)
   The version number of this protocol is 0x0004.
 Message type (BYTE)
-  The message has type 0x02.
+  The message has type 0x00.
 Sender Instance tag (INT)
   The instance tag of the person sending this message.
 Receiver Instance tag (INT)
