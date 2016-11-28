@@ -39,27 +39,25 @@ key. We propose n = 3, but this can be adjusted depending on performance.
 
 ### Algorithm
 
-*Mix key (X_i)*
+*Mix key = A_i, a_i*
 
 A mix key is a key that is added to the key derivation function used
 to produce new root and chains keys. A mix key can be produced through
 a DH function and through a key derivation function, both of which
-produce a 3072-bit long key. This key has a 128 bit security level
+produce a 3072-bit public key. This key has a 128 bit security level
 according to Table 2: Comparable strengths in NIST’s Recommendation for Key
 Management, page 53
 (http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-57pt1r4.pdf).
 
-*DH function - DH(x, Y)*
+*DH function - DH(a_i, B_i)*
 
-// TODO: should this be updated to the new generateDH()?
-Given x, a private key, and Y, a public key, generates a shared secret value
-in the 3072-bit group defined in [RFC-3526](https://www.ietf.org/rfc/rfc3526.txt).
+Given a_i, a private key, and B_i, a public key, generates a shared secret
+value: `dh_shared_secret`. 
 
-*Key Derivation Function - SHA3(Y)*
+*Key Derivation Function - SHA3-256(dh_shared_secret)*
 
-Given Y, generates a 3072-bit long string using the SHA3-256 algorithm This is
-used even when a DH shared secret is calculated (reducing from 3072 to 256 bits)
-because we want to keep this value with a constant size. //TODO: a 3072 bit long with SHA-256? Not clear.
+Given `dh_shared_secret`, generates a 256 bit SHA3-256 algorithm. This is used
+even when a DH shared secret is calculated (reducing it to 256 bits) because we want to keep this value with a constant size. // what?
 
 #### Considerations
 
