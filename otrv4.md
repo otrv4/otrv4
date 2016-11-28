@@ -1219,7 +1219,7 @@ If `msgstate` is `MSGSTATE_PLAINTEXT`:
     * TODO: How are going to handle subsequent occurences of this case?
       Should we simply flood the user with Query Messages until the DAKE ends?
   * Otherwise:
-    * If `SEND_WHITESPACE_TAG` is set, and you have not received a plaintext message from this correspondent since last entering `MSGSTATE_PLAINTEXT`, attach the whitespace tag to the message. Send the (possibly modified) message as plaintext. // TODO: does this mean we should keep a log on this state machine transitions?
+    * If `SEND_WHITESPACE_TAG` is set and you have not received a plaintext message from this correspondent, attach the whitespace tag to the message. Send the (possibly modified) message as plaintext. 
 
 If `msgstate` is `MSGSTATE_ENCRYPTED`:
 
