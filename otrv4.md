@@ -221,7 +221,7 @@ Auth message (AUTH):
   r2 (MPI)
   c3 (MPI)
   r3 (MPI)
-    Where (c1, r1, c2, r2, c3, r3) = Auth(A_2, a_2, {A_1, A_3}, m)
+    Where (c1, r1, c2, r2, c3, r3) = Auth(A_2, a_2, {A_1, A_2, A_3}, m)
 ```
 
 ### Public keys and fingerprints
@@ -550,7 +550,7 @@ Bob will be initiating the DAKE with Alice.
 2. Generates an ephemeral 3072-bit DH secret key `a` and a public key `A`.
 3. Computes `γ = DREnc(PKa, PKb, m)`, being `m = "Prof_B" || "Prof_A" || Y || X || B || A`.
    Prof_A is Alice's User Profile.
-4. Computes `σ = Auth(Ha, za, {Hb, Y}, "Prof_B" || "Prof_A" || Y || B || γ)`.
+4. Computes `σ = Auth(Ha, za, {Ha, Hb, Y}, "Prof_B" || "Prof_A" || Y || B || γ)`.
 5. Computes root level keys (`root[0]`, `chain_s`, and `chain_r`).
     ```Details
     * Set `prev_our_ecdh` as your current ECDH key pair (`our_ecdh`), if you have it.
@@ -652,9 +652,7 @@ A valid DRE-Auth message is generated as follows:
   * public key `B = g3 ^ b`.
 4. Generate `m = X || Y || A || B`
 5. Compute `DREnc(PKa, PKb, m)` and serialize it as a DRE-M value in the variable `γ`.
-6. Compute `σ = Auth(Ha, za, {Hb, Y}, "Prof_B" || "Prof_A" || Y || B || γ)`.
-(TODO: this above Auth invocation is incorrect. It seems to miss Hb in the list of receivers. Compare from the paper:
-Auth(hR , zR , {hI , hR , g1^i }, "Prof_B" || "Prof_A" || X || A || γ))
+6. Compute `σ = Auth(Ha, za, {Ha, Hb, Y}, "Prof_B" || "Prof_A" || Y || B || γ)`.
 
 A DRE-Auth is an OTR message encoded as:
 
@@ -761,15 +759,15 @@ It is also used to [reveal old MAC keys](#revealing-mac-eys).
       Must be strictly greater than 0, and increment by 1 with each message.
       This should be set with sender's j.
 
-    Next Public ECDH Key (POINT)
-    (TODO: this description is weird, and the difference between current and next is also confusing)
+    Public ECDH Key (POINT)
       The sender's current ratchet ECDH public key.
       This should contain the value of our_ecdh.public_key variable.
 
-    Next Public DH Key (MPI)
-    (TODO: this description is weird, and the difference between current and next is also confusing)
+    Public DH Key (MPI)
+      The sender's current ratchet DH public key.
       This should contain the value of our_dh.public_key variable.
       You should send a NULL value if i % 3 != 0.
+      NULL is 4 bytes length as 0x00000000
 
     Nonce (NONCE)
       The nonce used with XSalsa20 to create the encrypted message contained in
@@ -1725,7 +1723,7 @@ SKi is the secret key of the person decrypting the message.
 
 The Authentication scheme consists of two functions:
 
-`σ = Auth(A_2, a_2, {A_1, A_3}, m)`, an authentication function.
+`σ = Auth(A_2, a_2, {A_1, A_2, A_3}, m)`, an authentication function.
 
 `Verify({A_1, A_2, A_3}, σ, m)`, a verification function.
 
@@ -1741,7 +1739,7 @@ G = (501459341212218748317573362239202803024229898883658122912772232650473550786
 906622513423589000065035233481733743985973099897904160).
 ```
 
-#### Authentication: Auth(A2, a2, {A1, A3}, m):
+#### Authentication: Auth(A2, a2, {A1, A2, A3}, m):
 
 A2 is the public value associated with a2, that is, `A2 = G*a2`.
 m is the message to authenticate.
