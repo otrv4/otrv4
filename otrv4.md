@@ -1272,56 +1272,6 @@ Follow the instructions from the same section in OTRv3 [3].
   the message client (for example, XMPP clients can decide to reply only to
   the device you have more recently received a message from).
 
-#### Things to consider
-
-TODO: This whole section is a big TODO.
-
-* How can we address the problem of multiple Query Messages received while the
-  DAKE is in progress?
-
-Example: Alice has `REQUIRE_ENCRYPTION`.
-
-```
-| Alice                      | Bob                    |
-| Types "Hi", Sends Q1       |                        |
-|                            | Receives Q1, Sends ψ1a |
-| Types "Hey", Sends Q2      |                        |
-| Receives ψ1a, Sends ψ2a    |                        |
-| Sends ENC(Ka, "Hi")        |                        |
-| Sends ENC(Ka, "Hey")       |                        |
-|                            | Receives Q2, Sends ψ1b |
-| Types "Yes", ENC(Ka, "Yes")|                        |
-|                            | Receives ψ2a           |
-|                            | Receives ENC(Ka, "Hi") |
-|                            | Receives ENC(Ka, "Hey")|
-|                            | Sends ENC(Ka, "Hello") |
-| Receives ψ1b, Sends ψ2b    |                        |
-| Forget Ka??                |                        |
-| Receive ENC(Ka, "Hello")   |                        |
-| Can't dec if Ka is gone!!  |                        |
-| Types "Yo", ENC(Kb, "Yo")  |                        |
-|                            | Receives ψ2b           |
-|                            | Forget Ka??            |
-```
-
-Note this can also happen regardless of `REQUIRE_ENCRYPTION`: Alice only needs
-to send a new Query Message after an OTRv4 channel is established.
-
-In the current protocol messages from the previous conversation (which existed
-before the new DAKE has finished) may be lost if received after the ψ2b is sent
-(or received). This happens because we reset ratched-id to 0 after the DAKE is
-complete.
-
-Handling a new DAKE as a new DH ratchet (and simply incrementing j) should fix
-this by applying the same approach as OTRv3: a new DAKE is considered simply as
-a new key exchange.
-
-Another suggested alternative is breaking the OTR channel (by reseting the
-`msgstate` variable) at the moment you engage in a new DAKE (a new ψ1 is either
-sent of received). This can lead to problems of sending messages unencrypted
-unless all the participants have the `REQUIRE_ENCRYPTION` policy.
-
-
 ## Socialist Millionaires Protocol (SMP)
 
 SMP in version 4 shares the same TLVs and flow as SMP in OTRv3 with the
