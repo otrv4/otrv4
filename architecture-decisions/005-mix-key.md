@@ -1,7 +1,5 @@
 ## ADR 5: Mix Keys
 
-**Status**: proposed
-
 ### Context
 
 Because of potential weaknesses in elliptic curves and the potential of quantum

@@ -1,7 +1,5 @@
 ## ADR 3: User Profile
 
-**Status**: proposed
-
 ### Context
 
 Currently, OTRv3 supports its previous versions by allowing the user to configure

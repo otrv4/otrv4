@@ -1,7 +1,5 @@
 ## ADR 2: Double Ratchet & revealing MAC key
 
-**Status**: proposed
-
 ### Context
 
 In older OTR versions, in data message exchange, the key management is controlled

@@ -1,8 +1,5 @@
 ## ADR 1: Security Level
 
-**Status**: proposed
-(TODO: do we need a status here)
-
 ### Context
 
 Designing a new version of OTR is an opportunity to:
