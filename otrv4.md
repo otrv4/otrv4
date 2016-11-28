@@ -299,10 +299,7 @@ The previously mentioned variables are affected by these events:
 * Upon completing the DAKE.
 * When you send a Data Message.
 * When you receive a Data Message.
-
-TODO: what happens to state machine When you receive a Query message
-TODO: what happens to state machine When you receive an End conversation message
-TODO: what happens to state machine When you receive an Error message
+* When you receive an End Conversation Message
 
 ### Calculating Keys
 
@@ -999,7 +996,7 @@ MSGSTATE_FINISHED
 
 ### Authentication state
 
-The authentication state variable, `authstate`, controls the aunthentication
+The authentication state variable, `authstate`, controls the authentication
 mechanism. It can take one of two values:
 
 ```
@@ -1215,7 +1212,7 @@ If `msgstate` is `MSGSTATE_PLAINTEXT`:
 
   * If `REQUIRE_ENCRYPTION` is set:
     * Store the plaintext message for possible retransmission and send a Query Message.
-    * TODO: How are going to handle subsequent occurences of this case?
+    * TODO: How are going to handle subsequent occurrence of this case?
       Should we simply flood the user with Query Messages until the DAKE ends?
   * Otherwise:
     * If `SEND_WHITESPACE_TAG` is set and you have not received a plaintext message from this correspondent, attach the whitespace tag to the message. Send the (possibly modified) message as plaintext. 
@@ -1238,9 +1235,9 @@ If `msgstate` is `MSGSTATE_ENCRYPTED`:
 
 Verify the information in the message. If the verification succeeds:
 
-  * Decrypt the message and display the human-readable part (if non-empty) to the user. // TODO: if empty what does it mean?
-  * Rotate root, chain and mix keys as appropiate.
-  * If you have not sent a message to this correspondent in some (configurable) time, send a "heartbeat" message. // TODO: what is the configurable time?
+  * Decrypt the message and display the human-readable part (if it contains any) to the user.
+  * Rotate root, chain and mix keys as appropriate
+  * If you have not sent a message to this correspondent in some (configurable) time, send a "heartbeat" message.
 
 If the received message contains a TLV type 1:
 (TODO: in what order should TLVs be processed? Should we end the conversation immediately, or do other things first?)
