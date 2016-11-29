@@ -1222,7 +1222,7 @@ If `msgstate` is `MSGSTATE_PLAINTEXT`:
   * If `REQUIRE_ENCRYPTION` is set:
     * Store plaintext messages for possible retransmission.
     * Send a Query Message.
-    TODO: Should we simply flood the user with Query Messages until the DAKE ends?
+    * Stop sending additional query messages until the DAKE finishes.
   * Otherwise:
     * If `SEND_WHITESPACE_TAG` is set and you have not received a plaintext
       message from this correspondent, attach the whitespace tag to the message.

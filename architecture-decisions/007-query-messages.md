@@ -48,6 +48,8 @@ new DAKE.
 
 ### Decision
 
+We will not change the DAKE to allow receiving late messages and decrypt them.
+
 We will prevent query messages to be used to force a key rotation in OTRv4
 by disallowing its sending on `MSGSTATE_ENCRYPTED`.
 
@@ -63,3 +65,9 @@ A participant is still able to receive a query message while on
 If the receiver starts a new DAKE, messages from the previous conversation that
 start a new ratchet will fail to be verified and decrypted
 (the receiver will need the DH private key from before the new DAKE).
+
+When a participant is on `MSGSTATE_PLAINTEXT` and `REQUIRE_ENCRYPTION` is set,
+she can not send additional query messages, otherwise her stored messages will
+not be correctly decrypted when they arrive. This happens because every time
+the other participant receives a query message and sends a pre-key he will
+generate new ECDH (and DH) keys - and the stored message will use previous keys.
