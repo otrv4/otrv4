@@ -61,5 +61,5 @@ A participant is still able to receive a query message while on
 `MSGSTATE_ENCRYPTED` from a dishonest participant.
 
 If the receiver starts a new DAKE, messages from the previous conversation that
-start a new ratchet will fail to be received (the receiver will need the DH
-private key from before the new DAKE).
+start a new ratchet will fail to be verified and decrypted
+(the receiver will need the DH private key from before the new DAKE).
