@@ -597,7 +597,7 @@ Regardless of who you are:
 * Securely erase `our_ecdh.private` and `our_dh` key pair.
 * Calculate the ECDH shared secret `K_ecdh = (G1*x)*y`.
 * Calculate the DH shared secret `k_dh = (g3*a)*b`.
-* Calculate the SHA3-256 of the DH shared secret `mix_key = SHA3-256(k_dh)`
+* Calculate the SHA3-256 of the DH shared secret `mix_key = SHA3-256(k_dh)`.
 * Calculate `K = calculate_shared_secret(K_ecdh, mix_key)`.
 * Calculate the SSID from shared secret: it is the first 64 bits of `SHA3-256(0x00 || K)`.
 * Calculate the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = calculate_ratchet_keys(K)`.
@@ -610,7 +610,7 @@ choice of DH and ECDH key. A valid Pre-key message is generated as follows:
 1. Create a user profile, as detailed [here](#creating-a-user-profile)
 2. Choose a random ephemeral ECDH key pair:
   * secret key `x`, which is a random element from `Z_q` (448 bits).
-  * public key `X`
+  * public key `X`.
 3. Generates an ephemeral DH secret key pair:
   * secret key `a` (640 bits).
   * public key `A = g3 ^ a`.
@@ -923,7 +923,7 @@ this _before_ checking for any of the other `?OTR:` markers):
   * Parse it, extracting instance tags, `index`, `total`, and `piece[index]`.
   * Discard illegal fragment, if:
        * the recipient's own instance tag does not match the listed receiver instance tag
-       * and the listed receiver instance tag is not zero, 
+       * and the listed receiver instance tag is not zero,
     * then, discard the message and optionally pass a warning to the user.
     * `index` is 0
     * `total` is 0
@@ -933,7 +933,7 @@ this _before_ checking for any of the other `?OTR:` markers):
     * Forget any stored fragment you may have
     * Store `piece`
     * Store `index` and `total`
-  
+
   * If this is the following fragment (same stored `total` and `index==index+1`):
     * Append `piece` to stored `piece`
     * Store `index` and `total`
@@ -1190,8 +1190,8 @@ If `authstate` is `AUTHSTATE_AWAITING_DRE_AUTH`:
   * Verify that the profile signature is valid.
   * Verify that the profile is not expired.
   * If the auth σ is valid, decrypt the DRE message and verify:
-    * that the point Y received in the pre-key message is on curve 448.
-    * that the B DH public key is from the correct group.
+    * that the point `Y` received in the pre-key message is on curve 448.
+    * that the `B` DH public key is from the correct group.
 
 If everything verifies:
 
@@ -1215,10 +1215,13 @@ Otherwise:
 If `msgstate` is `MSGSTATE_PLAINTEXT`:
 
   * If `REQUIRE_ENCRYPTION` is set:
-    * Store plaintext messages for possible retransmission and send a Query Message.
-      Should we simply flood the user with Query Messages until the DAKE ends?
+    * Store plaintext messages for possible retransmission.
+    * Send a Query Message.
+    TODO: Should we simply flood the user with Query Messages until the DAKE ends?
   * Otherwise:
-    * If `SEND_WHITESPACE_TAG` is set and you have not received a plaintext message from this correspondent, attach the whitespace tag to the message. Send the (possibly modified) message as plaintext. 
+    * If `SEND_WHITESPACE_TAG` is set and you have not received a plaintext
+      message from this correspondent, attach the whitespace tag to the message.
+    * Send the (possibly modified) message as plaintext.
 
 If `msgstate` is `MSGSTATE_ENCRYPTED`:
 
@@ -1236,6 +1239,7 @@ If `msgstate` is `MSGSTATE_FINISHED`:
 
 If `msgstate` is `MSGSTATE_ENCRYPTED`:
   Verify the information in the message.
+
   If the verification succeeds:
     * Decrypt the message and display the human-readable part (if it contains
       any) to the user. SMP TLVs should be addressed according to the SMP state
@@ -1257,14 +1261,14 @@ Follow the instructions from the same section in OTRv3 [3].
 
 #### Implementation notes (OR Considerations for networks which allow multiple devices)
 
-* When using a transport network that allows multiple devices to be
-  simultaneously logged in with the same peer identifier, make sure to identify
-  the other participant by its device-specific identifier and not only the
-  peer identifier (for example, using XMPP full JID instead of bare JID).
-  Doing so allows establishing an OTR channel at the same time with multiple
-  devices from the other participant at the cost of how to expose this to
-  the message client (for example, XMPP clients can decide to reply only to
-  the device you have more recently received a message from).
+When using a transport network that allows multiple devices to be simultaneously
+logged in with the same peer identifier, make sure to identify the other
+participant by its device-specific identifier and not only the peer identifier
+(for example, using XMPP full JID instead of bare JID). Doing so allows
+establishing an OTR channel at the same time with multiple devices from the
+other participant at the cost of how to expose this to the message client (for
+example, XMPP clients can decide to reply only to the device you have more
+recently received a message from).
 
 ## Socialist Millionaires Protocol (SMP)
 
@@ -1370,9 +1374,9 @@ generators, `g2` and `g3`. A valid  SMP message 1 is generated as follows:
 2. Pick random values `a2` and `a3` (448 bits) in `Z_q`. These will be Alice's exponents for the DH exchange to pick generators.
 3. Pick random values `r2` and `r3` (448 bits) in `Z_q`. These will be used to generate zero-knowledge proofs that this message was created according to the protocol.
 4. Compute `G2a = G*a2` and `G3a = G*a3`.
-5. Generate a zero-knowledge proof that the value `a2` is known by setting 
+5. Generate a zero-knowledge proof that the value `a2` is known by setting
 `c2 = HashToScalar(1 || G*r2)` and `d2 = r2 - a2 * c2 mod q`.
-6. Generate a zero-knowledge proof that the value `a3` is known by setting 
+6. Generate a zero-knowledge proof that the value `a3` is known by setting
 `c3 = HashToScalar(2 || G*r3)` and `d3 = r3 - a3 * c3 mod q`.
 7. Store the values of `x`, `a2` and `a3` for use later in the protocol.
 
