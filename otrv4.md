@@ -181,6 +181,8 @@ Nonce (NONCE):
 
 ED448 point (POINT):
   56 byte data
+  The decode function is defined in Mike Hamburg's Decaf paper [11], section
+  A.2.
 
 User Profile(USER-PROF):
   Detailed in ["User Profile Data Type" section](#user-profile-data-type)
@@ -354,10 +356,13 @@ mix_key = SHA3-256(k_dh)
 
 ```
 calculate_shared_secret(K_ecdh, mix_key):
-  serialized_K_ecdh = serialize_point(K_ecdh)
+  serialized_K_ecdh = encode_ecdh(K_ecdh)
   K = SHA3-512(serialized_K_ecdh || mix_key)
   return K
 ```
+
+We will use the `encode_ecdh` function as defined in the Mike Hamburg Decaf
+paper [11], section A.1.
 
 #### Calculate Double Ratchet Keys
 
@@ -1741,3 +1746,4 @@ d is an array of bytes.
 [8]: https://tools.ietf.org/html/rfc3339
 [9]: https://github.com/twstrike/otrv4/blob/master/gen_gens_ed448.py
 [10]: https://ed25519.cr.yp.to/python/ed25519.py
+[11]: https://eprint.iacr.org/2015/673.pdf
