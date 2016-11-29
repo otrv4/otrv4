@@ -1229,11 +1229,22 @@ If `msgstate` is `MSGSTATE_ENCRYPTED`:
 
 If `msgstate` is `MSGSTATE_FINISHED`:
 
-  * Inform the user that the message cannot be sent at this time.
-  * Store the plaintext message for possible retransmission.
-  * Return to `MSGSTATE_PLAINTEXT`
-  * Return to `AUTHSTATE_NONE`
-  * Send Query Message.
+  This may happen if the user received a "Disconnected" TLV while typing the
+  message. She expected to send this message encrypted but the conversation
+  ended.
+
+  * If `REQUIRE_ENCRYPTION` is set:
+    * Transition to `MSGSTATE_PLAINTEXT`.
+    * Store plaintext messages for possible retransmission.
+    * Send a Query Message.
+  * Otherwise:
+    * Ask the user if she want to (a) restart an encrypted conversation or
+      (b) proceed in plaintext.
+    * If (a):
+      * Store the plaintext message for possible retransmission.
+      * Send Query Message.
+    * If (b) transition to `MSGSTATE_PLAINTEXT` and send the message.
+
 
 #### Receiving a Data Message
 
