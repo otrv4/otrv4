@@ -1,11 +1,8 @@
 # OTR version 4
 
-This protocol provides a way for two people to have a conversation over a
-network with the same security expectations as a private, in-person
-conversation. No external party can overhear what is being said, and no
-one (not even the participants) can prove what was said or that the two
-participants spoke to each other at all. OTR works on top of an existing
-messaging protocol, like XMPP.
+OTRV4 is a new version of OTR that provides a Deniable Authenticated Key
+Exchange and better forward secrecy through the use of double ratcheting. OTR
+works on top of an existing messaging protocol, like XMPP.
 
 ## Table of Contents
 
@@ -33,9 +30,9 @@ messaging protocol, like XMPP.
 ## Main Changes over Version 3
 
 - Improvements on security and privacy:
-  - Security level raised to 224 bits based on elliptic curve cryptography
+  - Security level raised to 224-bits based on elliptic curve cryptography (ECC)
   - Additional protection against transcript decryption in the case of
-    elliptic curve cryptography compromise
+    ECC compromise
 - The cryptographic primitives and protocols have been updated:
   - Deniable Authenticated Key Exchange using SPAWN.
   - Key management using the Double Ratchet Algorithm.
