@@ -180,7 +180,7 @@ Nonce (NONCE):
   24 byte data
 
 ED448 point (POINT):
-  56 byte unsigned value, big-endian
+  56 byte data
 
 User Profile(USER-PROF):
   Detailed in ["User Profile Data Type" section](#user-profile-data-type)
@@ -1149,8 +1149,8 @@ This indicates that you have sent a Pre-key message to your correspondent and
 that either she didn't receive it or didn't receive it yet; but has sent you one
 as well.
 
-The symmetry will be broken by comparing the hashed `X` you sent in your pre-key
-with the one you received, considered as 32-byte unsigned big-endian values.
+The symmetry will be broken by comparing the `X` you sent in your pre-key
+with the one you received, considered as 56-byte unsigned big-endian values.
 
 If yours is the lower hash value:
 
