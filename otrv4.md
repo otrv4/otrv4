@@ -278,8 +278,8 @@ following values:
 ```
 State variables:
   i: the current ratchet id.
-  j: the last sent message id
-  k: the last received message id.
+  j: the current sending message id
+  k: the current receiving message id.
 
 Key variables:
   `root[i]`: the Root key for the ratchet i.
@@ -304,12 +304,11 @@ The previously mentioned variables are affected by these events:
 
 This section describes the functions used to manage the key material.
 
-#### Ratcheting the ECDH keys
+#### Rotate the ECDH keys
 
 The sender will rotate into a new ECDH ratchet before it sends first message
 after receiving any messages from the other side.
-The next data message will advertise a new ratchet id (`i + 1`).
-(TODO: I don't understand the above sentence)
+The following data messages will advertise a new ratchet id as `i + 1`.
 
 When you ratchet the ECDH keys:
 
@@ -411,7 +410,7 @@ When receiving data messages, you must retrieve the chain key:
 ```
 retrieve_chain_key(C, i, k):
   if C[i][k] not exist:
-  C[i][k] = SHA3-512(retrieve_chain_key(C, i, k-1))
+    C[i][k] = SHA3-512(retrieve_chain_key(C, i, k-1))
 ```
 
 ### Calculate Encryption and MAC keys
@@ -820,7 +819,7 @@ Given a new ratchet:
 
 Otherwise:
 
-  * Increment last sent message ID `j = j+1`.
+  * Increment current sending message ID `j = j+1`.
   * Derive the next sending chain key `derive_chain_key(chain_s, i, j)`.
   * Securely delete `chain_s[i][j-1]`.
 
