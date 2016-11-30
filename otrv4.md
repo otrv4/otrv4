@@ -465,7 +465,7 @@ To create a user profile, assemble:
    DSA key to trust the user's profile in version 4. This is only used if the
    user supports version 3 and 4.
 
-(4 and 5 should probably mention that they don't include the signature themselves. They say "entire profile" which isn't correct, since the signatures are part of the profile)
+(TODO: 4 and 5 should probably mention that they don't include the signature themselves. They say "entire profile" which isn't correct, since the signatures are part of the profile)
 
 Then this profile must be published in a public place, like an untrusted
 server.
@@ -844,7 +844,8 @@ in the [Revealing MAC keys](#revealing-mac-keys) section.
 
 #### When you receive a Data Message:
 
-Use the `message_id` to compute the receiving chain key, and calculate encryption and mac keys.
+Use the `message_id` to compute the receiving chain key, and calculate encryption
+and mac keys.
 
 ```
   retrieve_chain_key(chain_r, ratchet_id, message_id)
@@ -859,7 +860,8 @@ Otherwise:
 
   * Decrypt the message using the "encryption key" (`MKenc`) and securely delete it.
   * Securely delete receiving chain keys older than `message_id-1`.
-  * Set `j = 0` to indicate that a new DH-ratchet should happen the next time you send a message.
+  * Set `j = 0` to indicate that a new DH-ratchet should happen the next time you
+  send a message.
   * Set `their_ecdh.public` as the "Public ECDH key" from the message.
   * Set `their_dh.public` as the "Public DH Key" from the message, if it
     is not NULL.
@@ -928,7 +930,8 @@ this _before_ checking for any of the other `?OTR:` markers):
 
   * Parse it, extracting instance tags, `index`, `total`, and `piece[index]`.
   * Discard illegal fragment, if:
-       * the recipient's own instance tag does not match the listed receiver instance tag
+       * the recipient's own instance tag does not match the listed receiver
+       instance tag
        * and the listed receiver instance tag is not zero,
     * then, discard the message and optionally pass a warning to the user.
     * `index` is 0
@@ -1267,10 +1270,12 @@ If `msgstate` is `MSGSTATE_ENCRYPTED`:
     * If the received message contains a TLV type 1 forget all encryption keys
       for this correspondent and transition `msgstate` to `MSGSTATE_FINISHED`.
   Otherwise:
-    Inform the user that an unreadable encrypted message was received, and reply with an Error Message.
+    Inform the user that an unreadable encrypted message was received, and reply
+    with an Error Message.
 
 If `msgstate` is `MSGSTATE_PLAINTEXT` or `MSGSTATE_FINISHED`:
-   * Inform the user that an unreadable encrypted message was received, and reply with an Error Message.
+   * Inform the user that an unreadable encrypted message was received, and reply
+   with an Error Message.
 
 #### User requests to end an OTR conversation
 
@@ -1305,8 +1310,10 @@ Lastly, OTRv4 uses Ed448 as the cryptographic primative. This changes the way
 values are serialized and how they are computed. To define the SMP values under
 Ed448, we reuse the previously defined generator for Cramer-Shoup:
 
-`G = (501459341212218748317573362239202803024229898883658122912772232650473550786782902904842340270909267251001424253087988710625934010181862,
-44731490761556280255905446185238890493953420277155459539681908020022814852045473906622513423589000065035233481733743985973099897904160)`
+`G = (5014593412122187483175733622392028030242298988836581229127722326504735507867829029
+04842340270909267251001424253087988710625934010181862,
+44731490761556280255905446185238890493953420277155459539681908020022814852045473906
+622513423589000065035233481733743985973099897904160)`
 
 ### Overview
 
@@ -1387,9 +1394,13 @@ Second MPI (MPI)
 SMP message 1Q is sent by Alice to begin a DH exchange to determine two new
 generators, `g2` and `g3`. A valid  SMP message 1 is generated as follows:
 
-1. Determine her secret input `x`, which is to be compared to Bob's secret `y`, as specified in the "Secret Information" section.
-2. Pick random values `a2` and `a3` (448 bits) in `Z_q`. These will be Alice's exponents for the DH exchange to pick generators.
-3. Pick random values `r2` and `r3` (448 bits) in `Z_q`. These will be used to generate zero-knowledge proofs that this message was created according to the protocol.
+1. Determine her secret input `x`, which is to be compared to Bob's secret `y`, as
+specified in the "Secret Information" section.
+2. Pick random values `a2` and `a3` (448 bits) in `Z_q`. These will be Alice's
+exponents for the DH exchange to pick generators.
+3. Pick random values `r2` and `r3` (448 bits) in `Z_q`. These will be used to
+generate zero-knowledge proofs that this message was created according to the
+protocol.
 4. Compute `G2a = G*a2` and `G3a = G*a3`.
 5. Generate a zero-knowledge proof that the value `a2` is known by setting
 `c2 = HashToScalar(1 || G*r2)` and `d2 = r2 - a2 * c2 mod q`.
@@ -1427,15 +1438,21 @@ generators, g2 and g3. It also begins the construction of the values used in the
 final comparison of the protocol. A valid SMP message 2 is generated as follows:
 
 1. Determine Bob's secret input `y`, which is to be compared to Alice's secret `x`.
-2. Pick random values `b2` and `b3` (448 bits) in `Z_q`. These will used during the DH exchange to pick generators.
-3. Pick random values `r2`, `r3`, `r4`, `r5` and `r6` (448 bits) in `Z_q`. These will be used to add a blinding factor to the final results, and to generate zero-knowledge proofs that this message was created honestly.
+2. Pick random values `b2` and `b3` (448 bits) in `Z_q`. These will used during the
+DH exchange to pick generators.
+3. Pick random values `r2`, `r3`, `r4`, `r5` and `r6` (448 bits) in `Z_q`. These
+will be used to add a blinding factor to the final results, and to generate zero-
+knowledge proofs that this message was created honestly.
 4. Compute `G2b = G*b2` and `G3b = G*b3`.
-5. Generate a zero-knowledge proof that the value `b2` is known by setting `c2 = HashToScalar(3 || G*r2)` and `d2 = r2 - b2 * c2 mod q`.
-6. Generate a zero-knowledge proof that the value `b3` is known by setting `c3 = HashToScalar(4 || G*r3)` and `d3 = r3 - b3 * c3 mod q`.
+5. Generate a zero-knowledge proof that the value `b2` is known by setting
+`c2 = HashToScalar(3 || G*r2)` and `d2 = r2 - b2 * c2 mod q`.
+6. Generate a zero-knowledge proof that the value `b3` is known by setting
+`c3 = HashToScalar(4 || G*r3)` and `d3 = r3 - b3 * c3 mod q`.
 7. Compute `G2 = G2a*b2` and `G3 = G3a*b3`.
 8. Compute `Pb = G3*r4` and `Qb = G*r4 + G2*y`.
-9. Generate a zero-knowledge proof that `Pb` and `Qb` were created according to the protocol
-by setting `cp = HashToScalar(5 || G3*r5 || G*r5 + G2*r6)`, `d5 = r5 - r4 * cp mod q` and `d6 = r6 - y * cp mod q`.
+9. Generate a zero-knowledge proof that `Pb` and `Qb` were created according to the
+protocol by setting `cp = HashToScalar(5 || G3*r5 || G*r5 + G2*r6)`,
+`d5 = r5 - r4 * cp mod q` and `d6 = r6 - y * cp mod q`.
 10. Store the values of `G3a`, `G2`, `G3`, `b3`, `Pb` and `Qb` for use later in the protocol.
 
 
@@ -1467,7 +1484,9 @@ SMP message 3 is Alice's final message in the SMP exchange. It has the last of
 the information required by Bob to determine if `x = y`. A valid SMP message 1
 is generated as follows:
 
-1. Pick random values `r4`, `r5`, `r6` and `r7` (448 bits) in `Z_q`. These will be used to add a blinding factor to the final results, and to generate zero-knowledge proofs that this message was created honestly.
+1. Pick random values `r4`, `r5`, `r6` and `r7` (448 bits) in `Z_q`. These will be
+used to add a blinding factor to the final results, and to generate zero-knowledge
+proofs that this message was created honestly.
 2. Compute `G2 = G2b*a2` and `G3 = G3b*a3`.
 3. Compute `Pa = G3*r4` and `Qa = G*r4 + G2*x`.
 4. Generate a zero-knowledge proof that `Pa` and `Qa` were created according to the protocol
@@ -1499,7 +1518,8 @@ SMP message 4 is Bob's final message in the SMP exchange. It has the last of the
 information required by Alice to determine if `x = y`. A valid SMP message 4 is
 generated as follows:
 
-1. Pick a random value `r7` (448 bits) in `Z_q`. This will be used to generate Bob's final zero-knowledge proof that this message was created honestly.
+1. Pick a random value `r7` (448 bits) in `Z_q`. This will be used to generate
+Bob's final zero-knowledge proof that this message was created honestly.
 2. Compute `Rb = (Qa - Qb) * b3`.
 3. Generate a zero-knowledge proof that `Rb` was created according to the protocol by setting
 	`cr = HashToScalar(8 || G*r7 || (Qa - Qb)*r7)` and `d7 = r7 - b3 * cr mod q`.
@@ -1599,7 +1619,8 @@ The DRE scheme consists of three functions:
 
 #### Domain parameters
 
-The Cramer-Shoup scheme uses a group (`G`, `q`, `G1`, `G2`). This is a group with the same `q` as Curve 448. The generators `G1` and `G2` are:
+The Cramer-Shoup scheme uses a group (`G`, `q`, `G1`, `G2`). This is a group with
+the same `q` as Curve 448. The generators `G1` and `G2` are:
 
 ```
 G1 = (5014593412122187483175733622392028030242298988836581229127722326504735507
@@ -1636,7 +1657,8 @@ Let `{C1, D1, H1} = PK1` and `{C2, D2, H2} = PK2`
     - `Ei = (Hi*ki) + K`
   2. Compute `αi = HashToScalar(U1i || U2i || Ei)`.
   3. Compute `Vi = Ci*ki + Di*(ki * αi)`
-3. Compute `K_enc = SHA3-256(K)`. K is compressed from 446 bits to 256 bits because XSalsa20 has a maximum key size of 256.
+3. Compute `K_enc = SHA3-256(K)`. K is compressed from 446 bits to 256 bits because
+XSalsa20 has a maximum key size of 256.
 4. Pick a random 24 bytes `nonce` and compute `phi = XSalsa20-Poly1305_K_enc(m, nonce)`
 5. Generate a NIZKPK:
   1. for i ∈ {1, 2}:
@@ -1683,7 +1705,8 @@ SKi is the secret key of the person decrypting the message.
     - `T3 = U1i*y1i`
     - `T4 = U2i*y2i`
   6. Verify `T1 + T2 + (T3 + T4)*αi ≟ Vi`.
-3. Recover secret key `K_enc = SHA3-256(Ei - U1i*zi)`. K is compressed from 446 bits to 256 bits because XSalsa20 has a maximum key size of 256.
+3. Recover secret key `K_enc = SHA3-256(Ei - U1i*zi)`. K is compressed from 446
+bits to 256 bits because XSalsa20 has a maximum key size of 256.
 4. Decrypt `m = XSalsa20-Poly1305_K_enc(phi, nonce)`.
 
 ### ROM Authentication
