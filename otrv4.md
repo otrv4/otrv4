@@ -275,10 +275,8 @@ Ratchet.
 As the ratchet moves forward through its keys, its state is kept with the
 following values:
 
-(TODO: do we need the initiator still??)
 ```
 State variables:
-  initiator: the participant who should perform the first root key rotation after the DAKE completes.
   i: the current ratchet id.
   j: the last sent message id
   k: the last received message id.
@@ -308,8 +306,9 @@ This section describes the functions used to manage the key material.
 
 #### Ratcheting the ECDH keys
 
-The participant invoking this is moving into a new ECDH ratchet. The next data
-message will advertise a new ratchet (`i + 1`) from the receiver perspective.
+The sender will rotate into a new ECDH ratchet before it sends first message
+after receiving any messages from the other side.
+The next data message will advertise a new ratchet id (`i + 1`).
 (TODO: I don't understand the above sentence)
 
 When you ratchet the ECDH keys:
@@ -378,16 +377,14 @@ calculate_ratchet_keys(K):
 
 #### Decide Between Chain Keys
 
-(TODO: why do we still have initiator here?)
-
 Both sides will compare their public keys to choose a chain key for sending and receiving:
 - Alice (and similarly, Bob) determines if she is the "low" end or the "high" end of this ratchet.
 If Alice's ephemeral ECDH public key is numerically greater than Bob's public key, then she is the "high" end.
 Otherwise, she is the "low" end.
 - Alice selects the chain keys for sending and receiving:
-  - If she is the "high" end, set `initiator` as `true`, use Ca as the sending
+  - If she is the "high" end, set `j` as `0`, use Ca as the sending
   chain key (`chain_s`) and Cb as the receiving chain key (`chain_r`).
-  - If she is the "low" end, set `initiator` as `false`, use Cb as the sending
+  - If she is the "low" end, set `j` as `1`, use Cb as the sending
   chain key (`chain_s`) and Ca as the receiving chain key (`chain_r`).
 
 ```
@@ -805,7 +802,7 @@ It is also used to [reveal old MAC keys](#revealing-mac-eys).
 
 In order to send a data message, a key is required to encrypt it. This key
 will be derived from the previous chain key and, if the message's counter `j`
-has been reset to zero, keys should be rotated.
+has been set to `0`, keys should be rotated.
 
 Given a new ratchet:
 
