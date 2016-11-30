@@ -174,7 +174,6 @@ OTRv4 supports the same TLV record types from OTRv3.
 
 OTRv4 uses almost the same data types as specified in OTRv3 (bytes, shorts, ints, MPIs,
 and DATA) with the addition of:
-(TODO: we need to specify exactly how to serialize the point)
 
 ```
 Nonce (NONCE):
@@ -182,12 +181,13 @@ Nonce (NONCE):
 
 ED448 point (POINT):
   56 byte data
-  The decode function is defined in Mike Hamburg's Decaf paper [11], section
-  A.2.
-
+  
 User Profile(USER-PROF):
-  Detailed in ["User Profile Data Type" section](#user-profile-data-type)
+  Detailed in "User Profile Data Type" section
 ```
+
+In order to serialize and deserialize the point, refer to Appendix A.1 (Encoding)
+and A.2 (Decoding) in Mike Hamburg's Decaf paper [11].
 
 ### DRE messages and Auth NIZKPK
 
@@ -356,7 +356,7 @@ mix_key = SHA3-256(k_dh)
 
 ```
 calculate_shared_secret(K_ecdh, mix_key):
-  serialized_K_ecdh = encode_ecdh(K_ecdh)
+  serialized_K_ecdh = serialize_ecdh(K_ecdh)
   K = SHA3-512(serialized_K_ecdh || mix_key)
   return K
 ```
