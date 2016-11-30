@@ -70,6 +70,9 @@ other participant but cannot transfer this knowledge to a third party.
 Once an OTRv4 channel has been created, all messages transmitted through this
 channel are confidential and integrity is protected.
 
+If key material has been compromised, decription of neither previous
+or future messages is enabled.
+
 Both parties can deny that they have participated in a conversation. They can
 also deny having sent any of the exchanged messages in the conversation. The
 respective party can be certain of the authenticity of the messages but cannot
@@ -77,9 +80,6 @@ transfer this knowledge to someone else.
 
 On the other hand, OTRv4 does not protect against an active attacker performing
 Denial of Service attacks to reduce availability.
-
-(TODO: forward secrecy / future secrecy?)
-
 
 ## Notation and parameters
 
