@@ -1020,8 +1020,12 @@ authentication process, defined as authentication state.
 
 ### Message state
 
-This machine models the transitions a message would make as a response
-to user input. It can go through the following three states:
+This machine offers an option to model the management of response
+messages a client would make as a response to user input. It describes a
+finite state machine which may transition throuhg states that describe
+when messages should be sent with or without encryption or not sent at
+all. The scope for this state should be a single conversation with a
+correspondent.
 
 ```
 MSGSTATE_PLAINTEXT
@@ -1043,8 +1047,10 @@ MSGSTATE_FINISHED
 
 ### Authentication state
 
-The authentication state variable, `authstate`, controls the authentication
-mechanism. It can take one of two values:
+This machines offers an option to model the management of the
+authentication protocol. It describes a finite state machine which
+may transitition through states that describe whether the protocol is
+iether running or awaiting response.
 
 ```
 AUTHSTATE_NONE
@@ -1077,34 +1083,36 @@ Received messages:
   * DRE-Auth message
   * Data Message
 
-The following sections will outline which actions to take for each case. They
-all assume that at least `ALLOW_V3` or `ALLOW_V4` is set; if not, then OTR is
-completely disabled and no special handling of messages should be done. Version
-1 and 2 messages are out of the scope of this specification.
+The following sections will outline which actions to take for each
+case.
+
+Note the following:
+
+  * Versions 1 and 2 messages are out of the scope of this specification.
+  * For version 3 and 4 messages, if the receiving instance tag is not
+    equal to its own, the message should be discarded and the user
+    optionally warned.
+  * The exception here is the DH Commit Message where the recipient
+    instance tag may be 0, which indicates that no particular instance
+    is specified.
 
 (TODO: this section doesn't seem to allow for the OTRv4 specific DAKE messages)
 
-For version 3 and 4 messages, if the receiving instance tag is not equal to its
-own, the message should be discarded and the user optionally warned.
-
-The exception here is the DH Commit Message where the recipient instance tag may
-be 0, which indicates that no particular instance is specified.
-
 #### Receiving OTRv3 Specific Messages
 
-If an OTRv3 D-H commit message arrives and you support OTRv3, you may start
-OTRv3. All other OTRv3 specific messages are ignored.
+  * If an OTRv3 D-H commit message arrives and you support OTRv3, you
+    may start OTRv3. All other OTRv3 specific messages are ignored.
 
 #### User requests to start an OTR conversation
 
-* Send an OTR Query Message to the correspondent.
+  * Send an OTR Query Message to the correspondent.
 
 #### Receiving plaintext without the whitespace tag
 
 If `msgstate` is `MSGSTATE_PLAINTEXT`:
 
   * Simply display the message to the user.
-  * If `REQUIRE_ENCRYPTION` is set, warn the user that the message was received
+  * If you enforce encryption, warn the user that the message was received
     unencrypted.
 
 If `msgstate` is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
@@ -1117,7 +1125,7 @@ If `msgstate` is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
 If `msgstate` is `MSGSTATE_PLAINTEXT`:
 
   * Remove the whitespace tag and display the message to the user.
-  * If `REQUIRE_ENCRYPTION` is set, warn the user that the message was received
+  * If you enforce encryption, warn the user that the message was received
     unencrypted.
 
 If `msgstate` is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
@@ -1125,32 +1133,32 @@ If `msgstate` is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
   * Remove the whitespace tag and display the message to the user.
   * Warn him that the message was received unencrypted.
 
-In any event, if `WHITESPACE_START_DAKE` is set:
+In any event, if you received a whitespace tag:
 
-If the tag offers OTR version 4 and `ALLOW_V4` is set:
+If the tag offers OTR version 4 and you allow version 4 of the protocol:
 
   * Send a pre-key Message.
   * Transition `authstate` to `AUTHSTATE_AWAITING_DRE_AUTH`.
 
-If the tag offers OTR version 3 and `ALLOW_V3` is set:
+If the tag offers OTR version 3 and you support version 3 of the protocol:
 
   * The protocol proceeds as specified in OTRv3.
 
 #### Receiving a Query Message
 
-If the query message offers OTR version 4 and `ALLOW_V4` is set:
+If the query message offers OTR version 4 and you allow version 4 of the protocol:
 
   * Send a Pre-key Message
   * Transition `authstate` to `AUTHSTATE_AWAITING_DRE_AUTH`.
 
-If the query message offers OTR version 3 and `ALLOW_V3` is set:
+If the query message offers OTR version 3 and you support version 3 of the protocol:
 
   * The protocol proceeds as specified in OTRv3.
 
 #### Receiving an Error Message
 
   * Display the message to the user.
-  * If `ERROR_START_DAKE` is set, reply with a Query Message.
+  * If you receive an error during AKE, reply with a Query Message.
   * Reset `msgstate` to `MSGSTATE_PLAINTEXT` and `authstate` to `AUTHSTATE_NONE`
 
 #### Receiving a Pre-key message
@@ -1230,7 +1238,7 @@ Otherwise:
 
 If `msgstate` is `MSGSTATE_PLAINTEXT`:
 
-  * If `REQUIRE_ENCRYPTION` is set:
+  * If you enforce encryption:
     * Store plaintext messages for possible retransmission.
     * Send a Query Message.
     * Stop sending additional query messages until the DAKE finishes.
@@ -1249,7 +1257,7 @@ If `msgstate` is `MSGSTATE_FINISHED`:
   message. She expected to send this message encrypted but the conversation
   ended.
 
-  * If `REQUIRE_ENCRYPTION` is set:
+  * If you enforce encryption:
     * Transition to `MSGSTATE_PLAINTEXT`.
     * Store plaintext messages for possible retransmission.
     * Send a Query Message.
