@@ -2,9 +2,8 @@
 
 ### Context
 
-In older OTR versions, in data message exchange, the key management is controlled
-by a "three step ratchet" which behaves as:
-(TODO: the sentence above could be smoother)
+Previous versions of the protocol rotate the keys used to encrypt
+messages being exchanged through the following three steps mechanism:
 
 1. Alice sends an encrypted message to Bob, and "advertises" her next Diffie-Hellamn
    key pubA.
