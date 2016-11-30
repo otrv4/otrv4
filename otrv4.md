@@ -1011,11 +1011,12 @@ We could fragment this message into three pieces:
 
 An OTR client maintains separate state for every correspondent. For example,
 Alice may have an active OTR conversation with Bob, while having an insecure
-conversation with Charlie. This state machine consists of two main state
-variables, as well as some other information (such as encryption keys). The two
-main state variables are:
+conversation with Charlie.
 
-(TODO: having the paragraph above end on a colon is quite weird and jarring to read)
+For a conversation, with each correspondent, to start and to be
+maintained it is necesary for the client to manage how to deliver
+response messages, defined as message state, and to manage the
+authentication process, defined as authentication state.
 
 ### Message state
 
