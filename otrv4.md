@@ -59,9 +59,8 @@ Both participants are online at the start of a conversation.
 Messages in a conversation can be exchanged over an insecure channel, where an
 attacker can eavesdrop or interfere with the encrypted messages.
 
-We assume a network model which provides in-order delivery of messages, but some
+The network model provides in-order delivery of messages, but some
 messages may not be delivered.
-(TODO: we should probably rephrase the third assumption to follow the same linguistic pattern as the two first ones)
 
 ## Security Properties
 
