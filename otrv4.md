@@ -86,7 +86,7 @@ and arithmetic used.
 
 ### Notation
 
-Scalars are in lower case, such as `x` or `y`. Points and public keys
+Scalars and secret keys are in lower case, such as `x` or `y`. Points and public keys
 are in upper case, such as `P` or `Q`.
 
 Addition and subtraction of elliptic curve points `A` and `B` are `A + B` and
@@ -182,7 +182,7 @@ ED448 point (POINT):
   56 byte data
   
 User Profile(USER-PROF):
-  Detailed in "User Profile Data Type" section
+  Detailed in [User Profile Data Type](#user-profile-data-type)section
 ```
 
 In order to serialize and deserialize the point, refer to Appendix A.1
@@ -260,15 +260,15 @@ cryptographic ratchet is a one way mechanism for deriving new cryptographic keys
 from previous keys. New keys cannot be used to calculate the old keys. Its name
 comes from the mechanical ratchet.
 
-OTRv4 retains the Diffie-Hellman Ratchet [7] and Symmetric Key Ratchet [8] from
-the algorithm.
+OTRv4 retains the Diffie-Hellman Ratchet [7] with Elliptic Curve Diffie Hellman
+(ECDH), and the Symmetric Key Ratchet [12] from the algorithm.
 
 OTRv4 adds new 3072 Diffie-Hellman keys called the Mix Key Pair. In addition,
 another Diffie-Hellman Ratchet and Key Symmetric Ratchet is added for the Mix
 Key alone. These were added to protect transcripts of data messages in the case
 that elliptic curve cryptography is broken. During the DAKE, both parties agree
 upon the first set of 3072 Diffie-Hellman keys. Then every third Diffie-Hellman
-Ratchet in the Double Ratchet, a new 3072 key is agreed upon. Between each
+Ratchet in the Double Ratchet, a new 3072-bit key is agreed upon. Between each
 Diffie-Hellman Mix Key Ratchet, both sides will conduct a Symmetric Mix Key
 Ratchet.
 
@@ -306,8 +306,8 @@ This section describes the functions used to manage the key material.
 
 #### Rotate the ECDH keys
 
-The sender will rotate into a new ECDH ratchet before it sends first message
-after receiving any messages from the other side.
+The sender will rotate into a new ECDH ratchet before it sends the first message
+after receiving any messages from the other side (i.e. the first reply).
 The following data messages will advertise a new ratchet id as `i + 1`.
 
 When you ratchet the ECDH keys:
@@ -1862,3 +1862,4 @@ d is an array of bytes.
 [9]: https://github.com/twstrike/otrv4/blob/master/gen_gens_ed448.py
 [10]: https://ed25519.cr.yp.to/python/ed25519.py "Daniel Bernstein: ed25519"
 [11]: https://eprint.iacr.org/2015/673.pdf "Mike Hamburg: Decaf: Eliminating cofactors through point compression"
+[12]: https://whispersystems.org/docs/specifications/doubleratchet/#symmetric-key-ratchet "Trevor Perrin (editor), Moxie Marlinspike: The Double Ratchet Algorithm"
