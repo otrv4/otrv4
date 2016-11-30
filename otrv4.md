@@ -1339,10 +1339,8 @@ Assuming that Alice begins the exchange:
 
 **Alice:**
 
-(TODO: random values in what range?)
-
-* Picks random values `a2` and `a3`.
-* Picks random values `r2` and `r3`.
+* Picks random values `a2` and `a3` in `Z_q`.
+* Picks random values `r2` and `r3` in `Z_q`.
 * Computes `c2 = HashToScalar(1 || G*r2)` and `d2 = r2 - a2 * c2`.
 * Computes `c3 = HashToScalar(2 || G*r3)` and `d3 = r3 - a3 * c3`.
 * Sends Bob a SMP message 1 with `G2a = G*a2`, `c2`, `d2`, `G3a = G*a3`, `c3`
@@ -1350,10 +1348,8 @@ Assuming that Alice begins the exchange:
 
 **Bob:**
 
-(TODO: random values in what range?)
-
-* Picks random values `b2` and `b3`.
-* Picks random values `r2`, `r3`, `r4`, `r5` and `r6`.
+* Picks random values `b2` and `b3` in `Z_q`.
+* Picks random values `r2`, `r3`, `r4`, `r5` and `r6` in `Z_q`.
 * Computes `G2b = G*b2` and `G3b = G*b3`.
 * Computes `c2 = HashToScalar(3 || G*r2)` and `d2 = r2 - b2 * c2`.
 * Computes `c3 = HashToScalar(4 || G*r3)` and `d3 = r3 - b3 * c3`.
@@ -1366,10 +1362,8 @@ Assuming that Alice begins the exchange:
 
 **Alice:**
 
-(TODO: random values in what range?)
-
 * Computes `G2 = G2b*a2` and `G3 = G3b*a3`.
-* Picks random values `r4`, `r5`, `r6` and `r7`.
+* Picks random values `r4`, `r5`, `r6` and `r7` in `Z_q`.
 * Computes `Pa = G3*r4` and `Qa = G1*r4 + G2*x`, where x is the 'actual secret'.
 * Computes `cp = HashToScalar(6 || G3*r5 || G*r5 + G2*r6)`, `d5 = r5 - r4 * cp`
   and `d6 = r6 - x * cp`.
@@ -1379,9 +1373,7 @@ Assuming that Alice begins the exchange:
 
 **Bob:**
 
-(TODO: random values in what range?)
-
-* Picks a random value `r7`.
+* Picks a random value `r7` in `Z_q`.
 * Computes `Rb = (Qa - Qb)*b3`.
 * Computes `Rab = Ra*b3`.
 * Computes `cr = HashToScalar(8 || G*r7 || (Qa - Qb)*r7)` and `d7 = r7 - b3 * cr`.
