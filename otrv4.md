@@ -208,8 +208,8 @@ Dual-receiver encrypted message (DRE-M):
   n1 (MPI)
   n2 (MPI)
   nonce (NONCE)
-  φ (DATA)
-    Where (U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2, nonce, φ) = DREnc(pubA, pubB, m)
+  phi (DATA)
+    Where (U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2, nonce, phi) = DREnc(pubA, pubB, m)
 ```
 
 An Auth non-interactive zero-knowledge proof of knowledge is serialized as
@@ -529,9 +529,9 @@ K_ecdh: a shared secret computed from an ECDH exchange = X*y, Y*x
 Alice                                    Bob
 ---------------------------------------------------
 Query Message or Whitespace Tag ------->
-                                <------- Prekey (ψ1)
-                  DRE-Auth (ψ2) ------->
-                                         Verify & Decrypt (ψ2)
+                                <------- Prekey (psi_1)
+                  DRE-Auth (psi_2) ------->
+                                         Verify & Decrypt (psi_2)
 ```
 
 Bob will be initiating the DAKE with Alice.
@@ -548,16 +548,16 @@ Bob will be initiating the DAKE with Alice.
     * Set `j = 1` because the pre-key message is considered the first in this DH ratchet.
     * Increase ratchet id `i = i + 1`.
     ```
-3. Sends Alice a pre-key message `ψ1 = ("Prof_B", Y, B)`. Prof_B is
+3. Sends Alice a pre-key message `psi_1 = ("Prof_B", Y, B)`. Prof_B is
    Bob's User Profile.
 
 **Alice:**
 
 1. Generates an ephemeral ECDH secret key `x` and a public key `X`.
 2. Generates an ephemeral 3072-bit DH secret key `a` and a public key `A`.
-3. Computes `γ = DREnc(PKa, PKb, m)`, being `m = Prof_B || Prof_A || Y || X || B || A`.
+3. Computes `gamma = DREnc(PKa, PKb, m)`, being `m = Prof_B || Prof_A || Y || X || B || A`.
    Prof_A is Alice's User Profile.
-4. Computes `σ = Auth(Ha, za, {Ha, Hb, Y}, Prof_B || Prof_A || Y || B || γ)`.
+4. Computes `sigma = Auth(Ha, za, {Ha, Hb, Y}, Prof_B || Prof_A || Y || B || gamma)`.
 5. Computes root level keys (`root[0]`, `chain_s`, and `chain_r`).
 
     ```Details
@@ -568,7 +568,7 @@ Bob will be initiating the DAKE with Alice.
     * Set `their_dh` as their DH ephemeral public key from the DAKE (`B`).
     * Increase ratchet id `i = i + 1`.
     ```
-6. Sends Alice a DRE-Auth Message `ψ2 = ("R", γ, σ)`.
+6. Sends Alice a DRE-Auth Message `psi_2 = ("R", gamma, sigma)`.
 7. At this point, the DAKE is complete for Alice and she:
 
     ```Details
@@ -578,8 +578,8 @@ Bob will be initiating the DAKE with Alice.
 
 **Bob:**
 
-1. Verifies `Verify({Hb, Ha, Y}, σ, Prof_B || Prof_A || Y || B || γ)`.
-2. Decrypts `m = DRDec(PKb, PKa, skb, γ)`.
+1. Verifies `Verify({Hb, Ha, Y}, sigma, Prof_B || Prof_A || Y || B || gamma)`.
+2. Decrypts `m = DRDec(PKb, PKa, skb, gamma)`.
 3. Verifies the following properties of the decrypted message `m`:
   1. The message is of the correct form (e.g., the fields are of the expected length).
      If any of the verifications fail, the message is ignored.
@@ -660,8 +660,8 @@ A valid DRE-Auth message is generated as follows:
   * secret key `b` (640 bits).
   * public key `B = g3 ^ b`.
 4. Generate `m = X || Y || A || B`
-5. Compute `DREnc(PKa, PKb, m)` and serialize it as a DRE-M value in the variable `γ`.
-6. Compute `σ = Auth(Ha, za, {Hb, Ha, Y}, "Prof_B" || "Prof_A" || Y || B || γ)`.
+5. Compute `DREnc(PKa, PKb, m)` and serialize it as a DRE-M value in the variable `gamma`.
+6. Compute `sigma = Auth(Ha, za, {Hb, Ha, Y}, "Prof_B" || "Prof_A" || Y || B || gamma)`.
 
 A DRE-Auth is an OTR message encoded as:
 
@@ -680,9 +680,9 @@ Y (POINT)
   The ephemeral public ECDH key.
 B (MPI)
   The ephemeral public DH key. Note that even though this is in uppercase, this is NOT a POINT.
-γ (DRE-M)
+gamma (DRE-M)
   The Dual-receiver encrypted value.
-σ (AUTH)
+sigma (AUTH)
   The Auth value.
 ```
 
@@ -1195,7 +1195,7 @@ If `authstate` is `AUTHSTATE_AWAITING_DRE_AUTH`:
 
   * Verify that the profile signature is valid.
   * Verify that the profile is not expired.
-  * If the auth σ is valid, decrypt the DRE message and verify:
+  * If the auth sigma is valid, decrypt the DRE message and verify:
     * that the point `Y` received in the pre-key message is on curve 448.
     * that the `B` DH public key is from the correct group.
 
@@ -1593,9 +1593,9 @@ The DRE scheme consists of three functions:
 
 `PK, SK = DRGen()`, a key generation function.
 
-`γ = DREnc(PK1, PK2, m)`, an encryption function.
+`gamma = DREnc(PK1, PK2, m)`, an encryption function.
 
-`m = DRDec(PK1, PK2, SKi, γ)`, a decryption function.
+`m = DRDec(PK1, PK2, SKi, gamma)`, a decryption function.
 
 #### Domain parameters
 
@@ -1637,7 +1637,7 @@ Let `{C1, D1, H1} = PK1` and `{C2, D2, H2} = PK2`
   2. Compute `αi = HashToScalar(U1i || U2i || Ei)`.
   3. Compute `Vi = Ci*ki + Di*(ki * αi)`
 3. Compute `K_enc = SHA3-256(K)`. K is compressed from 446 bits to 256 bits because XSalsa20 has a maximum key size of 256.
-4. Pick a random 24 bytes `nonce` and compute `φ = XSalsa20-Poly1305_K_enc(m, nonce)`
+4. Pick a random 24 bytes `nonce` and compute `phi = XSalsa20-Poly1305_K_enc(m, nonce)`
 5. Generate a NIZKPK:
   1. for i ∈ {1, 2}:
     1. Pick random value `ti` in Z_q.
@@ -1654,15 +1654,15 @@ Let `{C1, D1, H1} = PK1` and `{C2, D2, H2} = PK2`
     - `l = HashToScalar(gV || pV || eV || zV)`
   4. Generate for i ∈ {1,2}:
     1. Compute `ni = ti - l * ki (mod q)`.
-6. Send `γ = (U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2, nonce, φ)`.
+6. Send `gamma = (U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2, nonce, phi)`.
 
-#### Dual Receiver Decryption: DRDec(PK1, PK2, SKi, γ):
+#### Dual Receiver Decryption: DRDec(PK1, PK2, SKi, gamma):
 
 Let `{C1, D1, H1} = PK1`, `{C2, D2, H2} = PK2` and `{x1i, x2i, y1i, y2i, zi} = SKi`.
 SKi is the secret key of the person decrypting the message.
 
-1. Parse `γ` to retrieve components
-  `(U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2, nonce, φ) = γ`.
+1. Parse `gamma` to retrieve components
+  `(U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2, nonce, phi) = gamma`.
 2. Verify NIZKPK:
   1. for j ∈ {1, 2} compute:
     1. `αj = HashToScalar(U1j || U2j || Ej)`
@@ -1684,15 +1684,15 @@ SKi is the secret key of the person decrypting the message.
     - `T4 = U2i*y2i`
   6. Verify `T1 + T2 + (T3 + T4)*αi ≟ Vi`.
 3. Recover secret key `K_enc = SHA3-256(Ei - U1i*zi)`. K is compressed from 446 bits to 256 bits because XSalsa20 has a maximum key size of 256.
-4. Decrypt `m = XSalsa20-Poly1305_K_enc(φ, nonce)`.
+4. Decrypt `m = XSalsa20-Poly1305_K_enc(phi, nonce)`.
 
 ### ROM Authentication
 
 The Authentication scheme consists of two functions:
 
-`σ = Auth(A_2, a_2, {A_1, A_2, A_3}, m)`, an authentication function.
+`sigma = Auth(A_2, a_2, {A_1, A_2, A_3}, m)`, an authentication function.
 
-`Verify({A_1, A_2, A_3}, σ, m)`, a verification function.
+`Verify({A_1, A_2, A_3}, sigma, m)`, a verification function.
 
 #### Domain parameters
 
@@ -1717,11 +1717,11 @@ m is the message to authenticate.
 5. Compute `c = HashToScalar(G || q || A1 || A2 || A3 || T1 || T2 || T3 || m)`.
 6. Compute `c1 = c - c2 - c3 (mod q)`.
 7. Compute `r1 = t1 - c1 * a2 (mod q)`.
-8. Send `σ = (c1, r1, c2, r2, c3, r3)`.
+8. Send `sigma = (c1, r1, c2, r2, c3, r3)`.
 
-#### Verification: Verify({A1, A2, A3}, σ, m)
+#### Verification: Verify({A1, A2, A3}, sigma, m)
 
-1. Parse σ to retrive components `(c1, r1, c2, r2, c3, r3)`.
+1. Parse sigma to retrive components `(c1, r1, c2, r2, c3, r3)`.
 2. Compute `T1 = G*r1 + A1*c1`
 3. Compute `T2 = G*r2 + A2*c2`
 4. Compute `T3 = G*r3 + A3*c3`
