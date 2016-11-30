@@ -1035,17 +1035,10 @@ MSGSTATE_ENCRYPTED
     used during an OTR conversation. The only way to enter this state is for
     the authentication state machine (below) to be successfully completed.
 
-(TODO: I think the below description is a bit weird. It implies it will stop ALL messages when in this state, including new query messages for a new OTR session)
 MSGSTATE_FINISHED
-    This state indicates that outgoing messages are not delivered at all.
-    It is entered only when the other party indicates his side of the OTR
-    conversation has finished. For example, if Alice and Bob are having an OTR
-    conversation, and Bob instructs his OTR client to end its private session
-    with Alice (by logging out, for example), Alice will be notified of this,
-    and her client will switch to MSGSTATE_FINISHED mode. This prevents Alice
-    from accidentally sending a message to Bob in plaintext (consider what
-    happens if Alice was in the middle of typing a private message to Bob when
-    he suddenly logs out, just as Alice hits Enter).
+    This state indicates that outgoing messages are not delivered at
+    all within current conversation. It is entered only when the
+    other party notifies the OTR conversation was finished by her side.
 ```
 
 ### Authentication state
