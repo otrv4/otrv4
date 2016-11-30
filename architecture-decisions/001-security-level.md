@@ -43,8 +43,9 @@ We will use SHA3-512 as the cryptographic hash function. Since the security
 level of a hash in general is half the size of the output (because of the
 birthday paradox), this gives us an expected level of 256.
 
-We will use XSalsa as the stream cipher because it is faster than AES, is immune
-to timing attacks, and it's safe to randomly generate the nonce (since it's
+We will use XSalsa as the stream cipher because it has a block size of 512 bits
+compared to AES' 128 block size. It is also faster than AES, immune to
+timing attacks, and its nonce is safely generated at random (since it's
 significantly larger). XSalsa will be used with the following parameters: 20
 rounds, 192-bits nonces, and 256-bit keys.
 
