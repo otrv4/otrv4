@@ -456,14 +456,13 @@ To create a user profile, assemble:
    amount of seconds from the epoch to the expiration date. Its format is the
    same as the "date-time" described in section 5.6 of RFC3339 [8].
 4. Profile Signature: One of the Cramer-Shoup secret key values (`z`) and its
-   generator (`G1`) is used to create signatures of the entire profile. It is
-   created using the Ed448 signature algorithm as documented in [4].
+   generator (`G1`) is used to create signatures of the entire profile excluding
+   the signature itself.
+   It is created using the Ed448 signature algorithm as documented in [4].
 5. (optional) Transition Signature of the profile by the user's OTRv3 DSA key:
    A transitional signature that enables contacts that trust user's version 3
    DSA key to trust the user's profile in version 4. This is only used if the
    user supports version 3 and 4.
-
-(TODO: 4 and 5 should probably mention that they don't include the signature themselves. They say "entire profile" which isn't correct, since the signatures are part of the profile)
 
 Then this profile must be published in a public place, like an untrusted
 server.
