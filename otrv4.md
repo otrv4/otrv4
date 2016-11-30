@@ -88,9 +88,8 @@ and arithmetic used.
 
 ### Notation
 
-(TODO: what are "other variables" here?)
-Scalars are in lower case, such as `x` or `y`. Points and other variables are in
-upper case, such as `P` or `Q`.
+Scalars are in lower case, such as `x` or `y`. Points and public keys
+are in upper case, such as `P` or `Q`.
 
 Addition and subtraction of elliptic curve points `A` and `B` are `A + B` and `A - B`.
 Addition of a point to another point generates a third point. Scalar
@@ -254,10 +253,8 @@ SHA3-256 hash of the byte-level representation of the public key.
 In the DAKE, OTRv4 makes use of long-term Cramer-Shoup keys and ephemeral DH
 keys.
 
-(TODO: the link to 6 looks really weird when reading the sentence. Maybe put it in parenthesis or something.)
-
 For exchanging data messages, OTRv4 uses a key structure and key rotation
-strategy with the [Double Ratchet] algorithm [6] at its core. As a result we
+strategy with The Double Ratchet Algorithm, as specified by  Moxie Marlinspike [6], at its core. As a result we
 will use many of the terms within the Double Ratchet domain to describe the
 difference in the context of OTRv4. A cryptographic ratchet is a one way
 mechanism for deriving new cryptographic keys from previous keys. New keys
