@@ -546,6 +546,7 @@ Bob will be initiating the DAKE with Alice.
 
 1. Generates an ephemeral ECDH secret key `y` and a public key `Y`.
 2. Generates an ephemeral 3072-bit DH secret key `b` and a public key `B`.
+(TODO: in the below, the "your" and "our" words are very confusing.)
 
     ```Details
     * Set `prev_our_ecdh` as your current ECDH key pair (`our_ecdh`), if you
@@ -560,6 +561,7 @@ Bob will be initiating the DAKE with Alice.
    Bob's User Profile.
 
 **Alice:**
+(TODO: in the below, the "your" and "our" words are very confusing.)
 
 1. Generates an ephemeral ECDH secret key `x` and a public key `X`.
 2. Generates an ephemeral 3072-bit DH secret key `a` and a public key `A`.
@@ -577,6 +579,7 @@ Bob will be initiating the DAKE with Alice.
     * Set `their_dh` as their DH ephemeral public key from the DAKE (`B`).
     * Increase ratchet id `i = i + 1`.
     ```
+(TODO: in the below, should it really be "R" there?)
 6. Sends Alice a DRE-Auth Message `psi_2 = ("R", gamma, sigma)`.
 7. At this point, the DAKE is complete for Alice and she:
 
@@ -596,9 +599,10 @@ Bob will be initiating the DAKE with Alice.
   2. Alice's identifier is the first one listed
   3. Bob's identifier is the second one listed, and it matches the identifier
      transmitted outside of the ciphertext
-  4. `(Y, B)` is a prekey that Bob previously sent and remains unused.
+  4. `(Y, B)` is a prekey that Bob previously sent and has not been used.
 4. Computes root level keys (`root[0]`, `chain_s`, and `chain_r`).
 5. At this point, the DAKE is complete for Bob and he:
+(TODO: ??? for the below)
 
     ```Details
     * Set `their_ecdh` as their ECDH ephemeral public key from the DAKE (`X`).
@@ -608,6 +612,7 @@ Bob will be initiating the DAKE with Alice.
 
 #### After completing the DAKE
 
+(TODO: the below is weird)
 Regardless of who you are:
 
 * Calculate `our_ecdh` and `our_dh`.
@@ -712,7 +717,7 @@ secret established in the DAKE.
 A message with an empty human-readable part (the plaintext is of zero length, or
 starts with a NULL) is a "heartbeat" packet, and should not be displayed to the
 user (but it is still useful for key rotations).
-
+(TODO: in the below, I have no idea what "recover receiving chain key" means)
 ```
 Alice                                                                           Bob
 -----------------------------------------------------------------------------------
@@ -751,6 +756,7 @@ This message is used to transmit a private message to the correspondent.
 It is also used to [reveal old MAC keys](#revealing-mac-eys).
 
 #### Data Message format
+(TODO: in the below, message id and ratachet id reads very badly)
 
     Protocol version (SHORT)
       The version number of this protocol is 0x0004.
@@ -900,12 +906,15 @@ has not sent a message in a configurable amount of time. Put them (as a set
 of concatenated 64-byte values) into the "Old MAC keys to be revealed" section
 of the next Data Message you send.
 
+(TODO: we are inconsistent in specifying things as bytes or bits. We should probably choose one.)
 A receiver add a MAC key to `Old MAC keys to be revealed` in both following
 cases:
 
 - the receiver has received a message and has verified the message's
   authenticity
 - the receiver has discarded associated message keys
+
+(TODO: I still don't understand the above, and whether it's an OR or an AND)
 
 ### Fragmentation
 
@@ -917,6 +926,8 @@ OTRv4 has the same message fragmentation as OTRv3 without compatibility with ver
 This means that fragmentation is performed in OTRv4 in the same why as specified in OTRv3:
 the format is the same so you will have to wait for reassembly to finalize,
 to deal with a message.
+
+(TODO: the above paragraph should be rewritten in form formal language)
 
 All OTRv4 clients must be able to assemble received fragments, but performing
 fragmentation on outgoing messages is optional.
@@ -994,11 +1005,15 @@ We could fragment this message into three pieces:
 
 ## The protocol state machine
 
+(TODO: this state machine and description of internal variables are not requirements of how the implementation should be written, but abstractions that describe the behavior of the protocol on the wire, in the presence of these kinds of abstract operations. We should change the language in this section to make that more clear - the wire protocol doesn't actually care about thse things, as long as the behavior is the same)
+
 An OTR client maintains separate state for every correspondent. For example,
 Alice may have an active OTR conversation with Bob, while having an insecure
 conversation with Charlie. This state machine consists of two main state
 variables, as well as some other information (such as encryption keys). The two
 main state variables are:
+
+(TODO: having the paragraph above end on a colon is quite weird and jarring to read)
 
 ### Message state
 
@@ -1017,6 +1032,7 @@ MSGSTATE_ENCRYPTED
     used during an OTR conversation. The only way to enter this state is for
     the authentication state machine (below) to be successfully completed.
 
+(TODO: I think the below description is a bit weird. It implies it will stop ALL messages when in this state, including new query messages for a new OTR session)
 MSGSTATE_FINISHED
     This state indicates that outgoing messages are not delivered at all.
     It is entered only when the other party indicates his side of the OTR
@@ -1046,6 +1062,8 @@ AUTHSTATE_AWAITING_DRE_AUTH
 
 ### State transitions
 
+(TODO: for the below, I think once again some of them are implementation dependent. We should separate the things that are necessary for the wire protocol and what is for the implementation)
+
 An OTRv4 client must handle these ten events:
 
 User events:
@@ -1067,6 +1085,8 @@ The following sections will outline which actions to take for each case. They
 all assume that at least `ALLOW_V3` or `ALLOW_V4` is set; if not, then OTR is
 completely disabled and no special handling of messages should be done. Version
 1 and 2 messages are out of the scope of this specification.
+
+(TODO: this section doesn't seem to allow for the OTRv4 specific DAKE messages)
 
 For version 3 and 4 messages, if the receiving instance tag is not equal to its
 own, the message should be discarded and the user optionally warned.
@@ -1248,6 +1268,8 @@ If `msgstate` is `MSGSTATE_FINISHED`:
 
 #### Receiving a Data Message
 
+(TODO: the below markdown doesn't render well)
+
 If `msgstate` is `MSGSTATE_ENCRYPTED`:
   Verify the information in the message.
 
@@ -1288,6 +1310,7 @@ recently received a message from).
 SMP in version 4 shares the same TLVs and flow as SMP in OTRv3 with the
 following exceptions.
 
+(TODO: in the below, why don't we just use message 1, instead of 1Q?)
 In OTRv3, SMP Message 1 is used when a user does not specify an SMP question.
 SMP Message 1Q is used when they do. OTRv4 is simplified to use only SMP Message
 1Q for both cases. When a question is not present, the user specified question
@@ -1312,6 +1335,8 @@ Assuming that Alice begins the exchange:
 
 **Alice:**
 
+(TODO: random values in what range?)
+
 * Picks random values `a2` and `a3`.
 * Picks random values `r2` and `r3`.
 * Computes `c2 = HashToScalar(1 || G*r2)` and `d2 = r2 - a2 * c2`.
@@ -1320,6 +1345,8 @@ Assuming that Alice begins the exchange:
   and `d3`.
 
 **Bob:**
+
+(TODO: random values in what range?)
 
 * Picks random values `b2` and `b3`.
 * Picks random values `r2`, `r3`, `r4`, `r5` and `r6`.
@@ -1335,6 +1362,8 @@ Assuming that Alice begins the exchange:
 
 **Alice:**
 
+(TODO: random values in what range?)
+
 * Computes `G2 = G2b*a2` and `G3 = G3b*a3`.
 * Picks random values `r4`, `r5`, `r6` and `r7`.
 * Computes `Pa = G3*r4` and `Qa = G1*r4 + G2*x`, where x is the 'actual secret'.
@@ -1345,6 +1374,8 @@ Assuming that Alice begins the exchange:
 * Sends Bob a SMP message 3 with `Pa`, `Qa`, `cp`, `d5`, `d6`, `Ra`, `cr` and `d7`.
 
 **Bob:**
+
+(TODO: random values in what range?)
 
 * Picks a random value `r7`.
 * Computes `Rb = (Qa - Qb)*b3`.
@@ -1357,6 +1388,8 @@ Assuming that Alice begins the exchange:
 
 * Computes `Rab = Rb*a3`.
 * Checks whether `Rab == Pa - Pb`.
+
+(TODO: why in the description below is "times" used instead of just do the math?)
 
 If everything is done correctly, then `Rab` should hold the value of `Pa - Pb`
 times `(G2*a3*b3)*(x - y)`, which means that the test at the end of the protocol
@@ -1651,6 +1684,8 @@ WHITESPACE_START_DAKE
 ERROR_START_DAKE
   Start the OTR DAKE when you receive an OTR Error Message.
 ```
+
+(TODO: we should not have separate *_DAKE policies, we should just replace the *_AKE)
 
 For example, Alice could set up her client so that it speaks version 4 of the OTR
 protocol. Nevertheless, she may also add an exception for Charlie, who she knows
