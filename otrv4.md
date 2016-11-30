@@ -304,31 +304,33 @@ The previously mentioned variables are affected by these events:
 
 This section describes the functions used to manage the key material.
 
-#### Rotate the ECDH keys
+#### Rotating ECDH keys and Mix Keys
 
-The sender will rotate into a new ECDH ratchet before it sends the first message
-after receiving any messages from the other side (i.e. the first reply).
+The sender will rotate into a new ECDH ratchet and a new Mix Key ratchet before
+it sends the first message after receiving any messages from the other side
+(i.e. the first reply).
 The following data messages will advertise a new ratchet id as `i + 1`.
+
+  * Increment the current ratchet id (`i`) by 1.
+  * Reset the next sent message id (`j`) to 0.
 
 When you ratchet the ECDH keys:
 
-* Securely delete `our_ecdh`.
-* Generate a new ECDH key pair and assign it to `our_ecdh = generateECDH()`. See
-  [generateECDH()](#ECDH-and-DH-Shared-Secrets).
-* Increment the current ratchet id (`i`) by 1.
-* Reset the next sent message id (`j`) to 0.
+  * Generate a new ECDH key pair and assign it to `our_ecdh = generateECDH()`. See
+    [generateECDH()](#ECDH-and-DH-Shared-Secrets).
+  * Calculate `K_ecdh = ECDH(our_ecdh.secret, their_ecdh.public).
+  * Securely delete `our_ecdh.secret`.
 
-#### Calculating the DH shared secret
+When you ratchet the mix keys:
 
-If this ratchet is a multiple of three:
+If the ratchet id is a multiple of three:
 
-  * Securely delete `our_dh`.
   * Generate a new DH key pair and assign it to `our_dh = generateDH()`. See
   [generateDH()](#ECDH-and-DH-Shared-Secrets).
   * Calculate a `mix_key = SHA3-256(DH(our_dh.secret, their_dh.public)`.
+  * Securely delete `our_dh.secret`.
 
 Otherwise:
-
   * Derive a `mix_key = SHA3-256(mix_key)`.
 
 #### ECDH and DH Shared Secrets
