@@ -459,10 +459,11 @@ To create a user profile, assemble:
    generator (`G1`) is used to create signatures of the entire profile excluding
    the signature itself.
    It is created using the Ed448 signature algorithm as documented in [4].
-5. (optional) Transition Signature of the profile by the user's OTRv3 DSA key:
-   A transitional signature that enables contacts that trust user's version 3
-   DSA key to trust the user's profile in version 4. This is only used if the
-   user supports version 3 and 4.
+5. Transition Signature (optional): A signature of the profile excluding Profile
+   Signatures and itself signed by the user's OTRv3 DSA key. The transitional
+   signature that enables contacts that trust user's version 3 DSA key to trust
+   the user's profile in version 4.
+   This is only used if the user supports version 3 and 4.
 
 Then this profile must be published in a public place, like an untrusted
 server.
