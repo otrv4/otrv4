@@ -175,8 +175,7 @@ OTRv4 supports the same TLV record types from OTRv3.
 ### Data types
 
 OTRv4 uses almost the same data types as specified in OTRv3 (bytes, shorts, ints, MPIs,
-and DATA) except for CTR and MAC, and with the addition of:
-(TODO: what does the sentence about CTR and MAC mean above)
+and DATA) with the addition of:
 (TODO: we need to specify exactly how to serialize the point)
 
 ```
