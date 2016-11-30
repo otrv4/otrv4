@@ -1,8 +1,8 @@
-## ADR 6: No Postquantum Primatives
+## ADR 6: No Postquantum Primitives
 
 ### Context
 
-With the coming of post quantum computers (QC), many people have started talking
+With the coming of quantum computers (QC), many people have started talking
 about using QC resistant algorithms in privacy enhancing technology.
 
 ### Decision

@@ -1,6 +1,7 @@
 ## ADR 7: Query Messages
 
 **Status**: proposed
+(TODO: no status anymore, please)
 
 ### Context
 
