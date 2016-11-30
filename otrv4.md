@@ -273,9 +273,6 @@ Ratchet in the Double Ratchet, a new 3072 key is agreed upon. Between each
 Diffie-Hellman Mix Key Ratchet, both sides will conduct a Symmetric Mix Key
 Ratchet.
 
-(TODO: the below sentence seems lost)
-In order to manage keys, each correspondent keeps track of:
-
 As the ratchet moves forward through its keys, its state is kept with the
 following values:
 
