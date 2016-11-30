@@ -69,6 +69,6 @@ and user allow it in its policy.
 Because of the decision to use the Ed448 signature algorithm, OTRv4 will use the
 `z` value for the NIZKPK (Auth()) in the DAKE and for the Ed448
 signature. Using the same key material for two different purposes is
-potentially unsafe and we aknowledge, neverthelesshaving two different
+potentially unsafe and we aknowledge this. Nevertheless having two different
 keys would increment the number of keys that need to be managed and
 introduces again the need to bind these keys together.
