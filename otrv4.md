@@ -50,8 +50,6 @@ The high level flow of the protocol looks like this:
     Establish Conversation with DAKE  <------------>  Establish Conversation with DAKE
     Exchange Data Messages            <------------>  Exchange Data Messages
 
-The initial step to request an OTR conversation is optional and will not always be present.
-
 ## Assumptions
 
 Both participants are online at the start of a conversation.
@@ -59,8 +57,8 @@ Both participants are online at the start of a conversation.
 Messages in a conversation can be exchanged over an insecure channel, where an
 attacker can eavesdrop or interfere with the encrypted messages.
 
-The network model provides in-order delivery of messages, but some
-messages may not be delivered.
+The network model provides in-order delivery of messages, but some messages may
+not be delivered.
 
 ## Security Properties
 
@@ -70,8 +68,8 @@ other participant but cannot transfer this knowledge to a third party.
 Once an OTRv4 channel has been created, all messages transmitted through this
 channel are confidential and integrity is protected.
 
-If key material has been compromised, decription of neither previous
-or future messages is enabled.
+If key material has been compromised, previous messages are protected. In this
+case, future messages are protected in future ratchets only.
 
 Both parties can deny that they have participated in a conversation. They can
 also deny having sent any of the exchanged messages in the conversation. The
