@@ -589,6 +589,7 @@ Bob will be initiating the DAKE with Alice.
   4. `(Y, B)` is a prekey that Bob previously sent and remains unused.
 4. Computes root level keys (`root[0]`, `chain_s`, and `chain_r`).
 5. At this point, the DAKE is complete for Bob and he:
+
     ```Details
     * Set `their_ecdh` as their ECDH ephemeral public key from the DAKE (`X`).
     * Set `their_dh` as their DH ephemeral public key from the DAKE (`A`).
