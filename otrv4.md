@@ -89,14 +89,15 @@ and arithmetic used.
 Scalars are in lower case, such as `x` or `y`. Points and public keys
 are in upper case, such as `P` or `Q`.
 
-Addition and subtraction of elliptic curve points `A` and `B` are `A + B` and `A - B`.
+Addition and subtraction of elliptic curve points `A` and `B` are `A + B` and
+`A - B`.
 Addition of a point to another point generates a third point. Scalar
 multiplication with a scalar `a` with an elliptic curve point `B` yields a
 new point: `C = a * B`.
 
-The concatenation of byte sequences `I` and `J` is `I || J`. In this case, `I` and `J`
-represent a fixed-length byte sequence encoding the respective values. See
-section [Data types](#data-types) for encoding and decoding details.
+The concatenation of byte sequences `I` and `J` is `I || J`. In this case, `I`
+and `J`represent a fixed-length byte sequence encoding the respective values.
+See section [Data types](#data-types) for encoding and decoding details.
 
 ### Elliptic Curve Parameters
 
@@ -170,8 +171,8 @@ OTRv4 supports the same TLV record types from OTRv3.
 
 ### Data types
 
-OTRv4 uses almost the same data types as specified in OTRv3 (bytes, shorts, ints, MPIs,
-and DATA) with the addition of:
+OTRv4 uses almost the same data types as specified in OTRv3 (bytes, shorts,
+ints, MPIs, and DATA) with the addition of:
 
 ```
 Nonce (NONCE):
@@ -184,8 +185,8 @@ User Profile(USER-PROF):
   Detailed in "User Profile Data Type" section
 ```
 
-In order to serialize and deserialize the point, refer to Appendix A.1 (Encoding)
-and A.2 (Decoding) in Mike Hamburg's Decaf paper [11].
+In order to serialize and deserialize the point, refer to Appendix A.1
+(Encoding) and A.2 (Decoding) in Mike Hamburg's Decaf paper [11].
 
 ### DRE messages and Auth NIZKPK
 
@@ -207,7 +208,8 @@ Dual-receiver encrypted message (DRE-M):
   n2 (MPI)
   nonce (NONCE)
   phi (DATA)
-    Where (U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2, nonce, phi) = DREnc(pubA, pubB, m)
+    Where (U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2, nonce, phi) =
+    DREnc(pubA, pubB, m)
 ```
 
 An Auth non-interactive zero-knowledge proof of knowledge is serialized as
@@ -251,12 +253,12 @@ In the DAKE, OTRv4 makes use of long-term Cramer-Shoup keys and ephemeral DH
 keys.
 
 For exchanging data messages, OTRv4 uses a key structure and key rotation
-strategy with The Double Ratchet Algorithm, as specified by  Moxie Marlinspike ([6]), at its core. As a result we
-will use many of the terms within the Double Ratchet domain to describe the
-difference in the context of OTRv4. A cryptographic ratchet is a one way
-mechanism for deriving new cryptographic keys from previous keys. New keys
-cannot be used to calculate the old keys. Its name comes from the mechanical
-ratchet.
+strategy with The Double Ratchet Algorithm, as specified by  Moxie Marlinspike
+([6]), at its core. As a result we will use many of the terms within the Double
+Ratchet domain to describe the difference in the context of OTRv4. A
+cryptographic ratchet is a one way mechanism for deriving new cryptographic keys
+from previous keys. New keys cannot be used to calculate the old keys. Its name
+comes from the mechanical ratchet.
 
 OTRv4 retains the Diffie-Hellman Ratchet [7] and Symmetric Key Ratchet [8] from
 the algorithm.
@@ -311,7 +313,8 @@ The following data messages will advertise a new ratchet id as `i + 1`.
 When you ratchet the ECDH keys:
 
 * Securely delete `our_ecdh`.
-* Generate a new ECDH key pair and assign it to `our_ecdh = generateECDH()`. See [generateECDH()](#ECDH-and-DH-Shared-Secrets).
+* Generate a new ECDH key pair and assign it to `our_ecdh = generateECDH()`. See
+  [generateECDH()](#ECDH-and-DH-Shared-Secrets).
 * Increment the current ratchet id (`i`) by 1.
 * Reset the next sent message id (`j`) to 0.
 
@@ -320,7 +323,8 @@ When you ratchet the ECDH keys:
 If this ratchet is a multiple of three:
 
   * Securely delete `our_dh`.
-  * Generate a new DH key pair and assign it to `our_dh = generateDH()`. See [generateDH()](#ECDH-and-DH-Shared-Secrets).
+  * Generate a new DH key pair and assign it to `our_dh = generateDH()`. See
+  [generateDH()](#ECDH-and-DH-Shared-Secrets).
   * Calculate a `mix_key = SHA3-256(DH(our_dh.secret, their_dh.public)`.
 
 Otherwise:
@@ -374,9 +378,12 @@ calculate_ratchet_keys(K):
 
 #### Decide Between Chain Keys
 
-Both sides will compare their public keys to choose a chain key for sending and receiving:
-- Alice (and similarly, Bob) determines if she is the "low" end or the "high" end of this ratchet.
-If Alice's ephemeral ECDH public key is numerically greater than Bob's public key, then she is the "high" end.
+Both sides will compare their public keys to choose a chain key for sending and
+receiving:
+- Alice (and similarly, Bob) determines if she is the "low" end or the "high"
+end of this ratchet.
+If Alice's ephemeral ECDH public key is numerically greater than Bob's public
+key, then she is the "high" end.
 Otherwise, she is the "low" end.
 - Alice selects the chain keys for sending and receiving:
   - If she is the "high" end, set `j` as `0`, use Ca as the sending
@@ -471,7 +478,8 @@ server.
 #### Renewing a Profile
 
 If a renewed profile is not published in a public place, and if the only
-publicly available profile is expired, the user's participation deniability is at risk.
+publicly available profile is expired, the user's participation deniability is
+at risk.
 
 Before the profile expires, the user must publish an updated profile with a new
 expiration date. The client establishes the frequency of expiration - this can
@@ -497,9 +505,9 @@ Version Expiration (PROF-EXP):
 
 ### Deniable Authenticated Key Exchange (DAKE)
 
-This section outlines the flow of the Deniable Authenticated Key Exchange. This is a
-way to mutually agree upon a shared key for the two parties and authenticate one another
-while providing participation deniability.
+This section outlines the flow of the Deniable Authenticated Key Exchange. This
+is a way to mutually agree upon a shared key for the two parties and
+authenticate one another while providing participation deniability.
 
 This protocol is derived from the Spawn protocol [2], which uses dual-receiver
 encryption (DRE) and a non-interactive zero-knowledge proof of knowledge
@@ -540,10 +548,12 @@ Bob will be initiating the DAKE with Alice.
 2. Generates an ephemeral 3072-bit DH secret key `b` and a public key `B`.
 
     ```Details
-    * Set `prev_our_ecdh` as your current ECDH key pair (`our_ecdh`), if you have it.
+    * Set `prev_our_ecdh` as your current ECDH key pair (`our_ecdh`), if you
+      have it.
     * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`(y, Y)`).
     * Set `our_dh` as our DH ephemeral key pair from the DAKE (`b`, `B`).
-    * Set `j = 1` because the pre-key message is considered the first in this DH ratchet.
+    * Set `j = 1` because the pre-key message is considered the first in this DH
+      ratchet.
     * Increase ratchet id `i = i + 1`.
     ```
 3. Sends Alice a pre-key message `psi_1 = ("Prof_B", Y, B)`. Prof_B is
@@ -553,13 +563,14 @@ Bob will be initiating the DAKE with Alice.
 
 1. Generates an ephemeral ECDH secret key `x` and a public key `X`.
 2. Generates an ephemeral 3072-bit DH secret key `a` and a public key `A`.
-3. Computes `gamma = DREnc(PKa, PKb, m)`, being `m = Prof_B || Prof_A || Y || X || B || A`.
-   Prof_A is Alice's User Profile.
+3. Computes `gamma = DREnc(PKa, PKb, m)`, being
+   `m = Prof_B || Prof_A || Y || X || B || A`. Prof_A is Alice's User Profile.
 4. Computes `sigma = Auth(Ha, za, {Ha, Hb, Y}, Prof_B || Prof_A || Y || B || gamma)`.
 5. Computes root level keys (`root[0]`, `chain_s`, and `chain_r`).
 
     ```Details
-    * Set `prev_our_ecdh` as your current ECDH key pair (`our_ecdh`), if you have it.
+    * Set `prev_our_ecdh` as your current ECDH key pair (`our_ecdh`), if you
+      have it.
     * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`(x, X)`).
     * Set `our_dh` as our DH ephemeral key pair from the DAKE (`a`, `A`).
     * Set `their_ecdh` as their ECDH ephemeral public key from the DAKE (`Y`).
@@ -579,7 +590,8 @@ Bob will be initiating the DAKE with Alice.
 1. Verifies `Verify({Hb, Ha, Y}, sigma, Prof_B || Prof_A || Y || B || gamma)`.
 2. Decrypts `m = DRDec(PKb, PKa, skb, gamma)`.
 3. Verifies the following properties of the decrypted message `m`:
-  1. The message is of the correct form (e.g., the fields are of the expected length).
+  1. The message is of the correct form (e.g., the fields are of the expected
+     length).
      If any of the verifications fail, the message is ignored.
   2. Alice's identifier is the first one listed
   3. Bob's identifier is the second one listed, and it matches the identifier
@@ -604,8 +616,10 @@ Regardless of who you are:
 * Calculate the DH shared secret `k_dh = (g3*a)*b`.
 * Calculate the SHA3-256 of the DH shared secret `mix_key = SHA3-256(k_dh)`.
 * Calculate `K = calculate_shared_secret(K_ecdh, mix_key)`.
-* Calculate the SSID from shared secret: it is the first 64 bits of `SHA3-256(0x00 || K)`.
-* Calculate the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = calculate_ratchet_keys(K)`.
+* Calculate the SSID from shared secret: it is the first 64 bits of
+  `SHA3-256(0x00 || K)`.
+* Calculate the first set of keys with
+  `root[0], chain_s[0][0], chain_r[0][0] = calculate_ratchet_keys(K)`.
 
 #### Pre-key message
 
@@ -630,14 +644,16 @@ Message type (BYTE)
 Sender Instance tag (INT)
   The instance tag of the person sending this message.
 Receiver Instance tag (INT)
-  The instance tag of the intended recipient. For a pre-key message, this will often be 0
+  The instance tag of the intended recipient. For a pre-key message, this will
+  often be 0
   since the other party may not have identified its instance tag yet.
 Sender's User Profile (USER-PROF)
   As described in the section 'Creating a User Profile'.
 X (POINT)
   The ephemeral public ECDH key.
 A (MPI)
-  The ephemeral public DH key. Note that even though this is in uppercase, this is NOT a POINT.
+  The ephemeral public DH key. Note that even though this is in uppercase, this
+  is NOT a POINT.
 ```
 
 #### DRE-Auth message
@@ -659,7 +675,8 @@ A valid DRE-Auth message is generated as follows:
   * secret key `b` (640 bits).
   * public key `B = g3 ^ b`.
 4. Generate `m = X || Y || A || B`
-5. Compute `DREnc(PKa, PKb, m)` and serialize it as a DRE-M value in the variable `gamma`.
+5. Compute `DREnc(PKa, PKb, m)` and serialize it as a DRE-M value in the
+   variable `gamma`.
 6. Compute `sigma = Auth(Ha, za, {Hb, Ha, Y}, "Prof_B" || "Prof_A" || Y || B || gamma)`.
 
 A DRE-Auth is an OTR message encoded as:
@@ -678,7 +695,8 @@ Receiver's User Profile (USER-PROF)
 Y (POINT)
   The ephemeral public ECDH key.
 B (MPI)
-  The ephemeral public DH key. Note that even though this is in uppercase, this is NOT a POINT.
+  The ephemeral public DH key. Note that even though this is in uppercase, this
+  is NOT a POINT.
 gamma (DRE-M)
   The Dual-receiver encrypted value.
 sigma (AUTH)
@@ -805,8 +823,10 @@ Given a new ratchet:
   * Ratchet the ECDH keys. See "Ratcheting the ECDH keys" section. The new ECDH
     public key created by the sender this process will be the "Public ECDH Key"
     for the message
-  * Calculate ECDH shared secret `K_ecdh` by using `our_ecdh.secret` and `their_ecdh.public`.
-  * Calculate DH shared secret `k_dh` by using `our_dh.secret` and `their_dh.public`.
+  * Calculate ECDH shared secret `K_ecdh` by using `our_ecdh.secret` and
+    `their_ecdh.public`.
+  * Calculate DH shared secret `k_dh` by using `our_dh.secret` and
+    `their_dh.public`.
     If a new public DH key is created in this process, that will be the "Public
     DH Key" for the message. If it is not created, then this is will be NULL.
   * Calculate the mix key `mix_key` from a SHA3-256 of k_dh.
@@ -830,7 +850,8 @@ In any event:
    MKenc, MKmac = derive_enc_mac_keys(chain_s[i][j])
    ```
 
-2. Use the encryption key to encrypt the message and the mac key to calculate its MAC:
+2. Use the encryption key to encrypt the message and the mac key to calculate
+   its MAC:
 
    ```
    Nonce = generateNonce()
@@ -843,8 +864,8 @@ in the [Revealing MAC keys](#revealing-mac-keys) section.
 
 #### When you receive a Data Message:
 
-Use the `message_id` to compute the receiving chain key, and calculate encryption
-and mac keys.
+Use the `message_id` to compute the receiving chain key, and calculate
+encryption and mac keys.
 
 ```
   retrieve_chain_key(chain_r, ratchet_id, message_id)
@@ -857,10 +878,11 @@ If the message verification fails, reject the message.
 
 Otherwise:
 
-  * Decrypt the message using the "encryption key" (`MKenc`) and securely delete it.
+  * Decrypt the message using the "encryption key" (`MKenc`) and securely delete
+    it.
   * Securely delete receiving chain keys older than `message_id-1`.
-  * Set `j = 0` to indicate that a new DH-ratchet should happen the next time you
-  send a message.
+  * Set `j = 0` to indicate that a new DH-ratchet should happen the next time
+    you send a message.
   * Set `their_ecdh.public` as the "Public ECDH key" from the message.
   * Set `their_dh.public` as the "Public DH Key" from the message, if it
     is not NULL.
@@ -878,9 +900,11 @@ has not sent a message in a configurable amount of time. Put them (as a set
 of concatenated 64-byte values) into the "Old MAC keys to be revealed" section
 of the next Data Message you send.
 
-A receiver add a MAC key to `Old MAC keys to be revealed` in both following cases:
+A receiver add a MAC key to `Old MAC keys to be revealed` in both following
+cases:
 
-- the receiver has received a message and has verified the message's authenticity
+- the receiver has received a message and has verified the message's
+  authenticity
 - the receiver has discarded associated message keys
 
 ### Fragmentation
@@ -905,8 +929,8 @@ OTR message as follows:
 
   * Start with the OTR message as you would normally transmit it. For example, a
 Data Message would start with `?OTR:AAQD` and end with `.`.
-  * Break it up into sufficiently small pieces. Let this number of pieces be `total`,
-and the pieces be `piece\[1\],piece\[2\],...,piece[total]`.
+  * Break it up into sufficiently small pieces. Let this number of pieces be
+  `total`, and the pieces be `piece\[1\],piece\[2\],...,piece[total]`.
   * Transmit `total` OTRv4 fragmented messages with the following structure:
 
   ```
@@ -951,14 +975,14 @@ this _before_ checking for any of the other `?OTR:` markers):
     * Forget stored `piece`
     * Forget stored `index` and `total`
 
-After this, if stored `total` is bigger than 0 and stored `index` is equal to stored `total`,
-treat piece as the received message.
+After this, if stored `total` is bigger than 0 and stored `index` is equal to
+stored `total`, treat piece as the received message.
 
 If you receive a non-OTR message, or an unfragmented message, forget any stored
 value you may have (`piece`, `total` and, `index`).
 
-For example, here is a Data Message we would like to transmit over a network with
-an unreasonably small `maximum message size`:
+For example, here is a Data Message we would like to transmit over a network
+with an unreasonably small `maximum message size`:
 
     ?OTR:AAQD--here-is-my-very-long-message.
 
@@ -1269,12 +1293,12 @@ If `msgstate` is `MSGSTATE_ENCRYPTED`:
     * If the received message contains a TLV type 1 forget all encryption keys
       for this correspondent and transition `msgstate` to `MSGSTATE_FINISHED`.
   Otherwise:
-    Inform the user that an unreadable encrypted message was received, and reply
-    with an Error Message.
+    * Inform the user that an unreadable encrypted message was received, and
+    reply with an Error Message.
 
 If `msgstate` is `MSGSTATE_PLAINTEXT` or `MSGSTATE_FINISHED`:
-   * Inform the user that an unreadable encrypted message was received, and reply
-   with an Error Message.
+   * Inform the user that an unreadable encrypted message was received, and
+   reply with an Error Message.
 
 #### User requests to end an OTR conversation
 
@@ -1309,10 +1333,10 @@ Lastly, OTRv4 uses Ed448 as the cryptographic primative. This changes the way
 values are serialized and how they are computed. To define the SMP values under
 Ed448, we reuse the previously defined generator for Cramer-Shoup:
 
-`G = (5014593412122187483175733622392028030242298988836581229127722326504735507867829029
-04842340270909267251001424253087988710625934010181862,
-44731490761556280255905446185238890493953420277155459539681908020022814852045473906
-622513423589000065035233481733743985973099897904160)`
+`G = (50145934121221874831757336223920280302422989888365812291277223265047355078
+6782902904842340270909267251001424253087988710625934010181862,
+44731490761556280255905446185238890493953420277155459539681908020022814852045473
+906622513423589000065035233481733743985973099897904160)`
 
 ### Overview
 
@@ -1324,7 +1348,8 @@ Assuming that Alice begins the exchange:
 * Picks random values `r2` and `r3`.
 * Computes `c2 = HashToScalar(1 || G*r2)` and `d2 = r2 - a2 * c2`.
 * Computes `c3 = HashToScalar(2 || G*r3)` and `d3 = r3 - a3 * c3`.
-* Sends Bob a SMP message 1 with `G2a = G*a2`, `c2`, `d2`, `G3a = G*a3`, `c3` and `d3`.
+* Sends Bob a SMP message 1 with `G2a = G*a2`, `c2`, `d2`, `G3a = G*a3`, `c3`
+  and `d3`.
 
 **Bob:**
 
@@ -1335,15 +1360,18 @@ Assuming that Alice begins the exchange:
 * Computes `c3 = HashToScalar(4 || G*r3)` and `d3 = r3 - b3 * c3`.
 * Computes `G2 = G2a*b2` and `G3 = G3a*b3`.
 * Computes `Pb = G3*r4` and `Qb = G*r4 + G2*y`, where y is the 'actual secret'.
-* Computes `cp = HashToScalar(5 || G3*r5 || G*r5 + G2*r6)`, `d5 = r5 - r4 * cp` and `d6 = r6 - y * cp`.
-* Sends Alice a SMP message 2 with `G2b`, `c2`, `d2`, `G3b`, `c3`, `d3`, `Pb`, `Qb`, `cp`, `d5` and `d6`.
+* Computes `cp = HashToScalar(5 || G3*r5 || G*r5 + G2*r6)`, `d5 = r5 - r4 * cp`
+  and `d6 = r6 - y * cp`.
+* Sends Alice a SMP message 2 with `G2b`, `c2`, `d2`, `G3b`, `c3`, `d3`, `Pb`,
+  `Qb`, `cp`, `d5` and `d6`.
 
 **Alice:**
 
 * Computes `G2 = G2b*a2` and `G3 = G3b*a3`.
 * Picks random values `r4`, `r5`, `r6` and `r7`.
 * Computes `Pa = G3*r4` and `Qa = G1*r4 + G2*x`, where x is the 'actual secret'.
-* Computes `cp = HashToScalar(6 || G3*r5 || G*r5 + G2*r6)`, `d5 = r5 - r4 * cp` and `d6 = r6 - x * cp`.
+* Computes `cp = HashToScalar(6 || G3*r5 || G*r5 + G2*r6)`, `d5 = r5 - r4 * cp`
+  and `d6 = r6 - x * cp`.
 * Computes `Ra = (Qa - Qb)*a3`.
 * Computes `cr = HashToScalar(7 || G*r7 || (Qa - Qb)*r7)` and `d7 = r7 - a3 * cr`.
 * Sends Bob a SMP message 3 with `Pa`, `Qa`, `cp`, `d5`, `d6`, `Ra`, `cr` and `d7`.
@@ -1393,8 +1421,8 @@ Second MPI (MPI)
 SMP message 1Q is sent by Alice to begin a DH exchange to determine two new
 generators, `g2` and `g3`. A valid  SMP message 1 is generated as follows:
 
-1. Determine her secret input `x`, which is to be compared to Bob's secret `y`, as
-specified in the "Secret Information" section.
+1. Determine her secret input `x`, which is to be compared to Bob's secret `y`,
+   as specified in the "Secret Information" section.
 2. Pick random values `a2` and `a3` (448 bits) in `Z_q`. These will be Alice's
 exponents for the DH exchange to pick generators.
 3. Pick random values `r2` and `r3` (448 bits) in `Z_q`. These will be used to
@@ -1412,7 +1440,8 @@ The SMP message 1Q has the following data:
 
 ```
 question (DATA)
-  A user-specified question, which is associated with the user-specified portion of the secret.
+  A user-specified question, which is associated with the user-specified portion
+  of the secret.
   If there is no question input from the user, the length of this is 0 and the
   data is NULL.
 
@@ -1420,13 +1449,15 @@ G2a (POINT)
   Alice's half of the DH exchange to determine G2.
 
 c2 (MPI), d2 (MPI)
-  A zero-knowledge proof that Alice knows the value associated with her transmitted value G2a.
+  A zero-knowledge proof that Alice knows the value associated with her
+  transmitted value G2a.
 
 G3a (POINT)
   Alice's half of the DH exchange to determine G3.
 
 c3 (MPI), d3 (MPI)
-  A zero-knowledge proof that Alice knows the value associated with her transmitted value G3a.
+  A zero-knowledge proof that Alice knows the value associated with her
+  transmitted value G3a.
 
 ```
 
@@ -1436,12 +1467,13 @@ SMP message 2 is sent by Bob to complete the DH exchange to determine the new
 generators, g2 and g3. It also begins the construction of the values used in the
 final comparison of the protocol. A valid SMP message 2 is generated as follows:
 
-1. Determine Bob's secret input `y`, which is to be compared to Alice's secret `x`.
-2. Pick random values `b2` and `b3` (448 bits) in `Z_q`. These will used during the
-DH exchange to pick generators.
+1. Determine Bob's secret input `y`, which is to be compared to Alice's secret
+   `x`.
+2. Pick random values `b2` and `b3` (448 bits) in `Z_q`. These will used during
+   the DH exchange to pick generators.
 3. Pick random values `r2`, `r3`, `r4`, `r5` and `r6` (448 bits) in `Z_q`. These
-will be used to add a blinding factor to the final results, and to generate zero-
-knowledge proofs that this message was created honestly.
+   will be used to add a blinding factor to the final results, and to generate
+   zero-knowledge proofs that this message was created honestly.
 4. Compute `G2b = G*b2` and `G3b = G*b3`.
 5. Generate a zero-knowledge proof that the value `b2` is known by setting
 `c2 = HashToScalar(3 || G*r2)` and `d2 = r2 - b2 * c2 mod q`.
@@ -1449,10 +1481,11 @@ knowledge proofs that this message was created honestly.
 `c3 = HashToScalar(4 || G*r3)` and `d3 = r3 - b3 * c3 mod q`.
 7. Compute `G2 = G2a*b2` and `G3 = G3a*b3`.
 8. Compute `Pb = G3*r4` and `Qb = G*r4 + G2*y`.
-9. Generate a zero-knowledge proof that `Pb` and `Qb` were created according to the
-protocol by setting `cp = HashToScalar(5 || G3*r5 || G*r5 + G2*r6)`,
-`d5 = r5 - r4 * cp mod q` and `d6 = r6 - y * cp mod q`.
-10. Store the values of `G3a`, `G2`, `G3`, `b3`, `Pb` and `Qb` for use later in the protocol.
+9. Generate a zero-knowledge proof that `Pb` and `Qb` were created according to
+   the protocol by setting `cp = HashToScalar(5 || G3*r5 || G*r5 + G2*r6)`,
+   `d5 = r5 - r4 * cp mod q` and `d6 = r6 - y * cp mod q`.
+10. Store the values of `G3a`, `G2`, `G3`, `b3`, `Pb` and `Qb` for use later in
+    the protocol.
 
 
 The SMP message 2 has the following data:
@@ -1462,19 +1495,23 @@ G2b (POINT)
   Bob's half of the DH exchange to determine G2.
 
 c2 (MPI), d2 (MPI)
-  A zero-knowledge proof that Bob knows the exponent associated with his transmitted value G2b.
+  A zero-knowledge proof that Bob knows the exponent associated with his
+  transmitted value G2b.
 
 G3b (POINT)
   Bob's half of the DH exchange to determine G3.
 
 c3 (MPI), d3 (MPI)
-  A zero-knowledge proof that Bob knows the exponent associated with his transmitted value G3b.
+  A zero-knowledge proof that Bob knows the exponent associated with his
+  transmitted value G3b.
 
 Pb (POINT), Qb (POINT)
-  These values are used in the final comparison to determine if Alice and Bob share the same secret.
+  These values are used in the final comparison to determine if Alice and Bob
+  share the same secret.
 
 cp (MPI), d5 (MPI), d6 (MPI)
-  A zero-knowledge proof that Pb and Qb were created according to the protocol given above.
+  A zero-knowledge proof that Pb and Qb were created according to the protocol
+  given above.
 ```
 
 #### SMP message 3
@@ -1483,32 +1520,39 @@ SMP message 3 is Alice's final message in the SMP exchange. It has the last of
 the information required by Bob to determine if `x = y`. A valid SMP message 1
 is generated as follows:
 
-1. Pick random values `r4`, `r5`, `r6` and `r7` (448 bits) in `Z_q`. These will be
-used to add a blinding factor to the final results, and to generate zero-knowledge
-proofs that this message was created honestly.
+1. Pick random values `r4`, `r5`, `r6` and `r7` (448 bits) in `Z_q`. These will
+   be used to add a blinding factor to the final results, and to generate zero-
+   knowledge proofs that this message was created honestly.
 2. Compute `G2 = G2b*a2` and `G3 = G3b*a3`.
 3. Compute `Pa = G3*r4` and `Qa = G*r4 + G2*x`.
-4. Generate a zero-knowledge proof that `Pa` and `Qa` were created according to the protocol
-by setting `cp = HashToScalar(6 || G3*r5 || G*r5 + G2*r6)`, `d5 = r5 - r4 * cp mod q` and `d6 = r6 - x * cp mod q`.
+4. Generate a zero-knowledge proof that `Pa` and `Qa` were created according to
+   the protocol by setting `cp = HashToScalar(6 || G3*r5 || G*r5 + G2*r6)`,
+   `d5 = r5 - r4 * cp mod q` and `d6 = r6 - x * cp mod q`.
 5. Compute `Ra = (Qa - Qb) * a3`.
-6. Generate a zero-knowledge proof that `Ra` was created according to the protocol by setting
-`cr = HashToScalar(7 || G*r7 || (Qa - Qb)*r7)` and `d7 = r7 - a3 * cr mod q`.
-7. Store the values of `G3b`, `Pa - Pb`, `Qa - Qb` and `Ra` for use later in the protocol.
+6. Generate a zero-knowledge proof that `Ra` was created according to the
+   protocol by setting `cr = HashToScalar(7 || G*r7 || (Qa - Qb)*r7)` and
+   `d7 = r7 - a3 * cr mod q`.
+7. Store the values of `G3b`, `Pa - Pb`, `Qa - Qb` and `Ra` for use later in the
+   protocol.
 
 The SMP message 3 has the following data:
 
 ```
 Pa (POINT), Qa (POINT)
-  These values are used in the final comparison to determine if Alice and Bob share the same secret.
+  These values are used in the final comparison to determine if Alice and Bob
+  share the same secret.
 
 cp (MPI), d5 (MPI), d6 (MPI)
-  A zero-knowledge proof that Pa and Qa were created according to the protocol given above.
+  A zero-knowledge proof that Pa and Qa were created according to the protocol
+  given above.
 
 Ra (POINT)
-  This value is used in the final comparison to determine if Alice and Bob share the same secret.
+  This value is used in the final comparison to determine if Alice and Bob share
+  the same secret.
 
 cr (MPI), d7 (MPI)
-  A zero-knowledge proof that Ra was created according to the protocol given above.
+  A zero-knowledge proof that Ra was created according to the protocol given
+  above.
 ```
 
 #### SMP message 4
@@ -1584,8 +1628,10 @@ If smpstate is `SMPSTATE_EXPECT3`:
 * Create a SMP message 4 and send it to Alice.
 * Check whether the protocol was successful:
   1. Compute `Rab = Ra*b3`.
-  2. Determine if `x = y` by checking the equivalent condition that `Pa - Pb = Rab`.
-* Set smpstate to `SMPSTATE_EXPECT1`, as no more messages are expected from Alice.
+  2. Determine if `x = y` by checking the equivalent condition that
+     `Pa - Pb = Rab`.
+* Set smpstate to `SMPSTATE_EXPECT1`, as no more messages are expected from
+  Alice.
 
 #### Receiving a SMP message 4
 
@@ -1600,7 +1646,8 @@ If smpstate is SMPSTATE_EXPECT4:
 
 * Check whether the protocol was successful:
     1. `Compute Rab = Rb*a3`.
-    2. Determine if `x = y` by checking the equivalent condition that `(Pa / Pb) = Rab`.
+    2. Determine if `x = y` by checking the equivalent condition that
+       `(Pa / Pb) = Rab`.
 
 Set smpstate to `SMPSTATE_EXPECT1`, as no more messages are expected from Bob.
 
@@ -1618,8 +1665,8 @@ The DRE scheme consists of three functions:
 
 #### Domain parameters
 
-The Cramer-Shoup scheme uses a group (`G`, `q`, `G1`, `G2`). This is a group with
-the same `q` as Curve 448. The generators `G1` and `G2` are:
+The Cramer-Shoup scheme uses a group (`G`, `q`, `G1`, `G2`). This is a group
+with the same `q` as Curve 448. The generators `G1` and `G2` are:
 
 ```
 G1 = (5014593412122187483175733622392028030242298988836581229127722326504735507
@@ -1642,7 +1689,8 @@ Daniel J. Bernstein [10].
   - `C = G1*x1 + G2*x2`
   - `D = G1*y1 + G2*y2`
   - `H = G1*z`.
-3. The public key is `PK = {C, D, H}` and the secret key is `SK = {x1, x2, y1, y2, z}`.
+3. The public key is `PK = {C, D, H}` and the secret key is
+   `SK = {x1, x2, y1, y2, z}`.
 
 #### Dual Receiver Encryption: DREnc(PK1, PK2, m)
 
@@ -1658,7 +1706,8 @@ Let `{C1, D1, H1} = PK1` and `{C2, D2, H2} = PK2`
   3. Compute `Vi = Ci*ki + Di*(ki * αi)`
 3. Compute `K_enc = SHA3-256(K)`. K is compressed from 446 bits to 256 bits because
 XSalsa20 has a maximum key size of 256.
-4. Pick a random 24 bytes `nonce` and compute `phi = XSalsa20-Poly1305_K_enc(m, nonce)`
+4. Pick a random 24 bytes `nonce` and compute `phi = XSalsa20-Poly1305_K_enc(m,
+   nonce)`
 5. Generate a NIZKPK:
   1. for i ∈ {1, 2}:
     1. Pick random value `ti` in Z_q.
@@ -1679,7 +1728,8 @@ XSalsa20 has a maximum key size of 256.
 
 #### Dual Receiver Decryption: DRDec(PK1, PK2, SKi, gamma):
 
-Let `{C1, D1, H1} = PK1`, `{C2, D2, H2} = PK2` and `{x1i, x2i, y1i, y2i, zi} = SKi`.
+Let `{C1, D1, H1} = PK1`, `{C2, D2, H2} = PK2` and `{x1i, x2i, y1i, y2i, zi} =
+SKi`.
 SKi is the secret key of the person decrypting the message.
 
 1. Parse `gamma` to retrieve components
