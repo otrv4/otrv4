@@ -102,7 +102,7 @@ section [Data types](#data-types) for encoding and decoding details.
 
 ### Elliptic Curve Parameters
 
-OTRv4 uses the [Ed448-Goldilocks][4] [elliptic curve][5], which defines the
+OTRv4 uses the Ed448-Goldilocks [4] elliptic curve [5], which defines the
 following parameters:
 
 ```
@@ -136,8 +136,8 @@ using the rules for MPIs.
 
 ### 3072 Diffie-Hellman Parameters
 
-For the Diffie-Hellman group computations, the group is the one defined in [RFC
-3526][1] with a 3072-bit modulus (hex, big-endian):
+For the Diffie-Hellman group computations, the group is the one defined in RFC
+3526 [1] with a 3072-bit modulus (hex, big-endian):
 
 ```
 Prime: 2^3072 - 2^3008 - 1 + 2^64 * { [2^2942 pi] + 1690314 }
@@ -503,7 +503,7 @@ This section outlines the flow of the Deniable Authenticated Key Exchange. This 
 way to mutually agree upon a shared key for the two parties and authenticate one another
 while providing participation deniability.
 
-This protocol is derived from the [Spawn protocol][2], which uses dual-receiver
+This protocol is derived from the Spawn protocol [2], which uses dual-receiver
 encryption (DRE) and a non-interactive zero-knowledge proof of knowledge
 (NIZKPK) for authentication (Auth).
 
@@ -1736,15 +1736,15 @@ d is an array of bytes.
 2. Return `h (mod q)`
 
 <!--- References -->
-
+ 
 [1]: https://www.ietf.org/rfc/rfc3526.txt "M. Kojo: More Modular Exponential (MODP) Diffie-Hellman groups for Internet Key Exchange (IKE)"
 [2]: http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf "N. Unger, I. Goldberg: Improved Techniques for Implementing Strongly Deniable Authenticated Key Exchanges"
 [3]: https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html "Off-the-Record Messaging Protocol version 3"
 [4]: https://mikehamburg.com/papers/goldilocks/goldilocks.pdf "M. Hamburg: Ed448-Goldilocks, a new elliptic curve"
 [5]: http://www.ietf.org/rfc/rfc7748.txt "A. Langley, M. Hamburg, and S. Turner: Elliptic Curves for Security.” Internet Engineering Task Force; RFC 7748 (Informational); IETF, Jan-2016"
 [6]: https://whispersystems.org/docs/specifications/doubleratchet "Trevor Perrin (editor), Moxie Marlinspike: The Double Ratchet Algorithm"
-[7]: https://whispersystems.org/docs/specifications/doubleratchet/#diffie-hellman-ratchet
-[8]: https://tools.ietf.org/html/rfc3339
+[7]: https://whispersystems.org/docs/specifications/doubleratchet/#diffie-hellman-ratchet  "Trevor Perrin (editor), Moxie Marlinspike: The Double Ratchet Algorithm"
+[8]: https://tools.ietf.org/html/rfc3339 "G. Klyne, C. Newman: Date and Time on the Internet: Timestamps"
 [9]: https://github.com/twstrike/otrv4/blob/master/gen_gens_ed448.py
-[10]: https://ed25519.cr.yp.to/python/ed25519.py
-[11]: https://eprint.iacr.org/2015/673.pdf
+[10]: https://ed25519.cr.yp.to/python/ed25519.py "Daniel Bernstein: ed25519"
+[11]: https://eprint.iacr.org/2015/673.pdf "Mike Hamburg: Decaf: Eliminating cofactors through point compression"
