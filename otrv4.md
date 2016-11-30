@@ -181,8 +181,8 @@ Nonce (NONCE):
 ED448 point (POINT):
   56 byte data
   
-User Profile(USER-PROF):
-  Detailed in [User Profile Data Type](#user-profile-data-type)section
+User Profile (USER-PROF):
+  Detailed in "User Profile Data Type" section
 ```
 
 In order to serialize and deserialize the point, refer to Appendix A.1
@@ -635,7 +635,7 @@ choice of DH and ECDH key. A valid Pre-key message is generated as follows:
 
 1. Create a user profile, as detailed [here](#creating-a-user-profile)
 2. Choose a random ephemeral ECDH key pair:
-  * secret key `x`, which is a random element from `Z_q` (448 bits).
+  * secret key `x` (256 bits).
   * public key `X`.
 3. Generates an ephemeral DH secret key pair:
   * secret key `a` (640 bits).
@@ -676,7 +676,7 @@ A valid DRE-Auth message is generated as follows:
 1. Create an user profile, as detailed [here]
    (#creating-a-user-profile)
 2. Choose a random ephemeral ECDH key pair:
-  * secret key `y`, which is a random element from `Z_q` (448 bits).
+  * secret key `y` (256 bits).
   * public key `Y`
 3. Generates an ephemeral DH secret key pair:
   * secret key `b` (640 bits).
@@ -1428,9 +1428,9 @@ generators, `g2` and `g3`. A valid  SMP message 1 is generated as follows:
 
 1. Determine her secret input `x`, which is to be compared to Bob's secret `y`,
    as specified in the "Secret Information" section.
-2. Pick random values `a2` and `a3` (448 bits) in `Z_q`. These will be Alice's
+2. Pick random values `a2` and `a3` in `Z_q`. These will be Alice's
 exponents for the DH exchange to pick generators.
-3. Pick random values `r2` and `r3` (448 bits) in `Z_q`. These will be used to
+3. Pick random values `r2` and `r3` in `Z_q`. These will be used to
 generate zero-knowledge proofs that this message was created according to the
 protocol.
 4. Compute `G2a = G*a2` and `G3a = G*a3`.
@@ -1474,9 +1474,9 @@ final comparison of the protocol. A valid SMP message 2 is generated as follows:
 
 1. Determine Bob's secret input `y`, which is to be compared to Alice's secret
    `x`.
-2. Pick random values `b2` and `b3` (448 bits) in `Z_q`. These will used during
+2. Pick random values `b2` and `b3` in `Z_q`. These will used during
    the DH exchange to pick generators.
-3. Pick random values `r2`, `r3`, `r4`, `r5` and `r6` (448 bits) in `Z_q`. These
+3. Pick random values `r2`, `r3`, `r4`, `r5` and `r6` in `Z_q`. These
    will be used to add a blinding factor to the final results, and to generate
    zero-knowledge proofs that this message was created honestly.
 4. Compute `G2b = G*b2` and `G3b = G*b3`.
@@ -1525,7 +1525,7 @@ SMP message 3 is Alice's final message in the SMP exchange. It has the last of
 the information required by Bob to determine if `x = y`. A valid SMP message 1
 is generated as follows:
 
-1. Pick random values `r4`, `r5`, `r6` and `r7` (448 bits) in `Z_q`. These will
+1. Pick random values `r4`, `r5`, `r6` and `r7` in `Z_q`. These will
    be used to add a blinding factor to the final results, and to generate zero-
    knowledge proofs that this message was created honestly.
 2. Compute `G2 = G2b*a2` and `G3 = G3b*a3`.
@@ -1566,7 +1566,7 @@ SMP message 4 is Bob's final message in the SMP exchange. It has the last of the
 information required by Alice to determine if `x = y`. A valid SMP message 4 is
 generated as follows:
 
-1. Pick a random value `r7` (448 bits) in `Z_q`. This will be used to generate
+1. Pick a random value `r7` in `Z_q`. This will be used to generate
 Bob's final zero-knowledge proof that this message was created honestly.
 2. Compute `Rb = (Qa - Qb) * b3`.
 3. Generate a zero-knowledge proof that `Rb` was created according to the protocol by setting
