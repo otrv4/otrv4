@@ -56,10 +56,8 @@ and use the construct SHA3-512(counter || secret) to provide cryptographic
 domain separation every time multiple keys need to be derived from the same
 secret.
 
-We will use the SHA3-256 hash function for generating fingerprints for
-long-lived, public keys. SHA3-256 has a security strength of 128 bits. We choose
-SHA3-256 instead of SHA3-512 for the operation of generating fingerprints
-because the output from SHA3-512 is much larger.
+We will use the SHA3-512 hash function for generating fingerprints for
+long-lived, public keys. SHA3-512 has a security strength of 256 bits.
 
 ### Consequences
 
