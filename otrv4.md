@@ -581,8 +581,7 @@ Bob will be initiating the DAKE with Alice.
     * Set `their_dh` as their DH ephemeral public key from the DAKE (`B`).
     * Increase ratchet id `i = i + 1`.
     ```
-(TODO: in the below, should it really be "R" there?)
-6. Sends Alice a DRE-Auth Message `psi_2 = ("R", gamma, sigma)`.
+6. Sends Alice a DRE-Auth Message `psi_2 = (Prof_A, gamma, sigma)`.
 7. At this point, the DAKE is complete for Alice and she:
 
     ```Details
