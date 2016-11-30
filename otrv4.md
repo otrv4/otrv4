@@ -253,7 +253,7 @@ In the DAKE, OTRv4 makes use of long-term Cramer-Shoup keys and ephemeral DH
 keys.
 
 For exchanging data messages, OTRv4 uses a key structure and key rotation
-strategy with The Double Ratchet Algorithm, as specified by  Moxie Marlinspike [6], at its core. As a result we
+strategy with The Double Ratchet Algorithm, as specified by  Moxie Marlinspike ([6]), at its core. As a result we
 will use many of the terms within the Double Ratchet domain to describe the
 difference in the context of OTRv4. A cryptographic ratchet is a one way
 mechanism for deriving new cryptographic keys from previous keys. New keys
