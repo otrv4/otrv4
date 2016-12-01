@@ -576,10 +576,10 @@ Bob will be initiating the DAKE with Alice.
   1. The message is of the correct form (e.g., the fields are of the expected
      length).
      If any of the verifications fail, the message is ignored.
-(TODO: What's identifier? why alice not verifying this?)
-  2. Bob's identifier is the first one listed
-  3. Alice's identifier is the second one listed, and it matches the
-     identifier transmitted outside of the ciphertext
+(TODO: why alice not verifying this?)
+  2. Bob's User Profile is the first one listed
+  3. Alice's User Profile is the second one listed, and it matches the
+     one transmitted outside of the ciphertext
   4. `(Y, B)` is a prekey that Bob previously sent and has not been used.
 4. At this point, the DAKE is complete for Bob and he:
 
