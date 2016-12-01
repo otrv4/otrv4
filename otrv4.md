@@ -417,6 +417,9 @@ OTRv4 will initialize through a Query message or a whitespace tag, as discussed
 in OTRv3 [3]. After this, the conversation is authenticated using a deniable
 authenticated key exchange (DAKE).
 
+TODO: We don't say which "tag" refers to OTRv4, and we don't mention the "byte
+identifier" for OTRv4 in the query message.
+
 ### Requesting conversation with older OTR versions
 
 Bob might respond to Alice's request or notification of willingness to start a
