@@ -1637,9 +1637,6 @@ REQUIRE_ENCRYPTION
 SEND_WHITESPACE_TAG
   Advertise your support of OTR using the whitespace tag.
 
-WHITESPACE_START_AKE
-  Start the OTR DAKE when you receive a whitespace tag.
-
 ERROR_START_AKE
   Start the OTR DAKE when you receive an OTR Error Message.
 ```
