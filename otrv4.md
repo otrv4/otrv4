@@ -726,12 +726,12 @@ Send data message 0_1            -------------------->
 
                                                        Receive data message 0_0
                                                        Recover receiving chain key 0_0
-                                                       Derive Enc-key & MAC-key
+                                                       Derive Kenc & Kmac
                                                        Verify MAC, Decrypt message 0_0
 
                                                        Receive data message 0_1
                                                        Recover receiving chain key 1_1
-                                                       Derive Enc-key & MAC-key
+                                                       Derive Kenc & Kmac
                                                        Verify MAC, Decrypt message 0_1
 
                                                        Perform a new ratchet
@@ -740,12 +740,12 @@ Send data message 0_1            -------------------->
 
 Receive data message 1_0
 Recover receiving chain key 1_0
-Derive Enc-key & MAC-key
+Derive Kenc & Kmac
 Verify MAC, Decrypt message 1_0
 
 Receive data message 1_1
 Recover receiving chain key 1_1
-Derive Enc-key & MAC-key
+Derive Kenc & Kmac
 Verify MAC, Decrypt message 1_1
 ```
 
