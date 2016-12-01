@@ -97,7 +97,7 @@ new point: `C = a * B`.
 
 The concatenation of byte sequences `I` and `J` is `I || J`. In this case, `I`
 and `J`represent a fixed-length byte sequence encoding the respective values.
-See section [Data types](#data-types) for encoding and decoding details.
+See section [Data Types](#data-types) for encoding and decoding details.
 
 ### Elliptic Curve Parameters
 
@@ -139,7 +139,7 @@ For the Diffie-Hellman group computations, the group is the one defined in RFC
 3526 [1] with a 3072-bit modulus (hex, big-endian):
 
 ```
-Prime: 2^3072 - 2^3008 - 1 + 2^64 * { [2^2942 pi] + 1690314 }
+Prime: 2^3072 - 2^3008 - 1 + 2^64 * ([2^2942 pi] + 1690314)
 
 Value:
 FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1
@@ -169,7 +169,7 @@ from the above group, the operation should be done modulo the above prime.
 
 OTRv4 supports the same TLV record types from OTRv3.
 
-### Data types
+### Data Types
 
 OTRv4 uses almost the same data types as specified in OTRv3 (bytes, shorts,
 ints, MPIs, and DATA) with the addition of:
@@ -182,7 +182,7 @@ ED448 point (POINT):
   56 bytes data
 
 User Profile (USER-PROF):
-  Detailed in [User Profile Data Type](#user-profile-data-type) section
+  Detailed in "User Profile Data Type" section
 ```
 
 In order to serialize and deserialize the point, refer to Appendix A.1
@@ -451,7 +451,7 @@ To create a user profile, assemble:
    Profile Signatures and itself signed by the user's OTRv3 DSA key. The
    transitional signature that enables contacts that trust user's version 3
    DSA key to trust the user's profile in version 4. This is only used if the
-   user supports version 3 and 4.
+   user supports versions 3 and 4.
 
 Then this profile must be published in a public place, like an untrusted
 server.
@@ -727,7 +727,7 @@ Verify MAC, Decrypt message 1_1
 ### Data Message
 
 This message is used to transmit a private message to the correspondent.
-It is also used to [reveal old MAC keys](#revealing-mac-eys).
+It is also used to [reveal old MAC keys](#revealing-mac-keys).
 
 #### Data Message format
 
