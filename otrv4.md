@@ -13,7 +13,7 @@ works on top of an existing messaging protocol, like XMPP.
 5. [Notation and parameters](#notation-and-parameters)
 6. [Conversation Initialization](#conversation-initialization)
   1. [User Profile](#user-profile)
-  2. [Creating an User Profile](#creating-an-user-profile)
+  2. [Creating a User Profile](#creating-a-user-profile)
   3. [Deniable Authenticated Key Exchange (DAKE)](#deniable-authenticated-key-exchange-dake)
 7. [Requesting conversation with older OTR versions](#requesting-conversation-with-older-otr-versions)
 8. [Data exchange](#data-exchange)
@@ -182,7 +182,7 @@ ED448 point (POINT):
   56 bytes data
 
 User Profile (USER-PROF):
-  Detailed in "User Profile Data Type" section
+  Detailed in [User Profile Data Type](#user-profile-data-type) section
 ```
 
 In order to serialize and deserialize the point, refer to Appendix A.1
@@ -338,11 +338,11 @@ Otherwise:
 ```
 generateECDH()
   pick a random value r from Z_q
-  return pubECDH = G1 * r, secretECDH = r
+  return our_ecdh.public= G1 * r, our_ecdh.secret = r
 
 generateDH()
   pick a random value r (80 bytes)
-  return pubDH = g3 ^ r, secretDH = r
+  return our_dh.public = g3 ^ r, our_dh.secret = r
 ```
 
 #### Calculating Double Ratchet Keys
@@ -386,6 +386,7 @@ When sending data messages, you must derive the chain key:
 ```
 derive_chain_key(C, i, j):
   C[i][j] = SHA3-512(C[i][j-1])
+  return C[i][j]
 ```
 
 ### Retrieving chain keys
@@ -394,8 +395,9 @@ When receiving data messages, you must retrieve the chain key:
 
 ```
 retrieve_chain_key(C, i, k):
-  if C[i][k] not exist:
+  if C[i][k] does not exist:
     C[i][k] = SHA3-512(retrieve_chain_key(C, i, k-1))
+  return C[i][k]
 ```
 
 ### Calculating Encryption and MAC keys
@@ -404,25 +406,23 @@ When sending or receiving data messages, you must calculate the message keys:
 
 ```
 derive_enc_mac_keys(chain_key):
-  Kenc = SHA3-256(0x00 || chain_key)
-  Kmac = SHA3-512(0x01 || chain_key)
-  return MKenc, Kmac
+  Kenc = SHA3-256(0x01 || chain_key)
+  Kmac = SHA3-512(0x02 || chain_key)
+  return Kenc, Kmac
 ```
 
 ## Conversation Initialization
 
-OTRv4 will initialize through a Query message or a whitespace tag, as
-discussed in OTRv3 [3]. After this, the conversation is authenticated using a
-deniable authenticated key exchange (DAKE). The conversation can also start
-directly with the first message of the DAKE, without a Query message or a
-whitespace tag.
+OTRv4 will initialize through a Query message or a whitespace tag, as discussed
+in OTRv3 [3]. After this, the conversation is authenticated using a deniable
+authenticated key exchange (DAKE).
 
 ### Requesting conversation with older OTR versions
 
 Bob might respond to Alice's request or notification of willingness to start a
-conversation using OTRv3. If this is the case and Alice supports the version
-3, the protocol falls back to OTRv3 [3]. If Alice does not support version 3,
-then this message is ignored.
+conversation using OTRv3. If this is the case and Alice supports version 3,
+the protocol falls back to OTRv3 [3]. If Alice does not support version 3, then
+this message is ignored.
 
 ## User Profile
 
@@ -432,7 +432,7 @@ support information, and a signed profile expiration date. Both parties will
 include the user profile in the beginning of the DAKE. The frequency of the
 user profile publication is determined by its expiration and renewal policy.
 
-### Creating an User Profile
+### Creating a User Profile
 
 To create a user profile, assemble:
 
