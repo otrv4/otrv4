@@ -577,7 +577,7 @@ Bob will be initiating the DAKE with Alice.
   1. The message is of the correct form (e.g., the fields are of the expected
      length).
      If any of the verifications fail, the message is ignored.
-(TODO: why alice not verifying this?)
+(TODO: why alice not verifying this? Because it's not in the paper - ROM DAKE)
   2. Bob's User Profile is the first one listed
   3. Alice's User Profile is the second one listed, and it matches the
      one transmitted outside of the ciphertext
