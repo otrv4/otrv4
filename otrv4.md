@@ -883,15 +883,13 @@ discarded the associated message keys.
 
 Some networks may have a `maximum message size` that is too small to contain
 an encoded OTR message. In that event, the sender may choose to split the
-message into a number of fragments. This section describes the format of the
+message into a number of fragments. This section describes the format for the
 fragments.
 
 OTRv4 has the same message fragmentation as OTRv3 without compatibility with
 version 2. This means that fragmentation is performed in OTRv4 in the same way
-as specified in OTRv3: the format is the same so you will have to wait for
-reassembly to finalize, to deal with a message.
-
-(TODO: the above paragraph should be rewritten in form formal language)
+as specified in OTRv3: the format is the same but, in order to deal with the
+message, reassemble should finish.
 
 All OTRv4 clients must be able to assemble received fragments, but performing
 fragmentation on outgoing messages is optional.
