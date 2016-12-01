@@ -58,13 +58,13 @@ Both participants are online at the start of a conversation.
 Messages in a conversation can be exchanged over an insecure channel, where an
 attacker can eavesdrop or interfere with the encrypted messages.
 
-The network model provides in-order delivery of messages, but some messages may
-not be delivered.
+The network model provides in-order delivery of messages, but some messages
+may not be delivered.
 
 ## Security Properties
 
-In an OTRv4 conversation, both sides can verify the identity of the
-other participant but cannot transfer this knowledge to a third party.
+In an OTRv4 conversation, both sides can verify the identity of the other
+participant but cannot transfer this knowledge to a third party.
 
 Once an OTRv4 channel has been created, all messages transmitted through this
 channel are confidential and integrity is protected.
@@ -77,18 +77,18 @@ also deny having sent any of the exchanged messages in the conversation. The
 respective party can be certain of the authenticity of the messages but cannot
 transfer this knowledge to someone else.
 
-On the other hand, OTRv4 does not protect against an active attacker performing
-Denial of Service attacks to reduce availability.
+On the other hand, OTRv4 does not protect against an active attacker
+performing Denial of Service attacks to reduce availability.
 
 ## Notation and parameters
 
-This section contains information needed to understand the parameters, variables
-and arithmetic used.
+This section contains information needed to understand the parameters,
+variables and arithmetic used.
 
 ### Notation
 
-Scalars and secret keys are in lower case, such as `x` or `y`. Points and public
-keys are in upper case, such as `P` or `Q`.
+Scalars and secret keys are in lower case, such as `x` or `y`. Points and
+public keys are in upper case, such as `P` or `Q`.
 
 Addition and subtraction of elliptic curve points `A` and `B` are `A + B` and
 `A - B`. Addition of a point to another point generates a third point. Scalar
@@ -162,8 +162,8 @@ BBE11757 7A615D6C 770988C0 BAD946E2 08E24FA0 74E5AB31
 Generator g3: 2
 ```
 
-Note that this means that whenever you see an operation on a field element from
-the above group, the operation should be done modulo the above prime.
+Note that this means that whenever you see an operation on a field element
+from the above group, the operation should be done modulo the above prime.
 
 ### TLV Types
 
@@ -254,23 +254,23 @@ keys.
 
 For exchanging data messages, OTRv4 uses a key structure and key rotation
 strategy with The Double Ratchet Algorithm, as specified by  Moxie Marlinspike
-([6]), at its core. As a result we will use many of the terms within the Double
-Ratchet domain to describe the difference in the context of OTRv4. A
-cryptographic ratchet is a one way mechanism for deriving new cryptographic keys
-from previous keys. New keys cannot be used to calculate the old keys. Its name
-comes from the mechanical ratchet.
+([6]), at its core. As a result we will use many of the terms within the
+Double Ratchet domain to describe the difference in the context of OTRv4. A
+cryptographic ratchet is a one way mechanism for deriving new cryptographic
+keys from previous keys. New keys cannot be used to calculate the old keys.
+Its name comes from the mechanical ratchet.
 
-OTRv4 retains the Diffie-Hellman Ratchet [7] with Elliptic Curve Diffie Hellman
-(ECDH), and the Symmetric Key Ratchet [12] from the algorithm.
+OTRv4 retains the Diffie-Hellman Ratchet [7] with Elliptic Curve Diffie
+Hellman (ECDH), and the Symmetric Key Ratchet [12] from the algorithm.
 
 OTRv4 adds new 3072 Diffie-Hellman keys called the Mix Key Pair. In addition,
 another Diffie-Hellman Ratchet and Key Symmetric Ratchet is added for the Mix
-Key alone. These were added to protect transcripts of data messages in the case
-that elliptic curve cryptography is broken. During the DAKE, both parties agree
-upon the first set of 3072 Diffie-Hellman keys. Then every third Diffie-Hellman
-Ratchet in the Double Ratchet, a new 384 bytes (3072 bits) key is agreed upon.
-Between each Diffie-Hellman Mix Key Ratchet, both sides will conduct a
-Symmetric Mix Key Ratchet.
+Key alone. These were added to protect transcripts of data messages in the
+case that elliptic curve cryptography is broken. During the DAKE, both parties
+agree upon the first set of 3072 Diffie-Hellman keys. Then every third Diffie-
+Hellman Ratchet in the Double Ratchet, a new 384 bytes (3072 bits) key is
+agreed upon. Between each Diffie-Hellman Mix Key Ratchet, both sides will
+conduct a Symmetric Mix Key Ratchet.
 
 As the ratchet moves forward through its keys, its state is kept with the
 following values:
@@ -307,10 +307,10 @@ This section describes the functions used to manage the key material.
 
 #### Ratcheting ECDH keys and Mix Keys
 
-The sender will rotate into a new ECDH ratchet and a new Mix Key ratchet before
-it sends the first message after receiving any messages from the other side
-(i.e. the first reply). The following data messages will advertise a new ratchet
-id as `i + 1`.
+The sender will rotate into a new ECDH ratchet and a new Mix Key ratchet
+before it sends the first message after receiving any messages from the other
+side (i.e. the first reply). The following data messages will advertise a new
+ratchet id as `i + 1`.
 
   * Increment the current ratchet id (`i`) by 1.
   * Reset the next sent message id (`j`) to 0.
@@ -357,8 +357,8 @@ calculate_ratchet_keys(K):
 
 #### Deciding Between Chain Keys
 
-Both sides will compare their public keys to choose a chain key for sending and
-receiving:
+Both sides will compare their public keys to choose a chain key for sending
+and receiving:
 
 - Alice (and similarly, Bob) determines if she is the "low" end or the "high"
   end of this ratchet. If Alice's ephemeral ECDH public key is numerically
@@ -411,25 +411,26 @@ derive_enc_mac_keys(chain_key):
 
 ## Conversation Initialization
 
-OTRv4 will initialize through a Query message or a whitespace tag, as discussed
-in OTRv3 [3]. After this, the conversation is authenticated using a deniable
-authenticated key exchange (DAKE). The conversation can also start directly
-with the first message of the DAKE, without a Query message or a whitespace tag.
+OTRv4 will initialize through a Query message or a whitespace tag, as
+discussed in OTRv3 [3]. After this, the conversation is authenticated using a
+deniable authenticated key exchange (DAKE). The conversation can also start
+directly with the first message of the DAKE, without a Query message or a
+whitespace tag.
 
 ### Requesting conversation with older OTR versions
 
 Bob might respond to Alice's request or notification of willingness to start a
-conversation using OTRv3. If this is the case and Alice supports the version 3,
-the protocol falls back to OTRv3 [3]. If Alice does not support version 3, then
-this message is ignored.
+conversation using OTRv3. If this is the case and Alice supports the version
+3, the protocol falls back to OTRv3 [3]. If Alice does not support version 3,
+then this message is ignored.
 
 ## User Profile
 
-OTRv4 introduces mandatory user profile publication in a public place. The user
-profile contains the Cramer-Shoup long term public key, signed version support
-information, and a signed profile expiration date. Both parties will include
-the user profile in the beginning of the DAKE. The frequency of the user
-profile publication is determined by its expiration and renewal policy.
+OTRv4 introduces mandatory user profile publication in a public place. The
+user profile contains the Cramer-Shoup long term public key, signed version
+support information, and a signed profile expiration date. Both parties will
+include the user profile in the beginning of the DAKE. The frequency of the
+user profile publication is determined by its expiration and renewal policy.
 
 ### Creating an User Profile
 
@@ -443,14 +444,14 @@ To create a user profile, assemble:
    amount of seconds from the epoch to the expiration date. Its format is the
    same as the "date-time" described in section 5.6 of RFC3339 [8].
 4. Profile Signature: One of the Cramer-Shoup secret key values (`z`) and its
-   generator (`G1`) is used to create signatures of the entire profile excluding
-   the signature itself.
+   generator (`G1`) is used to create signatures of the entire profile
+   excluding the signature itself.
    It is created using the Ed448 signature algorithm as documented in [4].
-5. Transition Signature (optional): A signature of the profile excluding Profile
-   Signatures and itself signed by the user's OTRv3 DSA key. The transitional
-   signature that enables contacts that trust user's version 3 DSA key to trust
-   the user's profile in version 4.
-   This is only used if the user supports version 3 and 4.
+5. Transition Signature (optional): A signature of the profile excluding
+   Profile Signatures and itself signed by the user's OTRv3 DSA key. The
+   transitional signature that enables contacts that trust user's version 3
+   DSA key to trust the user's profile in version 4. This is only used if the
+   user supports version 3 and 4.
 
 Then this profile must be published in a public place, like an untrusted
 server.
@@ -461,9 +462,9 @@ If a renewed profile is not published in a public place, and if the only
 publicly available profile is expired, the user's participation deniability is
 at risk.
 
-Before the profile expires, the user must publish an updated profile with a new
-expiration date. The client establishes the frequency of expiration - this can
-be configurable. A recommended value is two weeks.
+Before the profile expires, the user must publish an updated profile with a
+new expiration date. The client establishes the frequency of expiration - this
+can be configurable. A recommended value is two weeks.
 
 #### User Profile Data Type
 
@@ -484,8 +485,8 @@ Version Expiration (PROF-EXP):
 
 ### Deniable Authenticated Key Exchange (DAKE)
 
-This section outlines the flow of the Deniable Authenticated Key Exchange. This
-is a way to mutually agree upon a shared key for the two parties and
+This section outlines the flow of the Deniable Authenticated Key Exchange.
+This is a way to mutually agree upon a shared key for the two parties and
 authenticate one another while providing participation deniability.
 
 This protocol is derived from the Spawn protocol [2], which uses dual-receiver
@@ -544,10 +545,14 @@ Bob will be initiating the DAKE with Alice.
 2. Generates an ephemeral 3072-DH secret key `a` and a public key `A`.
 3. Computes `gamma = DREnc(PKa, PKb, m)`, being
    `m = Prof_B || Prof_A || Y || X || B || A`. Prof_A is Alice's User Profile.
-4. Computes `sigma = Auth(Ha, za, {Ha, Hb, Y}, Prof_B || Prof_A || Y || B || gamma)`.
+4. Computes `sigma = Auth(Ha, za, {Ha, Hb, Y}, Prof_B || Prof_A || Y || B ||
+   gamma)`.
 5. Sends Alice a DRE-Auth Message `psi_2 = (Prof_A, gamma, sigma)`.
 6. At this point, the DAKE is complete for Alice and she:
-    ```Details
+    
+    ```
+    Details:
+    
     * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`(x, X)`).
     * Set `our_dh` as our DH ephemeral key pair from the DAKE (`a`, `A`).
     * Set `their_ecdh` as their ECDH ephemeral public key from the DAKE (`Y`).
@@ -573,12 +578,14 @@ Bob will be initiating the DAKE with Alice.
      If any of the verifications fail, the message is ignored.
 (TODO: What's identifier? why alice not verifying this?)
   2. Bob's identifier is the first one listed
-  3. Alice's identifier is the second one listed, and it matches the identifier
-     transmitted outside of the ciphertext
+  3. Alice's identifier is the second one listed, and it matches the
+     identifier transmitted outside of the ciphertext
   4. `(Y, B)` is a prekey that Bob previously sent and has not been used.
 4. At this point, the DAKE is complete for Bob and he:
 
-    ```Details
+    ```
+    Details:
+    
     * Set `their_ecdh` as their ECDH ephemeral public key from the DAKE (`X`).
     * Set `their_dh` as their DH ephemeral public key from the DAKE (`A`).
     * Set ratchet id `i = 0`.
@@ -616,7 +623,8 @@ Sender Instance tag (INT)
   The instance tag of the person sending this message.
 Receiver Instance tag (INT)
   The instance tag of the intended recipient. For a pre-key message, this will
-  often be 0 since the other party may not have identified its instance tag yet.
+  often be 0 since the other party may not have identified its instance tag
+  yet.
 Sender's User Profile (USER-PROF)
   As described in the section 'Creating a User Profile'.
 X (POINT)
@@ -630,9 +638,9 @@ A (MPI)
 
 This is the second message of the DAKE. Alice sends it to Bob to commit to a
 choice of her ECDH ephemeral key and her DH ephemeral key, and acknowledgement
-of Bob's ECDH ephemeral key and DH ephemeral key. The ECDH ephemeral public keys
-and DH ephemeral public keys are encrypted with DRE and authenticated with a
-NIZKPK.
+of Bob's ECDH ephemeral key and DH ephemeral key. The ECDH ephemeral public
+keys and DH ephemeral public keys are encrypted with DRE and authenticated
+with a NIZKPK.
 
 A valid DRE-Auth message is generated as follows:
 
@@ -676,12 +684,12 @@ sigma (AUTH)
 ## Data Exchange
 
 This section describes how each participant will use the Double Ratchet
-algorithm to exchange [data messages](#data-message) initialized with the shared
-secret established in the DAKE.
+algorithm to exchange [data messages](#data-message) initialized with the
+shared secret established in the DAKE.
 
-A message with an empty human-readable part (the plaintext is of zero length, or
-starts with a NULL) is a "heartbeat" packet, and should not be displayed to the
-user (but it is still useful for key rotations).
+A message with an empty human-readable part (the plaintext is of zero length,
+or starts with a NULL) is a "heartbeat" packet, and should not be displayed to
+the user (but it is still useful for key rotations).
 (TODO: in the below, I have no idea what "recover receiving chain key" means)
 ```
 Alice                                                                           Bob
@@ -767,8 +775,8 @@ It is also used to [reveal old MAC keys](#revealing-mac-eys).
       value is empty, its length is zero.
 
     Nonce (NONCE)
-      The nonce used with XSalsa20 to create the encrypted message contained in
-      this packet.
+      The nonce used with XSalsa20 to create the encrypted message contained
+      in this packet.
 
     Encrypted message (DATA)
       Using the appropriate encryption key (see below) derived from the
@@ -791,11 +799,11 @@ has been set to `0`, keys should be rotated.
 
 Given a new ratchet:
 
-  * Ratchet the ECDH keys. See "Ratcheting ECDH keys and Mix Keys" section. The new ECDH
-    public key created by the sender this process will be the "Public ECDH Key"
-    for the message
-    If a new public DH key is created in this process, that will be the "Public
-    DH Key" for the message. If it is not created, then this is will be empty.
+  * Ratchet the ECDH keys. See "Ratcheting ECDH keys and Mix Keys" section.
+    The new ECDH public key created by the sender this process will be the
+    "Public ECDH Key" for the message. If a new public DH key is created in
+    this process, that will be the "Public DH Key" for the message. If it is
+    not created, then this is will be empty.
   * Calculate the `K = SHA3-512(K_ecdh || mix_key)`.
   * Derive new set of keys `root[i], chain_s[i][0], chain_r[i][0] = calculate_ratchet_keys(K)`.
   * Securely delete the root key and all chain keys from the ratchet `i-2`.
@@ -824,8 +832,8 @@ In both cases:
    Authenticator = SHA3-512(MKmac || Encrypted_message)
    ```
 
-  * Forget and reveal MAC keys. The conditions for revealing MAC keys is stated
-    in the [Revealing MAC keys](#revealing-mac-keys) section.
+  * Forget and reveal MAC keys. The conditions for revealing MAC keys is
+    stated in the [Revealing MAC keys](#revealing-mac-keys) section.
 
 #### When you receive a Data Message:
 
@@ -843,8 +851,8 @@ If the message verification fails, reject the message.
 
 Otherwise:
 
-  * Decrypt the message using the "encryption key" (`MKenc`) and securely delete
-    it.
+  * Decrypt the message using the "encryption key" (`MKenc`) and securely
+    delete it.
   * Securely delete receiving chain keys older than `message_id-1`.
   * Set `j = 0` to indicate that a new DH-ratchet should happen the next time
     you send a message.
@@ -859,11 +867,11 @@ We reveal old MAC keys to provide forgeability of messages. Old MAC keys are
 keys for already received messages and, therefore, will no longer be
 used to verify the authenticity of the message.
 
-MAC keys are revealed with data messages. They are also revealed with heartbeat
-messages (data messages that encode a plaintext of zero length) if the receiver
-has not sent a message in a configurable amount of time. Put them (as a set
-of concatenated 64 bytes values) into the "Old MAC keys to be revealed"
-section of the next Data Message you send.
+MAC keys are revealed with data messages. They are also revealed with
+heartbeat messages (data messages that encode a plaintext of zero length) if
+the receiver has not sent a message in a configurable amount of time. Put them
+(as a set of concatenated 64 bytes values) into the "Old MAC keys to be
+revealed" section of the next Data Message you send.
 
 (TODO: we are inconsistent in specifying things as bytes or bits. We should probably choose one.)
 
@@ -873,9 +881,10 @@ discarded the associated message keys.
 
 ### Fragmentation
 
-Some networks may have a `maximum message size` that is too small to contain an
-encoded OTR message. In that event, the sender may choose to split the message
-into a number of fragments. This section describes the format of the fragments.
+Some networks may have a `maximum message size` that is too small to contain
+an encoded OTR message. In that event, the sender may choose to split the
+message into a number of fragments. This section describes the format of the
+fragments.
 
 OTRv4 has the same message fragmentation as OTRv3 without compatibility with
 version 2. This means that fragmentation is performed in OTRv4 in the same why
@@ -893,8 +902,8 @@ If you have information about the `maximum message size` you are able to send
 (the different IM networks have different limits), you can fragment an encoded
 OTR message as follows:
 
-  * Start with the OTR message as you would normally transmit it. For example, a
-    Data Message would start with `?OTR:AAQD` and end with `.`.
+  * Start with the OTR message as you would normally transmit it. For example,
+    a Data Message would start with `?OTR:AAQD` and end with `.`.
   * Break it up into sufficiently small pieces. Let this number of pieces be
   `total`, and the pieces be `piece\[1\],piece\[2\],...,piece[total]`.
   * Transmit `total` OTRv4 fragmented messages with the following structure:
@@ -913,8 +922,8 @@ Note that fragments are not messages that can be fragmented: you can't fragment 
 
 ####Receiving Fragments:
 
-If you receive a message containing `?OTR|` (note that you'll need to check for
-this _before_ checking for any of the other `?OTR:` markers):
+If you receive a message containing `?OTR|` (note that you'll need to check
+for this _before_ checking for any of the other `?OTR:` markers):
 
   * Parse it, extracting instance tags, `index`, `total`, and `piece[index]`.
   * Discard illegal fragment, if:
@@ -943,8 +952,8 @@ this _before_ checking for any of the other `?OTR:` markers):
 After this, if stored `total` is bigger than 0 and stored `index` is equal to
 stored `total`, treat piece as the received message.
 
-If you receive a non-OTR message, or an unfragmented message, forget any stored
-value you may have (`piece`, `total` and, `index`).
+If you receive a non-OTR message, or an unfragmented message, forget any
+stored value you may have (`piece`, `total` and, `index`).
 
 For example, here is a Data Message we would like to transmit over a network
 with an unreasonably small `maximum message size`:
@@ -959,25 +968,24 @@ We could fragment this message into three pieces:
 
 ## The protocol state machine
 
-(TODO: this state machine and description of internal variables are not requirements of how the implementation should be written, but abstractions that describe the behavior of the protocol on the wire, in the presence of these kinds of abstract operations. We should change the language in this section to make that more clear - the wire protocol doesn't actually care about thse things, as long as the behavior is the same)
+(TODO: this state machine and description of internal variables are not requirements of how the implementation should be written, but abstractions that describe the behavior of the protocol on the wire, in the presence of these kinds of abstract operations. We should change the language in this section to make that more clear - the wire protocol doesn't actually care about thse things, as long as the behavior is the same).
 
 An OTR client maintains separate state for every correspondent. For example,
 Alice may have an active OTR conversation with Bob, while having an insecure
 conversation with Charlie.
 
-For a conversation, with each correspondent, to start and to be
-maintained it is necesary for the client to manage how to deliver
-response messages, defined as message state, and to manage the
-authentication process, defined as authentication state.
+For a conversation, with each correspondent, to start and to be maintained it
+is necesary for the client to manage how to deliver response messages, defined
+as message state, and to manage the authentication process, defined as
+authentication state.
 
 ### Message state
 
-This machine offers an option to model the management of response
-messages a client would make as a response to user input. It describes a
-finite state machine which may transition throuhg states that describe
-when messages should be sent with or without encryption or not sent at
-all. The scope for this state should be a single conversation with a
-correspondent.
+This machine offers an option to model the management of response messages a
+client would make as a response to user input. It describes a finite state
+machine which may transition throuhg states that describe when messages should
+be sent with or without encryption or not sent at all. The scope for this
+state should be a single conversation with a correspondent.
 
 ```
 MSGSTATE_PLAINTEXT
@@ -999,10 +1007,10 @@ MSGSTATE_FINISHED
 
 ### Authentication state
 
-This machines offers an option to model the management of the
-authentication protocol. It describes a finite state machine which
-may transitition through states that describe whether the protocol is
-iether running or awaiting response.
+This machines offers an option to model the management of the authentication
+protocol. It describes a finite state machine which may transitition through
+states that describe whether the protocol is ether running or awaiting
+response.
 
 ```
 AUTHSTATE_NONE
@@ -1111,7 +1119,8 @@ If the query message offers OTR version 3 and you support version 3 of the proto
 
   * Display the message to the user.
   * If you receive an error during AKE, reply with a Query Message.
-  * Reset `msgstate` to `MSGSTATE_PLAINTEXT` and `authstate` to `AUTHSTATE_NONE`
+  * Reset `msgstate` to `MSGSTATE_PLAINTEXT` and `authstate` to
+    `AUTHSTATE_NONE`
 
 #### Receiving a Pre-key message
 
@@ -1122,8 +1131,8 @@ If the message is version 4 and `ALLOW_V4` is not set
 If `authstate` is `AUTHSTATE_AWAITING_DRE_AUTH`:
 
 This indicates that you have sent a Pre-key message to your correspondent and
-that either she didn't receive it or didn't receive it yet; but has sent you one
-as well.
+that either she didn't receive it or didn't receive it yet; but has sent you
+one as well.
 
 The symmetry will be broken by comparing the `X` you sent in your pre-key
 with the one you received, considered as 56 bytes unsigned big-endian values.
@@ -1230,8 +1239,8 @@ If `msgstate` is `MSGSTATE_ENCRYPTED`:
   If the verification succeeds:
 
     * Decrypt the message and display the human-readable part (if it contains
-      any) to the user. SMP TLVs should be addressed according to the SMP state
-      machine.
+      any) to the user. SMP TLVs should be addressed according to the SMP
+      state machine.
     * Rotate root, chain and mix keys as appropriate
     * If you have not sent a message to this correspondent in some
       (configurable) time, send a "heartbeat" message.
@@ -1254,14 +1263,14 @@ Follow the instructions from the same section in OTRv3 [3].
 
 #### Implementation notes (OR Considerations for networks which allow multiple devices)
 
-When using a transport network that allows multiple devices to be simultaneously
-logged in with the same peer identifier, make sure to identify the other
-participant by its device-specific identifier and not only the peer identifier
-(for example, using XMPP full JID instead of bare JID). Doing so allows
-establishing an OTR channel at the same time with multiple devices from the
-other participant at the cost of how to expose this to the message client (for
-example, XMPP clients can decide to reply only to the device you have more
-recently received a message from).
+When using a transport network that allows multiple devices to be
+simultaneously logged in with the same peer identifier, make sure to identify
+the other participant by its device-specific identifier and not only the peer
+identifier (for example, using XMPP full JID instead of bare JID). Doing so
+allows establishing an OTR channel at the same time with multiple devices from
+the other participant at the cost of how to expose this to the message client
+(for example, XMPP clients can decide to reply only to the device you have
+more recently received a message from).
 
 ## Socialist Millionaires Protocol (SMP)
 
@@ -1270,17 +1279,17 @@ following exceptions.
 
 (TODO: in the below, why don't we just use message 1, instead of 1Q?)
 In OTRv3, SMP Message 1 is used when a user does not specify an SMP question.
-SMP Message 1Q is used when they do. OTRv4 is simplified to use only SMP Message
-1Q for both cases. When a question is not present, the user specified question
-section has length 0 and value NULL.
+SMP Message 1Q is used when they do. OTRv4 is simplified to use only SMP
+Message 1Q for both cases. When a question is not present, the user specified
+question section has length 0 and value NULL.
 
 OTRv4 creates fingerprints using SHA3-512, which increases their size. Thus,
 the size of the fingerprint in the "Secret Information" section of OTRv3 [3]
 should be 64 bytes in size.
 
 Lastly, OTRv4 uses Ed448 as the cryptographic primative. This changes the way
-values are serialized and how they are computed. To define the SMP values under
-Ed448, we reuse the previously defined generator for Cramer-Shoup:
+values are serialized and how they are computed. To define the SMP values
+under Ed448, we reuse the previously defined generator for Cramer-Shoup:
 
 `G = (50145934121221874831757336223920280302422989888365812291277223265047355078
 6782902904842340270909267251001424253087988710625934010181862,
@@ -1414,8 +1423,9 @@ c3 (MPI), d3 (MPI)
 #### SMP message 2
 
 SMP message 2 is sent by Bob to complete the DH exchange to determine the new
-generators, g2 and g3. It also begins the construction of the values used in the
-final comparison of the protocol. A valid SMP message 2 is generated as follows:
+generators, g2 and g3. It also begins the construction of the values used in
+the final comparison of the protocol. A valid SMP message 2 is generated as
+follows:
 
 1. Determine Bob's secret input `y`, which is to be compared to Alice's secret
    `x`.
@@ -1471,8 +1481,8 @@ the information required by Bob to determine if `x = y`. A valid SMP message 1
 is generated as follows:
 
 1. Pick random values `r4`, `r5`, `r6` and `r7` in `Z_q`. These will
-   be used to add a blinding factor to the final results, and to generate zero-
-   knowledge proofs that this message was created honestly.
+   be used to add a blinding factor to the final results, and to generate
+   zero-knowledge proofs that this message was created honestly.
 2. Compute `G2 = G2b*a2` and `G3 = G3b*a3`.
 3. Compute `Pa = G3*r4` and `Qa = G*r4 + G2*x`.
 4. Generate a zero-knowledge proof that `Pa` and `Qa` were created according to
@@ -1482,8 +1492,8 @@ is generated as follows:
 6. Generate a zero-knowledge proof that `Ra` was created according to the
    protocol by setting `cr = HashToScalar(7 || G*r7 || (Qa - Qb)*r7)` and
    `d7 = r7 - a3 * cr mod q`.
-7. Store the values of `G3b`, `Pa - Pb`, `Qa - Qb` and `Ra` for use later in the
-   protocol.
+7. Store the values of `G3b`, `Pa - Pb`, `Qa - Qb` and `Ra` for use later in
+   the protocol.
 
 The SMP message 3 has the following data:
 
@@ -1497,8 +1507,8 @@ cp (MPI), d5 (MPI), d6 (MPI)
   given above.
 
 Ra (POINT)
-  This value is used in the final comparison to determine if Alice and Bob share
-  the same secret.
+  This value is used in the final comparison to determine if Alice and Bob
+  share the same secret.
 
 cr (MPI), d7 (MPI)
   A zero-knowledge proof that Ra was created according to the protocol given
@@ -1507,9 +1517,9 @@ cr (MPI), d7 (MPI)
 
 #### SMP message 4
 
-SMP message 4 is Bob's final message in the SMP exchange. It has the last of the
-information required by Alice to determine if `x = y`. A valid SMP message 4 is
-generated as follows:
+SMP message 4 is Bob's final message in the SMP exchange. It has the last of
+the information required by Alice to determine if `x = y`. A valid SMP message
+4 is generated as follows:
 
 1. Pick a random value `r7` in `Z_q`. This will be used to generate
 Bob's final zero-knowledge proof that this message was created honestly.
@@ -1521,8 +1531,8 @@ The SMP message 4 has the following data:
 
 ```
 Rb (POINT)
-  This value is used in the final comparison to determine if Alice and Bob share
-  the same secret.
+  This value is used in the final comparison to determine if Alice and Bob
+  share the same secret.
 
 cr (MPI), d7 (MPI)
   A zero-knowledge proof that Rb was created according to the protocol given
@@ -1575,8 +1585,10 @@ If smpstate is `SMPSTATE_EXPECT3`:
 
 * Verify Alice's zero-knowledge proofs for `Pa`, `Qa` and `Ra`:
   1. Check that `Pa`, `Qa` and `Ra` are points in the curve.
-  2. Check that `cp = HashToScalar(6 || G3*d5 + Pa*cp || G*d5 + G2*d6 + Qa*cp)`.
-  3. Check that `cr = HashToScalar(7 || G*d7 + G3a*cr || (Qa - Qb)*d7 + Ra*cr)`.
+  2. Check that `cp = HashToScalar(6 || G3*d5 + Pa*cp || G*d5 + G2*d6 +
+     Qa*cp)`.
+  3. Check that `cr = HashToScalar(7 || G*d7 + G3a*cr || (Qa - Qb)*d7 +
+     Ra*cr)`.
 * Create a SMP message 4 and send it to Alice.
 * Check whether the protocol was successful:
   1. Compute `Rab = Ra*b3`.
@@ -1608,10 +1620,9 @@ from Bob.
 
 ### Policies
 
-Policies are a suggestion on how to cope with implementation details
-like compatibility with older versions, enforcement of message
-encryption, advertisement of OTR support and conversation
-initialization management.
+Policies are a suggestion on how to cope with implementation details like
+compatibility with older versions, enforcement of message encryption,
+advertisement of OTR support and conversation initialization management.
 
 Policies should be boolean flags that act at different scopes, from
 per-correspondent to global scope, and may be used in any combination.
@@ -1638,11 +1649,12 @@ ERROR_START_DAKE
 
 (TODO: we should not have separate *_DAKE policies, we should just replace the *_AKE)
 
-For example, Alice could set up her client so that it speaks version 4 of the OTR
-protocol. Nevertheless, she may also add an exception for Charlie, who she knows
-talks through a client that runs an old version of the protocol. Therefore, the
-client will start the appropiate OTR conversation in correspondace with the
-other side, or will refuse to send non-encrypted messages to Bob.
+For example, Alice could set up her client so that it speaks version 4 of the
+OTR protocol. Nevertheless, she may also add an exception for Charlie, who she
+knows talks through a client that runs an old version of the protocol.
+Therefore, the client will start the appropiate OTR conversation in
+correspondace with the other side, or will refuse to send non-encrypted
+messages to Bob.
 
 ## Appendices
 
