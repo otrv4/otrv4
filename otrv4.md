@@ -290,6 +290,7 @@ Key variables:
   `their_dh`: their DH ephemeral public key.
   `mix_key`: the SHA3-256 of the DH shared secret previously computed.
   `mac_keys_to_reveal`: the mac keys to be revealed in next data message sent.
+```
 
 The previously mentioned variables are affected by these events:
 
