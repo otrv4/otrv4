@@ -547,11 +547,8 @@ Bob will be initiating the DAKE with Alice.
 
 1. Generates an ephemeral ECDH secret key `y` and a public key `Y`.
 2. Generates an ephemeral 3072-DH secret key `b` and a public key `B`.
-(TODO: in the below, the "your" and "our" words are very confusing.)
 
     ```Details
-    * Set `prev_our_ecdh` as your current ECDH key pair (`our_ecdh`), if you
-      have it.
     * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`(y, Y)`).
     * Set `our_dh` as our DH ephemeral key pair from the DAKE (`b`, `B`).
     * Set `j = 1` because the pre-key message is considered the first in this DH
@@ -562,7 +559,6 @@ Bob will be initiating the DAKE with Alice.
    Bob's User Profile.
 
 **Alice:**
-(TODO: in the below, the "your" and "our" words are very confusing.)
 
 1. Generates an ephemeral ECDH secret key `x` and a public key `X`.
 2. Generates an ephemeral 3072-DH secret key `a` and a public key `A`.
@@ -572,8 +568,6 @@ Bob will be initiating the DAKE with Alice.
 5. Computes root level keys (`root[0]`, `chain_s`, and `chain_r`).
 
     ```Details
-    * Set `prev_our_ecdh` as your current ECDH key pair (`our_ecdh`), if you
-      have it.
     * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`(x, X)`).
     * Set `our_dh` as our DH ephemeral key pair from the DAKE (`a`, `A`).
     * Set `their_ecdh` as their ECDH ephemeral public key from the DAKE (`Y`).
