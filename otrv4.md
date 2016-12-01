@@ -1277,10 +1277,9 @@ more recently received a message from).
 SMP in version 4 shares the same TLVs and flow as SMP in OTRv3 with the
 following exceptions.
 
-(TODO: in the below, why don't we just use message 1, instead of 1Q?)
-In OTRv3, SMP Message 1 is used when a user does not specify an SMP question.
-SMP Message 1Q is used when they do. OTRv4 is simplified to use only SMP
-Message 1Q for both cases. When a question is not present, the user specified
+In OTRv3, SMP Message 1 is used when a user does not specify an SMP question
+and, if not, a SMP Message 1Q is used. OTRv4 is simplified to use only SMP
+Message 1 for both cases. When a question is not present, the user specified
 question section has length 0 and value NULL.
 
 OTRv4 creates fingerprints using SHA3-512, which increases their size. Thus,
@@ -1375,13 +1374,13 @@ Second MPI (MPI)
   only one MPI is given as input, this field is simply omitted.
 ```
 
-#### SMP message 1Q
+#### SMP message 1
 
-SMP message 1Q is sent by Alice to begin a DH exchange to determine two new
+SMP message 1 is sent by Alice to begin a DH exchange to determine two new
 generators, `g2` and `g3`. A valid  SMP message 1 is generated as follows:
 
-1. Determine her secret input `x`, which is to be compared to Bob's secret `y`,
-   as specified in the "Secret Information" section.
+1. Determine her secret input `x`, which is to be compared to Bob's secret
+   `y`, as specified in the "Secret Information" section.
 2. Pick random values `a2` and `a3` in `Z_q`. These will be Alice's
 exponents for the DH exchange to pick generators.
 3. Pick random values `r2` and `r3` in `Z_q`. These will be used to
@@ -1395,7 +1394,7 @@ protocol.
 7. Store the values of `x`, `a2` and `a3` for use later in the protocol.
 
 
-The SMP message 1Q has the following data:
+The SMP message 1 has the following data:
 
 ```
 question (DATA)
