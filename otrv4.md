@@ -691,7 +691,7 @@ shared secret established in the DAKE.
 A message with an empty human-readable part (the plaintext is of zero length,
 or starts with a NULL) is a "heartbeat" packet, and should not be displayed to
 the user (but it is still useful for key rotations).
-(TODO: in the below, I have no idea what "recover receiving chain key" means)
+
 ```
 Alice                                                                           Bob
 -----------------------------------------------------------------------------------
@@ -700,12 +700,12 @@ Send data message 0_0            -------------------->
 Send data message 0_1            -------------------->
 
                                                        Receive data message 0_0
-                                                       Recover receiving chain key 0_0
+                                                       Compute receiving chain key 0_0
                                                        Derive Kenc & Kmac
                                                        Verify MAC, Decrypt message 0_0
 
                                                        Receive data message 0_1
-                                                       Recover receiving chain key 1_1
+                                                       Compute receiving chain key 1_1
                                                        Derive Kenc & Kmac
                                                        Verify MAC, Decrypt message 0_1
 
@@ -714,7 +714,7 @@ Send data message 0_1            -------------------->
                                  <-------------------- Send data message 1_1
 
 Receive data message 1_0
-Recover receiving chain key 1_0
+Compute receiving chain key 1_0
 Derive Kenc & Kmac
 Verify MAC, Decrypt message 1_0
 
