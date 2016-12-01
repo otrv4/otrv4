@@ -305,6 +305,18 @@ The previously mentioned variables are affected by these events:
 
 This section describes the functions used to manage the key material.
 
+#### Generating ECDH and DH Keys
+
+```
+generateECDH()
+  pick a random value r from Z_q
+  return our_ecdh.public = G1 * r, our_ecdh.secret = r
+
+generateDH()
+  pick a random value r (80 bytes)
+  return our_dh.public = g3 ^ r, our_dh.secret = r
+```
+
 #### Ratcheting ECDH keys and Mix Keys
 
 The sender will rotate into a new ECDH ratchet and a new Mix Key ratchet
@@ -333,16 +345,28 @@ If the ratchet id `i % 3 == 0`:
 Otherwise:
   * Derive and securely overwrite `mix_key = SHA3-256(mix_key)`.
 
-#### Generating ECDH and DH Keys
+#### Deciding Between Chain Keys
+
+Both sides will compare their public keys to choose a chain key for sending
+and receiving:
+
+- Alice (and, similarly, Bob) determines if she is the "low" end or the "high"
+  end of this ratchet. If Alice's ephemeral ECDH public key is numerically
+  greater than Bob's public key, then she is the "high" end. Otherwise, she is
+  the "low" end.
+
+- Alice selects the chain keys for sending and receiving:
+  - If she is the "high" end, use `Ca` as the sending chain key (`chain_s`)
+  and `Cb` as the receiving chain key (`chain_r`).
+  - If she is the "low" end, use `Cb` as the sending chain key (`chain_s`)
+  and Ca as the receiving chain key (`chain_r`).
 
 ```
-generateECDH()
-  pick a random value r from Z_q
-  return our_ecdh.public= G1 * r, our_ecdh.secret = r
-
-generateDH()
-  pick a random value r (80 bytes)
-  return our_dh.public = g3 ^ r, our_dh.secret = r
+decide_between_chain_keys(Ca, Cb):
+  if compare(our_ecdh.public, their_ecdh) > 0
+    return Ca, Cb
+  else
+    return Cb, Ca
 ```
 
 #### Calculating Double Ratchet Keys
@@ -353,30 +377,6 @@ calculate_ratchet_keys(K):
   Ca = SHA3-512(0x02 || K)
   Cb = SHA3-512(0x03 || K)
   return R, decide_between_chain_keys(Ca, Cb)
-```
-
-#### Deciding Between Chain Keys
-
-Both sides will compare their public keys to choose a chain key for sending
-and receiving:
-
-- Alice (and similarly, Bob) determines if she is the "low" end or the "high"
-  end of this ratchet. If Alice's ephemeral ECDH public key is numerically
-  greater than Bob's public key, then she is the "high" end. Otherwise, she is
-  the "low" end.
-
-- Alice selects the chain keys for sending and receiving:
-  - If she is the "high" end, use Ca as the sending chain key (`chain_s`)
-  and Cb as the receiving chain key (`chain_r`).
-  - If she is the "low" end, use Cb as the sending chain key (`chain_s`)
-  and Ca as the receiving chain key (`chain_r`).
-
-```
-decide_between_chain_keys(Ca, Cb):
-  if compare(our_ecdh.public, their_ecdh) > 0
-    return Ca, Cb
-  else
-    return Cb, Ca
 ```
 
 ### Deriving new chain keys
@@ -522,7 +522,7 @@ Alice                                    Bob
 ---------------------------------------------------
 Query Message or Whitespace Tag ------->
                                 <------- Prekey (psi_1)
-                  DRE-Auth (psi_2) ------->
+               DRE-Auth (psi_2) ------->
                                          Verify & Decrypt (psi_2)
 ```
 
@@ -533,11 +533,12 @@ Bob will be initiating the DAKE with Alice.
 1. Generates an ephemeral ECDH secret key `y` and a public key `Y`.
 2. Generates an ephemeral 3072-DH secret key `b` and a public key `B`.
 
-    ```Details
-    * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`(y, Y)`).
-    * Set `our_dh` as our DH ephemeral key pair from the DAKE (`b`, `B`).
     ```
-3. Sends Alice a pre-key message `psi_1 = ("Prof_B", Y, B)`. Prof_B is
+    Details:
+    * Set 'our_ecdh' as our ECDH ephemeral key pair from the DAKE (y, Y).
+    * Set 'our_dh' as our DH ephemeral key pair from the DAKE (b, B).
+    ```
+3. Sends Alice a pre-key message `psi_1 = (Prof_B, Y, B)`. Prof_B is
    Bob's User Profile.
 
 **Alice:**
@@ -554,19 +555,18 @@ Bob will be initiating the DAKE with Alice.
     ```
     Details:
 
-    * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`(x, X)`).
-    * Set `our_dh` as our DH ephemeral key pair from the DAKE (`a`, `A`).
-    * Set `their_ecdh` as their ECDH ephemeral public key from the DAKE (`Y`).
-    * Set `their_dh` as their DH ephemeral public key from the DAKE (`B`).
-    * Set ratchet id `i = 0`.
-    * Set `j` as `0` (which means she will ratchet again).
-    * Calculate ECDH shared secret `K_ecdh`.
-    * Calculate DH shared secret `k_dh` and `mix_key`.
-    * Calculate Mixed shared secret `K = SHA3-512(K_ecdh || mix_key)`.
-    * Calculate the SSID from shared secret: it is the first 8 bytes of
-    `SHA3-256(0x00 || K)`.
+    * Set 'our_ecdh' as our ECDH ephemeral key pair from the DAKE ('x', 'X').
+    * Set 'our_dh' as our DH ephemeral key pair from the DAKE ('a', 'A').
+    * Set 'their_ecdh' as their ECDH ephemeral public key from the DAKE ('Y').
+    * Set 'their_dh' as their DH ephemeral public key from the DAKE ('B').
+    * Set ratchet id 'i = 0'.
+    * Set 'j' as 0 (which means she will ratchet again).
+    * Calculate ECDH shared secret 'K_ecdh'.
+    * Calculate DH shared secret 'k_dh' and 'mix_key'.
+    * Calculate Mixed shared secret 'K = SHA3-512(K_ecdh || mix_key)'. 
+    * Calculate the SSID from shared secret: it is the first 8 bytes of 'SHA3-256(0x00 || K)'.
     * Calculate the first set of keys with
-    `root[0], chain_s[0][0], chain_r[0][0] = calculate_ratchet_keys(K)`.
+    'root[0], chain_s[0][0], chain_r[0][0] = calculate_ratchet_keys(K)'.
     ```
 
 **Bob:**
@@ -587,17 +587,17 @@ Bob will be initiating the DAKE with Alice.
     ```
     Details:
     
-    * Set `their_ecdh` as their ECDH ephemeral public key from the DAKE (`X`).
-    * Set `their_dh` as their DH ephemeral public key from the DAKE (`A`).
-    * Set ratchet id `i = 0`.
-    * Set `j` as `1`
-    * Calculate ECDH shared secret `K_ecdh`.
-    * Calculate DH shared secret `k_dh` and `mix_key`.
-    * Calculate Mixed shared secret `K = SHA3-512(K_ecdh || mix_key)`
+    * Set 'their_ecdh' as their ECDH ephemeral public key from the DAKE ('X').
+    * Set 'their_dh' as their DH ephemeral public key from the DAKE ('A').
+    * Set ratchet id 'i = 0'.
+    * Set 'j' as 1
+    * Calculate ECDH shared secret 'K_ecdh'.
+    * Calculate DH shared secret 'k_dh' and 'mix_key'.
+    * Calculate Mixed shared secret 'K = SHA3-512(K_ecdh || mix_key)'.
     * Calculate the SSID from shared secret: it is the first 8 bytes of
-    `SHA3-256(0x00 || K)`.
+    'SHA3-256(0x00 || K)'.
     * Calculate the first set of keys with
-    `root[0], chain_s[0][0], chain_r[0][0] = calculate_ratchet_keys(K)`.
+    'root[0], chain_s[0][0], chain_r[0][0] = calculate_ratchet_keys(K)'.
     ```
 
 #### Pre-key message
@@ -631,8 +631,8 @@ Sender's User Profile (USER-PROF)
 X (POINT)
   The ephemeral public ECDH key.
 A (MPI)
-  The ephemeral public DH key. Note that even though this is in uppercase, this
-  is NOT a POINT.
+  The ephemeral public DH key. Note that even though this is in uppercase,
+  this is NOT a POINT.
 ```
 
 #### DRE-Auth message
@@ -645,8 +645,7 @@ with a NIZKPK.
 
 A valid DRE-Auth message is generated as follows:
 
-1. Create an user profile, as detailed [here]
-   (#creating-a-user-profile)
+1. Create an user profile, as detailed [here](#creating-a-user-profile)
 2. Choose a random ephemeral ECDH key pair:
   * secret key `y`.
   * public key `Y`
@@ -674,8 +673,8 @@ Receiver's User Profile (USER-PROF)
 Y (POINT)
   The ephemeral public ECDH key.
 B (MPI)
-  The ephemeral public DH key. Note that even though this is in uppercase, this
-  is NOT a POINT.
+  The ephemeral public DH key. Note that even though this is in uppercase,
+  this is NOT a POINT.
 gamma (DRE-M)
   The Dual-receiver encrypted value.
 sigma (AUTH)
@@ -763,14 +762,14 @@ It is also used to [reveal old MAC keys](#revealing-mac-keys).
     Public ECDH Key (POINT)
       This is the public part of the ECDH key used to encrypt and decrypt the
       data message. For the sender of this message, this is their
-      `our_ecdh.public` value. For the receiver of this message, it is
-      used as`their_ecdh`.
+      'our_ecdh.public' value. For the receiver of this message, it is
+      used as 'their_ecdh'.
 
     Public DH Key (MPI)
       This is the public part of the DH key used to encrypt and decrypt the
-      data message. For the sender of this message, it is our_dh.public
-      value. For the receiver of this message, it is used as their_dh. If this
-      value is empty, its length is zero.
+      data message. For the sender of this message, it is 'our_dh.public'
+      value. For the receiver of this message, it is used as 'their_dh'. If
+      this value is empty, its length is zero.
 
     Nonce (NONCE)
       The nonce used with XSalsa20 to create the encrypted message contained
@@ -780,7 +779,8 @@ It is also used to [reveal old MAC keys](#revealing-mac-keys).
       Using the appropriate encryption key (see below) derived from the
       sender's and recipient's DH public keys (with the keyids given in this
       message), perform XSalsa20 encryption of the message. The nonce used for
-      this operation is also included in the header of the data message packet.
+      this operation is also included in the header of the data message
+      packet.
 
     Authenticator (MAC)
       The SHA3 MAC with the appropriate MAC key (see below) for everything:
@@ -1154,9 +1154,9 @@ message, you should:
 If everything checks out:
 
   * Reply with a DRE-Auth Message.
-  * Compute the ECDH shared secret `K_ecdh = (G1*x)*y`.
-  * Compute the DH shared secret `k_dh = (g3*a)*b`.
-  * Compute the mix key `mix_key = SHA3-256(k_dh)`.
+  * Compute the ECDH shared secret `K_ecdh`.
+  * Compute the DH shared secret `k_dh`.
+  * Compute the mix key `mix_key`.
   * Transition `authstate` to `AUTHSTATE_NONE`.
   * Transition `msgstate` to `MSGSTATE_ENCRYPTED`.
   * Initialize the double ratcheting.
@@ -1178,9 +1178,9 @@ If `authstate` is `AUTHSTATE_AWAITING_DRE_AUTH`:
 
 If everything verifies:
 
-  * Compute the ECDH shared secret `K_ecdh = (G1*y)*x`.
-  * Compute the DH shared secret `k_dh = (g3*b)*a`.
-  * Compute the mix key `mix_key = SHA3-256(k_dh)`.
+  * Compute the ECDH shared secret `K_ecdh`.
+  * Compute the DH shared secret `k_dh`.
+  * Compute the mix key `mix_key`.
   * Transition `authstate` to `AUTHSTATE_NONE`.
   * Transition `msgstate` to `MSGSTATE_ENCRYPTED`.
   * Initialize the double ratcheting.
@@ -1438,11 +1438,11 @@ follows:
 `c3 = HashToScalar(4 || G*r3)` and `d3 = r3 - b3 * c3 mod q`.
 7. Compute `G2 = G2a*b2` and `G3 = G3a*b3`.
 8. Compute `Pb = G3*r4` and `Qb = G*r4 + G2*y`.
-9. Generate a zero-knowledge proof that `Pb` and `Qb` were created according to
-   the protocol by setting `cp = HashToScalar(5 || G3*r5 || G*r5 + G2*r6)`,
+9. Generate a zero-knowledge proof that `Pb` and `Qb` were created according
+   to the protocol by setting `cp = HashToScalar(5 || G3*r5 || G*r5 + G2*r6)`,
    `d5 = r5 - r4 * cp mod q` and `d6 = r6 - y * cp mod q`.
-10. Store the values of `G3a`, `G2`, `G3`, `b3`, `Pb` and `Qb` for use later in
-    the protocol.
+10. Store the values of `G3a`, `G2`, `G3`, `b3`, `Pb` and `Qb` for use later
+    in the protocol.
 
 
 The SMP message 2 has the following data:
