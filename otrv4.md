@@ -824,11 +824,11 @@ In both cases:
    MKenc, MKmac = derive_enc_mac_keys(chain_s[i][j])
    ```
 
+  * Get a random 24 bytes value to be the nonce.
   * Use the encryption key to encrypt the message and the mac key to calculate
     its MAC:
 
    ```
-   Nonce = generateNonce()//TODO: not specified
    Encrypted_message = XSalsa20_Enc(MKenc, Nonce, m)
    Authenticator = SHA3-512(MKmac || Encrypted_message)
    ```
