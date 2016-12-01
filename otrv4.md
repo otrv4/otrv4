@@ -550,19 +550,19 @@ Bob will be initiating the DAKE with Alice.
    gamma)`.
 5. Sends Alice a DRE-Auth Message `psi_2 = (Prof_A, gamma, sigma)`.
 6. At this point, the DAKE is complete for Alice and she:
-    
+
     ```
     Details:
-    
+
     * Set `our_ecdh` as our ECDH ephemeral key pair from the DAKE (`(x, X)`).
     * Set `our_dh` as our DH ephemeral key pair from the DAKE (`a`, `A`).
     * Set `their_ecdh` as their ECDH ephemeral public key from the DAKE (`Y`).
     * Set `their_dh` as their DH ephemeral public key from the DAKE (`B`).
     * Set ratchet id `i = 0`.
-    * Set `j` as `0` (which means she will ratchet again)
+    * Set `j` as `0` (which means she will ratchet again).
     * Calculate ECDH shared secret `K_ecdh`.
     * Calculate DH shared secret `k_dh` and `mix_key`.
-    * Calculate Mixed shared secret `K = SHA3-512(K_ecdh || mix_key)`
+    * Calculate Mixed shared secret `K = SHA3-512(K_ecdh || mix_key)`.
     * Calculate the SSID from shared secret: it is the first 8 bytes of
     `SHA3-256(0x00 || K)`.
     * Calculate the first set of keys with
