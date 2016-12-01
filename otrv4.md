@@ -315,8 +315,8 @@ id as `i + 1`.
 
 When you ratchet the ECDH keys:
 
-  * Generate a new ECDH key pair and assign it to `our_ecdh = generateECDH()
-  * Calculate `K_ecdh = ECDH(our_ecdh.secret, their_ecdh.public).
+  * Generate a new ECDH key pair and assign it to `our_ecdh = generateECDH()`
+  * Calculate `K_ecdh = ECDH(our_ecdh.secret, their_ecdh.public)`.
   * Securely delete `our_ecdh.secret`.
 
 When you ratchet the mix keys:
