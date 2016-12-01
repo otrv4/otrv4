@@ -885,7 +885,7 @@ message into a number of fragments. This section describes the format of the
 fragments.
 
 OTRv4 has the same message fragmentation as OTRv3 without compatibility with
-version 2. This means that fragmentation is performed in OTRv4 in the same why
+version 2. This means that fragmentation is performed in OTRv4 in the same way
 as specified in OTRv3: the format is the same so you will have to wait for
 reassembly to finalize, to deal with a message.
 
@@ -966,14 +966,14 @@ We could fragment this message into three pieces:
 
 ## The protocol state machine
 
-(TODO: this state machine and description of internal variables are not requirements of how the implementation should be written, but abstractions that describe the behavior of the protocol on the wire, in the presence of these kinds of abstract operations. We should change the language in this section to make that more clear - the wire protocol doesn't actually care about thse things, as long as the behavior is the same).
+(TODO: this state machine and description of internal variables are not requirements of how the implementation should be written, but abstractions that describe the behavior of the protocol on the wire, in the presence of these kinds of abstract operations. We should change the language in this section to make that more clear - the wire protocol doesn't actually care about these things, as long as the behavior is the same).
 
 An OTR client maintains separate state for every correspondent. For example,
 Alice may have an active OTR conversation with Bob, while having an insecure
 conversation with Charlie.
 
 For a conversation, with each correspondent, to start and to be maintained it
-is necesary for the client to manage how to deliver response messages, defined
+is necessary for the client to manage how to deliver response messages, defined
 as message state, and to manage the authentication process, defined as
 authentication state.
 
@@ -981,7 +981,7 @@ authentication state.
 
 This machine offers an option to model the management of response messages a
 client would make as a response to user input. It describes a finite state
-machine which may transition throuhg states that describe when messages should
+machine which may transition through states that describe when messages should
 be sent with or without encryption or not sent at all. The scope for this
 state should be a single conversation with a correspondent.
 
@@ -1006,8 +1006,8 @@ MSGSTATE_FINISHED
 ### Authentication state
 
 This machines offers an option to model the management of the authentication
-protocol. It describes a finite state machine which may transitition through
-states that describe whether the protocol is ether running or awaiting
+protocol. It describes a finite state machine which may transition through
+states that describe whether the protocol is either running or awaiting.
 response.
 
 ```
