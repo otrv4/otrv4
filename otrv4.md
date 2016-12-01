@@ -1385,11 +1385,11 @@ Assuming that Alice begins the exchange:
 * Computes `Rab = Rb*a3`.
 * Checks whether `Rab == Pa - Pb`.
 
-If everything is done correctly, then `Rab` should hold the value of `(Pa - Pb)
-* ((G2*a3*b3)*(x - y))`, which means that the test at the end of the protocol
-will only succeed if `x == y`. Further, since `G2*a3*b3` is a random number not
-known to any party, if `x` is not equal to `y`, no other information is
-revealed.
+If everything is done correctly, then `Rab` should hold the value of 
+`(Pa - Pb) * ((G2*a3*b3)*(x - y))`, which means that the test at the end of the
+protocol will only succeed if `x == y`. Further, since `G2*a3*b3` is a random
+number not known to any party, if `x` is not equal to `y`, no other information
+is revealed.
 
 ### SMP Hash function
 
