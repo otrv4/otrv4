@@ -579,7 +579,6 @@ Bob will be initiating the DAKE with Alice.
   1. The message is of the correct form (e.g., the fields are of the expected
      length).
      If any of the verifications fail, the message is ignored.
-(TODO: why alice not verifying this? Reason: only the identifier verifies, according to the paper. He is the only one who decrypts the message, as the other party is the one to encrypt it -verification happens on the decrypted message-)
   2. Bob's User Profile is the first one listed
   3. Alice's User Profile is the second one listed, and it matches the
      one transmitted outside of the ciphertext
