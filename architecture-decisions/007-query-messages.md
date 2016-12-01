@@ -1,12 +1,9 @@
 ## ADR 7: Query Messages
 
-**Status**: proposed
-(TODO: no status anymore, please)
-
 ### Context
 
 In OTRv3, "the semantics of the OTR Query Message are that Alice is requesting
-that Bob start an OTR conversation with her (if, of course, he is willing and
+that Bob starts an OTR conversation with her (if, of course, he is willing and
 able to do so)."
 
 A query message can be sent at any time during the protocol execution, have no
@@ -16,9 +13,10 @@ version will simply ignore it), and is always answered by a compatible client
 
 In OTRv3, query messages are used to:
 
-  * **Start an OTR session**: if both participants are willing to use OTRv3, the
-  query message causes both to start the AKE, and by its end both have the
-  same D-H key and transition from `MSGSTATE_PLAINTEXT` to `MSGSTATE_ENCRYPTED`.
+  * **Start an OTR session**: if both participants are willing to use OTRv3,
+  the query message causes both to start the AKE, and by its end both have the
+  same D-H key and transition from `MSGSTATE_PLAINTEXT` to
+  `MSGSTATE_ENCRYPTED`.
 
   * **Force a key rotation**: forward secrecy depends on
   advertising/acknowledging new D-H keys. The same key is reused until a
@@ -26,24 +24,24 @@ In OTRv3, query messages are used to:
   this issue). Because a new AKE behaves exactly like a normal key rotation,
   there is no loss of messages.
 
-  * **Provide device mobility**: If Alice is in an
-  OTR conversation with Bob, all she needs to do in order to continue the
-  conversation in another device is to login to another device and send a new
-  Query Message by choosing to "start an OTR conversation". Instance tags are
-  another essential part of this.
+  * **Provide device mobility**: If Alice is in an OTR conversation with Bob,
+  all she needs to do in order to continue the conversation in another device
+  is to login to another device and send a new Query Message by choosing to
+  "start an OTR conversation". Instance tags are another essential part of
+  this.
 
 We propose to use query messages in OTRv4 with the same format as OTRv3, but
 with a slightly difference in the semantics:
 
-* "Force a key rotation" use case is made unnecessary by virtue of OTRv4 double
-  ratchet.
+* "Force a key rotation" use case is made unnecessary by virtue of OTRv4
+  double ratchet.
 
-* Query messages can be sent at any time but when the participant is already on
-  `MSGSTATE_ENCRYPTED`.
+* Query messages can be sent at any time but when the participant is already
+  on `MSGSTATE_ENCRYPTED`.
 
-Allowing query messages to be sent on `MSGSTATE_ENCRYPTED` causes a new DAKE to
-be started while a conversation already exists. In this case, messages from the
-previous conversation that arrive after the new DAKE starts may not be
+Allowing query messages to be sent on `MSGSTATE_ENCRYPTED` causes a new DAKE
+to be started while a conversation already exists. In this case, messages from
+the previous conversation that arrive after the new DAKE starts may not be
 decrypted, since each participant replaces their key material when engage on a
 new DAKE.
 
@@ -63,8 +61,8 @@ also prevent device mobility.
 A participant is still able to receive a query message while on
 `MSGSTATE_ENCRYPTED` from a dishonest participant.
 
-If the receiver starts a new DAKE, messages from the previous conversation that
-start a new ratchet will fail to be verified and decrypted
+If the receiver starts a new DAKE, messages from the previous conversation
+that start a new ratchet will fail to be verified and decrypted
 (the receiver will need the DH private key from before the new DAKE).
 
 When a participant is on `MSGSTATE_PLAINTEXT` and `REQUIRE_ENCRYPTION` is set,
