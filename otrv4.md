@@ -344,7 +344,7 @@ generateDH()
   return pubDH = g3 ^ r, secretDH = r
 
 K_ecdh = (G1*x)*y (POINT)
-  The shared ECDH key.
+  The shared 448-bit ECDH key.
 
 k_dh = (g3^a)^b mod p (MPI)
   The shared 3072-bit DH key.
@@ -1765,7 +1765,7 @@ Let `{C1, D1, H1} = PK1` and `{C2, D2, H2} = PK2`
     1. Compute `ni = ti - l * ki (mod q)`.
 6. Send `gamma = (U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2, nonce, phi)`.
 
-#### Dual Receiver Decryption: DRDec(PK1, PK2, SKi, gamma):
+#### Dual Receiver Decryption: DRDec(PK1, PK2, ski, gamma):
 
 Let `{C1, D1, H1} = PK1`, `{C2, D2, H2} = PK2` and `{x1i, x2i, y1i, y2i, zi} =
 ski`.
