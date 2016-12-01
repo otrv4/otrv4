@@ -1271,12 +1271,12 @@ If `msgstate` is `MSGSTATE_FINISHED`:
 
 #### Receiving a Data Message
 
-(TODO: the below markdown doesn't render well)
-
 If `msgstate` is `MSGSTATE_ENCRYPTED`:
-  Verify the information in the message.
+
+  * Verify the information in the message.
 
   If the verification succeeds:
+
     * Decrypt the message and display the human-readable part (if it contains
       any) to the user. SMP TLVs should be addressed according to the SMP state
       machine.
@@ -1285,12 +1285,15 @@ If `msgstate` is `MSGSTATE_ENCRYPTED`:
       (configurable) time, send a "heartbeat" message.
     * If the received message contains a TLV type 1 forget all encryption keys
       for this correspondent and transition `msgstate` to `MSGSTATE_FINISHED`.
+
   Otherwise:
+
     * Inform the user that an unreadable encrypted message was received, and
     reply with an Error Message.
 
 If `msgstate` is `MSGSTATE_PLAINTEXT` or `MSGSTATE_FINISHED`:
-   * Inform the user that an unreadable encrypted message was received, and
+
+ * Inform the user that an unreadable encrypted message was received, and
    reply with an Error Message.
 
 #### User requests to end an OTR conversation
@@ -1384,10 +1387,8 @@ Assuming that Alice begins the exchange:
 * Computes `Rab = Rb*a3`.
 * Checks whether `Rab == Pa - Pb`.
 
-(TODO: why in the description below is "times" used instead of just do the math?)
-
-If everything is done correctly, then `Rab` should hold the value of `Pa - Pb`
-times `(G2*a3*b3)*(x - y)`, which means that the test at the end of the protocol
+If everything is done correctly, then `Rab` should hold the value of `(Pa - Pb)
+* ((G2*a3*b3)*(x - y))`, which means that the test at the end of the protocol
 will only succeed if `x == y`. Further, since `G2*a3*b3` is a random number not
 known to any party, if `x` is not equal to `y`, no other information is
 revealed.
