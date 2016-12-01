@@ -389,14 +389,14 @@ derive_chain_key(C, i, j):
   return C[i][j]
 ```
 
-### Retrieving chain keys
+### Computing chain keys
 
-When receiving data messages, you must retrieve the chain key:
+When receiving data messages, you must compute the chain key:
 
 ```
-retrieve_chain_key(C, i, k):
+compute_chain_key(C, i, k):
   if C[i][k] does not exist:
-    C[i][k] = SHA3-512(retrieve_chain_key(C, i, k-1))
+    C[i][k] = SHA3-512(compute_chain_key(C, i, k-1))
   return C[i][k]
 ```
 
@@ -839,7 +839,7 @@ Use the `message_id` to compute the receiving chain key, and calculate
 encryption and mac keys.
 
 ```
-  retrieve_chain_key(chain_r, ratchet_id, message_id)
+  compute_chain_key(chain_r, ratchet_id, message_id)
   MKenc, MKmac = derive_enc_mac_keys(chain_r[ratchet_id][message_id])
 ```
 
@@ -1790,7 +1790,7 @@ m is the message to authenticate.
 
 #### Verification: Verify({A1, A2, A3}, sigma, m)
 
-1. Parse sigma to retrive components `(c1, r1, c2, r2, c3, r3)`.
+1. Parse sigma to retrieve components `(c1, r1, c2, r2, c3, r3)`.
 2. Compute `T1 = G*r1 + A1*c1`
 3. Compute `T2 = G*r2 + A2*c2`
 4. Compute `T3 = G*r3 + A3*c3`
