@@ -972,22 +972,25 @@ An OTR client maintains separate state for every correspondent. For example,
 Alice may have an active OTR conversation with Bob, while having an insecure
 conversation with Charlie.
 
-For a conversation, with each correspondent, to start and to be maintained it
+For a conversation to start and to be maintained it
 is necessary for the client to manage how to deliver response messages, defined
 as message state, and to manage the authentication process, defined as
 authentication state.
+
+The way the client reacts to user input and to received messages
+depends on wheter the client has decided to allow version 3 and/or 4,
+if encryption is required and if it will advertise OTR support.
 
 ### Message state
 
 This machine offers an option to model the management of response messages a
 client would make as a response to user input. It describes a finite state
 machine which may transition through states that describe when messages should
-be sent with or without encryption or not sent at all. The scope for this
-state should be a single conversation with a correspondent.
+be sent with or without encryption or not sent at all.
 
 ```
 MSGSTATE_PLAINTEXT
-    This state indicates that outgoing messages are sent without encryption.
+    This state indicates that outgoing messages are sent without encryption
     and it is used before an OTR conversation is initiated. It is the initial
     state, and the only way to subsequently enter this state is for the user
     to explicitly request it via an UI operation.
@@ -1007,7 +1010,7 @@ MSGSTATE_FINISHED
 
 This machines offers an option to model the management of the authentication
 protocol. It describes a finite state machine which may transition through
-states that describe whether the protocol is either running or awaiting.
+states that describe whether the protocol is either running or awaiting
 response.
 
 ```
@@ -1058,19 +1061,18 @@ Note the following:
 
 #### Receiving OTRv3 Specific Messages
 
-  * If an OTRv3 D-H commit message arrives and you support OTRv3, you
-    may start OTRv3. All other OTRv3 specific messages are ignored.
+  * If you allow OTRv3 the protocol proceeds as specified in OTRv3.
 
 #### User requests to start an OTR conversation
 
-  * Send an OTR Query Message to the correspondent.
+  * Send an OTR Query Message including the allowed versions to the correspondent.
 
 #### Receiving plaintext without the whitespace tag
 
 If `msgstate` is `MSGSTATE_PLAINTEXT`:
 
-  * Simply display the message to the user.
-  * If you enforce encryption, warn the user that the message was received
+  * Display the message to the user.
+  * If encryption is required, warn the user that the message was received
     unencrypted.
 
 If `msgstate` is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
@@ -1083,48 +1085,47 @@ If `msgstate` is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
 If `msgstate` is `MSGSTATE_PLAINTEXT`:
 
   * Remove the whitespace tag and display the message to the user.
-  * If you enforce encryption, warn the user that the message was received
+  * If encryption is required, warn the user that the message was received
     unencrypted.
 
 If `msgstate` is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
 
   * Remove the whitespace tag and display the message to the user.
-  * Warn him that the message was received unencrypted.
+  * Warn the user that the message was received unencrypted.
 
-In any event, if you received a whitespace tag:
+In any event, if advertisement through whitespace tags is allowed to receive:
 
-If the tag offers OTR version 4 and you allow version 4 of the protocol:
+If the tag offers OTR version 4 and version 4 of the protocol is allowed:
 
   * Send a pre-key Message.
   * Transition `authstate` to `AUTHSTATE_AWAITING_DRE_AUTH`.
 
-If the tag offers OTR version 3 and you support version 3 of the protocol:
+If the tag offers OTR version 3 and version 3 of the protocol is allowed:
 
   * The protocol proceeds as specified in OTRv3.
 
 #### Receiving a Query Message
 
-If the query message offers OTR version 4 and you allow version 4 of the protocol:
+If the query message offers OTR version 4 and version 4 of the protocol is allowed:
 
   * Send a Pre-key Message
   * Transition `authstate` to `AUTHSTATE_AWAITING_DRE_AUTH`.
 
-If the query message offers OTR version 3 and you support version 3 of the protocol:
+If the query message offers OTR version 3 and version 3 of the protocol is allowed:
 
   * The protocol proceeds as specified in OTRv3.
 
 #### Receiving an Error Message
 
   * Display the message to the user.
-  * If you receive an error during AKE, reply with a Query Message.
+  * Reply with a Query Message.
   * Reset `msgstate` to `MSGSTATE_PLAINTEXT` and `authstate` to
     `AUTHSTATE_NONE`
 
 #### Receiving a Pre-key message
 
-If the message is version 4 and `ALLOW_V4` is not set
-
-  * Ignore this message.
+  * If the message is version 4 and version 4 of the protocol is not
+    allowed, ignore this message.
 
 If `authstate` is `AUTHSTATE_AWAITING_DRE_AUTH`:
 
@@ -1164,9 +1165,9 @@ If everything checks out:
 
 #### Receiving a DRE-Auth message
 
-If the message is version 4 and `ALLOW_V4` is not set
+  * If the message is version 4 and version 4 of the protocol is not
+    allowed, ignore this message.
 
-  * Ignore this message.
 
 If `authstate` is `AUTHSTATE_AWAITING_DRE_AUTH`:
 
@@ -1197,13 +1198,14 @@ Otherwise:
 
 If `msgstate` is `MSGSTATE_PLAINTEXT`:
 
-  * If you enforce encryption:
+  * If encryption is required:
     * Store plaintext messages for possible retransmission.
     * Send a Query Message.
     * Stop sending additional query messages until the DAKE finishes.
   * Otherwise:
-    * If `SEND_WHITESPACE_TAG` is set and you have not received a plaintext
-      message from this correspondent, attach the whitespace tag to the message.
+    * If advertising willingness to start OTR is allowed and you have
+      not received a plaintext message from this correspondent, attach
+      the whitespace tag to the message.
     * Send the (possibly modified) message as plaintext.
 
 If `msgstate` is `MSGSTATE_ENCRYPTED`:
@@ -1216,17 +1218,13 @@ If `msgstate` is `MSGSTATE_FINISHED`:
   message. She expected to send this message encrypted but the conversation
   ended.
 
-  * If you enforce encryption:
+  * If encryption is required:
     * Transition to `MSGSTATE_PLAINTEXT`.
     * Store plaintext messages for possible retransmission.
     * Send a Query Message.
   * Otherwise:
-    * Ask the user if she want to (a) restart an encrypted conversation or
-      (b) proceed in plaintext.
-    * If (a):
-      * Store the plaintext message for possible retransmission.
-      * Send Query Message.
-    * If (b) transition to `MSGSTATE_PLAINTEXT` and send the message.
+    * Inform the user the conversation was finished by the other party.
+    * Securely dispose this conversation data.
 
 #### Receiving a Data Message
 
@@ -1247,17 +1245,17 @@ If `msgstate` is `MSGSTATE_ENCRYPTED`:
 
   Otherwise:
 
-    * Inform the user that an unreadable encrypted message was received, and
-    reply with an Error Message.
+    * Inform the user that an unreadable encrypted message was
+      received, and reply with an Error Message.
 
 If `msgstate` is `MSGSTATE_PLAINTEXT` or `MSGSTATE_FINISHED`:
 
- * Inform the user that an unreadable encrypted message was received, and
-   reply with an Error Message.
+  * Inform the user that an unreadable encrypted message was received,
+    and reply with an Error Message.
 
 #### User requests to end an OTR conversation
 
-Follow the instructions from the same section in OTRv3 [3].
+  * Follow the instructions from the same section in OTRv3 [3].
 
 #### Implementation notes (OR Considerations for networks which allow multiple devices)
 
@@ -1637,8 +1635,8 @@ REQUIRE_ENCRYPTION
 SEND_WHITESPACE_TAG
   Advertise your support of OTR using the whitespace tag.
 
-ERROR_START_AKE
-  Start the OTR DAKE when you receive an OTR Error Message.
+RECEIVE_WHITESPACE_TAG
+  Allow to receive whitespace tags.
 ```
 
 For example, Alice could set up her client so that it speaks version 4 of the
