@@ -1646,8 +1646,6 @@ ERROR_START_AKE
   Start the OTR DAKE when you receive an OTR Error Message.
 ```
 
-(TODO: we should not have separate *_DAKE policies, we should just replace the *_AKE)
-
 For example, Alice could set up her client so that it speaks version 4 of the
 OTR protocol. Nevertheless, she may also add an exception for Charlie, who she
 knows talks through a client that runs an old version of the protocol.
