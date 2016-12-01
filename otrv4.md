@@ -30,7 +30,7 @@ works on top of an existing messaging protocol, like XMPP.
 ## Main Changes over Version 3
 
 - Improvements on security and privacy:
-  - Security level raised to 28 bytes (224 bits) based on elliptic curve
+  - Security level raised to 224 bits based on elliptic curve
     cryptography (ECC)
   - Additional protection against transcript decryption in the case of
     ECC compromise
