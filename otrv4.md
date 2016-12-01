@@ -86,12 +86,11 @@ and arithmetic used.
 
 ### Notation
 
-Scalars and secret keys are in lower case, such as `x` or `y`. Points and public keys
-are in upper case, such as `P` or `Q`.
+Scalars and secret keys are in lower case, such as `x` or `y`. Points and public
+keys are in upper case, such as `P` or `Q`.
 
 Addition and subtraction of elliptic curve points `A` and `B` are `A + B` and
-`A - B`.
-Addition of a point to another point generates a third point. Scalar
+`A - B`. Addition of a point to another point generates a third point. Scalar
 multiplication with a scalar `a` with an elliptic curve point `B` yields a
 new point: `C = a * B`.
 
@@ -180,7 +179,7 @@ Nonce (NONCE):
 
 ED448 point (POINT):
   56 byte data
-  
+
 User Profile (USER-PROF):
   Detailed in "User Profile Data Type" section
 ```
@@ -308,8 +307,8 @@ This section describes the functions used to manage the key material.
 
 The sender will rotate into a new ECDH ratchet and a new Mix Key ratchet before
 it sends the first message after receiving any messages from the other side
-(i.e. the first reply).
-The following data messages will advertise a new ratchet id as `i + 1`.
+(i.e. the first reply). The following data messages will advertise a new ratchet
+id as `i + 1`.
 
   * Increment the current ratchet id (`i`) by 1.
   * Reset the next sent message id (`j`) to 0.
@@ -341,7 +340,7 @@ generateECDH()
   return pubECDH = G1 * r, secretECDH = r
 
 generateDH()
-  pick a random value r (640 bits)
+  pick a random value r (80 byte)
   return pubDH = g3 ^ r, secretDH = r
 
 K_ecdh = (G1*x)*y (POINT)
@@ -364,8 +363,8 @@ calculate_shared_secret(K_ecdh, mix_key):
   return K
 ```
 
-We will use the `encode_ecdh` function as defined in the Mike Hamburg Decaf
-paper [11], section A.1.
+We will use the `encode` function as defined in the Mike Hamburg Decaf paper
+[11], section A.1.
 
 #### Calculate Double Ratchet Keys
 
@@ -382,11 +381,12 @@ calculate_ratchet_keys(K):
 
 Both sides will compare their public keys to choose a chain key for sending and
 receiving:
+
 - Alice (and similarly, Bob) determines if she is the "low" end or the "high"
-end of this ratchet.
-If Alice's ephemeral ECDH public key is numerically greater than Bob's public
-key, then she is the "high" end.
-Otherwise, she is the "low" end.
+  end of this ratchet. If Alice's ephemeral ECDH public key is numerically
+  greater than Bob's public key, then she is the "high" end. Otherwise, she is
+  the "low" end.
+
 - Alice selects the chain keys for sending and receiving:
   - If she is the "high" end, set `j` as `0`, use Ca as the sending
   chain key (`chain_s`) and Cb as the receiving chain key (`chain_r`).
@@ -499,10 +499,9 @@ User Profile (USER-PROF):
 
 Version (VER):
   1 byte unsigned len, big-endian
-  len byte unsigned value, big-endian
 
 Version Expiration (PROF-EXP):
-  64-bit signed value, big-endian
+  8 byte signed value, big-endian
 ```
 
 ### Deniable Authenticated Key Exchange (DAKE)
@@ -547,7 +546,7 @@ Bob will be initiating the DAKE with Alice.
 **Bob:**
 
 1. Generates an ephemeral ECDH secret key `y` and a public key `Y`.
-2. Generates an ephemeral 3072-bit DH secret key `b` and a public key `B`.
+2. Generates an ephemeral 3072-DH secret key `b` and a public key `B`.
 (TODO: in the below, the "your" and "our" words are very confusing.)
 
     ```Details
@@ -566,7 +565,7 @@ Bob will be initiating the DAKE with Alice.
 (TODO: in the below, the "your" and "our" words are very confusing.)
 
 1. Generates an ephemeral ECDH secret key `x` and a public key `X`.
-2. Generates an ephemeral 3072-bit DH secret key `a` and a public key `A`.
+2. Generates an ephemeral 3072-DH secret key `a` and a public key `A`.
 3. Computes `gamma = DREnc(PKa, PKb, m)`, being
    `m = Prof_B || Prof_A || Y || X || B || A`. Prof_A is Alice's User Profile.
 4. Computes `sigma = Auth(Ha, za, {Ha, Hb, Y}, Prof_B || Prof_A || Y || B || gamma)`.
@@ -622,7 +621,7 @@ Regardless of who you are:
 * Calculate the DH shared secret `k_dh = (g3*a)*b`.
 * Calculate the SHA3-256 of the DH shared secret `mix_key = SHA3-256(k_dh)`.
 * Calculate `K = calculate_shared_secret(K_ecdh, mix_key)`.
-* Calculate the SSID from shared secret: it is the first 64 bits of
+* Calculate the SSID from shared secret: it is the first 8 byte of
   `SHA3-256(0x00 || K)`.
 * Calculate the first set of keys with
   `root[0], chain_s[0][0], chain_r[0][0] = calculate_ratchet_keys(K)`.
@@ -634,10 +633,10 @@ choice of DH and ECDH key. A valid Pre-key message is generated as follows:
 
 1. Create a user profile, as detailed [here](#creating-a-user-profile)
 2. Choose a random ephemeral ECDH key pair:
-  * secret key `x` (256 bits).
+  * secret key `x` (32 byte).
   * public key `X`.
 3. Generates an ephemeral DH secret key pair:
-  * secret key `a` (640 bits).
+  * secret key `a` (80 byte).
   * public key `A = g3 ^ a`.
 
 A pre-key is an OTR message encoded as:
@@ -651,8 +650,7 @@ Sender Instance tag (INT)
   The instance tag of the person sending this message.
 Receiver Instance tag (INT)
   The instance tag of the intended recipient. For a pre-key message, this will
-  often be 0
-  since the other party may not have identified its instance tag yet.
+  often be 0 since the other party may not have identified its instance tag yet.
 Sender's User Profile (USER-PROF)
   As described in the section 'Creating a User Profile'.
 X (POINT)
@@ -675,10 +673,10 @@ A valid DRE-Auth message is generated as follows:
 1. Create an user profile, as detailed [here]
    (#creating-a-user-profile)
 2. Choose a random ephemeral ECDH key pair:
-  * secret key `y` (256 bits).
+  * secret key `y` (32 byte).
   * public key `Y`
 3. Generates an ephemeral DH secret key pair:
-  * secret key `b` (640 bits).
+  * secret key `b` (80 byte).
   * public key `B = g3 ^ b`.
 4. Generate `m = X || Y || A || B`
 5. Compute `DREnc(PKa, PKb, m)` and serialize it as a DRE-M value in the
@@ -908,6 +906,7 @@ of concatenated 64-byte values) into the "Old MAC keys to be revealed" section
 of the next Data Message you send.
 
 (TODO: we are inconsistent in specifying things as bytes or bits. We should probably choose one.)
+
 A receiver add a MAC key to `Old MAC keys to be revealed` in both following
 cases:
 
@@ -923,10 +922,10 @@ Some networks may have a `maximum message size` that is too small to contain an
 encoded OTR message. In that event, the sender may choose to split the message
 into a number of fragments. This section describes the format of the fragments.
 
-OTRv4 has the same message fragmentation as OTRv3 without compatibility with version 2.
-This means that fragmentation is performed in OTRv4 in the same why as specified in OTRv3:
-the format is the same so you will have to wait for reassembly to finalize,
-to deal with a message.
+OTRv4 has the same message fragmentation as OTRv3 without compatibility with
+version 2. This means that fragmentation is performed in OTRv4 in the same why
+as specified in OTRv3: the format is the same so you will have to wait for
+reassembly to finalize, to deal with a message.
 
 (TODO: the above paragraph should be rewritten in form formal language)
 
@@ -940,7 +939,7 @@ If you have information about the `maximum message size` you are able to send
 OTR message as follows:
 
   * Start with the OTR message as you would normally transmit it. For example, a
-Data Message would start with `?OTR:AAQD` and end with `.`.
+    Data Message would start with `?OTR:AAQD` and end with `.`.
   * Break it up into sufficiently small pieces. Let this number of pieces be
   `total`, and the pieces be `piece\[1\],piece\[2\],...,piece[total]`.
   * Transmit `total` OTRv4 fragmented messages with the following structure:
@@ -1268,7 +1267,6 @@ If `msgstate` is `MSGSTATE_FINISHED`:
       * Send Query Message.
     * If (b) transition to `MSGSTATE_PLAINTEXT` and send the message.
 
-
 #### Receiving a Data Message
 
 If `msgstate` is `MSGSTATE_ENCRYPTED`:
@@ -1322,9 +1320,9 @@ SMP Message 1Q is used when they do. OTRv4 is simplified to use only SMP Message
 1Q for both cases. When a question is not present, the user specified question
 section has length 0 and value NULL.
 
-OTRv4 creates fingerprints using SHA3-256, which increases their size. Thus,
+OTRv4 creates fingerprints using SHA3-512, which increases their size. Thus,
 the size of the fingerprint in the "Secret Information" section of OTRv3 [3]
-should be 32 bytes in size.
+should be 64 bytes in size.
 
 Lastly, OTRv4 uses Ed448 as the cryptographic primative. This changes the way
 values are serialized and how they are computed. To define the SMP values under
@@ -1397,6 +1395,7 @@ revealed.
 
 In the following actions, there are many places where a SHA3-512 hash of an
 integer followed by one or two MPIs is taken. This is defined as `HashToScalar(d)`.
+
 The input to this hash function is:
 
 ```
@@ -1568,10 +1567,12 @@ The SMP message 4 has the following data:
 
 ```
 Rb (POINT)
-  This value is used in the final comparison to determine if Alice and Bob share the same secret.
+  This value is used in the final comparison to determine if Alice and Bob share
+  the same secret.
 
 cr (MPI), d7 (MPI)
-  A zero-knowledge proof that Rb was created according to the protocol given above.
+  A zero-knowledge proof that Rb was created according to the protocol given
+  above.
 ```
 
 ### The SMP state machine
@@ -1695,11 +1696,11 @@ other side, or will refuse to send non-encrypted messages to Bob.
 
 The DRE scheme consists of three functions:
 
-`PK, SK = DRGen()`, a key generation function.
+`PK, sk = DRGen()`, a key generation function.
 
 `gamma = DREnc(PK1, PK2, m)`, an encryption function.
 
-`m = DRDec(PK1, PK2, SKi, gamma)`, a decryption function.
+`m = DRDec(PK1, PK2, ski, gamma)`, a decryption function.
 
 #### Domain parameters
 
@@ -1722,13 +1723,13 @@ Daniel J. Bernstein [10].
 
 #### Dual Receiver Key Generation: DRGen()
 
-1. Pick random values `x1, x2, y1, y2, z` in Z_q (56 bytes each).
+1. Pick random values `x1, x2, y1, y2, z` in Z_q.
 2. Compute group elements
   - `C = G1*x1 + G2*x2`
   - `D = G1*y1 + G2*y2`
   - `H = G1*z`.
 3. The public key is `PK = {C, D, H}` and the secret key is
-   `SK = {x1, x2, y1, y2, z}`.
+   `sk = {x1, x2, y1, y2, z}`.
 
 #### Dual Receiver Encryption: DREnc(PK1, PK2, m)
 
@@ -1742,8 +1743,8 @@ Let `{C1, D1, H1} = PK1` and `{C2, D2, H2} = PK2`
     - `Ei = (Hi*ki) + K`
   2. Compute `αi = HashToScalar(U1i || U2i || Ei)`.
   3. Compute `Vi = Ci*ki + Di*(ki * αi)`
-3. Compute `K_enc = SHA3-256(K)`. K is compressed from 446 bits to 256 bits because
-XSalsa20 has a maximum key size of 256.
+3. Compute `K_enc = SHA3-256(K)`. K is compressed from 446 bits to 256 bits
+   because XSalsa20 has a maximum key size of 256.
 4. Pick a random 24 bytes `nonce` and compute `phi = XSalsa20-Poly1305_K_enc(m,
    nonce)`
 5. Generate a NIZKPK:
@@ -1767,8 +1768,8 @@ XSalsa20 has a maximum key size of 256.
 #### Dual Receiver Decryption: DRDec(PK1, PK2, SKi, gamma):
 
 Let `{C1, D1, H1} = PK1`, `{C2, D2, H2} = PK2` and `{x1i, x2i, y1i, y2i, zi} =
-SKi`.
-SKi is the secret key of the person decrypting the message.
+ski`.
+ski is the secret key of the person decrypting the message.
 
 1. Parse `gamma` to retrieve components
   `(U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2, nonce, phi) = gamma`.
@@ -1793,7 +1794,7 @@ SKi is the secret key of the person decrypting the message.
     - `T4 = U2i*y2i`
   6. Verify `T1 + T2 + (T3 + T4)*αi ≟ Vi`.
 3. Recover secret key `K_enc = SHA3-256(Ei - U1i*zi)`. K is compressed from 446
-bits to 256 bits because XSalsa20 has a maximum key size of 256.
+   bits to 256 bits because XSalsa20 has a maximum key size of 256.
 4. Decrypt `m = XSalsa20-Poly1305_K_enc(phi, nonce)`.
 
 ### ROM Authentication
