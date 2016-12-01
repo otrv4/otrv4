@@ -730,7 +730,6 @@ This message is used to transmit a private message to the correspondent.
 It is also used to [reveal old MAC keys](#revealing-mac-eys).
 
 #### Data Message format
-(TODO: in the below, message id and ratachet id reads very badly)
 
     Protocol version (SHORT)
       The version number of this protocol is 0x0004.
@@ -755,12 +754,10 @@ It is also used to [reveal old MAC keys](#revealing-mac-eys).
         example, you don't have the right keys), just ignore the message
         instead of producing an error or a notification to the user.
 
-    Ratchet id ratchet_id (INT)
-      Must be strictly greater than 0, and increment by 1 with each ratchet.
+    Ratchet id (INT)
       This should be set as sender's i.
 
-    Message id message_id (INT)
-      Must be strictly greater than 0, and increment by 1 with each message.
+    Message id (INT)
       This should be set with sender's j.
 
     Public ECDH Key (POINT)
