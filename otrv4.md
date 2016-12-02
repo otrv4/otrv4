@@ -1054,8 +1054,6 @@ Note the following:
     instance tag may be 0, which indicates that no particular instance
     is specified.
 
-(TODO: this section doesn't seem to allow for the OTRv4 specific DAKE messages)
-
 #### Receiving OTRv3 Specific Messages
 
   * If you allow OTRv3 the protocol proceeds as specified in OTRv3.
