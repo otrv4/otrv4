@@ -872,8 +872,6 @@ the receiver has not sent a message in a configurable amount of time. Put them
 (as a set of concatenated 64 bytes values) into the "Old MAC keys to be
 revealed" section of the next Data Message you send.
 
-(TODO: we are inconsistent in specifying things as bytes or bits. We should probably choose one.)
-
 A MAC key is added to `mac_keys_to_reveal` when the receiver has received
 a message and has verified the message's authenticity, or the receiver has
 discarded the associated message keys.
