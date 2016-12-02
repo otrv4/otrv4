@@ -24,6 +24,7 @@ works on top of an existing messaging protocol, like XMPP.
 10. [Socialist Millionaires' Protocol (SMP)](#socialist-millionaires-protocol-smp)
 
 [Appendices](#appendices)
+
   1. [ROM DRE](#rom-dre)
   2. [ROM Authentication](#rom-authentication)
 
@@ -479,8 +480,8 @@ User Profile (USER-PROF):
   Profile Signature (MPI)
   (optional) Transitional Signature (MPI)
 
-Version (VER):
-  1 byte unsigned value, big-endian
+Version (BYTE):
+  1 byte unsigned value
 
 Version Expiration (PROF-EXP):
   8 bytes signed value, big-endian
@@ -532,8 +533,8 @@ Bob will be initiating the DAKE with Alice.
 
 **Bob:**
 
-1. Generates ephemeral ECDH keys with a secret key `y` and a public key `Y`.
-2. Generates ephemeral 3072-DH keys with a secret key `b` and a public key `B`.
+1. Generates ephemeral ECDH keys: a secret key `y` and a public key `Y`.
+2. Generates ephemeral 3072-DH keys: a secret key `b` and a public key `B`.
 
     ```
     Details:
@@ -545,8 +546,8 @@ Bob will be initiating the DAKE with Alice.
 
 **Alice:**
 
-1. Generates ephemeral ECDH keys with a secret key `x` and a public key `X`.
-2. Generates ephemeral 3072-DH keys with a secret key `a` and a public key `A`.
+1. Generates ephemeral ECDH keys: a secret key `x` and a public key `X`.
+2. Generates ephemeral 3072-DH keys: a secret key `a` and a public key `A`.
 3. Computes `gamma = DREnc(PKa, PKb, m)`, being
    `m = Prof_B || Prof_A || Y || X || B || A`. Prof_A is Alice's User Profile.
 4. Computes `sigma = Auth(Ha, za, {Ha, Hb, Y}, Prof_B || Prof_A || Y || B ||
