@@ -269,7 +269,7 @@ another Diffie-Hellman Ratchet and Key Symmetric Ratchet is added for the Mix
 Key alone. These were added to protect transcripts of data messages in the
 case that elliptic curve cryptography is broken. During the DAKE, both parties
 agree upon the first set of 3072 Diffie-Hellman keys. Then every third Diffie-
-Hellman Ratchet in the Double Ratchet, a new 384 bytes (3072 bits) key is
+Hellman Ratchet in the Double Ratchet, a new 384-byte (3072-bit) key is
 agreed upon. Between each Diffie-Hellman Mix Key Ratchet, both sides will
 conduct a Symmetric Mix Key Ratchet.
 
@@ -600,13 +600,13 @@ Bob will be initiating the DAKE with Alice.
 This is the first message of the DAKE. Bob sends it to Alice to commit to a
 choice of DH and ECDH key. A valid Pre-key message is generated as follows:
 
-1. Create a user profile, as detailed [here](#creating-a-user-profile)
-2. Choose a random ephemeral ECDH key pair:
+1. Creates a user profile, as detailed [here](#creating-a-user-profile)
+2. Generates an ephemeral ECDH key pair:
   * secret key `x`.
-  * public key `X`.
-3. Generates an ephemeral DH secret key pair:
+  * public key `X = G1*x`.
+3. Generates an ephemeral DH key pair:
   * secret key `a` (80 bytes).
-  * public key `A = g3 ^ a`.
+  * public key `A = g3^a`.
 
 A pre-key is an OTR message encoded as:
 
@@ -640,11 +640,11 @@ with a NIZKPK.
 
 A valid DRE-Auth message is generated as follows:
 
-1. Create an user profile, as detailed [here](#creating-a-user-profile)
-2. Choose a random ephemeral ECDH key pair:
+1. Create a user profile, as detailed [here](#creating-a-user-profile)
+2. Generates an ephemeral ECDH key pair:
   * secret key `y`.
   * public key `Y`
-3. Generates an ephemeral DH secret key pair:
+3. Generates an ephemeral DH key pair:
   * secret key `b` (80 bytes).
   * public key `B = g3 ^ b`.
 4. Generate `m = X || Y || A || B`
