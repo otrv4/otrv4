@@ -17,7 +17,7 @@ def expmod(b,e,m):
   if e & 1: t = (t*b) % m
   return t
 
-# Modular multiplicative inverse
+# for inversion modulo p, use this identity: x^(p-2) (mod p).
 def inv(x):
   return expmod(x,p-2,p)
 
