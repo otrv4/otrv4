@@ -559,7 +559,7 @@ Bob will be initiating the DAKE with Alice.
     * Set 'j' as 0 (which means she will ratchet again).
     * Calculate ECDH shared secret 'K_ecdh'.
     * Calculate DH shared secret 'k_dh' and 'mix_key'.
-    * Calculate Mixed shared secret 'K = SHA3-512(K_ecdh || mix_key)'. 
+    * Calculate Mixed shared secret 'K = SHA3-512(K_ecdh || mix_key)'.
     * Calculate the SSID from shared secret: it is the first 8 bytes of 'SHA3-256(0x00 || K)'.
     * Calculate the first set of keys with
     'root[0], chain_s[0][0], chain_r[0][0] = calculate_ratchet_keys(K)'.
@@ -581,7 +581,7 @@ Bob will be initiating the DAKE with Alice.
 
     ```
     Details:
-    
+
     * Set 'their_ecdh' as their ECDH ephemeral public key from the DAKE ('X').
     * Set 'their_dh' as their DH ephemeral public key from the DAKE ('A').
     * Set ratchet id 'i = 0'.
@@ -957,8 +957,6 @@ We could fragment this message into three pieces:
 
 ## The protocol state machine
 
-(TODO: this state machine and description of internal variables are not requirements of how the implementation should be written, but abstractions that describe the behavior of the protocol on the wire, in the presence of these kinds of abstract operations. We should change the language in this section to make that more clear - the wire protocol doesn't actually care about these things, as long as the behavior is the same).
-
 An OTR client maintains separate state for every correspondent. For example,
 Alice may have an active OTR conversation with Bob, while having an insecure
 conversation with Charlie.
@@ -1014,113 +1012,79 @@ AUTHSTATE_AWAITING_DRE_AUTH
     key Message, he enters this state until Alice replies.
 ```
 
-### State transitions
+### Protocol events
 
-(TODO: for the below, I think once again some of them are implementation dependent. We should separate the things that are necessary for the wire protocol and what is for the implementation)
+The following sections will outline the actions the protocol should implement.
 
-An OTRv4 client must handle these ten events:
+Note:
 
-User events:
-  * User requests to start an OTR conversation
-  * User requests to end an OTR conversation
-  * User types a message to be sent
+* If the receiving instance tag is not equal to its own, the message should be
+  discarded and the user optionally warned.
+* The exception here is the DH Commit and pre-key messages where the recipient
+  instance tag may be 0, which indicates that no particular instance
+  is specified.
+* The protocol is initialized with the allowed versions (3 and/or 4).
+* The protocol enforce starting a DAKE when it receives a whitespace
+  tag.
 
-Received messages:
-  * OTRv3 Specific Messages
-  * Plaintext without the whitespace tag
-  * Plaintext with the whitespace tag
-  * Query Message
-  * Error Message
-  * Pre-key message
-  * DRE-Auth message
-  * Data Message
+#### Receiving plaintext without the whitespace tag
 
-The following sections will outline which actions to take for each
-case.
+* This message should be displayed to the user.
 
-Note the following:
+If `msgstate` is not `MSGSTATE_PLAINTEXT`:
 
-  * Versions 1 and 2 messages are out of the scope of this specification.
-  * For version 3 and 4 messages, if the receiving instance tag is not
-    equal to its own, the message should be discarded and the user
-    optionally warned.
-  * The exception here is the DH Commit Message where the recipient
-    instance tag may be 0, which indicates that no particular instance
-    is specified.
+* The user should be warned that the message was received unencrypted.
 
-#### Receiving OTRv3 Specific Messages
+#### Receiving plaintext with the whitespace tag
 
-  * If you allow OTRv3 the protocol proceeds as specified in OTRv3.
+* Remove the whitespace tag and display the message to the user.
 
-#### User requests to start an OTR conversation
+If the tag offers OTR version 4, and version 4 is allowed:
 
-  * Send an OTR Query Message including the allowed versions to the
-    correspondent.
+* Send a pre-key Message.
+* Transition `authstate` to `AUTHSTATE_AWAITING_DRE_AUTH`.
+
+Otherwise, if the tag offers OTR version 3, and version 3 is allowed:
+
+* Send a version 3 D-H Commit Message, and the protocol proceeds as specified in
+  OTRv3.
+
+Whitespace tags have the same structure as defined in "Tagged plaintext
+messages" of OTRv3 [3], and a 8 bytes tag "\x20\x20\x09\x09\x20\x09\x20\x20" is
+used to indicate a willingness to use OTR version 4.
+
+#### Starting an OTR conversation
+
+* Send an OTR Query Message including the allowed versions to the correspondent.
 
 Query messages are constructed according to the section "OTR Query Messages" of
 OTRv3 [3], and the byte identifier for OTR version 4 is "4".
 
-#### Receiving plaintext without the whitespace tag
-
-If `msgstate` is `MSGSTATE_PLAINTEXT`:
-
-  * Display the message to the user.
-  * If encryption is required, warn the user that the message was received
-    unencrypted.
-
-If `msgstate` is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
-
-  * Display the message to the user.
-  * Warn the user that the message was received unencrypted.
-
-#### Receiving plaintext with the whitespace tag
-
-If `msgstate` is `MSGSTATE_PLAINTEXT`:
-
-  * Remove the whitespace tag and display the message to the user.
-  * If encryption is required, warn the user that the message was received
-    unencrypted.
-
-If `msgstate` is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
-
-  * Remove the whitespace tag and display the message to the user.
-  * Warn the user that the message was received unencrypted.
-
-In any event, if advertisement through whitespace tags is allowed to receive:
-
-If the tag offers OTR version 4 and version 4 of the protocol is allowed:
-
-  * Send a pre-key Message.
-  * Transition `authstate` to `AUTHSTATE_AWAITING_DRE_AUTH`.
-
-If the tag offers OTR version 3 and version 3 of the protocol is allowed:
-
-  * The protocol proceeds as specified in OTRv3.
-
 #### Receiving a Query Message
 
-If the query message offers OTR version 4 and version 4 of the protocol is
-allowed:
+If the query message offers OTR version 4, and version 4 is allowed:
 
-  * Send a Pre-key Message
-  * Transition `authstate` to `AUTHSTATE_AWAITING_DRE_AUTH`.
+* Send a Pre-key Message
+* Transition `authstate` to `AUTHSTATE_AWAITING_DRE_AUTH`.
 
-If the query message offers OTR version 3 and version 3 of the protocol is
-allowed:
+Otherwise, if the query message offers OTR version 3, and version 3 is allowed:
 
-  * The protocol proceeds as specified in OTRv3.
+* Send a version 3 D-H Commit Message, and the protocol proceeds as specified
+  in OTRv3.
 
-#### Receiving an Error Message
+#### OTRv3 Specific Messages (AKE and Data message)
 
-  * Display the message to the user.
-  * Reply with a Query Message.
-  * Reset `msgstate` to `MSGSTATE_PLAINTEXT` and `authstate` to
-    `AUTHSTATE_NONE`
+* Proceeds as specified in OTRv3, see "The protocol state machine" section.
+
+#### Sending a Pre-key message
+
+* Create and send a pre-key message.
+* Transition `authstate` to `AUTHSTATE_AWAITING_DRE_AUTH`.
 
 #### Receiving a Pre-key message
 
-  * If the message is version 4 and version 4 of the protocol is not
-    allowed, ignore this message.
+If the message is version 4 and version 4 is not allowed, ignore
+this message.
 
 If `authstate` is `AUTHSTATE_AWAITING_DRE_AUTH`:
 
@@ -1133,138 +1097,110 @@ with the one you received, considered as 56 bytes unsigned big-endian values.
 
 If yours is the lower hash value:
 
-  * Ignore the incoming pre-key message.
+* Ignore the incoming pre-key message.
 
 Otherwise:
 
-  * Forget your old `X` value that you sent earlier.
+* Forget your old `X` value that you sent earlier.
 
 Regardless of `authstate` value, if you haven't ignored the incoming pre-key
 message, you should:
 
-  * Verify that the user profile signature is valid.
-  * Verify that the user profile is not expired.
-  * Verify that the point `X` received in the pre-key message is on curve 448.
-  * Verify that the DH public key is from the correct group.
+* Verify that the user profile signature is valid.
+* Verify that the user profile is not expired.
+* Verify that the point `X` received in the pre-key message is on curve 448.
+* Verify that the DH public key is from the correct group.
 
 If everything checks out:
 
-  * Reply with a DRE-Auth Message.
-  * Compute the ECDH shared secret `K_ecdh`.
-  * Compute the DH shared secret `k_dh`.
-  * Compute the mix key `mix_key`.
-  * Transition `authstate` to `AUTHSTATE_NONE`.
-  * Transition `msgstate` to `MSGSTATE_ENCRYPTED`.
-  * Initialize the double ratcheting.
-  * If there is an stored message, encrypt it and send it as a Data Message.
+* Reply with a DRE-Auth Message.
+
+#### Sending a DRE-Auth message
+
+* Compute the ECDH shared secret `K_ecdh`.
+* Compute the DH shared secret `k_dh`.
+* Compute the mix key `mix_key`.
+* Transition `authstate` to `AUTHSTATE_NONE`.
+* Transition `msgstate` to `MSGSTATE_ENCRYPTED`.
+* Initialize the double ratcheting.
+* Send a DRE-Auth Message.
+* If there is an stored message, encrypt it and send it as a Data Message.
 
 #### Receiving a DRE-Auth message
 
-  * If the message is version 4 and version 4 of the protocol is not
-    allowed, ignore this message.
+If the message is version 4 and version 4 is not allowed, ignore
+this message.
 
-If `authstate` is `AUTHSTATE_AWAITING_DRE_AUTH`:
+If `authstate` is NOT `AUTHSTATE_AWAITING_DRE_AUTH`:
 
-  * Verify that the profile signature is valid.
-  * Verify that the profile is not expired.
-  * If the auth sigma is valid, decrypt the DRE message and verify:
-    * that the point `Y` received in the pre-key message is on curve 448.
-    * that the `B` DH public key is from the correct group.
-
-If everything verifies:
-
-  * Compute the ECDH shared secret `K_ecdh`.
-  * Compute the DH shared secret `k_dh`.
-  * Compute the mix key `mix_key`.
-  * Transition `authstate` to `AUTHSTATE_NONE`.
-  * Transition `msgstate` to `MSGSTATE_ENCRYPTED`.
-  * Initialize the double ratcheting.
-  * If there is an stored message, encrypt it and send it as a Data Message.
+* Ignore the message. This may cause the sender to be in an invalid
+`msgstate` equals `MSGSTATE_ENCRYPTED`. This can be detected as soon as she
+tries to send a next data message as it would not be possible to decrypt it
+and an OTR error message will be replied.
 
 Otherwise:
 
-  * Ignore the message. This may cause the sender to be in an invalid
-  `msgstate` equals `MSGSTATE_ENCRYPTED`. This can be detected as soon as she
-  tries to send a next data message as it would not be possible to decrypt it
-  and an OTR error message will be replied.
+* Verify that the profile signature is valid.
+* Verify that the profile is not expired.
+* If the auth sigma is valid, decrypt the DRE message and verify:
+  * that the point `Y` received in the pre-key message is on curve 448.
+  * that the `B` DH public key is from the correct group.
 
-#### User types a message to be sent
+If everything verifies:
 
-If `msgstate` is `MSGSTATE_PLAINTEXT`:
+* Compute the ECDH shared secret `K_ecdh`.
+* Compute the DH shared secret `k_dh`.
+* Compute the mix key `mix_key`.
+* Transition `authstate` to `AUTHSTATE_NONE`.
+* Transition `msgstate` to `MSGSTATE_ENCRYPTED`.
+* Initialize the double ratcheting.
+* If there is an stored message, encrypt it and send it as a Data Message.
 
-  * If encryption is required:
-    * Store plaintext messages for possible retransmission.
-    * Send a Query Message.
-    * Stop sending additional query messages until the DAKE finishes.
-  * Otherwise:
-    * If advertising willingness to start OTR is allowed and you have
-      not received a plaintext message from this correspondent, attach
-      the whitespace tag to the message.
-    * Send the (possibly modified) message as plaintext.
+#### Sending a plaintext message
 
-Whitespace tags are constructed according to the section "Tagged plaintext
-messages" of OTRv3 [3], and a 8 bytes tag "\x20\x20\x09\x09\x20\x09\x20\x20" is
-used to indicate a willingness to use OTR version 4.
+* Send the message as plaintext.
+
+#### Sending an encrypted message
 
 If `msgstate` is `MSGSTATE_ENCRYPTED`:
 
-  * Encrypt the message, and send it as a Data Message.
-
-If `msgstate` is `MSGSTATE_FINISHED`:
-
-  This may happen if the user received a "Disconnected" TLV while typing the
-  message. She expected to send this message encrypted but the conversation
-  ended.
-
-  * If encryption is required:
-    * Transition to `MSGSTATE_PLAINTEXT`.
-    * Store plaintext messages for possible retransmission.
-    * Send a Query Message.
-  * Otherwise:
-    * Inform the user the conversation was finished by the other party.
-    * Securely dispose this conversation data.
+* Encrypt the message, and send it as a Data Message.
 
 #### Receiving a Data Message
 
-If `msgstate` is `MSGSTATE_ENCRYPTED`:
+Check if the message version is allowed, ignore this message if it's not.
 
-  * Verify the information in the message.
+If `msgstate` is NOT `MSGSTATE_ENCRYPTED`:
 
-  If the verification succeeds:
+* Inform the user that an unreadable encrypted message was received.
+* Reply with an Error Message.
 
-    * Decrypt the message and display the human-readable part (if it contains
-      any) to the user. SMP TLVs should be addressed according to the SMP
-      state machine.
-    * Rotate root, chain and mix keys as appropriate
-    * If you have not sent a message to this correspondent in some
-      (configurable) time, send a "heartbeat" message.
-    * If the received message contains a TLV type 1 forget all encryption keys
-      for this correspondent and transition `msgstate` to `MSGSTATE_FINISHED`.
+Otherwise:
 
-  Otherwise:
+* Verify the information in the message.
 
-    * Inform the user that an unreadable encrypted message was
-      received, and reply with an Error Message.
+If the verification succeeds:
 
-If `msgstate` is `MSGSTATE_PLAINTEXT` or `MSGSTATE_FINISHED`:
+* Decrypt the message and display the human-readable part (if it contains
+  any) to the user. SMP TLVs should be addressed according to the SMP
+  state machine.
+* Rotate root, chain and mix keys as appropriate.
+* If you have not sent a message to this correspondent in some
+  (configurable) time, send a "heartbeat" message.
+* If the received message contains a TLV type 1 forget all encryption keys
+  for this correspondent and transition `msgstate` to `MSGSTATE_FINISHED`.
 
-  * Inform the user that an unreadable encrypted message was received,
-    and reply with an Error Message.
+#### Receiving an Error Message
+
+* Display the human-readable message to the user.
+* Notify the client that an error has occurred.
+* Transition `msgstate` to `MSGSTATE_PLAINTEXT` and `authstate` to
+  `AUTHSTATE_NONE`
 
 #### User requests to end an OTR conversation
 
-  * Follow the instructions from the same section in OTRv3 [3].
+* Follow the instructions from the same section in OTRv3 [3].
 
-#### Implementation notes (OR Considerations for networks which allow multiple devices)
-
-When using a transport network that allows multiple devices to be
-simultaneously logged in with the same peer identifier, make sure to identify
-the other participant by its device-specific identifier and not only the peer
-identifier (for example, using XMPP full JID instead of bare JID). Doing so
-allows establishing an OTR channel at the same time with multiple devices from
-the other participant at the cost of how to expose this to the message client
-(for example, XMPP clients can decide to reply only to the device you have
-more recently received a message from).
 
 ## Socialist Millionaires Protocol (SMP)
 
@@ -1341,7 +1277,7 @@ Assuming that Alice begins the exchange:
 * Computes `Rab = Rb*a3`.
 * Checks whether `Rab == Pa - Pb`.
 
-If everything is done correctly, then `Rab` should hold the value of 
+If everything is done correctly, then `Rab` should hold the value of
 `(Pa - Pb) * ((G2*a3*b3)*(x - y))`, which means that the test at the end of the
 protocol will only succeed if `x == y`. Further, since `G2*a3*b3` is a random
 number not known to any party, if `x` is not equal to `y`, no other information
@@ -1611,6 +1547,17 @@ from Bob.
 
 ## Implementation notes
 
+### Considerations for networks which allow multiple devices
+
+When using a transport network that allows multiple devices to be
+simultaneously logged in with the same peer identifier, make sure to identify
+the other participant by its device-specific identifier and not only the peer
+identifier (for example, using XMPP full JID instead of bare JID). Doing so
+allows establishing an OTR channel at the same time with multiple devices from
+the other participant at the cost of how to expose this to the message client
+(for example, XMPP clients can decide to reply only to the device you have
+more recently received a message from).
+
 ### Policies
 
 Policies are a suggestion on how to cope with implementation details like
@@ -1640,9 +1587,45 @@ RECEIVE_WHITESPACE_TAG
 For example, Alice could set up her client so that it speaks version 4 of the
 OTR protocol. Nevertheless, she may also add an exception for Charlie, who she
 knows talks through a client that runs an old version of the protocol.
-Therefore, the client will start the appropiate OTR conversation in
-correspondace with the other side, or will refuse to send non-encrypted
-messages to Bob.
+Therefore, the client will start the appropriate OTR conversation with the
+other side, or will refuse to send non-encrypted messages to Bob.
+
+### Client implementation
+
+The client must be able to distinguish message types.
+
+#### Receiving plaintext
+
+If `msgstate` is `MSGSTATE_PLAINTEXT` and the user requires encryption,
+warn him that the message was received unencrypted.
+
+#### User types a message to be sent
+
+If `msgstate` is `MSGSTATE_FINISHED`:
+
+This may happen if the user received a "Disconnected" TLV while typing the
+message. She expected to send this message encrypted but the conversation
+ended.
+
+* Inform the user the conversation was finished by the other party.
+* If the user requires encryption, store the plaintext message for possible
+retransmission, and send a Query Message.
+
+If `msgstate` is `MSGSTATE_ENCRYPTED`:
+
+* Use the protocol to send an encrypted message.
+
+Otherwise:
+
+* If the user requires encryption, store the plaintext message for possible
+  retransmission, and send a Query Message.
+* Otherwise, if the user wants to advertise her versions using whitespace,
+  attach the whitespace tag to the message. It's a good idea to stop sending
+  whitespace tags after receiving a plaintext message from the other participant.
+
+#### An OTR error has occurred
+
+If the user has chosen to alway restart the conversation, send a Query Message.
 
 ## Appendices
 
@@ -1801,7 +1784,7 @@ d is an array of bytes.
 2. Return `h (mod q)`
 
 <!--- References -->
- 
+
 [1]: https://www.ietf.org/rfc/rfc3526.txt "M. Kojo: More Modular Exponential (MODP) Diffie-Hellman groups for Internet Key Exchange (IKE)"
 [2]: http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf "N. Unger, I. Goldberg: Improved Techniques for Implementing Strongly Deniable Authenticated Key Exchanges"
 [3]: https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html "Off-the-Record Messaging Protocol version 3"
