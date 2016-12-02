@@ -418,9 +418,6 @@ OTRv4 will initialize through a Query message or a whitespace tag, as discussed
 in OTRv3 [3]. After this, the conversation is authenticated using a deniable
 authenticated key exchange (DAKE).
 
-TODO: We don't say which "tag" refers to OTRv4, and we don't mention the "byte
-identifier" for OTRv4 in the query message.
-
 ### Requesting conversation with older OTR versions
 
 Bob might respond to Alice's request or notification of willingness to start a
@@ -1060,7 +1057,11 @@ Note the following:
 
 #### User requests to start an OTR conversation
 
-  * Send an OTR Query Message including the allowed versions to the correspondent.
+  * Send an OTR Query Message including the allowed versions to the
+    correspondent.
+
+Query messages are constructed according to the section "OTR Query Messages" of
+OTRv3 [3], and the byte identifier for OTR version 4 is "4".
 
 #### Receiving plaintext without the whitespace tag
 
@@ -1101,12 +1102,14 @@ If the tag offers OTR version 3 and version 3 of the protocol is allowed:
 
 #### Receiving a Query Message
 
-If the query message offers OTR version 4 and version 4 of the protocol is allowed:
+If the query message offers OTR version 4 and version 4 of the protocol is
+allowed:
 
   * Send a Pre-key Message
   * Transition `authstate` to `AUTHSTATE_AWAITING_DRE_AUTH`.
 
-If the query message offers OTR version 3 and version 3 of the protocol is allowed:
+If the query message offers OTR version 3 and version 3 of the protocol is
+allowed:
 
   * The protocol proceeds as specified in OTRv3.
 
@@ -1202,6 +1205,10 @@ If `msgstate` is `MSGSTATE_PLAINTEXT`:
       not received a plaintext message from this correspondent, attach
       the whitespace tag to the message.
     * Send the (possibly modified) message as plaintext.
+
+Whitespace tags are constructed according to the section "Tagged plaintext
+messages" of OTRv3 [3], and a 8 bytes tag "\x20\x20\x09\x09\x20\x09\x20\x20" is
+used to indicate a willingness to use OTR version 4.
 
 If `msgstate` is `MSGSTATE_ENCRYPTED`:
 
