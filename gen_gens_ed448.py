@@ -3,6 +3,7 @@ import hashlib
 import binascii
 
 b = 448
+d = -39081
 q = 2**448 - 2**224 - 1
 l = 2**446 - 13818066809895115352007386748515426880336692474882178609894547503885
 cofactor = 4
@@ -16,18 +17,14 @@ def expmod(b,e,m):
   if e & 1: t = (t*b) % m
   return t
 
+# Modular multiplicative inverse
 def inv(x):
-  return expmod(x,q-2,q) # Why q-2?
-
-# The d was for the twisted edwards 25519
-d = -39081
-I = expmod(2, (q-1)/4, q) # I = 2 ** (q-1)/4 mod q # Why 4?
+  return expmod(x,q-2,q)
 
 def xrecover(y):
   xx = (1-y*y) * inv(1-d*y*y)
-  x = expmod(xx, (q+3)/cofactor, q) # Whya was it 8? cofactor?
-  if (x*x - xx) % q != 0: x = (x*I) % q
-  if x % 2 != 0: x = q-x
+  x = expmod(xx, (q+1)/4, q) # x is now the candidate square root of x^2
+  if (x*x - xx) % q != 0: raise Exception("no square root")
   return x
 
 # point addition
@@ -60,16 +57,15 @@ def isoncurve(P):
 def decodeint(s):
   return sum(2**i * bit(s,i) for i in range(0,b))
 
-# Is this the same as decodeUCoordinate from X25519?
 def decodepoint(s):
   y = sum(2**i * bit(s,i) for i in range(0,b-1))
   x = xrecover(y)
-  if x & 1 != bit(s,b-1): x = q-x
+  if x & 1 != bit(s,b-1): x = q-x # select the right square root x
   P = [x,y]
   if not isoncurve(P): raise Exception("decoding point that is not on curve")
   return P
 
-# Where does this second part comes from?
+# Edward curve has identity_element as Point (0,1)
 identity_element = [0,1]
 
 def find_g(x):
@@ -78,7 +74,7 @@ def find_g(x):
         ss = "%s%d" % (x, c)
         try:
             p = decodepoint(H(ss))
-            g = scalarmult(p, cofactor) # why 8?
+            g = scalarmult(p, cofactor)
             is_id = scalarmult(g, l)
             if is_id == identity_element: # IF P^cofactor^primeOrder == [0, 1]
                 return g, ss
