@@ -969,7 +969,7 @@ as message state, and to manage the authentication process, defined as
 authentication state.
 
 The way the client reacts to user input and to received messages
-depends on wheter the client has decided to allow version 3 and/or 4,
+depends on whether the client has decided to allow version 3 and/or 4,
 if encryption is required and if it will advertise OTR support.
 
 ### Message state
