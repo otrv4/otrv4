@@ -531,6 +531,7 @@ Bob will be initiating the DAKE with Alice.
 
     ```
     Details:
+
     * Set 'our_ecdh' as our ECDH ephemeral key pair from the DAKE ('y', 'Y').
     * Set 'our_dh' as our DH ephemeral key pair from the DAKE ('b', 'B').
     ```
@@ -546,7 +547,7 @@ Bob will be initiating the DAKE with Alice.
 4. Computes `sigma = Auth(Ha, za, {Ha, Hb, Y}, Prof_B || Prof_A || Y || B ||
    gamma)`.
 5. Sends Alice a DRE-Auth Message `psi_2 = (Prof_A, gamma, sigma)`.
-6. At this point, the DAKE is complete for Alice and she:
+6. At this point, the DAKE is complete for Alice:
 
     ```
     Details:
@@ -792,15 +793,15 @@ has been set to `0`, keys should be rotated.
 
 Given a new ratchet:
 
-  * Ratchet the ECDH keys. See "Ratcheting ECDH keys and Mix Keys" section.
-    The new ECDH public key created by the sender this process will be the
+  * Ratchet the ECDH keys, see "Ratcheting ECDH keys and Mix Keys" section.
+    The new ECDH public key created by the sender with this process will be the
     "Public ECDH Key" for the message. If a new public DH key is created in
-    this process, that will be the "Public DH Key" for the message. If it is
-    not created, then this is will be empty.
+    this process, it will be the "Public DH Key" for the message. If it is
+    not created, then it will be empty.
   * Calculate the `K = SHA3-512(K_ecdh || mix_key)`.
   * Derive new set of keys `root[i], chain_s[i][0], chain_r[i][0] = calculate_ratchet_keys(K)`.
   * Securely delete the root key and all chain keys from the ratchet `i-2`.
-  * Securely delete the `K`.
+  * Securely delete `K`.
 
 Otherwise:
 
@@ -888,7 +889,7 @@ fragmentation on outgoing messages is optional.
 ### Transmitting Fragments
 
 If you have information about the `maximum message size` you are able to send
-(the different IM networks have different limits), you can fragment an encoded
+(different IM networks have different limits), you can fragment an encoded
 OTR message as follows:
 
   * Start with the OTR message as you would normally transmit it. For example,
@@ -939,15 +940,15 @@ for this _before_ checking for any of the other `?OTR:` markers):
     * Forget stored `index` and `total`
 
 After this, if stored `total` is bigger than 0 and stored `index` is equal to
-stored `total`, treat piece as the received message.
+stored `total`, treat `piece` as the received message.
 
-If you receive a non-OTR message, or an unfragmented message, forget any
+If you receive a non-OTR message or an unfragmented message, forget any
 stored value you may have (`piece`, `total` and, `index`).
 
 For example, here is a Data Message we would like to transmit over a network
 with an unreasonably small `maximum message size`:
 
-    ?OTR:AAQD--here-is-my-very-long-message.
+    ?OTR:AAQD--here-is-my-very-long-message
 
 We could fragment this message into three pieces:
 
@@ -961,16 +962,17 @@ An OTR client maintains separate state for every correspondent. For example,
 Alice may have an active OTR conversation with Bob, while having an insecure
 conversation with Charlie.
 
-For a conversation to start and to be maintained it
-is necessary for the client to manage how to deliver response messages, defined
-as message state, and to manage the authentication process, defined as
-authentication state.
+For a conversation to start and to be maintained, it is necessary for the client
+to manage how to deliver response messages, defined as "message state", and to
+manage the authentication process, defined as "authentication state".
 
-The way the client reacts to user input and to received messages
-depends on whether the client has decided to allow version 3 and/or 4,
-if encryption is required and if it will advertise OTR support.
+The way the client reacts to user input and to received messages depends on
+whether the client has decided to allow version 3 and/or 4, if encryption is
+required and if it will advertise OTR support.
 
 ### Message state
+
+// TODO: this is confusing
 
 This machine offers an option to model the management of response messages a
 client would make as a response to user input. It describes a finite state
@@ -992,7 +994,7 @@ MSGSTATE_ENCRYPTED
 MSGSTATE_FINISHED
     This state indicates that outgoing messages are not delivered at
     all within current conversation. It is entered only when the
-    other party notifies the OTR conversation was finished by her side.
+    other party notifies that the OTR conversation was finished by her side.
 ```
 
 ### Authentication state
@@ -1014,22 +1016,22 @@ AUTHSTATE_AWAITING_DRE_AUTH
 
 ### Protocol events
 
-The following sections will outline the actions the protocol should implement.
+The following sections will outline the actions that the protocol should
+implement.
 
 Note:
 
 * If the receiving instance tag is not equal to its own, the message should be
   discarded and the user optionally warned.
 * The exception here is the DH Commit and pre-key messages where the recipient
-  instance tag may be 0, which indicates that no particular instance
-  is specified.
+  instance tag may be 0, which indicates that no particular instance is
+  specified.
 * The protocol is initialized with the allowed versions (3 and/or 4).
-* The protocol enforce starting a DAKE when it receives a whitespace
-  tag.
+* The protocol enforce starting a DAKE when it receives a whitespace tag.
 
 #### Receiving plaintext without the whitespace tag
 
-* This message should be displayed to the user.
+* The message should be displayed to the user.
 
 If `msgstate` is not `MSGSTATE_PLAINTEXT`:
 
@@ -1039,12 +1041,12 @@ If `msgstate` is not `MSGSTATE_PLAINTEXT`:
 
 * Remove the whitespace tag and display the message to the user.
 
-If the tag offers OTR version 4, and version 4 is allowed:
+If the tag offers OTR version 4 and version 4 is allowed:
 
 * Send a pre-key Message.
 * Transition `authstate` to `AUTHSTATE_AWAITING_DRE_AUTH`.
 
-Otherwise, if the tag offers OTR version 3, and version 3 is allowed:
+Otherwise, if the tag offers OTR version 3 and version 3 is allowed:
 
 * Send a version 3 D-H Commit Message, and the protocol proceeds as specified in
   OTRv3.
@@ -1058,18 +1060,18 @@ used to indicate a willingness to use OTR version 4.
 * Send an OTR Query Message including the allowed versions to the correspondent.
 
 Query messages are constructed according to the section "OTR Query Messages" of
-OTRv3 [3], and the byte identifier for OTR version 4 is "4".
+OTRv3 [3]. The byte identifier for OTR version 4 is "4".
 
 #### Receiving a Query Message
 
-If the query message offers OTR version 4, and version 4 is allowed:
+If the query message offers OTR version 4 and version 4 is allowed:
 
-* Send a Pre-key Message
+* Send a Pre-key Message.
 * Transition `authstate` to `AUTHSTATE_AWAITING_DRE_AUTH`.
 
 Otherwise, if the query message offers OTR version 3, and version 3 is allowed:
 
-* Send a version 3 D-H Commit Message, and the protocol proceeds as specified
+* Send a version 3 D-H Commit Message and the protocol proceeds as specified
   in OTRv3.
 
 #### OTRv3 Specific Messages (AKE and Data message)
@@ -1128,8 +1130,7 @@ If everything checks out:
 
 #### Receiving a DRE-Auth message
 
-If the message is version 4 and version 4 is not allowed, ignore
-this message.
+If the message is version 4 and version 4 is not allowed, ignore this message.
 
 If `authstate` is NOT `AUTHSTATE_AWAITING_DRE_AUTH`:
 
@@ -1164,11 +1165,11 @@ If everything verifies:
 
 If `msgstate` is `MSGSTATE_ENCRYPTED`:
 
-* Encrypt the message, and send it as a Data Message.
+* Encrypt the message and send it as a Data Message.
 
 #### Receiving a Data Message
 
-Check if the message version is allowed, ignore this message if it's not.
+Check if the message version is allowed. Ignore this message if it's not.
 
 If `msgstate` is NOT `MSGSTATE_ENCRYPTED`:
 
@@ -1185,8 +1186,8 @@ If the verification succeeds:
   any) to the user. SMP TLVs should be addressed according to the SMP
   state machine.
 * Rotate root, chain and mix keys as appropriate.
-* If you have not sent a message to this correspondent in some
-  (configurable) time, send a "heartbeat" message.
+* If you have not sent a message to this correspondent in some (configurable)
+  time, send a "heartbeat" message.
 * If the received message contains a TLV type 1 forget all encryption keys
   for this correspondent and transition `msgstate` to `MSGSTATE_FINISHED`.
 
@@ -1200,7 +1201,6 @@ If the verification succeeds:
 #### User requests to end an OTR conversation
 
 * Follow the instructions from the same section in OTRv3 [3].
-
 
 ## Socialist Millionaires Protocol (SMP)
 
@@ -1549,14 +1549,14 @@ from Bob.
 
 ### Considerations for networks which allow multiple devices
 
-When using a transport network that allows multiple devices to be
-simultaneously logged in with the same peer identifier, make sure to identify
-the other participant by its device-specific identifier and not only the peer
-identifier (for example, using XMPP full JID instead of bare JID). Doing so
-allows establishing an OTR channel at the same time with multiple devices from
-the other participant at the cost of how to expose this to the message client
-(for example, XMPP clients can decide to reply only to the device you have
-more recently received a message from).
+When using a transport network that allows multiple devices to be simultaneously
+logged in with the same peer identifier, make sure to identify the other
+participant by its device-specific identifier and not only the peer identifier
+(for example, using XMPP full JID instead of bare JID). Doing so allows
+establishing an OTR channel at the same time with multiple devices from the
+other participant at the cost of how to expose this to the message client (for
+example, XMPP clients can decide to reply only to the device you have more
+recently received a message from).
 
 ### Policies
 
@@ -1590,6 +1590,7 @@ knows talks through a client that runs an old version of the protocol.
 Therefore, the client will start the appropriate OTR conversation with the
 other side, or will refuse to send non-encrypted messages to Bob.
 
+// TODO: should this be inside policies?
 ### Client implementation
 
 The client must be able to distinguish message types.
