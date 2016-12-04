@@ -189,7 +189,7 @@ User Profile (USER-PROF):
 In order to serialize and deserialize the point, refer to Appendix A.1
 (Encoding) and A.2 (Decoding) in Mike Hamburg's Decaf paper [11].
 
-### DRE messages and Auth NIZKPK
+### DRE messages and Auth
 
 A dual-receiver encrypted message is serialized as follows:
 
@@ -526,8 +526,8 @@ Bob will be initiating the DAKE with Alice.
 
 **Bob:**
 
-1. Generates ephemeral ECDH keys: a secret key `y` and a public key `Y`.
-2. Generates ephemeral 3072-DH keys: a secret key `b` and a public key `B`.
+1. Generates ephemeral ECDH keys: a secret key `y` and a public key `Y = G1*y`.
+2. Generates ephemeral 3072-DH keys: a secret key `b` and a public key `B = g3^b`.
 
     ```
     Details:
@@ -539,9 +539,9 @@ Bob will be initiating the DAKE with Alice.
 
 **Alice:**
 
-1. Generates ephemeral ECDH keys: a secret key `x` and a public key `X`.
-2. Generates ephemeral 3072-DH keys: a secret key `a` and a public key `A`.
-3. Computes `gamma = DREnc(PKa, PKb, m)`, being
+1. Generates ephemeral ECDH keys: a secret key `x` and a public key `X = G1*x`.
+2. Generates ephemeral 3072-DH keys: a secret key `a` and a public key `A = g3^a`.
+3. Computes `gamma = DREnc(PKb, PKa, m)`, being
    `m = Prof_B || Prof_A || Y || X || B || A`. Prof_A is Alice's User Profile.
 4. Computes `sigma = Auth(Ha, za, {Ha, Hb, Y}, Prof_B || Prof_A || Y || B ||
    gamma)`.
@@ -567,7 +567,7 @@ Bob will be initiating the DAKE with Alice.
 
 **Bob:**
 
-1. Verifies `Verify({Hb, Ha, Y}, sigma, Prof_B || Prof_A || Y || B || gamma)`.
+1. Verifies `Verify({Ha, Hb, Y}, sigma, Prof_B || Prof_A || Y || B || gamma)`.
 2. Decrypts `m = DRDec(PKb, PKa, skb, gamma)`.
 3. Verifies the following properties of the decrypted message `m`:
   1. The message is of the correct form (e.g., the fields are of the expected
@@ -600,13 +600,13 @@ Bob will be initiating the DAKE with Alice.
 This is the first message of the DAKE. Bob sends it to Alice to commit to a
 choice of DH and ECDH key. A valid Pre-key message is generated as follows:
 
-1. Creates a user profile, as detailed [here](#creating-a-user-profile)
+1. Creates a user profile, as detailed [here](#creating-a-user-profile).
 2. Generates an ephemeral ECDH key pair:
-  * secret key `x`.
-  * public key `X = G1*x`.
+  * secret key `y`.
+  * public key `Y`.
 3. Generates an ephemeral DH key pair:
-  * secret key `a` (80 bytes).
-  * public key `A = g3^a`.
+  * secret key `b` (80 bytes).
+  * public key `B`.
 
 A pre-key is an OTR message encoded as:
 
@@ -623,9 +623,9 @@ Receiver Instance tag (INT)
   yet.
 Sender's User Profile (USER-PROF)
   As described in the section 'Creating a User Profile'.
-X (POINT)
+Y (POINT)
   The ephemeral public ECDH key.
-A (MPI)
+B (MPI)
   The ephemeral public DH key. Note that even though this is in uppercase,
   this is NOT a POINT.
 ```
@@ -642,13 +642,13 @@ A valid DRE-Auth message is generated as follows:
 
 1. Create a user profile, as detailed [here](#creating-a-user-profile)
 2. Generates an ephemeral ECDH key pair:
-  * secret key `y`.
-  * public key `Y`
+  * secret key `x`.
+  * public key `X`
 3. Generates an ephemeral DH key pair:
-  * secret key `b` (80 bytes).
-  * public key `B = g3 ^ b`.
-4. Generate `m = X || Y || A || B`
-5. Compute `DREnc(PKa, PKb, m)` and serialize it as a DRE-M value in the
+  * secret key `a` (80 bytes).
+  * public key `A`.
+4. Generate `m = Prof_B || Prof_A || Y || X || B || A`
+5. Compute `DREnc(PKb, PKa, m)` and serialize it as a DRE-M value in the
    variable `gamma`.
 6. Compute `sigma = Auth(Ha, za, {Hb, Ha, Y}, Prof_B || Prof_A || Y || B || gamma)`.
 
@@ -665,7 +665,7 @@ Receiver Instance tag (INT)
   The instance tag of the intended recipient.
 Receiver's User Profile (USER-PROF)
   As described in the section 'Creating a User Profile'.
-Y (POINT)
+X (POINT)
   The ephemeral public ECDH key.
 B (MPI)
   The ephemeral public DH key. Note that even though this is in uppercase,
@@ -1108,8 +1108,8 @@ message, you should:
 
 * Verify that the user profile signature is valid.
 * Verify that the user profile is not expired.
-* Verify that the point `X` received in the pre-key message is on curve 448.
-* Verify that the DH public key is from the correct group.
+* Verify that the point `Y` received is on curve 448.
+* Verify that the DH public key `B` is from the correct group.
 
 If everything checks out:
 
@@ -1142,9 +1142,9 @@ Otherwise:
 
 * Verify that the profile signature is valid.
 * Verify that the profile is not expired.
-* If the auth sigma is valid, decrypt the DRE message and verify:
-  * that the point `Y` received in the pre-key message is on curve 448.
-  * that the `B` DH public key is from the correct group.
+* If the auth `sigma` is valid, decrypt the DRE message and verify:
+  * that the point `X` received is on curve 448.
+  * that the DH public key `A` is from the correct group.
 
 If everything verifies:
 
