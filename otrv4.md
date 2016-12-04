@@ -1656,6 +1656,8 @@ G2 = (1178121612634369467372824843433100646651805353570163734168790821479394042
 
 ```
 
+// TODO: we have to explain that we are choosing Base point as G2 and why
+
 These generators were created with an implementation [9] based on code by
 Daniel J. Bernstein [10].
 
