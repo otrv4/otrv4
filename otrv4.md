@@ -1659,6 +1659,34 @@ G2 = (1178121612634369467372824843433100646651805353570163734168790821479394042
 These generators were created with an implementation [9] based on code by
 Daniel J. Bernstein [10].
 
+The implementation works as follows:
+
+1. Select `x`, a "nothing up my sleeve" value (a value chosen above suspicion of hidden properties).
+2. Select a counter `c`.
+3. Compute `H = SHA512(x || c)`
+4. Compute `P = decodepoint(H)`:
+
+   * Determine `d` as a the nonsquare of `F_q`.
+   * Decode `y`. An element `(x, y)` is encoded as a b-bit string,
+   namely the (b − 1)-bit encoding of y followed by a sign bit; the sign bit
+   is 1 iff x is negative. // TODO: this is in E, should it be mentioned?
+   * Recover `x` by `y` by `x = ± sqrt((y**2-1)/(dy**2+1))`.
+   * Compute square roots modulo `p` by first computing candidate root `z = x
+   ^ (p+1)/4 (mod p)` and then checking if `x^2 = z`. If it is, then `z` is
+   square root of `x`; if it isn’t, then `x` does not have a square root. //
+   TODO: this verification is different.
+   * Compute the point `P = (x,y)` and check if it is on the curve. // TODO:
+   and if not?
+
+5. Compute `g = P^cofactor`.
+6. Check if `g^q` is the identity element:
+
+   * If it is, `g` is a generator.
+   * If it is not, increment the counter c.
+
+For more explanation on how the implementation works, please refer to [13] and
+[14].
+
 #### Dual Receiver Key Generation: DRGen()
 
 1. Pick random values `x1, x2, y1, y2, z` in Z_q.
@@ -1798,3 +1826,5 @@ d is an array of bytes.
 [10]: https://ed25519.cr.yp.to/python/ed25519.py "Daniel Bernstein: ed25519"
 [11]: https://eprint.iacr.org/2015/673.pdf "Mike Hamburg: Decaf: Eliminating cofactors through point compression"
 [12]: https://whispersystems.org/docs/specifications/doubleratchet/#symmetric-key-ratchet "Trevor Perrin (editor), Moxie Marlinspike: The Double Ratchet Algorithm"
+[13]: https://ed25519.cr.yp.to/ed25519-20110926.pdf "Daniel Bernstein, Niels Duif, Tanja Lange, Peter Schwabe and Bo-Yin Yang: High-speed high-security signatures"
+[14]: https://tools.ietf.org/html/draft-irtf-cfrg-eddsa-05 "S. Josefsson and I. Liusvaara: Edwards-curve Digital Signature Algorithm (EdDSA)"

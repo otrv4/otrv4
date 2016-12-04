@@ -3,7 +3,7 @@ import hashlib
 import binascii
 
 b = 448
-d = -39081
+d = -39081 # This is the non-square element of F_p
 p = 2**448 - 2**224 - 1
 q = 2**446 - 13818066809895115352007386748515426880336692474882178609894547503885
 cofactor = 4
@@ -21,6 +21,7 @@ def expmod(b,e,m):
 def inv(x):
   return expmod(x,p-2,p)
 
+# determine x by x = ± sqrt((y**2-1)/(dy**2+1))
 def xrecover(y):
   xx = (1-y*y) * inv(1-d*y*y)
   x = expmod(xx, (p+1)/4, p) # x is now the candidate square root of x^2
@@ -58,7 +59,7 @@ def decodeint(s):
   return sum(2**i * bit(s,i) for i in range(0,b))
 
 def decodepoint(s):
-  y = sum(2**i * bit(s,i) for i in range(0,b-1))
+  y = sum(2**i * bit(s,i) for i in range(0,b-1)) # encoded as the b-bit string
   x = xrecover(y)
   if x & 1 != bit(s,b-1): x = p-x # select the right square root x
   P = [x,y]
@@ -76,7 +77,7 @@ def find_g(x):
             point = decodepoint(H(ss))
             g = scalarmult(point, cofactor)
             is_id = scalarmult(g, q)
-            if is_id == identity_element: # IF P^cofactor^primeOrder == [0, 1]
+            if is_id == identity_element: # if P^cofactor^primeOrder == [0, 1]
                 return g, ss
         except Exception as e:
             pass
