@@ -667,7 +667,7 @@ Receiver's User Profile (USER-PROF)
   As described in the section 'Creating a User Profile'.
 X (POINT)
   The ephemeral public ECDH key.
-B (MPI)
+A (MPI)
   The ephemeral public DH key. Note that even though this is in uppercase,
   this is NOT a POINT.
 gamma (DRE-M)
