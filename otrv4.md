@@ -1571,7 +1571,7 @@ knows talks through a client that runs an old version of the protocol.
 Therefore, the client will start the appropriate OTR conversation with the
 other side, or will refuse to send non-encrypted messages to Bob.
 
-### Client implementation
+### Suggestion for client implementation
 
 The client must be able to distinguish message types.
 
@@ -1669,8 +1669,8 @@ with this code [9] that works as follows:
 	         * Compute `g = point^cofactor`.
 	         * If `g^q` equals the identity element, then `g` is a generator.
 
-For more explanation on how this implementation works, please refer to [10], [13]
-and [14]
+For more explanation on how this implementation works, refer to [10], [13]
+and [14].
 
 #### Dual Receiver Key Generation: DRGen()
 
@@ -1694,8 +1694,8 @@ Let `{C1, D1, H1} = PK1` and `{C2, D2, H2} = PK2`
     - `Ei = (Hi*ki) + K`
   2. Compute `αi = HashToScalar(U1i || U2i || Ei)`.
   3. Compute `Vi = Ci*ki + Di*(ki * αi)`
-3. Compute `K_enc = SHA3-256(K)`. K is compressed from 55 bytes to 32 bytes
-   because XSalsa20 has a maximum key size of 32 bytes.
+3. Compute symmetric key `K_enc = SHA3-256(K)`. K is hashed from 55 bytes to 32
+   bytes because XSalsa20 has a maximum key size of 32 bytes.
 4. Pick a random 24 bytes `nonce` and compute `phi = XSalsa20-Poly1305_K_enc(m,
    nonce)`
 5. Generate a NIZKPK:
@@ -1744,7 +1744,7 @@ ski is the secret key of the person decrypting the message.
     - `T3 = U1i*y1i`
     - `T4 = U2i*y2i`
   6. Verify `T1 + T2 + (T3 + T4)*αi ≟ Vi`.
-3. Recover secret key `K_enc = SHA3-256(Ei - U1i*zi)`. K is compressed from
+3. Recover symmetric key `K_enc = SHA3-256(Ei - U1i*zi)`. K is hashed from
    55 bytes to 32 bytes because XSalsa20 has a maximum key size of 32 bytes.
 4. Decrypt `m = XSalsa20-Poly1305_K_enc(phi, nonce)`.
 
