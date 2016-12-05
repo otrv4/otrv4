@@ -1021,11 +1021,11 @@ implement.
 
 Note:
 
-(TODO: "is not equal to its own" is weirdly phrased)
 (TODO: the DH commit thing looks a bit out of place)
 
-* If the receiving instance tag is not equal to its own, the message should be
-  discarded and the user optionally warned.
+* The receiving instance tag must be specified and should match the
+  instance tag the client uses to identify itself. Otherwise the
+  message should be discarded and the user optionally warned.
 * The exception here is the DH Commit and Pre-key messages where the recipient
   instance tag may be 0, which indicates that no particular instance is
   specified.
