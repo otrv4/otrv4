@@ -1105,9 +1105,6 @@ If everything checks out:
 * Transition `msgstate` to `MSGSTATE_ENCRYPTED`.
 * Initialize the double ratcheting.
 * Send a DRE-Auth Message.
-* If there is an stored message, encrypt it and send it as a Data Message.
-
-(TODO: stored messages? I don't know if we have those anymore. Should we? Can there be morethan one?)
 
 #### Receiving a DRE-Auth message
 
@@ -1136,7 +1133,6 @@ If everything verifies:
 * Transition `authstate` to `AUTHSTATE_NONE`.
 * Transition `msgstate` to `MSGSTATE_ENCRYPTED`.
 * Initialize the double ratcheting.
-* If there is an stored message, encrypt it and send it as a Data Message.
 
 #### Sending a plaintext message
 
@@ -1594,7 +1590,9 @@ ended.
 
 * Inform the user the conversation was finished by the other party.
 * If the user requires encryption, store the plaintext message for possible
-retransmission, and send a Query Message.
+  retransmission, and send a Query Message. The stored message can be sent at
+  the moment the DAKE finishes (either together with the DRE-Auth message or
+  right after receiving it).
 
 If `msgstate` is `MSGSTATE_ENCRYPTED`:
 
