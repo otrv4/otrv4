@@ -1021,14 +1021,11 @@ implement.
 
 Note:
 
-(TODO: the DH commit thing looks a bit out of place)
-
 * The receiving instance tag must be specified and should match the
   instance tag the client uses to identify itself. Otherwise the
-  message should be discarded and the user optionally warned.
-* The exception here is the DH Commit and Pre-key messages where the recipient
-  instance tag may be 0, which indicates that no particular instance is
-  specified.
+  message should be discarded and the user optionally
+  warned. Nevertheless DH Commit and Pre-key messages may not specify
+  an instance tag and set the value to zero.
 * The protocol is initialized with the allowed versions (3 and/or 4).
 * The protocol enforce starting a DAKE when it receives a whitespace tag.
 
