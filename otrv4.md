@@ -1003,7 +1003,7 @@ Note:
 * The receiving instance tag must be specified and should match the
   instance tag the client uses to identify itself. Otherwise the
   message should be discarded and the user optionally
-  warned. Nevertheless DH Commit and Pre-key messages may not specify
+  warned. Nevertheless D-H Commit and Pre-key messages may not specify
   an instance tag and set the value to zero.
 * The protocol is initialized with the allowed versions (3 and/or 4).
 * The protocol enforce starting a DAKE when it receives a whitespace tag.
@@ -1027,7 +1027,7 @@ If the tag offers OTR version 4 and version 4 is allowed:
 
 Otherwise, if the tag offers OTR version 3 and version 3 is allowed:
 
-* Send a version 3 DH Commit Message, and the protocol proceeds as specified in
+* Send a version 3 D-H Commit Message, and the protocol proceeds as specified in
   OTRv3.
 
 Whitespace tags have the same structure as defined in "Tagged plaintext
@@ -1050,7 +1050,7 @@ If the query message offers OTR version 4 and version 4 is allowed:
 
 Otherwise, if the query message offers OTR version 3, and version 3 is allowed:
 
-* Send a version 3 DH Commit Message and the protocol proceeds as specified
+* Send a version 3 D-H Commit Message and the protocol proceeds as specified
   in OTRv3.
 
 #### OTRv3 Specific Messages (AKE and Data message)
