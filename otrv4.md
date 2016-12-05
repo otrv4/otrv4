@@ -972,28 +972,7 @@ required and if it will advertise OTR support.
 
 ### Message state
 
-The state of a messafe is tracked to manage the messages the client
-will issue in response to user input. These response messags might be
-sent with or without encryption or not sent at all.
-
-```
-MSGSTATE_PLAINTEXT
-    This state indicates that outgoing messages are sent without encryption
-    and it is used before an OTR conversation is initiated. It is the initial
-    state, and the only way to subsequently enter this state is for the user
-    to explicitly request it via an UI operation.
-
-MSGSTATE_ENCRYPTED
-    This state indicates that outgoing messages are sent encrypted and it is
-    used during an OTR conversation. The only way to enter this state is for
-    the authentication state machine (below) to be successfully completed.
-
-MSGSTATE_FINISHED
-    This state indicates that outgoing messages are not delivered at
-    all within current conversation. It is entered only when the
-    other party notifies that the OTR conversation was finished by her side.
-```
-(TODO: FINISHED is still confusing to me, and as I said in an earlier todo it implies that it's impossible to send any more messages ever.)
+The message state is the same as OTRv3 [3].
 
 ### Authentication state
 
