@@ -532,10 +532,10 @@ Bob will be initiating the DAKE with Alice.
     ```
     Details:
 
-    * Set 'our_ecdh' as our ECDH ephemeral key pair from the DAKE ('y', 'Y').
-    * Set 'our_dh' as our DH ephemeral key pair from the DAKE ('b', 'B').
+    * Set 'our_ecdh' as ECDH ephemeral key pair generated ('y', 'Y').
+    * Set 'our_dh' as DH ephemeral key pair generated ('b', 'B').
     ```
-3. Sends Alice a pre-key message `psi_1 = (Prof_B, Y, B)`. Prof_B is
+3. Sends Alice a Pre-key message `psi_1 = (Prof_B, Y, B)`. Prof_B is
    Bob's User Profile.
 
 **Alice:**
@@ -552,10 +552,10 @@ Bob will be initiating the DAKE with Alice.
     ```
     Details:
 
-    * Set 'our_ecdh' as our ECDH ephemeral key pair from the DAKE ('x', 'X').
-    * Set 'our_dh' as our DH ephemeral key pair from the DAKE ('a', 'A').
-    * Set 'their_ecdh' as their ECDH ephemeral public key from the DAKE ('Y').
-    * Set 'their_dh' as their DH ephemeral public key from the DAKE ('B').
+    * Set 'our_ecdh' as ECDH ephemeral key pair generated ('x', 'X').
+    * Set 'our_dh' as DH ephemeral key pair generated ('a', 'A').
+    * Set 'their_ecdh' as ECDH ephemeral public key from the Pre-key message ('Y').
+    * Set 'their_dh' as DH ephemeral public key from the Pre-key message ('B').
     * Set ratchet id 'i = 0'.
     * Set 'j' as 0 (which means she will ratchet again).
     * Calculate ECDH shared secret 'K_ecdh'.
@@ -583,8 +583,8 @@ Bob will be initiating the DAKE with Alice.
     ```
     Details:
 
-    * Set 'their_ecdh' as their ECDH ephemeral public key from the DAKE ('X').
-    * Set 'their_dh' as their DH ephemeral public key from the DAKE ('A').
+    * Set 'their_ecdh' as ECDH ephemeral public key from the DRE-Auth message ('X').
+    * Set 'their_dh' as DH ephemeral public key from the DRE-Auth message ('A').
     * Set ratchet id 'i = 0'.
     * Set 'j' as 1
     * Calculate ECDH shared secret 'K_ecdh'.
@@ -609,7 +609,7 @@ choice of DH and ECDH key. A valid Pre-key message is generated as follows:
   * secret key `b` (80 bytes).
   * public key `B`.
 
-A pre-key is an OTR message encoded as:
+A Pre-key is an OTR message encoded as:
 
 ```
 Protocol version (SHORT)
@@ -619,7 +619,7 @@ Message type (BYTE)
 Sender Instance tag (INT)
   The instance tag of the person sending this message.
 Receiver Instance tag (INT)
-  The instance tag of the intended recipient. For a pre-key message, this will
+  The instance tag of the intended recipient. For a Pre-key message, this will
   often be 0 since the other party may not have identified its instance tag
   yet.
 Sender's User Profile (USER-PROF)
@@ -1029,7 +1029,7 @@ Note:
 
 * If the receiving instance tag is not equal to its own, the message should be
   discarded and the user optionally warned.
-* The exception here is the DH Commit and pre-key messages where the recipient
+* The exception here is the DH Commit and Pre-key messages where the recipient
   instance tag may be 0, which indicates that no particular instance is
   specified.
 * The protocol is initialized with the allowed versions (3 and/or 4).
@@ -1049,7 +1049,7 @@ If `msgstate` is not `MSGSTATE_PLAINTEXT`:
 
 If the tag offers OTR version 4 and version 4 is allowed:
 
-* Send a pre-key Message.
+* Send a Pre-key Message.
 * Transition `authstate` to `AUTHSTATE_AWAITING_DRE_AUTH`.
 
 Otherwise, if the tag offers OTR version 3 and version 3 is allowed:
@@ -1088,7 +1088,7 @@ Otherwise, if the query message offers OTR version 3, and version 3 is allowed:
 
 #### Sending a Pre-key message
 
-* Create and send a pre-key message.
+* Create and send a Pre-key message.
 * Transition `authstate` to `AUTHSTATE_AWAITING_DRE_AUTH`.
 
 #### Receiving a Pre-key message
@@ -1102,18 +1102,18 @@ This indicates that you have sent a Pre-key message to your correspondent and
 that either she didn't receive it or didn't receive it yet; but has sent you
 one as well.
 
-The symmetry will be broken by comparing the `X` you sent in your pre-key
+The symmetry will be broken by comparing the `X` you sent in your Pre-key
 with the one you received, considered as 56 bytes unsigned big-endian values.
 
 If yours is the lower hash value:
 
-* Ignore the incoming pre-key message.
+* Ignore the incoming Pre-key message.
 
 Otherwise:
 
 * Forget your old `X` value that you sent earlier.
 
-Regardless of `authstate` value, if you haven't ignored the incoming pre-key
+Regardless of `authstate` value, if you haven't ignored the incoming Pre-key
 message, you should:
 
 * Verify that the user profile signature is valid.
