@@ -969,12 +969,9 @@ required and if it will advertise OTR support.
 
 ### Message state
 
-// TODO: this is confusing
-
-This machine offers an option to model the management of response messages a
-client would make as a response to user input. It describes a finite state
-machine which may transition through states that describe when messages should
-be sent with or without encryption or not sent at all.
+The state of a messafe is tracked to manage the messages the client
+will issue in response to user input. These response messags might be
+sent with or without encryption or not sent at all.
 
 ```
 MSGSTATE_PLAINTEXT
