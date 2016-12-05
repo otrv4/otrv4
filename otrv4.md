@@ -1165,9 +1165,9 @@ If the verification succeeds:
 * Rotate root, chain and mix keys as appropriate.
 * If you have not sent a message to this correspondent in some (configurable)
   time, send a "heartbeat" message.
-* If the received message contains a TLV type 1 forget all encryption keys
-  for this correspondent and transition `msgstate` to `MSGSTATE_FINISHED`.
-(TODO: maybe specify what TLV type 1 is?)
+* If the received message contains a TLV type 1 (Disconnected) [3] forget
+  all encryption keys for this correspondent and transition `msgstate` to
+  `MSGSTATE_FINISHED`.
 
 #### Receiving an Error Message
 
