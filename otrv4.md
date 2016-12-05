@@ -1667,12 +1667,11 @@ G2 = (5014593412122187483175733622392028030242298988836581229127722326504735507
 
 ```
 
-Generator 1 is the base point of Ed448. Generator 2 was created with an
-implementation [9] based on code by Daniel J. Bernstein [10].
+Generator 1 (`G1`) is the base point of Ed448. Generator 2 (`G2`) was created
+with this code [9] that works as follows:
 
-The implementation works as follows:
-
-1. Select `x`, a "nothing up my sleeve" value (a value chosen above suspicion of hidden properties).
+1. Select `x`, a "nothing up my sleeve" value (a value chosen above suspicion of
+   hidden properties).
 2. Select a counter `c`.
 3. Compute `H = SHA512(x || c)`
 4. Compute `P = decodepoint(H)`:
@@ -1695,7 +1694,7 @@ The implementation works as follows:
    * If it is, `g` is a generator.
    * If it is not, increment the counter c.
 
-For more explanation on how the implementation works, please refer to [13] and
+For more explanation on how this implementation works, please refer to [13] and
 [14].
 
 #### Dual Receiver Key Generation: DRGen()
