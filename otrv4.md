@@ -1659,6 +1659,7 @@ G2 = (5014593412122187483175733622392028030242298988836581229127722326504735507
 86782902904842340270909267251001424253087988710625934010181862,
 4473149076155628025590544618523889049395342027715545953968190802002281485204547
 3906622513423589000065035233481733743985973099897904160)
+// TODO: change this to new generator
 
 ```
 
@@ -1668,6 +1669,7 @@ with this code [9] that works as follows:
 1. Select `x`, a "nothing up my sleeve" value (a value chosen above suspicion of
    hidden properties). In this case, we choose `OTRv4 g2`.
 2. Set counter `c = 0` and increment it until a generator is found:
+
 	* Concatenate `x` with `c` in a string format `ss`.
 	* Compute `H = SHA3-512(ss)`
 	* Compute `point = decodepoint(H)`:
@@ -1676,11 +1678,14 @@ with this code [9] that works as follows:
 	     namely the (448 − 1)-bit encoding of `y` followed by a sign bit; the
 	     sign bit is 1 iff `x` is negative.
 	   * Recover `x` through decoded `y` by `x = ± sqrt((1-y^2)/(1-dy^2))`:
+
 	     * Calculate `xx = (1-y^2) * inv(1-dy^2)`.
 	     * Compute candidate root `z = xx ^ (p+1)/4 (mod p)`.
-	     * If `xx == z^2`, then `z` is `x`:	    	  * Compute the point `P = (x,y)` and check if it is on the curve.
-	     	  * Compute `g = point^cofactor`.
-	     	  * If `g^q` equals the identity element, then `g` is a generator.
+	     * If `xx == z^2`, then `z` is `x`:
+
+	         * Compute the point `P = (x,y)` and check if it is on the curve.
+	         * Compute `g = point^cofactor`.
+	         * If `g^q` equals the identity element, then `g` is a generator.
 
 For more explanation on how this implementation works, please refer to [13] and
 [14].
