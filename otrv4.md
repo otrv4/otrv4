@@ -1575,7 +1575,6 @@ knows talks through a client that runs an old version of the protocol.
 Therefore, the client will start the appropriate OTR conversation with the
 other side, or will refuse to send non-encrypted messages to Bob.
 
-// TODO: should this be inside policies?
 ### Client implementation
 
 The client must be able to distinguish message types.
