@@ -1562,6 +1562,7 @@ REQUIRE_ENCRYPTION
 
 SEND_WHITESPACE_TAG
   Advertise your support of OTR using the whitespace tag.
+  It's backwards compatible with the same SEND_WHITESPACE_TAG in OTRv3.
 
 RECEIVE_WHITESPACE_TAG
   Allow to receive whitespace tags.
