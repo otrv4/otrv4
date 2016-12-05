@@ -31,16 +31,13 @@ works on top of an existing messaging protocol, like XMPP.
 ## Main Changes over Version 3
 
 - Improvements on security and privacy:
-  - Security level raised to 224 bits based on elliptic curve
-    cryptography (ECC)
+  - Security level raised to 224 bits and based on elliptic curve cryptography
+    (ECC). This includes an upgrade to SMP
   - Additional protection against transcript decryption in the case of
     ECC compromise
 - The cryptographic primitives and protocols have been updated:
   - Deniable Authenticated Key Exchange using Spawn [2].
   - Key management using the Double Ratchet Algorithm [6].
-- SMP:
-  - Upgraded the cryptographic primitives to use ECC based on the Edwards
-    448 curve (Goldilocks).
 
 ## High Level Overview
 
@@ -48,9 +45,9 @@ The high level flow of the protocol looks like this:
 
     Alice                                            Bob
     --------------------------------------------------------------------------------
-    Request OTR conversation          ------------->
-    Establish Conversation with DAKE  <------------>  Establish Conversation with DAKE
-    Exchange Data Messages            <------------>  Exchange Data Messages
+    Requests OTR conversation           ------------->
+    Establishes Conversation with DAKE  <------------>  Establishes Conversation with DAKE
+    Exchanges Data Messages             <------------>  Exchanges Data Messages
 
 ## Assumptions
 
