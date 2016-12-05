@@ -996,8 +996,11 @@ MSGSTATE_FINISHED
     all within current conversation. It is entered only when the
     other party notifies that the OTR conversation was finished by her side.
 ```
+(TODO: FINISHED is still confusing to me, and as I said in an earlier todo it implies that it's impossible to send any more messages ever.)
 
 ### Authentication state
+
+(TODO: the below sentence makes very little sense =/ - Do we need these states at all? This seems to be modeled on the OTRv3 AKE where there were many necessary states)
 
 This machines offers an option to model the management of the authentication
 protocol. It describes a finite state machine which may transition through
@@ -1020,6 +1023,9 @@ The following sections will outline the actions that the protocol should
 implement.
 
 Note:
+
+(TODO: "is not equal to its own" is weirdly phrased)
+(TODO: the DH commit thing looks a bit out of place)
 
 * If the receiving instance tag is not equal to its own, the message should be
   discarded and the user optionally warned.
@@ -1047,6 +1053,8 @@ If the tag offers OTR version 4 and version 4 is allowed:
 * Transition `authstate` to `AUTHSTATE_AWAITING_DRE_AUTH`.
 
 Otherwise, if the tag offers OTR version 3 and version 3 is allowed:
+
+(TODO: the DH Commit message is spelled differently in different places in the document)
 
 * Send a version 3 D-H Commit Message, and the protocol proceeds as specified in
   OTRv3.
@@ -1128,6 +1136,8 @@ If everything checks out:
 * Send a DRE-Auth Message.
 * If there is an stored message, encrypt it and send it as a Data Message.
 
+(TODO: stored messages? I don't know if we have those anymore. Should we? Can there be morethan one?)
+
 #### Receiving a DRE-Auth message
 
 If the message is version 4 and version 4 is not allowed, ignore this message.
@@ -1190,6 +1200,7 @@ If the verification succeeds:
   time, send a "heartbeat" message.
 * If the received message contains a TLV type 1 forget all encryption keys
   for this correspondent and transition `msgstate` to `MSGSTATE_FINISHED`.
+(TODO: maybe specify what TLV type 1 is?)
 
 #### Receiving an Error Message
 
@@ -1197,6 +1208,8 @@ If the verification succeeds:
 * Notify the client that an error has occurred.
 * Transition `msgstate` to `MSGSTATE_PLAINTEXT` and `authstate` to
   `AUTHSTATE_NONE`
+
+(TODO: hmm, do we want to include internationalization here in some way?)
 
 #### User requests to end an OTR conversation
 
@@ -1583,6 +1596,7 @@ SEND_WHITESPACE_TAG
 RECEIVE_WHITESPACE_TAG
   Allow to receive whitespace tags.
 ```
+(TODO: do we want to specify backwards compatibility with earlier whitespace flags?)
 
 For example, Alice could set up her client so that it speaks version 4 of the
 OTR protocol. Nevertheless, she may also add an exception for Charlie, who she
