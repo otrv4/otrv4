@@ -381,16 +381,16 @@ When you ratchet the ECDH keys:
 
 When you ratchet the mix keys:
 
-If the ratchet id `i % 3 == 0`:
+  If `i % 3 == 0`:
 
-  * Generate our new DH key pair `our_dh = generateDH()`.
-  * Calculate `k_dh = DH(our_dh.secret, their_dh.public)`.
-  * Calculate a `mix_key = SHA3-256(k_dh)`.
-  * Securely delete `our_dh.secret`.
+    * Generate our new DH key pair `our_dh = generateDH()`.
+    * Calculate `k_dh = DH(our_dh.secret, their_dh.public)`.
+    * Calculate a `mix_key = SHA3-256(k_dh)`.
+    * Securely delete `our_dh.secret`.
 
-Otherwise:
+  Otherwise:
 
-  * Derive and securely overwrite `mix_key = SHA3-256(mix_key)`.
+    * Derive and securely overwrite `mix_key = SHA3-256(mix_key)`.
 
 ### Deriving new chain keys
 
