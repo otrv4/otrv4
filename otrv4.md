@@ -375,7 +375,7 @@ ratchet id as `i + 1`.
 
 When you ratchet the ECDH keys:
 
-  * Generate a new ECDH key pair and assign it to `our_ecdh = generateECDH()`
+  * Generate a new ECDH key pair and assign it to `our_ecdh = generateECDH()`.
   * Calculate `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
   * Securely delete `our_ecdh.secret`.
 
@@ -383,7 +383,7 @@ When you ratchet the mix keys:
 
   If `i % 3 == 0`:
 
-    * Generate our new DH key pair `our_dh = generateDH()`.
+    * Generate the new DH key pair `our_dh = generateDH()`.
     * Calculate `k_dh = DH(our_dh.secret, their_dh.public)`.
     * Calculate a `mix_key = SHA3-256(k_dh)`.
     * Securely delete `our_dh.secret`.
@@ -441,7 +441,7 @@ this message is ignored.
 
 OTRv4 introduces mandatory user profile publication in a public place. The
 user profile contains the Cramer-Shoup long term public key, signed version
-support information, and a signed profile expiration date. Both parties will
+support information and a signed profile expiration date. Both parties will
 include the user profile in the beginning of the DAKE. The frequency of the
 user profile publication is determined by its expiration and renewal policy.
 
@@ -449,7 +449,7 @@ user profile publication is determined by its expiration and renewal policy.
 
 To create a user profile, assemble:
 
-1. Cramer-Shoup key-pair
+1. Cramer-Shoup key-pair.
 2. Version: a string corresponding to the user's supported OTR versions.
    The format is described in OTRv3 under the section "OTR Query Messages".
    [3]
@@ -484,7 +484,7 @@ can be configurable. A recommended value is two weeks.
 ```
 User Profile (USER-PROF):
   Cramer-Shoup key (CRAMER-SHOUP-PUBKEY)
-  Version (VER)
+  Version (BYTE)
   Version Expiration (PROF-EXP)
   Profile Signature (MPI)
   (optional) Transitional Signature (MPI)
@@ -535,7 +535,7 @@ Bob will be initiating the DAKE with Alice.
     * Set 'our_ecdh' as ECDH ephemeral key pair generated ('y', 'Y').
     * Set 'our_dh' as DH ephemeral key pair generated ('b', 'B').
     ```
-3. Sends Alice a Pre-key message `psi_1 = (Prof_B, Y, B)`. Prof_B is
+3. Sends Alice a Pre-key message `psi_1 = (Prof_B, Y, B)`. `Prof_B` is
    Bob's User Profile.
 
 **Alice:**
@@ -543,7 +543,7 @@ Bob will be initiating the DAKE with Alice.
 1. Generates ephemeral ECDH keys: a secret key `x` and a public key `X = G1*x`.
 2. Generates ephemeral 3072-DH keys: a secret key `a` and a public key `A = g3^a`.
 3. Computes `gamma = DREnc(PKb, PKa, m)`, being
-   `m = Prof_B || Prof_A || Y || X || B || A`. Prof_A is Alice's User Profile.
+   `m = Prof_B || Prof_A || Y || X || B || A`. `Prof_A` is Alice's User Profile.
 4. Computes `sigma = Auth(Ha, za, {Ha, Hb, Y}, Prof_B || Prof_A || Y || B ||
    gamma)`.
 5. Sends Alice a DRE-Auth Message `psi_2 = (Prof_A, gamma, sigma)`.
@@ -817,12 +817,12 @@ In both cases:
    MKenc, MKmac = derive_enc_mac_keys(chain_s[i][j])
    ```
 
-  * Get a random 24 bytes value to be the nonce.
+  * Get a random 24 bytes value to be the `nonce`.
   * Use the encryption key to encrypt the message and the mac key to calculate
     its MAC:
 
    ```
-   Encrypted_message = XSalsa20_Enc(MKenc, Nonce, m)
+   Encrypted_message = XSalsa20_Enc(MKenc, nonce, m)
    Authenticator = SHA3-512(MKmac || Encrypted_message)
    ```
 
@@ -831,17 +831,16 @@ In both cases:
 
 #### When you receive a Data Message:
 
-Use the `message_id` to compute the receiving chain key, and calculate
+* Use the `message_id` to compute the receiving chain key, and calculate
 encryption and mac keys.
 
-```
-  compute_chain_key(chain_r, ratchet_id, message_id)
-  MKenc, MKmac = derive_enc_mac_keys(chain_r[ratchet_id][message_id])
-```
+  ```
+    compute_chain_key(chain_r, ratchet_id, message_id)
+    MKenc, MKmac = derive_enc_mac_keys(chain_r[ratchet_id][message_id])
+  ```
 
-Use the "mac key" (`MKmac`) to verify the MAC of the message.
-
-If the message verification fails, reject the message.
+* Use the "mac key" (`MKmac`) to verify the MAC of the message. If the message
+  verification fails, reject the message.
 
 Otherwise:
 
@@ -1588,8 +1587,8 @@ warn him that the message was received unencrypted.
 
 If `msgstate` is `MSGSTATE_FINISHED`:
 
-This may happen if the user received a "Disconnected" TLV while typing the
-message. She expected to send this message encrypted but the conversation
+This may happen if the user received a TLV type 1 (Disconnected) while typing
+the message. She expected to send this message encrypted but the conversation
 ended.
 
 * Inform the user the conversation was finished by the other party.
