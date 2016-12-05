@@ -10,7 +10,7 @@ q = 2**446 - 1381806680989511535200738674851542688033669247488217860989454750388
 cofactor = 4
 
 def H(m):
-    return hashlib.sha3_512(m).digest()
+  return hashlib.sha3_512(m).digest()
 
 def expmod(b,e,m):
   if e == 0: return 1
