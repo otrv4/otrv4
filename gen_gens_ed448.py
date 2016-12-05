@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import hashlib
 import binascii
+import sha3
 
 b = 448
 d = -39081 # This is the non-square element of F_p
@@ -9,7 +10,7 @@ q = 2**446 - 1381806680989511535200738674851542688033669247488217860989454750388
 cofactor = 4
 
 def H(m):
-    return hashlib.sha512(m).digest() # TODO: this should be sha3
+    return hashlib.sha3_512(m).digest()
 
 def expmod(b,e,m):
   if e == 0: return 1
@@ -21,7 +22,7 @@ def expmod(b,e,m):
 def inv(x):
   return expmod(x,p-2,p)
 
-# determine x by x = ± sqrt((y**2-1)/(dy**2+1))
+# determine x by x = ± sqrt((1-y^2)/(1-dy^2))
 def xrecover(y):
   xx = (1-y*y) * inv(1-d*y*y)
   x = expmod(xx, (p+1)/4, p) # x is now the candidate square root of x^2
@@ -74,7 +75,8 @@ def find_g(x):
     while True:
         ss = "%s%d" % (x, c)
         try:
-            point = decodepoint(H(ss))
+            h = H(ss)
+            point = decodepoint(h)
             g = scalarmult(point, cofactor)
             is_id = scalarmult(g, q)
             if is_id == identity_element: # if P^cofactor^primeOrder == [0, 1]
@@ -83,14 +85,7 @@ def find_g(x):
             pass
         c = c+1
 
-generator1_x = "OTRv4 g1"
 generator2_x = "OTRv4 g2"
-
-g1, sg1 = find_g(generator1_x)
-print("g1")
-print("x = " + format(g1[0], '#04x'))
-print("y = " + format(g1[1], '#04x'))
-print("sg1 = " + sg1)
 
 g2, sg2 = find_g(generator2_x)
 print("g2")

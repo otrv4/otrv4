@@ -121,11 +121,14 @@ Field prime (p)
 Order of base point (q) [prime; q < p; q*B = I]
   2^446 - 13818066809895115352007386748515426880336692474882178609894547503885
 
-Number of bytes in p (|p|)
+Number of bytes in p (|p|) // TODO: should this be here?
   56 bytes
 
 Number of bytes in q (|q|)
   55 bytes
+
+Non-square element in p (d)
+  -39081
 ```
 
 A scalar modulo `p` is a "field element", and should be encoded and decoded
@@ -1663,28 +1666,21 @@ Generator 1 (`G1`) is the base point of Ed448. Generator 2 (`G2`) was created
 with this code [9] that works as follows:
 
 1. Select `x`, a "nothing up my sleeve" value (a value chosen above suspicion of
-   hidden properties).
-2. Select a counter `c`.
-3. Compute `H = SHA512(x || c)`
-4. Compute `P = decodepoint(H)`:
+   hidden properties). In this case, we choose `OTRv4 g2`.
+2. Set counter `c = 0` and increment it until a generator is found:
+	* Concatenate `x` with `c` in a string format `ss`.
+	* Compute `H = SHA3-512(ss)`
+	* Compute `point = decodepoint(H)`:
 
-   * Determine `d` as a the nonsquare of `F_q`.
-   * Decode `y`. An element `(x, y)` is encoded as a b-bit string,
-   namely the (b − 1)-bit encoding of y followed by a sign bit; the sign bit
-   is 1 iff x is negative. // TODO: this is in E, should it be mentioned?
-   * Recover `x` by `y` by `x = ± sqrt((y**2-1)/(dy**2+1))`.
-   * Compute square roots modulo `p` by first computing candidate root `z = x
-   ^ (p+1)/4 (mod p)` and then checking if `x^2 = z`. If it is, then `z` is
-   square root of `x`; if it isn’t, then `x` does not have a square root. //
-   TODO: this verification is different.
-   * Compute the point `P = (x,y)` and check if it is on the curve. // TODO:
-   and if not?
-
-5. Compute `g = P^cofactor`.
-6. Check if `g^q` is the identity element:
-
-   * If it is, `g` is a generator.
-   * If it is not, increment the counter c.
+	   * Decode `y`. An element `(x, y)` is encoded as a 448-bit array,
+	     namely the (448 − 1)-bit encoding of `y` followed by a sign bit; the
+	     sign bit is 1 iff `x` is negative.
+	   * Recover `x` through decoded `y` by `x = ± sqrt((1-y^2)/(1-dy^2))`:
+	     * Calculate `xx = (1-y^2) * inv(1-dy^2)`.
+	     * Compute candidate root `z = xx ^ (p+1)/4 (mod p)`.
+	     * If `xx == z^2`, then `z` is `x`:	    	  * Compute the point `P = (x,y)` and check if it is on the curve.
+	     	  * Compute `g = point^cofactor`.
+	     	  * If `g^q` equals the identity element, then `g` is a generator.
 
 For more explanation on how this implementation works, please refer to [13] and
 [14].
