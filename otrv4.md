@@ -376,7 +376,7 @@ ratchet id as `i + 1`.
 When you ratchet the ECDH keys:
 
   * Generate a new ECDH key pair and assign it to `our_ecdh = generateECDH()`
-  * Calculate `K_ecdh = ECDH(our_ecdh.secret, their_ecdh.public)`.
+  * Calculate `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
   * Securely delete `our_ecdh.secret`.
 
 When you ratchet the mix keys:
@@ -850,8 +850,8 @@ Otherwise:
   * Securely delete receiving chain keys older than `message_id-1`.
   * Set `j = 0` to indicate that a new DH-ratchet should happen the next time
     you send a message.
-  * Set `their_ecdh.public` as the "Public ECDH key" from the message.
-  * Set `their_dh.public` as the "Public DH Key" from the message, if it
+  * Set `their_ecdh` as the "Public ECDH key" from the message.
+  * Set `their_dh` as the "Public DH Key" from the message, if it
     is not NULL.
   * Add the MKmac key to list `mac_keys_to_reveal`.
 
