@@ -1045,9 +1045,7 @@ If the tag offers OTR version 4 and version 4 is allowed:
 
 Otherwise, if the tag offers OTR version 3 and version 3 is allowed:
 
-(TODO: the DH Commit message is spelled differently in different places in the document)
-
-* Send a version 3 D-H Commit Message, and the protocol proceeds as specified in
+* Send a version 3 DH Commit Message, and the protocol proceeds as specified in
   OTRv3.
 
 Whitespace tags have the same structure as defined in "Tagged plaintext
@@ -1070,7 +1068,7 @@ If the query message offers OTR version 4 and version 4 is allowed:
 
 Otherwise, if the query message offers OTR version 3, and version 3 is allowed:
 
-* Send a version 3 D-H Commit Message and the protocol proceeds as specified
+* Send a version 3 DH Commit Message and the protocol proceeds as specified
   in OTRv3.
 
 #### OTRv3 Specific Messages (AKE and Data message)
