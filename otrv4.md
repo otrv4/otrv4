@@ -121,7 +121,7 @@ Field prime (p)
 Order of base point (q) [prime; q < p; q*B = I]
   2^446 - 13818066809895115352007386748515426880336692474882178609894547503885
 
-Number of bytes in p (|p|) // TODO: should this be here?
+Number of bytes in p (|p|)
   56 bytes
 
 Number of bytes in q (|q|)
@@ -140,7 +140,7 @@ For the Diffie-Hellman group computations, the group is the one defined in RFC
 3526 [1] with a 3072-bit modulus (hex, big-endian):
 
 ```
-Prime: 2^3072 - 2^3008 - 1 + 2^64 * ([2^2942 pi] + 1690314)
+Prime (dhq): 2^3072 - 2^3008 - 1 + 2^64 * ([2^2942 pi] + 1690314)
 
 Value:
 FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1
@@ -310,7 +310,7 @@ generateECDH()
   return our_ecdh.public = G1 * r, our_ecdh.secret = r
 
 generateDH()
-  pick a random value r (80 bytes)
+  pick a random value r (80 bytes) from Z_dhq
   return our_dh.public = g3 ^ r, our_dh.secret = r
 ```
 
