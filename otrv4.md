@@ -189,6 +189,12 @@ User Profile (USER-PROF):
 In order to serialize and deserialize the point, refer to Appendix A.1
 (Encoding) and A.2 (Decoding) in Mike Hamburg's Decaf paper [11].
 
+### OTR Error Messages
+
+Any message containing the string "?OTR Error:" is an OTR Error Message. The
+following part of the message should contain human-readable details of the
+error.
+
 ### DRE messages and Auth
 
 A dual-receiver encrypted message is serialized as follows:
