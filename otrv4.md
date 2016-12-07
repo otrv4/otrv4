@@ -1059,8 +1059,7 @@ Otherwise, if the query message offers OTR version 3, and version 3 is allowed:
 
 #### Receiving a Pre-key message
 
-If the message is version 4 and version 4 is not allowed, ignore
-this message.
+If the message is version 4 and version 4 is not allowed, ignore this message.
 
 If `authstate` is `AUTHSTATE_AWAITING_DRE_AUTH`:
 
@@ -1108,18 +1107,18 @@ If the message is version 4 and version 4 is not allowed, ignore this message.
 
 If `authstate` is NOT `AUTHSTATE_AWAITING_DRE_AUTH`:
 
-* Ignore the message. This may cause the sender to be in an invalid
-`msgstate` equals `MSGSTATE_ENCRYPTED`. This can be detected as soon as she
-tries to send a next data message as it would not be possible to decrypt it
-and an OTR error message will be replied.
+* Ignore the message. This may cause the sender to be in an invalid `msgstate`
+equals `MSGSTATE_ENCRYPTED`. This can be detected as soon as the sender tries to
+send the next data message as it would not be possible to decrypt it. In this
+case, an OTR error message will be sent to the sender.
 
 Otherwise:
 
-* Verify that the profile signature is valid.
-* Verify that the profile is not expired.
+* Verify that the user profile signature is valid.
+* Verify that the user profile has not expired.
 * If the auth `sigma` is valid, decrypt the DRE message and verify:
   * that the point `X` received is on curve 448.
-  * that the DH public key `A` is from the correct group.
+  * that the DH public key `A` received is from the correct group.
 
 If everything verifies:
 
