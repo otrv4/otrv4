@@ -1001,7 +1001,7 @@ Note:
   warned. Nevertheless D-H Commit and Pre-key messages may not specify
   an instance tag and set the value to zero.
 * The protocol is initialized with the allowed versions (3 and/or 4).
-* The protocol enforce starting a DAKE when it receives a whitespace tag.
+* The protocol enforces starting a DAKE when it receives a whitespace tag.
 
 #### Receiving plaintext without the whitespace tag
 
@@ -1064,12 +1064,13 @@ this message.
 
 If `authstate` is `AUTHSTATE_AWAITING_DRE_AUTH`:
 
-This indicates that you have sent a Pre-key message to your correspondent and
-that either she didn't receive it or didn't receive it yet; but has sent you
-one as well.
+This indicates that although a Pre-key message has been sent to the
+correspondent, they have sent a Pre-key message back before receiving the one
+sent to them.
 
-The symmetry will be broken by comparing the `X` you sent in your Pre-key
-with the one you received, considered as 56 bytes unsigned big-endian values.
+This conflict will be solved by comparing the `X` and `Y` public keys sent in
+the respective Pre-key messages. These public keys are 56-byte unsigned big-
+endian values.
 
 If yours is the lower hash value:
 
@@ -1083,9 +1084,9 @@ Regardless of `authstate` value, if you haven't ignored the incoming Pre-key
 message, you should:
 
 * Verify that the user profile signature is valid.
-* Verify that the user profile is not expired.
+* Verify that the user profile has not expired.
 * Verify that the point `Y` received is on curve 448.
-* Verify that the DH public key `B` is from the correct group.
+* Verify that the DH public key `B` received is from the correct group.
 
 If everything checks out:
 
