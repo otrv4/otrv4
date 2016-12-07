@@ -965,10 +965,6 @@ For a conversation to start and to be maintained, it is necessary for the client
 to manage how to deliver response messages, defined as "message state", and to
 manage the authentication process, defined as "authentication state".
 
-The way the client reacts to user input and to received messages depends on
-whether the client has decided to allow version 3 and/or 4, if encryption is
-required and if it will advertise OTR support.
-
 ### Message state
 
 The message state is the same as OTRv3 [3].
