@@ -76,8 +76,8 @@ def find_g(x):
             point = decodepoint(h)
             g = scalarmult(point, cofactor)
             is_id = scalarmult(g, q)
-            if is_id == I: # if P^cofactor^primeOrder == [0, 1]
-                return g, ss
+            if is_id == I: # if P^cofactor^primeOrder == [0, 1]. The number of points of the twist is 4 times the prime q.
+               return g, ss
         except Exception as e:
             pass
         c = c+1
