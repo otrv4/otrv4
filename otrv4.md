@@ -1564,11 +1564,9 @@ REQUIRE_ENCRYPTION
 SEND_WHITESPACE_TAG
   Advertise your support of OTR using the whitespace tag.
   It's backwards compatible with the same SEND_WHITESPACE_TAG in OTRv3.
-
-RECEIVE_WHITESPACE_TAG
-  Allow to receive whitespace tags.
+  The client can reuse this policy in OTRv3 to decide whether to send
+  the whitespace tag.
 ```
-(TODO: do we want to specify backwards compatibility with earlier whitespace flags?)
 
 For example, Alice could set up her client so that it speaks version 4 of the
 OTR protocol. Nevertheless, she may also add an exception for Charlie, who she
