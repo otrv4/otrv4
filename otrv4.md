@@ -1659,9 +1659,9 @@ Otherwise:
   attach the whitespace tag to the message. It's a good idea to stop sending
   whitespace tags after receiving a plaintext message from the other participant.
 
-#### An OTR error has occurred
+#### An OTR error has been received
 
-If the user has chosen to alway restart the conversation, send a Query Message.
+If the user has chosen to always restart the conversation in this case, then send a Query Message.
 
 ## Appendices
 
