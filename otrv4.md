@@ -829,7 +829,13 @@ In both cases:
 
    ```
    Encrypted_message = XSalsa20_Enc(MKenc, nonce, m)
-   Authenticator = SHA3-512(MKmac || Encrypted_message)
+   ```
+
+  * Use the MAC key to create a MAC tag. MAC all the sections of the data message
+    from the protocol version to the encrypted message.
+
+   ```
+   Authenticator = SHA3-512(MKmac || Data_message_sections)
    ```
 
   * Forget and reveal MAC keys. The conditions for revealing MAC keys is
