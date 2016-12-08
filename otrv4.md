@@ -1115,8 +1115,8 @@ If `authstate` is NOT `AUTHSTATE_AWAITING_DRE_AUTH`:
 
 * Ignore the message. This may cause the sender to be in an invalid `msgstate`
 equals `MSGSTATE_ENCRYPTED`. This can be detected as soon as the sender tries to
-send the next data message as it would not be possible to decrypt it. In this
-case, an OTR error message will be sent to the sender.
+send the next data message, it would not be possible for receiver to decrypt it.
+In this case, an OTR error message will be sent by receiver to the sender.
 
 Otherwise:
 
@@ -1566,6 +1566,12 @@ SEND_WHITESPACE_TAG
   It's backwards compatible with the same SEND_WHITESPACE_TAG in OTRv3.
   The client can reuse this policy in OTRv3 to decide whether to send
   the whitespace tag.
+
+ERROR_START_AKE
+  Start the OTR AKE when you receive an OTR Error Message.
+  It's backwards compatible with the same ERROR_START_AKE in OTRv3.
+  The client can reuse this policy in OTRv3 to decide whether to start
+  the AKE when receiving error message.
 ```
 
 For example, Alice could set up her client so that it speaks version 4 of the
