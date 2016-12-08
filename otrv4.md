@@ -193,7 +193,8 @@ In order to serialize and deserialize the point, refer to Appendix A.1
 
 Any message containing the string "?OTR Error:" is an OTR Error Message. The
 following part of the message should contain human-readable details of the
-error.
+error. The message may also include a specific code at the beginning e.g. "?OTR
+Error: ERROR_CODE_1:"
 
 ### DRE messages and Auth
 
@@ -1173,10 +1174,9 @@ Otherwise:
 
 #### Receiving an Error Message
 
-* Notify the user that an error has occurred.
-* Display the human-readable message to the user.
-
-(TODO: hmm, do we want to include internationalization here in some way?)
+* Detect if an error code exists in the form "ERROR_CODE_x" where x is a number.
+* Display the human-readable error message to the user. If an error code exists,
+* Display the message in the user configured language.
 
 #### User requests to end an OTR conversation
 
