@@ -1006,7 +1006,7 @@ FINISHED
     of the OTR conversation. For example, if Alice and Bob are having an OTR
     conversation, and Bob instructs his OTR client to end its private session
     with Alice (for example, by logging out), Alice will be notified of this,
-    and her client will switch to END_SIGNALED mode. This prevents  Alice from
+    and her client will switch to FINISHED mode. This prevents  Alice from
     accidentally sending a message to Bob in plaintext (consider what happens
     if Alice was in the middle of typing a private message to Bob when he
     suddenly logs out, just as Alice hits Enter.)
