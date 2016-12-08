@@ -307,7 +307,7 @@ The previously mentioned variables are affected by these events:
 * Upon completing the DAKE.
 * When you send a Data Message.
 * When you receive a Data Message.
-* When you receive an End Conversation Message
+* When you receive a TLV type 1 (Disconnect)
 
 ### Generating ECDH and DH Keys
 
@@ -986,7 +986,8 @@ START
     This is the state that is used before an OTR conversation is initiated.
     The initial state, and the only way to subsequently enter this state is for
     the user to explicitly request to do so via some UI operation. Messages
-    sent in this state are in plaintext.
+    sent in this state are plaintext messages. If a TLV type 1 (Disconnect)
+    message is sent in another state, transition to this state.
 
 DAKE_IN_PROGRESS
 
@@ -1000,9 +1001,8 @@ ENCRYPTED_MESSAGES
     received and validated. Messages sent in this state are encrypted.
 
 FINISHED
-
-    This state is entered only when a participant sends or receives a TLV type
-    1 (Disconnected) message, which indicates they have terminated their side
+    This state is entered only when a participant receives a TLV type 1
+    (Disconnected) message, which indicates they have terminated their side
     of the OTR conversation. For example, if Alice and Bob are having an OTR
     conversation, and Bob instructs his OTR client to end its private session
     with Alice (for example, by logging out), Alice will be notified of this,
@@ -1217,7 +1217,12 @@ Otherwise:
 
 #### User requests to end an OTR conversation
 
-Follow the instructions from the same section in OTRv3 [3].
+Send a Data message, encoding a message with an empty human-readable part, and
+TLV type 1. Transition to the `START` state.
+
+#### Receiving a TLV type 1 (Disconnect) Message
+
+Transition to the START state. If a TLV type 1 is received in the `START` state, stay in that state.
 
 ## Socialist Millionaires Protocol (SMP)
 
