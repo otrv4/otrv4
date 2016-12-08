@@ -980,31 +980,37 @@ required and if it will advertise OTR support.
 
 ### Protocol states
 
+```
 START
+
     This is the state that is used before an OTR conversation is initiated.
     The initial state, and the only way to subsequently enter this state is for
-    the user to explicitly request to do so via some UI operation. When
-    messages are sent in this state, they are plaintext messages.
+    the user to explicitly request to do so via some UI operation. Messages
+    sent in this state are in plaintext.
 
 DAKE_IN_PROGRESS
-    Enter this state when a participant receives or sends a Pre-key message.
-    Data Messages sent in this state are queued for delivery in the next
-    ENCRYPTED_MESSAGES state.
+
+    This state is entered when a participant receives or sends a Pre-key
+    message. Data Messages sent in this state are queued for delivery in the
+    next ENCRYPTED_MESSAGES state.
 
 ENCRYPTED_MESSAGES
-    Enter this state after DRE-Auth message has been sent or it has been
+
+    This state is entered after DRE-Auth message has been sent or it has been
     received and validated. Messages sent in this state are encrypted.
 
 FINISHED
+
     This state is entered only when a participant sends or receives a TLV type
     1 (Disconnected) message, which indicates they have terminated their side
     of the OTR conversation. For example, if Alice and Bob are having an OTR
     conversation, and Bob instructs his OTR client to end its private session
     with Alice (for example, by logging out), Alice will be notified of this,
     and her client will switch to END_SIGNALED mode. This prevents  Alice from
-    accidentally sending a message to Bob in plaintext. (Consider what happens
+    accidentally sending a message to Bob in plaintext (consider what happens
     if Alice was in the middle of typing a private message to Bob when he
     suddenly logs out, just as Alice hits Enter.)
+```
 
 ### Protocol events
 
@@ -1014,10 +1020,10 @@ implement.
 Note:
 
 * The receiving instance tag must be specified and should match the
-  instance tag the client uses to identify itself. Otherwise the
-  message should be discarded and the user optionally
-  warned. Nevertheless D-H Commit and Pre-key messages may not specify
-  the receiver's instance tag. In this case the value is set to zero.
+  instance tag the client uses to identify itself. Otherwise, the
+  message should be discarded and the user optionally warned. Nevertheless D-H
+  Commit and Pre-key messages may not specify the receiver's instance tag. In
+  this case the value is set to zero.
 * The protocol is initialized with the allowed versions (3 and/or 4).
 
 #### User requests to start an OTR conversation
@@ -1044,23 +1050,27 @@ If the state is `ENCRYPTED_MESSAGES`, `DAKE_IN_PROGRESS`, or `FINISHED`:
 Remove the whitespace tag and display the message to the user.
 
 If the tag offers OTR version 4 and version 4 is allowed:
-    * Send a Pre-key Message.
-    * Transition the state to `DAKE_IN_PROGRESS`.
+
+  * Send a Pre-key Message.
+  * Transition the state to `DAKE_IN_PROGRESS`.
 
 If the tag offers OTR version 3 and version 3 is allowed:
-    * Send a version 3 D-H Commit Message.
-    * Proceed with the protocol as specified in OTRv3 "Receiving plaintext with
+
+  * Send a version 3 D-H Commit Message.
+  * Proceed with the protocol as specified in OTRv3 "Receiving plaintext with
       the whitespace tag" [3].
 
 #### Receiving a Query Message
 
 If the Query Message offers OTR version 4 and version 4 is allowed:
-    * Send a Pre-key Message.
-    * Transition the state to `DAKE_IN_PROGRESS`.
+
+  * Send a Pre-key Message.
+  * Transition the state to `DAKE_IN_PROGRESS`.
 
 Otherwise, if the query message offers OTR version 3, and version 3 is allowed:
-    * Send a version 3 D-H Commit Message and the protocol proceeds as
-      specified in OTRv3 "Receiving a Query Message" [3].
+
+  * Send a version 3 D-H Commit Message and the protocol proceeds as
+    specified in OTRv3 "Receiving a Query Message" [3].
 
 #### OTRv3 Specific Messages (AKE and Data message)
 
@@ -1071,33 +1081,38 @@ Proceed as specified in OTRv3, see "The protocol state machine" section [3].
 If the message is version 4 and version 4 is not allowed, ignore this message.
 
 If the state is `START`:
-    * Validate the Pre-key message.
-    * If validation fails, ignore the message.
-    * If validation succeeds:
-        * send a DRE-Auth message
-        * transition to the `ENCRYPTED_MESSAGES` state.
+
+  * Validate the Pre-key message.
+  * If validation fails, ignore the message.
+  * If validation succeeds:
+      * send a DRE-Auth message
+      * transition to the `ENCRYPTED_MESSAGES` state.
 
 If the state is `DAKE_IN_PROGRESS`:
-    This indicates that both you and the other participant have sent Pre-key
-    messages to each other. This can happen if they send you a Pre-key message
-    before receiving yours.
 
-    To agree on a Pre-key message to use for this conversation:
-    * Compare the `X` (as a 56-byte unsigned big-endian value) you sent in your
-      Pre-key with the value from the message you received.
-    * If yours is the lower hash value, ignore the received Pre-key message.
-    * Otherwise:
-      * Forget your old `X` value that you sent earlier.
-      * Validate the pre-key message.
-      * If validation succeeds:
-        * Send a DRE-Auth message.
-        * Transition to the `ENCRYPTED_MESSAGES` state.
+This indicates that both you and the other participant have sent Pre-key
+messages to each other. This can happen if they send you a Pre-key message
+before receiving yours.
+
+To agree on a Pre-key message to use for this conversation:
+
+  * Compare the `X` (as a 56-byte unsigned big-endian value) you sent in you
+    Pre-key with the value from the message you received.
+  * If yours is the lower hash value, ignore the received Pre-key message.
+
+  * Otherwise:
+    * Forget your old `X` value that you sent earlier.
+    * Validate the pre-key message.
+    * If validation succeeds:
+      * Send a DRE-Auth message.
+      * Transition to the `ENCRYPTED_MESSAGES` state.
 
 To validate the Pre-key message, you should:
-    * Verify that the user profile signature is valid.
-    * Verify that the user profile is not expired.
-    * Verify that the point `Y` received is on curve 448.
-    * Verify that the DH public key `B` is from the correct group.
+
+  * Verify that the user profile signature is valid.
+  * Verify that the user profile is not expired.
+  * Verify that the point `Y` received is on curve 448.
+  * Verify that the DH public key `B` is from the correct group.
 
 #### Sending a DRE-Auth message
 
@@ -1115,17 +1130,18 @@ If the message is version 4 and version 4 is not allowed, ignore this message.
 If the state is not `DAKE_IN_PROGRESS`, ignore this message.
 
 If the state is `DAKE_IN_PROGRESS`:
-    * Verify that the profile signature is valid.
-    * Verify that the profile is not expired.
-    * If the auth `sigma` is valid, decrypt the DRE message and verify:
-      * that the point `X` received is on curve 448.
-      * that the DH public key `A` is from the correct group.
-    * If everything verifies:
-      * Compute the ECDH shared secret `K_ecdh`.
-      * Compute the DH shared secret `k_dh`.
-      * Compute the mix key `mix_key`.
-      * Initialize the double ratcheting.
-      * Transition state to `ENCRYPTED_MESSAGES`.
+
+  * Verify that the profile signature is valid.
+  * Verify that the profile is not expired.
+  * If the auth `sigma` is valid, decrypt the DRE message and verify:
+    * that the point `X` received is on curve 448.
+    * that the DH public key `A` is from the correct group.
+  * If everything verifies:
+    * Compute the ECDH shared secret `K_ecdh`.
+    * Compute the DH shared secret `k_dh`.
+    * Compute the mix key `mix_key`.
+    * Initialize the double ratcheting.
+    * Transition state to `ENCRYPTED_MESSAGES`.
 
 #### Sending an encrypted data message
 
@@ -1141,36 +1157,43 @@ to send encrypted messages.
 #### Receiving a Data Message
 
 If the state is not `ENCRYPTED_MESSAGES`:
-    * Inform the user that an unreadable encrypted message was received.
-    * Reply with an Error Message.
+
+  * Inform the user that an unreadable encrypted message was received.
+  * Reply with an Error Message.
 
 Otherwise:
-    * To validate the data message:
-        * Verify the MAC tag.
-        * Check if the message version is allowed.
-        * Verify that the instance tags are consistant with those used in the
-          DAKE.
-        * Verify that the public ECDH key is on curve 448.
-        * Verify that the public DH key is from the correct group.
-    * If the message is not valid in any of the above steps, discard it and
-      optionally pass along a warning to the user.
-    * Use the ratchet id and the message id to compute the corresponding
-      decryption key. Try to decrypt the message.
-      * If the message cannot be decrypted and the IGNORE_UNREADABLE flag is not
-        set:
-        * Inform the user that an unreadable encrypted message was received.
-        * Reply with an Error Message.
-      * If the message cannot be decrypted and the IGNORE_UNREADABLE flag is set,
-        ignore it instead of producing an error or a notification to the user.
-      * If the message can be decrypted:
-        * Display the human-readable part (if it contains any) to the user. SMP
-          TLVs should be addressed according to the SMP state machine.
-        * Rotate root, chain and mix keys as appropriate.
-        * If the received message contains a TLV type 1 (Disconnected) [3] forget
-          all encryption keys for this correspondent and transition the state to
-          `FINISHED`.
-        * If you have not sent a message to this correspondent in some (configurable)
-          time, send a "heartbeat" message.
+
+  * To validate the data message:
+    * Verify the MAC tag.
+    * Check if the message version is allowed.
+    * Verify that the instance tags are consistant with those used in the DAKE.
+    * Verify that the public ECDH key is on curve 448.
+    * Verify that the public DH key is from the correct group.
+  * If the message is not valid in any of the above steps, discard it and
+    optionally pass along a warning to the user.
+
+  * Use the ratchet id and the message id to compute the corresponding
+    decryption key. Try to decrypt the message.
+
+    * If the message cannot be decrypted and the `IGNORE_UNREADABLE` flag is not
+    set:
+      * Inform the user that an unreadable encrypted message was received.
+      * Reply with an Error Message.
+
+    * If the message cannot be decrypted and the `IGNORE_UNREADABLE` flag is
+    set:
+      * Ignore it instead of producing an error or a notification to the user.
+
+    * If the message can be decrypted:
+      * Display the human-readable part (if it contains any) to the user. SMP
+      TLVs should be addressed according to the SMP state machine.
+      * Rotate root, chain and mix keys as appropriate.
+      * If the received message contains a TLV type 1 (Disconnected) [3] forget
+      all encryption keys for this correspondent and transition the state to
+      `FINISHED`.
+
+   * If you have not sent a message to this correspondent in some
+     (configurable) time, send a "heartbeat" message.
 
 #### Receiving an Error Message
 
