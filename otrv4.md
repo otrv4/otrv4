@@ -389,7 +389,7 @@ When you ratchet the ECDH keys:
 
 When you ratchet the mix keys:
 
-  If `i % 3 == 0`:
+  * If `i % 3 == 0`:
 
     * Generate the new DH key pair `our_dh = generateDH()`.
     * Calculate `k_dh = DH(our_dh.secret, their_dh.public)`.
@@ -398,7 +398,7 @@ When you ratchet the mix keys:
 
   Otherwise:
 
-    * Derive and securely overwrite `mix_key = SHA3-256(mix_key)`.
+   * Derive and securely overwrite `mix_key = SHA3-256(mix_key)`.
 
 ### Deriving new chain keys
 
@@ -1116,11 +1116,12 @@ To agree on a Pre-key message to use for this conversation:
       * Transition to the `ENCRYPTED_MESSAGES` state.
 
 If the state is `ENCRYPTED_MESSAGES`:
-    * Validate the Pre-key message.
-    * If validation fails, ignore the message.
-    * If validation succeeds:
-        * send a DRE-Auth message
-        * keep in the `ENCRYPTED_MESSAGES` state.
+
+  * Validate the Pre-key message.
+  * If validation fails, ignore the message.
+  * If validation succeeds:
+    * send a DRE-Auth message
+    * keep in the `ENCRYPTED_MESSAGES` state.
 
 To validate the Pre-key message, you should:
 
