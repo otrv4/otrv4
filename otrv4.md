@@ -1107,6 +1107,13 @@ To agree on a Pre-key message to use for this conversation:
       * Send a DRE-Auth message.
       * Transition to the `ENCRYPTED_MESSAGES` state.
 
+If the state is `ENCRYPTED_MESSAGES`:
+    * Validate the Pre-key message.
+    * If validation fails, ignore the message.
+    * If validation succeeds:
+        * send a DRE-Auth message
+        * keep in the `ENCRYPTED_MESSAGES` state.
+
 To validate the Pre-key message, you should:
 
   * Verify that the user profile signature is valid.
