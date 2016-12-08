@@ -1051,10 +1051,6 @@ If the tag offers OTR version 3 and version 3 is allowed:
     * Proceed with the protocol as specified in OTRv3 "Receiving plaintext with
       the whitespace tag" [3].
 
-#### Start an OTR conversation (without requesting)
-
-Send a Pre-key message to the correspondent.
-
 #### Receiving a Query Message
 
 If the Query Message offers OTR version 4 and version 4 is allowed:
