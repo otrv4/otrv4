@@ -22,6 +22,7 @@ works on top of an existing messaging protocol, like XMPP.
   3. [Fragmentation](#fragmentation)
 9. [The protocol state machine](#the-protocol-state-machine)
 10. [Socialist Millionaires' Protocol (SMP)](#socialist-millionaires-protocol-smp)
+11. [Implementation Notes](#implementation-notes)
 
 [Appendices](#appendices)
 
@@ -733,6 +734,7 @@ It is also used to [reveal old MAC keys](#revealing-mac-keys).
 
 #### Data Message format
 
+```
     Protocol version (SHORT)
       The version number of this protocol is 0x0004.
 
@@ -791,6 +793,7 @@ It is also used to [reveal old MAC keys](#revealing-mac-keys).
 
     Old MAC keys to be revealed (DATA)
       See Revealing MAC Keys section
+```
 
 #### When you send a Data Message:
 
@@ -1570,7 +1573,7 @@ If smpstate is SMPSTATE_EXPECT4:
 Set smpstate to `SMPSTATE_EXPECT1`, as no more messages are expected
 from Bob.
 
-## Implementation notes
+## Implementation Notes
 
 ### Considerations for networks which allow multiple devices
 
@@ -1678,19 +1681,19 @@ The Cramer-Shoup scheme uses a group (`G`, `q`, `G1`, `G2`). This is a group
 with the same `q` as Curve 448. The generators `G1` and `G2` are:
 
 ```
-G1 = (11781216126343694673728248434331006466518053535701637341687908214793940427
-7809514858788439644911793978499419995990477371552926308078495, 19)
+G1 = (1178121612634369467372824843433100646651805353570163734168790821479394042
+77809514858788439644911793978499419995990477371552926308078495, 19)
 
-= (0x297ea0ea2692ff1b4faff46098453a6a26adf733245f065c3c59d0709cecfa96147eaaf3932
-d94c63d96c170033f4ba0c7f0de840aed939f, 0x13)
+= (0x297ea0ea2692ff1b4faff46098453a6a26adf733245f065c3c59d0709cecfa96147eaaf393
+2d94c63d96c170033f4ba0c7f0de840aed939f, 0x13)
 
-G2 = (39136076640153877785254408713387484269585054688479520488126360749530603427
-3165958212315431889921087320515545432683148400791008269241572,
-57440909387185970865019004813896181270807778015893712886231216991563794214635628
-7346163045114803481001237424605972373287716834704142326)
+G2 = (3913607664015387778525440871338748426958505468847952048812636074953060342
+73165958212315431889921087320515545432683148400791008269241572,
+5744090938718597086501900481389618127080777801589371288623121699156379421463562
+87346163045114803481001237424605972373287716834704142326)
 
-= (0x89d75bf8561f2e0a3e726ad8480ddb510c7dbd1129b9443694d2f59dd833b5b05a44baf77eb
-7da584eb4a951bb3eb15b0b29c66a7fbf0ce4,
+= (0x89d75bf8561f2e0a3e726ad8480ddb510c7dbd1129b9443694d2f59dd833b5b05a44baf77e
+b7da584eb4a951bb3eb15b0b29c66a7fbf0ce4,
 0xca500f343628b32f0059b76f9fdd5b3c5bf1b176e4681af329da6fba07f49e3e4323192c5f7e4
 8cc8569615b50d9183ef9fd53e8f9a4aff6)
 ```
@@ -1698,26 +1701,23 @@ G2 = (39136076640153877785254408713387484269585054688479520488126360749530603427
 Generator 1 (`G1`) is the base point of Ed448. Generator 2 (`G2`) was created
 with this code [9] that works as follows:
 
-1. Select `x`, a "nothing up my sleeve" value (a value chosen above suspicion of
-   hidden properties). In this case, we choose `OTRv4 g2`.
+1. Select `x`, a "nothing up my sleeve" value (a value chosen above suspicion
+   of hidden properties). In this case, we choose `OTRv4 g2`.
 2. Set counter `c = 0` and increment it until a generator is found:
 
-	* Concatenate `x` with `c` in a string format `ss`.
-	* Compute `H = SHA3-512(ss)`
-	* Compute `point = decodepoint(H)`:
-
-	   * Decode `y`. An element `(x, y)` is encoded as a 448-bit array,
-	     namely the (448 − 1)-bit encoding of `y` followed by a sign bit; the
-	     sign bit is 1 iff `x` is negative.
-	   * Recover `x` through decoded `y` by `x = ± sqrt((1-y^2)/(1-dy^2))`:
-
-	     * Calculate `xx = (1-y^2) * inv(1-dy^2)`.
-	     * Compute candidate root `z = xx ^ (p+1)/4 (mod p)`.
-	     * If `xx == z^2`, then `z` is `x`:
-
-	         * Compute the point `P = (x,y)` and check if it is on the curve.
-	         * Compute `g = point^cofactor`.
-	         * If `g^q` equals the identity element, then `g` is a generator.
+  * Concatenate `x` with `c` in a string format `ss`.
+  * Compute `H = SHA3-512(ss)`
+  * Compute `point = decodepoint(H)`:
+    * Decode `y`. An element `(x, y)` is encoded as a 448-bit array,namely the
+      (448 − 1)-bit encoding of `y` followed by a sign bit; the sign bit is 1
+      iff `x` is negative.
+    * Recover `x` through decoded `y` by `x = ± sqrt((1-y^2)/(1-dy^2))`:
+      * Calculate `xx = (1-y^2) * inv(1-dy^2)`.
+      * Compute candidate root `z = xx ^ (p+1)/4 (mod p)`.
+      * If `xx == z^2`, then `z` is `x`:
+        * Compute the point `P = (x,y)` and check if it is on the curve.
+	* Compute `g = point^cofactor`.
+	* If `g^q` equals the identity element, then `g` is a generator.
 
 For more explanation on how this implementation works, refer to [10], [13]
 and [14].
@@ -1814,8 +1814,8 @@ We reuse the previously defined generator in Cramer-Shoup of DRE:
 G = (11781216126343694673728248434331006466518053535701637341687908214793940427
 7809514858788439644911793978499419995990477371552926308078495, 19)
 
-= (0x297ea0ea2692ff1b4faff46098453a6a26adf733245f065c3c59d0709cecfa96147eaaf3932
-d94c63d96c170033f4ba0c7f0de840aed939f, 0x13)
+= (0x297ea0ea2692ff1b4faff46098453a6a26adf733245f065c3c59d0709cecfa96147eaaf393
+2d94c63d96c170033f4ba0c7f0de840aed939f, 0x13)
 ```
 
 #### Authentication: Auth(A2, a2, {A1, A2, A3}, m):
