@@ -1043,7 +1043,8 @@ used to indicate a willingness to use OTR version 4.
 Display the message to the user.
 
 If the state is `ENCRYPTED_MESSAGES`, `DAKE_IN_PROGRESS`, or `FINISHED`:
-    The user should be warned that the message received was unencrypted.
+
+  * The user should be warned that the message received was unencrypted.
 
 #### Receiving plaintext with the whitespace tag
 
@@ -1058,7 +1059,7 @@ If the tag offers OTR version 3 and version 3 is allowed:
 
   * Send a version 3 D-H Commit Message.
   * Proceed with the protocol as specified in OTRv3 "Receiving plaintext with
-      the whitespace tag" [3].
+    the whitespace tag" [3].
 
 #### Receiving a Query Message
 
@@ -1067,18 +1068,21 @@ If the Query Message offers OTR version 4 and version 4 is allowed:
   * Send a Pre-key Message.
   * Transition the state to `DAKE_IN_PROGRESS`.
 
-Otherwise, if the query message offers OTR version 3, and version 3 is allowed:
+If the query message offers OTR version 3 and version 3 is allowed:
 
-  * Send a version 3 D-H Commit Message and the protocol proceeds as
-    specified in OTRv3 "Receiving a Query Message" [3].
+  * Send a version 3 D-H Commit Message.
+  * Proceed with the protocol as specified in OTRv3 "Receiving a Query Message"
+    [3].
 
-#### OTRv3 Specific Messages (AKE and Data message)
+#### Receiving OTRv3 Specific Messages (AKE or Data message)
 
-Proceed as specified in OTRv3, see "The protocol state machine" section [3].
+Proceed as specified in OTRv3. See "The protocol state machine" section [3].
 
 #### Receiving a Pre-key message
 
-If the message is version 4 and version 4 is not allowed, ignore this message.
+If the message is version 4 and version 4 is not allowed:
+
+  * Ignore this message.
 
 If the state is `START`:
 
@@ -1098,7 +1102,8 @@ To agree on a Pre-key message to use for this conversation:
 
   * Compare the `X` (as a 56-byte unsigned big-endian value) you sent in you
     Pre-key with the value from the message you received.
-  * If yours is the lower hash value, ignore the received Pre-key message.
+  * If yours is the lower hash value:
+    * Ignore the received Pre-key message.
 
   * Otherwise:
     * Forget your old `X` value that you sent earlier.
@@ -1124,7 +1129,6 @@ To validate the Pre-key message, you should:
 #### Sending a DRE-Auth message
 
 * Compute the ECDH shared secret `K_ecdh`.
-* Compute the DH shared secret `k_dh`.
 * Compute the mix key `mix_key`.
 * Transition the state to `ENCRYPTED_MESSAGES`.
 * Initialize the double ratcheting.
@@ -1134,7 +1138,9 @@ To validate the Pre-key message, you should:
 
 If the message is version 4 and version 4 is not allowed, ignore this message.
 
-If the state is not `DAKE_IN_PROGRESS`, ignore this message.
+If the state is not `DAKE_IN_PROGRESS`:
+
+  * Ignore this message.
 
 If the state is `DAKE_IN_PROGRESS`:
 
@@ -1143,9 +1149,9 @@ If the state is `DAKE_IN_PROGRESS`:
   * If the auth `sigma` is valid, decrypt the DRE message and verify:
     * that the point `X` received is on curve 448.
     * that the DH public key `A` is from the correct group.
+
   * If everything verifies:
     * Compute the ECDH shared secret `K_ecdh`.
-    * Compute the DH shared secret `k_dh`.
     * Compute the mix key `mix_key`.
     * Initialize the double ratcheting.
     * Transition state to `ENCRYPTED_MESSAGES`.
@@ -1176,6 +1182,7 @@ Otherwise:
     * Verify that the instance tags are consistant with those used in the DAKE.
     * Verify that the public ECDH key is on curve 448.
     * Verify that the public DH key is from the correct group.
+
   * If the message is not valid in any of the above steps, discard it and
     optionally pass along a warning to the user.
 
