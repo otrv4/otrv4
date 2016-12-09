@@ -39,7 +39,8 @@ works on top of an existing messaging protocol, like XMPP.
 - The cryptographic primitives and protocols have been updated:
   - Deniable Authenticated Key Exchange using Spawn [2].
   - Key management using the Double Ratchet Algorithm [6].
-(TODO: something here about the smaller primitive upgrades? Move to XSalsa?)
+  - Smaller primitive upgrades to the SHA3 family
+  - Switch to XSalsa20 from AES
 
 ## High Level Overview
 
@@ -1018,6 +1019,7 @@ ENCRYPTED_MESSAGES
     received and validated. Messages sent in this state are encrypted.
 
 FINISHED
+
     This state is entered only when a participant receives a TLV type 1
     (Disconnected) message, which indicates they have terminated their side
     of the OTR conversation. For example, if Alice and Bob are having an OTR
