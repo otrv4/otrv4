@@ -130,11 +130,9 @@ Number of bytes in p (|p|)
 Number of bytes in q (|q|)
   55 bytes
 
-Non-square element in p (d)
+Non-square element in Z_p (d)
   -39081
 ```
-
-(TODO: maybe I'm being stupid about the above, but how can you have a negative element in a prime group?)
 
 A scalar modulo `p` is a "field element", and should be encoded and decoded
 using the rules for MPIs.
