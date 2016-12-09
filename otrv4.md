@@ -142,12 +142,12 @@ using the rules for MPIs.
 For the Diffie-Hellman group computations, the group is the one defined in RFC
 3526 ([1]) with a 3072-bit modulus (hex, big-endian):
 
-(TODO: what is the square bracket notation below? I don't really understand it)
-
 ```
-Prime (dhq): 2^3072 - 2^3008 - 1 + 2^64 * ([2^2942 pi] + 1690314)
+Prime (p): 2^3072 - 2^3008 - 1 + 2^64 * ([2^2942 pi] + 1690314)
+(NOTE: [2^2942 pi] denotes "integer_part_of(2^2942 * π)", where π is the
+transcendental number 3.1415926....)
 
-Value:
+Its hexadecimal value is:
 FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1
 29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD
 EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245
