@@ -489,7 +489,7 @@ To create a user profile, assemble:
    (seconds since Jan 1, 1970).
 4. Profile Signature: One of the Cramer-Shoup secret key values (`z`) and its
    generator (`G1`) is used to create signatures of the entire profile
-   excluding the signature itself.
+   excluding the signature itself. Its size is 112 bytes.
    It is created using the Ed448 signature algorithm as documented in ([4]).
 5. Transition Signature (optional): A signature of the profile excluding
    Profile Signatures and itself signed by the user's OTRv3 DSA key. The
