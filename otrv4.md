@@ -250,7 +250,7 @@ Auth message (AUTH):
 
 ### Public keys and fingerprints
 
-OTRv4 introduces a new type of public-key:
+OTRv4 introduces a new type of public key:
 
 ```
 OTR public authentication Cramer-Shoup key (CRAMER-SHOUP-PUBKEY):
@@ -277,18 +277,18 @@ For exchanging data messages, OTRv4 uses a key structure and key rotation
 strategy with The Double Ratchet Algorithm, as specified by  Moxie Marlinspike
 ([6]), at its core. As a result we will use many of the terms within the
 Double Ratchet domain to describe the difference in the context of OTRv4. A
-cryptographic ratchet is a one way mechanism for deriving new cryptographic
+cryptographic ratchet is a one-way mechanism for deriving new cryptographic
 keys from previous keys. New keys cannot be used to calculate the old keys.
 Its name comes from the mechanical ratchet.
 
 OTRv4 retains the Diffie-Hellman Ratchet ([7]) with Elliptic Curve Diffie
 Hellman (ECDH), and the Symmetric Key Ratchet ([12]) from the algorithm.
 
-OTRv4 adds new 3072 Diffie-Hellman keys called the Mix Key Pair. In addition,
+OTRv4 adds new 3072-bit Diffie-Hellman keys called the Mix Key Pair. In addition,
 another Diffie-Hellman Ratchet and Key Symmetric Ratchet is added for the Mix
 Key alone. These were added to protect transcripts of data messages in the
 case that elliptic curve cryptography is broken. During the DAKE, both parties
-agree upon the first set of 3072 Diffie-Hellman keys. Then every third Diffie-
+agree upon the first set of 3072-bit Diffie-Hellman keys. Then every third Diffie-
 Hellman Ratchet in the Double Ratchet, a new 384-byte (3072-bit) key is
 agreed upon. Between each Diffie-Hellman Mix Key Ratchet, both sides will
 conduct a Symmetric Mix Key Ratchet.
@@ -338,7 +338,7 @@ generateDH()
 
 ```
 k_dh:
-  The serialized 3072-DH shared secret computed from a DH exchange.
+  The serialized 3072-bit DH shared secret computed from a DH exchange.
   This is serialized as a big-endian unsigned integer.
 
 mix_key:
@@ -1085,7 +1085,7 @@ If the Query Message offers OTR version 4 and version 4 is allowed:
   * Send a Pre-key Message.
   * Transition the state to `DAKE_IN_PROGRESS`.
 
-If the query message offers OTR version 3 and version 3 is allowed:
+If the Query message offers OTR version 3 and version 3 is allowed:
 
   * Send a version 3 D-H Commit Message.
   * Proceed with the protocol as specified in OTRv3 "Receiving a Query Message"
@@ -1235,7 +1235,7 @@ Otherwise:
 
 #### User requests to end an OTR conversation
 
-Send a Data message, encoding a message with an empty human-readable part, and
+Send a data message, encoding a message with an empty human-readable part, and
 TLV type 1. Transition to the `START` state.
 
 #### Receiving a TLV type 1 (Disconnect) Message
