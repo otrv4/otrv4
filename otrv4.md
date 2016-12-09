@@ -658,7 +658,7 @@ B (MPI)
 ### DRE-Auth message
 
 This is the second message of the DAKE. Alice sends it to Bob to commit to a
-choice of her ECDH ephemeral key and her DH ephemeral key, and acknowledgement
+choice of her ECDH ephemeral key and her DH ephemeral key, and acknowledgment
 of Bob's ECDH ephemeral key and DH ephemeral key. The ECDH ephemeral public
 keys and DH ephemeral public keys are encrypted with DRE and authenticated
 with a NIZKPK.
@@ -937,7 +937,7 @@ The message should begin with `?OTR|` and end with `,`.
 
 Note that `index` and `total` are unsigned short ints (2 bytes), and each has
 a maximum value of 65535. Also, each `piece[index]` must be non-empty.
-The instance tags, `index` and `total` values may have leading zeroes.
+The instance tags, `index` and `total` values may have leading zeros.
 
 Note that fragments are not messages that can be fragmented: you can't fragment a fragment.
 
@@ -1200,7 +1200,7 @@ Otherwise:
   * To validate the data message:
     * Verify the MAC tag.
     * Check if the message version is allowed.
-    * Verify that the instance tags are consistant with those used in the DAKE.
+    * Verify that the instance tags are consistent with those used in the DAKE.
     * Verify that the public ECDH key is on curve 448.
     * Verify that the public DH key is from the correct group.
 
@@ -1259,7 +1259,7 @@ OTRv4 creates fingerprints using SHA3-512, which increases their size. Thus,
 the size of the fingerprint in the "Secret Information" section of OTRv3 ([3])
 should be 64 bytes in size.
 
-Lastly, OTRv4 uses Ed448 as the cryptographic primative. This changes the way
+Lastly, OTRv4 uses Ed448 as the cryptographic primitive. This changes the way
 values are serialized and how they are computed. To define the SMP values
 under Ed448, we reuse the previously defined generator for Cramer-Shoup:
 
