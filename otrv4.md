@@ -143,9 +143,8 @@ For the Diffie-Hellman group computations, the group is the one defined in RFC
 3526 ([1]) with a 3072-bit modulus (hex, big-endian):
 
 ```
-Prime (dh_p): 2^3072 - 2^3008 - 1 + 2^64 * ([2^2942 pi] + 1690314)
-(NOTE: [2^2942 pi] denotes "integer_part_of(2^2942 * π)", where π is the
-transcendental number 3.1415926....)
+Prime (dh_p): 2^3072 - 2^3008 - 1 + 2^64 * (integer_part_of(2^2942 * π) +
+1690314)
 
 Its hexadecimal value is:
 FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1
