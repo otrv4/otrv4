@@ -1643,17 +1643,12 @@ other side, or will refuse to send non-encrypted messages to Bob.
 
 Following are suggestions for implementation about handling different messages
 
-#### Receiving plaintext
-
-If `msgstate` is `MSGSTATE_PLAINTEXT` and the user requires encryption,
-warn him that the message was received unencrypted.
-
 #### User types a message to be sent
 
-If `msgstate` is `MSGSTATE_FINISHED`:
+If `msgstate` is `FINISHED`:
 
 This may happen if the user received a TLV type 1 (Disconnected) while typing
-the message. She expected to send this message encrypted but the conversation
+the message. They expected to send this message encrypted but the conversation
 ended.
 
 * Inform the user the conversation was finished by the other party.
@@ -1662,7 +1657,7 @@ ended.
   the moment the DAKE finishes (either together with the DRE-Auth message or
   right after receiving it).
 
-If `msgstate` is `MSGSTATE_ENCRYPTED`:
+If `msgstate` is `ENCRYPTED_MESSAGES`:
 
 * Use the protocol to send an encrypted message.
 
@@ -1670,7 +1665,7 @@ Otherwise:
 
 * If the user requires encryption, store the plaintext message for possible
   retransmission, and send a Query Message.
-* Otherwise, if the user wants to advertise her versions using whitespace,
+* Otherwise, if the user wants to advertise their versions using whitespace,
   attach the whitespace tag to the message. It's a good idea to stop sending
   whitespace tags after receiving a plaintext message from the other participant.
 
