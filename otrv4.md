@@ -134,7 +134,7 @@ Non-square element in Z_p (d)
   -39081
 ```
 
-A scalar modulo `p` is a "field element", and should be encoded and decoded
+A scalar modulo `q` is a "field element", and should be encoded and decoded
 using the rules for MPIs.
 
 ### 3072 Diffie-Hellman Parameters
@@ -143,7 +143,7 @@ For the Diffie-Hellman group computations, the group is the one defined in RFC
 3526 ([1]) with a 3072-bit modulus (hex, big-endian):
 
 ```
-Prime (p): 2^3072 - 2^3008 - 1 + 2^64 * ([2^2942 pi] + 1690314)
+Prime (dh_p): 2^3072 - 2^3008 - 1 + 2^64 * ([2^2942 pi] + 1690314)
 (NOTE: [2^2942 pi] denotes "integer_part_of(2^2942 * π)", where π is the
 transcendental number 3.1415926....)
 
@@ -166,8 +166,6 @@ BBE11757 7A615D6C 770988C0 BAD946E2 08E24FA0 74E5AB31
 43DB5BFC E0FD108E 4B82D120 A93AD2CA FFFFFFFF FFFFFFFF
 
 Generator (g3): 2
-
-Subgroup order (dhq): (p - 1) / 2
 ```
 
 Note that this means that whenever you see an operation on a field element
@@ -332,7 +330,7 @@ generateECDH()
   return our_ecdh.public = G1 * r, our_ecdh.secret = r
 
 generateDH()
-  pick a random value r (80 bytes) from Z_dhq
+  pick a random value r (80 bytes)
   return our_dh.public = g3 ^ r, our_dh.secret = r
 ```
 
