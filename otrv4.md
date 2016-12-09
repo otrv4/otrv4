@@ -1639,9 +1639,7 @@ other side, or will refuse to send non-encrypted messages to Bob.
 
 ### Suggestion for client implementation
 
-The client must be able to distinguish message types.
-(TODO: what does the above mean?)
-
+Following are suggestions for implementation about handling different messages
 
 #### Receiving plaintext
 
