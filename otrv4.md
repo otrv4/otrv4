@@ -475,12 +475,8 @@ To create a user profile, assemble:
 2. Version: a string corresponding to the user's supported OTR versions.
    The format is described in OTRv3 under the section "OTR Query Messages"
    ([3]).
-3. Profile Expiration: This is the date the profile expires. It contains the
-   amount of seconds from the epoch to the expiration date. Its format is the
-   same as the "date-time" described in section 5.6 of RFC3339 ([8]).
-
-(TODO: why are we using a date-time format to specify the date the profile expires? Why do we use seconds since epoch when days since epoch would suffice?)
-
+3. Profile Expiration: This is the date the profile expires, in epoch seconds
+   (seconds since Jan 1, 1970).
 4. Profile Signature: One of the Cramer-Shoup secret key values (`z`) and its
    generator (`G1`) is used to create signatures of the entire profile
    excluding the signature itself.
