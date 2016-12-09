@@ -620,13 +620,11 @@ Bob will be initiating the DAKE with Alice.
 This is the first message of the DAKE. Bob sends it to Alice to commit to a
 choice of DH and ECDH key. A valid Pre-key message is generated as follows:
 
-(TODO: the present tense of the verbs below should probably be changed to imperative)
-
-1. Creates a user profile, as detailed [here](#creating-a-user-profile).
-2. Generates an ephemeral ECDH key pair:
+1. Create a user profile, as detailed [here](#creating-a-user-profile).
+2. Generate an ephemeral ECDH key pair:
   * secret key `y`.
   * public key `Y`.
-3. Generates an ephemeral DH key pair:
+3. Generate an ephemeral DH key pair:
   * secret key `b` (80 bytes).
   * public key `B`.
 
@@ -662,12 +660,11 @@ with a NIZKPK.
 
 A valid DRE-Auth message is generated as follows:
 
-(TODO: the present tense of the verbs below should probably be changed to imperative)
 1. Create a user profile, as detailed [here](#creating-a-user-profile)
-2. Generates an ephemeral ECDH key pair:
+2. Generate an ephemeral ECDH key pair:
   * secret key `x`.
   * public key `X`
-3. Generates an ephemeral DH key pair:
+3. Generate an ephemeral DH key pair:
   * secret key `a` (80 bytes).
   * public key `A`.
 4. Generate `m = Prof_B || Prof_A || Y || X || B || A`
