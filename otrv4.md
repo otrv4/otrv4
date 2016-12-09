@@ -201,9 +201,15 @@ In order to serialize and deserialize the point, refer to Appendix A.1
 Any message containing the string "?OTR Error:" is an OTR Error Message. The
 following part of the message should contain human-readable details of the
 error. The message may also include a specific code at the beginning e.g. "?OTR
-Error: ERROR_CODE_1:"
+Error: ERROR_CODE_1:". This code is used to identify which error is being
+received for optional internationalization of the message.
 
-(TODO: are there any specified error codes? How do they work? where are they put?)
+Error Code List:
+
+```
+ERROR_CODE_1:
+  Message cannot be decrypted
+```
 
 ### DRE messages and Auth
 
@@ -1190,7 +1196,7 @@ to send encrypted messages.
 If the state is not `ENCRYPTED_MESSAGES`:
 
   * Inform the user that an unreadable encrypted message was received.
-  * Reply with an Error Message.
+  * Reply with an Error Message with ERROR_CODE_1.
 
 Otherwise:
 
@@ -1210,7 +1216,7 @@ Otherwise:
     * If the message cannot be decrypted and the `IGNORE_UNREADABLE` flag is not
     set:
       * Inform the user that an unreadable encrypted message was received.
-      * Reply with an Error Message.
+      * Reply with an Error Message with ERROR_CODE_1.
 
     * If the message cannot be decrypted and the `IGNORE_UNREADABLE` flag is
     set:
