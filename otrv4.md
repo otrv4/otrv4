@@ -459,13 +459,23 @@ then this message is ignored.
 
 ## User Profile
 
-(TODO: we probably need a paragraph about what publishing actually means in this context)
+OTRv4 introduces a user profile. The user profile contains the Cramer-Shoup
+long term public key, signed information about supported versions, a signed
+profile expiration date, and an optional transition signature.
 
-OTRv4 introduces mandatory user profile publication in a public place. The
-user profile contains the Cramer-Shoup long term public key, signed version
-support information and a signed profile expiration date. Both parties will
-include the user profile in the beginning of the DAKE. The frequency of the
-user profile publication is determined by its expiration and renewal policy.
+Each participant maintains a user profile for publication and for authentication
+in the DAKE. Profiles should be published in a public location. Anyone who wants
+to access the user profile should know (or be able to find) its location.
+
+The profile publication allows users to repudiate their participation in a
+conversation that includes their profile.
+
+When the user profile expires, it should be updated. The expiration and renewal
+policy determine the frequency of the user profile publication.
+
+Both parties include the user profile in the DAKE. Participants in the DAKE do
+not request the profile from the site of publication. Both the published profile
+and the profile used in the DAKE should match each other.
 
 ### Creating a User Profile
 
@@ -505,15 +515,16 @@ can be configurable. A recommended value is two weeks.
 ```
 User Profile (USER-PROF):
   Cramer-Shoup key (CRAMER-SHOUP-PUBKEY)
-  Version (BYTE)
-  Version Expiration (PROF-EXP)
+  Version (VERSION)
+  Profile Expiration (PROF-EXP)
   Profile Signature (MPI)
   (optional) Transitional Signature (MPI)
 
-Version (BYTE):
-  1 byte unsigned value
+Version (VERSION):
+  1 byte unsigned len
+  len byte data
 
-Version Expiration (PROF-EXP):
+Profile Expiration (PROF-EXP):
   8 bytes signed value, big-endian
 ```
 
