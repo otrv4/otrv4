@@ -439,9 +439,9 @@ When sending or receiving data messages, you must calculate the message keys:
 
 ```
 derive_enc_mac_keys(chain_key):
-  Kenc = SHA3-256(0x01 || chain_key)
-  Kmac = SHA3-512(0x02 || chain_key)
-  return Kenc, Kmac
+  MKenc = SHA3-256(0x01 || chain_key)
+  MKmac = SHA3-512(0x02 || chain_key)
+  return MKenc, MKmac
 ```
 
 ## Conversation Initialization
@@ -717,12 +717,12 @@ Send data message 0_1            -------------------->
 
                                                        Receive data message 0_0
                                                        Compute receiving chain key 0_0
-                                                       Derive Kenc & Kmac
+                                                       Derive MKenc & MKmac
                                                        Verify MAC, Decrypt message 0_0
 
                                                        Receive data message 0_1
                                                        Compute receiving chain key 1_1
-                                                       Derive Kenc & Kmac
+                                                       Derive MKenc & MKmac
                                                        Verify MAC, Decrypt message 0_1
 
                                                        Perform a new ratchet
@@ -731,12 +731,12 @@ Send data message 0_1            -------------------->
 
 Receive data message 1_0
 Compute receiving chain key 1_0
-Derive Kenc & Kmac
+Derive MKenc & MKmac
 Verify MAC, Decrypt message 1_0
 
 Receive data message 1_1
 Recover receiving chain key 1_1
-Derive Kenc & Kmac
+Derive MKenc & MKmac
 Verify MAC, Decrypt message 1_1
 ```
 
