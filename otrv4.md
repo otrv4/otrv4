@@ -39,6 +39,7 @@ works on top of an existing messaging protocol, like XMPP.
 - The cryptographic primitives and protocols have been updated:
   - Deniable Authenticated Key Exchange using Spawn [2].
   - Key management using the Double Ratchet Algorithm [6].
+(TODO: something here about the smaller primitive upgrades? Move to XSalsa?)
 
 ## High Level Overview
 
@@ -100,6 +101,7 @@ See section [Data Types](#data-types) for encoding and decoding details.
 
 ### Elliptic Curve Parameters
 
+(TODO: I think we need to put the references inside of parenthesis or something, they make reading the rendered markdown really hard)
 OTRv4 uses the Ed448-Goldilocks [4] elliptic curve [5], which defines the
 following parameters:
 
@@ -132,6 +134,8 @@ Non-square element in p (d)
   -39081
 ```
 
+(TODO: maybe I'm being stupid about the above, but how can you have a negative element in a prime group?)
+
 A scalar modulo `p` is a "field element", and should be encoded and decoded
 using the rules for MPIs.
 
@@ -139,6 +143,8 @@ using the rules for MPIs.
 
 For the Diffie-Hellman group computations, the group is the one defined in RFC
 3526 [1] with a 3072-bit modulus (hex, big-endian):
+
+(TODO: what is the square bracket notation below? I don't really understand it)
 
 ```
 Prime (dhq): 2^3072 - 2^3008 - 1 + 2^64 * ([2^2942 pi] + 1690314)
@@ -196,6 +202,8 @@ Any message containing the string "?OTR Error:" is an OTR Error Message. The
 following part of the message should contain human-readable details of the
 error. The message may also include a specific code at the beginning e.g. "?OTR
 Error: ERROR_CODE_1:"
+
+(TODO: are there any specified error codes? How do they work? where are they put?)
 
 ### DRE messages and Auth
 
@@ -447,6 +455,8 @@ this message is ignored.
 
 ## User Profile
 
+(TODO: we probably need a paragraph about what publishing actually means in this context)
+
 OTRv4 introduces mandatory user profile publication in a public place. The
 user profile contains the Cramer-Shoup long term public key, signed version
 support information and a signed profile expiration date. Both parties will
@@ -464,6 +474,9 @@ To create a user profile, assemble:
 3. Profile Expiration: This is the date the profile expires. It contains the
    amount of seconds from the epoch to the expiration date. Its format is the
    same as the "date-time" described in section 5.6 of RFC3339 [8].
+
+(TODO: why are we using a date-time format to specify the date the profile expires? Why do we use seconds since epoch when days since epoch would suffice?)
+
 4. Profile Signature: One of the Cramer-Shoup secret key values (`z`) and its
    generator (`G1`) is used to create signatures of the entire profile
    excluding the signature itself.
@@ -609,6 +622,8 @@ Bob will be initiating the DAKE with Alice.
 This is the first message of the DAKE. Bob sends it to Alice to commit to a
 choice of DH and ECDH key. A valid Pre-key message is generated as follows:
 
+(TODO: the present tense of the verbs below should probably be changed to imperative)
+
 1. Creates a user profile, as detailed [here](#creating-a-user-profile).
 2. Generates an ephemeral ECDH key pair:
   * secret key `y`.
@@ -649,6 +664,7 @@ with a NIZKPK.
 
 A valid DRE-Auth message is generated as follows:
 
+(TODO: the present tense of the verbs below should probably be changed to imperative)
 1. Create a user profile, as detailed [here](#creating-a-user-profile)
 2. Generates an ephemeral ECDH key pair:
   * secret key `x`.
@@ -1628,6 +1644,8 @@ other side, or will refuse to send non-encrypted messages to Bob.
 ### Suggestion for client implementation
 
 The client must be able to distinguish message types.
+(TODO: what does the above mean?)
+
 
 #### Receiving plaintext
 
