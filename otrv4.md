@@ -37,10 +37,10 @@ works on top of an existing messaging protocol, like XMPP.
   - Additional protection against transcript decryption in the case of
     ECC compromise
 - The cryptographic primitives and protocols have been updated:
-  - Deniable Authenticated Key Exchange using Spawn [2].
-  - Key management using the Double Ratchet Algorithm [6].
-  - Smaller primitive upgrades to the SHA3 family
-  - Switch to XSalsa20 from AES
+  - Deniable Authenticated Key Exchange using Spawn ([2]).
+  - Key management using the Double Ratchet Algorithm ([6]).
+  - Upgrades SHA-2 to the SHA-3 family.
+  - Switch to XSalsa20 from AES.
 
 ## High Level Overview
 
@@ -102,8 +102,7 @@ See section [Data Types](#data-types) for encoding and decoding details.
 
 ### Elliptic Curve Parameters
 
-(TODO: I think we need to put the references inside of parenthesis or something, they make reading the rendered markdown really hard)
-OTRv4 uses the Ed448-Goldilocks [4] elliptic curve [5], which defines the
+OTRv4 uses the Ed448-Goldilocks ([4]) elliptic curve ([5]), which defines the
 following parameters:
 
 ```
@@ -141,7 +140,7 @@ using the rules for MPIs.
 ### 3072 Diffie-Hellman Parameters
 
 For the Diffie-Hellman group computations, the group is the one defined in RFC
-3526 [1] with a 3072-bit modulus (hex, big-endian):
+3526 ([1]) with a 3072-bit modulus (hex, big-endian):
 
 (TODO: what is the square bracket notation below? I don't really understand it)
 
@@ -193,7 +192,7 @@ User Profile (USER-PROF):
 ```
 
 In order to serialize and deserialize the point, refer to Appendix A.1
-(Encoding) and A.2 (Decoding) in Mike Hamburg's Decaf paper [11].
+(Encoding) and A.2 (Decoding) in Mike Hamburg's Decaf paper ([11]).
 
 ### OTR Error Messages
 
@@ -276,8 +275,8 @@ cryptographic ratchet is a one way mechanism for deriving new cryptographic
 keys from previous keys. New keys cannot be used to calculate the old keys.
 Its name comes from the mechanical ratchet.
 
-OTRv4 retains the Diffie-Hellman Ratchet [7] with Elliptic Curve Diffie
-Hellman (ECDH), and the Symmetric Key Ratchet [12] from the algorithm.
+OTRv4 retains the Diffie-Hellman Ratchet ([7]) with Elliptic Curve Diffie
+Hellman (ECDH), and the Symmetric Key Ratchet ([12]) from the algorithm.
 
 OTRv4 adds new 3072 Diffie-Hellman keys called the Mix Key Pair. In addition,
 another Diffie-Hellman Ratchet and Key Symmetric Ratchet is added for the Mix
@@ -442,15 +441,15 @@ derive_enc_mac_keys(chain_key):
 ## Conversation Initialization
 
 OTRv4 will initialize through a Query message or a whitespace tag, as discussed
-in OTRv3 [3]. After this, the conversation is authenticated using a deniable
+in OTRv3 ([3]). After this, the conversation is authenticated using a deniable
 authenticated key exchange (DAKE).
 
 ### Requesting conversation with older OTR versions
 
 Bob might respond to Alice's request or notification of willingness to start a
 conversation using OTRv3. If this is the case and Alice supports version 3,
-the protocol falls back to OTRv3 [3]. If Alice does not support version 3, then
-this message is ignored.
+the protocol falls back to OTRv3 ([3]). If Alice does not support version 3,
+then this message is ignored.
 
 ## User Profile
 
@@ -468,18 +467,18 @@ To create a user profile, assemble:
 
 1. Cramer-Shoup key-pair.
 2. Version: a string corresponding to the user's supported OTR versions.
-   The format is described in OTRv3 under the section "OTR Query Messages".
-   [3]
+   The format is described in OTRv3 under the section "OTR Query Messages"
+   ([3]).
 3. Profile Expiration: This is the date the profile expires. It contains the
    amount of seconds from the epoch to the expiration date. Its format is the
-   same as the "date-time" described in section 5.6 of RFC3339 [8].
+   same as the "date-time" described in section 5.6 of RFC3339 ([8]).
 
 (TODO: why are we using a date-time format to specify the date the profile expires? Why do we use seconds since epoch when days since epoch would suffice?)
 
 4. Profile Signature: One of the Cramer-Shoup secret key values (`z`) and its
    generator (`G1`) is used to create signatures of the entire profile
    excluding the signature itself.
-   It is created using the Ed448 signature algorithm as documented in [4].
+   It is created using the Ed448 signature algorithm as documented in ([4]).
 5. Transition Signature (optional): A signature of the profile excluding
    Profile Signatures and itself signed by the user's OTRv3 DSA key. The
    transitional signature that enables contacts that trust user's version 3
@@ -522,7 +521,7 @@ This section outlines the flow of the Deniable Authenticated Key Exchange.
 This is a way to mutually agree upon shared keys for the two parties and
 authenticate one another while providing participation deniability.
 
-This protocol is derived from the Spawn protocol [2], which uses dual-receiver
+This protocol is derived from the Spawn protocol ([2]), which uses dual-receiver
 encryption (DRE) and a non-interactive zero-knowledge proof of knowledge
 (NIZKPK) for authentication (Auth).
 
@@ -1051,11 +1050,11 @@ Send an OTR Query Message or a plaintext message with a whitespace tag to the
 correspondent.
 
 Query Messages are constructed according to the section "OTR Query Messages" of
-OTRv3 [3]. The byte identifier for OTR version 4 is "4".
+OTRv3 ([3]). The byte identifier for OTR version 4 is "4".
 
 Whitespace tags have the same structure as defined in "Tagged plaintext
-messages" of OTRv3 [3], and a 8 bytes tag "\x20\x20\x09\x09\x20\x09\x20\x20" is
-used to indicate a willingness to use OTR version 4.
+messages" of OTRv3 ([3]), and a 8 bytes tag "\x20\x20\x09\x09\x20\x09\x20\x20"
+is used to indicate a willingness to use OTR version 4.
 
 #### Receiving plaintext without the whitespace tag
 
@@ -1078,7 +1077,7 @@ If the tag offers OTR version 3 and version 3 is allowed:
 
   * Send a version 3 D-H Commit Message.
   * Proceed with the protocol as specified in OTRv3 "Receiving plaintext with
-    the whitespace tag" [3].
+    the whitespace tag" ([3]).
 
 #### Receiving a Query Message
 
@@ -1091,11 +1090,11 @@ If the query message offers OTR version 3 and version 3 is allowed:
 
   * Send a version 3 D-H Commit Message.
   * Proceed with the protocol as specified in OTRv3 "Receiving a Query Message"
-    [3].
+    ([3]).
 
 #### Receiving OTRv3 Specific Messages (AKE or Data message)
 
-Proceed as specified in OTRv3. See "The protocol state machine" section [3].
+Proceed as specified in OTRv3. See "The protocol state machine" section ([3]).
 
 #### Receiving a Pre-key message
 
@@ -1222,9 +1221,9 @@ Otherwise:
       * Display the human-readable part (if it contains any) to the user. SMP
       TLVs should be addressed according to the SMP state machine.
       * Rotate root, chain and mix keys as appropriate.
-      * If the received message contains a TLV type 1 (Disconnected) [3] forget
-      all encryption keys for this correspondent and transition the state to
-      `FINISHED`.
+      * If the received message contains a TLV type 1 (Disconnected) ([3])
+        forget all encryption keys for this correspondent and transition the
+        state to `FINISHED`.
 
    * If you have not sent a message to this correspondent in some
      (configurable) time, send a "heartbeat" message.
@@ -1255,7 +1254,7 @@ Message 1 for both cases. When a question is not present, the user specified
 question section has length 0 and value NULL.
 
 OTRv4 creates fingerprints using SHA3-512, which increases their size. Thus,
-the size of the fingerprint in the "Secret Information" section of OTRv3 [3]
+the size of the fingerprint in the "Secret Information" section of OTRv3 ([3])
 should be 64 bytes in size.
 
 Lastly, OTRv4 uses Ed448 as the cryptographic primative. This changes the way
@@ -1718,7 +1717,7 @@ b7da584eb4a951bb3eb15b0b29c66a7fbf0ce4,
 ```
 
 Generator 1 (`G1`) is the base point of Ed448. Generator 2 (`G2`) was created
-with this code [9] that works as follows:
+with this code ([9]) that works as follows:
 
 1. Select `x`, a "nothing up my sleeve" value (a value chosen above suspicion
    of hidden properties). In this case, we choose `OTRv4 g2`.
@@ -1738,8 +1737,8 @@ with this code [9] that works as follows:
 	* Compute `g = point^cofactor`.
 	* If `g^q` equals the identity element, then `g` is a generator.
 
-For more explanation on how this implementation works, refer to [10], [13]
-and [14].
+For more explanation on how this implementation works, refer to ([10]), ([13])
+and ([14]).
 
 #### Dual Receiver Key Generation: DRGen()
 
