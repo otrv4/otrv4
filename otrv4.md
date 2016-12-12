@@ -870,15 +870,15 @@ We reveal old MAC keys to provide forgeability of messages. Old MAC keys are
 keys for already received messages and, therefore, will no longer be
 used to verify the authenticity of the message.
 
-MAC keys are revealed with data messages. They are also revealed with
-heartbeat messages (data messages that encode a plaintext of zero length) if
-the receiver has not sent a message in a configurable amount of time. Put them
-(as a set of concatenated 64 bytes values) into the "Old MAC keys to be
-revealed" section of the next Data Message you send.
+Data messages and heartbeat messages (data messages with a plaintext length of
+zero) reveal MAC keys. If a participant has not sent a data message in some
+configurable amount of time, a heartbeat message is sent to reveal the MAC keys.
 
-A MAC key is added to `mac_keys_to_reveal` when the receiver has received
-a message and has verified the message's authenticity, or the receiver has
-discarded the associated message keys.
+Old MAC keys are formatted as a list of concatenated 64 byte values.
+
+A MAC key is added to `mac_keys_to_reveal` after a participant has verified
+a message associated with the MAC key or after they have discarded the
+encryption key associated with the MAC key.
 
 ## Fragmentation
 
@@ -887,10 +887,10 @@ an encoded OTR message. In that event, the sender may choose to split the
 message into a number of fragments. This section describes the format for the
 fragments.
 
-OTRv4 has the same message fragmentation as OTRv3 without compatibility with
-version 2. This means that fragmentation is performed in OTRv4 in the same way
-as specified in OTRv3: the format is the same but, in order to deal with the
-message, reassemble should finish.
+OTRv4 has the same message fragmentation as OTRv3, without compatibility with
+OTRv2. This means that OTRv4 and OTRv3 perform fragmentation in the same way,
+with the same format. Thus, message parsing should happen after the message has
+been reassembled.
 
 All OTRv4 clients must be able to assemble received fragments, but performing
 fragmentation on outgoing messages is optional.
