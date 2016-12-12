@@ -459,12 +459,14 @@ OTRv4 introduces a user profile. The user profile contains the Cramer-Shoup
 long term public key, signed information about supported versions, a signed
 profile expiration date, and an optional transition signature.
 
-Each participant maintains a user profile for publication and for authentication
-in the DAKE. Profiles should be published in a public location. Anyone who wants
-to access the user profile should know (or be able to find) its location.
-
-The profile publication allows users to repudiate their participation in a
-conversation that includes their profile.
+Each participant maintains a user profile for authentication in the DAKE and for
+publication. Publishing the user profile allows users to repudiate their
+participation in OTRv4 conversations. When a user profile is published, it is
+available from a public location, such as a server. Each implementation may
+decide how to publish the profile. For example, one client may publish profiles
+to a server pool (similar to a keyserver pool, where PGP public keys can be
+published). Another client may use XMPP's publish-subscribe extension (XEP-0060)
+for publishing profiles.
 
 When the user profile expires, it should be updated. The expiration and renewal
 policy determine the frequency of the user profile publication.
