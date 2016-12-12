@@ -515,14 +515,10 @@ can be configurable. A recommended value is two weeks.
 ```
 User Profile (USER-PROF):
   Cramer-Shoup key (CRAMER-SHOUP-PUBKEY)
-  Version (VERSION)
+  Version (BYTE)
   Profile Expiration (PROF-EXP)
   Profile Signature (MPI)
   (optional) Transitional Signature (MPI)
-
-Version (VERSION):
-  1 byte unsigned len
-  len byte data
 
 Profile Expiration (PROF-EXP):
   8 bytes signed value, big-endian
