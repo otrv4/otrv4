@@ -75,7 +75,7 @@ In an OTRv4 conversation, both sides can verify the identity of the other
 participant but cannot transfer this knowledge to a third party.
 
 Once an OTRv4 channel has been created, all messages transmitted through this
-channel are confidential and integrity is protected.
+channel are confidential and their integrity is protected.
 
 If key material has been compromised, previous messages are protected. In this
 case, future messages are protected in future ratchets only.
