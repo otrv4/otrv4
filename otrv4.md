@@ -485,8 +485,8 @@ To create a user profile, assemble:
 2. Version: a string corresponding to the user's supported OTR versions.
    The format is described in OTRv3 under the section "OTR Query Messages"
    ([3]).
-3. Profile Expiration: This is the date the profile expires, in epoch seconds
-   (seconds since Jan 1, 1970).
+3. Profile Expiration: Expiration date in standard Unix 64-bit format
+   (seconds since the midnight starting Jan 1, 1970, UTC, ignoring leap seconds)
 4. Profile Signature: One of the Cramer-Shoup secret key values (`z`) and its
    generator (`G1`) is used to create signatures of the entire profile
    excluding the signature itself. The size of the signature is 112 bytes.
