@@ -550,75 +550,52 @@ Bob will be initiating the DAKE with Alice.
 
 **Bob:**
 
-1. Generates ephemeral ECDH keys: a secret key `y` and a public key `Y = G1*y`.
-2. Generates ephemeral 3072-DH keys: a secret key `b` and a public key `B = g3^b`.
-
-    ```
-    Details:
-
-    * Set 'our_ecdh' as ECDH ephemeral key pair generated ('y', 'Y').
-    * Set 'our_dh' as DH ephemeral key pair generated ('b', 'B').
-    ```
-3. Sends Alice a Pre-key message `psi_1 = (Prof_B, Y, B)`. `Prof_B` is
-   Bob's User Profile.
+1. Generates and sets `our_ecdh` as ephemeral  ECDH keys.
+2. Generates and sets `our_dh` as ephemeral 3072-DH keys.
+3. Sends Alice a Pre-key message.
 
 **Alice:**
 
-1. Generates ephemeral ECDH keys: a secret key `x` and a public key `X = G1*x`.
-2. Generates ephemeral 3072-DH keys: a secret key `a` and a public key `A = g3^a`.
-3. Computes `gamma = DREnc(PKb, PKa, m)`, being
-   `m = Prof_B || Prof_A || Y || X || B || A`. `Prof_A` is Alice's User Profile.
-4. Computes `sigma = Auth(Ha, za, {Ha, Hb, Y}, Prof_B || Prof_A || Y || B ||
-   gamma)`.
-5. Sends Alice a DRE-Auth Message `psi_2 = (Prof_A, gamma, sigma)`.
-6. At this point, the DAKE is complete for Alice:
-
-    ```
-    Details:
-
-    * Set 'our_ecdh' as ECDH ephemeral key pair generated ('x', 'X').
-    * Set 'our_dh' as DH ephemeral key pair generated ('a', 'A').
-    * Set 'their_ecdh' as ECDH ephemeral public key from the Pre-key message ('Y').
-    * Set 'their_dh' as DH ephemeral public key from the Pre-key message ('B').
-    * Set ratchet id 'i = 0'.
-    * Set 'j' as 0 (which means she will ratchet again).
-    * Calculate ECDH shared secret 'K_ecdh'.
-    * Calculate DH shared secret 'k_dh' and 'mix_key'.
-    * Calculate Mixed shared secret 'K = SHA3-512(K_ecdh || mix_key)'.
-    * Calculate the SSID from shared secret: it is the first 8 bytes of 'SHA3-256(0x00 || K)'.
-    * Calculate the first set of keys with
-    'root[0], chain_s[0][0], chain_r[0][0] = calculate_ratchet_keys(K)'.
-    ```
+1. Receives Pre-key message from Bob:
+    * Validates Bob`s User Profile.
+    * Sets `their_ecdh` as ECDH ephemeral public key.
+    * Sets `their_dh` as DH ephemeral public key.
+2. Generates and sets `our_ecdh` as ephemeral ECDH keys.
+3. Generates and sets `our_dh` as ephemeral 3072-DH keys.
+4. Sends Bob a DRE-Auth message (see DRE-Auth message section).
+5. At this point, the DAKE is complete for Alice:
+    * Sets ratchet id `i` as 0.
+    * Sets `j` as 0 (which means she will ratchet again).
+    * Calculates ECDH shared secret `K_ecdh`.
+    * Calculates DH shared secret `k_dh` and `mix_key`.
+    * Calculates Mixed shared secret `K = SHA3-512(K_ecdh || mix_key)`.
+    * Calculates the SSID from shared secret: it is the first 8 bytes of `SHA3-256(0x00 || K)`.
+    * Calculates the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = calculate_ratchet_keys(K)`.
 
 **Bob:**
 
-1. Verifies `Verify({Ha, Hb, Y}, sigma, Prof_B || Prof_A || Y || B || gamma)`.
-2. Decrypts `m = DRDec(PKb, PKa, skb, gamma)`.
-3. Verifies the following properties of the decrypted message `m`:
-  1. The message is of the correct form (e.g., the fields are of the expected
+1. Receives DRE-Auth message from Alice:
+    * Validates Alice`s User Profile.
+    * Verify the authentication `sigma`(see in ROM Authentication and DRE-Auth message section).
+2. Decrypts `gamma` and verifies the following properties of the decrypted message. If any of
+   the verifications fail, the message is ignored:
+    * The message is of the correct form (e.g., the fields are of the expected
      length).
-     If any of the verifications fail, the message is ignored.
-  2. Bob's User Profile is the first one listed
-  3. Alice's User Profile is the second one listed, and it matches the
+    * Bob's User Profile is the first one listed
+    * Alice's User Profile is the second one listed, and it matches the
      one transmitted outside of the ciphertext
-  4. `(Y, B)` is a prekey that Bob previously sent and has not been used.
-4. At this point, the DAKE is complete for Bob and he:
-
-    ```
-    Details:
-
-    * Set 'their_ecdh' as ECDH ephemeral public key from the DRE-Auth message ('X').
-    * Set 'their_dh' as DH ephemeral public key from the DRE-Auth message ('A').
-    * Set ratchet id 'i = 0'.
-    * Set 'j' as 1
-    * Calculate ECDH shared secret 'K_ecdh'.
-    * Calculate DH shared secret 'k_dh' and 'mix_key'.
-    * Calculate Mixed shared secret 'K = SHA3-512(K_ecdh || mix_key)'.
-    * Calculate the SSID from shared secret: it is the first 8 bytes of
-    'SHA3-256(0x00 || K)'.
-    * Calculate the first set of keys with
-    'root[0], chain_s[0][0], chain_r[0][0] = calculate_ratchet_keys(K)'.
-    ```
+    * `(Y, B)` in the message is a prekey that Bob previously sent and has not been used.
+3. Retrieve ephemeral public keys from Bob:
+    * Sets `their_ecdh` as ECDH ephemeral public key.
+    * Sets `their_dh` as DH ephemeral public key.
+4. At this point, the DAKE is complete for Bob:
+    * Sets ratchet id `i` as 0.
+    * Sets `j` as 1.
+    * Calculates ECDH shared secret `K_ecdh`.
+    * Calculates DH shared secret `k_dh` and `mix_key`.
+    * Calculates Mixed shared secret `K = SHA3-512(K_ecdh || mix_key)`.
+    * Calculates the SSID from shared secret: it is the first 8 bytes of `SHA3-256(0x00 || K)`.
+    * Calculates the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = calculate_ratchet_keys(K)`.
 
 #### Pre-key message
 
@@ -688,7 +665,7 @@ Sender Instance tag (INT)
   The instance tag of the person sending this message.
 Receiver Instance tag (INT)
   The instance tag of the intended recipient.
-Receiver's User Profile (USER-PROF)
+Sender's User Profile (USER-PROF)
   As described in the section 'Creating a User Profile'.
 X (POINT)
   The ephemeral public ECDH key.
