@@ -66,6 +66,9 @@ attacker can eavesdrop or interfere with the encrypted messages.
 The network model provides in-order delivery of messages, but some messages
 may not be delivered.
 
+OTRv4 does not protect against an active attacker performing Denial of Service
+attacks to reduce availability.
+
 ## Security Properties
 
 In an OTRv4 conversation, both sides can verify the identity of the other
@@ -81,9 +84,6 @@ Both parties can deny that they have participated in a conversation. They can
 also deny having sent any of the exchanged messages in the conversation. The
 respective party can be certain of the authenticity of the messages but cannot
 transfer this knowledge to someone else.
-
-OTRv4 does not protect against an active attacker performing Denial of Service
-attacks to reduce availability.
 
 ## Notation and parameters
 
