@@ -1338,6 +1338,29 @@ protocol will only succeed if `x == y`. Further, since `G2*a3*b3` is a random
 number not known to any party, if `x` is not equal to `y`, no other information
 is revealed.
 
+### Secret information
+
+The secret information x and y compared during this protocol contains not only
+information entered by the users, but also information unique to the
+conversation in which SMP takes place. Specifically, the format is:
+
+```
+Version (BYTE)
+  The version of SMP used. The version described here is 2.
+Initiator fingerprint (64 BYTE)
+  The fingerprint that the party initiating SMP is using in the current
+  conversation.
+Responder fingerprint (64 BYTE)
+  The fingerprint that the party that did not initiate SMP is using in the
+  current conversation.
+Secure Session ID
+  The ssid described previously.
+User-specified secret
+  The input string given by the user at runtime.
+```
+
+Then the SHA3-256 hash of the above is taken, and the digest becomes the actual secret (x or y) to be used in SMP. The additional fields insure that not only do both parties know the same secret input string, but no man-in-the-middle is capable of reading their communication either.
+
 ### SMP Hash function
 
 In the following actions, there are many places where a SHA3-512 hash of an
