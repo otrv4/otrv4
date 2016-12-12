@@ -730,64 +730,64 @@ It is also used to [reveal old MAC keys](#revealing-mac-keys).
 #### Data Message format
 
 ```
-    Protocol version (SHORT)
-      The version number of this protocol is 0x0004.
+Protocol version (SHORT)
+  The version number of this protocol is 0x0004.
 
-    Message type (BYTE)
-      The Data Message has type 0x03.
+Message type (BYTE)
+  The Data Message has type 0x03.
 
-    Sender Instance tag (INT)
-      The instance tag of the person sending this message.
+Sender Instance tag (INT)
+  The instance tag of the person sending this message.
 
-    Receiver Instance tag (INT)
-      The instance tag of the intended recipient.
+Receiver Instance tag (INT)
+  The instance tag of the intended recipient.
 
-    Flags (BYTE)
-      The bitwise-OR of the flags for this message. Usually you should
-      set this to 0x00. The only currently defined flag is:
+Flags (BYTE)
+  The bitwise-OR of the flags for this message. Usually you should
+  set this to 0x00. The only currently defined flag is:
 
-      IGNORE_UNREADABLE (0x01)
+  IGNORE_UNREADABLE (0x01)
 
-        If you receive a Data Message with this flag set, and you are
-        unable to decrypt the message or verify the MAC (because, for
-        example, you don't have the right keys), just ignore the message
-        instead of producing an error or a notification to the user.
+    If you receive a Data Message with this flag set, and you are
+    unable to decrypt the message or verify the MAC (because, for
+    example, you don't have the right keys), just ignore the message
+    instead of producing an error or a notification to the user.
 
-    Ratchet id (INT)
-      This should be set as sender's i.
+Ratchet id (INT)
+  This should be set as sender's i.
 
-    Message id (INT)
-      This should be set with sender's j.
+Message id (INT)
+  This should be set with sender's j.
 
-    Public ECDH Key (POINT)
-      This is the public part of the ECDH key used to encrypt and decrypt the
-      data message. For the sender of this message, this is their
-      'our_ecdh.public' value. For the receiver of this message, it is
-      used as 'their_ecdh'.
+Public ECDH Key (POINT)
+  This is the public part of the ECDH key used to encrypt and decrypt the
+  data message. For the sender of this message, this is their
+  'our_ecdh.public' value. For the receiver of this message, it is
+  used as 'their_ecdh'.
 
-    Public DH Key (MPI)
-      This is the public part of the DH key used to encrypt and decrypt the
-      data message. For the sender of this message, it is 'our_dh.public'
-      value. For the receiver of this message, it is used as 'their_dh'. If
-      this value is empty, its length is zero.
+Public DH Key (MPI)
+  This is the public part of the DH key used to encrypt and decrypt the
+  data message. For the sender of this message, it is 'our_dh.public'
+  value. For the receiver of this message, it is used as 'their_dh'. If
+  this value is empty, its length is zero.
 
-    Nonce (NONCE)
-      The nonce used with XSalsa20 to create the encrypted message contained
-      in this packet.
+Nonce (NONCE)
+  The nonce used with XSalsa20 to create the encrypted message contained
+  in this packet.
 
-    Encrypted message (DATA)
-      Using the appropriate encryption key (see below) derived from the
-      sender's and recipient's DH public keys (with the keyids given in this
-      message), perform XSalsa20 encryption of the message. The nonce used for
-      this operation is also included in the header of the data message
-      packet.
+Encrypted message (DATA)
+  Using the appropriate encryption key (see below) derived from the
+  sender's and recipient's DH public keys (with the keyids given in this
+  message), perform XSalsa20 encryption of the message. The nonce used for
+  this operation is also included in the header of the data message
+  packet.
 
-    Authenticator (MAC)
-      The SHA3 MAC with the appropriate MAC key (see below) for everything:
-      from the protocol version to the end of the encrypted message.
+Authenticator (MAC)
+  The SHA3 MAC with the appropriate MAC key (see below) for everything:
+  from the protocol version to the end of the encrypted message.
 
-    Old MAC keys to be revealed (DATA)
-      See Revealing MAC Keys section
+Old MAC keys to be revealed (DATA)
+  See Revealing MAC Keys section
 ```
 
 #### When you send a Data Message:
