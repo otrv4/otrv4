@@ -657,8 +657,8 @@ A valid DRE-Auth message is generated as follows:
    variable `gamma`. The decription is: `m = DRDec(PKb, PKa, skb,
    gamma)`
 6. Compute `sigma = Auth(Ha, za, {Hb, Ha, Y}, Prof_B || Prof_A || Y || B ||
-   gamma)`. The verification is: `sigma` by `Verify({Ha, Hb, Y}, sigma, Prof_B
-   || Prof_A || Y || B || gamma)`.
+   gamma)`. The verification is: `Verify({Ha, Hb, Y}, sigma, Prof_B || Prof_A ||
+   Y || B || gamma)`.
 
 A DRE-Auth is an OTR message encoded as:
 
