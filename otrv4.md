@@ -39,8 +39,9 @@ works on top of an existing messaging protocol, like XMPP.
 - The cryptographic primitives and protocols have been updated:
   - Deniable Authenticated Key Exchange using Spawn ([2]).
   - Key management using the Double Ratchet Algorithm ([6]).
-  - SHA-2 to SHA-3 family.
+  - Upgrades SHA-1 and SHA-2 to SHA-3.
   - Switch from AES to XSalsa20.
+
 
 ## High Level Overview
 
@@ -170,7 +171,7 @@ Generator (g3)
 
 Note that this means that whenever you see an operation on a field element
 from the above group, the operation should be done modulo the above prime.
-
+i
 ### TLV Types
 
 OTRv4 supports the same TLV record types from OTRv3.
@@ -489,7 +490,7 @@ To create a user profile, assemble:
    (seconds since Jan 1, 1970).
 4. Profile Signature: One of the Cramer-Shoup secret key values (`z`) and its
    generator (`G1`) is used to create signatures of the entire profile
-   excluding the signature itself. Its size is 112 bytes.
+   excluding the signature itself. The size of the signature is 112 bytes.
    It is created using the Ed448 signature algorithm as documented in ([4]).
 5. Transition Signature (optional): A signature of the profile excluding
    Profile Signatures and itself signed by the user's OTRv3 DSA key. The
