@@ -274,24 +274,18 @@ ERROR_CODE_1:
 
 ## Key management
 
-In the DAKE, OTRv4 makes use of long-term Cramer-Shoup keys and ephemeral
-Diffie-Hellman (DH) keys.
+In the DAKE, OTRv4 makes use of long-term Cramer-Shoup keys, ephemeral Elliptic
+Curve Diffie-Hellman (ECDH) keys, and ephemeral Diffie-Hellman (DH) keys.
 
-For exchanging data messages, OTRv4 uses a key structure and key rotation
-strategy with the Double Ratchet algorithm ([6]) at its core. As a result we
-will use many of the terms within the Double Ratchet domain to describe the
-difference in the context of OTRv4. A cryptographic ratchet is a one-way
-mechanism for deriving new cryptographic keys from previous keys. New keys
-cannot be used to calculate the old keys.
+For exchanging data messages, OTRv4 makes use of both the DH Ratchet (with ECDH)
+and the Symmetric Key Ratchet from the Double Ratchet algorithm ([6]). A
+cryptographic ratchet is a one-way mechanism for deriving new cryptographic keys
+from previous keys. New keys cannot be used to calculate the old keys.
 
-OTRv4 retains the DH Ratchet ([7]) with Elliptic Curve Diffie-Hellman (ECDH),
-and the Symmetric Key Ratchet ([12]) from the algorithm.
-
-OTRv4 adds new 3072-bit DH keys called the Mix Key Pair. In addition, another DH
-Ratchet and Key Symmetric Ratchet is added for the Mix Key alone. These were
-added to protect transcripts of data messages in the case that elliptic curve
-cryptography is broken. During the DAKE, both parties agree upon the first set
-of 3072-bit DH keys. Then every third DH Ratchet in the Double Ratchet, a new
+OTRv4 adds new 3072-bit DH keys to the Double Ratchet algorithm called the Mix
+Key Pair. These are used to protect transcripts of data messages in the case
+that ECC is broken. During the DAKE, both parties agree upon the first set of
+3072-bit DH keys. Then every third DH Ratchet in the Double Ratchet, a new
 384-byte (3072-bit) key is agreed upon. Between each DH Mix Key Ratchet, both
 sides will conduct a Symmetric Mix Key Ratchet.
 
