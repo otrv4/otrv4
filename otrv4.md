@@ -170,7 +170,7 @@ Generator (g3)
 
 Note that this means that whenever you see an operation on a field element
 from the above group, the operation should be done modulo the above prime.
-i
+
 ### TLV Types
 
 OTRv4 supports the same TLV record types from OTRv3.
