@@ -282,15 +282,14 @@ and the Symmetric Key Ratchet from the Double Ratchet algorithm ([6]). A
 cryptographic ratchet is a one-way mechanism for deriving new cryptographic keys
 from previous keys. New keys cannot be used to calculate the old keys.
 
-OTRv4 adds new 3072-bit DH keys to the Double Ratchet algorithm called the Mix
-Key Pair. These are used to protect transcripts of data messages in the case
-that ECC is broken. During the DAKE, both parties agree upon the first set of
-3072-bit DH keys. Then every third DH Ratchet in the Double Ratchet, a new
-384-byte (3072-bit) key is agreed upon. Between each DH Mix Key Ratchet, both
-sides will conduct a Symmetric Mix Key Ratchet.
+OTRv4 adds new 3072-bit (384-byte) DH keys, called the Mix Key Pair, to the
+Double Ratchet algorithm. These keys are used to protect transcripts of data
+messages in a case where ECC is broken. During the DAKE, both parties agree upon
+the first set of DH keys. Then, during every third DH Ratchet in the Double
+Ratchet, a new key is agreed upon. Between each DH Mix Key Ratchet, both sides
+will conduct a Symmetric Mix Key Ratchet.
 
-As the ratchet moves forward through its keys, its state is kept with the
-following values:
+The following variables keep state as the ratchet moves forward:
 
 ```
 State variables:
