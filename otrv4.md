@@ -102,7 +102,7 @@ multiplication with a scalar `a` with an elliptic curve point `B` yields a
 new point: `C = a * B`.
 
 The concatenation of byte sequences `I` and `J` is `I || J`. In this case, `I`
-and `J`represent a fixed-length byte sequence encoding the respective values.
+and `J` represent a fixed-length byte sequence encoding the respective values.
 See section [Data Types](#data-types) for encoding and decoding details.
 
 ### Elliptic Curve Parameters
@@ -176,11 +176,7 @@ Generator (g3)
 Note that this means that whenever you see an operation on a field element
 from the above group, the operation should be done modulo the above prime.
 
-### TLV Types
-
-OTRv4 supports the same TLV record types from OTRv3.
-
-### Data Types
+## Data Types
 
 OTRv4 uses almost the same data types as specified in OTRv3 (bytes, shorts,
 ints, MPIs, and DATA) with the addition of:
@@ -198,21 +194,6 @@ User Profile (USER-PROF):
 
 In order to serialize and deserialize the point, refer to Appendix A.1
 (Encoding) and A.2 (Decoding) in Mike Hamburg's Decaf paper ([11]).
-
-### OTR Error Messages
-
-Any message containing the string "?OTR Error:" is an OTR Error Message. The
-following part of the message should contain human-readable details of the
-error. The message may also include a specific code at the beginning e.g. "?OTR
-Error: ERROR_CODE_1:". This code is used to identify which error is being
-received for optional internationalization of the message.
-
-Error Code List:
-
-```
-ERROR_CODE_1:
-  Message cannot be decrypted
-```
 
 ### DRE messages and Auth
 
@@ -272,6 +253,25 @@ OTR public authentication Cramer-Shoup key (CRAMER-SHOUP-PUBKEY):
 OTRv4 public keys have fingerprints, which are hex strings that serve as
 identifiers for the public key. The fingerprint is calculated by taking the
 SHA3-512 hash of the byte-level representation of the public key.
+
+### TLV Types
+
+OTRv4 supports the same TLV record types from OTRv3.
+
+### OTR Error Messages
+
+Any message containing the string "?OTR Error:" is an OTR Error Message. The
+following part of the message should contain human-readable details of the
+error. The message may also include a specific code at the beginning e.g. "?OTR
+Error: ERROR_CODE_1:". This code is used to identify which error is being
+received for optional internationalization of the message.
+
+Error Code List:
+
+```
+ERROR_CODE_1:
+  Message cannot be decrypted
+```
 
 ## Key management
 
