@@ -43,13 +43,19 @@ works on top of an existing messaging protocol, like XMPP.
 
 ## High Level Overview
 
-The high level flow of the protocol looks like this:
+```
+Alice                                            Bob
+--------------------------------------------------------------------------------
+Requests OTR conversation           ------------->
+Establishes Conversation with DAKE  <------------>  Establishes Conversation with DAKE
+Exchanges Data Messages             <------------>  Exchanges Data Messages
+```
 
-    Alice                                            Bob
-    --------------------------------------------------------------------------------
-    Requests OTR conversation           ------------->
-    Establishes Conversation with DAKE  <------------>  Establishes Conversation with DAKE
-    Exchanges Data Messages             <------------>  Exchanges Data Messages
+An OTRv4 conversation is established when one participant requests a
+conversation, advertising which versions they support. If the other participant
+supports one of these versions, a deniable key exchange protocol is used to
+establish a secure channel. Encrypted messages are then exchanged in this secure
+channel with forward secrecy.
 
 ## Assumptions
 
