@@ -39,9 +39,8 @@ works on top of an existing messaging protocol, like XMPP.
 - The cryptographic primitives and protocols have been updated:
   - Deniable Authenticated Key Exchange using Spawn ([2]).
   - Key management using the Double Ratchet Algorithm ([6]).
-  - Upgrades SHA-1 and SHA-2 to SHA-3.
+  - Upgrade SHA-1 and SHA-2 to SHA-3.
   - Switch from AES to XSalsa20.
-
 
 ## High Level Overview
 
