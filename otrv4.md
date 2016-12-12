@@ -83,8 +83,8 @@ also deny having sent any of the exchanged messages in the conversation. The
 respective party can be certain of the authenticity of the messages but cannot
 transfer this knowledge to someone else.
 
-On the other hand, OTRv4 does not protect against an active attacker
-performing Denial of Service attacks to reduce availability.
+On the other hand, OTRv4 does not protect against an active attacker performing
+Denial of Service attacks to reduce availability.
 
 ## Notation and parameters
 
