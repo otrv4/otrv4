@@ -31,16 +31,15 @@ works on top of an existing messaging protocol, like XMPP.
 
 ## Main Changes over Version 3
 
-- Improvements on security and privacy:
-  - Security level raised to 224 bits and based on elliptic curve cryptography
-    (ECC). This includes an upgrade to SMP
-  - Additional protection against transcript decryption in the case of
-    ECC compromise
+- Security level raised to 224 bits and based on elliptic curve cryptography
+  (ECC).
+- Additional protection against transcript decryption in the case of ECC
+  compromise.
 - The cryptographic primitives and protocols have been updated:
-  - Deniable Authenticated Key Exchange use Spawn ([2]).
-  - Key management use the Double Ratchet Algorithm ([6]).
-  - Upgrade SHA-1 and SHA-2 to SHA-3.
-  - Switch from AES to XSalsa20.
+  - Deniable Authenticated Key Exchange using Spawn ([2]).
+  - Key management using the Double Ratchet Algorithm ([6]).
+  - Upgraded SHA-1 and SHA-2 to SHA-3.
+  - Switched from AES to XSalsa20.
 
 ## High Level Overview
 
