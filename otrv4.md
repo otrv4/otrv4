@@ -1,6 +1,6 @@
 # OTR version 4
 
-OTRV4 is a new version of OTR that provides a Deniable Authenticated Key
+OTRv4 is a new version of OTR that provides a Deniable Authenticated Key
 Exchange and better forward secrecy through the use of double ratcheting. OTR
 works on top of an existing messaging protocol, like XMPP.
 
