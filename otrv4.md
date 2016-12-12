@@ -558,12 +558,12 @@ Bob will be initiating the DAKE with Alice.
 **Alice:**
 
 1. Receives Pre-key message from Bob:
-    * Validates Bob`s User Profile.
+    * Validates Bob's User Profile.
     * Sets `their_ecdh` as ECDH ephemeral public key.
     * Sets `their_dh` as DH ephemeral public key.
 2. Generates and sets `our_ecdh` as ephemeral ECDH keys.
 3. Generates and sets `our_dh` as ephemeral 3072-DH keys.
-4. Sends Bob a DRE-Auth message (see DRE-Auth message section).
+4. Sends Bob a DRE-Auth message (see [DRE-Auth message section](#dre-auth-message)).
 5. At this point, the DAKE is complete for Alice:
     * Sets ratchet id `i` as 0.
     * Sets `j` as 0 (which means she will ratchet again).
@@ -576,16 +576,18 @@ Bob will be initiating the DAKE with Alice.
 **Bob:**
 
 1. Receives DRE-Auth message from Alice:
-    * Validates Alice`s User Profile.
-    * Verify the authentication `sigma`(see in ROM Authentication and DRE-Auth message section).
-2. Decrypts `gamma` and verifies the following properties of the decrypted message. If any of
-   the verifications fail, the message is ignored:
+    * Validates Alice's User Profile.
+    * Verify the authentication `sigma` (see [ROM Authentication](#rom-authentication) and [DRE-Auth message](#dre-auth-message) sections).
+2. Decrypts `gamma` (see [ROM Authentication](#rom-authentication)) and verifies
+   the following properties of the decrypted message. If any of the
+   verifications fail, the message is ignored:
     * The message is of the correct form (e.g., the fields are of the expected
      length).
     * Bob's User Profile is the first one listed
     * Alice's User Profile is the second one listed, and it matches the
      one transmitted outside of the ciphertext
-    * `(Y, B)` in the message is a prekey that Bob previously sent and has not been used.
+    * `(Y, B)` in the message is a prekey that Bob previously sent and has not
+      been used.
 3. Retrieve ephemeral public keys from Bob:
     * Sets `their_ecdh` as ECDH ephemeral public key.
     * Sets `their_dh` as DH ephemeral public key.
@@ -652,8 +654,11 @@ A valid DRE-Auth message is generated as follows:
   * public key `A`.
 4. Generate `m = Prof_B || Prof_A || Y || X || B || A`
 5. Compute `DREnc(PKb, PKa, m)` and serialize it as a DRE-M value in the
-   variable `gamma`.
-6. Compute `sigma = Auth(Ha, za, {Hb, Ha, Y}, Prof_B || Prof_A || Y || B || gamma)`.
+   variable `gamma`. The decription is: `m = DRDec(PKb, PKa, skb,
+   gamma)`
+6. Compute `sigma = Auth(Ha, za, {Hb, Ha, Y}, Prof_B || Prof_A || Y || B ||
+   gamma)`. The verification is: `sigma` by `Verify({Ha, Hb, Y}, sigma, Prof_B
+   || Prof_A || Y || B || gamma)`.
 
 A DRE-Auth is an OTR message encoded as:
 
