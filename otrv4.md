@@ -1011,34 +1011,34 @@ required and if it will advertise OTR support.
 ```
 START
 
-    This is the state that is used before an OTR conversation is initiated.
-    The initial state, and the only way to subsequently enter this state is for
-    the user to explicitly request to do so via some UI operation. Messages
-    sent in this state are plaintext messages. If a TLV type 1 (Disconnect)
-    message is sent in another state, transition to this state.
+  This is the state that is used before an OTR conversation is initiated.
+  The initial state, and the only way to subsequently enter this state is for
+  the user to explicitly request to do so via some UI operation. Messages
+  sent in this state are plaintext messages. If a TLV type 1 (Disconnect)
+  message is sent in another state, transition to this state.
 
 DAKE_IN_PROGRESS
 
-    This state is entered when a participant receives or sends a Pre-key
-    message. Data Messages sent in this state are queued for delivery in the
-    next ENCRYPTED_MESSAGES state.
+  This state is entered when a participant receives or sends a Pre-key
+  message. Data Messages sent in this state are queued for delivery in the
+  next ENCRYPTED_MESSAGES state.
 
 ENCRYPTED_MESSAGES
 
-    This state is entered after DRE-Auth message has been sent or it has been
-    received and validated. Messages sent in this state are encrypted.
+  This state is entered after DRE-Auth message has been sent or it has been
+  received and validated. Messages sent in this state are encrypted.
 
 FINISHED
 
-    This state is entered only when a participant receives a TLV type 1
-    (Disconnected) message, which indicates they have terminated their side
-    of the OTR conversation. For example, if Alice and Bob are having an OTR
-    conversation, and Bob instructs his OTR client to end its private session
-    with Alice (for example, by logging out), Alice will be notified of this,
-    and her client will switch to FINISHED mode. This prevents  Alice from
-    accidentally sending a message to Bob in plaintext (consider what happens
-    if Alice was in the middle of typing a private message to Bob when he
-    suddenly logs out, just as Alice hits Enter.)
+  This state is entered only when a participant receives a TLV type 1
+  (Disconnected) message, which indicates they have terminated their side
+  of the OTR conversation. For example, if Alice and Bob are having an OTR
+  conversation, and Bob instructs his OTR client to end its private session
+  with Alice (for example, by logging out), Alice will be notified of this,
+  and her client will switch to FINISHED mode. This prevents  Alice from
+  accidentally sending a message to Bob in plaintext (consider what happens
+  if Alice was in the middle of typing a private message to Bob when he
+  suddenly logs out, just as Alice hits Enter.)
 ```
 
 ### Protocol events
