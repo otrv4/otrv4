@@ -577,8 +577,8 @@ Bob will be initiating the DAKE with Alice.
 
 1. Receives DRE-Auth message from Alice:
     * Validates Alice's User Profile.
-    * Verify the authentication `sigma` (see [ROM Authentication](#rom-authentication) and [DRE-Auth message](#dre-auth-message) sections).
-2. Decrypts `gamma` (see [ROM Authentication](#rom-authentication)) and verifies
+    * Verify the authentication `sigma` (see [DRE-Auth message](#dre-auth-message)).
+2. Decrypts `gamma` (see [DRE-Auth message](#dre-auth-message)) and verifies
    the following properties of the decrypted message. If any of the
    verifications fail, the message is ignored:
     * The message is of the correct form (e.g., the fields are of the expected
@@ -657,8 +657,14 @@ A valid DRE-Auth message is generated as follows:
    variable `gamma`. The decription is: `m = DRDec(PKb, PKa, skb,
    gamma)`
 6. Compute `sigma = Auth(Ha, za, {Hb, Ha, Y}, Prof_B || Prof_A || Y || B ||
-   gamma)`. The verification is: `Verify({Ha, Hb, Y}, sigma, Prof_B || Prof_A ||
-   Y || B || gamma)`.
+   gamma)`.
+
+To verify and decrypt the DRE-Auth message:
+
+1. Validate user profile.
+2. Verify the `sigma` with [ROM Authentication](#rom-authentication)
+   `Verify({Ha, Hb, Y}, sigma, Prof_B || Prof_A || Y || B || gamma)`.
+3. Decrypt the `gamma` with [ROM DRE](#rom-dre) `m = DRDec(PKb, PKa, skb, gamma)`
 
 A DRE-Auth is an OTR message encoded as:
 
@@ -1620,7 +1626,7 @@ The DRE scheme consists of three functions:
 
 `gamma = DREnc(PK1, PK2, m)`, an encryption function.
 
-`m = DRDec(PK1, PK2, ski, gamma)`, a decryption function.
+`m = DRDec(PK1, PK2, ski, gamma) i ∈ {1, 2}` , a decryption function.
 
 #### Domain parameters
 
