@@ -277,17 +277,17 @@ ERROR_1:
 In the DAKE, OTRv4 makes use of long-term Cramer-Shoup keys, ephemeral Elliptic
 Curve Diffie-Hellman (ECDH) keys, and ephemeral Diffie-Hellman (DH) keys.
 
-For exchanging data messages, OTRv4 makes use of both the DH Ratchet (with ECDH)
-and the Symmetric Key Ratchet from the Double Ratchet algorithm [\[2\]](#references). A
+For exchanging data messages, OTRv4 makes use of both the DH ratchet (with ECDH)
+and the symmetric-key ratchet from the Double Ratchet algorithm [\[2\]](#references). A
 cryptographic ratchet is a one-way mechanism for deriving new cryptographic keys
 from previous keys. New keys cannot be used to calculate the old keys.
 
-OTRv4 adds new 3072-bit (384-byte) DH keys, called the Mix Key Pair, to the
+OTRv4 adds new 3072-bit (384-byte) DH keys, called the mix key pair, to the
 Double Ratchet algorithm. These keys are used to protect transcripts of data
 messages in a case where ECC is broken. During the DAKE, both parties agree upon
-the first set of DH keys. Then, during every third DH Ratchet in the Double
-Ratchet, a new key is agreed upon. Between each DH Mix Key Ratchet, both sides
-will conduct a Symmetric Mix Key Ratchet.
+the first set of DH keys. Then, during every third DH ratchet in the Double
+Ratchet, a new key is agreed upon. Between each DH mix key ratchet, both sides
+will conduct a symmetric mix key ratchet.
 
 The following variables keep state as the ratchet moves forward:
 
@@ -317,7 +317,7 @@ The previously mentioned variables are affected by these events:
 * When you receive a Data Message.
 * When you receive a TLV type 1 (Disconnect)
 
-### Generating ECDH and DH Keys
+### Generating ECDH and DH keys
 
 ```
 generateECDH()
@@ -344,7 +344,7 @@ K_ecdh:
   This is serialized as a POINT.
 ```
 
-### Deciding Between Chain Keys
+### Deciding between chain keys
 
 Both sides will compare their public keys to choose a chain key for sending
 and receiving:
@@ -368,7 +368,7 @@ decide_between_chain_keys(Ca, Cb):
     return Cb, Ca
 ```
 
-### Calculating Double Ratchet Keys
+### Calculating Double Ratchet keys
 
 ```
 calculate_ratchet_keys(K):
@@ -378,9 +378,9 @@ calculate_ratchet_keys(K):
   return R, decide_between_chain_keys(Ca, Cb)
 ```
 
-### Ratcheting ECDH keys and Mix Keys
+### Ratcheting ECDH keys and mix keys
 
-The sender will rotate into a new ECDH ratchet and a new Mix Key ratchet
+The sender will rotate into a new ECDH ratchet and a new mix key ratchet
 before they send the first message after receiving any messages from the other
 side (i.e. the first reply). The following data messages will advertise a new
 ratchet id as `i + 1`.
@@ -428,7 +428,7 @@ compute_chain_key(C, i, k):
   return C[i][k]
 ```
 
-### Calculating Encryption and MAC keys
+### Calculating encryption and MAC keys
 
 When sending or receiving data messages, you must calculate the message keys:
 
@@ -442,8 +442,7 @@ derive_enc_mac_keys(chain_key):
 ## Conversation Initialization
 
 OTRv4 will initialize through a Query message or a whitespace tag, as discussed
-in OTRv3 [\[7\]](#references). After this, the conversation is authenticated using a deniable
-authenticated key exchange (DAKE).
+in OTRv3 [\[7\]](#references). After this, the conversation is authenticated using DAKE.
 
 ### Requesting conversation with older OTR versions
 
@@ -809,7 +808,7 @@ has been set to `0`, keys should be rotated.
 
 Given a new ratchet:
 
-  * Ratchet the ECDH keys, see "Ratcheting ECDH keys and Mix Keys" section.
+  * Ratchet the ECDH keys, see "Ratcheting ECDH keys and mix keys" section.
     The new ECDH public key created by the sender with this process will be the
     "Public ECDH Key" for the message. If a new public DH key is created in
     this process, it will be the "Public DH Key" for the message. If it is
