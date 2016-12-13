@@ -1001,7 +1001,7 @@ START
 DAKE_IN_PROGRESS
 
   This state is entered when a participant receives or sends a Pre-key
-  message. Data Messages sent in this state are queued for delivery in the
+  message. Data Messages created in this state are queued for delivery in the
   next ENCRYPTED_MESSAGES state.
 
 ENCRYPTED_MESSAGES
