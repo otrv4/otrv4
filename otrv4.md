@@ -1255,7 +1255,7 @@ values are serialized and how they are computed. To define the SMP values
 under Ed448, we reuse the previously defined generator for Cramer-Shoup:
 
 ```
-G1 = (11781216126343694673728248434331006466518053535701637341687908214793940427
+G = (11781216126343694673728248434331006466518053535701637341687908214793940427
 7809514858788439644911793978499419995990477371552926308078495, 19)
 
 = (0x297ea0ea2692ff1b4faff46098453a6a26adf733245f065c3c59d0709cecfa96147eaaf3932
@@ -1328,7 +1328,7 @@ conversation in which SMP takes place. Specifically, the format is:
 
 ```
 Version (BYTE)
-  The version of SMP used. The version described here is 2.
+  The version of SMP used. The version described here is 1.
 Initiator fingerprint (64 BYTE)
   The fingerprint that the party initiating SMP is using in the current
   conversation.
