@@ -1,0 +1,52 @@
+ciphertext                  γ - gama
+signature                   σ - Sigma
+some auxiliary information  α - alpha
+Esses nomes gregos nao ajuda muito
+
+Data types
+  No mesmo nivel que "Data types" DRE messages and Auth NIZKPK
+  talvez se for un subnivel
+
+Nomes que encontrei por ai que parece nao seguir padrao
+  DRE messages and Auth NIZKPK
+  Dual-receiver encrypted message
+  Dual-receiver encrypted message (DRE-M) --->  DRE-M ==  φ
+
+Auth non-interactive zero-knowledge proof of knowledge
+
+
+DRE-M
+AUTH
+CRAMER-SHOUP-PUBKEY are data type?
+Sim, sao data types mas nao sei como ta serializado
+
+key have type 0x0010 - Qual o tipo das outras chaves?
+
+#Duvidas!
+  - User Profile Data Type - talvez colocar todos os data type no mesmo canto
+  - x/X is the better name? Also, this is integer/point?
+  - flow ta errado, Alice nao eh I.... Baseado no flow ela eh Responder
+  - Pre-key message section - acho que ta pra emitir os nome Bob/Alice
+  - difference between D-H and DH
+  - wrap text in block code (break-line)
+  - acho que maiusculo e minusculo tao me confundindo...
+  - L:611 pubECDH, secretECDH = newECDH() precisa?
+
+´´´
+  calculate_shared_secret(EC_shared_key, DH_shared_key):
+    serialized_EC_secret = serialize_point(EC_shared_key)
+    serialized_DH_secret = serialize_MPI(DH_shared_key)
+    secret = SHA3-256(serialized_EC_secret, serialized_DH_shared_key)
+´´´
+  eh preciso explicar dessa maneira, ou so dizer que o secredo vai ser o resultado
+do SHA3 da EC_secret y DH_secret serializados
+
+  - Double-Ratchet - R, Ca and Cb tem numeros magicos 0x00/1/2... porque?
+  - Deciding Between Chain Keys: porque tenho que decidir entre os Chain Keys
+  - their_dh.public is it a point?
+  - L:736 Nonce = generateNonce() Creo que pode ser removido
+  - uma coisa que tem no outro spec eh que as Mensagens seguem uma depois da outra, com os seus formatos
+
+
+  - DRE-Auth y (Auth) eh a mesma coisa? - nao, sao diferentes....
+

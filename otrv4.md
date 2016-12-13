@@ -35,8 +35,8 @@ works on top of an existing messaging protocol, like XMPP.
 - Additional protection against transcript decryption in the case of ECC
   compromise.
 - The cryptographic primitives and protocols have been updated:
-  - Deniable Authenticated Key Exchange using Spawn ([1]).
-  - Key management using the Double Ratchet Algorithm ([2]).
+  - Deniable Authenticated Key Exchange using Spawn [1](#references).
+  - Key management using the Double Ratchet Algorithm [2](#references).
   - Upgraded SHA-1 and SHA-2 to SHA-3.
   - Switched from AES to XSalsa20.
 
@@ -106,7 +106,7 @@ See section [Data Types](#data-types) for encoding and decoding details.
 
 ### Elliptic Curve Parameters
 
-OTRv4 uses the Ed448-Goldilocks ([3]) elliptic curve ([4]), which defines the
+OTRv4 uses the Ed448-Goldilocks [3](#references) elliptic curve [4](#references), which defines the
 following parameters:
 
 ```
@@ -144,7 +144,7 @@ using the rules for MPIs.
 ### 3072 Diffie-Hellman Parameters
 
 For the Diffie-Hellman group computations, the group is the one defined in RFC
-3526 ([5]) with a 3072-bit modulus (hex, big-endian):
+3526 [5](#references) with a 3072-bit modulus (hex, big-endian):
 
 ```
 Prime (dh_p):
@@ -192,7 +192,7 @@ User Profile (USER-PROF):
 ```
 
 In order to serialize and deserialize the point, refer to Appendix A.1
-(Encoding) and A.2 (Decoding) in Mike Hamburg's Decaf paper ([6]).
+(Encoding) and A.2 (Decoding) in Mike Hamburg's Decaf paper [6](#references).
 
 ### DRE messages and Auth
 
@@ -278,7 +278,7 @@ In the DAKE, OTRv4 makes use of long-term Cramer-Shoup keys, ephemeral Elliptic
 Curve Diffie-Hellman (ECDH) keys, and ephemeral Diffie-Hellman (DH) keys.
 
 For exchanging data messages, OTRv4 makes use of both the DH Ratchet (with ECDH)
-and the Symmetric Key Ratchet from the Double Ratchet algorithm ([2]). A
+and the Symmetric Key Ratchet from the Double Ratchet algorithm [2](#references). A
 cryptographic ratchet is a one-way mechanism for deriving new cryptographic keys
 from previous keys. New keys cannot be used to calculate the old keys.
 
@@ -442,14 +442,14 @@ derive_enc_mac_keys(chain_key):
 ## Conversation Initialization
 
 OTRv4 will initialize through a Query message or a whitespace tag, as discussed
-in OTRv3 ([7]). After this, the conversation is authenticated using a deniable
+in OTRv3 [7](#references). After this, the conversation is authenticated using a deniable
 authenticated key exchange (DAKE).
 
 ### Requesting conversation with older OTR versions
 
 Bob might respond to Alice's request or notification of willingness to start a
 conversation using OTRv3. If this is the case and Alice supports version 3,
-the protocol falls back to OTRv3 ([7]). If Alice does not support version 3,
+the protocol falls back to OTRv3 [7](#references). If Alice does not support version 3,
 then this message is ignored.
 
 ### User Profile
@@ -481,13 +481,13 @@ To create a user profile, assemble:
 1. User's Cramer-Shoup long term public key.
 2. Version: a string corresponding to the user's supported OTR versions.
    The format is described in OTRv3 under the section "OTR Query Messages"
-   ([7]).
+   [7](#references).
 3. Profile Expiration: Expiration date in standard Unix 64-bit format
    (seconds since the midnight starting Jan 1, 1970, UTC, ignoring leap seconds)
 4. Profile Signature: One of the Cramer-Shoup secret key values (`z`) and its
    generator (`G1`) is used to create signatures of the entire profile
    excluding the signature itself. The size of the signature is 112 bytes.
-   It is created using the Ed448 signature algorithm as documented in ([3]).
+   It is created using the Ed448 signature algorithm as documented in [3](#references).
 5. Transition Signature (optional): A signature of the profile excluding
    Profile Signatures and itself signed by the user's OTRv3 DSA key. The
    transitional signature that enables contacts that trust user's version 3
@@ -528,7 +528,7 @@ This section outlines the flow of the Deniable Authenticated Key Exchange.
 This is a way to mutually agree upon shared keys for the two parties and
 authenticate one another while providing participation deniability.
 
-This protocol is derived from the Spawn protocol ([1]), which uses dual-receiver
+This protocol is derived from the Spawn protocol [1](#references), which uses dual-receiver
 encryption (DRE) and a non-interactive zero-knowledge proof of knowledge
 (NIZKPK) for authentication (Auth).
 
@@ -1042,10 +1042,10 @@ Send an OTR Query Message or a plaintext message with a whitespace tag to the
 correspondent.
 
 Query Messages are constructed according to the section "OTR Query Messages" of
-OTRv3 ([7]). The byte identifier for OTR version 4 is "4".
+OTRv3 [7](#references). The byte identifier for OTR version 4 is "4".
 
 Whitespace tags have the same structure as defined in "Tagged plaintext
-messages" of OTRv3 ([7]), and a 8 bytes tag "\x20\x20\x09\x09\x20\x09\x20\x20"
+messages" of OTRv3 [7](#references), and a 8 bytes tag "\x20\x20\x09\x09\x20\x09\x20\x20"
 is used to indicate a willingness to use OTR version 4.
 
 #### Receiving plaintext without the whitespace tag
@@ -1069,7 +1069,7 @@ If the tag offers OTR version 3 and version 3 is allowed:
 
   * Send a version 3 D-H Commit Message.
   * Proceed with the protocol as specified in OTRv3 "Receiving plaintext with
-    the whitespace tag" ([7]).
+    the whitespace tag" [7](#references).
 
 #### Receiving a Query Message
 
@@ -1082,11 +1082,11 @@ If the Query message offers OTR version 3 and version 3 is allowed:
 
   * Send a version 3 D-H Commit Message.
   * Proceed with the protocol as specified in OTRv3 "Receiving a Query Message"
-    ([7]).
+    [7](#references).
 
 #### Receiving OTRv3 Specific Messages (AKE or Data message)
 
-Proceed as specified in OTRv3. See "The protocol state machine" section ([7]).
+Proceed as specified in OTRv3. See "The protocol state machine" section [7](#references).
 
 #### Receiving a Pre-key message
 
@@ -1213,7 +1213,7 @@ Otherwise:
       * Display the human-readable part (if it contains any) to the user. SMP
       TLVs should be addressed according to the SMP state machine.
       * Rotate root, chain and mix keys as appropriate.
-      * If the received message contains a TLV type 1 (Disconnected) ([7])
+      * If the received message contains a TLV type 1 (Disconnected) [7](#references)
         forget all encryption keys for this correspondent and transition the
         state to `FINISHED`.
 
@@ -1247,7 +1247,7 @@ Message 1 for both cases. When a question is not present, the user specified
 question section has length 0 and value NULL.
 
 OTRv4 creates fingerprints using SHA3-512, which increases their size. Thus,
-the size of the fingerprint in the "Secret Information" section of OTRv3 ([7])
+the size of the fingerprint in the "Secret Information" section of OTRv3 [7](#references)
 should be 64 bytes in size.
 
 Lastly, OTRv4 uses Ed448 as the cryptographic primitive. This changes the way
@@ -1657,7 +1657,7 @@ b7da584eb4a951bb3eb15b0b29c66a7fbf0ce4,
 ```
 
 Generator 1 (`G1`) is the base point of Ed448. Generator 2 (`G2`) was created
-with this code ([8]) that works as follows:
+with this code [8](#references) that works as follows:
 
 1. Select `x`, a "nothing up my sleeve" value (a value chosen above suspicion
    of hidden properties). In this case, we choose `OTRv4 g2`.
@@ -1677,8 +1677,8 @@ with this code ([8]) that works as follows:
 	* Compute `g = point^cofactor`.
 	* If `g^q` equals the identity element, then `g` is a generator.
 
-For more explanation on how this implementation works, refer to ([9]), ([10])
-and ([11]).
+For more explanation on how this implementation works, refer to [9](#references), [10](#references)
+and [11](#references).
 
 #### Dual Receiver Key Generation: DRGen()
 
@@ -1806,16 +1806,17 @@ d is an array of bytes.
 1. Compute `h = SHA3-512(d)` as an unsigned value, big-endian.
 2. Return `h (mod q)`
 
-<!--- References -->
 
-[1]: http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf "N. Unger, I. Goldberg: Improved Techniques for Implementing Strongly Deniable Authenticated Key Exchanges"
-[2]: https://whispersystems.org/docs/specifications/doubleratchet "Trevor Perrin (editor), Moxie Marlinspike: The Double Ratchet Algorithm"
-[3]: https://mikehamburg.com/papers/goldilocks/goldilocks.pdf "M. Hamburg: Ed448-Goldilocks, a new elliptic curve"
-[4]: http://www.ietf.org/rfc/rfc7748.txt "A. Langley, M. Hamburg, and S. Turner: Elliptic Curves for Security; Internet Engineering Task Force; RFC 7748 (Informational); IETF, Jan-2016"
-[5]: https://www.ietf.org/rfc/rfc3526.txt "M. Kojo: More Modular Exponential (MODP) Diffie-Hellman groups for Internet Key Exchange (IKE)"
-[6]: https://eprint.iacr.org/2015/673.pdf "Mike Hamburg: Decaf: Eliminating cofactors through point compression"
-[7]: https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html "Off-the-Record Messaging Protocol version 3"
-[8]: https://github.com/twstrike/otrv4/blob/master/gen_gens_ed448.py
-[9]: https://ed25519.cr.yp.to/python/ed25519.py "Daniel Bernstein: ed25519"
-[10]: https://ed25519.cr.yp.to/ed25519-20110926.pdf "Daniel Bernstein, Niels Duif, Tanja Lange, Peter Schwabe and Bo-Yin Yang: High-speed high-security signatures"
-[11]: https://tools.ietf.org/html/draft-irtf-cfrg-eddsa-05 "S. Josefsson and I. Liusvaara: Edwards-curve Digital Signature Algorithm (EdDSA)"
+### References
+
+1- http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf "N. Unger, I. Goldberg: Improved Techniques for Implementing Strongly Deniable Authenticated Key Exchanges"
+2- https://whispersystems.org/docs/specifications/doubleratchet "Trevor Perrin (editor), Moxie Marlinspike: The Double Ratchet Algorithm"
+3- https://mikehamburg.com/papers/goldilocks/goldilocks.pdf "M. Hamburg: Ed448-Goldilocks, a new elliptic curve"
+4- http://www.ietf.org/rfc/rfc7748.txt "A. Langley, M. Hamburg, and S. Turner: Elliptic Curves for Security.” Internet Engineering Task Force; RFC 7748 (Informational); IETF, Jan-2016"
+5- https://www.ietf.org/rfc/rfc3526.txt "M. Kojo: More Modular Exponential (MODP) Diffie-Hellman groups for Internet Key Exchange (IKE)"
+6- https://eprint.iacr.org/2015/673.pdf "Mike Hamburg: Decaf: Eliminating cofactors through point compression"
+7- https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html "Off-the-Record Messaging Protocol version 3"
+8- https://github.com/twstrike/otrv4/blob/master/gen_gens_ed448.py
+9- https://ed25519.cr.yp.to/python/ed25519.py "Daniel Bernstein: ed25519"
+10- https://ed25519.cr.yp.to/ed25519-20110926.pdf "Daniel Bernstein, Niels Duif, Tanja Lange, Peter Schwabe and Bo-Yin Yang: High-speed high-security signatures"
+11- https://tools.ietf.org/html/draft-irtf-cfrg-eddsa-05 "S. Josefsson and I. Liusvaara: Edwards-curve Digital Signature Algorithm (EdDSA)"
