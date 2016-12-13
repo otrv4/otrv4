@@ -501,7 +501,8 @@ server.
 
 If a renewed profile is not published in a public place, and if the only
 publicly available profile is expired, the user's participation deniability is
-at risk.
+at risk. In addition, an expired profile received in the DAKE is considered
+invalid.
 
 Before the profile expires, the user must publish an updated profile with a
 new expiration date. The client establishes the frequency of expiration - this
@@ -1095,7 +1096,7 @@ If the message is version 4 and version 4 is not allowed:
 
 If the state is `START`:
 
-  * Validate the Pre-key message.
+  * Validate the Pre-key message. Validation is detailed below.
   * If validation fails, ignore the message.
   * If validation succeeds:
       * send a DRE-Auth message
@@ -1116,7 +1117,7 @@ To agree on a Pre-key message to use for this conversation:
 
   * Otherwise:
     * Forget your old `X` value that you sent earlier.
-    * Validate the pre-key message.
+    * Validate the pre-key message. Validation is detailed below.
     * If validation succeeds:
       * Send a DRE-Auth message.
       * Transition to the `ENCRYPTED_MESSAGES` state.
