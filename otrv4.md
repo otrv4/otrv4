@@ -1,7 +1,7 @@
 # OTR version 4
 
-OTRv4 is a new version of OTR that provides a Deniable Authenticated Key
-Exchange and better forward secrecy through the use of double ratcheting. OTR
+OTRv4 is a new version of OTR that provides a deniable authenticated key
+exchange and better forward secrecy through the use of double ratcheting. OTR
 works on top of an existing messaging protocol, like XMPP.
 
 ## Table of Contents
@@ -35,7 +35,7 @@ works on top of an existing messaging protocol, like XMPP.
 - Additional protection against transcript decryption in the case of ECC
   compromise.
 - The cryptographic primitives and protocols have been updated:
-  - Deniable Authenticated Key Exchange using Spawn [\[1\]](#references).
+  - Deniable authenticated key exchange using Spawn [\[1\]](#references).
   - Key management using the Double Ratchet Algorithm [\[2\]](#references).
   - Upgraded SHA-1 and SHA-2 to SHA-3.
   - Switched from AES to XSalsa20.
@@ -524,9 +524,9 @@ Profile Expiration (PROF-EXP):
 
 ### Deniable Authenticated Key Exchange (DAKE)
 
-This section outlines the flow of the Deniable Authenticated Key Exchange.
-This is a way to mutually agree upon shared keys for the two parties and
-authenticate one another while providing participation deniability.
+This section outlines the flow of the DAKE. This is a way to mutually agree upon
+shared keys for the two parties and authenticate one another while providing
+participation deniability.
 
 This protocol is derived from the Spawn protocol [\[1\]](#references), which uses dual-receiver
 encryption (DRE) and a non-interactive zero-knowledge proof of knowledge
