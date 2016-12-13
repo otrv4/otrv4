@@ -915,7 +915,7 @@ OTR message as follows:
   * Start with the OTR message as you would normally transmit it. For example,
     a Data Message would start with `?OTR:AAQD` and end with `.`.
   * Break it up into sufficiently small pieces. Let this number of pieces be
-  `total`, and the pieces be `piece\[1\],piece\[2\],...,piece[total]`.
+  `total`, and the pieces be `piece[1],piece[2],...,piece[total]`.
   * Transmit `total` OTRv4 fragmented messages with the following structure:
 
   ```
