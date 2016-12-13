@@ -88,7 +88,7 @@ transfer this knowledge to someone else.
 ## Notation and parameters
 
 This section contains information needed to understand the parameters,
-variables and arithmetic used.
+variables and arithmetic used in the specification.
 
 ### Notation
 
@@ -381,7 +381,7 @@ calculate_ratchet_keys(K):
 ### Ratcheting ECDH keys and Mix Keys
 
 The sender will rotate into a new ECDH ratchet and a new Mix Key ratchet
-before it sends the first message after receiving any messages from the other
+before they send the first message after receiving any messages from the other
 side (i.e. the first reply). The following data messages will advertise a new
 ratchet id as `i + 1`.
 
@@ -494,15 +494,15 @@ To create a user profile, assemble:
    DSA key to trust the user's profile in version 4. This is only used if the
    user supports versions 3 and 4.
 
-Then this profile must be published in a public place, like an untrusted
-server.
+After the profile is created, it must be published in a public place, like an
+untrusted server.
 
 #### Renewing a Profile
 
-If a renewed profile is not published in a public place, and if the only
-publicly available profile is expired, the user's participation deniability is
-at risk. In addition, an expired profile received in the DAKE is considered
-invalid.
+If a renewed profile is not published in a public place, the user's
+participation deniability is at risk. Participation deniability is also at risk
+if the only publicly available profile is expired. In addition, an expired
+profile received in the DAKE is considered invalid.
 
 Before the profile expires, the user must publish an updated profile with a
 new expiration date. The client establishes the frequency of expiration - this
@@ -1369,8 +1369,8 @@ Second MPI (MPI)
 
 ### SMP message 1
 
-SMP message 1 is sent by Alice to begin a DH exchange to determine two new
-generators, `g2` and `g3`. A valid  SMP message 1 is generated as follows:
+Alice sends SMP message 1 to begin a DH exchange to determine two new
+generators, `g2` and `g3`. A valid SMP message 1 is generated as follows:
 
 1. Determine her secret input `x`, which is to be compared to Bob's secret
    `y`, as specified in the "Secret Information" section.
