@@ -14,26 +14,26 @@ referred to as “mix key”.
 This proposal specifies:
 
 1. Adding an extra key to mix in with the ECDH key when deriving a new
-root key.
+   root key.
 2. An algorithm for ratcheting and deriving this mix key.
 
 This proposal does not change the Double Ratchet algorithm with the
 exception of how to derive root keys.
 
-The first 3072-bit DH key agreement takes place in the DAKE.  See Nik Unger's
+The first 3072-bit DH key agreement takes place in the DAKE. See Nik Unger's
 paper ([1]), which specifies Transitionally Secure Spawn. The difference to this
 entry in the paper is that we are trying to protect against elliptic curve
-weaknesses, and SIDH ([2]) is specific for postquantum resistance. So this will
+weaknesses, and SIDH ([2]) is specific for postquantum resistance. So we will
 instead use a classic Diffie Hellman key exchange.
 
 The options for ratcheting/re-deriving this mix key are:
 
 1. Obtain every mix key from a DH function which requires the other party to
-contribute to the computation.
+   contribute to the computation.
 2. Obtain a mix key with DH functions which requires the other party to
-contribute to the computation every n times. Between these derivations,
-the mix keys are obtained using a KDF that is seeded with the last DH
-key. We propose n = 3, but this can be adjusted depending on performance.
+   contribute to the computation every n times. Between these derivations,
+   the mix keys are obtained using a KDF that is seeded with the last DH
+   key. We propose n = 3, but this can be adjusted depending on performance.
 
 ### Algorithm
 
@@ -41,12 +41,11 @@ From now, we will assume the 2nd option for ratcheting/re-deriving the mix-key w
 
 *k_dh = A_i, a_i*
 
-A mix key is a key that is added to the key derivation function used
-to produce new root and chains keys. A mix key can be produced through
-a DH function and through a key derivation function, both of which
-produce a 3072-bit public key. This key has a 128-bit security level
-according to Table 2: Comparable strengths in NIST’s Recommendation for Key
-Management, page 53 ([3]).
+A mix key is a key that is added to the key derivation function used to produce
+new root and chains keys. A mix key can be produced through a DH function and
+through a key derivation function, both of which produce a 3072-bit public key.
+This key has a 128-bit security level according to Table 2: Comparable strengths
+in NIST’s Recommendation for Key Management, page 53 ([3]).
 
 *generateDH function - generateDH()*
 
@@ -81,11 +80,12 @@ Bob's DH keypair = `(b_i, B_i)`
 Every root key derivation requires both an ECDH key and a mix key. For
 the purposes of this explanation, we will only discuss the mix key.
 
-n is the number of root key derivations before performing a new DH
-computation. The interim root key derivations will use a mix key
-derived from a SHA3-256 using the previous mix key as the seed.
+`n` is the number of root key derivations before performing a new DH computation.
+The interim root key derivations will use a mix key derived from a SHA3-256 using
+the previous mix key as the seed.
 
 _When n is configured to equal 3_
+
 ```
 
 If we assume a message has been sent by Alice and Bob after the DAKE and we are now at ratchet 3:
@@ -128,9 +128,9 @@ Sends data_message_3_0 with A_1 --------------------------------->
 
 **Alice or Bob sends the first message in a ratchet (a first reply)**
 
-The ratchet identifier ratchet_id increases every time a greater
-ratchet_id is received or a new message is being sent and signals
-the machine to ratchet i.e. `ratchet_id += 1`
+The ratchet identifier `ratchet_id` increases every time a greater `ratchet_id` is
+received or a new message is being sent and signals the machine to ratchet, i.e.
+`ratchet_id += 1`
 
 If `ratchet_id % 3 == 0 && sending the first message of a new ratchet`
 
@@ -144,9 +144,9 @@ Otherwise
 
 **Alice or Bob send a follow-up message**
 
-When a new public key has been generated and sent in the first message
-in a ratchet, all follow up messages in that ratchet will also need
-the public key to ensure that the other party receives it.
+When a new public key has been generated and sent in the first message in a
+ratchet, all follow up messages in that ratchet will also need the public key to
+ensure that the other party receives it.
 
 If `ratchet_id % 6 == 3 || ratchet_id % 6 == 0`
 
@@ -158,8 +158,8 @@ The ratchet_id will need to be increased, so `ratchet_id += 1`
 
 If `ratchet_id % 6 == 3 || ratchet_id % 6 == 0`
 
-   * A new public key should be attached to the message. If it is not,
-    reject the message.
+   * A new public key should be attached to the message. If it is not, reject the
+     message.
 
 Otherwise:
 
@@ -169,9 +169,9 @@ Otherwise:
 
 **Alice or Bob receive a follow up message**
 
-If the ratchet_id is not greater than the current state of ratchet_id,
-then this is not a new ratchet. In this case there is no further
-action to be taken for the mix key.
+If the `ratchet_id` is not greater than the current state of `ratchet_id`, then
+this is not a new ratchet. In this case there is no further action to be taken for
+the mix key.
 
 **Diagram: Pattern of DH computations and key derivations in a conversation**
 
@@ -219,25 +219,24 @@ g = 2 and exponents a and b are 3072 bits long in an “Intel Core i7
 
 We’ve decide to use a 3072-bit key produced by
 
-1. a DH function which takes as argument the other party’s exponent
-   through a data message and produces a mix key.
+1. a DH function which takes as argument the other party’s exponent through a data
+   message and produces a mix key.
 2. a KDF (SHA3-256) function which takes as argument the previous mix key to
    produce a new one.
 
 The DH function will run every n = 3 times because of the following reasons:
 
-1. It is a small number so a particular key can only be compromised
-   for a maximum of 2\*n ratchets. This means that the maximum ratchets
-   that will use the mix key or a key derived from the mix key is 6.
-2. The benefit of using an odd number is for simplicity of
-   implementation. With an odd number, both Alice and Bob can generate
-   a new public and secret key at the same time as sending the public
-   key and compute a new mix key from a DH function. However, with an
-   even number, Alice would need to generate and send a key in a
-   different ratchet to the one where the public key would be
-   used. This happens because the public key would only be used in a
-   mix key computed from a new DH function on even numbers of
-   ratchet_ids so only Bob would be the sender at these times.
+1. It is a small number so a particular key can only be compromised for a maximum
+   of 2\*n ratchets. This means that the maximum ratchets that will use the mix
+   key or a key derived from the mix key is 6.
+2. The benefit of using an odd number is for simplicity of implementation. With an
+   odd number, both Alice and Bob can generate a new public and secret key at the
+   same time as sending the public key and compute a new mix key from a DH
+   function. However, with an even number, Alice would need to generate and send a
+   key in a different ratchet to the one where the public key would be used. This
+   happens because the public key would only be used in a mix key computed from a
+   new DH function on even numbers of ratchet_ids so only Bob would be the sender
+   at these times.
 
 From the IETF paper, RFC 3526 ([4]):
 
@@ -266,9 +265,9 @@ From the IETF paper, RFC 3526 ([4]):
 
 ### Consequences
 
-Using a 3072 DH function to produce the mix key extends data messages
-size in 56 bytes of extra key material that may cause some transport
-protocols to fragment these messages.
+Using a 3072 DH function to produce the mix key extends data messages size in 56
+bytes of extra key material that may cause some transport protocols to fragment
+these messages.
 
 [1]: http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf "N. Unger, I. Goldberg: Improved Techniques for Implementing Strongly Deniable Authenticated Key Exchanges"
 [2]: https://eprint.iacr.org/2011/506.pdf "L. de Feo, D. Jao, J. Plût: Towards Quantum-Resistant Cryptosystems from Supersingular Elliptic Curve Isogenies"
