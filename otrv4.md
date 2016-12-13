@@ -463,7 +463,7 @@ participation in OTRv4 conversations. When a user profile is published, it is
 available from a public location, such as a server. Each implementation may
 decide how to publish the profile. For example, one client may publish profiles
 to a server pool (similar to a keyserver pool, where PGP public keys can be
-published). Another client may use XMPP's publish-subscribe extension (XEP-0060)
+published). Another client may use XMPP's publish-subscribe extension (XEP-0060 [\[8\]](#references))
 for publishing profiles.
 
 When the user profile expires, it should be updated. Client implementation
@@ -1656,7 +1656,7 @@ b7da584eb4a951bb3eb15b0b29c66a7fbf0ce4,
 ```
 
 Generator 1 (`G1`) is the base point of Ed448. Generator 2 (`G2`) was created
-with this code [\[8\]](#references) that works as follows:
+with this code [\[9\]](#references) that works as follows:
 
 1. Select `x`, a "nothing up my sleeve" value (a value chosen above suspicion
    of hidden properties). In this case, we choose `OTRv4 g2`.
@@ -1676,8 +1676,8 @@ with this code [\[8\]](#references) that works as follows:
 	* Compute `g = point^cofactor`.
 	* If `g^q` equals the identity element, then `g` is a generator.
 
-For more explanation on how this implementation works, refer to [\[9\]](#references),
-[\[10\]](#references) and [\[11\]](#references).
+For more explanation on how this implementation works, refer to [\[10\]](#references),
+[\[11\]](#references) and [\[12\]](#references).
 
 #### Dual Receiver Key Generation: DRGen()
 
@@ -1815,7 +1815,8 @@ d is an array of bytes.
 5. https://www.ietf.org/rfc/rfc3526.txt "M. Kojo: More Modular Exponential (MODP) Diffie-Hellman groups for Internet Key Exchange (IKE)"
 6. https://eprint.iacr.org/2015/673.pdf "Mike Hamburg: Decaf: Eliminating cofactors through point compression"
 7. https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html "Off-the-Record Messaging Protocol version 3"
-8. https://github.com/twstrike/otrv4/blob/master/gen_gens_ed448.py
-9. https://ed25519.cr.yp.to/python/ed25519.py "Daniel Bernstein: ed25519"
-10. https://ed25519.cr.yp.to/ed25519-20110926.pdf "Daniel Bernstein, Niels Duif, Tanja Lange, Peter Schwabe and Bo-Yin Yang: High-speed high-security signatures"
-11. https://tools.ietf.org/html/draft-irtf-cfrg-eddsa-05 "S. Josefsson and I. Liusvaara: Edwards-curve Digital Signature Algorithm (EdDSA)"
+8. https://xmpp.org/extensions/xep-0060.pdf "P. Millard, P. Saint-Andre and R. Meijer: XEP-0060: Publish-Subscribe"
+9. https://github.com/twstrike/otrv4/blob/master/gen_gens_ed448.py
+10. https://ed25519.cr.yp.to/python/ed25519.py "Daniel Bernstein: ed25519"
+11. https://ed25519.cr.yp.to/ed25519-20110926.pdf "Daniel Bernstein, Niels Duif, Tanja Lange, Peter Schwabe and Bo-Yin Yang: High-speed high-security signatures"
+12. https://tools.ietf.org/html/draft-irtf-cfrg-eddsa-05 "S. Josefsson and I. Liusvaara: Edwards-curve Digital Signature Algorithm (EdDSA)"
