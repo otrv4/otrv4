@@ -589,7 +589,7 @@ Bob will be initiating the DAKE with Alice.
      one transmitted outside of the ciphertext
     * `(Y, B)` in the message is a prekey that Bob previously sent and has not
       been used.
-3. Retrieve ephemeral public keys from Bob:
+3. Retrieve ephemeral public keys from Alice:
     * Sets `their_ecdh` as ECDH ephemeral public key.
     * Sets `their_dh` as DH ephemeral public key.
 4. At this point, the DAKE is complete for Bob:
