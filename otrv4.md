@@ -262,13 +262,13 @@ OTRv4 supports the same TLV record types from OTRv3.
 Any message containing the string "?OTR Error:" is an OTR Error Message. The
 following part of the message should contain human-readable details of the
 error. The message may also include a specific code at the beginning e.g. "?OTR
-Error: ERROR_CODE_1:". This code is used to identify which error is being
+Error: ERROR_N:". This code is used to identify which error is being
 received for optional internationalization of the message.
 
 Error Code List:
 
 ```
-ERROR_CODE_1:
+ERROR_1:
   Message cannot be decrypted
 ```
 
