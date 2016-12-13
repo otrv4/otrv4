@@ -64,7 +64,7 @@ for users to chat using version 3, but is preferable to use 4 if both parties
 support it.
 
 We will support a conversation on version 3 if we don't find any user profile
-and the user allows it in its policy.
+and the client allows it.
 
 Because of the decision to use the Ed448 signature algorithm, OTRv4 will use the
 `z` value both for the NIZKPK (`Auth()`) in the DAKE and for the Ed448

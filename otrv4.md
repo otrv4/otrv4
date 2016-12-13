@@ -467,8 +467,8 @@ to a server pool (similar to a keyserver pool, where PGP public keys can be
 published). Another client may use XMPP's publish-subscribe extension (XEP-0060)
 for publishing profiles.
 
-When the user profile expires, it should be updated. The expiration and renewal
-policy determine the frequency of the user profile publication.
+When the user profile expires, it should be updated. Client implementation
+should determine the frequency of user's profile expiration and renewal.
 
 Both parties include the user profile in the DAKE. Participants in the DAKE do
 not request the profile from the site of publication. Both the published profile
