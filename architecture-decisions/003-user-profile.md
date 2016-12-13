@@ -52,7 +52,7 @@ If more than one valid user profile is available from the server, the one with
 the latest expiry will take priority.
 
 The signature should be generated using the Cramer-Shoup secret value `z` and a
-generator of Ed448 (`G1`) according to Mike Hamburg's Ed448 paper ([1]).
+generator of Ed448 (`G1`) according to Mike Hamburg's Ed448 paper [\[1\]](#references).
 
 We chose this curve because we are using the Ed448 in the rest of OTRv4 and
 there are at least two implementations available for different platforms.
@@ -73,4 +73,6 @@ unsafe and we aknowledge this. Nevertheless having two different keys would
 increment the number of keys to be managed and would introduce the need of
 binding them together.
 
-[1]: https://mikehamburg.com/papers/goldilocks/goldilocks.pdf "Ed448-Goldilocks, a new elliptic curve"
+### References
+
+1. https://mikehamburg.com/papers/goldilocks/goldilocks.pdf "Ed448-Goldilocks, a new elliptic curve"

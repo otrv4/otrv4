@@ -21,9 +21,9 @@ This proposal does not change the Double Ratchet algorithm with the
 exception of how to derive root keys.
 
 The first 3072-bit DH key agreement takes place in the DAKE. See Nik Unger's
-paper ([1]), which specifies Transitionally Secure Spawn. The difference to this
+paper [\[1\]](#references), which specifies Transitionally Secure Spawn. The difference to this
 entry in the paper is that we are trying to protect against elliptic curve
-weaknesses, and SIDH ([2]) is specific for postquantum resistance. So we will
+weaknesses, and SIDH [\[2\]](#references) is specific for postquantum resistance. So we will
 instead use a classic Diffie Hellman key exchange.
 
 The options for ratcheting/re-deriving this mix key are:
@@ -45,7 +45,7 @@ A mix key is a key that is added to the key derivation function used to produce
 new root and chains keys. A mix key can be produced through a DH function and
 through a key derivation function, both of which produce a 3072-bit public key.
 This key has a 128-bit security level according to Table 2: Comparable strengths
-in NIST’s Recommendation for Key Management, page 53 ([3]).
+in NIST’s Recommendation for Key Management, page 53 [\[3\]](#references).
 
 *generateDH function - generateDH()*
 
@@ -238,7 +238,7 @@ The DH function will run every n = 3 times because of the following reasons:
    new DH function on even numbers of ratchet_ids so only Bob would be the sender
    at these times.
 
-From the IETF paper, RFC 3526 ([4]):
+From the IETF paper, RFC 3526 [\[4\]](#references):
 
 * Prime is: 2^3072 - 2^3008 - 1 + 2^64 * { [2^2942 pi] + 1690314 }
 * Hex value:
@@ -269,7 +269,9 @@ Using a 3072 DH function to produce the mix key extends data messages size in 56
 bytes of extra key material that may cause some transport protocols to fragment
 these messages.
 
-[1]: http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf "N. Unger, I. Goldberg: Improved Techniques for Implementing Strongly Deniable Authenticated Key Exchanges"
-[2]: https://eprint.iacr.org/2011/506.pdf "L. de Feo, D. Jao, J. Plût: Towards Quantum-Resistant Cryptosystems from Supersingular Elliptic Curve Isogenies"
-[3]: http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-57pt1r4.pdf "E. Barker: NIST Special Publication 800-57 Part 1 Revision 4; Recommendation for Key Management; Part 1 General"
-[4]: https://www.ietf.org/rfc/rfc3526.txt "M. Kojo: More Modular Exponential (MODP) Diffie-Hellman groups for Internet Key Exchange (IKE)"
+### References
+
+1. http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf "N. Unger, I. Goldberg: Improved Techniques for Implementing Strongly Deniable Authenticated Key Exchanges"
+2. https://eprint.iacr.org/2011/506.pdf "L. de Feo, D. Jao, J. Plût: Towards Quantum-Resistant Cryptosystems from Supersingular Elliptic Curve Isogenies"
+3. http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-57pt1r4.pdf "E. Barker: NIST Special Publication 800-57 Part 1 Revision 4; Recommendation for Key Management; Part 1 General"
+4. https://www.ietf.org/rfc/rfc3526.txt "M. Kojo: More Modular Exponential (MODP) Diffie-Hellman groups for Internet Key Exchange (IKE)"

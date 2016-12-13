@@ -12,7 +12,7 @@ messages exchanged was done through the following three steps mechanism:
 3. Alice sends a message to Bob using her advertised key `privA` and
    acknowledged key `pubB`.
 
-In [1], the Double Ratchet Algorithm is introduced, which allows:
+Double Ratchet Algorithm [\[1\]](#references) is introduced, which allows:
 
 1. out-of-order messages
 2. per-message forward secrecy
@@ -21,7 +21,7 @@ We consider adding this new algorithm into OTRv4 while maintaining the same
 security properties of prior OTR versions, such as message deniability
 (achieved by revealing MAC keys).
 
-In [2], a vulnerability was found in Message Integrity of OTR version 2, where
+A vulnerability was found in message integrity of OTR version 2 [\[2\]](#references), where
 revealing MAC keys is done immediately by both sides. Two potential solutions
 are possible:
 
@@ -31,7 +31,7 @@ are possible:
    after two ratchet generations.
 
 OTRv3 made the decision to reveal MAC keys only by the receiver per ratchet.
-If we want to use Double Ratcheting, the Revealing MAC Key can be done in
+If we want to use Double Ratcheting, the revealing MAC key can be done in
 this way immediately after receiving each message.
 
 One difference between revealing MAC keys in the three-step ratchet and in the
@@ -45,7 +45,7 @@ Therefore, to reveal MAC keys in the Double Ratchet, we have two options:
 
 ### Decision
 
-For OTRv4, we decided to use the Double Ratchet Algorithm for key management.
+For OTRv4, we decided to use the Double Ratchet algorithm for key management.
 Even though our network model is in-order, we can benefit from the per-message
 forward secrecy that the Double Ratchet algorithm provides.
 
@@ -61,6 +61,7 @@ steps when ratcheting.
 However, key management and ratcheting process become more complex because of
 the different types of keys involved.
 
+### References
 
-[1]: https://whispersystems.org/blog/advanced-ratcheting/ "Advanced cryptographic ratcheting"
-[2]: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.165.7945&rep=rep1&type=pdf "Finite-State Security Analysis of OTR Version 2"
+1. https://whispersystems.org/blog/advanced-ratcheting/ "Advanced cryptographic ratcheting"
+2. http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.165.7945&rep=rep1&type=pdf "Finite-State Security Analysis of OTR Version 2"
