@@ -4,7 +4,7 @@
 
 In OTRv3, "the semantics of the OTR Query Message are that Alice is requesting
 that Bob starts an OTR conversation with her (if, of course, he is willing and
-able to do so)."
+able to do so)".
 
 A query message can be sent at any time during the protocol execution, have no
 guarantee of being answered (a client that does not support any compatible OTR
@@ -37,9 +37,9 @@ with a slightly difference in the semantics:
   double ratchet.
 
 * Query messages can be sent at any time but when the participant is already
-  on `MSGSTATE_ENCRYPTED`.
+  on `ENCRYPTED_MESSAGES`.
 
-Allowing query messages to be sent on `MSGSTATE_ENCRYPTED` causes a new DAKE
+Allowing query messages to be sent on `ENCRYPTED_MESSAGES` causes a new DAKE
 to be started while a conversation already exists. In this case, messages from
 the previous conversation that arrive after the new DAKE starts may not be
 decrypted, since each participant replaces their key material when engage on a
@@ -50,16 +50,15 @@ new DAKE.
 We will not change the DAKE to allow receiving late messages and decrypt them.
 
 We will prevent query messages to be used to force a key rotation in OTRv4
-by disallowing its sending on `MSGSTATE_ENCRYPTED`.
+by disallowing its sending on `ENCRYPTED_MESSAGES`.
 
 We will not prevent receiving query messages on the same state, because it would
 also prevent device mobility.
 
-
 ### Consequences
 
 A participant is still able to receive a query message while on
-`MSGSTATE_ENCRYPTED` from a dishonest participant.
+`ENCRYPTED_MESSAGES` from a dishonest participant.
 
 If the receiver starts a new DAKE, messages from the previous conversation
 that start a new ratchet will fail to be verified and decrypted
