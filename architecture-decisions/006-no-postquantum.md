@@ -23,6 +23,6 @@ that time.
 ### Consequences
 
 OTRv4 does not use any algorithms which aim to provide effective resistance to
-attacks by quantum computers. If quantum computers develop the ability to
-destroy elliptic curve cryptography and 3072-bit Diffie-Hellman in the next
-upcoming years, that would make OTRv4's primitives unsafe and unusable.
+attacks by quantum computers. If elliptic curve cryptography and 3072-bit
+Diffie-Hellman can be attacked by quantum computers in the next upcoming years,
+OTRv4's primitives will become unsafe and unusable.
