@@ -1341,10 +1341,10 @@ User-specified secret
   The input string given by the user at runtime.
 ```
 
-Then the SHA3-256 hash of the above is taken, and the digest becomes the actual
-secret (x or y) to be used in SMP. The additional fields insure that not only do
-both parties know the same secret input string, but no man-in-the-middle is
-capable of reading their communication either.
+Then the SHA3-512 hash of the above is taken, and the digest becomes the
+actual secret (x or y) to be used in SMP. The additional fields insure that
+not only do both parties know the same secret input string, but no man-in-the-
+middle is capable of reading their communication either.
 
 ### SMP Hash function
 
