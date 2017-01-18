@@ -1751,9 +1751,10 @@ ski is the secret key of the person decrypting the message.
     - `T3 = U1i*y1i`
     - `T4 = U2i*y2i`
   6. Verify `T1 + T2 + (T3 + T4)*αi ≟ Vi`.
-3. Recover symmetric key `K_enc = SHA3-256(Ei - U1i*zi)`. K is hashed from
+3. Recover `K = Ei - U1i*zi`.
+4. Recover symmetric key `K_enc = SHA3-256(K)`. K is hashed from
    55 bytes to 32 bytes because XSalsa20 has a maximum key size of 32 bytes.
-4. Decrypt `m = XSalsa20-Poly1305_K_enc(phi, nonce)`.
+5. Decrypt `m = XSalsa20-Poly1305_K_enc(phi, nonce)`.
 
 ### ROM Authentication
 
