@@ -1745,12 +1745,7 @@ ski is the secret key of the person decrypting the message.
     - `zV = T11 || T21 || T31 || T12 || T22 || T32 || T4`
     - `l' = HashToScalar(gV || pV || eV || zV)`
   4. Verify `l' ≟ l`.
-  5. Compute
-    - `T1 = U1i*x1i`
-    - `T2 = U2i*x2i`
-    - `T3 = U1i*y1i`
-    - `T4 = U2i*y2i`
-  6. Verify `T1 + T2 + (T3 + T4)*αi ≟ Vi`.
+  5. Verify `U1i*x1i + U2i*x2i + (U1i*y1i + U2i*y2i)*αi ≟ Vi`.
 3. Recover `K = Ei - U1i*zi`.
 4. Recover symmetric key `K_enc = SHA3-256(K)`. K is hashed from
    55 bytes to 32 bytes because XSalsa20 has a maximum key size of 32 bytes.
