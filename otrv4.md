@@ -1755,7 +1755,7 @@ ski is the secret key of the person decrypting the message.
 
 The Authentication scheme consists of two functions:
 
-`sigma = Auth(A_2, a_2, {A_1, A_2, A_3}, m)`, an authentication function.
+`sigma = Auth(A_1, a_1, {A_1, A_2, A_3}, m)`, an authentication function.
 
 `Verify({A_1, A_2, A_3}, sigma, m)`, a verification function.
 
@@ -1771,9 +1771,9 @@ G = (11781216126343694673728248434331006466518053535701637341687908214793940427
 2d94c63d96c170033f4ba0c7f0de840aed939f, 0x13)
 ```
 
-#### Authentication: Auth(A2, a2, {A1, A2, A3}, m):
+#### Authentication: Auth(A1, a1, {A1, A2, A3}, m):
 
-A2 is the public value associated with a2, that is, `A2 = G*a2`.
+A1 is the public value associated with a1, that is, `A1 = G*a1`.
 m is the message to authenticate.
 
 1. Pick random values `t1, c2, c3, r2, r3` in Z_q.
@@ -1782,7 +1782,7 @@ m is the message to authenticate.
 4. Compute `T3 = G*r3 + A3*c3`.
 5. Compute `c = HashToScalar(G || q || A1 || A2 || A3 || T1 || T2 || T3 || m)`.
 6. Compute `c1 = c - c2 - c3 (mod q)`.
-7. Compute `r1 = t1 - c1 * a2 (mod q)`.
+7. Compute `r1 = t1 - c1 * a1 (mod q)`.
 8. Send `sigma = (c1, r1, c2, r2, c3, r3)`.
 
 #### Verification: Verify({A1, A2, A3}, sigma, m)
