@@ -368,10 +368,10 @@ decide_between_chain_keys(Ca, Cb):
     return Cb, Ca
 ```
 
-### Calculating Double Ratchet keys
+### Deriving Double Ratchet keys
 
 ```
-calculate_ratchet_keys(K):
+derive_ratchet_keys(K):
   R = SHA3-512(0x01 || K)
   Ca = SHA3-512(0x02 || K)
   Cb = SHA3-512(0x03 || K)
