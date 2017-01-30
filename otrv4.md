@@ -50,11 +50,11 @@ Establishes Conversation with DAKE  <------------>  Establishes Conversation wit
 Exchanges Data Messages             <------------>  Exchanges Data Messages
 ```
 
-An OTRv4 conversation is established when one participant requests a
-conversation, advertising which versions they support. If the other participant
-supports one of these versions, a deniable key exchange protocol is used to
-establish a secure channel. Encrypted messages are then exchanged in this secure
-channel with forward secrecy.
+An OTRv4 conversation can begin after one participant requests a conversation.
+This includes an advertisement of which versions they support. If the other
+participant supports one of these versions, a deniable, authenticated key exchange
+(DAKE) is used to establish a secure channel. Encrypted messages are then
+exchanged in this secure channel with forward secrecy.
 
 ## Assumptions
 
@@ -71,19 +71,30 @@ attacks to reduce availability.
 
 ## Security Properties
 
-In an OTRv4 conversation, both sides can verify the identity of the other
-participant but cannot transfer this knowledge to a third party.
+OTRv4 does not take advantage of quantum resistant algorithms for several
+reasons. It aims to be easy to implement in today's environments within a
+year. Current quantum resistant algorithms and their respective
+implementations are not ready enough to fit in that time frame. As a result,
+the protections mentioned in the following paragraphs only apply to non-quantum
+adversaries. The only exception is the usage of a "mix key" to provide
+some post-conversation transcript protection against potential weaknesses with
+elliptic curves and the early arrival of quantum computers.
 
-Once an OTRv4 channel has been created, all messages transmitted through this
-channel are confidential and their integrity is protected.
+In the DAKE, although access to one of the participant's private keys is
+required for authentication, both participants can deny having used their private,
+long term keys in this process. An external cryptographic expert will be able to
+prove that one person between the two used their long term private key for the
+authentication, but they will not be able to identify whose key was used.
 
-If key material has been compromised, previous messages are protected. In this
-case, future messages are protected in future ratchets only.
+Once an OTRv4 channel has been created with the DAKE, all data messages
+transmitted through this channel are confidential and their integrity to the
+participants is protected. In addition, the MAC keys used to validate
+each message are revealed. This allows for forgeability of the data messages
+and consequent deniability of their contents.
 
-Both parties can deny that they have participated in a conversation. They can
-also deny having sent any of the exchanged messages in the conversation. The
-respective party can be certain of the authenticity of the messages but cannot
-transfer this knowledge to someone else.
+If key material for a particular data message is compromised, previous messages
+are protected. Future messages are protected by the Diffie-Hellman and Elliptic
+Curve Diffie-Hellman ratchets.
 
 ## Notation and parameters
 
