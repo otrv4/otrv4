@@ -1263,7 +1263,7 @@ should be 64 bytes in size.
 
 Lastly, OTRv4 uses Ed448 as the cryptographic primitive. This changes the way
 values are serialized and how they are computed. To define the SMP values
-under Ed448, we reuse the previously defined generator for Cramer-Shoup:
+under Ed448, we reuse the previously defined G1 generator for Cramer-Shoup:
 
 ```
 G = (11781216126343694673728248434331006466518053535701637341687908214793940427
@@ -1773,10 +1773,10 @@ The Authentication scheme consists of two functions:
 
 #### Domain parameters
 
-We reuse the previously defined generator in Cramer-Shoup of DRE:
+We reuse the previously defined G1 generator in Cramer-Shoup of DRE:
 
 ```
-G = (11781216126343694673728248434331006466518053535701637341687908214793940427
+G1 = (11781216126343694673728248434331006466518053535701637341687908214793940427
 7809514858788439644911793978499419995990477371552926308078495, 19)
 
 = (0x297ea0ea2692ff1b4faff46098453a6a26adf733245f065c3c59d0709cecfa96147eaaf393
@@ -1785,14 +1785,14 @@ G = (11781216126343694673728248434331006466518053535701637341687908214793940427
 
 #### Authentication: Auth(A1, a1, {A1, A2, A3}, m):
 
-A1 is the public value associated with a1, that is, `A1 = G*a1`.
+A1 is the public value associated with a1, that is, `A1 = G1*a1`.
 m is the message to authenticate.
 
 1. Pick random values `t1, c2, c3, r2, r3` in Z_q.
-2. Compute `T1 = G*t1`.
-3. Compute `T2 = G*r2 + A2*c2`.
-4. Compute `T3 = G*r3 + A3*c3`.
-5. Compute `c = HashToScalar(G || q || A1 || A2 || A3 || T1 || T2 || T3 || m)`.
+2. Compute `T1 = G1*t1`.
+3. Compute `T2 = G1*r2 + A2*c2`.
+4. Compute `T3 = G1*r3 + A3*c3`.
+5. Compute `c = HashToScalar(G1 || q || A1 || A2 || A3 || T1 || T2 || T3 || m)`.
 6. Compute `c1 = c - c2 - c3 (mod q)`.
 7. Compute `r1 = t1 - c1 * a1 (mod q)`.
 8. Send `sigma = (c1, r1, c2, r2, c3, r3)`.
@@ -1800,10 +1800,10 @@ m is the message to authenticate.
 #### Verification: Verify({A1, A2, A3}, sigma, m)
 
 1. Parse sigma to retrieve components `(c1, r1, c2, r2, c3, r3)`.
-2. Compute `T1 = G*r1 + A1*c1`
-3. Compute `T2 = G*r2 + A2*c2`
-4. Compute `T3 = G*r3 + A3*c3`
-5. Compute `c = HashToScalar(G || q || A1 || A2 || A3 || T1 || T2 || T3 || m)`.
+2. Compute `T1 = G1*r1 + A1*c1`
+3. Compute `T2 = G1*r2 + A2*c2`
+4. Compute `T3 = G1*r3 + A3*c3`
+5. Compute `c = HashToScalar(G1 || q || A1 || A2 || A3 || T1 || T2 || T3 || m)`.
 6. Check if `c ≟ c1 + c2 + c3 (mod q)`.
 
 ### HashToScalar(d)
