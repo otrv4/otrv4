@@ -348,7 +348,7 @@ k_dh:
   This is serialized as a big-endian unsigned integer.
 
 mix_key:
-  A SHA3-256 of the shared DH key SHA3-256(k_dh).
+  A SHA3-256 hash of the shared DH key SHA3-256(k_dh).
 
 K_ecdh:
   The serialized ECDH shared secret computed from an ECDH exchange.
@@ -478,7 +478,8 @@ published). Another client may use XMPP's publish-subscribe extension (XEP-0060 
 for publishing profiles.
 
 When the user profile expires, it should be updated. Client implementation
-should determine the frequency of user's profile expiration and renewal.
+should determine the frequency of user's profile expiration and renewal. The
+recommended expiration time is two weeks.
 
 Both parties include the user profile in the DAKE. Participants in the DAKE do
 not request the profile from the site of publication. Both the published profile
