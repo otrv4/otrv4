@@ -223,10 +223,8 @@ Dual-receiver encrypted message (DRE-M):
   l (MPI)
   n1 (MPI)
   n2 (MPI)
-  nonce (NONCE)
-  phi (DATA)
-    Where (U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2, nonce, phi) =
-    DREnc(pubA, pubB, m)
+    Where (U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2) =
+    DREnc(pubA, pubB, k)
 ```
 
 An Auth non-interactive zero-knowledge proof of knowledge is serialized as
@@ -665,11 +663,14 @@ A valid DRE-Auth message is generated as follows:
 3. Generate an ephemeral DH key pair:
   * secret key `a` (80 bytes).
   * public key `A`.
-4. Generate `m = Prof_B || Prof_A || Y || X || B || A`
-5. Compute `DREnc(PKb, PKa, m)` and serialize it as a DRE-M value in the
-   variable `gamma`. The decription is: `m = DRDec(PKb, PKa, skb,
-   gamma)`
-6. Compute `sigma = Auth(Ha, za, {Hb, Ha, Y}, Prof_B || Prof_A || Y || B ||
+4. Pick random values `r` in Z_q and compute `K = G1*r`.
+5. Compute symmetric key `K_enc = SHA3-256(K)`. K is hashed from 55 bytes to 32
+   bytes because XSalsa20 has a maximum key size of 32 bytes.
+6. Generate `m = Prof_B || Prof_A || Y || X || B || A`.
+7. Pick a random 24 bytes `nonce` and compute `phi = XSalsa20-Poly1305_K_enc(m,
+   nonce)`.
+8. Compute `gamma = DREnc(PKb, PKa, K)`.
+9. Compute `sigma = Auth(Ha, za, {Hb, Ha, Y}, Prof_B || Prof_A || Y || B ||
    gamma)`.
 
 To verify and decrypt the DRE-Auth message:
@@ -677,7 +678,9 @@ To verify and decrypt the DRE-Auth message:
 1. Validate user profile.
 2. Verify the `sigma` with [ROM Authentication](#rom-authentication)
    `Verify({Ha, Hb, Y}, sigma, Prof_B || Prof_A || Y || B || gamma)`.
-3. Decrypt the `gamma` with [ROM DRE](#rom-dre) `m = DRDec(PKb, PKa, skb, gamma)`
+3. Decrypt the `gamma` with [ROM DRE](#rom-dre) `K = DRDec(PKb, PKa, skb, gamma)`.
+4. Compute symmetric key `K_dec = SHA3-256(K)`.
+5. Decrypt `m = XSalsa20-Poly1305_K_dec(phi, nonce)`.
 
 A DRE-Auth is an OTR message encoded as:
 
@@ -692,15 +695,14 @@ Receiver Instance tag (INT)
   The instance tag of the intended recipient.
 Sender's User Profile (USER-PROF)
   As described in the section 'Creating a User Profile'.
-X (POINT)
-  The ephemeral public ECDH key.
-A (MPI)
-  The ephemeral public DH key. Note that even though this is in uppercase,
-  this is NOT a POINT.
 gamma (DRE-M)
-  The Dual-receiver encrypted value.
+  The Dual-receiver encrypted key.
 sigma (AUTH)
   The Auth value.
+nonce (NONCE)
+  The nonce used to encrypt m.
+phi (DATA)
+  The encrypted message (Prof_B || Prof_A || Y || X || B || A).
 ```
 
 ## Data Exchange
@@ -1641,9 +1643,9 @@ The DRE scheme consists of three functions:
 
 `PK, sk = DRGen()`, a key generation function.
 
-`gamma = DREnc(PK1, PK2, m)`, an encryption function.
+`gamma = DREnc(PK1, PK2, K)`, an encryption function.
 
-`m = DRDec(PK1, PK2, ski, gamma) i ∈ {1, 2}` , a decryption function.
+`K = DRDec(PK1, PK2, ski, gamma) i ∈ {1, 2}` , a decryption function.
 
 #### Domain parameters
 
@@ -1702,11 +1704,11 @@ For more explanation on how this implementation works, refer to [\[10\]](#refere
 3. The public key is `PK = {C, D, H}` and the secret key is
    `sk = {x1, x2, y1, y2, z}`.
 
-#### Dual Receiver Encryption: DREnc(PK1, PK2, m)
+#### Dual Receiver Encryption: DREnc(PK1, PK2, K)
 
 Let `{C1, D1, H1} = PK1` and `{C2, D2, H2} = PK2`
 
-1. Pick random values `k1, k2, r` in Z_q and compute `K = G1*r`.
+1. Pick random values `k1, k2` in Z_q.
 2. For i ∈ {1, 2}:
   1. Compute
     - `U1i = G1*ki`
@@ -1714,11 +1716,7 @@ Let `{C1, D1, H1} = PK1` and `{C2, D2, H2} = PK2`
     - `Ei = (Hi*ki) + K`
   2. Compute `αi = HashToScalar(U1i || U2i || Ei)`.
   3. Compute `Vi = Ci*ki + Di*(ki * αi)`
-3. Compute symmetric key `K_enc = SHA3-256(K)`. K is hashed from 55 bytes to 32
-   bytes because XSalsa20 has a maximum key size of 32 bytes.
-4. Pick a random 24 bytes `nonce` and compute `phi = XSalsa20-Poly1305_K_enc(m,
-   nonce)`
-5. Generate a NIZKPK:
+3. Generate a NIZKPK:
   1. for i ∈ {1, 2}:
     1. Pick random value `ti` in Z_q.
     2. Compute
@@ -1734,7 +1732,7 @@ Let `{C1, D1, H1} = PK1` and `{C2, D2, H2} = PK2`
     - `l = HashToScalar(gV || pV || eV || zV)`
   4. Generate for i ∈ {1,2}:
     1. Compute `ni = ti - l * ki (mod q)`.
-6. Send `gamma = (U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2, nonce, phi)`.
+4. Send `gamma = (U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2)`.
 
 #### Dual Receiver Decryption: DRDec(PK1, PK2, ski, gamma):
 
@@ -1760,9 +1758,6 @@ ski is the secret key of the person decrypting the message.
   4. Verify `l' ≟ l`.
   5. Verify `U1i*x1i + U2i*x2i + (U1i*y1i + U2i*y2i)*αi ≟ Vi`.
 3. Recover `K = Ei - U1i*zi`.
-4. Recover symmetric key `K_enc = SHA3-256(K)`. K is hashed from
-   55 bytes to 32 bytes because XSalsa20 has a maximum key size of 32 bytes.
-5. Decrypt `m = XSalsa20-Poly1305_K_enc(phi, nonce)`.
 
 ### ROM Authentication
 
