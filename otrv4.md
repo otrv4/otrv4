@@ -490,9 +490,10 @@ and the profile used in the DAKE should match each other.
 To create a user profile, assemble:
 
 1. User's Cramer-Shoup long term public key.
-2. Version: a string corresponding to the user's supported OTR versions.
+2. Versions: a string corresponding to the user's supported OTR versions.
    The format is described in OTRv3 under the section "OTR Query Messages"
-   [\[7\]](#references).
+   [\[7\]](#references). If the user allows versions 3 and 4, versions is "34"
+   (2 bytes).
 3. Profile Expiration: Expiration date in standard Unix 64-bit format
    (seconds since the midnight starting Jan 1, 1970, UTC, ignoring leap seconds)
 4. Profile Signature: One of the Cramer-Shoup secret key values (`z`) and its
@@ -524,7 +525,7 @@ can be configurable. A recommended value is two weeks.
 ```
 User Profile (USER-PROF):
   Cramer-Shoup public key (CRAMER-SHOUP-PUBKEY)
-  Version (BYTE)
+  Versions (DATA)
   Profile Expiration (PROF-EXP)
   Profile Signature (MPI)
   (optional) Transitional Signature (MPI)
