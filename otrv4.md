@@ -1169,11 +1169,15 @@ If the state is not `DAKE_IN_PROGRESS`:
 
 If the state is `DAKE_IN_PROGRESS`:
 
-  * Verify that the profile signature is valid.
-  * Verify that the profile is not expired.
-  * If the auth `sigma` is valid, decrypt the DRE message and verify:
-    * that the point `X` received is on curve 448.
-    * that the DH public key `A` is from the correct group.
+  * If the auth `sigma` is valid:
+    * Decrypt the DRE key.
+    * Decrypt phi and verify:
+      * that our profile is the first in the message.
+      * that their profile is valid (and not expired) and matches the profile
+        transmitted outside of phi.
+      * that the point `X` received is on curve 448.
+      * that the DH public key `A` is from the correct group.
+      * that `Y` and `B` were previously sent in this session (and remain unused).
 
   * If everything verifies:
     * Compute the ECDH shared secret `K_ecdh`.
