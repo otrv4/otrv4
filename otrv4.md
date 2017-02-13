@@ -489,9 +489,9 @@ To create a user profile, assemble:
 
 1. User's Cramer-Shoup long term public key.
 2. Versions: a string corresponding to the user's supported OTR versions.
-   The format is described in OTRv3 under the section "OTR Query Messages"
-   [\[7\]](#references). If the user allows versions 3 and 4, versions is "34"
-   (2 bytes).
+   The format is described under the section ["Establishing
+   Versions"](#establishing-versions) below. If the user allows versions 3 and
+   4, versions are "34" (2 bytes).
 3. Profile Expiration: Expiration date in standard Unix 64-bit format
    (seconds since the midnight starting Jan 1, 1970, UTC, ignoring leap seconds)
 4. Profile Signature: One of the Cramer-Shoup secret key values (`z`) and its
@@ -506,6 +506,27 @@ To create a user profile, assemble:
 
 After the profile is created, it must be published in a public place, like an
 untrusted server.
+
+##### Establishing Versions
+
+A valid versions string can be created by concatenating supported version numbers
+together in any order. For example, a user who supports versions 3 and 4
+will have the version string "43" or "34" in their profile. A user who only
+supports version 4 will have "4". Thus, a version string has varying size, and it
+is represented as a DATA type with its length specified.
+
+Invalid version strings contain "2" or "1". Implementations of OTRv4 have
+backwards support up to OTR version 3, and thus do not support versions 2 and 1,
+i.e. "32" and "31"
+
+##### Version Priority
+
+OTRv4 addresses version rollback attacks by prioritizing later versions over older
+versions. For example, in the case where both participants support versions 3 and 4,
+both will default to using 4. In another case where one participant only supports
+version 3 and the other supports version 3 and 4, version 3 will be used. Each
+client should keep track of which versions are more recent and thus prioritize
+them while processing versions in the DAKE.
 
 #### Renewing a Profile
 
@@ -570,6 +591,9 @@ Bob will be initiating the DAKE with Alice.
 
 1. Receives Pre-key message from Bob:
     * Validates Bob's User Profile.
+    * Picks the highest compatible version of OTR listed in Bob's profile.
+      If the versions are incompatible, Alice does not send any further messages.
+      Version prioritization is explained [here](#version-priority).
     * Sets `their_ecdh` as ECDH ephemeral public key.
     * Sets `their_dh` as DH ephemeral public key.
 2. Generates and sets `our_ecdh` as ephemeral ECDH keys.
@@ -588,6 +612,10 @@ Bob will be initiating the DAKE with Alice.
 
 1. Receives DRE-Auth message from Alice:
     * Validates Alice's User Profile.
+    * Picks the highest compatible version of OTR listed in Alice's
+      profile, and follows the specification for this version. Version
+      prioritization is explained [here](#version-priority)
+      If the versions are incompatible, Bob does not send any further messages.
     * Verify the authentication `sigma` (see [DRE-Auth message](#dre-auth-message)).
 2. Decrypts `gamma` (see [DRE-Auth message](#dre-auth-message)) and verifies
    the following properties of the decrypted message. If any of the
@@ -666,18 +694,18 @@ A valid DRE-Auth message is generated as follows:
 4. Pick random values `r` in Z_q and compute `K = G1*r`.
 5. Compute symmetric key `K_enc = SHA3-256(K)`. K is hashed from 55 bytes to 32
    bytes because XSalsa20 has a maximum key size of 32 bytes.
-6. Generate `m = Prof_B || Prof_A || Y || X || B || A`.
+6. Generate `m = Bobs_User_Profile || Alices_User_Profile || Y || X || B || A`.
 7. Pick a random 24 bytes `nonce` and compute `phi = XSalsa20-Poly1305_K_enc(m,
    nonce)`.
 8. Compute `gamma = DREnc(PKb, PKa, K)`.
-9. Compute `sigma = Auth(Ha, za, {Hb, Ha, Y}, Prof_B || Prof_A || Y || B ||
-   gamma)`.
+9. Compute `sigma = Auth(Ha, za, {Hb, Ha, Y}, Bobs_User_Profile || Alices_User_Profile
+   || Y || B || gamma)`.
 
 To verify and decrypt the DRE-Auth message:
 
 1. Validate user profile.
 2. Verify the `sigma` with [ROM Authentication](#rom-authentication)
-   `Verify({Ha, Hb, Y}, sigma, Prof_B || Prof_A || Y || B || gamma)`.
+   `Verify({Ha, Hb, Y}, sigma, Bobs_User_Profile || Alices_User_Profile || Y || B || gamma)`.
 3. Decrypt the `gamma` with [ROM DRE](#rom-dre) `K = DRDec(PKb, PKa, skb, gamma)`.
 4. Compute symmetric key `K_dec = SHA3-256(K)`.
 5. Decrypt `m = XSalsa20-Poly1305_K_dec(phi, nonce)`.
@@ -702,7 +730,7 @@ sigma (AUTH)
 nonce (NONCE)
   The nonce used to encrypt m.
 phi (DATA)
-  The encrypted message (Prof_B || Prof_A || Y || X || B || A).
+  The encrypted message (Bobs_User_Profile || Alices_User_Profile || Y || X || B || A).
 ```
 
 ## Data Exchange
@@ -1104,17 +1132,25 @@ Proceed as specified in OTRv3. See "The protocol state machine" section [\[7\]](
 
 #### Receiving a Pre-key message
 
-If the message is version 4 and version 4 is not allowed:
-
-  * Ignore this message.
-
 If the state is `START`:
 
-  * Validate the Pre-key message. Validation is detailed below.
-  * If validation fails, ignore the message.
-  * If validation succeeds:
-      * send a DRE-Auth message
-      * transition to the `ENCRYPTED_MESSAGES` state.
+  * Validate the Pre-key message. If any of the verifications fail, ignore the
+    message.
+    * Verify that the user profile signature is valid.
+    * Verify that the user profile is not expired.
+    * Verify that your versions are compatible with the versions in the user
+      profile.
+      * If your versions are incompatible with the versions in the message,
+        ignore the message
+      * Else, pick the highest compatible version and follow the OTR
+        specification for this version. Version prioritization is detailed
+        [here](#version-prioritizing).
+    * If the highest compatible version is OTR version 4
+      * Verify that the point `Y` received is on curve 448.
+      * Verify that the DH public key `B` is from the correct group.
+      * If all validations succeed:
+          * send a DRE-Auth message
+          * transition to the `ENCRYPTED_MESSAGES` state.
 
 If the state is `DAKE_IN_PROGRESS`:
 
@@ -1128,13 +1164,25 @@ To agree on a Pre-key message to use for this conversation:
     Pre-key with the value from the message you received.
   * If yours is the lower hash value:
     * Ignore the received Pre-key message.
-
   * Otherwise:
     * Forget your old `X` value that you sent earlier.
-    * Validate the pre-key message. Validation is detailed below.
-    * If validation succeeds:
-      * Send a DRE-Auth message.
-      * Transition to the `ENCRYPTED_MESSAGES` state.
+    * Validate the pre-key message. If any of the verifications fail, ignore the
+      message.
+      * Verify that the user profile signature is valid.
+      * Verify that the user profile is not expired.
+      * Verify that your versions are compatible with the versions in the user
+        profile.
+        * If your versions are incompatible with the versions in the message,
+          ignore the message
+        * Else, pick the highest compatible version and follow the OTR
+          specification for this version. Version prioritization is detailed
+          [here](#version-prioritizing).
+    * If the highest compatible version is OTR version 4
+      * Verify that the point `Y` received is on curve 448.
+      * Verify that the DH public key `B` is from the correct group.
+      * If validation succeeds:
+        * Send a DRE-Auth message.
+        * Transition to the `ENCRYPTED_MESSAGES` state.
 
 If the state is `ENCRYPTED_MESSAGES`:
 
@@ -1143,13 +1191,6 @@ If the state is `ENCRYPTED_MESSAGES`:
   * If validation succeeds:
     * send a DRE-Auth message
     * keep in the `ENCRYPTED_MESSAGES` state.
-
-To validate the Pre-key message, you should:
-
-  * Verify that the user profile signature is valid.
-  * Verify that the user profile is not expired.
-  * Verify that the point `Y` received is on curve 448.
-  * Verify that the DH public key `B` is from the correct group.
 
 #### Sending a DRE-Auth message
 
@@ -1161,29 +1202,34 @@ To validate the Pre-key message, you should:
 
 #### Receiving a DRE-Auth message
 
-If the message is version 4 and version 4 is not allowed, ignore this message.
-
 If the state is not `DAKE_IN_PROGRESS`:
 
   * Ignore this message.
 
 If the state is `DAKE_IN_PROGRESS`:
 
-  * If the auth `sigma` is valid:
-    * Decrypt the DRE key.
-    * Decrypt phi and verify:
-      * that our profile is the first in the message.
-      * that their profile is valid (and not expired) and matches the profile
-        transmitted outside of phi.
-      * that the point `X` received is on curve 448.
-      * that the DH public key `A` is from the correct group.
-      * that `Y` and `B` were previously sent in this session (and remain unused).
-
-  * If everything verifies:
-    * Compute the ECDH shared secret `K_ecdh`.
-    * Compute the mix key `mix_key`.
-    * Initialize the double ratcheting.
-    * Transition state to `ENCRYPTED_MESSAGES`.
+  * Verify that the Sender's User Profile:
+    * Check that the profile is not expired
+    * Pick the highest compatible version indicated in the profile.
+      * If the versions advertised are not compatible with those that are supported,
+        ignore this message.
+      * Else, follow the specification for the highest compatible version.
+        Version prioritization is detailed [here](#version-priority)
+      * If the highest compatible version is version 4:
+        * If the auth `sigma` is valid:
+          * Decrypt the DRE key.
+          * Decrypt phi and verify:
+          * that our profile is the first in the message.
+          * that their user profile is not expired and matches the profile
+            in the Sender's User Profile section.
+          * that the point `X` received is on curve 448.
+          * that the DH public key `A` is from the correct group.
+          * that `Y` and `B` were previously sent in this session (and remain unused).
+          * If everything verifies:
+            * Compute the ECDH shared secret `K_ecdh`.
+            * Compute the mix key `mix_key`.
+            * Initialize the double ratcheting.
+            * Transition state to `ENCRYPTED_MESSAGES`.
 
 #### Sending an encrypted data message
 
