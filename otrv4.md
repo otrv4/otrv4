@@ -450,8 +450,9 @@ derive_enc_mac_keys(chain_key):
 
 ## Conversation Initialization
 
-OTRv4 will initialize through a Query message or a whitespace tag, as discussed
-in OTRv3 [\[7\]](#references). After this, the conversation is authenticated using DAKE.
+OTRv4 will initialize through a [Query Message or a Whitespace
+Tag](#user-requests-to-start-an-otr-conversation). After this, the conversation is
+authenticated using DAKE.
 
 ### Requesting conversation with older OTR versions
 
@@ -489,9 +490,9 @@ To create a user profile, assemble:
 
 1. User's Cramer-Shoup long term public key.
 2. Versions: a string corresponding to the user's supported OTR versions.
-   The format is described under the section ["Establishing
-   Versions"](#establishing-versions) below. If the user allows versions 3 and
-   4, versions are "34" (2 bytes).
+   A user profile can advertise multiple OTR versions. The format is
+   described under the section ["Establishing Versions"](#establishing-versions)
+   below.
 3. Profile Expiration: Expiration date in standard Unix 64-bit format
    (seconds since the midnight starting Jan 1, 1970, UTC, ignoring leap seconds)
 4. Profile Signature: One of the Cramer-Shoup secret key values (`z`) and its
@@ -511,13 +512,13 @@ untrusted server.
 
 A valid versions string can be created by concatenating supported version numbers
 together in any order. For example, a user who supports versions 3 and 4
-will have the version string "43" or "34" in their profile. A user who only
-supports version 4 will have "4". Thus, a version string has varying size, and it
-is represented as a DATA type with its length specified.
+will have the version string "43" or "34" in their profile (2 bytes). A user who only
+supports version 4 will have "4" (1 byte). Thus, a version string has varying size,
+and it is represented as a DATA type with its length specified.
 
-Invalid version strings contain "2" or "1". Implementations of OTRv4 have
-backwards support up to OTR version 3, and thus do not support versions 2 and 1,
-i.e. "32" and "31"
+Invalid version strings contain "2" or "1". The OTRv4 specification supports up
+to OTR version 3, and thus do not support versions 2 and 1, i.e. version strings of
+"32" or "31".
 
 ##### Version Priority
 
@@ -1080,15 +1081,59 @@ Note:
 
 #### User requests to start an OTR conversation
 
-Send an OTR Query Message or a plaintext message with a whitespace tag to the
-correspondent.
+Send an OTR Query Message or a plaintext message with a whitespace
+tag to the correspondent. [Query messages](#query-messages) and [whitespace
+tags](#whitespace-tags) are constructed according to the sections below.
 
-Query Messages are constructed according to the section "OTR Query Messages" of
-OTRv3 [\[7\]](#references). The byte identifier for OTR version 4 is "4".
+#### Query Messages
 
-Whitespace tags have the same structure as defined in "Tagged plaintext
-messages" of OTRv3 [\[7\]](#references), and a 8 bytes tag "\x20\x20\x09\x09\x20\x09\x20\x20"
-is used to indicate a willingness to use OTR version 4.
+If Alice wishes to communicate to Bob that she would like to use OTR,
+she sends a message containing the string "?OTRv" followed by an indication of
+what versions of OTR she is willing to use with Bob. The version string is
+constructed as follows:
+
+If she is willing to use OTR version 3, she appends a byte identifier for the
+versions in question, followed by "?". The byte identifier for OTR version 3
+is "3", and similarly for 4. Thus, if she is wiling to use OTR versions 3 and 4,
+the following identifier would be "34". The order of the identifiers between the
+"v" and the "?" does not matter, but none should be listed more than once. The OTRv4
+specification only supports versions 3 and higher. Thus, query messages for
+older versions have been omitted.
+
+Example query messages:
+
+"?OTRv3?"
+    Version 3
+"?OTRv45x?"
+    Version 4, and hypothetical future versions identified by "5" and "x"
+"?OTRv?"
+    A bizarre claim that Alice would like to start an OTR conversation, but is
+    unwilling to speak any version of the protocol. Although this is
+    syntactically valid, the receiver will not create a reply.
+
+These strings may be hidden from the user (for example, in an attribute of an
+HTML tag), and/or may be accompanied by an explanitory message ("Alice has
+requested an Off-the-Record private conversation."). If Bob is willing to use
+OTR with Alice (with a protocol version that Alice has offered), he should start
+the AKE according to the highest compatible version he supports.
+
+#### Whitespace Tags
+
+If Alice wishes to communicate to Bob that she is willing to use OTR, she can attach
+a special whitespace tag to any plaintext message she sends him. This tag may occur
+anywhere in the message, and may be hidden from the user (as in the [Query
+Messages](#query-messages), above).
+
+The tag consists of the following 16 bytes, followed by one or more sets of 8 bytes
+indicating the version of OTR Alice is willing to use:
+
+  Always send "\x20\x09\x20\x20\x09\x09\x09\x09" "\x20\x09\x20\x09\x20\x09\x20\x20", followed by one or more of:
+  "\x20\x20\x09\x09\x20\x20\x09\x09" to indicate a willingness to use OTR version 3 with Bob
+  "\x20\x20\x09\x09\x20\x09\x20\x20" to indicate a willingness to use OTR version 4 with Bob
+
+If Bob is willing to use OTR with Alice (with a protocol version that Alice has offered),
+he should start the AKE. On the other hand, if Alice receives a plaintext message from Bob
+(rather than an initiation of the AKE), she should stop sending him the whitespace tag.
 
 #### Receiving plaintext without the whitespace tag
 
