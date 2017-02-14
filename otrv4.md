@@ -1098,7 +1098,7 @@ constructed as follows:
 
 If she is willing to use OTR version 3, she appends a byte identifier for the
 versions in question, followed by "?". The byte identifier for OTR version 3
-is "3", and similarly for 4. Thus, if she is wiling to use OTR versions 3 and 4,
+is "3", and similarly for 4. Thus, if she is willing to use OTR versions 3 and 4,
 the following identifier would be "34". The order of the identifiers between the
 "v" and the "?" does not matter, but none should be listed more than once. The OTRv4
 specification only supports versions 3 and higher. Thus, query messages for
@@ -1116,7 +1116,7 @@ Example query messages:
     syntactically valid, the receiver will not create a reply.
 
 These strings may be hidden from the user (for example, in an attribute of an
-HTML tag), and/or may be accompanied by an explanitory message ("Alice has
+HTML tag), and may be accompanied by an explanatory message ("Alice has
 requested an Off-the-Record private conversation."). If Bob is willing to use
 OTR with Alice (with a protocol version that Alice has offered), he should start
 the AKE according to the highest compatible version he supports.
