@@ -121,7 +121,7 @@ OTRv4 uses the Ed448-Goldilocks [\[3\]](#references) elliptic curve [\[4\]](#ref
 following parameters:
 
 ```
-Base point (B)
+Base point (G1)
   (x=11781216126343694673728248434331006466518053535701637341687908214793
      9404277809514858788439644911793978499419995990477371552926308078495,
    y=19)
@@ -136,7 +136,7 @@ Identity point (I)
 Field prime (p)
   2^448 - 2^224 - 1
 
-Order of base point (q) [prime; q < p; q*B = I]
+Order of base point (q) [prime; q < p; q*G1 = I]
   2^446 - 13818066809895115352007386748515426880336692474882178609894547503885
 
 Number of bytes in p (|p|)
