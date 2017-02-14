@@ -14,12 +14,33 @@ works on top of an existing messaging protocol, like XMPP.
 6. [Conversation Initialization](#conversation-initialization)
   1. [Requesting conversation with older OTR versions](#requesting-conversation-with-older-otr-versions)
   2. [User Profile](#user-profile)
+    1. [Creating a User Profile](#creating-a-user-profile)
+    2. [Establishing Versions](#establishing-versions)
+    3. [Version Priority](#version-priority)
+    4. [Renewing a Profile](#renewing-a-profile)
+    5. [User Profile Data Type](#user-profile-data-type)
   3. [Deniable Authenticated Key Exchange (DAKE)](#deniable-authenticated-key-exchange-dake)
 7. [Data exchange](#data-exchange)
   1. [Data Message](#data-message)
   2. [Revealing MAC Keys](#revealing-mac-keys)
   3. [Fragmentation](#fragmentation)
 8. [The protocol state machine](#the-protocol-state-machine)
+  1. [Protocol States](#protocol-states)
+  2. [Protocol Events](#protocol-events)
+  3. [User requests to start an OTR conversation](#user-requests-to-start-an-otr-conversation)
+    1. [Query Messages](#query-messages)
+    2. [Whitespace Tags](#whitespace-tags)
+  4. [Receiving plaintext without the whitespace tag](#receiving-plaintext-without-the-whitespace-tag)
+  5. [Receiving plaintext with the whitespace tag](#receiving-plaintext-without-the-whitespace-tag)
+  6. [Receiving a Query Message](#receiving-a-query-message)
+  7. [Receiving OTRv3 Specific Messages](#receiving-otrv3-specific-messages)
+  8. [Receiving a Pre-key Message](#receiving-a-pre-key-message)
+  9. [Sending a DRE-Auth Message](#sending-a-dre-auth-message)
+  10. [Receiving a DRE-Auth Message](#receiving-a-dre-auth-message)
+  11. [Sending an encrypted data message](#sending-an-encrypted-data-message)
+  12. [Receiving an error message](#receiving-an-error-message)
+  13. [User requests to end an OTR conversation](#user-requests-to-end-an-otr-conversation)
+  14. [Receiving a TLV type 1 Disconnect Message](#receiving-a-tlv-type-1-disconnect-message)
 9. [Socialist Millionaires' Protocol (SMP)](#socialist-millionaires-protocol-smp)
 10. [Implementation Notes](#implementation-notes)
 
@@ -512,7 +533,7 @@ To create a user profile, assemble:
 After the profile is created, it must be published in a public place, like an
 untrusted server.
 
-##### Establishing Versions
+#### Establishing Versions
 
 A valid versions string can be created by concatenating supported version numbers
 together in any order. For example, a user who supports versions 3 and 4
@@ -524,7 +545,7 @@ Invalid version strings contain "2" or "1". The OTRv4 specification supports up
 to OTR version 3, and thus do not support versions 2 and 1, i.e. version strings of
 "32" or "31".
 
-##### Version Priority
+#### Version Priority
 
 OTRv4 addresses version rollback attacks by prioritizing later versions over older
 versions. For example, in the case where both participants support versions 3 and 4,
@@ -1089,7 +1110,7 @@ Send an OTR Query Message or a plaintext message with a whitespace
 tag to the correspondent. [Query messages](#query-messages) and [whitespace
 tags](#whitespace-tags) are constructed according to the sections below.
 
-#### Query Messages
+##### Query Messages
 
 If Alice wishes to communicate to Bob that she would like to use OTR,
 she sends a message containing the string "?OTRv" followed by an indication of
@@ -1121,7 +1142,7 @@ requested an Off-the-Record private conversation."). If Bob is willing to use
 OTR with Alice (with a protocol version that Alice has offered), he should start
 the AKE according to the highest compatible version he supports.
 
-#### Whitespace Tags
+##### Whitespace Tags
 
 If Alice wishes to communicate to Bob that she is willing to use OTR, she can attach
 a special whitespace tag to any plaintext message she sends him. This tag may occur
@@ -1175,9 +1196,10 @@ If the Query message offers OTR version 3 and version 3 is allowed:
   * Proceed with the protocol as specified in OTRv3 "Receiving a Query Message"
     [\[7\]](#references).
 
-#### Receiving OTRv3 Specific Messages (AKE or Data message)
+#### Receiving OTRv3 Specific Messages
 
-Proceed as specified in OTRv3. See "The protocol state machine" section [\[7\]](#references).
+Whether the message is an AKE message or a Data message, proceed as specified in OTRv3.
+See "The protocol state machine" section [\[7\]](#references).
 
 #### Receiving a Pre-key message
 
@@ -1291,7 +1313,7 @@ and sending when the participant transitions to the `ENCRYPTED_MESSAGES` state.
 If the state is `FINISHED`, the participant must start another OTR conversation
 to send encrypted messages.
 
-#### Receiving a Data Message
+#### Receiving an encrypted data message
 
 If the state is not `ENCRYPTED_MESSAGES`:
 
@@ -1344,7 +1366,7 @@ Otherwise:
 Send a data message, encoding a message with an empty human-readable part, and
 TLV type 1. Transition to the `START` state.
 
-#### Receiving a TLV type 1 (Disconnect) Message
+#### Receiving a TLV type 1 Disconnect Message
 
 Transition to the START state. If a TLV type 1 is received in the `START` state,
 stay in that state.
