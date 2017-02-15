@@ -44,7 +44,7 @@ works on top of an existing messaging protocol, like XMPP.
   12. [Receiving an encrypted data message](#receiving-an-encrypted-data-message)
   13. [Receiving an error message](#receiving-an-error-message)
   14. [User requests to end an OTR conversation](#user-requests-to-end-an-otr-conversation)
-  15. [Receiving a TLV type 1 Disconnect Message](#receiving-a-tlv-type-1-disconnect-message)
+  15. [Receiving a TLV type 1 (Disconnect) Message](#receiving-a-tlv-type-1-disconnect-message)
 9. [Socialist Millionaires' Protocol (SMP)](#socialist-millionaires-protocol-smp)
 10. [Implementation Notes](#implementation-notes)
 
@@ -353,7 +353,7 @@ are replaced by these events:
 * When you start a new DAKE by sending or receiving a [pre-key message](#dake-overview).
 * Upon completing the DAKE by sending or receiving a [DRE-Auth Message](#dake-overview).
 * [When you send and receive a Data Message](#data-exchange)
-* [When you receive a TLV type 1 Disconnect](#receiving-a-tlv-type-1-disconnect-message)
+* [When you receive a TLV type 1 (Disconnect)](#receiving-a-tlv-type-1-disconnect-message)
 
 ### Generating ECDH and DH keys
 
@@ -1382,7 +1382,7 @@ Otherwise:
 Send a data message, encoding a message with an empty human-readable part, and
 TLV type 1. Transition to the `START` state.
 
-#### Receiving a TLV type 1 Disconnect Message
+#### Receiving a TLV type 1 (Disconnect) Message
 
 If a TLV type 1 is received in the `START` state, stay in that state, else
 transition to the START state and [reset the state variables and key
