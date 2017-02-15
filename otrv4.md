@@ -1276,11 +1276,23 @@ To agree on a Pre-key message to use for this conversation:
 
 If the state is `ENCRYPTED_MESSAGES`:
 
-  * Validate the Pre-key message.
-  * If validation fails, ignore the message.
-  * If validation succeeds:
-    * send a DRE-Auth message
-    * keep in the `ENCRYPTED_MESSAGES` state.
+  * Validate the Pre-key message. If any of the verifications fail, ignore the
+    message.
+    * Verify that the user profile signature is valid.
+    * Verify that the user profile is not expired.
+    * Verify that your versions are compatible with the versions in the user
+      profile.
+      * If your versions are incompatible with the versions in the message,
+        ignore the message
+      * Else, pick the highest compatible version and follow the OTR
+        specification for this version. Version prioritization is detailed
+        [here](#version-prioritizing).
+    * If the highest compatible version is OTR version 4
+      * Verify that the point `Y` received is on curve 448.
+      * Verify that the DH public key `B` is from the correct group.
+      * If all validations succeed:
+          * send a DRE-Auth message
+          * stay in the `ENCRYPTED_MESSAGES` state.
 
 #### Sending a DRE-Auth message
 
@@ -1298,7 +1310,8 @@ If the state is not `DAKE_IN_PROGRESS`:
 
 If the state is `DAKE_IN_PROGRESS`:
 
-  * Verify that the Sender's User Profile:
+  * Verify that the Sender's User Profile. If any of the verifications fail, ignore the
+    message.
     * Check that the profile is not expired
     * Pick the highest compatible version indicated in the profile.
       * If the versions advertised are not compatible with those that are supported,
@@ -1309,17 +1322,17 @@ If the state is `DAKE_IN_PROGRESS`:
         * If the auth `sigma` is valid:
           * Decrypt the DRE key.
           * Decrypt phi and verify:
-          * that our profile is the first in the message.
-          * that their user profile is not expired and matches the profile
-            in the Sender's User Profile section.
-          * that the point `X` received is on curve 448.
-          * that the DH public key `A` is from the correct group.
-          * that `Y` and `B` were previously sent in this session (and remain unused).
-          * If everything verifies:
-            * Compute the ECDH shared secret `K_ecdh`.
-            * Compute the mix key `mix_key`.
-            * Initialize the double ratcheting.
-            * Transition state to `ENCRYPTED_MESSAGES`.
+            * that our profile is the first in the message.
+            * that their user profile is not expired and matches the profile
+              in the Sender's User Profile section.
+            * that the point `X` received is on curve 448.
+            * that the DH public key `A` is from the correct group.
+            * that `Y` and `B` were previously sent in this session (and remain unused).
+            * If everything verifies:
+              * Compute the ECDH shared secret `K_ecdh`.
+              * Compute the mix key `mix_key`.
+              * Initialize the double ratcheting.
+              * Transition state to `ENCRYPTED_MESSAGES`.
 
 #### Sending an encrypted data message
 
