@@ -634,8 +634,8 @@ Bob will be initiating the DAKE with Alice.
     * Picks the highest compatible version of OTR listed in Bob's profile.
       If the versions are incompatible, Alice does not send any further messages.
       Version prioritization is explained [here](#version-priority).
-    * Sets `their_ecdh` as ECDH ephemeral public key.
-    * Sets `their_dh` as DH ephemeral public key.
+    * Validates the received ECDH ephemeral public key is on curve 448 and sets it as `their_ecdh`.
+    * Validates that the received DH ephemeral public key is on the correct group and sets it as `their_dh`.
 2. Generates and sets `our_ecdh` as ephemeral ECDH keys.
 3. Generates and sets `our_dh` as ephemeral 3072-DH keys.
 4. Sends Bob a DRE-Auth message (see [DRE-Auth message section](#dre-auth-message)).
@@ -669,8 +669,8 @@ Bob will be initiating the DAKE with Alice.
     * `(Y, B)` in the message is a prekey that Bob previously sent and has not
       been used.
 3. Retrieve ephemeral public keys from Alice:
-    * Sets `their_ecdh` as ECDH ephemeral public key.
-    * Sets `their_dh` as DH ephemeral public key.
+    * Validates the received ECDH ephemeral public key is on curve 448 and sets it as `their_ecdh`.
+    * Validates that the received DH ephemeral public key is on the correct group and sets it as `their_dh`.
 4. At this point, the DAKE is complete for Bob:
     * Sets ratchet id `i` as 0.
     * Sets `j` as 1.
@@ -720,9 +720,10 @@ B (MPI)
 
 This is the second message of the DAKE. Alice sends it to Bob to commit to a
 choice of her ECDH ephemeral key and her DH ephemeral key, and acknowledgment
-of Bob's ECDH ephemeral key and DH ephemeral key. The ECDH ephemeral public
-keys and DH ephemeral public keys are encrypted with DRE and authenticated
-with a NIZKPK.
+of Bob's ECDH ephemeral key and DH ephemeral key. This acknowledgement includes
+a validation that Bob's ECDH key is on the curve 448 and his DH key is in the
+correct group. The public ECDH ephemeral public keys and public DH ephemeral
+public keys are encrypted with DRE and authenticated with a NIZKPK.
 
 A valid DRE-Auth message is generated as follows:
 
@@ -779,7 +780,9 @@ phi (DATA)
 
 This section describes how each participant will use the Double Ratchet
 algorithm to exchange [data messages](#data-message) initialized with the
-shared secret established in the DAKE.
+shared secret established in the DAKE. Detailed validation and processing of each data
+message is described in the [section on receiving encrypted data
+messages](#receiving-an-encrypted-data-message).
 
 A message with an empty human-readable part (the plaintext is of zero length,
 or starts with a NULL) is a "heartbeat" packet, and should not be displayed to
@@ -1429,6 +1432,7 @@ Assuming that Alice begins the exchange:
 
 **Bob:**
 
+* Validates that `G2a` and `G3a` are on the curve 448.
 * Picks random values `b2` and `b3` in `Z_q`.
 * Picks random values `r2`, `r3`, `r4`, `r5` and `r6` in `Z_q`.
 * Computes `G2b = G1*b2` and `G3b = G1*b3`.
@@ -1443,6 +1447,7 @@ Assuming that Alice begins the exchange:
 
 **Alice:**
 
+* Validates that `G2b` and `G3b` are on the curve 448.
 * Computes `G2 = G2b*a2` and `G3 = G3b*a3`.
 * Picks random values `r4`, `r5`, `r6` and `r7` in `Z_q`.
 * Computes `Pa = G3*r4` and `Qa = G1*r4 + G2*x`, where x is the 'actual secret'.
@@ -1454,6 +1459,7 @@ Assuming that Alice begins the exchange:
 
 **Bob:**
 
+* Validates that `Pa`, `Qa`, and `Ra` are on the curve 448.
 * Picks a random value `r7` in `Z_q`.
 * Computes `Rb = (Qa - Qb)*b3`.
 * Computes `Rab = Ra*b3`.
@@ -1463,6 +1469,7 @@ Assuming that Alice begins the exchange:
 
 **Alice:**
 
+* Validates that `Rb` is on curve 448.
 * Computes `Rab = Rb*a3`.
 * Checks whether `Rab == Pa - Pb`.
 
@@ -1571,24 +1578,25 @@ generators, g2 and g3. It also begins the construction of the values used in
 the final comparison of the protocol. A valid SMP message 2 is generated as
 follows:
 
-1. Determine Bob's secret input `y`, which is to be compared to Alice's secret
+1. Validate that `G2a` and `G3a` are on curve 448.
+2. Determine Bob's secret input `y`, which is to be compared to Alice's secret
    `x`.
-2. Pick random values `b2` and `b3` in `Z_q`. These will used during
+3. Pick random values `b2` and `b3` in `Z_q`. These will used during
    the DH exchange to pick generators.
-3. Pick random values `r2`, `r3`, `r4`, `r5` and `r6` in `Z_q`. These
+4. Pick random values `r2`, `r3`, `r4`, `r5` and `r6` in `Z_q`. These
    will be used to add a blinding factor to the final results, and to generate
    zero-knowledge proofs that this message was created honestly.
-4. Compute `G2b = G*b2` and `G3b = G*b3`.
-5. Generate a zero-knowledge proof that the value `b2` is known by setting
+5. Compute `G2b = G*b2` and `G3b = G*b3`.
+6. Generate a zero-knowledge proof that the value `b2` is known by setting
 `c2 = HashToScalar(3 || G*r2)` and `d2 = r2 - b2 * c2 mod q`.
-6. Generate a zero-knowledge proof that the value `b3` is known by setting
+7. Generate a zero-knowledge proof that the value `b3` is known by setting
 `c3 = HashToScalar(4 || G*r3)` and `d3 = r3 - b3 * c3 mod q`.
-7. Compute `G2 = G2a*b2` and `G3 = G3a*b3`.
-8. Compute `Pb = G3*r4` and `Qb = G*r4 + G2*y`.
-9. Generate a zero-knowledge proof that `Pb` and `Qb` were created according
+8. Compute `G2 = G2a*b2` and `G3 = G3a*b3`.
+9. Compute `Pb = G3*r4` and `Qb = G*r4 + G2*y`.
+10. Generate a zero-knowledge proof that `Pb` and `Qb` were created according
    to the protocol by setting `cp = HashToScalar(5 || G3*r5 || G*r5 + G2*r6)`,
    `d5 = r5 - r4 * cp mod q` and `d6 = r6 - y * cp mod q`.
-10. Store the values of `G3a`, `G2`, `G3`, `b3`, `Pb` and `Qb` for use later
+11. Store the values of `G3a`, `G2`, `G3`, `b3`, `Pb` and `Qb` for use later
     in the protocol.
 
 
@@ -1624,19 +1632,20 @@ SMP message 3 is Alice's final message in the SMP exchange. It has the last of
 the information required by Bob to determine if `x = y`. A valid SMP message 1
 is generated as follows:
 
-1. Pick random values `r4`, `r5`, `r6` and `r7` in `Z_q`. These will
+1. Validate that `G2b`, `G3b`, `Pb`, and `Qb` are on curve 448.
+2. Pick random values `r4`, `r5`, `r6` and `r7` in `Z_q`. These will
    be used to add a blinding factor to the final results, and to generate
    zero-knowledge proofs that this message was created honestly.
-2. Compute `G2 = G2b*a2` and `G3 = G3b*a3`.
-3. Compute `Pa = G3*r4` and `Qa = G*r4 + G2*x`.
-4. Generate a zero-knowledge proof that `Pa` and `Qa` were created according to
+3. Compute `G2 = G2b*a2` and `G3 = G3b*a3`.
+4. Compute `Pa = G3*r4` and `Qa = G*r4 + G2*x`.
+5. Generate a zero-knowledge proof that `Pa` and `Qa` were created according to
    the protocol by setting `cp = HashToScalar(6 || G3*r5 || G1*r5 + G2*r6)`,
    `d5 = r5 - r4 * cp mod q` and `d6 = r6 - x * cp mod q`.
-5. Compute `Ra = (Qa - Qb) * a3`.
-6. Generate a zero-knowledge proof that `Ra` was created according to the
+6. Compute `Ra = (Qa - Qb) * a3`.
+7. Generate a zero-knowledge proof that `Ra` was created according to the
    protocol by setting `cr = HashToScalar(7 || G1*r7 || (Qa - Qb)*r7)` and
    `d7 = r7 - a3 * cr mod q`.
-7. Store the values of `G3b`, `Pa - Pb`, `Qa - Qb` and `Ra` for use later in
+8. Store the values of `G3b`, `Pa - Pb`, `Qa - Qb` and `Ra` for use later in
    the protocol.
 
 The SMP message 3 has the following data:
@@ -1665,10 +1674,11 @@ SMP message 4 is Bob's final message in the SMP exchange. It has the last of
 the information required by Alice to determine if `x = y`. A valid SMP message
 4 is generated as follows:
 
-1. Pick a random value `r7` in `Z_q`. This will be used to generate
+1. Validate that `Pa`, `Qa`, and `Ra` are on curve 448.
+2. Pick a random value `r7` in `Z_q`. This will be used to generate
 Bob's final zero-knowledge proof that this message was created honestly.
-2. Compute `Rb = (Qa - Qb) * b3`.
-3. Generate a zero-knowledge proof that `Rb` was created according to the protocol by setting
+3. Compute `Rb = (Qa - Qb) * b3`.
+4. Generate a zero-knowledge proof that `Rb` was created according to the protocol by setting
 	`cr = HashToScalar(8 || G1*r7 || (Qa - Qb)*r7)` and `d7 = r7 - b3 * cr mod q`.
 
 The SMP message 4 has the following data:
@@ -1749,8 +1759,9 @@ Set smpstate to `SMPSTATE_EXPECT1` and send a type 6 TLV (SMP abort) to Bob.
 If smpstate is SMPSTATE_EXPECT4:
 
 * Verify Bob's zero-knowledge proof for Rb:
-   1. Check that `Rb` is `>= 2` and `<= modulus-2`.
-   2. Check that `cr = HashToScalar(8 || G1*d7 G3*cr || (Qa / Qb)*d7 + Rb*cr)`.
+   1. Check that `Rb` is a point on the curve.
+   2. Check that `Rb` is `>= 2` and `<= modulus-2`.
+   3. Check that `cr = HashToScalar(8 || G1*d7 G3*cr || (Qa / Qb)*d7 + Rb*cr)`.
 
 * Check whether the protocol was successful:
     1. `Compute Rab = Rb*a3`.
@@ -1845,6 +1856,8 @@ For more explanation on how this implementation works, refer to [\[10\]](#refere
 #### Dual Receiver Encryption: DREnc(PK1, PK2, K)
 
 Let `{C1, D1, H1} = PK1` and `{C2, D2, H2} = PK2`
+`C1`, `D1`, `H1`, `C2`, `D2`, and `H2` should be checked to verify
+they are on curve 448.
 
 1. Pick random values `k1, k2` in Z_q.
 2. For i ∈ {1, 2}:
@@ -1877,6 +1890,8 @@ Let `{C1, D1, H1} = PK1` and `{C2, D2, H2} = PK2`
 Let `{C1, D1, H1} = PK1`, `{C2, D2, H2} = PK2` and `{x1i, x2i, y1i, y2i, zi} =
 ski`.
 ski is the secret key of the person decrypting the message.
+`C1`, `D1`, `H1`, `C2`, `D2`, and `H2` should be checked to verify
+they are on curve 448.
 
 1. Parse `gamma` to retrieve components
   `(U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2, nonce, phi) = gamma`.
@@ -1922,6 +1937,8 @@ G1 = (11781216126343694673728248434331006466518053535701637341687908214793940427
 A1 is the public value associated with a1, that is, `A1 = G1*a1`.
 m is the message to authenticate.
 
+`A1`, `A2`, and `A3` should be checked to verify they are on curve 448.
+
 1. Pick random values `t1, c2, c3, r2, r3` in Z_q.
 2. Compute `T1 = G1*t1`.
 3. Compute `T2 = G1*r2 + A2*c2`.
@@ -1932,6 +1949,8 @@ m is the message to authenticate.
 8. Send `sigma = (c1, r1, c2, r2, c3, r3)`.
 
 #### Verification: Verify({A1, A2, A3}, sigma, m)
+
+`A1`, `A2`, and `A3` should be checked to verify they are on curve 448.
 
 1. Parse sigma to retrieve components `(c1, r1, c2, r2, c3, r3)`.
 2. Compute `T1 = G1*r1 + A1*c1`
