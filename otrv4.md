@@ -179,7 +179,7 @@ Non-square element in Z_p (d)
 ```
 
 A scalar modulo `q` is a "field element", and should be encoded and decoded
-using the rules for MPIs.
+using the rules for multi-precision integers (MPIs). MPIs are defined in the section on [Data Types](#data-types).
 
 ### 3072-bit Diffie-Hellman Parameters
 
@@ -217,8 +217,26 @@ from the above group, the operation should be done modulo the above prime.
 
 ## Data Types
 
-OTRv4 uses almost the same data types as specified in OTRv3 (bytes, shorts,
-ints, MPIs, and DATA) with the addition of:
+OTRv4 uses many of the data types specified in OTRv3:
+
+```
+Bytes (BYTE):
+  1 byte unsigned value
+Shorts (SHORT):
+  2 byte unsigned value, big-endian
+Ints (INT):
+  4 byte unsigned value, big-endian
+Multi-precision integers (MPI):
+  4 byte unsigned len, big-endian
+  len byte unsigned value, big-endian
+  (MPIs must use the minimum-length encoding; i.e. no leading 0x00 bytes.
+   This is important when calculating public key fingerprints.)
+Opaque variable-length data (DATA):
+  4 byte unsigned len, big-endian
+  len byte data
+```
+
+OTRv4 also uses the following data types:
 
 ```
 Nonce (NONCE):
