@@ -133,8 +133,8 @@ public keys are in upper case, such as `P` or `Q`.
 
 Addition and subtraction of elliptic curve points `A` and `B` are `A + B` and
 `A - B`. Addition of a point to another point generates a third point. Scalar
-multiplication with a scalar `a` with an elliptic curve point `B` yields a
-new point: `C = a * B`.
+multiplication of an elliptic curve point `B` with a scalar `a` yields a
+new point: `C = B * a`.
 
 The concatenation of byte sequences `I` and `J` is `I || J`. In this case, `I`
 and `J` represent a fixed-length byte sequence encoding the respective values.
@@ -165,7 +165,7 @@ Identity point (I)
 Field prime (p)
   2^448 - 2^224 - 1
 
-Order of base point (q) [prime; q < p; q*G1 = I]
+Order of base point (q) [prime; q < p; q * G1 = I]
   2^446 - 13818066809895115352007386748515426880336692474882178609894547503885
 
 Number of bytes in p (|p|)
@@ -734,7 +734,7 @@ A valid DRE-Auth message is generated as follows:
 3. Generate an ephemeral DH key pair:
   * secret key `a` (80 bytes).
   * public key `A`.
-4. Pick random values `r` in Z_q and compute `K = G1*r`.
+4. Pick random values `r` in Z_q and compute `K = G1 * r`.
 5. Compute symmetric key `K_enc = SHA3-256(K)`. K is hashed from 55 bytes to 32
    bytes because XSalsa20 has a maximum key size of 32 bytes.
 6. Generate `m = Bobs_User_Profile || Alices_User_Profile || Y || X || B || A`.
@@ -1438,9 +1438,9 @@ Assuming that Alice begins the exchange:
 
 * Picks random values `a2` and `a3` in `Z_q`.
 * Picks random values `r2` and `r3` in `Z_q`.
-* Computes `c2 = HashToScalar(1 || G1*r2)` and `d2 = r2 - a2 * c2`.
-* Computes `c3 = HashToScalar(2 || G1*r3)` and `d3 = r3 - a3 * c3`.
-* Sends Bob a SMP message 1 with `G2a = G1*a2`, `c2`, `d2`, `G3a = G1*a3`, `c3`
+* Computes `c2 = HashToScalar(1 || G1 * r2)` and `d2 = r2 - a2 * c2`.
+* Computes `c3 = HashToScalar(2 || G1 * r3)` and `d3 = r3 - a3 * c3`.
+* Sends Bob a SMP message 1 with `G2a = G1 * a2`, `c2`, `d2`, `G3a = G1 * a3`, `c3`
   and `d3`.
 
 **Bob:**
@@ -1448,12 +1448,12 @@ Assuming that Alice begins the exchange:
 * Validates that `G2a` and `G3a` are on the curve 448.
 * Picks random values `b2` and `b3` in `Z_q`.
 * Picks random values `r2`, `r3`, `r4`, `r5` and `r6` in `Z_q`.
-* Computes `G2b = G1*b2` and `G3b = G1*b3`.
-* Computes `c2 = HashToScalar(3 || G1*r2)` and `d2 = r2 - b2 * c2`.
-* Computes `c3 = HashToScalar(4 || G1*r3)` and `d3 = r3 - b3 * c3`.
-* Computes `G2 = G2a*b2` and `G3 = G3a*b3`.
-* Computes `Pb = G3*r4` and `Qb = G1*r4 + G2*y`, where y is the 'actual secret'.
-* Computes `cp = HashToScalar(5 || G3*r5 || G1*r5 + G2*r6)`, `d5 = r5 - r4 * cp`
+* Computes `G2b = G1 * b2` and `G3b = G1 * b3`.
+* Computes `c2 = HashToScalar(3 || G1 * r2)` and `d2 = r2 - b2 * c2`.
+* Computes `c3 = HashToScalar(4 || G1 * r3)` and `d3 = r3 - b3 * c3`.
+* Computes `G2 = G2a * b2` and `G3 = G3a * b3`.
+* Computes `Pb = G3 * r4` and `Qb = G1 * r4 + G2 * y`, where y is the 'actual secret'.
+* Computes `cp = HashToScalar(5 || G3 * r5 || G1 * r5 + G2 * r6)`, `d5 = r5 - r4 * cp`
   and `d6 = r6 - y * cp`.
 * Sends Alice a SMP message 2 with `G2b`, `c2`, `d2`, `G3b`, `c3`, `d3`, `Pb`,
   `Qb`, `cp`, `d5` and `d6`.
@@ -1461,34 +1461,34 @@ Assuming that Alice begins the exchange:
 **Alice:**
 
 * Validates that `G2b` and `G3b` are on the curve 448.
-* Computes `G2 = G2b*a2` and `G3 = G3b*a3`.
+* Computes `G2 = G2b * a2` and `G3 = G3b * a3`.
 * Picks random values `r4`, `r5`, `r6` and `r7` in `Z_q`.
-* Computes `Pa = G3*r4` and `Qa = G1*r4 + G2*x`, where x is the 'actual secret'.
-* Computes `cp = HashToScalar(6 || G3*r5 || G1*r5 + G2*r6)`, `d5 = r5 - r4 * cp`
+* Computes `Pa = G3 * r4` and `Qa = G1 * r4 + G2 * x`, where x is the 'actual secret'.
+* Computes `cp = HashToScalar(6 || G3 * r5 || G1 * r5 + G2 * r6)`, `d5 = r5 - r4 * cp`
   and `d6 = r6 - x * cp`.
-* Computes `Ra = (Qa - Qb)*a3`.
-* Computes `cr = HashToScalar(7 || G1*r7 || (Qa - Qb)*r7)` and `d7 = r7 - a3 * cr`.
+* Computes `Ra = (Qa - Qb) * a3`.
+* Computes `cr = HashToScalar(7 || G1 * r7 || (Qa - Qb) * r7)` and `d7 = r7 - a3 * cr`.
 * Sends Bob a SMP message 3 with `Pa`, `Qa`, `cp`, `d5`, `d6`, `Ra`, `cr` and `d7`.
 
 **Bob:**
 
 * Validates that `Pa`, `Qa`, and `Ra` are on the curve 448.
 * Picks a random value `r7` in `Z_q`.
-* Computes `Rb = (Qa - Qb)*b3`.
-* Computes `Rab = Ra*b3`.
-* Computes `cr = HashToScalar(8 || G1*r7 || (Qa - Qb)*r7)` and `d7 = r7 - b3 * cr`.
+* Computes `Rb = (Qa - Qb) * b3`.
+* Computes `Rab = Ra * b3`.
+* Computes `cr = HashToScalar(8 || G1 * r7 || (Qa - Qb) * r7)` and `d7 = r7 - b3 * cr`.
 * Checks whether `Rab == Pa - Pb`.
 * Sends Alice a SMP message 4 with `Rb`, `cr`, `d7`.
 
 **Alice:**
 
 * Validates that `Rb` is on curve 448.
-* Computes `Rab = Rb*a3`.
+* Computes `Rab = Rb * a3`.
 * Checks whether `Rab == Pa - Pb`.
 
 If everything is done correctly, then `Rab` should hold the value of
-`(Pa - Pb) * ((G2*a3*b3)*(x - y))`, which means that the test at the end of the
-protocol will only succeed if `x == y`. Further, since `G2*a3*b3` is a random
+`(Pa - Pb) * ((G2 * a3 * b3) * (x - y))`, which means that the test at the end of the
+protocol will only succeed if `x == y`. Further, since `G2 * a3 * b3` is a random
 number not known to any party, if `x` is not equal to `y`, no other information
 is revealed.
 
@@ -1551,11 +1551,11 @@ exponents for the DH exchange to pick generators.
 3. Pick random values `r2` and `r3` in `Z_q`. These will be used to
 generate zero-knowledge proofs that this message was created according to the
 protocol.
-4. Compute `G2a = G*a2` and `G3a = G*a3`.
+4. Compute `G2a = G * a2` and `G3a = G * a3`.
 5. Generate a zero-knowledge proof that the value `a2` is known by setting
-`c2 = HashToScalar(1 || G*r2)` and `d2 = r2 - a2 * c2 mod q`.
+`c2 = HashToScalar(1 || G * r2)` and `d2 = r2 - a2 * c2 mod q`.
 6. Generate a zero-knowledge proof that the value `a3` is known by setting
-`c3 = HashToScalar(2 || G*r3)` and `d3 = r3 - a3 * c3 mod q`.
+`c3 = HashToScalar(2 || G * r3)` and `d3 = r3 - a3 * c3 mod q`.
 7. Store the values of `x`, `a2` and `a3` for use later in the protocol.
 
 
@@ -1599,15 +1599,15 @@ follows:
 4. Pick random values `r2`, `r3`, `r4`, `r5` and `r6` in `Z_q`. These
    will be used to add a blinding factor to the final results, and to generate
    zero-knowledge proofs that this message was created honestly.
-5. Compute `G2b = G*b2` and `G3b = G*b3`.
+5. Compute `G2b = G * b2` and `G3b = G * b3`.
 6. Generate a zero-knowledge proof that the value `b2` is known by setting
-`c2 = HashToScalar(3 || G*r2)` and `d2 = r2 - b2 * c2 mod q`.
+`c2 = HashToScalar(3 || G * r2)` and `d2 = r2 - b2 * c2 mod q`.
 7. Generate a zero-knowledge proof that the value `b3` is known by setting
-`c3 = HashToScalar(4 || G*r3)` and `d3 = r3 - b3 * c3 mod q`.
-8. Compute `G2 = G2a*b2` and `G3 = G3a*b3`.
-9. Compute `Pb = G3*r4` and `Qb = G*r4 + G2*y`.
+`c3 = HashToScalar(4 || G * r3)` and `d3 = r3 - b3 * c3 mod q`.
+8. Compute `G2 = G2a * b2` and `G3 = G3a * b3`.
+9. Compute `Pb = G3 * r4` and `Qb = G * r4 + G2 * y`.
 10. Generate a zero-knowledge proof that `Pb` and `Qb` were created according
-   to the protocol by setting `cp = HashToScalar(5 || G3*r5 || G*r5 + G2*r6)`,
+   to the protocol by setting `cp = HashToScalar(5 || G3 * r5 || G * r5 + G2 * r6)`,
    `d5 = r5 - r4 * cp mod q` and `d6 = r6 - y * cp mod q`.
 11. Store the values of `G3a`, `G2`, `G3`, `b3`, `Pb` and `Qb` for use later
     in the protocol.
@@ -1649,14 +1649,14 @@ is generated as follows:
 2. Pick random values `r4`, `r5`, `r6` and `r7` in `Z_q`. These will
    be used to add a blinding factor to the final results, and to generate
    zero-knowledge proofs that this message was created honestly.
-3. Compute `G2 = G2b*a2` and `G3 = G3b*a3`.
-4. Compute `Pa = G3*r4` and `Qa = G*r4 + G2*x`.
+3. Compute `G2 = G2b * a2` and `G3 = G3b * a3`.
+4. Compute `Pa = G3 * r4` and `Qa = G * r4 + G2 * x`.
 5. Generate a zero-knowledge proof that `Pa` and `Qa` were created according to
-   the protocol by setting `cp = HashToScalar(6 || G3*r5 || G1*r5 + G2*r6)`,
+   the protocol by setting `cp = HashToScalar(6 || G3 * r5 || G1 * r5 + G2 * r6)`,
    `d5 = r5 - r4 * cp mod q` and `d6 = r6 - x * cp mod q`.
 6. Compute `Ra = (Qa - Qb) * a3`.
 7. Generate a zero-knowledge proof that `Ra` was created according to the
-   protocol by setting `cr = HashToScalar(7 || G1*r7 || (Qa - Qb)*r7)` and
+   protocol by setting `cr = HashToScalar(7 || G1 * r7 || (Qa - Qb) * r7)` and
    `d7 = r7 - a3 * cr mod q`.
 8. Store the values of `G3b`, `Pa - Pb`, `Qa - Qb` and `Ra` for use later in
    the protocol.
@@ -1692,7 +1692,7 @@ the information required by Alice to determine if `x = y`. A valid SMP message
 Bob's final zero-knowledge proof that this message was created honestly.
 3. Compute `Rb = (Qa - Qb) * b3`.
 4. Generate a zero-knowledge proof that `Rb` was created according to the protocol by setting
-	`cr = HashToScalar(8 || G1*r7 || (Qa - Qb)*r7)` and `d7 = r7 - b3 * cr mod q`.
+	`cr = HashToScalar(8 || G1 * r7 || (Qa - Qb) * r7)` and `d7 = r7 - b3 * cr mod q`.
 
 The SMP message 4 has the following data:
 
@@ -1721,8 +1721,8 @@ If smpstate is `SMPSTATE_EXPECT1`:
 
 * Verify Alice's zero-knowledge proofs for G2a and G3a:
   1. Check that both `G2a` and `G3a` are points in the curve.
-  2. Check that `c2 = HashToScalar(1 || G1*d2 + G2a*c2)`.
-  3. Check that `c3 = HashToScalar(2 || G1*d3 + G3a*c3)`.
+  2. Check that `c2 = HashToScalar(1 || G1 * d2 + G2a * c2)`.
+  3. Check that `c3 = HashToScalar(2 || G1 * d3 + G3a * c3)`.
 * Create a SMP message 2 and send it to Alice.
 * Set smpstate to `SMPSTATE_EXPECT3`.
 
@@ -1736,9 +1736,9 @@ If smpstate is `SMPSTATE_EXPECT2`:
 
 * Verify Bob's zero-knowledge proofs for `G2b`, `G3b`, `Pb` and `Qb`:
     1. Check that `G2b`, `G3b`, `Pb` and `Qb` are points in the curve.
-    2. Check that `c2 = HashToScalar(3 || G1*d2 + G2b*c2)`.
-    3. Check that `c3 = HashToScalar(4 || G1*d3 + G3b*c3)`.
-    4. Check that `cp = HashToScalar(5 || G3*d5 + Pb*cp || G*d5 + G2*d6 + Qb*cp)`.
+    2. Check that `c2 = HashToScalar(3 || G1 * d2 + G2b * c2)`.
+    3. Check that `c3 = HashToScalar(4 || G1 * d3 + G3b * c3)`.
+    4. Check that `cp = HashToScalar(5 || G3 * d5 + Pb * cp || G * d5 + G2 * d6 + Qb * cp)`.
 * Create SMP message 3 and send it to Bob.
 * Set smpstate to `SMPSTATE_EXPECT4`.
 
@@ -1752,17 +1752,19 @@ If smpstate is `SMPSTATE_EXPECT3`:
 
 * Verify Alice's zero-knowledge proofs for `Pa`, `Qa` and `Ra`:
   1. Check that `Pa`, `Qa` and `Ra` are points in the curve.
-  2. Check that `cp = HashToScalar(6 || G3*d5 + Pa*cp || G1*d5 + G2*d6 +
-     Qa*cp)`.
-  3. Check that `cr = HashToScalar(7 || G1*d7 + G3a*cr || (Qa - Qb)*d7 +
-     Ra*cr)`.
+  2. Check that `cp = HashToScalar(6 || G3 * d5 + Pa * cp || G1 * d5 + G2 * d6 +
+     Qa * cp)`.
+  3. Check that `cr = HashToScalar(7 || G1 * d7 + G3a * cr || (Qa - Qb) * d7 +
+     Ra * cr)`.
 * Create a SMP message 4 and send it to Alice.
 * Check whether the protocol was successful:
-  1. Compute `Rab = Ra*b3`.
+  1. Compute `Rab = Ra * b3`.
   2. Determine if `x = y` by checking the equivalent condition that
      `Pa - Pb = Rab`.
 * Set smpstate to `SMPSTATE_EXPECT1`, as no more messages are expected from
   Alice.
+
+  //`cr = HashToScalar(8 || G1 * r7 || (Qa - Qb) * r7)` and `d7 = r7 - b3 * cr mod q`.
 
 #### Receiving a SMP message 4
 
@@ -1774,10 +1776,10 @@ If smpstate is SMPSTATE_EXPECT4:
 * Verify Bob's zero-knowledge proof for Rb:
    1. Check that `Rb` is a point on the curve.
    2. Check that `Rb` is `>= 2` and `<= modulus-2`.
-   3. Check that `cr = HashToScalar(8 || G1*d7 G3*cr || (Qa / Qb)*d7 + Rb*cr)`.
+   3. Check that `cr = HashToScalar(8 || G1 * d7 + G3 * cr || (Qa / Qb) * d7 + Rb * cr)`.
 
 * Check whether the protocol was successful:
-    1. `Compute Rab = Rb*a3`.
+    1. `Compute Rab = Rb * a3`.
     2. Determine if `x = y` by checking the equivalent condition that
        `(Pa / Pb) = Rab`.
 
@@ -1860,9 +1862,9 @@ For more explanation on how this implementation works, refer to [\[10\]](#refere
 
 1. Pick random values `x1, x2, y1, y2, z` in Z_q.
 2. Compute group elements
-  - `C = G1*x1 + G2*x2`
-  - `D = G1*y1 + G2*y2`
-  - `H = G1*z`.
+  - `C = G1 * x1 + G2 * x2`
+  - `D = G1 * y1 + G2 * y2`
+  - `H = G1 * z`.
 3. The public key is `PK = {C, D, H}` and the secret key is
    `sk = {x1, x2, y1, y2, z}`.
 
@@ -1875,19 +1877,19 @@ they are on curve 448.
 1. Pick random values `k1, k2` in Z_q.
 2. For i ∈ {1, 2}:
   1. Compute
-    - `U1i = G1*ki`
-    - `U2i = G2*ki`
-    - `Ei = (Hi*ki) + K`
+    - `U1i = G1 * ki`
+    - `U2i = G2 * ki`
+    - `Ei = (Hi * ki) + K`
   2. Compute `αi = HashToScalar(U1i || U2i || Ei)`.
-  3. Compute `Vi = Ci*ki + Di*(ki * αi)`
+  3. Compute `Vi = Ci * ki + Di * (ki * αi)`
 3. Generate a NIZKPK:
   1. for i ∈ {1, 2}:
     1. Pick random value `ti` in Z_q.
     2. Compute
-      - `T1i = G1*ti`
-      - `T2i = G2*ti`
-      - `T3i = (Ci + Di*αi)*ti`
-  2. Compute `T4 = H1*t1 - H2*t2`.
+      - `T1i = G1 * ti`
+      - `T2i = G2 * ti`
+      - `T3i = (Ci + Di * αi) * ti`
+  2. Compute `T4 = H1 * t1 - H2 * t2`.
   3. Compute
     - `gV = G1 || G2 || q`
     - `pV = C1 || D1 || H1 || C2 || D2 || H2`
@@ -1911,10 +1913,10 @@ they are on curve 448.
 2. Verify NIZKPK:
   1. for j ∈ {1, 2} compute:
     1. `αj = HashToScalar(U1j || U2j || Ej)`
-    2. `T1j = G1*nj + U1j*l`
-    3. `T2j = G2*nj + U2j*l`
-    4. `T3j = (Cj + Dj*αj)*nj + Vj*l`
-  2. Compute `T4 = H1*n1 - H2*n2 + (E1-E2)*l`
+    2. `T1j = G1 * nj + U1j * l`
+    3. `T2j = G2 * nj + U2j * l`
+    4. `T3j = (Cj + Dj * αj) * nj + Vj * l`
+  2. Compute `T4 = H1 * n1 - H2 * n2 + (E1-E2) * l`
   3. Compute
     - `gV = G1 || G2 || q`
     - `pV = C1 || D1 || H1 || C2 || D2 || H2`
@@ -1922,8 +1924,8 @@ they are on curve 448.
     - `zV = T11 || T21 || T31 || T12 || T22 || T32 || T4`
     - `l' = HashToScalar(gV || pV || eV || zV)`
   4. Verify `l' ≟ l`.
-  5. Verify `U1i*x1i + U2i*x2i + (U1i*y1i + U2i*y2i)*αi ≟ Vi`.
-3. Recover `K = Ei - U1i*zi`.
+  5. Verify `U1i * x1i + U2i * x2i + (U1i * y1i + U2i * y2i) * αi ≟ Vi`.
+3. Recover `K = Ei - U1i * zi`.
 
 ### ROM Authentication
 
@@ -1953,9 +1955,9 @@ m is the message to authenticate.
 `A1`, `A2`, and `A3` should be checked to verify they are on curve 448.
 
 1. Pick random values `t1, c2, c3, r2, r3` in Z_q.
-2. Compute `T1 = G1*t1`.
-3. Compute `T2 = G1*r2 + A2*c2`.
-4. Compute `T3 = G1*r3 + A3*c3`.
+2. Compute `T1 = G1 * t1`.
+3. Compute `T2 = G1 * r2 + A2 * c2`.
+4. Compute `T3 = G1 * r3 + A3 * c3`.
 5. Compute `c = HashToScalar(G1 || q || A1 || A2 || A3 || T1 || T2 || T3 || m)`.
 6. Compute `c1 = c - c2 - c3 (mod q)`.
 7. Compute `r1 = t1 - c1 * a1 (mod q)`.
@@ -1966,9 +1968,9 @@ m is the message to authenticate.
 `A1`, `A2`, and `A3` should be checked to verify they are on curve 448.
 
 1. Parse sigma to retrieve components `(c1, r1, c2, r2, c3, r3)`.
-2. Compute `T1 = G1*r1 + A1*c1`
-3. Compute `T2 = G1*r2 + A2*c2`
-4. Compute `T3 = G1*r3 + A3*c3`
+2. Compute `T1 = G1 * r1 + A1 * c1`
+3. Compute `T2 = G1 * r2 + A2 * c2`
+4. Compute `T3 = G1 * r3 + A3 * c3`
 5. Compute `c = HashToScalar(G1 || q || A1 || A2 || A3 || T1 || T2 || T3 || m)`.
 6. Check if `c ≟ c1 + c2 + c3 (mod q)`.
 
