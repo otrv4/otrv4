@@ -429,7 +429,7 @@ decide_between_chain_keys(Ca, Cb):
     return Cb, Ca
 ```
 
-### Deriving Double Ratchet Keys
+### Deriving Double Ratchet keys
 
 ```
 derive_ratchet_keys(K):
