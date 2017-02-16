@@ -624,7 +624,7 @@ Bob will be initiating the DAKE with Alice.
 **Bob:**
 
 1. Generates and sets `our_ecdh` as ephemeral  ECDH keys.
-2. Generates and sets `our_dh` as ephemeral 3072-DH keys.
+2. Generates and sets `our_dh` as ephemeral 3072-bit DH keys.
 3. Sends Alice a Pre-key message.
 
 **Alice:**
@@ -637,7 +637,7 @@ Bob will be initiating the DAKE with Alice.
     * Validates the received ECDH ephemeral public key is on curve 448 and sets it as `their_ecdh`.
     * Validates that the received DH ephemeral public key is on the correct group and sets it as `their_dh`.
 2. Generates and sets `our_ecdh` as ephemeral ECDH keys.
-3. Generates and sets `our_dh` as ephemeral 3072-DH keys.
+3. Generates and sets `our_dh` as ephemeral 3072-bit DH keys.
 4. Sends Bob a DRE-Auth message (see [DRE-Auth message section](#dre-auth-message)).
 5. At this point, the DAKE is complete for Alice:
     * Sets ratchet id `i` as 0.

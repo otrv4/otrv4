@@ -265,7 +265,7 @@ From the IETF paper, RFC 3526 [\[4\]](#references):
 
 ### Consequences
 
-Using a 3072 DH function to produce the mix key extends data messages size in 56
+Using a 3072-bit DH function to produce the mix key extends data messages size in 56
 bytes of extra key material that may cause some transport protocols to fragment
 these messages.
 
