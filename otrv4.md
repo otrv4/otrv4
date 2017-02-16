@@ -429,7 +429,7 @@ decide_between_chain_keys(Ca, Cb):
     return Cb, Ca
 ```
 
-### Deriving Double Ratchet keys
+### Deriving Double Ratchet Keys
 
 ```
 derive_ratchet_keys(K):
@@ -439,23 +439,25 @@ derive_ratchet_keys(K):
   return R, decide_between_chain_keys(Ca, Cb)
 ```
 
-### Ratcheting ECDH keys and mix keys
+### Rotating ECDH keys and mix key
 
-After receiving a messages from the other side, the sender will rotate into
-a new ECDH ratchet and a new mix key ratchet before they send a new message.
-(i.e. the first reply). The following data messages will advertise a new
-ratchet id as `i + 1`.
+Before sending the first reply (i.e. a new message considering a previous
+message has been received) the sender will rotate their ECDH keys and mix key.
+This is for the computation of K (see "Deriving Double Ratchet Keys"). The
+following data messages will advertise a new ratchet id as `i + 1`.
+
+Before rotating the keys:
 
   * Increment the current ratchet id (`i`) by 1.
   * Reset the next sent message id (`j`) to 0.
 
-When you ratchet the ECDH keys:
+To rotate the ECDH keys:
 
   * Generate a new ECDH key pair and assign it to `our_ecdh = generateECDH()`.
   * Calculate `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
   * Securely delete `our_ecdh.secret`.
 
-When you ratchet the mix keys:
+To rotate the mix key:
 
   * If `i % 3 == 0`:
 
@@ -914,7 +916,7 @@ has been set to `0`, keys should be rotated.
 
 Given a new ratchet:
 
-  * Ratchet the ECDH keys, see "Ratcheting ECDH keys and mix keys" section.
+  * Rotate the ECDH keys and mix key, see "Rotating ECDH keys and mix key" section.
     The new ECDH public key created by the sender with this process will be the
     "Public ECDH Key" for the message. If a new public DH key is created in
     this process, it will be the "Public DH Key" for the message. If it is
