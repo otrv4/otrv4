@@ -156,7 +156,7 @@ Base point (G1)
    y=0x13)
 
 Cofactor (c)
-  4
+  1 (this cofactor value is due to the use of Decaf [\[6\]](#references))
 
 Identity point (I)
   (x=0,
@@ -181,7 +181,7 @@ Non-square element in Z_p (d)
 A scalar modulo `q` is a "field element", and should be encoded and decoded
 using the rules for MPIs.
 
-### 3072 Diffie-Hellman Parameters
+### 3072-bit Diffie-Hellman Parameters
 
 For the Diffie-Hellman group computations, the group is the one defined in RFC
 3526 [\[5\]](#references) with a 3072-bit modulus (hex, big-endian):
