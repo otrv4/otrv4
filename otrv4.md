@@ -47,6 +47,7 @@ works on top of an existing messaging protocol, like XMPP.
   15. [Receiving a TLV type 1 (Disconnect) Message](#receiving-a-tlv-type-1-disconnect-message)
 9. [Socialist Millionaires' Protocol (SMP)](#socialist-millionaires-protocol-smp)
 10. [Implementation Notes](#implementation-notes)
+11. [Forging Transcripts](#forging-transcripts)
 
 [Appendices](#appendices)
 
@@ -64,6 +65,8 @@ works on top of an existing messaging protocol, like XMPP.
   - Key management using the Double Ratchet Algorithm [\[2\]](#references).
   - Upgraded SHA-1 and SHA-2 to SHA-3.
   - Switched from AES to XSalsa20.
+- Explicit instructions for producing forged transcripts using the same
+  functions used to conduct honest conversations.
 
 ## High Level Overview
 
@@ -985,9 +988,9 @@ Otherwise:
 
 ### Revealing MAC Keys
 
-We reveal old MAC keys to provide forgeability of messages. Old MAC keys are
-keys for already received messages and, therefore, will no longer be
-used to verify the authenticity of the message.
+We reveal old MAC keys to provide [forgeability of messages](#forging-transcripts).
+Old MAC keys are keys for already received messages and, therefore, will no
+longer be used to verify the authenticity of the message.
 
 Data messages and heartbeat messages (data messages with a plaintext length of
 zero) reveal MAC keys. If a participant has not sent a data message in some
@@ -1818,6 +1821,45 @@ establishing an OTR channel at the same time with multiple devices from the
 other participant at the cost of how to expose this to the message client (for
 example, XMPP clients can decide to reply only to the device you have more
 recently received a message from).
+
+## Forging Transcripts
+
+OTRv4 strongly encourages that each implementation of this specification exposes
+an interface for producing forged transcripts with the same functions used to
+conduct honest conversations. This section will guide implementers through
+achieving this.
+
+The major utilities are:
+
+Parse
+  Parses OTR messages given as input to show the values of each of the fields in
+  a message.
+
+Modify Data Message
+  Modify an encrypted OTR message using a revealed MAC key, new text, and an
+  estimated offset. This returns an OTR Data Message with the modified text.
+
+Forge AKE and Session Keys
+  Any participant of an OTR conversation may forge an AKE with another participant
+  as long as they have their profile. This function will take the profile and secret
+  long term key of one participant and the profile of another party. It will return
+  an AKE transcript between the two parties.
+
+Forge Entire Transcript
+  The Forge Entire Transcript function will allow one participant to completely
+  forge a transcript between them and another person in a way that its forgery cannot be
+  cryptographically proven. The input will be one participant's profile, their secret
+  key, another person's profile, and a list of plain text messages corresponding to
+  what messages were exchanged. Each message in the list will have the structure:
+  1) sender 2) plain text message, so that the function may precisely create the
+  desired transcript.
+
+Read Forge
+  Decrypts an OTR Data message using the given chain key and message number, and
+  displays the message. If a new message is given, replace the message with that one,
+  encrypt and MAC it properly, and output the resulting OTR Data Message.
+  This works even if the given key was not correct for the original
+  message, so as to enable complete forgeries.
 
 ## Appendices
 
