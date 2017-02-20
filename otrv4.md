@@ -149,6 +149,9 @@ OTRv4 uses the Ed448-Goldilocks [\[3\]](#references) elliptic curve [\[4\]](#ref
 following parameters:
 
 ```
+Equation
+	x^2+y^2 = 1-39081x^2y^2
+
 Base point (G1)
   (x=11781216126343694673728248434331006466518053535701637341687908214793
      9404277809514858788439644911793978499419995990477371552926308078495,
@@ -182,7 +185,7 @@ Non-square element in Z_p (d)
 ```
 
 A scalar modulo `q` is a "field element", and should be encoded and decoded
-using the rules for multi-precision integers (MPIs). MPIs are defined in the section on [Data Types](#data-types).
+using the rules for multi-precision integers (MPIs). MPIs are defined on [Data Types](#data-types) section.
 
 ### 3072-bit Diffie-Hellman Parameters
 
