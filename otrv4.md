@@ -1842,6 +1842,15 @@ Modify Data Message
   Modify an encrypted OTR message using a revealed MAC key, new text, and an
   estimated offset. This returns an OTR Data Message with the modified text.
 
+Read and Forge
+  Read and forge allows someone in possession of a chain key to decrypt OTR messages
+  or modify them as forgeries. It takes three inputs, the chain key, the OTR
+  message and an optional new plain text message. If the new message is included,
+  the original text is replaced with the new message, and then a new MAC tag,
+  based on the new message is attached to the data message. This new messags is
+  then displayed. One applicable scenario is a participant listening and modifying
+  the messages as they are received.
+
 Forge AKE and Session Keys
   Any participant of an OTR conversation may forge an AKE with another participant
   as long as they have their profile. This function will take the profile and secret
@@ -1856,13 +1865,6 @@ Forge Entire Transcript
   what messages were exchanged. Each message in the list will have the structure:
   1) sender 2) plain text message, so that the function may precisely create the
   desired transcript.
-
-Read Forge
-  Decrypts an OTR Data message using the given chain key and message number, and
-  displays the message. If a new message is given, replace the message with that one,
-  encrypt and MAC it properly, and output the resulting OTR Data Message.
-  This works even if the given key was not correct for the original
-  message, so as to enable complete forgeries.
 
 ## Appendices
 
