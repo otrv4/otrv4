@@ -275,20 +275,20 @@ It is wished to compute `s` as
 
 1. From the curve equation, is known that:
 `(1 - ax^2) * (1 - y^2) = 1 + (a * x)^2 * y^2 - (y^2 + (a * x)^2) = (a - d) * x^2 * y^2`,
-so that `sqrt(1 - (a * x^2)) / x * y = ± sqrt(a - d) / (1 - y^2)`.
+so that `sqrt(1 - (a * x^2)) / x * y = ± sqrt((a - d) / (1 - y^2))`.
 Note that in extended homogenous coordinates:
-`1/x^2 = (a - (d * y)^2) / 1 y^2) = ((a * Z)^2 - (d * Y)^2) / (Z^2 - Y^2)`,
-so that `1/x = ((a * Z)* X - (d*Y) * T) / (Z^2 - Y^2)`
-2. Compute `r = 1/ sqrt((a - d) * (Z + Y) * (Z - Y)`
+`1/x^2 = (a - (d * y)^2) / 1 - y^2) = ((a * Z)^2 - (d * Y)^2) / (Z^2 - Y^2)`,
+so that `1/x = ((a * Z * X) - (d * Y * T))/ (Z^2 - Y^2)`
+2. Compute `r = 1/ sqrt((a - d) * (Z + Y) * (Z - Y))`
 3. Compute `u = (a - d) * r`
 4. Compute `r = -r` if `-2 * u * Z` is negative
-5. Compute `s = | u * (r * ((a * Z) * Z - d * Y * T) + Y) / a|`
+5. Compute `s = | u * (r * ((a * Z * X) - (d * Y * T)) + Y) / a|`
 
 #### Decode
 
 Given s, compute:
 `(x, y) = (2 * s / (1 + (a * s)^2),
-1 - (a * s)^ 2 / sqrt(a^2 * s^4 + (2 * a - 4 * d) * s^2 + 1`
+(1 - (a * s)^ 2 / sqrt(a^2 * s^4 + (2 * a - 4 * d) * s^2 + 1))`
 
 1. Compute `X = 2 * s`
 2. Compute `Z = 1 + a * s^2`
