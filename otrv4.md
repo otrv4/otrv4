@@ -255,8 +255,50 @@ User Profile (USER-PROF):
   Detailed in "User Profile Data Type" section
 ```
 
-In order to serialize and deserialize the point, refer to Appendix A.1
-(Encoding) and A.2 (Decoding) in Mike Hamburg's Decaf paper [\[6\]](#references).
+In order to serialize and deserialize the point, use Encode and Decode as
+defined on Appendix A.1 (Encoding) and A.2 (Decoding) in Mike Hamburg's Decaf
+paper [\[6\]](#references). These functions work as follows:
+
+
+#### Encode
+
+Using the Jacobi quartic, a point `P` can by encoded by the s-coordinate of the
+coset representative `(s, t)`, where `s` is non-negative and finite, and `t /s`
+is non-negative or infinite.
+
+It is wished to compute `s` as
+`(1 ± sqrt(1 - (a * x)^2)) / a * x` and `t / s` = `∓ 2 * sqrt(1 - (a * x) ^ 2) / x * y`.
+
+1. From the curve equation, is known that:
+`(1 - ax^2) * (1 - y^2) = 1 + (a * x)^2 * y^2 - (y^2 + (a * x)^2) = (a - d) * x^2 * y^2`,
+so that `sqrt(1 - (a * x^2)) / x * y = ± sqrt(a - d) / (1 - y^2)`.
+Note that in extended homogenous coordinates:
+`1/x^2 = (a - (d * y)^2) / 1 y^2) = ((a * Z)^2 - (d * Y)^2) / (Z^2 - Y^2)`,
+so that `1/x = ((a * Z)* X - (d*Y) * T) / (Z^2 - Y^2)`
+2. Compute `r = 1/ sqrt((a - d) * (Z + Y) * (Z - Y)`
+3. Compute `u = (a - d) * r`
+4. Compute `r = -r` if `-2 * u * Z` is negative
+5. Compute `s = | u * (r * ((a * Z) * Z - d * Y * T) + Y) / a|`
+
+#### Decode
+
+Given s, compute:
+`(x, y) = (2 * s / (1 + (a * s)^2),
+1 - (a * s)^ 2 / sqrt(a^2 * s^4 + (2 * a - 4 * d) * s^2 + 1`
+
+1. Compute `X = 2 * s`
+2. Compute `Z = 1 + a * s^2`
+3. Compute `u = Z^2 - (4 * d) * s^2`
+4. Compute `v` equals
+   1. `1 / sqrt(u * s^2)` if `u * s^2` is square and non-zero
+	2. `0` if `u * s^2 = 0`
+	3. reject if `u * s^2` is not square
+5. Compute `v` = `-v` if `u * v` is negative
+6. Compute `w = v * s * (2 - Z)`
+7. Compute `w = w + 1` if `s = 0`
+8. Compute `Y = w * Z`
+9. Compute `T = w * X`
+10. Compute `P = (X : Y : Z : T)`
 
 ### DRE messages and Auth
 
