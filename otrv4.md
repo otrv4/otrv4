@@ -1869,7 +1869,7 @@ from Bob.
 
 ## Implementation Notes
 
-### Considerations for networks which allow multiple devices
+### Considerations for networks that allow multiple devices
 
 When using a transport network that allows multiple devices to be simultaneously
 logged in with the same peer identifier, make sure to identify the other
