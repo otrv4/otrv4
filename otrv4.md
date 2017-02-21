@@ -222,6 +222,13 @@ Hexadecimal value of dh_p:
 
 Generator (g3)
   2
+
+Cofactor (dh_c)
+  2
+
+Order of dh_p (dh_q; prime; dh_q = (dh_p - 1) / 2):
+  2^3071 - 2^3007 - 1 + 2^63 * (integer_part_of(2^2942 * π) + 1690314)
+
 ```
 
 Note that this means that whenever you see an operation on a field element
