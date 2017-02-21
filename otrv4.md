@@ -19,7 +19,10 @@ works on top of an existing messaging protocol, like XMPP.
     2. [Establishing Versions](#establishing-versions)
     3. [Version Priority](#version-priority)
     4. [Renewing a Profile](#renewing-a-profile)
-    5. [User Profile Data Type](#user-profile-data-type)
+    5. [Creating a User Profile Signature](#creating-a-user-profile-signature)
+    6. [Verify a User Profile Signature](#verify-a-user-profile-signature)
+    7. [User Profile Signature](#user-profile-signature)
+    8. [User Profile Data Type](#user-profile-data-type)
   3. [Deniable Authenticated Key Exchange (DAKE)](#deniable-authenticated-key-exchange-dake)
     1. [DAKE Overview](#dake-overview)
     2. [Pre-key message](#pre-key-message)
@@ -618,7 +621,7 @@ To create a user profile, assemble:
 4. Profile Signature: One of the Cramer-Shoup secret key values (`z`) and its
    generator (`G1`) is used to create signatures of the entire profile
    excluding the signature itself. The size of the signature is 112 bytes.
-   It is created using the Ed448 signature algorithm as documented in [\[3\]](#references).
+   It is created using the [Ed448 signature algorithm](#user-profile-signature).
 5. Transition Signature (optional): A signature of the profile excluding
    Profile Signatures and itself signed by the user's OTRv3 DSA key. The
    transitional signature that enables contacts that trust user's version 3
@@ -660,15 +663,118 @@ Before the profile expires, the user must publish an updated profile with a
 new expiration date. The client establishes the frequency of expiration - this
 can be configurable. A recommended value is two weeks.
 
+#### Creating a User Profile Signature
+
+The user profile signature is based on the Ed448 Schnorr's signature algorithm described
+by Mike Hamburg, with one change. Hamburg creates a 32 byte symmetric key when he derives
+a new pair of public and secret keys in Ed448. Each time a signature is created in Hamburg's
+algorithm, this symmetric key is used to derive a nonce, and the nonce becomes a part of
+the final output. In OTRv4, instead of using a symmetric key, a new 32 byte random value is
+generated to derive the nonce each time a signature is created.
+
+Hamburg gives an overview of how the signature is created in his paper [_Ed448-Goldilocks,
+a new elliptic curve_](#references), and his [implementation function decaf\_448\_sign\_shake](https://sourceforge.net/p/ed448goldilocks/code/ci/decaf/tree/src/decaf_crypto.c#l117)
+provides more detail.
+
+Hamburg uses the following steps to create a signature in his implementation:
+
+1. Derive an intermediary nonce by first using SHA3 SHAKE 256 to hash the message,
+   a random value `random_v`, and the specific string "decaf\_448\_sign\_shake". Decode and
+   reduce this output into a scalar with the order of the base point
+   [q](#elliptic-curve-parameters).
+   ```
+   random_v = new_random_value()
+   output = SHAKE256(message || random_v || "decaf\_448\_sign\_shake")
+   intermediary_nonce = decode(output) % q
+   ```
+
+2. Use this intermediary nonce to create the temporary signature bytes by computing nonce * G1 and
+   encoding the output.
+   ```
+   temporary_signature_bytes = encode(G1 * intermediary_nonce)
+   ```
+
+3. Use SHAKE256 again to hash the message, public key, and the temporary signature bytes.
+   The `public_key` is the [`h` value](#dual-receiver-key-generation-drgen) of the Cramer-Shoup
+   public key. Decode and reduce this output into a scalar by the order of the base point
+   [q](#elliptic-curve-parameters). Lastly, scalar multiply the result with the secret key value.
+   The `secret_key` is the [`z` value](#dual-receiver-key-generation-drgen)of the Cramer-Shoup
+   private key.
+   ```
+   output = SHAKE256(message || public_key || temporary_signature_bytes)
+   challenge = (decode(output) % q) * secret_key
+   ```
+
+4. Derive the final nonce by scalar subtracting the challenge from the intermediary nonce.
+   ```
+   nonce = intermediary_nonce - challenge
+   ```
+
+5. Concatenate the final nonce and the temporary signature bytes into the full signature, with the nonce first.
+   The nonce and the temporary signature are each 56 bytes each, so the final result is 112 bytes or,
+   896 bits.
+
+#### Verify a User Profile Signature
+
+Hamburg also gives an overview of how the signature is verified in his [implementation function
+decaf\_448\_verify\_shake](https://sourceforge.net/p/ed448goldilocks/code/ci/decaf/tree/src/decaf_crypto.c#l163)
+provides more detail.
+
+He uses the following steps to verify the signature:
+
+1. Divide the full signature into the nonce bytes and the temporary signature bytes. The nonce is the first
+   56 bytes and the temporary signature bytes are the second 56 bytes.
+
+2. Derive the challenge by using SHAKE256 to hash the message, public key, and the temporary signature bytes.
+   The public key is retrieved from `h` value of the Cramer-Shoup long term public key in the profile.
+   Decode and reduce this output into a scalar by the order of the base point [q](#elliptic-curve-parameters).
+   ```
+   output = SHAKE256(message || public_key || temporary_signature_bytes)
+   challenge = decode(output) % q
+   ```
+
+3. Decode the temporary signature and the public key into points. This includes verifying that the temporary
+   signature and the public key are points on the curve 448.
+   ```
+   temporary_signature_point = decode_point_from(temporary_signature_bytes)
+   public_key_point = decode_point_from(public_key)
+   ```
+
+4. Decode the nonce into a scalar. This includes verifying that the nonce is a scalar within order of the
+   base point.
+   ```
+   nonce = decode_into_scalar(nonce_bytes)
+   ```
+
+5. Compute the double scalar multiplication of the Ed448 base point, the `public_key`, the `nonce`, and the `challenge`.
+   ```
+   result_point  = G1 * nonce + public_key_point * challenge
+   ```
+
+6. Check that the `result_point` and the `temporary_signature_point` are equal. If they are equal, the signature is valid.
+
 #### User Profile Data Type
+
+SIG below refers to the OTR version 3 DSA Signature with the structure:
+
+DSA signature (SIG):
+  (len is the length of the DSA public parameter q, which in current implementations must be 20 bytes, or 160 bits)
+  len byte unsigned r, big-endian
+  len byte unsigned s, big-endian
+
+SCHNORR-SIG refers to the OTR version 4 signature:
+
+Schnorr signature (SCHNORR-SIG):
+  (len is the expected length of the signature, which is 112 bytes, or 896 bits)
+  len byte unsigned value, big-endian
 
 ```
 User Profile (USER-PROF):
   Cramer-Shoup public key (CRAMER-SHOUP-PUBKEY)
   Versions (DATA)
   Profile Expiration (PROF-EXP)
-  Profile Signature (MPI)
-  (optional) Transitional Signature (MPI)
+  Profile Signature (SCHNORR-SIG)
+  (optional) Transitional Signature (SIG)
 
 Profile Expiration (PROF-EXP):
   8 bytes signed value, big-endian
