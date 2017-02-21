@@ -1981,40 +1981,34 @@ G1 = (1178121612634369467372824843433100646651805353570163734168790821479394042
 = (0x297ea0ea2692ff1b4faff46098453a6a26adf733245f065c3c59d0709cecfa96147eaaf393
 2d94c63d96c170033f4ba0c7f0de840aed939f, 0x13)
 
-G2 = (3913607664015387778525440871338748426958505468847952048812636074953060342
-73165958212315431889921087320515545432683148400791008269241572,
-5744090938718597086501900481389618127080777801589371288623121699156379421463562
-87346163045114803481001237424605972373287716834704142326)
+G2 = (16198104581588018595899223143190272311918511238122751222361431851896743243
+4013519584102297147218387513217725422122524316513263204161236914142188,
+17443011591827011924522432141214711554174683032038520272613022239901295213216602
+00204217838721145102661825010820238188238915121131226223
+)
 
-= (0x89d75bf8561f2e0a3e726ad8480ddb510c7dbd1129b9443694d2f59dd833b5b05a44baf77e
-b7da584eb4a951bb3eb15b0b29c66a7fbf0ce4,
-0xca500f343628b32f0059b76f9fdd5b3c5bf1b176e4681af329da6fba07f49e3e4323192c5f7e4
-8cc8569615b50d9183ef9fd53e8f9a4aff6)
+=(0xa162683a9e50b9093a63df8fbe1be7bf5570267a4b7aec8fb9bd432bf32887c3540ae5472fda
+264b84b1fedde1f3a5843fcca117450e8ebc,
+0xae2b000b3bb64677f5e0208d02937336ae441e03cb55141b1a8216ef5a8105d5d83cc8ccd95357
+1591664212fa6c14eebcee5b33d31fe2df)
 ```
 
 Generator 1 (`G1`) is the base point of Ed448. Generator 2 (`G2`) was created
-with this code [\[9\]](#references) that works as follows:
+following this post [\[13\]](#references) and with this code
+[\[9\]](#references) that works as follows:
 
 1. Select `x`, a "nothing up my sleeve" value (a value chosen above suspicion
-   of hidden properties). In this case, we choose `OTRv4 g2`.
-2. Set counter `c = 0` and increment it until a generator is found:
-
-  * Concatenate `x` with `c` in a string format `ss`.
-  * Compute `H = SHA3-512(ss)`
-  * Compute `point = decodepoint(H)`:
-    * Decode `y`. An element `(x, y)` is encoded as a 448-bit array,namely the
-      (448 − 1)-bit encoding of `y` followed by a sign bit; the sign bit is 1
-      iff `x` is negative.
-    * Recover `x` through decoded `y` by `x = ± sqrt((1-y^2)/(1-dy^2))`:
-      * Calculate `xx = (1-y^2) * inv(1-dy^2)`.
-      * Compute candidate root `z = xx ^ (p+1)/4 (mod p)`.
-      * If `xx == z^2`, then `z` is `x`:
-        * Compute the point `P = (x,y)` and check if it is on the curve.
-	* Compute `g = point^cofactor`.
-	* If `g^q` equals the identity element, then `g` is a generator.
-
-For more explanation on how this implementation works, refer to [\[10\]](#references),
-[\[11\]](#references) and [\[12\]](#references).
+   of hidden properties). In this case, we choose `decaf_448_g2`.
+2. Hash the base point to prevent a theoretical backdoor mentioned by Stanislav
+   Smyshlaev: `hashed_base = SHAKE-256(base_point)`
+3. Hash the `x` into an array of 512 bits. These will be used as the uniform
+   random seed: `seed = SHAKE-256(x)`
+4. Hash the base point with the uniform random seed:
+   `encoded_point = SHAKE-256(hashed_base, seed)`
+5. Apply elligator 2 [\[14\]](#references). Use
+   `point_from_hash_uniform` from Mike Hamburg's ed448 code
+   [\[15\]](#references) which maps a hash buffer to the curve:
+   `p = point_from_hash_uniform(encoded_point)`
 
 #### Dual Receiver Key Generation: DRGen()
 
@@ -2174,7 +2168,11 @@ Thus, its offset is 0. The forger wants to replace "hi" with "yo".
 6. https://eprint.iacr.org/2015/673.pdf "Mike Hamburg: Decaf: Eliminating cofactors through point compression"
 7. https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html "Off-the-Record Messaging Protocol version 3"
 8. https://xmpp.org/extensions/xep-0060.pdf "P. Millard, P. Saint-Andre and R. Meijer: XEP-0060: Publish-Subscribe"
-9. https://github.com/twstrike/otrv4/blob/master/gen_gens_ed448.py
+9. https://github.com/twstrike/cramershoup/blob/master/src/test.c#L60
 10. https://ed25519.cr.yp.to/python/ed25519.py "Daniel Bernstein: ed25519"
 11. https://ed25519.cr.yp.to/ed25519-20110926.pdf "Daniel Bernstein, Niels Duif, Tanja Lange, Peter Schwabe and Bo-Yin Yang: High-speed high-security signatures"
 12. https://tools.ietf.org/html/draft-irtf-cfrg-eddsa-05 "S. Josefsson and I. Liusvaara: Edwards-curve Digital Signature Algorithm (EdDSA)"
+13. https://moderncrypto.org/mail-archive/curves/2017/000840.html
+14. https://elligator.cr.yp.to/elligator-20130828.pdf "Daniel J. Bernstein, Mike Hamburg, Anna Krasnova and Tanja Lange: Elligator: Elliptic-curve points
+indistinguishable from uniform random strings"
+15. https://sourceforge.net/p/ed448goldilocks/code/ci/decaf/tree/src/decaf_fast.c#l1125
