@@ -86,9 +86,9 @@ Exchanges Data Messages             <------------>  Exchanges Data Messages
 
 An OTRv4 conversation can begin after one participant requests a conversation.
 This includes an advertisement of which versions they support. If the other
-participant supports one of these versions, a deniable, authenticated key exchange
-(DAKE) is used to establish a secure channel. Encrypted messages are then
-exchanged in this secure channel with forward secrecy.
+participant supports one of these versions, a deniable, authenticated key
+exchange (DAKE) is used to establish a secure channel. Encrypted messages are
+then exchanged in this secure channel with forward secrecy.
 
 ## Assumptions
 
@@ -115,10 +115,11 @@ some post-conversation transcript protection against potential weaknesses with
 elliptic curves and the early arrival of quantum computers.
 
 In the DAKE, although access to one of the participant's private keys is
-required for authentication, both participants can deny having used their private,
-long term keys in this process. An external cryptographic expert will be able to
-prove that one person between the two used their long term private key for the
-authentication, but they will not be able to identify whose key was used.
+required for authentication, both participants can deny having used their
+private, long term keys in this process. An external cryptographic expert will
+be able to prove that one person between the two used their long term private
+key for the authentication, but they will not be able to identify whose key was
+used.
 
 Once an OTRv4 channel has been created with the DAKE, all data messages
 transmitted through this channel are confidential and their integrity to the
@@ -151,8 +152,8 @@ See section [Data Types](#data-types) for encoding and decoding details.
 
 ### Elliptic Curve Parameters
 
-OTRv4 uses the Ed448-Goldilocks [\[3\]](#references) elliptic curve [\[4\]](#references), which defines the
-following parameters:
+OTRv4 uses the Ed448-Goldilocks [\[3\]](#references) elliptic curve
+[\[4\]](#references), which defines the following parameters:
 
 ```
 Equation
@@ -194,7 +195,8 @@ Non-square element in Z_p (d)
 ```
 
 A scalar modulo `q` is a "field element", and should be encoded and decoded
-using the rules for multi-precision integers (MPIs). MPIs are defined on [Data Types](#data-types) section.
+using the rules for multi-precision integers (MPIs). MPIs are defined on
+[Data Types](#data-types) section.
 
 ### 3072-bit Diffie-Hellman Parameters
 
@@ -401,9 +403,10 @@ In the DAKE, OTRv4 makes use of long-term Cramer-Shoup keys, ephemeral Elliptic
 Curve Diffie-Hellman (ECDH) keys, and ephemeral Diffie-Hellman (DH) keys.
 
 For exchanging data messages, OTRv4 makes use of both the DH ratchet (with ECDH)
-and the symmetric-key ratchet from the Double Ratchet algorithm [\[2\]](#references). A
-cryptographic ratchet is a one-way mechanism for deriving new cryptographic keys
-from previous keys. New keys cannot be used to calculate the old keys.
+and the symmetric-key ratchet from the Double Ratchet algorithm
+[\[2\]](#references). A cryptographic ratchet is a one-way mechanism for
+deriving new cryptographic keys from previous keys. New keys cannot be used to
+calculate the old keys.
 
 OTRv4 adds new 3072-bit (384-byte) DH keys, called the mix key pair, to the
 Double Ratchet algorithm. These keys are used to protect transcripts of data
@@ -638,22 +641,22 @@ untrusted server.
 
 A valid versions string can be created by concatenating supported version numbers
 together in any order. For example, a user who supports versions 3 and 4
-will have the version string "43" or "34" in their profile (2 bytes). A user who only
-supports version 4 will have "4" (1 byte). Thus, a version string has varying size,
-and it is represented as a DATA type with its length specified.
+will have the version string "43" or "34" in their profile (2 bytes). A user who
+only supports version 4 will have "4" (1 byte). Thus, a version string has
+varying size, and it is represented as a DATA type with its length specified.
 
 Invalid version strings contain "2" or "1". The OTRv4 specification supports up
-to OTR version 3, and thus do not support versions 2 and 1, i.e. version strings of
-"32" or "31".
+to OTR version 3, and thus do not support versions 2 and 1, i.e. version strings
+of "32" or "31".
 
 #### Version Priority
 
-OTRv4 addresses version rollback attacks by prioritizing later versions over older
-versions. For example, in the case where both participants support versions 3 and 4,
-both will default to using 4. In another case where one participant only supports
-version 3 and the other supports version 3 and 4, version 3 will be used. Each
-client should keep track of which versions are more recent and thus prioritize
-them while processing versions in the DAKE.
+OTRv4 addresses version rollback attacks by prioritizing later versions over
+older versions. For example, in the case where both participants support
+versions 3 and 4, both will default to using 4. In another case where one
+participant only supports version 3 and the other supports version 3 and 4,
+version 3 will be used. Each client should keep track of which versions are more
+recent and thus prioritize them while processing versions in the DAKE.
 
 #### Renewing a Profile
 
@@ -668,35 +671,42 @@ can be configurable. A recommended value is two weeks.
 
 #### Creating a User Profile Signature
 
-The user profile signature is based on the Ed448 Schnorr's signature algorithm described
-by Mike Hamburg. Hamburg gives an overview of how the signature is created in his paper [_Ed448-Goldilocks,
-a new elliptic curve_](#references), and his [implementation function decaf\_448\_sign\_shake](https://sourceforge.net/p/ed448goldilocks/code/ci/decaf/tree/src/decaf_crypto.c#l117)
-provides more detail.
+The user profile signature is based on a variant of Schnorr's signature
+algorithm defined by Mike Hamburg. An overview of how the signature works
+can be found on [_Ed448-Goldilocks,a new elliptic curve_](#references) and an
+[implementation function decaf\_448\_sign\_shake](https://sourceforge.net/p/ed448goldilocks/code/ci/decaf/tree/src/decaf_crypto.c#l117) provides more detail.
 
 OTRv4 uses the following steps to create a signature:
 
-1. Derive an intermediary nonce by first using SHA3 SHAKE256 to hash the message,
-   a random value `random_v`, and the specific string "decaf\_448\_sign\_shake". Decode and
-   reduce this output into a scalar within the order of the base point
+   ```
+   signature = sign(message, private_key)
+   ```
+
+1. Derive an intermediary nonce by using SHAKE-256 of the message, of a random
+   value `random_v`, and of a specific string "decaf\_448\_sign\_shake". Decode
+   this value into a scalar and reduce it mod the order of the base point
    [q](#elliptic-curve-parameters).
+
    ```
    random_v = new_random_value()
-   output = SHAKE256(message || random_v || "decaf\_448\_sign\_shake")
+   output = SHAKE-256(message || random_v || "decaf\_448\_sign\_shake")
    intermediary_nonce = decode(output) % q
    ```
 
-2. Use this intermediary nonce to create the temporary signature bytes by computing nonce * G1 and
-   encoding the output.
+2. Use this intermediary nonce to create a temporary signature by computing
+   `nonce * G1` and encoding the output into an array of bytes.
+
    ```
-   temporary_signature_bytes = encode(G1 * intermediary_nonce)
+   temporary_signature = encode(G1 * intermediary_nonce)
    ```
 
-3. Use SHAKE256 again to hash the message, public key, and the temporary signature bytes.
-   The `public_key` is the [`h` value](#dual-receiver-key-generation-drgen) of the Cramer-Shoup
-   public key. Decode and reduce this output into a scalar by the order of the base point
-   [q](#elliptic-curve-parameters).
+3. Use SHAKE-256 to hash the message, the public key, and the temporary
+   signature. The `public_key` is the [`h` value](#dual-receiver-key-generation-drgen)
+   of the Cramer-Shoup public key. Decode this value into a scalar and reduce
+   it mod the order of the base point [q](#elliptic-curve-parameters).
+
    ```
-   output = SHAKE256(message || public_key || temporary_signature_bytes)
+   output = SHAKE256(message || public_key || temporary_signature)
    challenge = decode(output) % q
    ```
 
@@ -704,65 +714,76 @@ OTRv4 uses the following steps to create a signature:
    value](#dual-receiver-key-generation-drgen) of the Cramer-Shoup private key.
    Derive the final nonce by scalar subtracting the product of the multiplication
    from the intermediary nonce.
+
    ```
    nonce = intermediary_nonce - challenge * secret_key
    ```
 
-5. Concatenate the final nonce and the temporary signature bytes into the full signature, with the nonce first.
-   The nonce and the temporary signature are each 56 bytes each, so the final result is 112 bytes, or
-   896 bits.
+5. Concatenate the final nonce and the temporary signature into the signature.
+   The nonce and the temporary signature are each 56 bytes each, giving a total
+   size of 112 bytes.
 
 #### Verify a User Profile Signature
 
-Hamburg also gives an overview of how to verify the signature in the [implementation function
+An overview of how to verify this signature can be found on [implementation function
 decaf\_448\_verify\_shake](https://sourceforge.net/p/ed448goldilocks/code/ci/decaf/tree/src/decaf_crypto.c#l163).
 
-He uses the following steps to verify the signature:
-
-1. Divide the full signature into the nonce bytes and the temporary signature bytes. The nonce is the first
-   56 bytes and the temporary signature bytes are the second 56 bytes.
-
-2. Derive the challenge by using SHAKE256 to hash the message, public key, and the temporary signature bytes.
-   The public key is retrieved from [`h` value](#dual-receiver-key-generation-drgen) of the Cramer-Shoup long term public key in the profile.
-   Decode and reduce this output into a scalar by the order of the base point [q](#elliptic-curve-parameters).
    ```
-   output = SHAKE256(message || public_key || temporary_signature_bytes)
+   valid = verify(signature, message, public_key)
+   ```
+These are the steps to verify the signature:
+
+2. Derive a challenge by using a SHAKE-256 of the message, a public key, and
+   the temporary signature (the first 56 bytes of the signature). The public key
+   is the [`h` value](#dual-receiver-key-generation-drgen) of the Cramer-Shoup
+   long term public key in the profile. Decode this value into a scalar and
+   reduce it mod the order of the base point [q](#elliptic-curve-parameters).
+
+   ```
+   output = SHAKE-256(message || public_key || temporary_signature)
    challenge = decode(output) % q
    ```
 
-3. Decode the temporary signature and the public key into points. This includes verifying that the temporary
-   signature and the public key are points on the curve 448.
+3. Decode the temporary signature and the public key into points. This will
+   verify that the temporary signature and the public key are points on the
+   curve 448.
+
    ```
-   temporary_signature_point = decode_point_from(temporary_signature_bytes)
-   public_key_point = decode_point_from(public_key)
+   temporary_signature_point = decode(temporary_signature)
+   public_key_point = decode(public_key)
    ```
 
-4. Decode the nonce into a scalar. This includes verifying that the nonce is a scalar within order of the
-   base point.
+4. Decode the nonce into a scalar. This will verify that the nonce is a scalar
+   within order of the base point.
+
    ```
-   nonce = decode_into_scalar(nonce_bytes)
+   nonce = decode(nonce_bytes)
    ```
 
-5. Compute the double scalar multiplication of the Ed448 base point, the `public_key`, the `nonce`, and the `challenge`.
+5. Compute: the addition of the multiplication of `G1` (the base point) with the
+   `nonce` and the multiplication of the `public_key_point` with the `challenge`.
+
    ```
    result_point  = G1 * nonce + public_key_point * challenge
    ```
 
-6. Check that the `result_point` and the `temporary_signature_point` are equal. If they are equal, the signature is valid.
+6. Check that the `result_point` and the `temporary_signature_point` are equal.
+   If they are equal, the signature is valid.
 
 #### User Profile Data Type
 
 SIG below refers to the OTR version 3 DSA Signature with the structure:
 
 DSA signature (SIG):
-  (len is the length of the DSA public parameter q, which in current implementations must be 20 bytes, or 160 bits)
+  (len is the length of the DSA public parameter q, which in current
+  implementations must be 20 bytes)
   len byte unsigned r, big-endian
   len byte unsigned s, big-endian
 
 SCHNORR-SIG refers to the OTR version 4 signature:
 
 Schnorr signature (SCHNORR-SIG):
-  (len is the expected length of the signature, which is 112 bytes, or 896 bits)
+  (len is the expected length of the signature, which is 112 bytes)
   len byte unsigned value, big-endian
 
 ```
@@ -1948,7 +1969,7 @@ If smpstate is `SMPSTATE_EXPECT3`:
 * Set smpstate to `SMPSTATE_EXPECT1`, as no more messages are expected from
   Alice.
 
-  //`cr = HashToScalar(8 || G1 * r7 || (Qa - Qb) * r7)` and `d7 = r7 - b3 * cr mod q`.
+  `cr = HashToScalar(8 || G1 * r7 || (Qa - Qb) * r7)` and `d7 = r7 - b3 * cr mod q`.
 
 #### Receiving a SMP message 4
 
