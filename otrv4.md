@@ -2008,11 +2008,12 @@ recently received a message from).
 
 OTRv4 strongly encourages that each implementation of this specification exposes
 an interface for producing forged transcripts with the same functions used to
-conduct honest conversations. This section will guide implementers through
-achieving this. The major utilities are:
+conduct honest conversations. This section will guide implementers to achieve
+this. The major utilities are:
 
+```
 Parse
-  Parses OTR messages given as input to show the values of each of the fields in
+  Parses OTR messages to the values of each of the fields in
   a message. Parse will reuse the message parsing functionality of the spec.
 
 Modify Data Message
@@ -2021,7 +2022,7 @@ Modify Data Message
   guess can be made that the string `x` appears at a given offset in the message,
   this method will replace the old text with some new desired text, which
   must be the same length. For example, if the string "hi" is accurately guessed
-  to be at the beginning of an encrypted message, it can be replaced with "yo",
+  to be at the beginning of an encrypted message, it can be replaced with "yo"
   and a cryptographically valid data message can be created with the new text.
 
   To achieve this, the XOR of the old text and the new text is XORed
@@ -2031,33 +2032,29 @@ Modify Data Message
   new tag is attached to the data message, replacing the old value. A pseudocode
   [example](#modify-an-encrypted-data-message) is included in the appendix.
 
-  This modification works because the encryption that the data message relies
-  up on is malleable.
-
   Modify Data Message reuses the [MAC tag creation](#when-you-send-a-data-message)
   functionality of the spec.
 
 Read and Forge
-  Read and forge allows someone in possession of a chain key to decrypt OTR messages
-  or modify them as forgeries. It takes three inputs, the chain key, the OTR
-  message and an optional new plain text message. If the new message is included,
-  the original text is replaced with the new message, and then a new MAC tag,
-  based on the new message is attached to the data message. This new message is
-  then displayed. One applicable scenario is a participant listening and forging
-  the messages as the revealed MAC keys are received.
+  Read and forge allows someone in possession of a chain key to decrypt OTR
+  messages or modify them as forgeries. It takes three inputs, the chain key,
+  the OTR message and an optional new plain text message. If the new message is
+  included, the original text is replaced with the new message, and then a new
+  MAC tag, based on the new message is attached to the data message. This new
+  message is then displayed.
 
   Read and Forge reuses the message parser, [decrypt a data
   message],(#receiving-an-encrypted-data-message) and [MAC tag
   creation](#when-you-send-a-data-message) functionalities of the spec.
 
 Forge AKE and Session Keys
-  Any participant of an OTR conversation may forge an AKE with another participant
-  as long as they have their profile. This function will take the profile and secret
-  long term key of one participant and the profile of another. It will return
-  an AKE transcript between the two parties. The participant's private key is
-  required since it is used to authenticate the key exchange, but the resulting
-  transcript is created in such a way that a cryptographic expert cannot identify
-  which profile owner authenticated the conversation.
+  Any participant of an OTR conversation may forge an AKE with another
+  participant as long as they have their profile. This function will take the
+  profile and secret long term key of one participant and the profile of another.
+  It will return an AKE transcript between the two parties. The participant's
+  private key is required since it is used to authenticate the key exchange, but
+  the resulting transcript is created in such a way that a cryptographic expert
+  cannot identify which profile owner authenticated the conversation.
 
   This forging utility reuses the spec functions:
     1. [Create a Identity message](#identity-message)
@@ -2065,21 +2062,22 @@ Forge AKE and Session Keys
 
 Forge Entire Transcript
   The Forge Entire Transcript function will allow one participant to completely
-  forge a transcript between them and another person in a way that its forgery cannot be
-  cryptographically proven. The input will be one participant's profile, their secret
-  key, another person's profile, and a list of plain text messages corresponding to
-  what messages were exchanged. Each message in the list will have the structure:
-  1) sender 2) plain text message, so that the function may precisely create the
-  desired transcript. The participant's private key is required since it is used
-  to authenticate the key exchange, but the resulting transcript is created in such a
-  way that a cryptographic expert cannot identify which profile owner authenticated
-  the conversation.
+  forge a transcript between them and another person in a way that its forgery
+  cannot be cryptographically proven. The input will be one participant's
+  profile, their secret key, another person's profile, and a list of plain text
+  messages corresponding to what messages were exchanged. Each message in the
+  list will have the structure: 1) sender 2) plain text message, so that the
+  function may precisely create the desired transcript. The participant's private
+  key is required since it is used to authenticate the key exchange, but the
+  resulting transcript is created in such a way that a cryptographic expert
+  cannot identify which profile owner authenticated the conversation.
 
   This forging utility reuses the spec functions:
     1. [Create an Identity message](#identity-message)
     2. [Create a DRE-Auth message](#dre-auth-message)
     3. [Create an encrypted data message](#data-exchange)
     4. [The protocol state machine](#the-protocol-state-machine)
+```
 
 ## Appendices
 
@@ -2259,8 +2257,8 @@ d is an array of bytes.
 
 ### Modify an encrypted data message
 
-In this example, a forger guesses that "hi" is at the beginning of an encrypted message.
-Thus, its offset is 0. The forger wants to replace "hi" with "yo".
+In this example, a forger guesses that "hi" is at the beginning of an encrypted
+message. Thus, its offset is 0. The forger wants to replace "hi" with "yo".
 
   ```
   offset = 0
