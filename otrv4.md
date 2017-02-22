@@ -979,6 +979,9 @@ nonce (NONCE)
   The nonce used to encrypt m.
 phi (DATA)
   The encrypted message (Bobs_User_Profile || Alices_User_Profile || Y || X || B || A).
+  In practice, Bobs_User_Profile is the sender's profile and Alices_User_Profile is the
+  receiver's profile. In addition, Y and B are sender's ephemeral keys and X and A are the
+  receiver's ephemeral keys.
 ```
 
 ## Data Exchange
