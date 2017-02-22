@@ -1434,7 +1434,7 @@ before receiving yours.
 
 To agree on an Identity message to use for this conversation:
 
-  * Compare the `X` (as a 56-byte unsigned big-endian value) you sent in you
+  * Compare the `X` (as a 56-byte unsigned big-endian value) you sent in your
     Identity message with the value from the message you received.
   * If yours is the lower hash value:
     * Ignore the received Identity message.
