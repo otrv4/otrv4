@@ -264,6 +264,9 @@ OTRv4 also uses the following data types:
 Nonce (NONCE):
   24 bytes data
 
+Message Authentication Code (MAC):
+  64 bytes MAC data
+
 ED448 point (POINT):
   56 bytes data
 
