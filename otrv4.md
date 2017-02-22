@@ -435,8 +435,8 @@ Key variables:
 The previously mentioned state variables are incremented and the key variable values
 are replaced by these events:
 
-* When you start a new DAKE by sending or receiving an [Identity message](#dake-overview).
-* Upon completing the DAKE by sending or receiving a [DRE-Auth Message](#dake-overview).
+* When you start a new [DAKE](#dake-overview) by sending or receiving an [Identity message](#identity-message).
+* Upon completing the DAKE by sending or receiving a [DRE-Auth Message](#dre-auth-message).
 * [When you send and receive a Data Message](#data-exchange)
 * [When you receive a TLV type 1 (Disconnect)](#receiving-a-tlv-type-1-disconnect-message)
 
