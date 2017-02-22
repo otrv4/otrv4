@@ -666,21 +666,15 @@ can be configurable. A recommended value is two weeks.
 #### Creating a User Profile Signature
 
 The user profile signature is based on the Ed448 Schnorr's signature algorithm described
-by Mike Hamburg, with one change. Hamburg creates a 32 byte symmetric key when he derives
-a new pair of public and secret keys in Ed448. Each time a signature is created in Hamburg's
-algorithm, this symmetric key is used to derive a nonce, and the nonce becomes a part of
-the final output. In OTRv4, instead of using a symmetric key, a new 32 byte random value is
-generated to derive the nonce each time a signature is created.
-
-Hamburg gives an overview of how the signature is created in his paper [_Ed448-Goldilocks,
+by Mike Hamburg. Hamburg gives an overview of how the signature is created in his paper [_Ed448-Goldilocks,
 a new elliptic curve_](#references), and his [implementation function decaf\_448\_sign\_shake](https://sourceforge.net/p/ed448goldilocks/code/ci/decaf/tree/src/decaf_crypto.c#l117)
 provides more detail.
 
-Hamburg uses the following steps to create a signature in his implementation:
+OTRv4 uses the following steps to create a signature:
 
-1. Derive an intermediary nonce by first using SHA3 SHAKE 256 to hash the message,
+1. Derive an intermediary nonce by first using SHA3 SHAKE256 to hash the message,
    a random value `random_v`, and the specific string "decaf\_448\_sign\_shake". Decode and
-   reduce this output into a scalar with the order of the base point
+   reduce this output into a scalar within the order of the base point
    [q](#elliptic-curve-parameters).
    ```
    random_v = new_random_value()
@@ -697,28 +691,28 @@ Hamburg uses the following steps to create a signature in his implementation:
 3. Use SHAKE256 again to hash the message, public key, and the temporary signature bytes.
    The `public_key` is the [`h` value](#dual-receiver-key-generation-drgen) of the Cramer-Shoup
    public key. Decode and reduce this output into a scalar by the order of the base point
-   [q](#elliptic-curve-parameters). Lastly, scalar multiply the result with the secret key value.
-   The `secret_key` is the [`z` value](#dual-receiver-key-generation-drgen)of the Cramer-Shoup
-   private key.
+   [q](#elliptic-curve-parameters).
    ```
    output = SHAKE256(message || public_key || temporary_signature_bytes)
-   challenge = (decode(output) % q) * secret_key
+   challenge = decode(output) % q
    ```
 
-4. Derive the final nonce by scalar subtracting the challenge from the intermediary nonce.
+4. Scalar multiply the challenge with the secret key. The `secret_key` is the [`z`
+   value](#dual-receiver-key-generation-drgen) of the Cramer-Shoup private key.
+   Derive the final nonce by scalar subtracting the product of the multiplication
+   from the intermediary nonce.
    ```
-   nonce = intermediary_nonce - challenge
+   nonce = intermediary_nonce - challenge * secret_key
    ```
 
 5. Concatenate the final nonce and the temporary signature bytes into the full signature, with the nonce first.
-   The nonce and the temporary signature are each 56 bytes each, so the final result is 112 bytes or,
+   The nonce and the temporary signature are each 56 bytes each, so the final result is 112 bytes, or
    896 bits.
 
 #### Verify a User Profile Signature
 
-Hamburg also gives an overview of how the signature is verified in his [implementation function
-decaf\_448\_verify\_shake](https://sourceforge.net/p/ed448goldilocks/code/ci/decaf/tree/src/decaf_crypto.c#l163)
-provides more detail.
+Hamburg also gives an overview of how to verify the signature in the [implementation function
+decaf\_448\_verify\_shake](https://sourceforge.net/p/ed448goldilocks/code/ci/decaf/tree/src/decaf_crypto.c#l163).
 
 He uses the following steps to verify the signature:
 
@@ -726,7 +720,7 @@ He uses the following steps to verify the signature:
    56 bytes and the temporary signature bytes are the second 56 bytes.
 
 2. Derive the challenge by using SHAKE256 to hash the message, public key, and the temporary signature bytes.
-   The public key is retrieved from `h` value of the Cramer-Shoup long term public key in the profile.
+   The public key is retrieved from [`h` value](#dual-receiver-key-generation-drgen) of the Cramer-Shoup long term public key in the profile.
    Decode and reduce this output into a scalar by the order of the base point [q](#elliptic-curve-parameters).
    ```
    output = SHAKE256(message || public_key || temporary_signature_bytes)
