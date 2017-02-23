@@ -269,7 +269,7 @@ Nonce (NONCE):
 Message Authentication Code (MAC):
   64 bytes MAC data
 
-ED448 point (POINT):
+Ed448 point (POINT):
   56 bytes data
 
 User Profile (USER-PROF):
@@ -746,7 +746,7 @@ These are the steps to verify the signature:
 
 3. Decode the temporary signature and the public key into points. This will
    verify that the temporary signature and the public key are points on the
-   curve 448.
+   curve Ed448.
 
    ```
    temporary_signature_point = decode(temporary_signature)
@@ -839,7 +839,7 @@ Bob will be initiating the DAKE with Alice.
     * Picks the highest compatible version of OTR listed in Bob's profile.
       If the versions are incompatible, Alice does not send any further messages.
       Version prioritization is explained [here](#version-priority).
-    * Validates the received ECDH ephemeral public key is on curve 448 and sets it as `their_ecdh`.
+    * Validates the received ECDH ephemeral public key is on curve Ed448 and sets it as `their_ecdh`.
     * Validates that the received DH ephemeral public key is on the correct group and sets it as `their_dh`.
 2. Generates and sets `our_ecdh` as ephemeral ECDH keys.
 3. Generates and sets `our_dh` as ephemeral 3072-bit DH keys.
@@ -874,7 +874,7 @@ Bob will be initiating the DAKE with Alice.
     * `(Y, B)` in the message is an Identity message that Bob previously sent and has not
       been used.
 3. Retrieve ephemeral public keys from Alice:
-    * Validates the received ECDH ephemeral public key is on curve 448 and sets it as `their_ecdh`.
+    * Validates the received ECDH ephemeral public key is on curve Ed448 and sets it as `their_ecdh`.
     * Validates that the received DH ephemeral public key is on the correct group and sets it as `their_dh`.
 4. At this point, the DAKE is complete for Bob:
     * Sets ratchet id `i` as 0.
@@ -926,7 +926,7 @@ B (MPI)
 This is the second message of the DAKE. Alice sends it to Bob to commit to a
 choice of her ECDH ephemeral key and her DH ephemeral key, and acknowledgment
 of Bob's ECDH ephemeral key and DH ephemeral key. This acknowledgement includes
-a validation that Bob's ECDH key is on the curve 448 and his DH key is in the
+a validation that Bob's ECDH key is on the curve Ed448 and his DH key is in the
 correct group. The public ECDH ephemeral public keys and public DH ephemeral
 public keys are encrypted with DRE and authenticated with a NIZKPK.
 
@@ -1441,8 +1441,8 @@ If the state is `START`:
         specification for this version. Version prioritization is detailed
         [here](#version-prioritizing).
     * If the highest compatible version is OTR version 4
-      * Verify that the point `Y` received is on curve 448.
-      * Verify that the DH public key `B` is from the correct group.
+      * Verify that the point `Y` received is on curve Ed448.
+      * Verify that the DH public key `B` is from the correct group and not degenerate.
       * If all validations succeed:
           * send a DRE-Auth message
           * transition to the `ENCRYPTED_MESSAGES` state.
@@ -1473,7 +1473,7 @@ To agree on an Identity message to use for this conversation:
           specification for this version. Version prioritization is detailed
           [here](#version-prioritizing).
     * If the highest compatible version is OTR version 4
-      * Verify that the point `Y` received is on curve 448.
+      * Verify that the point `Y` received is on curve Ed448.
       * Verify that the DH public key `B` is from the correct group.
       * If validation succeeds:
         * Send a DRE-Auth message.
@@ -1493,7 +1493,7 @@ If the state is `ENCRYPTED_MESSAGES`:
         specification for this version. Version prioritization is detailed
         [here](#version-prioritizing).
     * If the highest compatible version is OTR version 4
-      * Verify that the point `Y` received is on curve 448.
+      * Verify that the point `Y` received is on curve Ed448.
       * Verify that the DH public key `B` is from the correct group.
       * If all validations succeed:
           * send a DRE-Auth message
@@ -1530,7 +1530,7 @@ If the state is `DAKE_IN_PROGRESS`:
             * that our profile is the first in the message.
             * that their user profile is not expired and matches the profile
               in the Sender's User Profile section.
-            * that the point `X` received is on curve 448.
+            * that the point `X` received is on curve Ed448.
             * that the DH public key `A` is from the correct group.
             * that `Y` and `B` were previously sent in this session (and remain unused).
             * If everything verifies:
@@ -1563,7 +1563,7 @@ Otherwise:
     * Verify the MAC tag.
     * Check if the message version is allowed.
     * Verify that the instance tags are consistent with those used in the DAKE.
-    * Verify that the public ECDH key is on curve 448.
+    * Verify that the public ECDH key is on curve Ed448.
     * Verify that the public DH key is from the correct group.
 
   * If the message is not valid in any of the above steps, discard it and
@@ -1650,7 +1650,7 @@ Assuming that Alice begins the exchange:
 
 **Bob:**
 
-* Validates that `G2a` and `G3a` are on the curve 448.
+* Validates that `G2a` and `G3a` are on the curve Ed448, in the correct group and not degenerate.
 * Picks random values `b2` and `b3` in `Z_q`.
 * Picks random values `r2`, `r3`, `r4`, `r5` and `r6` in `Z_q`.
 * Computes `G2b = G1 * b2` and `G3b = G1 * b3`.
@@ -1665,7 +1665,7 @@ Assuming that Alice begins the exchange:
 
 **Alice:**
 
-* Validates that `G2b` and `G3b` are on the curve 448.
+* Validates that `G2b` and `G3b` are on the curve Ed448, in the correct group and not degenerate.
 * Computes `G2 = G2b * a2` and `G3 = G3b * a3`.
 * Picks random values `r4`, `r5`, `r6` and `r7` in `Z_q`.
 * Computes `Pa = G3 * r4` and `Qa = G1 * r4 + G2 * x`, where x is the 'actual secret'.
@@ -1677,7 +1677,7 @@ Assuming that Alice begins the exchange:
 
 **Bob:**
 
-* Validates that `Pa`, `Qa`, and `Ra` are on the curve 448.
+* Validates that `Pa`, `Qa`, and `Ra` are on the curve Ed448, in the correct group and not degenerate.
 * Picks a random value `r7` in `Z_q`.
 * Computes `Rb = (Qa - Qb) * b3`.
 * Computes `Rab = Ra * b3`.
@@ -1687,7 +1687,7 @@ Assuming that Alice begins the exchange:
 
 **Alice:**
 
-* Validates that `Rb` is on curve 448.
+* Validates that `Rb` is on curve Ed448, in the correct group and not degenerate.
 * Computes `Rab = Rb * a3`.
 * Checks whether `Rab == Pa - Pb`.
 
@@ -1796,7 +1796,7 @@ generators, g2 and g3. It also begins the construction of the values used in
 the final comparison of the protocol. A valid SMP message 2 is generated as
 follows:
 
-1. Validate that `G2a` and `G3a` are on curve 448.
+1. Validate that `G2a` and `G3a` are on curve Ed448, in the correct group, and are not degenerate.
 2. Determine Bob's secret input `y`, which is to be compared to Alice's secret
    `x`.
 3. Pick random values `b2` and `b3` in `Z_q`. These will used during
@@ -1850,7 +1850,7 @@ SMP message 3 is Alice's final message in the SMP exchange. It has the last of
 the information required by Bob to determine if `x = y`. A valid SMP message 1
 is generated as follows:
 
-1. Validate that `G2b`, `G3b`, `Pb`, and `Qb` are on curve 448.
+1. Validate that `G2b`, `G3b`, `Pb`, and `Qb` are on curve Ed448, in the correct group, and are not degenerate.
 2. Pick random values `r4`, `r5`, `r6` and `r7` in `Z_q`. These will
    be used to add a blinding factor to the final results, and to generate
    zero-knowledge proofs that this message was created honestly.
@@ -1892,7 +1892,7 @@ SMP message 4 is Bob's final message in the SMP exchange. It has the last of
 the information required by Alice to determine if `x = y`. A valid SMP message
 4 is generated as follows:
 
-1. Validate that `Pa`, `Qa`, and `Ra` are on curve 448.
+1. Validate that `Pa`, `Qa`, and `Ra` are on curve Ed448, in the correct group, and are not degenerate.
 2. Pick a random value `r7` in `Z_q`. This will be used to generate
 Bob's final zero-knowledge proof that this message was created honestly.
 3. Compute `Rb = (Qa - Qb) * b3`.
@@ -1925,7 +1925,7 @@ Set smpstate to `SMPSTATE_EXPECT1` and send a SMP abort to Alice.
 If smpstate is `SMPSTATE_EXPECT1`:
 
 * Verify Alice's zero-knowledge proofs for G2a and G3a:
-  1. Check that both `G2a` and `G3a` are points in the curve.
+  1. Check that both `G2a` and `G3a` are on curve Ed448, in the correct group, and are not degenerate.
   2. Check that `c2 = HashToScalar(1 || G1 * d2 + G2a * c2)`.
   3. Check that `c3 = HashToScalar(2 || G1 * d3 + G3a * c3)`.
 * Create a SMP message 2 and send it to Alice.
@@ -1940,7 +1940,7 @@ Set smpstate to `SMPSTATE_EXPECT1` and send a SMP abort to Bob.
 If smpstate is `SMPSTATE_EXPECT2`:
 
 * Verify Bob's zero-knowledge proofs for `G2b`, `G3b`, `Pb` and `Qb`:
-    1. Check that `G2b`, `G3b`, `Pb` and `Qb` are points in the curve.
+    1. Check that `G2b`, `G3b`, `Pb` and `Qb` are on curve Ed448, in the correct group, and are not degenerate.
     2. Check that `c2 = HashToScalar(3 || G1 * d2 + G2b * c2)`.
     3. Check that `c3 = HashToScalar(4 || G1 * d3 + G3b * c3)`.
     4. Check that `cp = HashToScalar(5 || G3 * d5 + Pb * cp || G * d5 + G2 * d6 + Qb * cp)`.
@@ -1956,7 +1956,7 @@ Set smpstate to `SMPSTATE_EXPECT1` and send a SMP abort to Bob.
 If smpstate is `SMPSTATE_EXPECT3`:
 
 * Verify Alice's zero-knowledge proofs for `Pa`, `Qa` and `Ra`:
-  1. Check that `Pa`, `Qa` and `Ra` are points in the curve.
+  1. Check that `Pa`, `Qa` and `Ra` are on curve Ed448, in the correct group, and are not degenerate.
   2. Check that `cp = HashToScalar(6 || G3 * d5 + Pa * cp || G1 * d5 + G2 * d6 +
      Qa * cp)`.
   3. Check that `cr = HashToScalar(7 || G1 * d7 + G3a * cr || (Qa - Qb) * d7 +
@@ -1979,7 +1979,7 @@ Set smpstate to `SMPSTATE_EXPECT1` and send a type 6 TLV (SMP abort) to Bob.
 If smpstate is SMPSTATE_EXPECT4:
 
 * Verify Bob's zero-knowledge proof for Rb:
-   1. Check that `Rb` is a point on the curve.
+   1. Check that `Rb` is on curve Ed448, in the correct group, and are not degenerate.
    2. Check that `Rb` is `>= 2` and `<= modulus-2`.
    3. Check that `cr = HashToScalar(8 || G1 * d7 + G3 * cr || (Qa / Qb) * d7 + Rb * cr)`.
 
@@ -2094,7 +2094,7 @@ The DRE scheme consists of three functions:
 #### Domain parameters
 
 The Cramer-Shoup scheme uses a group (`G`, `q`, `G1`, `G2`). This is a group
-with the same `q` as Curve 448. The generators `G1` and `G2` are:
+with the same `q` as curve Ed448. The generators `G1` and `G2` are:
 
 ```
 G1 = (1178121612634369467372824843433100646651805353570163734168790821479394042
@@ -2128,7 +2128,7 @@ following this post [\[13\]](#references) and with this code
 4. Hash the base point with the uniform random seed:
    `encoded_point = SHAKE-256(hashed_base, seed)`
 5. Apply elligator 2 [\[14\]](#references). Use
-   `point_from_hash_uniform` from Mike Hamburg's ed448 code
+   `point_from_hash_uniform` from Mike Hamburg's Ed448 code
    [\[15\]](#references) which maps a hash buffer to the curve:
    `p = point_from_hash_uniform(encoded_point)`
 
@@ -2146,7 +2146,7 @@ following this post [\[13\]](#references) and with this code
 
 Let `{C1, D1, H1} = PK1` and `{C2, D2, H2} = PK2`
 `C1`, `D1`, `H1`, `C2`, `D2`, and `H2` should be checked to verify
-they are on curve 448.
+they are on curve Ed448.
 
 1. Pick random values `k1, k2` in Z_q.
 2. For i ∈ {1, 2}:
@@ -2180,7 +2180,7 @@ Let `{C1, D1, H1} = PK1`, `{C2, D2, H2} = PK2` and `{x1i, x2i, y1i, y2i, zi} =
 ski`.
 ski is the secret key of the person decrypting the message.
 `C1`, `D1`, `H1`, `C2`, `D2`, and `H2` should be checked to verify
-they are on curve 448.
+they are on curve Ed448.
 
 1. Parse `gamma` to retrieve components
   `(U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2, nonce, phi) = gamma`.
@@ -2226,7 +2226,7 @@ G1 = (11781216126343694673728248434331006466518053535701637341687908214793940427
 A1 is the public value associated with a1, that is, `A1 = G1*a1`.
 m is the message to authenticate.
 
-`A1`, `A2`, and `A3` should be checked to verify they are on curve 448.
+`A1`, `A2`, and `A3` should be checked to verify they are on curve Ed448.
 
 1. Pick random values `t1, c2, c3, r2, r3` in Z_q.
 2. Compute `T1 = G1 * t1`.
@@ -2239,7 +2239,7 @@ m is the message to authenticate.
 
 #### Verification: Verify({A1, A2, A3}, sigma, m)
 
-`A1`, `A2`, and `A3` should be checked to verify they are on curve 448.
+`A1`, `A2`, and `A3` should be checked to verify they are on curve Ed448.
 
 1. Parse sigma to retrieve components `(c1, r1, c2, r2, c3, r3)`.
 2. Compute `T1 = G1 * r1 + A1 * c1`
