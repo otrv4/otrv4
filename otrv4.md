@@ -1558,7 +1558,7 @@ to send encrypted messages.
 If the state is not `ENCRYPTED_MESSAGES`:
 
   * Inform the user that an unreadable encrypted message was received.
-  * Reply with an Error Message with ERROR_CODE_1.
+  * Reply with an Error Message with ERROR_1.
 
 Otherwise:
 
@@ -1578,7 +1578,7 @@ Otherwise:
     * If the message cannot be decrypted and the `IGNORE_UNREADABLE` flag is not
     set:
       * Inform the user that an unreadable encrypted message was received.
-      * Reply with an Error Message with ERROR_CODE_1.
+      * Reply with an Error Message with ERROR_1.
 
     * If the message cannot be decrypted and the `IGNORE_UNREADABLE` flag is
     set:
@@ -1597,8 +1597,8 @@ Otherwise:
 
 #### Receiving an Error Message
 
-* Detect if an error code exists in the form "ERROR_CODE_x" where x is a number.
-* Display the human-readable error message to the user. If an error code exists,
+* Detect if an error code exists in the form "ERROR__x" where x is a number.
+* If the error code exists in the spec, display the human-readable error message to the user.
 * Display the message in the user configured language.
 
 #### User requests to end an OTR conversation
