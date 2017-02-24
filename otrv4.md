@@ -2063,6 +2063,24 @@ Forge AKE and Session Keys
     1. [Create a Identity message](#identity-message)
     2. [Create a DRE-Auth message](#dre-auth-message)
 
+Show MAC Key
+  This function takes a chain key and a message key number and shows the mac key
+  associated with those two values. For example, if the message key number is 3,
+  the message key is ratcheted 3 times, and the third mac key is returned. Show
+  MAC key may be used with the ReMAC message in the case where a chain key has
+  been compromised by an attacker, and the attacker wishes to forge messages.
+  Functionalities around deriving the MAC keys may be used to implement this
+  function.
+
+ReMAC Message
+  ReMAC Message will create a new OTRv4 Data Message from the input: new MAC key,
+  sender instance tag, receiver instance tag, flags, ratchet id, message id, public
+  ECDH Key, public DH key, nonce, encrypted message, and revealed MAC keys. This
+  method will use the input to create a new Data Message and create a new authenticator
+  for this message with the new MAC key provided. An attacker may use this function
+  to forge messages with a compromised MAC key. Functionalities around creating MAC
+  tags may be reused to employ this function.
+
 Forge Entire Transcript
   The Forge Entire Transcript function will allow one participant to completely
   forge a transcript between them and another person in a way that its forgery
