@@ -306,18 +306,19 @@ coset representative `(s, t)`, where `s` is non-negative and finite, and `t /s`
 is non-negative or infinite.
 
 It is wished to compute `s` as
-`(1 ± sqrt(1 - (a * x)^2)) / a * x` and `t / s` = `∓ 2 * sqrt(1 - (a * x) ^ 2) / x * y`.
-
-1. From the curve equation, is known that:
+`(1 ± sqrt(1 - (a * x)^2)) / a * x` and `t / s` as
+`∓ 2 * sqrt(1 - (a * x) ^ 2) / x * y`.
+Note that from the curve equation, is known that:
 `(1 - ax^2) * (1 - y^2) = 1 + (a * x)^2 * y^2 - (y^2 + (a * x)^2) = (a - d) * x^2 * y^2`,
-so that `sqrt(1 - (a * x^2)) / x * y = ± sqrt((a - d) / (1 - y^2))`.
-Note that in extended homogenous coordinates:
+so that `sqrt(1 - (a * x^2)) / x * y = ± sqrt((a - d) / (1 - y^2))`. In extended
+homogenous coordinates:
 `1/x^2 = (a - (d * y)^2) / 1 - y^2) = ((a * Z)^2 - (d * Y)^2) / (Z^2 - Y^2)`,
 so that `1/x = ((a * Z * X) - (d * Y * T))/ (Z^2 - Y^2)`
-2. Compute `r = 1/ sqrt((a - d) * (Z + Y) * (Z - Y))`
-3. Compute `u = (a - d) * r`
-4. Compute `r = -r` if `-2 * u * Z` is negative
-5. Compute `s = | u * (r * ((a * Z * X) - (d * Y * T)) + Y) / a|`
+
+1. Compute `r = 1/ sqrt((a - d) * (Z + Y) * (Z - Y))`
+2. Compute `u = (a - d) * r`
+3. Compute `r = -r` if `-2 * u * Z` is negative
+4. Compute `s = | u * (r * ((a * Z * X) - (d * Y * T)) + Y) / a|`
 
 #### Decode
 
@@ -328,10 +329,10 @@ Given s, compute:
 1. Compute `X = 2 * s`
 2. Compute `Z = 1 + a * s^2`
 3. Compute `u = Z^2 - (4 * d) * s^2`
-4. Compute `v` equals
+4. Check that `v` equals:
    1. `1 / sqrt(u * s^2)` if `u * s^2` is square and non-zero
-	2. `0` if `u * s^2 = 0`
-	3. reject if `u * s^2` is not square
+   2. `0` if `u * s^2 = 0`
+   3. reject if `u * s^2` is not square
 5. Compute `v` = `-v` if `u * v` is negative
 6. Compute `w = v * s * (2 - Z)`
 7. Compute `w = w + 1` if `s = 0`
@@ -411,8 +412,8 @@ received for optional internationalization of the message.
 Error Code List:
 
 ```
-ERROR_1:
-  Message cannot be decrypted
+  ERROR_1:
+    Message cannot be decrypted
 ```
 
 ## Key management
@@ -426,10 +427,10 @@ and the symmetric-key ratchet from the Double Ratchet algorithm
 deriving new cryptographic keys from previous keys. New keys cannot be used to
 calculate the old keys.
 
-OTRv4 adds new 3072-bit (384-byte) DH keys, called the mix key pair, to the
+OTRv4 adds 3072-bit (384-byte) DH keys, called the mix key pair, to the
 Double Ratchet algorithm. These keys are used to protect transcripts of data
-messages in a case where ECC is broken. During the DAKE, both parties agree upon
-the first set of DH keys. Then, during every third DH ratchet in the Double
+messages in case ECC is broken. During the DAKE, both parties agree upon the
+first set of DH keys. Then, during every third DH ratchet in the Double
 Ratchet, a new key is agreed upon. Between each DH mix key ratchet, both sides
 will conduct a symmetric mix key ratchet.
 
@@ -453,8 +454,8 @@ Key variables:
   'mac_keys_to_reveal': the mac keys to be revealed in next data message sent.
 ```
 
-The previously mentioned state variables are incremented and the key variable values
-are replaced by these events:
+The previously mentioned state variables are incremented and the key variable
+values are replaced by these events:
 
 * When you start a new [DAKE](#dake-overview) by sending or receiving an [Identity message](#identity-message).
 * Upon completing the DAKE by sending or receiving a [DRE-Auth Message](#dre-auth-message).
@@ -507,7 +508,7 @@ key will be used for encrypting and decrypting data messages:
   - If she is the "high" end, use `Ca` as the sending chain key (`chain_s`)
   and `Cb` as the receiving chain key (`chain_r`).
   - If she is the "low" end, use `Cb` as the sending chain key (`chain_s`)
-  and Ca as the receiving chain key (`chain_r`).
+  and `Ca` as the receiving chain key (`chain_r`).
 
 ```
 decide_between_chain_keys(Ca, Cb):
@@ -598,15 +599,15 @@ this channel.
 ## Conversation Initialization
 
 OTRv4 will initialize through a [Query Message or a Whitespace
-Tag](#user-requests-to-start-an-otr-conversation). After this, the conversation is
-authenticated using DAKE.
+Tag](#user-requests-to-start-an-otr-conversation). After this, the conversation
+is authenticated using DAKE.
 
 ### Requesting conversation with older OTR versions
 
 Bob might respond to Alice's request or notification of willingness to start a
 conversation using OTRv3. If this is the case and Alice supports version 3,
-the protocol falls back to OTRv3 [\[7\]](#references). If Alice does not support version 3,
-then this message is ignored.
+the protocol falls back to OTRv3 [\[7\]](#references). If Alice does not support
+version 3, then this message is ignored.
 
 ### User Profile
 
@@ -620,8 +621,8 @@ participation in OTRv4 conversations. When a user profile is published, it is
 available from a public location, such as a server. Each implementation may
 decide how to publish the profile. For example, one client may publish profiles
 to a server pool (similar to a keyserver pool, where PGP public keys can be
-published). Another client may use XMPP's publish-subscribe extension (XEP-0060 [\[8\]](#references))
-for publishing profiles.
+published). Another client may use XMPP's publish-subscribe extension
+(XEP-0060 [\[8\]](#references)) for publishing profiles.
 
 When the user profile expires, it should be updated. Client implementation
 should determine the frequency of user's profile expiration and renewal. The
@@ -637,20 +638,19 @@ To create a user profile, assemble:
 
 1. User's Cramer-Shoup long term public key.
 2. Versions: a string corresponding to the user's supported OTR versions.
-   A user profile can advertise multiple OTR versions. The format is
-   described under the section ["Establishing Versions"](#establishing-versions)
-   below.
+   A user profile can advertise multiple OTR versions. The format is described
+   under the section ["Establishing Versions"](#establishing-versions) below.
 3. Profile Expiration: Expiration date in standard Unix 64-bit format
    (seconds since the midnight starting Jan 1, 1970, UTC, ignoring leap seconds)
 4. Profile Signature: One of the Cramer-Shoup secret key values (`z`) and its
    generator (`G1`) is used to create signatures of the entire profile
-   excluding the signature itself. The size of the signature is 112 bytes.
-   It is created using the [Ed448 signature algorithm](#user-profile-signature).
-5. Transition Signature (optional): A signature of the profile excluding
-   Profile Signatures and itself signed by the user's OTRv3 DSA key. The
-   transitional signature that enables contacts that trust user's version 3
-   DSA key to trust the user's profile in version 4. This is only used if the
-   user supports versions 3 and 4.
+   excluding the signature itself. The size of the signature is 112 bytes. It is
+   created using the [Ed448 signature algorithm](#user-profile-signature).
+5. Transition Signature (optional): A signature of the profile excluding Profile
+   Signatures and itself signed by the user's OTRv3 DSA key. The transitional
+   signature that enables contacts that trust user's version 3 DSA key to trust
+   the user's profile in version 4. This is only used if the user supports
+   versions 3 and 4.
 
 After the profile is created, it must be published in a public place, like an
 untrusted server.
@@ -822,9 +822,9 @@ This section outlines the flow of the DAKE. This is a way to mutually agree upon
 shared keys for the two parties and authenticate one another while providing
 participation deniability.
 
-This protocol is derived from the Spawn protocol [\[1\]](#references), which uses dual-receiver
-encryption (DRE) and a non-interactive zero-knowledge proof of knowledge
-(NIZKPK) for authentication (Auth).
+This protocol is derived from the Spawn protocol [\[1\]](#references), which
+uses dual-receiver encryption (DRE) and a non-interactive zero-knowledge proof
+of knowledge (NIZKPK) for authentication (Auth).
 
 Alice's long-term Cramer-Shoup key-pair is `ska = (x1a, x2a, y1a, y2a, za)` and
 `PKa = (Ca, Da, Ha)`. Bob's long-term Cramer-Shoup key-pair is `skb = (x1b, x2b,
@@ -857,8 +857,10 @@ Bob will be initiating the DAKE with Alice.
     * Picks the highest compatible version of OTR listed in Bob's profile.
       If the versions are incompatible, Alice does not send any further messages.
       Version prioritization is explained [here](#version-priority).
-    * Validates the received ECDH ephemeral public key is on curve Ed448 and sets it as `their_ecdh`.
-    * Validates that the received DH ephemeral public key is on the correct group and sets it as `their_dh`.
+    * Validates the received ECDH ephemeral public key is on curve Ed448 and
+      sets it as `their_ecdh`.
+    * Validates that the received DH ephemeral public key is on the correct
+      group and sets it as `their_dh`.
 2. Generates and sets `our_ecdh` as ephemeral ECDH keys.
 3. Generates and sets `our_dh` as ephemeral 3072-bit DH keys.
 4. Sends Bob a DRE-Auth message (see [DRE-Auth message section](#dre-auth-message)).
@@ -868,7 +870,7 @@ Bob will be initiating the DAKE with Alice.
     * Calculates ECDH shared secret `K_ecdh`.
     * Calculates DH shared secret `k_dh` and `mix_key`.
     * Calculates Mixed shared secret `K = SHA3-512(K_ecdh || mix_key)`.
-    * Calculates the SSID from shared secret: it is the first 8 bytes of `SHA3-256(0x00 || K)`.
+    * Calculates the SSID from shared secret: the first 8 bytes of `SHA3-256(0x00 || K)`.
     * Calculates the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = calculate_ratchet_keys(K)`.
     * [Decides which chain key she will use](#deciding-between-chain-keys).
 
@@ -876,10 +878,10 @@ Bob will be initiating the DAKE with Alice.
 
 1. Receives DRE-Auth message from Alice:
     * Validates Alice's User Profile.
-    * Picks the highest compatible version of OTR listed in Alice's
-      profile, and follows the specification for this version. Version
-      prioritization is explained [here](#version-priority)
-      If the versions are incompatible, Bob does not send any further messages.
+    * Picks the highest compatible version of OTR listed on Alice's profile, and
+      follows the specification for this version. Version prioritization is
+      explained [here](#version-priority) If the versions are incompatible, Bob
+      does not send any further messages.
     * Verify the authentication `sigma` (see [DRE-Auth message](#dre-auth-message)).
 2. Decrypts `gamma` (see [DRE-Auth message](#dre-auth-message)) and verifies
    the following properties of the decrypted message. If any of the
@@ -889,11 +891,13 @@ Bob will be initiating the DAKE with Alice.
     * Bob's User Profile is the first one listed
     * Alice's User Profile is the second one listed, and it matches the
      one transmitted outside of the ciphertext
-    * `(Y, B)` in the message is an Identity message that Bob previously sent and has not
-      been used.
+    * `(Y, B)` in the message is an Identity message that Bob previously sent
+      and has not been used.
 3. Retrieve ephemeral public keys from Alice:
-    * Validates the received ECDH ephemeral public key is on curve Ed448 and sets it as `their_ecdh`.
-    * Validates that the received DH ephemeral public key is on the correct group and sets it as `their_dh`.
+    * Validates the received ECDH ephemeral public key is on curve Ed448 and
+      sets it as `their_ecdh`.
+    * Validates that the received DH ephemeral public key is on the correct
+      group and sets it as `their_dh`.
 4. At this point, the DAKE is complete for Bob:
     * Sets ratchet id `i` as 0.
     * Sets `j` as 1.
@@ -1005,8 +1009,8 @@ phi (DATA)
 ## Data Exchange
 
 This section describes how each participant will use the Double Ratchet
-algorithm to exchange [data messages](#data-message) initialized with the
-shared secret established in the DAKE. Detailed validation and processing of each data
+algorithm to exchange [data messages](#data-message) initialized with the shared
+secret established in the DAKE. Detailed validation and processing of each data
 message is described in the [section on receiving encrypted data
 messages](#receiving-an-encrypted-data-message).
 
@@ -1372,6 +1376,7 @@ older versions have been omitted.
 
 Example query messages:
 
+```
 "?OTRv3?"
     Version 3
 "?OTRv45x?"
@@ -1379,7 +1384,8 @@ Example query messages:
 "?OTRv?"
     A bizarre claim that Alice would like to start an OTR conversation, but is
     unwilling to speak any version of the protocol. Although this is
-    syntactically valid, the receiver will not create a reply.
+    syntactically valid, the receiver will not reply.
+```
 
 These strings may be hidden from the user (for example, in an attribute of an
 HTML tag), and may be accompanied by an explanatory message ("Alice has
@@ -1389,21 +1395,25 @@ the AKE according to the highest compatible version he supports.
 
 ##### Whitespace Tags
 
-If Alice wishes to communicate to Bob that she is willing to use OTR, she can attach
-a special whitespace tag to any plaintext message she sends him. This tag may occur
-anywhere in the message, and may be hidden from the user (as in the [Query
-Messages](#query-messages), above).
+If Alice wishes to communicate to Bob that she is willing to use OTR, she can
+attach a special whitespace tag to any plaintext message she sends him. This tag
+may occur anywhere in the message, and may be hidden from the user (as in the
+[Query Messages](#query-messages), above).
 
-The tag consists of the following 16 bytes, followed by one or more sets of 8 bytes
-indicating the version of OTR Alice is willing to use:
+The tag consists of the following 16 bytes, followed by one or more sets of 8
+bytes indicating the version of OTR Alice is willing to use:
 
-  Always send "\x20\x09\x20\x20\x09\x09\x09\x09" "\x20\x09\x20\x09\x20\x09\x20\x20", followed by one or more of:
-  "\x20\x20\x09\x09\x20\x20\x09\x09" to indicate a willingness to use OTR version 3 with Bob
-  "\x20\x20\x09\x09\x20\x09\x20\x20" to indicate a willingness to use OTR version 4 with Bob
+```
+  Always send "\x20\x09\x20\x20\x09\x09\x09\x09" "\x20\x09\x20\x09\x20\x09\x20\x20",
+  followed by one or more of:
+    "\x20\x20\x09\x09\x20\x20\x09\x09" to indicate a willingness to use OTR version 3 with Bob
+    "\x20\x20\x09\x09\x20\x09\x20\x20" to indicate a willingness to use OTR version 4 with Bob
+```
 
-If Bob is willing to use OTR with Alice (with a protocol version that Alice has offered),
-he should start the AKE. On the other hand, if Alice receives a plaintext message from Bob
-(rather than an initiation of the AKE), she should stop sending him the whitespace tag.
+If Bob is willing to use OTR with Alice (with the protocol version that Alice
+has offered), he should start the AKE. On the other hand, if Alice receives a
+plaintext message from Bob (rather than an initiation of the AKE), she should
+stop sending him a whitespace tag.
 
 #### Receiving plaintext without the whitespace tag
 
@@ -1616,7 +1626,8 @@ Otherwise:
 #### Receiving an Error Message
 
 * Detect if an error code exists in the form "ERROR__x" where x is a number.
-* If the error code exists in the spec, display the human-readable error message to the user.
+* If the error code exists in the spec, display the human-readable error message
+  to the user.
 * Display the message in the user configured language.
 
 #### User requests to end an OTR conversation
