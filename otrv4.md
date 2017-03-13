@@ -790,20 +790,6 @@ These are the steps to verify the signature:
 
 #### User Profile Data Type
 
-SIG below refers to the OTR version 3 DSA Signature with the structure:
-
-DSA signature (SIG):
-  (len is the length of the DSA public parameter q, which in current
-  implementations must be 20 bytes)
-  len byte unsigned r, big-endian
-  len byte unsigned s, big-endian
-
-SCHNORR-SIG refers to the OTR version 4 signature:
-
-Schnorr signature (SCHNORR-SIG):
-  (len is the expected length of the signature, which is 112 bytes)
-  len byte unsigned value, big-endian
-
 ```
 User Profile (USER-PROF):
   Cramer-Shoup public key (CRAMER-SHOUP-PUBKEY)
@@ -814,6 +800,24 @@ User Profile (USER-PROF):
 
 Profile Expiration (PROF-EXP):
   8 bytes signed value, big-endian
+```
+
+SIG refers to the `OTR version 3 DSA Signature` with the structure:
+
+```
+DSA signature (SIG):
+  (len is the length of the DSA public parameter q, which in current
+  implementations is 20 bytes)
+  len byte unsigned r, big-endian
+  len byte unsigned s, big-endian
+```
+
+SCHNORR-SIG refers to the `OTR version 4 signature`:
+
+```
+Schnorr signature (SCHNORR-SIG):
+  (len is the expected length of the signature, which is 112 bytes)
+  len byte unsigned value, big-endian
 ```
 
 ### Deniable Authenticated Key Exchange (DAKE)
