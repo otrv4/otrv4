@@ -638,7 +638,7 @@ To create a user profile, assemble:
 1. User's Cramer-Shoup long term public key.
 2. Versions: a string corresponding to the user's supported OTR versions.
    A user profile can advertise multiple OTR versions. The format is described
-   under the section ["Establishing Versions"](#establishing-versions) below.
+   under the section [Establishing Versions](#establishing-versions) below.
 3. Profile Expiration: Expiration date in standard Unix 64-bit format
    (seconds since the midnight starting Jan 1, 1970, UTC, ignoring leap seconds)
 4. Profile Signature: One of the Cramer-Shoup secret key values (`z`) and its
@@ -690,8 +690,9 @@ can be configurable. A recommended value is two weeks.
 
 The user profile signature is based on a variant of Schnorr's signature
 algorithm defined by Mike Hamburg. An overview of how the signature works
-can be found on [[\[3\]](#references) and the
-[implementation function: decaf\_448\_sign\_shake](https://sourceforge.net/p/ed448goldilocks/code/ci/decaf/tree/src/decaf_crypto.c#l117) provides more detail.
+can be found on [\[3\]](#references) and the [implementation function:
+decaf\_448\_sign\_shake](https://sourceforge.net/p/ed448goldilocks/code/ci/decaf/tree/src/decaf_crypto.c#l117)
+provides more detail.
 
 OTRv4 uses the following steps to create a signature:
 
