@@ -56,7 +56,7 @@ works on top of an existing messaging protocol, like XMPP.
 
   1. [ROM DRE](#rom-dre)
   2. [ROM Authentication](#rom-authentication)
-  3. [HashToScalar](#hashToScalar(d))
+  3. [HashToScalar](#hashtoscalar)
   4. [Modify an encrypted data message](#modify-an-encrypted-data-message)
 
 ## Main Changes over Version 3
@@ -2304,9 +2304,9 @@ m is the message to authenticate.
 5. Compute `c = HashToScalar(G1 || q || A1 || A2 || A3 || T1 || T2 || T3 || m)`.
 6. Check if `c ≟ c1 + c2 + c3 (mod q)`.
 
-### HashToScalar(d)
+### HashToScalar
 
-d is an array of bytes.
+This function is `hashToScalar(d)`: d is an array of bytes.
 
 1. Compute `h = SHA3-512(d)` as an unsigned value, big-endian.
 2. Return `h (mod q)`
