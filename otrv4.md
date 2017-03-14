@@ -398,7 +398,26 @@ SHA3-512 hash of the byte-level representation of the public key.
 
 ### TLV Types
 
-OTRv4 supports the same TLV record types from OTRv3.
+OTRv4 supports the same TLV record types from OTRv3, as follows:
+
+Type 0: Padding
+    The value may be an arbitrary amount of data, which should be ignored. This type can be used to disguise the length of the plaintext message.
+Type 1: Disconnected
+    If the user requests to close the private connection, you may send a message (possibly with empty human-readable part) containing a record with this TLV type just before you discard the session keys, and transition to MSGSTATE_PLAINTEXT (see below). If you receive a TLV record of this type, you should transition to FINISHED (see below), and inform the user that his correspondent has closed his end of the private connection, and the user should do the same.
+Type 2: SMP Message 1
+    The value represents an initiating message of the Socialist Millionaires' Protocol, described below.
+Type 3: SMP Message 2
+    The value represents the second message in an instance of SMP.
+Type 4: SMP Message 3
+    The value represents the third message in an instance of SMP.
+Type 5: SMP Message 4
+    The value represents the final message in an instance of SMP.
+Type 6: SMP Abort Message
+    If the user cancels SMP prematurely or encounters an error in the protocol and cannot continue, you may send a message (possibly with empty human-readable part) with this TLV type to instruct the other party's client to abort the protocol. The associated length should be zero and the associated value should be empty. If you receive a TLV of this type, you should change the SMP state to SMP_EXPECT1 (see below).
+Type 7: SMP Message 1Q
+    Like a SMP Message 1, but whose value begins with a NUL-terminated user-specified question.
+Type 8: Extra symmetric key
+    If you wish to use the extra symmetric key, compute it yourself as outlined in the section "Extra symmetric key", below. Then send this type 8 TLV to your buddy to indicate that you'd like to use the extra symmetric key for something. The value of the TLV begins with a 4-byte indication of what this symmetric key will be used for (file transfer, voice encryption, etc.). After that, the contents are use-specific (which file, etc.). There are no currently defined uses. Note that the value of the key itself is not placed into the TLV; your buddy will compute it on his/her own.
 
 ### OTR Error Messages
 
@@ -1440,8 +1459,7 @@ If the tag offers OTR version 4 and version 4 is allowed:
 If the tag offers OTR version 3 and version 3 is allowed:
 
   * Send a version 3 D-H Commit Message.
-  * Proceed with the protocol as specified in OTRv3 "Receiving plaintext with
-    the whitespace tag" [\[7\]](#references).
+  * Transition authstate to `AUTHSTATE_AWAITING_DHKEY`.
 
 #### Receiving a Query Message
 
@@ -1453,13 +1471,47 @@ If the Query Message offers OTR version 4 and version 4 is allowed:
 If the Query message offers OTR version 3 and version 3 is allowed:
 
   * Send a version 3 D-H Commit Message.
-  * Proceed with the protocol as specified in OTRv3 "Receiving a Query Message"
-    [\[7\]](#references).
+  * Transition authstate to `AUTHSTATE_AWAITING_DHKEY`.
 
-#### Receiving OTRv3 Specific Messages
+#### Receiving an OTRv3 specific D-H Commit Message
 
-Whether the message is an AKE message or a Data message, proceed as specified in OTRv3.
-See "The protocol state machine" section [\[7\]](#references).
+If the message is version 3 and ALLOW_V3 is not set, ignore the message. Otherwise:
+
+If authstate is AUTHSTATE_NONE:
+  * Reply with a D-H Key Message, and transition authstate to AUTHSTATE_AWAITING_REVEALSIG.
+If authstate is AUTHSTATE_AWAITING_DHKEY:
+  * This is the trickiest transition in the whole protocol. It indicates that you have already sent a D-H Commit message to your correspondent, but that he either didn't receive it, or just didn't receive it yet, and has sent you one as well. The symmetry will be broken by comparing the hashed gx you sent in your D-H Commit Message with the one you received, considered as 32-byte unsigned big-endian values.
+
+  * If yours is the higher hash value:
+    * Ignore the incoming D-H Commit message, but resend your D-H Commit message.
+  * Otherwise:
+    * Forget your old gx value that you sent (encrypted) earlier, and pretend you're in AUTHSTATE_NONE; i.e. reply with a D-H Key Message, and transition authstate to AUTHSTATE_AWAITING_REVEALSIG.
+
+If authstate is AUTHSTATE_AWAITING_REVEALSIG:
+  * Retransmit your D-H Key Message (the same one as you sent when you entered AUTHSTATE_AWAITING_REVEALSIG). Forget the old D-H Commit message, and use this new one instead. There are a number of reasons this might happen, including:
+
+    * Your correspondent simply started a new AKE.
+    * Your correspondent resent his D-H Commit message, as specified above.
+    * On some networks, like AIM, if your correspondent is logged in multiple times, each of his clients will send a D-H Commit Message in response to a Query Message; resending the same D-H Key Message in response to each of those messages will prevent compounded confusion, since each of his clients will see each of the D-H Key Messages you send. [And the problem gets even worse if you are each logged in multiple times.]
+
+If authstate is AUTHSTATE_AWAITING_SIG or AUTHSTATE_V1_SETUP:
+  * Reply with a new D-H Key message, and transition authstate to AUTHSTATE_AWAITING_REVEALSIG.
+
+#### Receiving an OTRv3 specific D-H Key Message
+
+If the message is version 3 and ALLOW_V3 is not set, ignore this message. Otherwise:
+
+If authstate is AUTHSTATE_AWAITING_DHKEY:
+  * Reply with a Reveal Signature Message and transition authstate to AUTHSTATE_AWAITING_SIG.
+If authstate is AUTHSTATE_AWAITING_SIG:
+
+  * If this D-H Key message is the same the one you received earlier (when you entered AUTHSTATE_AWAITING_SIG):
+    * Retransmit your Reveal Signature Message.
+  * Otherwise:
+    * Ignore the message.
+
+If authstate is AUTHSTATE_NONE, AUTHSTATE_AWAITING_REVEALSIG, or AUTHSTATE_V1_SETUP:
+  * Ignore the message.
 
 #### Receiving an Identity message
 
@@ -1588,45 +1640,63 @@ to send encrypted messages.
 
 #### Receiving an encrypted data message
 
-If the state is not `ENCRYPTED_MESSAGES`:
+If the version is 4:
 
-  * Inform the user that an unreadable encrypted message was received.
-  * Reply with an Error Message with ERROR_1.
+  If the state is not `ENCRYPTED_MESSAGES`:
 
-Otherwise:
+    * Inform the user that an unreadable encrypted message was received.
+    * Reply with an Error Message with ERROR_1.
 
-  * To validate the data message:
-    * Verify the MAC tag.
-    * Check if the message version is allowed.
-    * Verify that the instance tags are consistent with those used in the DAKE.
-    * Verify that the public ECDH key is on curve Ed448.
-    * Verify that the public DH key is from the correct group.
+  Otherwise:
 
-  * If the message is not valid in any of the above steps, discard it and
-    optionally pass along a warning to the user.
+    * To validate the data message:
+      * Verify the MAC tag.
+      * Check if the message version is allowed.
+      * Verify that the instance tags are consistent with those used in the DAKE.
+      * Verify that the public ECDH key is on curve Ed448.
+      * Verify that the public DH key is from the correct group.
 
-  * Use the ratchet id and the message id to compute the corresponding
-    decryption key. Try to decrypt the message.
+    * If the message is not valid in any of the above steps, discard it and
+      optionally pass along a warning to the user.
 
-    * If the message cannot be decrypted and the `IGNORE_UNREADABLE` flag is not
-    set:
-      * Inform the user that an unreadable encrypted message was received.
-      * Reply with an Error Message with ERROR_1.
+    * Use the ratchet id and the message id to compute the corresponding
+      decryption key. Try to decrypt the message.
 
-    * If the message cannot be decrypted and the `IGNORE_UNREADABLE` flag is
-    set:
-      * Ignore it instead of producing an error or a notification to the user.
+      * If the message cannot be decrypted and the `IGNORE_UNREADABLE` flag is not
+      set:
+        * Inform the user that an unreadable encrypted message was received.
+        * Reply with an Error Message with ERROR_1.
 
-    * If the message can be decrypted:
-      * Display the human-readable part (if it contains any) to the user. SMP
-      TLVs should be addressed according to the SMP state machine.
-      * Rotate root, chain and mix keys as appropriate.
-      * If the received message contains a TLV type 1 (Disconnected) [\[7\]](#references)
-        forget all encryption keys for this correspondent and transition the
-        state to `FINISHED`.
+      * If the message cannot be decrypted and the `IGNORE_UNREADABLE` flag is
+      set:
+        * Ignore it instead of producing an error or a notification to the user.
 
-   * If you have not sent a message to this correspondent in some
-     (configurable) time, send a "heartbeat" message.
+      * If the message can be decrypted:
+        * Display the human-readable part (if it contains any) to the user. SMP
+        TLVs should be addressed according to the SMP state machine.
+        * Rotate root, chain and mix keys as appropriate.
+        * If the received message contains a TLV type 1 (Disconnected) [TLV Types](#TLV-Types)
+          forget all encryption keys for this correspondent and transition the
+          state to `FINISHED`.
+
+     * If you have not sent a message to this correspondent in some
+       (configurable) time, send a "heartbeat" message.
+
+If the version is 3:
+
+  If msgstate is ENCRYPTED_MESSAGES:
+
+    * Verify the information (MAC, keyids, ctr value, etc.) in the message.
+    * If the verification succeeds:
+      * Decrypt the message and display the human-readable part (if non-empty) to the user.
+      * Update the D-H encryption keys, if necessary.
+      * If you have not sent a message to this correspondent in some (configurable) time, send a "heartbeat" message, consisting of a Data Message encoding an empty plaintext. The heartbeat message should have the IGNORE_UNREADABLE flag set.
+      * If the received message contains a TLV type 1, forget all encryption keys for this correspondent, and transition msgstate to FINISHED.
+    * Otherwise, inform the user that an unreadable encrypted message was received, and reply with an Error Message.
+
+  If msgstate is PLAINTEXT or FINISHED:
+
+    * Inform the user that an unreadable encrypted message was received, and reply with an Error Message.
 
 #### Receiving an Error Message
 
