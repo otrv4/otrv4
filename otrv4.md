@@ -2045,9 +2045,9 @@ recently received a message from).
 ## Forging Transcripts
 
 OTRv4 strongly encourages that each implementation of this specification exposes
-an interface for producing forged transcripts with the same functions used to
-conduct honest conversations. This section will guide implementers to achieve
-this. The major utilities are:
+an interface to produce forged transcripts with the same functions used for
+honest conversations. This section will guide implementers to achieve this.
+The major utilities are:
 
 ```
 Parse
@@ -2055,84 +2055,93 @@ Parse
   a message. Parse will reuse the message parsing functionality of the spec.
 
 Modify Data Message
-  Even if an encrypted data message cannot be read because we don't
-  know the message key (or a key used to derive this message key), if a good
-  guess can be made that the string `x` appears at a given offset in the message,
-  this method will replace the old text with some new desired text, which
-  must be the same length. For example, if the string "hi" is accurately guessed
-  to be at the beginning of an encrypted message, it can be replaced with "yo"
-  and a cryptographically valid data message can be created with the new text.
+  If an encrypted data message cannot be read because we don't
+  know the message key (or a key used to derive this message key) but it can
+  be guessed that the string `x` appears at a given offset in the message,
+  this method will replace the old text with some new desired text with
+  the same length. For example, if the string "hi" is accurately guessed
+  to be at the beginning of an encrypted message, it can be replaced with the
+  string "yo". In that way, a cryptographically valid data message can be
+  created with the new text.
 
   To achieve this, the XOR of the old text and the new text is XORed
   again with the original encrypted message starting at the given offset.
   After replacing parts of the encrypted message, the MAC tag is recalculated
   with the revealed MAC key associated with this message number. Then the
   new tag is attached to the data message, replacing the old value. A pseudocode
-  [example](#modify-an-encrypted-data-message) is included in the appendix.
+  is included at the appendix.
 
-  Modify Data Message reuses the [MAC tag creation](#when-you-send-a-data-message)
-  functionality of the spec.
+  Modify Data Message reuses the spec function:
+
+    1. MAC tag creation.
 
 Read and Forge
   Read and forge allows someone in possession of a chain key to decrypt OTR
-  messages or modify them as forgeries. It takes three inputs, the chain key,
+  messages or modify them as forgeries. It takes three inputs: the chain key,
   the OTR message and an optional new plain text message. If the new message is
   included, the original text is replaced with the new message, and then a new
   MAC tag, based on the new message is attached to the data message. This new
   message is then displayed.
 
-  Read and Forge reuses the message parser, [decrypt a data
-  message],(#receiving-an-encrypted-data-message) and [MAC tag
-  creation](#when-you-send-a-data-message) functionalities of the spec.
+  Read and Forge reuses the spec functions:
+
+    1. Message parser
+    2. Decryption of a data message
+    3. MAC tag creation.
 
 Forge AKE and Session Keys
   Any participant of an OTR conversation may forge an AKE with another
   participant as long as they have their profile. This function will take the
-  profile and secret long term key of one participant and the profile of another.
-  It will return an AKE transcript between the two parties. The participant's
-  private key is required since it is used to authenticate the key exchange, but
-  the resulting transcript is created in such a way that a cryptographic expert
-  cannot identify which profile owner authenticated the conversation.
+  profile and the secret long term key of one participant and the profile of
+  another.
+  It will then return an AKE transcript between the two parties. The
+  participant's private key is required since it is used to authenticate the key
+  exchange, but the resulting transcript is created in such a way that a
+  cryptographic expert cannot identify which profile owner authenticated the
+  conversation.
 
   This forging utility reuses the spec functions:
-    1. [Create a Identity message](#identity-message)
-    2. [Create a DRE-Auth message](#dre-auth-message)
+
+    1. Create a Identity message
+    2. Create a DRE-Auth message
 
 Show MAC Key
   This function takes a chain key and a message key number and shows the mac key
   associated with those two values. For example, if the message key number is 3,
-  the message key is ratcheted 3 times, and the third mac key is returned. Show
-  MAC key may be used with the ReMAC message in the case where a chain key has
+  the message key is ratcheted 3 times, and the third mac key is returned. 'Show
+  MAC key' may be used with the ReMAC message in the case where a chain key has
   been compromised by an attacker, and the attacker wishes to forge messages.
   Functionalities around deriving the MAC keys may be used to implement this
   function.
 
 ReMAC Message
-  ReMAC Message will create a new OTRv4 Data Message from the input: new MAC key,
-  sender instance tag, receiver instance tag, flags, ratchet id, message id, public
-  ECDH Key, public DH key, nonce, encrypted message, and revealed MAC keys. This
-  method will use the input to create a new Data Message and create a new authenticator
-  for this message with the new MAC key provided. An attacker may use this function
-  to forge messages with a compromised MAC key. Functionalities around creating MAC
-  tags may be reused to employ this function.
+  ReMAC Message will create a new OTRv4 Data Message from the input: new MAC
+  key, sender instance tag, receiver instance tag, flags, ratchet id, message
+  id, public ECDH Key, public DH key, nonce, encrypted message, and revealed MAC
+  keys. This function will use the input to create a new Data Message and create
+  a new authenticator for this message with the new MAC key provided. An
+  attacker may use this function to forge messages with a compromised MAC key.
+  Functionalities around creating MAC tags may be reused to implement this
+  function.
 
 Forge Entire Transcript
   The Forge Entire Transcript function will allow one participant to completely
   forge a transcript between them and another person in a way that its forgery
-  cannot be cryptographically proven. The input will be one participant's
+  cannot be cryptographically proven. The input will be: one participant's
   profile, their secret key, another person's profile, and a list of plain text
   messages corresponding to what messages were exchanged. Each message in the
   list will have the structure: 1) sender 2) plain text message, so that the
-  function may precisely create the desired transcript. The participant's private
-  key is required since it is used to authenticate the key exchange, but the
-  resulting transcript is created in such a way that a cryptographic expert
+  function may precisely create the desired transcript. The participant's
+  private key is required since it is used to authenticate the key exchange, but
+  the resulting transcript is created in such a way that a cryptographic expert
   cannot identify which profile owner authenticated the conversation.
 
   This forging utility reuses the spec functions:
-    1. [Create an Identity message](#identity-message)
-    2. [Create a DRE-Auth message](#dre-auth-message)
-    3. [Create an encrypted data message](#data-exchange)
-    4. [The protocol state machine](#the-protocol-state-machine)
+
+    1. Create an Identity message
+    2. Create a DRE-Auth message
+    3. Create an encrypted data message
+    4. The protocol state machine
 ```
 
 ## Appendices
