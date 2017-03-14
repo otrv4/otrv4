@@ -21,8 +21,7 @@ works on top of an existing messaging protocol, like XMPP.
     4. [Renewing a Profile](#renewing-a-profile)
     5. [Creating a User Profile Signature](#creating-a-user-profile-signature)
     6. [Verify a User Profile Signature](#verify-a-user-profile-signature)
-    7. [User Profile Signature](#user-profile-signature)
-    8. [User Profile Data Type](#user-profile-data-type)
+    7. [User Profile Data Type](#user-profile-data-type)
   3. [Deniable Authenticated Key Exchange (DAKE)](#deniable-authenticated-key-exchange-dake)
     1. [DAKE Overview](#dake-overview)
     2. [Identity message](#identity-message)
@@ -38,7 +37,7 @@ works on top of an existing messaging protocol, like XMPP.
     1. [Query Messages](#query-messages)
     2. [Whitespace Tags](#whitespace-tags)
   4. [Receiving plaintext without the whitespace tag](#receiving-plaintext-without-the-whitespace-tag)
-  5. [Receiving plaintext with the whitespace tag](#receiving-plaintext-without-the-whitespace-tag)
+  5. [Receiving plaintext with the whitespace tag](#receiving-plaintext-with-the-whitespace-tag)
   6. [Receiving a Query Message](#receiving-a-query-message)
   7. [Receiving OTRv3 Specific Messages](#receiving-otrv3-specific-messages)
   8. [Receiving an Identity Message](#receiving-an-identity-message)
@@ -57,7 +56,7 @@ works on top of an existing messaging protocol, like XMPP.
 
   1. [ROM DRE](#rom-dre)
   2. [ROM Authentication](#rom-authentication)
-  3. [HashToScalar](#hashToScalar)
+  3. [HashToScalar](#hashToScalar(d))
   4. [Modify an encrypted data message](#modify-an-encrypted-data-message)
 
 ## Main Changes over Version 3
@@ -691,8 +690,8 @@ can be configurable. A recommended value is two weeks.
 
 The user profile signature is based on a variant of Schnorr's signature
 algorithm defined by Mike Hamburg. An overview of how the signature works
-can be found on [_Ed448-Goldilocks,a new elliptic curve_](#references) and an
-[implementation function decaf\_448\_sign\_shake](https://sourceforge.net/p/ed448goldilocks/code/ci/decaf/tree/src/decaf_crypto.c#l117) provides more detail.
+can be found on [[\[3\]](#references) and the
+[implementation function: decaf\_448\_sign\_shake](https://sourceforge.net/p/ed448goldilocks/code/ci/decaf/tree/src/decaf_crypto.c#l117) provides more detail.
 
 OTRv4 uses the following steps to create a signature:
 
@@ -728,10 +727,11 @@ OTRv4 uses the following steps to create a signature:
    challenge = decode(output) % q
    ```
 
-4. Scalar multiply the challenge with the secret key. The `secret_key` is the [`z`
-   value](#dual-receiver-key-generation-drgen) of the Cramer-Shoup private key.
-   Derive the final nonce by scalar subtracting the product of the multiplication
-   from the intermediary nonce.
+4. Scalar multiply the challenge with the secret key. The `secret_key` is the
+   [`z`](#dual-receiver-key-generation-drgen) value of the Cramer-Shoup private
+   key.
+   Derive the final nonce by scalar subtracting the product of the
+   multiplication from the intermediary nonce.
 
    ```
    nonce = intermediary_nonce - challenge * secret_key
@@ -743,8 +743,8 @@ OTRv4 uses the following steps to create a signature:
 
 #### Verify a User Profile Signature
 
-An overview of how to verify this signature can be found on [implementation function
-decaf\_448\_verify\_shake](https://sourceforge.net/p/ed448goldilocks/code/ci/decaf/tree/src/decaf_crypto.c#l163).
+An overview of how to verify this signature can be found on the [implementation
+function: decaf\_448\_verify\_shake](https://sourceforge.net/p/ed448goldilocks/code/ci/decaf/tree/src/decaf_crypto.c#l163).
 
    ```
    valid = verify(signature, message, public_key)
@@ -753,7 +753,7 @@ These are the steps to verify the signature:
 
 2. Derive a challenge by using a SHAKE-256 of the message, a public key, and
    the temporary signature (the first 56 bytes of the signature). The public key
-   is the [`h` value](#dual-receiver-key-generation-drgen) of the Cramer-Shoup
+   is the [`h`](#dual-receiver-key-generation-drgen) value of the Cramer-Shoup
    long term public key in the profile. Decode this value into a scalar and
    reduce it mod the order of the base point [q](#elliptic-curve-parameters).
 
@@ -1474,7 +1474,7 @@ If the state is `START`:
         ignore the message
       * Else, pick the highest compatible version and follow the OTR
         specification for this version. Version prioritization is detailed
-        [here](#version-prioritizing).
+        [here](#version-priority).
     * If the highest compatible version is OTR version 4
       * Verify that the point `Y` received is on curve Ed448.
       * Verify that the DH public key `B` is from the correct group and not degenerate.
@@ -1506,7 +1506,7 @@ To agree on an Identity message to use for this conversation:
           ignore the message
         * Else, pick the highest compatible version and follow the OTR
           specification for this version. Version prioritization is detailed
-          [here](#version-prioritizing).
+          [here](#version-priority).
     * If the highest compatible version is OTR version 4
       * Verify that the point `Y` received is on curve Ed448.
       * Verify that the DH public key `B` is from the correct group.
@@ -1526,7 +1526,7 @@ If the state is `ENCRYPTED_MESSAGES`:
         ignore the message
       * Else, pick the highest compatible version and follow the OTR
         specification for this version. Version prioritization is detailed
-        [here](#version-prioritizing).
+        [here](#version-priority).
     * If the highest compatible version is OTR version 4
       * Verify that the point `Y` received is on curve Ed448.
       * Verify that the DH public key `B` is from the correct group.
@@ -1643,7 +1643,8 @@ TLV type 1. Transition to the `START` state.
 
 If a TLV type 1 is received in the `START` state, stay in that state, else
 transition to the START state and [reset the state variables and key
-variables](#resetting-state-and-key-variables).
+variables](#resetting-state-variables-and-key-variables). Resetting state
+variables and key variables
 
 ## Socialist Millionaires Protocol (SMP)
 
@@ -1661,7 +1662,7 @@ should be 64 bytes in size.
 
 Lastly, OTRv4 uses Ed448 as the cryptographic primitive. This changes the way
 values are serialized and how they are computed. To define the SMP values
-under Ed448, we reuse the previously defined G1 generator for Cramer-Shoup:
+under Ed448, we reuse the previously defined generator `G1` for Cramer-Shoup:
 
 ```
 G1 = (11781216126343694673728248434331006466518053535701637341687908214793940427
