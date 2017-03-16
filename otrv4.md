@@ -61,8 +61,9 @@ works on top of an existing messaging protocol, like XMPP.
   2. [ROM Authentication](#rom-authentication)
   3. [HashToScalar](#hashtoscalar)
   4. [Modify an encrypted data message](#modify-an-encrypted-data-message)
-  5. [Extra Symmetric Key](#extra-symmetric-key)
+  5. [OTRv3 or less Specific Encoded Messages](otrv3-or-less-specific-encoded-messages)
   6. [OTRv3 or less Protocol State Machine](#otrv3-or-less-protocol-state-machine)
+  7. [Extra Symmetric Key](#extra-symmetric-key)
 
 ## Main Changes over Version 3
 
