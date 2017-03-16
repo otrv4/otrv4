@@ -349,7 +349,7 @@ Given s, compute:
 9. Compute `T = w * X`
 10. Construct the point `P` as `P = (X : Y : Z : T)`
 
-### Serializing Dual Receives Encryption Messages and Auth Messages
+### Serializing Dual Receiver Encryption Messages and Auth Messages
 
 A dual-receiver encrypted (DRE) message is serialized as follows:
 
@@ -1524,7 +1524,8 @@ If the Query message offers OTR version 3 and version 3 is allowed:
 #### Receiving an OTRv3 specific D-H Commit Message
 
 Note that the states, messages and keys referred here are specific of OTRv3
-Protocol.
+Protocol. For their definition, refer to
+[Appendix](#otrv3-or-less-specific-encoded-Messages)
 
 If the message is version 3 and version 3 is not allowed, ignore the message.
 Otherwise:
@@ -1571,7 +1572,8 @@ If authstate is `AUTHSTATE_AWAITING_SIG` or `AUTHSTATE_V1_SETUP`:
 #### Receiving an OTRv3 specific D-H Key Message
 
 Note that the states, messages and keys referred here are specific of OTRv3
-Protocol.
+Protocol. For their definition, refer to
+[Appendix](#otrv3-or-less-specific-encoded-Messages)
 
 If the message is version 3 and version 3 is not allowed, ignore this message.
 Otherwise:
@@ -2518,27 +2520,43 @@ message. Thus, its offset is 0. The forger wants to replace "hi" with "yo".
   new_data_message = replace(old_data_message, new_encrypted_message, new_mac_tag)
 
   ```
-### Extra Symmetric Key
+### OTRv3 or less Specific Encoded Messages
 
-OTRv3 defines an additional symmetric key that can be derived by the
-communicating parties to use for application-specific purposes, such as file
-transfer, voice encryption, etc. When one party wishes to use the extra
-symmetric key, it is created as `type 8 TLV` and attached to a Data Message as
-previously stated. The key itself is derived using the same "secbytes" used
-to compute the encryption and MAC keys of the Data Message of OTRv3:
+#### D-H Commit Message
 
-```
-  Write the value of OTRv3 shared secret (`s`) as a minimum-length MPI (4-byte
-  big-endian len, len-byte big-endian value).
-```
+This is the first message of OTRv3 AKE. Bob sends it to Alice to commit to a
+choice of D-H encryption key (but the key itself is not yet revealed). This
+allows the secure session id to be much shorter than in OTRv1, while still
+preventing a man-in-the-middle attack on it.
 
-The extra symmetric key is derived by calculating:
+It consists of: the protocol version, the message type, the sender's instance
+tag, the receiver's instance tag, the encrypted sender's private key and the
+hashed sender's private key.
 
-  `extra_sym_key = SHA256(0xFF | k)`
+#### D-H Key Message
 
-Upon receipt of the Data Message containing the `type 8 TLV`, the recipient will
-compute the extra symmetric key in the same way. Note that the value of the
-extra symmetric key is not contained in the TLV itself.
+This is the second message of OTRv3 AKE. Alice sends it to Bob.
+
+It consists of: the protocol version, the message type, the sender's instance
+tag, the receiver's instance tag, the revealed key, the encrypted signature and
+and the MAC of the signature.
+
+#### Signature Message
+
+This is the final message of the OTRv3 AKE. Alice sends it to Bob,
+authenticating herself and the channel parameters to him.
+
+It consists of: the protocol version, the message type, the sender's instance
+tag, the receiver's instance tag, the encrypted signature and the MAC of the
+signature.
+
+
+#### Reveal Signature Message
+
+This is the third message of OTRv3 AKE. Bob sends it to Alice, revealing his D-H
+encryption key (and thus opening an encrypted channel), and also authenticating
+himself (and the parameters of the channel, preventing a man-in-the-middle
+attack on the channel itself) to Alice.
 
 ### OTRv3 or less Protocol State Machine
 
@@ -2606,6 +2624,28 @@ AUTHSTATE_V1_SETUP
   verifications succeed, the authstate variable is transitioned to
   'AUTHSTATE_NONE'.
 ```
+
+### Extra Symmetric Key
+
+OTRv3 defines an additional symmetric key that can be derived by the
+communicating parties to use for application-specific purposes, such as file
+transfer, voice encryption, etc. When one party wishes to use the extra
+symmetric key, it is created as `type 8 TLV` and attached to a Data Message as
+previously stated. The key itself is derived using the same "secbytes" used
+to compute the encryption and MAC keys of the Data Message of OTRv3:
+
+```
+  Write the value of OTRv3 shared secret (`s`) as a minimum-length MPI (4-byte
+  big-endian len, len-byte big-endian value).
+```
+
+The extra symmetric key is derived by calculating:
+
+  `extra_sym_key = SHA256(0xFF | k)`
+
+Upon receipt of the Data Message containing the `type 8 TLV`, the recipient will
+compute the extra symmetric key in the same way. Note that the value of the
+extra symmetric key is not contained in the TLV itself.
 
 ### References
 
