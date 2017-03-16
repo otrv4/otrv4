@@ -2558,6 +2558,10 @@ encryption key (and thus opening an encrypted channel), and also authenticating
 himself (and the parameters of the channel, preventing a man-in-the-middle
 attack on the channel itself) to Alice.
 
+It consists of: the protocol version, the message type, the sender's instance
+tag, the receiver's instance tag, the encrypted signature and the MAC of the
+signature.
+
 ### OTRv3 or less Protocol State Machine
 
 OTRv3 defines two main state variables:
