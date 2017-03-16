@@ -398,26 +398,60 @@ SHA3-512 hash of the byte-level representation of the public key.
 
 ### TLV Types
 
-OTRv4 supports the same TLV record types from OTRv3, as follows:
+OTRv4 supports the majority of the TLV record types from OTRv3. The ones not
+supported state so. They are:
 
+```
 Type 0: Padding
-    The value may be an arbitrary amount of data, which should be ignored. This type can be used to disguise the length of the plaintext message.
+    The value may be an arbitrary amount of data. This data should be ignored.
+    This type can be used to disguise the length of a plaintext message.
+
 Type 1: Disconnected
-    If the user requests to close the private connection, you may send a message (possibly with empty human-readable part) containing a record with this TLV type just before you discard the session keys, and transition to MSGSTATE_PLAINTEXT (see below). If you receive a TLV record of this type, you should transition to FINISHED (see below), and inform the user that his correspondent has closed his end of the private connection, and the user should do the same.
+    If the user requests to close its private connection, you may send a message
+    (possibly with an empty human-readable part) containing a record with this
+    TLV type just before you discard the session keys. You should then
+    transition to 'MSGSTATE_PLAINTEXT' (see below).
+    If you receive a TLV record of this type, you should transition to 'FINISHED'
+    (see below), and inform the user that its correspondent has closed its end
+    of the private connection. This user close it as well.
+
 Type 2: SMP Message 1
-    The value represents an initiating message of the Socialist Millionaires' Protocol, described below.
+    The value represents the initial message of the Socialist Millionaires'
+    Protocol (SMP), described below.
+
 Type 3: SMP Message 2
-    The value represents the second message in an instance of SMP.
+    The value represents the second message in an instance of the SMP.
+
 Type 4: SMP Message 3
-    The value represents the third message in an instance of SMP.
+    The value represents the third message in an instance of the SMP.
+
 Type 5: SMP Message 4
-    The value represents the final message in an instance of SMP.
+    The value represents the final message in an instance of the SMP.
+
 Type 6: SMP Abort Message
-    If the user cancels SMP prematurely or encounters an error in the protocol and cannot continue, you may send a message (possibly with empty human-readable part) with this TLV type to instruct the other party's client to abort the protocol. The associated length should be zero and the associated value should be empty. If you receive a TLV of this type, you should change the SMP state to SMP_EXPECT1 (see below).
+    If the user cancels the SMP prematurely or encounters an error in the
+    protocol and cannot continue, you may send a message (possibly with an empty
+    human-readable part) with this TLV type to instruct the other party's client
+    to abort the protocol. The associated length should be zero and the
+    associated value should be empty. If you receive a TLV of this type,
+    you should change the SMP state to 'SMP_EXPECT1' (see below).
+
 Type 7: SMP Message 1Q
-    Like a SMP Message 1, but whose value begins with a NUL-terminated user-specified question.
+    Not supported by OTRv4.
+    Like a SMP Message 1, but its value begins with a NUL-terminated
+    user-specified question.
+
 Type 8: Extra symmetric key
-    If you wish to use the extra symmetric key, compute it yourself as outlined in the section "Extra symmetric key", below. Then send this type 8 TLV to your buddy to indicate that you'd like to use the extra symmetric key for something. The value of the TLV begins with a 4-byte indication of what this symmetric key will be used for (file transfer, voice encryption, etc.). After that, the contents are use-specific (which file, etc.). There are no currently defined uses. Note that the value of the key itself is not placed into the TLV; your buddy will compute it on his/her own.
+    Not supported by OTRv4.
+    If you wish to use the extra symmetric key, compute it as outlined in the
+    section "Extra symmetric key", below. Then, send this 'type 8 TLV' to your
+    peer to indicate that you'd like to use it. The value of the TLV begins with
+    a 4-byte indication of what this symmetric key will be used for
+    (file transfer, voice encryption, etc). After that, the contents are
+    use-specific (which file, etc): there are no predefined uses.
+    Note that the value of the key itself is not placed into the TLV; your peer
+    will compute it on its own.
+```
 
 ### OTR Error Messages
 
