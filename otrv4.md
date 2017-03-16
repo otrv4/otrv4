@@ -58,6 +58,7 @@ works on top of an existing messaging protocol, like XMPP.
   2. [ROM Authentication](#rom-authentication)
   3. [HashToScalar](#hashtoscalar)
   4. [Modify an encrypted data message](#modify-an-encrypted-data-message)
+  5. [Extra Symmetric Key](#extra-symmetric-key)
 
 ## Main Changes over Version 3
 
@@ -443,6 +444,7 @@ Type 7: SMP Message 1Q
 
 Type 8: Extra symmetric key
     Only used by OTRv3, and not in OTRv4.
+    Refer to appendix for explanation.
     If you wish to use the extra symmetric key, compute it as outlined in the
     section "Extra symmetric key", below. Then, send this 'type 8 TLV' to your
     peer to indicate that you'd like to use it. The value of the TLV begins with
@@ -2506,6 +2508,27 @@ message. Thus, its offset is 0. The forger wants to replace "hi" with "yo".
   new_data_message = replace(old_data_message, new_encrypted_message, new_mac_tag)
 
   ```
+### Extra Symmetric Key
+
+OTRv3 defines an additional symmetric key that can be derived by the
+communicating parties to use for application-specific purposes, such as file
+transfer, voice encryption, etc. When one party wishes to use the extra
+symmetric key, it is created as `type 8 TLV` and attached to a Data Message as
+previously stated. The key itself is derived using the same "secbytes" used
+to compute the encryption and MAC keys of the Data Message of OTRv3:
+
+```
+  Write the value of OTRv3 shared secret (`s`) as a minimum-length MPI (4-byte
+  big-endian len, len-byte big-endian value).
+```
+
+The extra symmetric key is derived by calculating:
+
+  `extra_sym_key = SHA256(0xFF | k)`
+
+Upon receipt of the Data Message containing the `type 8 TLV`, the recipient will
+compute the extra symmetric key in the same way. Note that the value of the
+extra symmetric key is not contained in the TLV itself.
 
 ### References
 
