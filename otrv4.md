@@ -12,6 +12,9 @@ works on top of an existing messaging protocol, like XMPP.
 4. [Security Properties](#security-properties)
 5. [Notation and parameters](#notation-and-parameters)
 6. [Data Types](#data-types)
+   1. [Encoding Ed448 Points](#encoding-ed448-points)
+   2. [Decoding Ed448 Points](#decoding-ed448-points)
+   3. [Serializing Dual Receiver Encryption Messages and Auth Messages](#serializing-dual-receiver-encryption-messages-and-auth-messages)
 7. [Conversation Initialization](#conversation-initialization)
    1. [Requesting conversation with older OTR versions](#requesting-conversation-with-older-otr-versions)
    2. [User Profile](#user-profile)
@@ -81,14 +84,17 @@ works on top of an existing messaging protocol, like XMPP.
 Alice                                            Bob
 --------------------------------------------------------------------------------
 Requests OTR conversation           ------------->
-Establishes Conversation with DAKE  <------------>  Establishes Conversation with DAKE
+
+Establishes Conversation with       <------------>  Establishes Conversation with
+Deniable Authenticated Key Exchange                 Deniable Authenticated Key Exchange
+
 Exchanges Data Messages             <------------>  Exchanges Data Messages
 ```
 
 An OTRv4 conversation can begin after one participant requests a conversation.
 This includes an advertisement of which versions they support. If the other
-participant supports one of these versions, a deniable, authenticated key
-exchange (DAKE) is used to establish a secure channel. Encrypted messages are
+participant supports OTRv4 as the highest compatible version, a deniable, authenticated
+key exchange (DAKE) is used to establish a secure channel. Encrypted messages are
 then exchanged in this secure channel with forward secrecy.
 
 ## Assumptions
@@ -98,7 +104,7 @@ Both participants are online at the start of a conversation.
 Messages in a conversation can be exchanged over an insecure channel, where an
 attacker can eavesdrop or interfere with the encrypted messages.
 
-The network model provides in-order delivery of messages, but some messages
+The network model provides in-order delivery of messages, and some messages
 may not be delivered.
 
 OTRv4 does not protect against an active attacker performing Denial of Service
@@ -115,7 +121,7 @@ adversaries. The only exception is the usage of a "mix key" to provide
 some post-conversation transcript protection against potential weaknesses with
 elliptic curves and the early arrival of quantum computers.
 
-In the DAKE, although access to one of the participant's private keys is
+In the DAKE, although access to one participant's private long term key is
 required for authentication, both participants can deny having used their
 private long term keys in this process. An external cryptographic expert will
 be able to prove that one person between the two used their long term private
@@ -125,12 +131,12 @@ used.
 Once an OTRv4 channel has been created with the DAKE, all data messages
 transmitted through this channel are confidential and their integrity to the
 participants is protected. In addition, the MAC keys used to validate
-each message are revealed. This allows for forgeability of the data messages
-and consequent deniability of their contents.
+each message are revealed afterwards. This allows for forgeability of the data
+messages and consequent deniability of their contents.
 
-If key material for a particular data message is compromised, previous messages
-are protected. Future messages are protected by the Diffie-Hellman and Elliptic
-Curve Diffie-Hellman ratchets.
+If key material used to encrypt a particular data message is compromised, previous
+messages are protected. In addition, future messages are protected by the Diffie-
+Hellman and Elliptic Curve Diffie-Hellman ratchets.
 
 ## Notation and parameters
 
@@ -232,7 +238,7 @@ Generator (g3)
 Cofactor (dh_c)
   2
 
-Order of dh_p (dh_q; prime; dh_q = (dh_p - 1) / 2):
+Order of dh_p (dh_q; prime; = (dh_p - 1) / 2):
   2^3071 - 2^3007 - 1 + 2^63 * (integer_part_of(2^2942 * π) + 1690314)
 
 Hexadecimal value of dh_q:
@@ -300,19 +306,20 @@ defined on Appendix A.1 (Encoding) and A.2 (Decoding) in Mike Hamburg's Decaf
 paper [\[6\]](#references). These functions work as follows:
 
 
-#### Encode
+### Encoding Ed448 Points
 
 Using the Jacobi quartic, a point `P` can by encoded by the s-coordinate of the
 coset representative `(s, t)`, where `s` is non-negative and finite, and `t /s`
 is non-negative or infinite.
 
-It is wished to compute `s` as
-`(1 ± sqrt(1 - (a * x)^2)) / a * x` and `t / s` as
-`∓ 2 * sqrt(1 - (a * x) ^ 2) / x * y`.
-Note that from the curve equation, is known that:
+We wish to compute `s` as `(1 ± sqrt(1 - (a * x)^2)) / a * x` and
+`t / s` as `∓ 2 * sqrt(1 - (a * x) ^ 2) / x * y`.
+
+Note that from the curve equation, it is known that:
 `(1 - ax^2) * (1 - y^2) = 1 + (a * x)^2 * y^2 - (y^2 + (a * x)^2) = (a - d) * x^2 * y^2`,
-so that `sqrt(1 - (a * x^2)) / x * y = ± sqrt((a - d) / (1 - y^2))`. In extended
-homogenous coordinates:
+so that `sqrt(1 - (a * x^2)) / x * y = ± sqrt((a - d) / (1 - y^2))`.
+
+In extended homogenous coordinates:
 `1/x^2 = (a - (d * y)^2) / 1 - y^2) = ((a * Z)^2 - (d * Y)^2) / (Z^2 - Y^2)`,
 so that `1/x = ((a * Z * X) - (d * Y * T))/ (Z^2 - Y^2)`
 
@@ -321,7 +328,7 @@ so that `1/x = ((a * Z * X) - (d * Y * T))/ (Z^2 - Y^2)`
 3. Compute `r = -r` if `-2 * u * Z` is negative
 4. Compute `s = | u * (r * ((a * Z * X) - (d * Y * T)) + Y) / a|`
 
-#### Decode
+### Decoding Ed448 Points
 
 Given s, compute:
 `(x, y) = (2 * s / (1 + (a * s)^2),
@@ -339,11 +346,11 @@ Given s, compute:
 7. Compute `w = w + 1` if `s = 0`
 8. Compute `Y = w * Z`
 9. Compute `T = w * X`
-10. Compute `P = (X : Y : Z : T)`
+10. Construct the point `P` as `P = (X : Y : Z : T)`
 
-### DRE messages and Auth
+### Serializing Dual Receives Encryption Messages and Auth Messages
 
-A dual-receiver encrypted message is serialized as follows:
+A dual-receiver encrypted (DRE) message is serialized as follows:
 
 ```
 Dual-receiver encrypted message (DRE-M):
