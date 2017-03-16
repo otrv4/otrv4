@@ -115,7 +115,7 @@ elliptic curves and the early arrival of quantum computers.
 
 In the DAKE, although access to one of the participant's private keys is
 required for authentication, both participants can deny having used their
-private, long term keys in this process. An external cryptographic expert will
+private long term keys in this process. An external cryptographic expert will
 be able to prove that one person between the two used their long term private
 key for the authentication, but they will not be able to identify whose key was
 used.
@@ -254,7 +254,7 @@ Hexadecimal value of dh_q:
 ```
 
 Note that this means that whenever you see an operation on a field element
-from the above group, the operation should be done modulo the above prime.
+from the above group, the operation should be done modulo the prime `dh_p`.
 
 ## Data Types
 
@@ -509,8 +509,10 @@ Key variables:
 The previously mentioned state variables are incremented and the key variable
 values are replaced by these events:
 
-* When you start a new [DAKE](#dake-overview) by sending or receiving an [Identity message](#identity-message).
-* Upon completing the DAKE by sending or receiving a [DRE-Auth Message](#dre-auth-message).
+* When you start a new [DAKE](#dake-overview) by sending or receiving an
+  [Identity message](#identity-message).
+* Upon completing the [DAKE](#dake-overview) by sending or receiving a
+  [DRE-Auth Message](#dre-auth-message).
 * [When you send and receive a Data Message](#data-exchange)
 * [When you receive a TLV type 1 (Disconnect)](#receiving-a-tlv-type-1-disconnect-message)
 
@@ -645,14 +647,14 @@ derive_enc_mac_keys(chain_key):
 
 ### Resetting state variables and key variables
 
-The state variables are set to 0 and the key variables are set to NIL for
+The state variables are set to `0` and the key variables are set to `NIL` for
 this channel.
 
 ## Conversation Initialization
 
 OTRv4 will initialize through a [Query Message or a Whitespace
 Tag](#user-requests-to-start-an-otr-conversation). After this, the conversation
-is authenticated using DAKE.
+is authenticated using the DAKE.
 
 ### Requesting conversation with older OTR versions
 
@@ -973,7 +975,7 @@ choice of DH and ECDH key. A valid Identity message is generated as follows:
 
 1. Create a user profile, as detailed [here](#creating-a-user-profile).
 2. Generate an ephemeral ECDH key pair:
-  * secret key `y`.
+  * secret key `y` (56 bytes).
   * public key `Y`.
 3. Generate an ephemeral DH key pair:
   * secret key `b` (80 bytes).
@@ -1014,7 +1016,7 @@ A valid DRE-Auth message is generated as follows:
 
 1. Create a user profile, as detailed [here](#creating-a-user-profile)
 2. Generate an ephemeral ECDH key pair:
-  * secret key `x`.
+  * secret key `x` (56 bytes).
   * public key `X`
 3. Generate an ephemeral DH key pair:
   * secret key `a` (80 bytes).
@@ -1173,7 +1175,7 @@ Authenticator (MAC)
   from the protocol version to the end of the encrypted message.
 
 Old MAC keys to be revealed (DATA)
-  See Revealing MAC Keys section
+  See 'Revealing MAC Keys section'.
 ```
 
 #### When you send a Data Message:
@@ -1492,7 +1494,7 @@ If the tag offers OTR version 4 and version 4 is allowed:
 
 If the tag offers OTR version 3 and version 3 is allowed:
 
-  * Send a version 3 D-H Commit Message.
+  * Send a version `3 D-H Commit Message`.
   * Transition authstate to `AUTHSTATE_AWAITING_DHKEY`.
 
 #### Receiving a Query Message
@@ -1504,47 +1506,79 @@ If the Query Message offers OTR version 4 and version 4 is allowed:
 
 If the Query message offers OTR version 3 and version 3 is allowed:
 
-  * Send a version 3 D-H Commit Message.
+  * Send a version `3 D-H Commit Message`.
   * Transition authstate to `AUTHSTATE_AWAITING_DHKEY`.
 
 #### Receiving an OTRv3 specific D-H Commit Message
 
-If the message is version 3 and ALLOW_V3 is not set, ignore the message. Otherwise:
+Note that the states, messages and keys referred here are specific of OTRv3
+Protocol.
 
-If authstate is AUTHSTATE_NONE:
-  * Reply with a D-H Key Message, and transition authstate to AUTHSTATE_AWAITING_REVEALSIG.
-If authstate is AUTHSTATE_AWAITING_DHKEY:
-  * This is the trickiest transition in the whole protocol. It indicates that you have already sent a D-H Commit message to your correspondent, but that he either didn't receive it, or just didn't receive it yet, and has sent you one as well. The symmetry will be broken by comparing the hashed gx you sent in your D-H Commit Message with the one you received, considered as 32-byte unsigned big-endian values.
+If the message is version 3 and version 3 is not allowed, ignore the message.
+Otherwise:
+
+If authstate is `AUTHSTATE_NONE`:
+
+  * Reply with a `D-H Key Message`, and transition authstate to
+    `AUTHSTATE_AWAITING_REVEALSIG`.
+
+If authstate is `AUTHSTATE_AWAITING_DHKEY`:
+  * This indicates that you have already sent a `D-H Commit message` to your
+    peer, but that it either didn't receive it, or just didn't receive it yet
+    and has sent you one as well. The symmetry will be broken by comparing the
+    hashed `gx` you sent in your `D-H Commit Message` with the one you received,
+    considered as 32-byte unsigned big-endian values.
 
   * If yours is the higher hash value:
-    * Ignore the incoming D-H Commit message, but resend your D-H Commit message.
-  * Otherwise:
-    * Forget your old gx value that you sent (encrypted) earlier, and pretend you're in AUTHSTATE_NONE; i.e. reply with a D-H Key Message, and transition authstate to AUTHSTATE_AWAITING_REVEALSIG.
+    * Ignore the incoming `D-H Commit message`, but resend your
+      `D-H Commit message`.
 
-If authstate is AUTHSTATE_AWAITING_REVEALSIG:
-  * Retransmit your D-H Key Message (the same one as you sent when you entered AUTHSTATE_AWAITING_REVEALSIG). Forget the old D-H Commit message, and use this new one instead. There are a number of reasons this might happen, including:
+  * Otherwise:
+    * Forget the old encrypted `gx` value that you sent earlier, and pretend
+      you're in `AUTHSTATE_NONE`. For example, reply with a `D-H Key Message`,
+      and transition `authstate` to `AUTHSTATE_AWAITING_REVEALSIG`.
+
+If authstate is `AUTHSTATE_AWAITING_REVEALSIG`:
+  * Retransmit your `D-H Key Message` (the same one you sent when you entered
+    `AUTHSTATE_AWAITING_REVEALSIG`). Forget the old `D-H Commit message` and
+    use this new one instead.
+    There are a number of reasons this might happen, including:
 
     * Your correspondent simply started a new AKE.
-    * Your correspondent resent his D-H Commit message, as specified above.
-    * On some networks, like AIM, if your correspondent is logged in multiple times, each of his clients will send a D-H Commit Message in response to a Query Message; resending the same D-H Key Message in response to each of those messages will prevent compounded confusion, since each of his clients will see each of the D-H Key Messages you send. [And the problem gets even worse if you are each logged in multiple times.]
+    * Your correspondent resent his `D-H Commit message`, as specified above.
+    * On some networks, like AIM, if your correspondent is logged in multiple
+      times, each of his clients will send a `D-H Commit Message` in response
+      to a Query Message. Resending the same `D-H Key Message` in response to
+      each of those messages will prevent confusion, since each of the clients
+      will see each of the `D-H Key Messages` sent.
 
-If authstate is AUTHSTATE_AWAITING_SIG or AUTHSTATE_V1_SETUP:
-  * Reply with a new D-H Key message, and transition authstate to AUTHSTATE_AWAITING_REVEALSIG.
+If authstate is `AUTHSTATE_AWAITING_SIG` or `AUTHSTATE_V1_SETUP`:
+  * Reply with a new `D-H Key message` and transition authstate to
+    `AUTHSTATE_AWAITING_REVEALSIG`.
 
 #### Receiving an OTRv3 specific D-H Key Message
 
-If the message is version 3 and ALLOW_V3 is not set, ignore this message. Otherwise:
+Note that the states, messages and keys referred here are specific of OTRv3
+Protocol.
 
-If authstate is AUTHSTATE_AWAITING_DHKEY:
-  * Reply with a Reveal Signature Message and transition authstate to AUTHSTATE_AWAITING_SIG.
-If authstate is AUTHSTATE_AWAITING_SIG:
+If the message is version 3 and version 3 is not allowed, ignore this message.
+Otherwise:
 
-  * If this D-H Key message is the same the one you received earlier (when you entered AUTHSTATE_AWAITING_SIG):
-    * Retransmit your Reveal Signature Message.
+If authstate is `AUTHSTATE_AWAITING_DHKEY`:
+  * Reply with a `Reveal Signature Message` and transition authstate to
+    `AUTHSTATE_AWAITING_SIG`.
+
+If authstate is `AUTHSTATE_AWAITING_SIG`:
+
+  * If this `D-H Key message` is the same you received earlier (when you entered
+    `AUTHSTATE_AWAITING_SIG`):
+    * Retransmit your `Reveal Signature Message`.
+
   * Otherwise:
     * Ignore the message.
 
-If authstate is AUTHSTATE_NONE, AUTHSTATE_AWAITING_REVEALSIG, or AUTHSTATE_V1_SETUP:
+If authstate is `AUTHSTATE_NONE`, `AUTHSTATE_AWAITING_REVEALSIG`, or
+`AUTHSTATE_V1_SETUP`:
   * Ignore the message.
 
 #### Receiving an Identity message
@@ -1564,7 +1598,8 @@ If the state is `START`:
         [here](#version-priority).
     * If the highest compatible version is OTR version 4
       * Verify that the point `Y` received is on curve Ed448.
-      * Verify that the DH public key `B` is from the correct group and not degenerate.
+      * Verify that the DH public key `B` is from the correct group and that it
+        does not degenerate.
       * If all validations succeed:
           * send a DRE-Auth message
           * transition to the `ENCRYPTED_MESSAGES` state.
@@ -1583,8 +1618,8 @@ To agree on an Identity message to use for this conversation:
     * Ignore the received Identity message.
   * Otherwise:
     * Forget your old `X` value that you sent earlier.
-    * Validate the Identity message. If any of the verifications fail, ignore the
-      message.
+    * Validate the Identity message. If any of the verifications fail, ignore
+      the message.
       * Verify that the user profile signature is valid.
       * Verify that the user profile is not expired.
       * Verify that your versions are compatible with the versions in the user
@@ -1718,19 +1753,29 @@ If the version is 4:
 
 If the version is 3:
 
-  If msgstate is ENCRYPTED_MESSAGES:
+Note that the states, messages and keys referred here are specific of OTRv3
+Protocol.
+
+  If msgstate is `MSGSTATE_ENCRYPTED`:
 
     * Verify the information (MAC, keyids, ctr value, etc.) in the message.
     * If the verification succeeds:
-      * Decrypt the message and display the human-readable part (if non-empty) to the user.
+      * Decrypt the message and display the human-readable part (if non-empty)
+        to the user.
       * Update the D-H encryption keys, if necessary.
-      * If you have not sent a message to this correspondent in some (configurable) time, send a "heartbeat" message, consisting of a Data Message encoding an empty plaintext. The heartbeat message should have the IGNORE_UNREADABLE flag set.
-      * If the received message contains a TLV type 1, forget all encryption keys for this correspondent, and transition msgstate to FINISHED.
-    * Otherwise, inform the user that an unreadable encrypted message was received, and reply with an Error Message.
+      * If you have not sent a message to this correspondent in some
+        (configurable) time, send a "heartbeat" message, consisting of a Data
+	Message encoding an empty plaintext. The heartbeat message should have
+	the `IGNORE_UNREADABLE` flag set.
+      * If the received message contains a TLV type 1, forget all encryption
+         keys for this correspondent, and transition msgstate to `FINISHED`.
+    * Otherwise, inform the user that an unreadable encrypted message was
+      received, and reply with an Error Message.
 
-  If msgstate is PLAINTEXT or FINISHED:
+  If msgstate is `PLAINTEXT` or `FINISHED`:
 
-    * Inform the user that an unreadable encrypted message was received, and reply with an Error Message.
+    * Inform the user that an unreadable encrypted message was received, and
+      reply with an Error Message.
 
 #### Receiving an Error Message
 
@@ -1762,8 +1807,8 @@ Message 1 for both cases. When a question is not present, the user specified
 question section has length 0 and value NULL.
 
 OTRv4 creates fingerprints using SHA3-512, which increases their size. Thus,
-the size of the fingerprint in the "Secret Information" section of OTRv3 [\[7\]](#references)
-should be 64 bytes in size.
+the size of the fingerprint in the "Secret Information" section of OTRv3
+[\[7\]](#references) should be 64 bytes in size.
 
 Lastly, OTRv4 uses Ed448 as the cryptographic primitive. This changes the way
 values are serialized and how they are computed. To define the SMP values
@@ -1792,14 +1837,16 @@ Assuming that Alice begins the exchange:
 
 **Bob:**
 
-* Validates that `G2a` and `G3a` are on the curve Ed448, in the correct group and not degenerate.
+* Validates that `G2a` and `G3a` are on the curve Ed448, in the correct group
+  and that they do not degenerate.
 * Picks random values `b2` and `b3` in `Z_q`.
 * Picks random values `r2`, `r3`, `r4`, `r5` and `r6` in `Z_q`.
 * Computes `G2b = G1 * b2` and `G3b = G1 * b3`.
 * Computes `c2 = HashToScalar(3 || G1 * r2)` and `d2 = r2 - b2 * c2`.
 * Computes `c3 = HashToScalar(4 || G1 * r3)` and `d3 = r3 - b3 * c3`.
 * Computes `G2 = G2a * b2` and `G3 = G3a * b3`.
-* Computes `Pb = G3 * r4` and `Qb = G1 * r4 + G2 * y`, where y is the 'actual secret'.
+* Computes `Pb = G3 * r4` and `Qb = G1 * r4 + G2 * y`, where y is the 'actual
+  secret'.
 * Computes `cp = HashToScalar(5 || G3 * r5 || G1 * r5 + G2 * r6)`, `d5 = r5 - r4 * cp`
   and `d6 = r6 - y * cp`.
 * Sends Alice a SMP message 2 with `G2b`, `c2`, `d2`, `G3b`, `c3`, `d3`, `Pb`,
@@ -1807,10 +1854,12 @@ Assuming that Alice begins the exchange:
 
 **Alice:**
 
-* Validates that `G2b` and `G3b` are on the curve Ed448, in the correct group and not degenerate.
+* Validates that `G2b` and `G3b` are on the curve Ed448, in the correct group
+  and that they do not degenerate.
 * Computes `G2 = G2b * a2` and `G3 = G3b * a3`.
 * Picks random values `r4`, `r5`, `r6` and `r7` in `Z_q`.
-* Computes `Pa = G3 * r4` and `Qa = G1 * r4 + G2 * x`, where x is the 'actual secret'.
+* Computes `Pa = G3 * r4` and `Qa = G1 * r4 + G2 * x`, where x is the 'actual
+  secret'.
 * Computes `cp = HashToScalar(6 || G3 * r5 || G1 * r5 + G2 * r6)`, `d5 = r5 - r4 * cp`
   and `d6 = r6 - x * cp`.
 * Computes `Ra = (Qa - Qb) * a3`.
@@ -1819,7 +1868,8 @@ Assuming that Alice begins the exchange:
 
 **Bob:**
 
-* Validates that `Pa`, `Qa`, and `Ra` are on the curve Ed448, in the correct group and not degenerate.
+* Validates that `Pa`, `Qa`, and `Ra` are on the curve Ed448, in the correct
+  group and that they do not degenerate.
 * Picks a random value `r7` in `Z_q`.
 * Computes `Rb = (Qa - Qb) * b3`.
 * Computes `Rab = Ra * b3`.
@@ -1829,7 +1879,8 @@ Assuming that Alice begins the exchange:
 
 **Alice:**
 
-* Validates that `Rb` is on curve Ed448, in the correct group and not degenerate.
+* Validates that `Rb` is on curve Ed448, in the correct group and that they do
+  not degenerate.
 * Computes `Rab = Rb * a3`.
 * Checks whether `Rab == Pa - Pb`.
 
@@ -1938,7 +1989,8 @@ generators, g2 and g3. It also begins the construction of the values used in
 the final comparison of the protocol. A valid SMP message 2 is generated as
 follows:
 
-1. Validate that `G2a` and `G3a` are on curve Ed448, in the correct group, and are not degenerate.
+1. Validate that `G2a` and `G3a` are on curve Ed448, in the correct group and
+   that they do not degenerate.
 2. Determine Bob's secret input `y`, which is to be compared to Alice's secret
    `x`.
 3. Pick random values `b2` and `b3` in `Z_q`. These will used during
@@ -1992,7 +2044,8 @@ SMP message 3 is Alice's final message in the SMP exchange. It has the last of
 the information required by Bob to determine if `x = y`. A valid SMP message 1
 is generated as follows:
 
-1. Validate that `G2b`, `G3b`, `Pb`, and `Qb` are on curve Ed448, in the correct group, and are not degenerate.
+1. Validate that `G2b`, `G3b`, `Pb`, and `Qb` are on curve Ed448 and that they
+   do not degenerate.
 2. Pick random values `r4`, `r5`, `r6` and `r7` in `Z_q`. These will
    be used to add a blinding factor to the final results, and to generate
    zero-knowledge proofs that this message was created honestly.
@@ -2034,12 +2087,14 @@ SMP message 4 is Bob's final message in the SMP exchange. It has the last of
 the information required by Alice to determine if `x = y`. A valid SMP message
 4 is generated as follows:
 
-1. Validate that `Pa`, `Qa`, and `Ra` are on curve Ed448, in the correct group, and are not degenerate.
+1. Validate that `Pa`, `Qa`, and `Ra` are on curve Ed448 and that they do not
+   degenerate.
 2. Pick a random value `r7` in `Z_q`. This will be used to generate
 Bob's final zero-knowledge proof that this message was created honestly.
 3. Compute `Rb = (Qa - Qb) * b3`.
-4. Generate a zero-knowledge proof that `Rb` was created according to the protocol by setting
-	`cr = HashToScalar(8 || G1 * r7 || (Qa - Qb) * r7)` and `d7 = r7 - b3 * cr mod q`.
+4. Generate a zero-knowledge proof that `Rb` was created according to the
+   protocol by setting
+   `cr = HashToScalar(8 || G1 * r7 || (Qa - Qb) * r7)` and `d7 = r7 - b3 * cr mod q`.
 
 The SMP message 4 has the following data:
 
@@ -2067,7 +2122,8 @@ Set smpstate to `SMPSTATE_EXPECT1` and send a SMP abort to Alice.
 If smpstate is `SMPSTATE_EXPECT1`:
 
 * Verify Alice's zero-knowledge proofs for G2a and G3a:
-  1. Check that both `G2a` and `G3a` are on curve Ed448, in the correct group, and are not degenerate.
+  1. Check that both `G2a` and `G3a` are on curve Ed448 and that they do not
+     degenerate.
   2. Check that `c2 = HashToScalar(1 || G1 * d2 + G2a * c2)`.
   3. Check that `c3 = HashToScalar(2 || G1 * d3 + G3a * c3)`.
 * Create a SMP message 2 and send it to Alice.
@@ -2082,7 +2138,8 @@ Set smpstate to `SMPSTATE_EXPECT1` and send a SMP abort to Bob.
 If smpstate is `SMPSTATE_EXPECT2`:
 
 * Verify Bob's zero-knowledge proofs for `G2b`, `G3b`, `Pb` and `Qb`:
-    1. Check that `G2b`, `G3b`, `Pb` and `Qb` are on curve Ed448, in the correct group, and are not degenerate.
+    1. Check that `G2b`, `G3b`, `Pb` and `Qb` are on curve Ed448 and that they
+       do not degenerate.
     2. Check that `c2 = HashToScalar(3 || G1 * d2 + G2b * c2)`.
     3. Check that `c3 = HashToScalar(4 || G1 * d3 + G3b * c3)`.
     4. Check that `cp = HashToScalar(5 || G3 * d5 + Pb * cp || G * d5 + G2 * d6 + Qb * cp)`.
@@ -2098,7 +2155,8 @@ Set smpstate to `SMPSTATE_EXPECT1` and send a SMP abort to Bob.
 If smpstate is `SMPSTATE_EXPECT3`:
 
 * Verify Alice's zero-knowledge proofs for `Pa`, `Qa` and `Ra`:
-  1. Check that `Pa`, `Qa` and `Ra` are on curve Ed448, in the correct group, and are not degenerate.
+  1. Check that `Pa`, `Qa` and `Ra` are on curve Ed448 and that they do not
+     degenerate.
   2. Check that `cp = HashToScalar(6 || G3 * d5 + Pa * cp || G1 * d5 + G2 * d6 +
      Qa * cp)`.
   3. Check that `cr = HashToScalar(7 || G1 * d7 + G3a * cr || (Qa - Qb) * d7 +
@@ -2121,7 +2179,7 @@ Set smpstate to `SMPSTATE_EXPECT1` and send a type 6 TLV (SMP abort) to Bob.
 If smpstate is SMPSTATE_EXPECT4:
 
 * Verify Bob's zero-knowledge proof for Rb:
-   1. Check that `Rb` is on curve Ed448, in the correct group, and are not degenerate.
+   1. Check that `Rb` is on curve Ed448 and that it does not degenerate.
    2. Check that `Rb` is `>= 2` and `<= modulus-2`.
    3. Check that `cr = HashToScalar(8 || G1 * d7 + G3 * cr || (Qa / Qb) * d7 + Rb * cr)`.
 
