@@ -766,7 +766,7 @@ OTRv4 uses the following steps to create a signature:
    signature = sign(message, private_key)
    ```
 
-1. Derive an intermediary nonce by using SHAKE-256 of the message, of a random
+1. Derive an intermediary nonce by using SHA3 SHAKE-256 of the message, of a random
    value `random_v`, and of a specific string "decaf\_448\_sign\_shake". Decode
    this value into a scalar and reduce it mod the order of the base point
    [q](#elliptic-curve-parameters).
@@ -2359,7 +2359,7 @@ following this post [\[13\]](#references) and with this code
 
 1. Select `x`, a "nothing up my sleeve" value (a value chosen above suspicion
    of hidden properties). In this case, we choose `decaf_448_g2`.
-2. Hash the base point to prevent a theoretical backdoor mentioned by Stanislav
+2. Hash the base point to prevent a theoretical backdoor defined by Stanislav
    Smyshlaev: `hashed_base = SHAKE-256(base_point)`
 3. Hash the `x` into an array of 512 bits. These will be used as the uniform
    random seed: `seed = SHAKE-256(x)`
