@@ -59,6 +59,7 @@ works on top of an existing messaging protocol, like XMPP.
   3. [HashToScalar](#hashtoscalar)
   4. [Modify an encrypted data message](#modify-an-encrypted-data-message)
   5. [Extra Symmetric Key](#extra-symmetric-key)
+  6. [OTRv3 or less Protocol State Machine](#otrv3-or-less-protocol-state-machine)
 
 ## Main Changes over Version 3
 
@@ -408,13 +409,14 @@ Type 0: Padding
     This type can be used to disguise the length of a plaintext message.
 
 Type 1: Disconnected
-    If the user requests to close its private connection, you may send a message
-    (possibly with an empty human-readable part) containing a record with this
-    TLV type just before you discard the session keys. You should then
-    transition to 'MSGSTATE_PLAINTEXT' (see below).
-    If you receive a TLV record of this type, you should transition to 'FINISHED'
-    (see below), and inform the user that its correspondent has closed its end
-    of the private connection. This user close it as well.
+    In OTRv3, if the user requests to close its private connection, you may send
+    a message (possibly with an empty human-readable part) containing a record
+    with this TLV type just before you discard the session keys. You should then
+    transition to 'MSGSTATE_PLAINTEXT'.
+    If you receive a TLV record of this type, you should transition to
+    'FINISHED' in OTRv4 and to 'MSGSTATE_FINISHED' if else. Inform the user that
+    its correspondent has closed its end of the private connection. This user
+    close it as well.
 
 Type 2: SMP Message 1
     The value represents the initial message of the Socialist Millionaires'
@@ -2529,6 +2531,73 @@ The extra symmetric key is derived by calculating:
 Upon receipt of the Data Message containing the `type 8 TLV`, the recipient will
 compute the extra symmetric key in the same way. Note that the value of the
 extra symmetric key is not contained in the TLV itself.
+
+### OTRv3 or less Protocol State Machine
+
+OTRv3 defines two main state variables:
+
+#### Message state
+
+The message state variable `msgstate` controls what happens to outgoing messages
+typed by the user. It can take one of three values:
+
+```
+MSGSTATE_PLAINTEXT
+  This state indicates that outgoing messages are sent without encryption. This
+  is the state used before an OTRv3 conversation is initiated. This is the
+  initial state, and the only way to subsequently enter this state is for the
+  user to explicitly request so via some UI operation.
+
+MSGSTATE_ENCRYPTED
+  This state indicates that outgoing messages are sent encrypted. This is the
+  state that is used during an OTRv3 conversation. The only way to enter this
+  state is when the authentication state machine (below) is completed.
+
+MSGSTATE_FINISHED
+  This state indicates that outgoing messages are not delivered at all. This
+  state is entered only when the other party indicates that its side of the
+  conversation has ended. For example, if Alice and Bob are having an OTR
+  conversation, and Bob instructs his OTR client to end its private session with
+  Alice (for example, by logging out), Alice will be notified of this, and her
+  client will switch to 'MSGSTATE_FINISHED' mode. This prevents Alice from
+  accidentally sending a message to Bob in plaintext (consider what happens if
+  Alice was in the middle of typing a private message to Bob when he suddenly
+  logs out, just as Alice hits Enter.)
+```
+
+#### Authentication state
+
+The authentication state variable `authstate` can take one of four values (plus
+one extra for OTRv1 compatibility):
+
+```
+AUTHSTATE_NONE
+  This state indicates that the authentication protocol is not currently in
+  progress. This is the initial state.
+
+AUTHSTATE_AWAITING_DHKEY
+  After Bob initiates the authentication protocol by sending Alice the 'D-H
+  Commit Message', he enters this state to await Alice's reply.
+
+AUTHSTATE_AWAITING_REVEALSIG
+  After Alice receives Bob's D-H Commit Message, and replies with her own 'D-H
+  Key Message', she enters this state to await Bob's reply.
+
+AUTHSTATE_AWAITING_SIG
+  After Bob receives Alice's 'D-H Key Message', and replies with his own Reveal
+  Signature Message, he enters this state to await Alice's reply.
+
+AUTHSTATE_V1_SETUP
+  For OTR version 1 compatibility, if Bob sends a version 1 Key Exchange Message
+  to Alice, he enters this state to await Alice's reply.
+  Then, Alice (in 'AUTHSTATE_AWAITING_REVEALSIG') receives Bob's Reveal
+  Signature Message (and replies with her own Signature Message), or
+  Bob (in 'AUTHSTATE_AWAITING_SIG') receives Alice's Signature Message.
+  Assuming the signature verifications succeed, the 'msgstate' variable is
+  transitioned to 'MSGSTATE_ENCRYPTED'. Regardless of whether the signature
+  verifications succeed, the authstate variable is transitioned to
+  'AUTHSTATE_NONE'.
+```
 
 ### References
 
