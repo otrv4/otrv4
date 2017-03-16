@@ -437,12 +437,12 @@ Type 6: SMP Abort Message
     you should change the SMP state to 'SMP_EXPECT1' (see below).
 
 Type 7: SMP Message 1Q
-    Not supported by OTRv4.
+    Only used by OTRv3, and not in OTRv4.
     Like a SMP Message 1, but its value begins with a NUL-terminated
     user-specified question.
 
 Type 8: Extra symmetric key
-    Not supported by OTRv4.
+    Only used by OTRv3, and not in OTRv4.
     If you wish to use the extra symmetric key, compute it as outlined in the
     section "Extra symmetric key", below. Then, send this 'type 8 TLV' to your
     peer to indicate that you'd like to use it. The value of the TLV begins with
