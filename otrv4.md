@@ -126,7 +126,8 @@ required for authentication, both participants can deny having used their
 private long term keys in this process. An external cryptographic expert will
 be able to prove that one person between the two used their long term private
 key for the authentication, but they will not be able to identify whose key was
-used.
+used. This provides deniability for those participating in the DAKE, whereas
+the AKE of OTRv3 is not deniable.
 
 Once an OTRv4 channel has been created with the DAKE, all data messages
 transmitted through this channel are confidential and their integrity to the
@@ -2502,11 +2503,11 @@ message. Thus, its offset is 0. The forger wants to replace "hi" with "yo".
   offset = 0
   old_text = "hi"
   new_text = "yo"
-  textlength = string_length_of("hi")
+  text_length = string_length_of("hi")
   encrypted_message_length = get_from_data_message()
   old_encrypted_message = get_from_data_message()
 
-  for (i=0; i < textlength && offset+i < encrypted_message_length; i++) {
+  for (i=0; i < text_length && offset+i < encrypted_message_length; i++) {
       old_encrypted_message[offset+i] ^= old_text[i] ^ new_text[i]
   }
 
