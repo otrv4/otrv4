@@ -1528,7 +1528,7 @@ If the Query message offers OTR version 3 and version 3 is allowed:
 
 Note that the states, messages and keys referred here are specific of OTRv3
 Protocol. For their definition, refer to
-[Appendix](#otrv3-or-less-specific-encoded-messages)
+[Appendix](#otrv3-or-less-specific-encoded-messages).
 
 If the message is version 3 and version 3 is not allowed, ignore the message.
 Otherwise:
@@ -1576,7 +1576,7 @@ If authstate is `AUTHSTATE_AWAITING_SIG` or `AUTHSTATE_V1_SETUP`:
 
 Note that the states, messages and keys referred here are specific of OTRv3
 Protocol. For their definition, refer to
-[Appendix](#otrv3-or-less-specific-encoded-messages)
+[Appendix](#otrv3-or-less-specific-encoded-messages).
 
 If the message is version 3 and version 3 is not allowed, ignore this message.
 Otherwise:
