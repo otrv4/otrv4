@@ -63,7 +63,8 @@ works on top of an existing messaging protocol, like XMPP.
   4. [Modify an encrypted data message](#modify-an-encrypted-data-message)
   5. [OTRv3 or less Specific Encoded Messages](#otrv3-or-less-specific-encoded-messages)
   6. [OTRv3 or less Protocol State Machine](#otrv3-or-less-protocol-state-machine)
-  7. [Extra Symmetric Key](#extra-symmetric-key)
+  7. [Transitional Signature](#transitional-signature)
+  8. [Extra Symmetric Key](#extra-symmetric-key)
 
 ## Main Changes over Version 3
 
@@ -714,10 +715,10 @@ To create a user profile, assemble:
    excluding the signature itself. The size of the signature is 112 bytes. It is
    created using the [Ed448 signature algorithm](#user-profile-signature).
 5. Transition Signature (optional): A signature of the profile excluding Profile
-   Signatures and itself signed by the user's OTRv3 DSA key. The transitional
-   signature that enables contacts that trust user's version 3 DSA key to trust
-   the user's profile in version 4. This is only used if the user supports
-   versions 3 and 4.
+   Signatures and itself signed by the user's OTRv3 DSA key. The [Transitional
+   Signature](#transitional-signature) that enables contacts that trust user's
+   version 3 DSA key to trust the user's profile in version 4. This is only used
+   if the user supports versions 3 and 4.
 
 After the profile is created, it must be published in a public place, like an
 untrusted server.
@@ -871,7 +872,8 @@ Profile Expiration (PROF-EXP):
   8 bytes signed value, big-endian
 ```
 
-SIG refers to the `OTR version 3 DSA Signature` with the structure:
+SIG refers to the `OTR version 3 DSA Signature` with the structure. Refer to
+[Transitional Signature](#transitional-signature) for more information:
 
 ```
 DSA signature (SIG):
