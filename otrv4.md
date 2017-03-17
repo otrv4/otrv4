@@ -1819,7 +1819,7 @@ following exceptions.
 In OTRv3, SMP Message 1 is used when a user does not specify an SMP question
 and, if not, a SMP Message 1Q is used. OTRv4 is simplified to use only SMP
 Message 1 for both cases. When a question is not present, the user specified
-question section has length 0 and value NULL.
+question section has length `0` and value `NULL`.
 
 OTRv4 creates fingerprints using SHA3-512, which increases their size. Thus,
 the size of the fingerprint in the "Secret Information" section of OTRv3
@@ -2629,6 +2629,44 @@ AUTHSTATE_V1_SETUP
   verifications succeed, the authstate variable is transitioned to
   'AUTHSTATE_NONE'.
 ```
+
+### Transitional Signature
+
+OTRv3 uses long-lived public keys for authentication (but not encryption).
+
+```
+OTR public authentication DSA key (PUBKEY):
+
+  Pubkey type (SHORT)
+  DSA public keys have type 0x0000
+
+    p (MPI)
+    q (MPI)
+    g (MPI)
+    y (MPI)
+      (p,q,g,y) are the DSA public key parameters
+```
+
+OTR public keys are used to generate signatures: different types of keys produce
+signatures in different formats. The format for a signature made by a DSA public
+key is as follows (this, in OTRv4 is referred as 'transitional signature'):
+
+```
+DSA signature (SIG):
+  (len is the length of the DSA public parameter q, which in current
+  implementations must be 20 bytes, or 160 bits)
+  len byte unsigned r, big-endian
+  len byte unsigned s, big-endian
+```
+
+OTR public keys have fingerprints, which are hex strings that serve as
+identifiers for the public key. The fingerprint is calculated by taking the
+SHA-1 hash of the byte-level representation of the public key. However, there is
+an exception for backwards compatibility: if the pubkey type is 0x0000, those
+two leading 0x00 bytes are omitted from the data to be hashed. The encoding
+assures that, assuming the hash function itself has no useful collisions, and
+DSA keys have length less than 524281 bits (500 times larger than most DSA
+keys), no two public keys will have the same fingerprint.
 
 ### Extra Symmetric Key
 
