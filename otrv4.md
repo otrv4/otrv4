@@ -241,8 +241,8 @@ Generator (g3)
 Cofactor (dh_c)
   2
 
-Order of dh_p (dh_q; prime; = (dh_p - 1) / 2):
-  2^3071 - 2^3007 - 1 + 2^63 * (integer_part_of(2^2942 * π) + 1690314)
+Subprime (dh_q):
+  (dh_p - 1) / 2
 
 Hexadecimal value of dh_q:
   7FFFFFFF FFFFFFFF E487ED51 10B4611A 62633145 C06E0E68
