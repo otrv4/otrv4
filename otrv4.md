@@ -312,7 +312,7 @@ paper [\[6\]](#references). These functions work as follows:
 ### Encoding Ed448 Points
 
 Using the Jacobi quartic, a point `P` can by encoded by the s-coordinate of the
-coset representative `(s, t)`, where `s` is non-negative and finite, and `t /s`
+coset representative `(s, t)`, where `s` is non-negative and finite, and `t / s`
 is non-negative or infinite.
 
 We wish to compute `s` as `(1 ± sqrt(1 - (a * x)^2)) / a * x` and
@@ -1524,7 +1524,7 @@ If the Query message offers OTR version 3 and version 3 is allowed:
   * Send a version `3 D-H Commit Message`.
   * Transition authstate to `AUTHSTATE_AWAITING_DHKEY`.
 
-#### Receiving an OTRv3 specific D-H Commit Message
+#### Receiving a D-H Commit Message
 
 Note that the states, messages and keys referred here are specific of OTRv3
 Protocol. For their definition, refer to
@@ -1572,7 +1572,7 @@ If authstate is `AUTHSTATE_AWAITING_SIG` or `AUTHSTATE_V1_SETUP`:
   * Reply with a new `D-H Key message` and transition authstate to
     `AUTHSTATE_AWAITING_REVEALSIG`.
 
-#### Receiving an OTRv3 specific D-H Key Message
+#### Receiving a D-H Key Message
 
 Note that the states, messages and keys referred here are specific of OTRv3
 Protocol. For their definition, refer to
@@ -1785,11 +1785,11 @@ Protocol.
 	Message encoding an empty plaintext. The heartbeat message should have
 	the `IGNORE_UNREADABLE` flag set.
       * If the received message contains a TLV type 1, forget all encryption
-         keys for this correspondent, and transition msgstate to `FINISHED`.
+         keys for this correspondent, and transition msgstate to `MSGSTATE_FINISHED`.
     * Otherwise, inform the user that an unreadable encrypted message was
       received, and reply with an Error Message.
 
-  If msgstate is `PLAINTEXT` or `FINISHED`:
+  If msgstate is `MSGSTATE_PLAINTEXT` or `MSGSTATE_FINISHED`:
 
     * Inform the user that an unreadable encrypted message was received, and
       reply with an Error Message.
