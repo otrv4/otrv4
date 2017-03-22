@@ -488,10 +488,12 @@ In the DAKE, OTRv4 makes use of long-term Cramer-Shoup keys, ephemeral Elliptic
 Curve Diffie-Hellman (ECDH) keys, and ephemeral Diffie-Hellman (DH) keys.
 
 For exchanging data messages, OTRv4 makes use of both the DH ratchet (with ECDH)
-and the symmetric-key ratchet from the Double Ratchet algorithm
-[\[2\]](#references). A cryptographic ratchet is a one-way mechanism for
-deriving new cryptographic keys from previous keys. New keys cannot be used to
-calculate the old keys.
+and the symmetric-key ratchet from the Double Ratchet algorithm. If you wish to
+understand the Double Ratchet in more detail then please refer to the spec
+[\[2\]](#references) but to implement OTRv4 this is not necessary. OTRv4
+contains everything necessary to implement the Double Ratchet in this context. A
+cryptographic ratchet is a one-way mechanism for deriving new cryptographic keys
+from previous keys. New keys cannot be used to calculate the old keys.
 
 OTRv4 adds 3072-bit (384-byte) DH keys, called the mix key pair, to the
 Double Ratchet algorithm. These keys are used to protect transcripts of data
@@ -821,7 +823,7 @@ function: decaf\_448\_verify\_shake](https://sourceforge.net/p/ed448goldilocks/c
    ```
 These are the steps to verify the signature:
 
-2. Derive a challenge by using a SHAKE-256 of the message, a public key, and
+1. Derive a challenge by using a SHAKE-256 of the message, a public key, and
    the temporary signature (the first 56 bytes of the signature). The public key
    is the [`h`](#dual-receiver-key-generation-drgen) value of the Cramer-Shoup
    long term public key in the profile. Decode this value into a scalar and
@@ -832,7 +834,7 @@ These are the steps to verify the signature:
    challenge = decode(output) % q
    ```
 
-3. Decode the temporary signature and the public key into points. This will
+2. Decode the temporary signature and the public key into points. This will
    verify that the temporary signature and the public key are points on the
    curve Ed448.
 
@@ -841,21 +843,21 @@ These are the steps to verify the signature:
    public_key_point = decode(public_key)
    ```
 
-4. Decode the nonce into a scalar. This will verify that the nonce is a scalar
+3. Decode the nonce into a scalar. This will verify that the nonce is a scalar
    within order of the base point.
 
    ```
    nonce = decode(nonce_bytes)
    ```
 
-5. Compute: the addition of the multiplication of `G1` (the base point) with the
+4. Compute: the addition of the multiplication of `G1` (the base point) with the
    `nonce` and the multiplication of the `public_key_point` with the `challenge`.
 
    ```
    result_point  = G1 * nonce + public_key_point * challenge
    ```
 
-6. Check that the `result_point` and the `temporary_signature_point` are equal.
+5. Check that the `result_point` and the `temporary_signature_point` are equal.
    If they are equal, the signature is valid.
 
 #### User Profile Data Type
