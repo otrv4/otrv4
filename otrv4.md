@@ -2525,7 +2525,7 @@ message. Thus, its offset is 0. The forger wants to replace "hi" with "yo".
   new_data_message = replace(old_data_message, new_encrypted_message, new_mac_tag)
 
   ```
-### OTRv3 or less Specific Encoded Messages
+### OTRv3 Specific Encoded Messages
 
 #### D-H Commit Message
 
@@ -2558,7 +2558,7 @@ signature.
 
 #### Reveal Signature Message
 
-This is the third message of OTRv3 AKE. Bob sends it to Alice, revealing his D-H
+This is the third message of the OTRv3 AKE. Bob sends it to Alice, revealing his D-H
 encryption key (and thus opening an encrypted channel), and also authenticating
 himself (and the parameters of the channel, preventing a man-in-the-middle
 attack on the channel itself) to Alice.
@@ -2567,9 +2567,9 @@ It consists of: the protocol version, the message type, the sender's instance
 tag, the receiver's instance tag, the encrypted signature and the MAC of the
 signature.
 
-### OTRv3 or less Protocol State Machine
+### OTRv3 Protocol State Machine
 
-OTRv3 defines two main state variables:
+OTRv3 defines three main state variables:
 
 #### Message state
 
@@ -2602,8 +2602,7 @@ MSGSTATE_FINISHED
 
 #### Authentication state
 
-The authentication state variable `authstate` can take one of four values (plus
-one extra for OTRv1 compatibility):
+The authentication state variable `authstate` can take one of four values:
 
 ```
 AUTHSTATE_NONE
@@ -2622,16 +2621,6 @@ AUTHSTATE_AWAITING_SIG
   After Bob receives Alice's 'D-H Key Message', and replies with his own Reveal
   Signature Message, he enters this state to await Alice's reply.
 
-AUTHSTATE_V1_SETUP
-  For OTR version 1 compatibility, if Bob sends a version 1 Key Exchange Message
-  to Alice, he enters this state to await Alice's reply.
-  Then, Alice (in 'AUTHSTATE_AWAITING_REVEALSIG') receives Bob's Reveal
-  Signature Message (and replies with her own Signature Message), or
-  Bob (in 'AUTHSTATE_AWAITING_SIG') receives Alice's Signature Message.
-  Assuming the signature verifications succeed, the 'msgstate' variable is
-  transitioned to 'MSGSTATE_ENCRYPTED'. Regardless of whether the signature
-  verifications succeed, the authstate variable is transitioned to
-  'AUTHSTATE_NONE'.
 ```
 
 ### Transitional Signature
