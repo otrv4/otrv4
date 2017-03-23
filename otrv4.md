@@ -419,14 +419,7 @@ Type 0: Padding
     This type can be used to disguise the length of a plaintext message.
 
 Type 1: Disconnected
-    In OTRv3, if the user requests to close its private connection, you may send
-    a message (possibly with an empty human-readable part) containing a record
-    with this TLV type just before you discard the session keys. You should then
-    transition to 'MSGSTATE_PLAINTEXT'.
-    If you receive a TLV record of this type, you should transition to
-    'FINISHED' in OTRv4 and to 'MSGSTATE_FINISHED' if else. Inform the user that
-    its correspondent has closed its end of the private connection. This user
-    close it as well.
+  Closes the connection.
 
 Type 2: SMP Message 1
     The value represents the initial message of the Socialist Millionaires'
@@ -1509,7 +1502,7 @@ If the tag offers OTR version 4 and version 4 is allowed:
   * Send an Identity message.
   * Transition the state to `DAKE_IN_PROGRESS`.
 
-If the tag offers OTR version 3 and version 3 is allowed:
+Otherwise if the tag offers OTR version 3 and version 3 is allowed:
 
   * Send a version `3 D-H Commit Message`.
   * Transition authstate to `AUTHSTATE_AWAITING_DHKEY`.
@@ -1570,7 +1563,7 @@ If authstate is `AUTHSTATE_AWAITING_REVEALSIG`:
       each of those messages will prevent confusion, since each of the clients
       will see each of the `D-H Key Messages` sent.
 
-If authstate is `AUTHSTATE_AWAITING_SIG` or `AUTHSTATE_V1_SETUP`:
+If authstate is `AUTHSTATE_AWAITING_SIG`:
   * Reply with a new `D-H Key message` and transition authstate to
     `AUTHSTATE_AWAITING_REVEALSIG`.
 
@@ -1810,10 +1803,15 @@ TLV type 1. Transition to the `START` state.
 
 #### Receiving a TLV type 1 (Disconnect) Message
 
-If a TLV type 1 is received in the `START` state, stay in that state, else
-transition to the START state and [reset the state variables and key
-variables](#resetting-state-variables-and-key-variables). Resetting state
-variables and key variables
+If you are using version 4:
+  If a TLV type 1 is received in the `START` state, stay in that state, else
+  transition to the START state and [reset the state variables and key
+  variables](#resetting-state-variables-and-key-variables). Resetting state
+  variables and key variables
+
+If you are using version 3:
+  * Transition to 'MSGSTATE_FINISHED'.
+  * Inform the user that its correspondent has closed its end of the private connection.
 
 ## Socialist Millionaires Protocol (SMP)
 
@@ -2555,7 +2553,6 @@ It consists of: the protocol version, the message type, the sender's instance
 tag, the receiver's instance tag, the encrypted signature and the MAC of the
 signature.
 
-
 #### Reveal Signature Message
 
 This is the third message of the OTRv3 AKE. Bob sends it to Alice, revealing his D-H
@@ -2566,6 +2563,47 @@ attack on the channel itself) to Alice.
 It consists of: the protocol version, the message type, the sender's instance
 tag, the receiver's instance tag, the encrypted signature and the MAC of the
 signature.
+
+#### Sending a TLV type 1 (Disconnect) Message
+
+If the user requests to close its private connection, you may send
+a message (possibly with an empty human-readable part) containing a record
+with TLV type 1 just before you discard the session keys. You should then
+transition to 'MSGSTATE_PLAINTEXT'.
+
+### Receiving OTRv3 messages
+
+#### Receiving a Signature Message
+
+If version 3 is not allowed, ignore this message. Otherwise:
+
+If authstate is AUTHSTATE_AWAITING_SIG:
+  * Decrypt the encrypted signature, and verify the signature and the MACs. If everything checks out:
+
+    * Transition authstate to AUTHSTATE_NONE.
+    * Transition msgstate to MSGSTATE_ENCRYPTED.
+    * If there is a recent stored message, encrypt it and send it as a Data Message.
+
+  * Otherwise, ignore the message.
+If authstate is AUTHSTATE_NONE, AUTHSTATE_AWAITING_DHKEY or AUTHSTATE_AWAITING_REVEALSIG:
+  * Ignore the message.
+
+#### Receiving a Reveal Signature Message
+
+If version 3 is not allowed, ignore this message. Otherwise:
+
+If authstate is AUTHSTATE_AWAITING_REVEALSIG:
+  * Use the received value of r to decrypt the value of gx received in the D-H Commit Message, and verify the hash therein.
+  * Decrypt the encrypted signature, and verify the signature and the MACs. If everything checks out:
+
+    * Reply with a Signature Message.
+    * Transition authstate to AUTHSTATE_NONE.
+    * Transition msgstate to MSGSTATE_ENCRYPTED.
+    * If there is a recent stored message, encrypt it and send it as a Data Message.
+
+  * Otherwise, ignore the message.
+If authstate is AUTHSTATE_NONE, AUTHSTATE_AWAITING_DHKEY or AUTHSTATE_AWAITING_SIG:
+  * Ignore the message.
 
 ### OTRv3 Protocol State Machine
 
