@@ -1431,18 +1431,21 @@ tags](#whitespace-tags) are constructed according to the sections below.
 
 ##### Query Messages
 
-If Alice wishes to communicate to Bob that she would like to use OTR,
-she sends a message containing the string "?OTRv" followed by an indication of
-what versions of OTR she is willing to use with Bob. The version string is
-constructed as follows:
+If Alice wishes to communicate to Bob that she would like to use OTR, she
+sends a message containing the string "?OTRv" followed by an indication of
+what versions of OTR she is willing to use with Bob. The versions she is
+willing to use, whether she can set this on a global level or on a user by
+user basis, this is up to the implementer. However, the requirement of
+enabling users to choose whether they want to allow or disallow versions is
+required. The version string is constructed as follows:
 
 If she is willing to use OTR version 3, she appends a byte identifier for the
 versions in question, followed by "?". The byte identifier for OTR version 3
-is "3", and similarly for 4. Thus, if she is willing to use OTR versions 3 and 4,
-the following identifier would be "34". The order of the identifiers between the
-"v" and the "?" does not matter, but none should be listed more than once. The OTRv4
-specification only supports versions 3 and higher. Thus, query messages for
-older versions have been omitted.
+is "3", and similarly for 4. Thus, if she is willing to use OTR versions 3 and
+4, the following identifier would be "34". The order of the identifiers
+between the "v" and the "?" does not matter, but none should be listed more
+than once. The OTRv4 specification only supports versions 3 and higher. Thus,
+query messages for older versions have been omitted.
 
 Example query messages:
 
@@ -1803,13 +1806,13 @@ TLV type 1. Transition to the `START` state.
 
 #### Receiving a TLV type 1 (Disconnect) Message
 
-If you are using version 4:
+If the version is 4:
   If a TLV type 1 is received in the `START` state, stay in that state, else
   transition to the START state and [reset the state variables and key
   variables](#resetting-state-variables-and-key-variables). Resetting state
   variables and key variables
 
-If you are using version 3:
+If the version is 3:
   * Transition to 'MSGSTATE_FINISHED'.
   * Inform the user that its correspondent has closed its end of the private connection.
 
