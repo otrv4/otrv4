@@ -676,7 +676,7 @@ version 3, then this message is ignored.
 
 OTRv4 introduces a user profile. The user profile contains the Cramer-Shoup
 long term public key, signed information about supported versions, a signed
-profile expiration date, and an optional transition signature.
+profile expiration date, and a singed optional transition signature.
 
 Each participant maintains a user profile for authentication in the DAKE and for
 publication. Publishing the user profile allows users to repudiate their
@@ -704,13 +704,14 @@ To create a user profile, assemble:
    A user profile can advertise multiple OTR versions. The format is described
    under the section [Establishing Versions](#establishing-versions) below.
 3. Profile Expiration: Expiration date in standard Unix 64-bit format
-   (seconds since the midnight starting Jan 1, 1970, UTC, ignoring leap seconds)
+   (seconds since the midnight starting Jan 1, 1970, UTC, ignoring leap
+   seconds).
 4. Profile Signature: One of the Cramer-Shoup secret key values (`z`) and its
    generator (`G1`) is used to create signatures of the entire profile
    excluding the signature itself. The size of the signature is 112 bytes. It is
    created using the [Ed448 signature algorithm](#user-profile-signature).
 5. Transition Signature (optional): A signature of the profile excluding Profile
-   Signatures and itself signed by the user's OTRv3 DSA key. The [Transitional
+   Signatures and the user's OTRv3 DSA key. The [Transitional
    Signature](#transitional-signature) that enables contacts that trust user's
    version 3 DSA key to trust the user's profile in version 4. This is only used
    if the user supports versions 3 and 4.
@@ -720,15 +721,16 @@ untrusted server.
 
 #### Establishing Versions
 
-A valid versions string can be created by concatenating supported version numbers
-together in any order. For example, a user who supports versions 3 and 4
+A valid versions string can be created by concatenating supported version
+numbers together in any order. For example, a user who supports versions 3 and 4
 will have the version string "43" or "34" in their profile (2 bytes). A user who
 only supports version 4 will have "4" (1 byte). Thus, a version string has
 varying size, and it is represented as a DATA type with its length specified.
 
 Invalid version strings contain "2" or "1". The OTRv4 specification supports up
 to OTR version 3, and thus do not support versions 2 and 1, i.e. version strings
-of "32" or "31".
+of "32" or "31". Any other string that is not "4", "3", "2" or "1" should be
+ignored.
 
 #### Version Priority
 
