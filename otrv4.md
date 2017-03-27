@@ -1524,79 +1524,7 @@ If the Query message offers OTR version 3 and version 3 is allowed:
   * Send a version `3 D-H Commit Message`.
   * Transition authstate to `AUTHSTATE_AWAITING_DHKEY`.
 
-#### Receiving a D-H Commit Message
 
-Note that the states, messages and keys referred here are specific of OTRv3
-Protocol. For their definition, refer to
-[Appendix](#otrv3-or-less-specific-encoded-messages).
-
-If the message is version 3 and version 3 is not allowed, ignore the message.
-Otherwise:
-
-If authstate is `AUTHSTATE_NONE`:
-
-  * Reply with a `D-H Key Message`, and transition authstate to
-    `AUTHSTATE_AWAITING_REVEALSIG`.
-
-If authstate is `AUTHSTATE_AWAITING_DHKEY`:
-  * This indicates that you have already sent a `D-H Commit message` to your
-    peer, but that it either didn't receive it, or just didn't receive it yet
-    and has sent you one as well. The symmetry will be broken by comparing the
-    hashed `gx` you sent in your `D-H Commit Message` with the one you received,
-    considered as 32-byte unsigned big-endian values.
-
-  * If yours is the higher hash value:
-    * Ignore the incoming `D-H Commit message`, but resend your
-      `D-H Commit message`.
-
-  * Otherwise:
-    * Forget the old encrypted `gx` value that you sent earlier, and pretend
-      you're in `AUTHSTATE_NONE`. For example, reply with a `D-H Key Message`,
-      and transition `authstate` to `AUTHSTATE_AWAITING_REVEALSIG`.
-
-If authstate is `AUTHSTATE_AWAITING_REVEALSIG`:
-  * Retransmit your `D-H Key Message` (the same one you sent when you entered
-    `AUTHSTATE_AWAITING_REVEALSIG`). Forget the old `D-H Commit message` and
-    use this new one instead.
-    There are a number of reasons this might happen, including:
-
-    * Your correspondent simply started a new AKE.
-    * Your correspondent resent his `D-H Commit message`, as specified above.
-    * On some networks, like AIM, if your correspondent is logged in multiple
-      times, each of his clients will send a `D-H Commit Message` in response
-      to a Query Message. Resending the same `D-H Key Message` in response to
-      each of those messages will prevent confusion, since each of the clients
-      will see each of the `D-H Key Messages` sent.
-
-If authstate is `AUTHSTATE_AWAITING_SIG`:
-  * Reply with a new `D-H Key message` and transition authstate to
-    `AUTHSTATE_AWAITING_REVEALSIG`.
-
-#### Receiving a D-H Key Message
-
-Note that the states, messages and keys referred here are specific of OTRv3
-Protocol. For their definition, refer to
-[Appendix](#otrv3-or-less-specific-encoded-messages).
-
-If the message is version 3 and version 3 is not allowed, ignore this message.
-Otherwise:
-
-If authstate is `AUTHSTATE_AWAITING_DHKEY`:
-  * Reply with a `Reveal Signature Message` and transition authstate to
-    `AUTHSTATE_AWAITING_SIG`.
-
-If authstate is `AUTHSTATE_AWAITING_SIG`:
-
-  * If this `D-H Key message` is the same you received earlier (when you entered
-    `AUTHSTATE_AWAITING_SIG`):
-    * Retransmit your `Reveal Signature Message`.
-
-  * Otherwise:
-    * Ignore the message.
-
-If authstate is `AUTHSTATE_NONE`, `AUTHSTATE_AWAITING_REVEALSIG`, or
-`AUTHSTATE_V1_SETUP`:
-  * Ignore the message.
 
 #### Receiving an Identity message
 
@@ -1618,8 +1546,8 @@ If the state is `START`:
       * Verify that the DH public key `B` is from the correct group and that it
         does not degenerate.
       * If all validations succeed:
-          * send a DRE-Auth message
-          * transition to the `ENCRYPTED_MESSAGES` state.
+        * send a DRE-Auth message
+        * transition to the `ENCRYPTED_MESSAGES` state.
 
 If the state is `DAKE_IN_PROGRESS`:
 
@@ -1670,8 +1598,8 @@ If the state is `ENCRYPTED_MESSAGES`:
       * Verify that the point `Y` received is on curve Ed448.
       * Verify that the DH public key `B` is from the correct group.
       * If all validations succeed:
-          * send a DRE-Auth message
-          * stay in the `ENCRYPTED_MESSAGES` state.
+        * send a DRE-Auth message
+        * stay in the `ENCRYPTED_MESSAGES` state.
 
 #### Sending a DRE-Auth message
 
@@ -1801,6 +1729,10 @@ Protocol.
   to the user.
 * Display the message in the user configured language.
 
+If using version 3 and it is expected that the AKE will start when receiving a message:
+
+  * Reply with a query message
+
 #### User requests to end an OTR conversation
 
 Send a data message, encoding a message with an empty human-readable part, and
@@ -1821,7 +1753,7 @@ If the version is 3:
 ## Socialist Millionaires Protocol (SMP)
 
 SMP in version 4 shares the same TLVs and flow as SMP in OTRv3 with the
-following exceptions.
+following exceptions. For how OTRv3 handles SMP, please refer to the spec [\[2\]](#references).
 
 In OTRv3, SMP Message 1 is used when a user does not specify an SMP question
 and, if not, a SMP Message 1Q is used. OTRv4 is simplified to use only SMP
@@ -2528,6 +2460,7 @@ message. Thus, its offset is 0. The forger wants to replace "hi" with "yo".
   new_data_message = replace(old_data_message, new_encrypted_message, new_mac_tag)
 
   ```
+
 ### OTRv3 Specific Encoded Messages
 
 #### D-H Commit Message
@@ -2549,34 +2482,71 @@ It consists of: the protocol version, the message type, the sender's instance
 tag, the receiver's instance tag, the revealed key, the encrypted signature and
 and the MAC of the signature.
 
-#### Signature Message
+#### Receiving a D-H Commit Message
 
-This is the final message of the OTRv3 AKE. Alice sends it to Bob,
-authenticating herself and the channel parameters to him.
+If the message is version 3 and version 3 is not allowed, ignore the message.
+Otherwise:
 
-It consists of: the protocol version, the message type, the sender's instance
-tag, the receiver's instance tag, the encrypted signature and the MAC of the
-signature.
+If authstate is `AUTHSTATE_NONE`:
 
-#### Reveal Signature Message
+  * Reply with a `D-H Key Message`, and transition authstate to
+    `AUTHSTATE_AWAITING_REVEALSIG`.
 
-This is the third message of the OTRv3 AKE. Bob sends it to Alice, revealing his D-H
-encryption key (and thus opening an encrypted channel), and also authenticating
-himself (and the parameters of the channel, preventing a man-in-the-middle
-attack on the channel itself) to Alice.
+If authstate is `AUTHSTATE_AWAITING_DHKEY`:
+  * This indicates that you have already sent a `D-H Commit message` to your
+    peer, but that it either didn't receive it, or just didn't receive it yet
+    and has sent you one as well. The symmetry will be broken by comparing the
+    hashed `gx` you sent in your `D-H Commit Message` with the one you received,
+    considered as 32-byte unsigned big-endian values.
 
-It consists of: the protocol version, the message type, the sender's instance
-tag, the receiver's instance tag, the encrypted signature and the MAC of the
-signature.
+  * If yours is the higher hash value:
+    * Ignore the incoming `D-H Commit message`, but resend your
+      `D-H Commit message`.
 
-#### Sending a TLV type 1 (Disconnect) Message
+  * Otherwise:
+    * Forget the old encrypted `gx` value that you sent earlier, and pretend
+      you're in `AUTHSTATE_NONE`. For example, reply with a `D-H Key Message`,
+      and transition `authstate` to `AUTHSTATE_AWAITING_REVEALSIG`.
 
-If the user requests to close its private connection, you may send
-a message (possibly with an empty human-readable part) containing a record
-with TLV type 1 just before you discard the session keys. You should then
-transition to 'MSGSTATE_PLAINTEXT'.
+If authstate is `AUTHSTATE_AWAITING_REVEALSIG`:
+  * Retransmit your `D-H Key Message` (the same one you sent when you entered
+    `AUTHSTATE_AWAITING_REVEALSIG`). Forget the old `D-H Commit message` and
+    use this new one instead.
+    There are a number of reasons this might happen, including:
 
-### Receiving OTRv3 messages
+    * Your correspondent simply started a new AKE.
+    * Your correspondent resent his `D-H Commit message`, as specified above.
+    * On some networks, like AIM, if your correspondent is logged in multiple
+      times, each of his clients will send a `D-H Commit Message` in response
+      to a Query Message. Resending the same `D-H Key Message` in response to
+      each of those messages will prevent confusion, since each of the clients
+      will see each of the `D-H Key Messages` sent.
+
+If authstate is `AUTHSTATE_AWAITING_SIG`:
+  * Reply with a new `D-H Key message` and transition authstate to
+    `AUTHSTATE_AWAITING_REVEALSIG`.
+
+#### Receiving a D-H Key Message
+
+If the message is version 3 and version 3 is not allowed, ignore this message.
+Otherwise:
+
+If authstate is `AUTHSTATE_AWAITING_DHKEY`:
+  * Reply with a `Reveal Signature Message` and transition authstate to
+    `AUTHSTATE_AWAITING_SIG`.
+
+If authstate is `AUTHSTATE_AWAITING_SIG`:
+
+  * If this `D-H Key message` is the same you received earlier (when you entered
+    `AUTHSTATE_AWAITING_SIG`):
+    * Retransmit your `Reveal Signature Message`.
+
+  * Otherwise:
+    * Ignore the message.
+
+If authstate is `AUTHSTATE_NONE`, `AUTHSTATE_AWAITING_REVEALSIG`, or
+`AUTHSTATE_V1_SETUP`:
+  * Ignore the message.
 
 #### Receiving a Signature Message
 
@@ -2609,6 +2579,33 @@ If authstate is AUTHSTATE_AWAITING_REVEALSIG:
   * Otherwise, ignore the message.
 If authstate is AUTHSTATE_NONE, AUTHSTATE_AWAITING_DHKEY or AUTHSTATE_AWAITING_SIG:
   * Ignore the message.
+
+#### Reveal Signature Message
+
+This is the third message of the OTRv3 AKE. Bob sends it to Alice, revealing his D-H
+encryption key (and thus opening an encrypted channel), and also authenticating
+himself (and the parameters of the channel, preventing a man-in-the-middle
+attack on the channel itself) to Alice.
+
+It consists of: the protocol version, the message type, the sender's instance
+tag, the receiver's instance tag, the encrypted signature and the MAC of the
+signature
+
+#### Signature Message
+
+This is the final message of the OTRv3 AKE. Alice sends it to Bob,
+authenticating herself and the channel parameters to him.
+
+It consists of: the protocol version, the message type, the sender's instance
+tag, the receiver's instance tag, the encrypted signature and the MAC of the
+signature.
+
+#### Sending a TLV type 1 (Disconnect) Message
+
+If the user requests to close its private connection, you may send
+a message (possibly with an empty human-readable part) containing a record
+with TLV type 1 just before you discard the session keys. You should then
+transition to 'MSGSTATE_PLAINTEXT'.
 
 ### OTRv3 Protocol State Machine
 
@@ -2665,66 +2662,6 @@ AUTHSTATE_AWAITING_SIG
   Signature Message, he enters this state to await Alice's reply.
 
 ```
-
-### Transitional Signature
-
-OTRv3 uses long-lived public keys for authentication (but not encryption).
-
-```
-OTR public authentication DSA key (PUBKEY):
-
-  Pubkey type (SHORT)
-  DSA public keys have type 0x0000
-
-    p (MPI)
-    q (MPI)
-    g (MPI)
-    y (MPI)
-      (p,q,g,y) are the DSA public key parameters
-```
-
-OTR public keys are used to generate signatures: different types of keys produce
-signatures in different formats. The format for a signature made by a DSA public
-key is as follows (this, in OTRv4 is referred as 'transitional signature'):
-
-```
-DSA signature (SIG):
-  (len is the length of the DSA public parameter q, which in current
-  implementations must be 20 bytes, or 160 bits)
-  len byte unsigned r, big-endian
-  len byte unsigned s, big-endian
-```
-
-OTR public keys have fingerprints, which are hex strings that serve as
-identifiers for the public key. The fingerprint is calculated by taking the
-SHA-1 hash of the byte-level representation of the public key. However, there is
-an exception for backwards compatibility: if the pubkey type is 0x0000, those
-two leading 0x00 bytes are omitted from the data to be hashed. The encoding
-assures that, assuming the hash function itself has no useful collisions, and
-DSA keys have length less than 524281 bits (500 times larger than most DSA
-keys), no two public keys will have the same fingerprint.
-
-### Extra Symmetric Key
-
-OTRv3 defines an additional symmetric key that can be derived by the
-communicating parties to use for application-specific purposes, such as file
-transfer, voice encryption, etc. When one party wishes to use the extra
-symmetric key, it is created as `type 8 TLV` and attached to a Data Message as
-previously stated. The key itself is derived using the same "secbytes" used
-to compute the encryption and MAC keys of the Data Message of OTRv3:
-
-```
-  Write the value of OTRv3 shared secret (`s`) as a minimum-length MPI (4-byte
-  big-endian len, len-byte big-endian value).
-```
-
-The extra symmetric key is derived by calculating:
-
-  `extra_sym_key = SHA256(0xFF | k)`
-
-Upon receipt of the Data Message containing the `type 8 TLV`, the recipient will
-compute the extra symmetric key in the same way. Note that the value of the
-extra symmetric key is not contained in the TLV itself.
 
 ### References
 
