@@ -875,7 +875,7 @@ Profile Expiration (PROF-EXP):
 ```
 
 SIG refers to the `OTR version 3 DSA Signature` with the structure. Refer to
-'DSA signature' on OTRv3 for more infomation:
+'DSA signature' on OTRv3 for more information:
 
 ```
 DSA signature (SIG):
