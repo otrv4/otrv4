@@ -410,54 +410,62 @@ SHA3-512 hash of the byte-level representation of the public key.
 
 ### TLV Types
 
+Each TLV record is of the form:
+
+Type (SHORT)
+  The type of this record. Records with unrecognized types should be ignored.
+Length (SHORT)
+  The length of the following field
+Value (len BYTEs) [where len is the value of the Length field]
+  Any pertinent data for the record type.
+
 OTRv4 supports the majority of the TLV record types from OTRv3. The ones not
 supported state so. They are:
 
 ```
 Type 0: Padding
-    The value may be an arbitrary amount of data. This data should be ignored.
-    This type can be used to disguise the length of a plaintext message.
+  The value may be an arbitrary amount of data. This data should be ignored.
+  This type can be used to disguise the length of a plaintext message.
 
 Type 1: Disconnected
   Closes the connection.
 
 Type 2: SMP Message 1
-    The value represents the initial message of the Socialist Millionaires'
-    Protocol (SMP), described below.
+  The value represents the initial message of the Socialist Millionaires'
+  Protocol (SMP), described below.
 
 Type 3: SMP Message 2
-    The value represents the second message in an instance of the SMP.
+  The value represents the second message in an instance of the SMP.
 
 Type 4: SMP Message 3
-    The value represents the third message in an instance of the SMP.
+  The value represents the third message in an instance of the SMP.
 
 Type 5: SMP Message 4
-    The value represents the final message in an instance of the SMP.
+  The value represents the final message in an instance of the SMP.
 
 Type 6: SMP Abort Message
-    If the user cancels the SMP prematurely or encounters an error in the
-    protocol and cannot continue, you may send a message (possibly with an empty
-    human-readable part) with this TLV type to instruct the other party's client
-    to abort the protocol. The associated length should be zero and the
-    associated value should be empty. If you receive a TLV of this type,
-    you should change the SMP state to 'SMP_EXPECT1' (see below).
+  If the user cancels the SMP prematurely or encounters an error in the
+  protocol and cannot continue, you may send a message (possibly with an empty
+  human-readable part) with this TLV type to instruct the other party's client
+  to abort the protocol. The associated length should be zero and the
+  associated value should be empty. If you receive a TLV of this type,
+  you should change the SMP state to 'SMP_EXPECT1' (see below).
 
 Type 7: SMP Message 1Q
-    Only used by OTRv3, and not in OTRv4.
-    Like a SMP Message 1, but its value begins with a NUL-terminated
-    user-specified question.
+  Only used by OTRv3, and not in OTRv4.
+  Like a SMP Message 1, but its value begins with a NUL-terminated
+  user-specified question.
 
 Type 8: Extra symmetric key
-    Only used by OTRv3, and not in OTRv4.
-    Refer to appendix for explanation.
-    If you wish to use the extra symmetric key, compute it as outlined in the
-    section "Extra symmetric key", below. Then, send this 'type 8 TLV' to your
-    peer to indicate that you'd like to use it. The value of the TLV begins with
-    a 4-byte indication of what this symmetric key will be used for
-    (file transfer, voice encryption, etc). After that, the contents are
-    use-specific (which file, etc): there are no predefined uses.
-    Note that the value of the key itself is not placed into the TLV; your peer
-    will compute it on its own.
+  Only used by OTRv3, and not in OTRv4.
+  If you wish to use the extra symmetric key, compute it as outlined in the
+  section "Extra symmetric key" [\[2\]](#references). Then, send this 'type 8 TLV' to your
+  peer to indicate that you'd like to use it. The value of the TLV begins with
+  a 4-byte indication of what this symmetric key will be used for
+  (file transfer, voice encryption, etc). After that, the contents are
+  use-specific (which file, etc): there are no predefined uses.
+  Note that the value of the key itself is not placed into the TLV; your peer
+  will compute it on its own.
 ```
 
 ### OTR Error Messages
