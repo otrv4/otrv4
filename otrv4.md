@@ -717,10 +717,9 @@ To create a user profile, assemble:
    excluding the signature itself. The size of the signature is 112 bytes. It is
    created using the [Ed448 signature algorithm](#user-profile-signature).
 5. Transition Signature (optional): A signature of the profile excluding Profile
-   Signatures and the user's OTRv3 DSA key. The [Transitional
-   Signature](#transitional-signature) that enables contacts that trust user's
-   version 3 DSA key to trust the user's profile in version 4. This is only used
-   if the user supports versions 3 and 4.
+   Signatures and the user's OTRv3 DSA key. The Transition Signature enables
+   contacts that trust user's version 3 DSA key to trust the user's profile in
+   version 4. This is only used if the user supports versions 3 and 4.
 
 After the profile is created, it must be published in a public place, like an
 untrusted server.
@@ -876,7 +875,7 @@ Profile Expiration (PROF-EXP):
 ```
 
 SIG refers to the `OTR version 3 DSA Signature` with the structure. Refer to
-[Transitional Signature](#transitional-signature) for more information:
+'DSA signature' on OTRv3 for more infomation:
 
 ```
 DSA signature (SIG):
