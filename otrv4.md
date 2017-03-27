@@ -1881,7 +1881,7 @@ middle is capable of reading their communication either.
 ### SMP Hash function
 
 In the following actions, there are many places where a SHA3-512 hash of an
-integer followed by one or two MPIs is taken. This is defined as `HashToScalar(d)`.
+integer followed by one or two Points is taken. This is defined as `HashToScalar(d)`.
 
 The input to this hash function is:
 
@@ -1891,12 +1891,12 @@ Version (BYTE)
   protocol, to prevent Alice from replaying Bob's zero knowledge proofs or
   vice versa.
 
-First MPI (MPI)
-  The first MPI given as input, serialized in the usual way.
+First Point (POINT)
+  The first Point given as input, encoded in the usual way.
 
-Second MPI (MPI)
-  The second MPI given as input, if present, serialized in the usual way. If
-  only one MPI is given as input, this field is simply omitted.
+Second Point (POINT)
+  The second Point given as input, if present, encoded in the usual way. If
+  only one Point is given as input, this field is simply omitted.
 ```
 
 ### SMP message 1
@@ -1955,14 +1955,14 @@ follows:
    that they do not degenerate.
 2. Determine Bob's secret input `y`, which is to be compared to Alice's secret
    `x`.
-3. Pick random values `b2` and `b3` in `Z_q`. These will used during
-   the DH exchange to pick generators.
+3. Pick random values `b2` and `b3` in `Z_q`. These will used for creating
+   generators.
 4. Pick random values `r2`, `r3`, `r4`, `r5` and `r6` in `Z_q`. These
    will be used to add a blinding factor to the final results, and to generate
    zero-knowledge proofs that this message was created honestly.
-5. Compute `G2b = G * b2` and `G3b = G * b3`.
+5. Compute `G2b = G1 * b2` and `G3b = G * b3`.
 6. Generate a zero-knowledge proof that the value `b2` is known by setting
-`c2 = HashToScalar(3 || G * r2)` and `d2 = r2 - b2 * c2 mod q`.
+`c2 = HashToScalar(3 || G1 * r2)` and `d2 = r2 - b2 * c2 mod q`.
 7. Generate a zero-knowledge proof that the value `b3` is known by setting
 `c3 = HashToScalar(4 || G * r3)` and `d3 = r3 - b3 * c3 mod q`.
 8. Compute `G2 = G2a * b2` and `G3 = G3a * b3`.
