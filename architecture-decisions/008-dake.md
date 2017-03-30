@@ -16,8 +16,10 @@ deniability properties in regard to an online and offline judge:
 - RSDAKE:
 - Spawn * :
   - non-interactive: NO online deniability with respect to R simulating I.
-  - interactive: security weakness (sections 3.8.5 and 3.8.6 of paper 1).
-- QuickSpawn:
+  - interactive: online deniability for both parties. Security weakness
+    (sections 3.8.5 and 3.8.6 of paper 1).
+- QuickSpawn: non-interactive that intentionally sacrifices online deniability
+  for R for simplicity.
 
 TODO: Improve the summary of properties.
 
