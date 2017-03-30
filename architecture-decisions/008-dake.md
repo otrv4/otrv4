@@ -35,7 +35,8 @@ We choose to use Spawn because:
 
 We will need to implement a Cramer-Shoup cryptosystem on Ed448 plus
 Dual-Receiver Encryption (DRE) and NIZKPK.
-The resulting messages are not as efficient as other DAKES.
+The resulting messages are not as efficient as other DAKES, but this hasn't
+been a problem so far.
 
 ### References
 
