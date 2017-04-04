@@ -60,7 +60,7 @@ there are at least two implementations available for different platforms.
 #### Protecting from rollback in OTRv4
 
 Rollback from v4 wire protocol to v3 wire protocol can't be detected by OTRv4.
-Bob's DH-Commit message does not contain an User Profile. After the AKE finishes,
+Bob's DH-Commit message does not contain a User Profile. After the AKE finishes,
 Alice could contact the Profiles server and ask for Bob's User Profile to
 validate if Bob really does not support 4, but this put the trust on the server.
 
@@ -75,10 +75,10 @@ Rollback from vX (released after 4) wire protocol to v4 wire protocol can be
 detected by OTRv4:
 
 - For OTRvX (released after OTRv4), the known wire versions are: X, ..., 4.
-- After receiving an User Profile, an OTRvX client must make sure the highest
+- After receiving a User Profile, an OTRvX client must make sure the highest
   version supported by both participants is used:
   - For every known version that's present in the received User Profile, check
-    if the version used to receive this message is the higher you support.
+    if the version used to receive this message is the highest you support.
 
 ```
 Alice                               Malory                                Bob
