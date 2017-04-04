@@ -57,12 +57,11 @@ works on top of an existing messaging protocol, like XMPP.
 
 [Appendices](#appendices)
 
-  1. [ROM DRE](#rom-dre)
-  2. [ROM Authentication](#rom-authentication)
-  3. [HashToScalar](#hashtoscalar)
-  4. [Modify an encrypted data message](#modify-an-encrypted-data-message)
-  5. [OTRv3 Specific Encoded Messages](#otrv3-specific-encoded-messages)
-  6. [OTRv3 Protocol State Machine](#otrv3-protocol-state-machine)
+  1. [SNIZKPK Authentication](#snizkpk-authentication)
+  2. [HashToScalar](#hashtoscalar)
+  3. [Modify an encrypted data message](#modify-an-encrypted-data-message)
+  4. [OTRv3 Specific Encoded Messages](#otrv3-specific-encoded-messages)
+  5. [OTRv3 Protocol State Machine](#otrv3-protocol-state-machine)
 
 ## Main Changes over Version 3
 
@@ -71,7 +70,7 @@ works on top of an existing messaging protocol, like XMPP.
 - Additional protection against transcript decryption in the case of ECC
   compromise.
 - The cryptographic primitives and protocols have been updated:
-  - Deniable authenticated key exchange using Spawn [\[1\]](#references).
+  - Deniable authenticated key exchange using DAKEZ [\[1\]](#references).
   - Key management using the Double Ratchet Algorithm [\[2\]](#references).
   - Upgraded SHA-1 and SHA-2 to SHA-3.
   - Switched from AES to XSalsa20.
@@ -349,34 +348,13 @@ Given s, compute:
 9. Compute `T = w * X`
 10. Construct the point `P` as `P = (X : Y : Z : T)`
 
-### Serializing Dual Receiver Encryption Messages and Auth Messages
-
-A dual-receiver encrypted (DRE) message is serialized as follows:
-
-```
-Dual-receiver encrypted message (DRE-M):
-
-  U11 (POINT)
-  U21 (POINT)
-  E1 (POINT)
-  V1 (POINT)
-  U12 (POINT)
-  U22 (POINT)
-  E2 (POINT)
-  V2 (POINT)
-  l (MPI)
-  n1 (MPI)
-  n2 (MPI)
-    Where (U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2) =
-    DREnc(pubA, pubB, k)
-```
+### Serializing Auth Messages
 
 An Auth non-interactive zero-knowledge proof of knowledge is serialized as
 follows:
 
 ```
 Auth message (AUTH):
-
   c1 (MPI)
   r1 (MPI)
   c2 (MPI)
@@ -391,15 +369,13 @@ Auth message (AUTH):
 OTRv4 introduces a new type of public key:
 
 ```
-OTR public authentication Cramer-Shoup key (CRAMER-SHOUP-PUBKEY):
+OTR4 public authentication ElGamal key (EL-GAMAL-PUBKEY):
 
   Pubkey type (SHORT)
-    Cramer-Shoup public keys have type 0x0010
+    ElGamal public keys have type 0x0010
 
-    C (POINT)
-    D (POINT)
     H (POINT)
-      (C, D, H) are the Cramer-Shoup public key parameters
+      H is the ElGamal public key generated (H = G1 * r).
 ```
 
 OTRv4 public keys have fingerprints, which are hex strings that serve as
@@ -483,7 +459,7 @@ Error Code List:
 
 ## Key management
 
-In the DAKE, OTRv4 makes use of long-term Cramer-Shoup keys, ephemeral Elliptic
+In the DAKE, OTRv4 makes use of long-term ElGamal keys, ephemeral Elliptic
 Curve Diffie-Hellman (ECDH) keys, and ephemeral Diffie-Hellman (DH) keys.
 
 For exchanging data messages, OTRv4 makes use of both the DH ratchet (with ECDH)
@@ -665,11 +641,11 @@ derive_enc_mac_keys(chain_key):
 The state variables are set to `0` and the key variables are set to `NIL` for
 this channel.
 
-## Conversation Initialization
+## Online Conversation Initialization
 
 OTRv4 will initialize through a [Query Message or a Whitespace
 Tag](#user-requests-to-start-an-otr-conversation). After this, the conversation
-is authenticated using the DAKE.
+is authenticated using the interactive DAKE.
 
 ### Requesting conversation with older OTR versions
 
@@ -680,7 +656,7 @@ version 3, then this message is ignored.
 
 ### User Profile
 
-OTRv4 introduces a user profile. The user profile contains the Cramer-Shoup
+OTRv4 introduces a user profile. The user profile contains the ElGamal
 long term public key, signed information about supported versions, a signed
 profile expiration date, and a singed optional transition signature.
 
@@ -705,14 +681,14 @@ and the profile used in the DAKE should match each other.
 
 To create a user profile, assemble:
 
-1. User's Cramer-Shoup long term public key.
+1. User's ElGamal long term public key.
 2. Versions: a string corresponding to the user's supported OTR versions.
    A user profile can advertise multiple OTR versions. The format is described
    under the section [Establishing Versions](#establishing-versions) below.
 3. Profile Expiration: Expiration date in standard Unix 64-bit format
    (seconds since the midnight starting Jan 1, 1970, UTC, ignoring leap
    seconds).
-4. Profile Signature: One of the Cramer-Shoup secret key values (`z`) and its
+4. ????: Profile Signature: One of the ElGamal secret key values (`z`) and its
    generator (`G1`) is used to create signatures of the entire profile
    excluding the signature itself. The size of the signature is 112 bytes. It is
    created using the [Ed448 signature algorithm](#user-profile-signature).
@@ -737,14 +713,11 @@ to OTR version 3, and thus do not support versions 2 and 1, i.e. version strings
 of "32" or "31". Any other string that is not "4", "3", "2" or "1" should be
 ignored.
 
-#### Version Priority
+#### Validating a User Profile
 
-OTRv4 addresses version rollback attacks by prioritizing later versions over
-older versions. For example, in the case where both participants support
-versions 3 and 4, both will default to using 4. In another case where one
-participant only supports version 3 and the other supports version 3 and 4,
-version 3 will be used. Each client should keep track of which versions are more
-recent and thus prioritize them while processing versions in the DAKE.
+* Verify that the user profile signature is valid.
+* Verify that the user profile is not expired.
+* Verify that the versions field contains "4".
 
 #### Renewing a Profile
 
@@ -791,7 +764,7 @@ OTRv4 uses the following steps to create a signature:
 
 3. Use SHAKE-256 to hash the message, the public key, and the temporary
    signature. The `public_key` is the [`h` value](#dual-receiver-key-generation-drgen)
-   of the Cramer-Shoup public key. Decode this value into a scalar and reduce
+   of the ElGamal public key. Decode this value into a scalar and reduce
    it mod the order of the base point [q](#elliptic-curve-parameters).
 
    ```
@@ -800,7 +773,7 @@ OTRv4 uses the following steps to create a signature:
    ```
 
 4. Scalar multiply the challenge with the secret key. The `secret_key` is the
-   [`z`](#dual-receiver-key-generation-drgen) value of the Cramer-Shoup private
+   [`z`](#dual-receiver-key-generation-drgen) value of the ElGamal private
    key.
    Derive the final nonce by scalar subtracting the product of the
    multiplication from the intermediary nonce.
@@ -825,7 +798,7 @@ These are the steps to verify the signature:
 
 1. Derive a challenge by using a SHAKE-256 of the message, a public key, and
    the temporary signature (the first 56 bytes of the signature). The public key
-   is the [`h`](#dual-receiver-key-generation-drgen) value of the Cramer-Shoup
+   is the [`h`](#dual-receiver-key-generation-drgen) value of the ElGamal
    long term public key in the profile. Decode this value into a scalar and
    reduce it mod the order of the base point [q](#elliptic-curve-parameters).
 
@@ -864,7 +837,7 @@ These are the steps to verify the signature:
 
 ```
 User Profile (USER-PROF):
-  Cramer-Shoup public key (CRAMER-SHOUP-PUBKEY)
+  ElGamal public key (EL-GAMAL-PUBKEY)
   Versions (DATA)
   Profile Expiration (PROF-EXP)
   Profile Signature (SCHNORR-SIG)
@@ -893,29 +866,27 @@ Schnorr signature (SCHNORR-SIG):
   len byte unsigned value, big-endian
 ```
 
-### Deniable Authenticated Key Exchange (DAKE)
+### Interactive Deniable Authenticated Key Exchange (DAKE)
 
-This section outlines the flow of the DAKE. This is a way to mutually agree upon
-shared keys for the two parties and authenticate one another while providing
-participation deniability.
+This section outlines the flow of the interactive DAKE. This is a way to
+mutually agree upon shared keys for the two parties and authenticate one another
+while providing participation deniability.
 
-This protocol is derived from the Spawn protocol [\[1\]](#references), which
-uses dual-receiver encryption (DRE) and a non-interactive zero-knowledge proof
-of knowledge (NIZKPK) for authentication (Auth).
+This protocol is derived from the DAKEZ protocol [\[1\]](#references), which
+uses a signature non-interactive zero-knowledge proof of knowledge (SNIZKPK) for
+authentication (Auth).
 
-Alice's long-term Cramer-Shoup key-pair is `ska = (x1a, x2a, y1a, y2a, za)` and
-`PKa = (Ca, Da, Ha)`. Bob's long-term Cramer-Shoup key-pair is `skb = (x1b, x2b,
-y1b, y2b, zb)` and `PKb = (Cb, Db, Hb)`. Both key pairs are generated by
-`DRGen()`.
+Alice's long-term ElGamal key-pair is `(ska, PKa)` and Bob's long-term ElGamal
+key-pair is `(skb, PKb)`. Both key pairs are generated by `PK = G1 * sk`.
 
-#### DAKE Overview
+#### Interactive DAKE Overview
 
 ```
 Alice                                    Bob
 ---------------------------------------------------
 Query Message or Whitespace Tag ------->
                                 <------- Identity message
-               DRE-Auth ------->
+                       DRE-Auth ------->
                                          Verify & Decrypt
 ```
 
@@ -940,50 +911,49 @@ Bob will be initiating the DAKE with Alice.
       group and sets it as `their_dh`.
 2. Generates and sets `our_ecdh` as ephemeral ECDH keys.
 3. Generates and sets `our_dh` as ephemeral 3072-bit DH keys.
-4. Sends Bob a DRE-Auth message (see [DRE-Auth message section](#dre-auth-message)).
-5. At this point, the DAKE is complete for Alice:
-    * Sets ratchet id `i` as 0.
-    * Sets `j` as 0 (which means she will ratchet again).
-    * Calculates ECDH shared secret `K_ecdh`.
-    * Calculates DH shared secret `k_dh` and `mix_key`.
-    * Calculates Mixed shared secret `K = SHA3-512(K_ecdh || mix_key)`.
-    * Calculates the SSID from shared secret: the first 8 bytes of `SHA3-256(0x00 || K)`.
-    * Calculates the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = calculate_ratchet_keys(K)`.
-    * [Decides which chain key she will use](#deciding-between-chain-keys).
+4. Sends Bob a Auth-R message (see [Auth-R message](#auth-r-message) section).
+
 
 **Bob:**
 
-1. Receives DRE-Auth message from Alice:
+1. Receives Auth-R message from Alice:
     * Validates Alice's User Profile.
     * Picks the highest compatible version of OTR listed on Alice's profile, and
       follows the specification for this version. Version prioritization is
       explained [here](#version-priority) If the versions are incompatible, Bob
       does not send any further messages.
-    * Verify the authentication `sigma` (see [DRE-Auth message](#dre-auth-message)).
-2. Decrypts `gamma` (see [DRE-Auth message](#dre-auth-message)) and verifies
-   the following properties of the decrypted message. If any of the
-   verifications fail, the message is ignored:
-    * The message is of the correct form (e.g., the fields are of the expected
-     length).
-    * Bob's User Profile is the first one listed
-    * Alice's User Profile is the second one listed, and it matches the
-     one transmitted outside of the ciphertext
-    * `(Y, B)` in the message is an Identity message that Bob previously sent
+    * Verify the authentication `sigma` (see [Auth-R message](#auth-r-message) section).
+    * Verify `(Y, B)` in the message is an Identity message that Bob previously sent
       and has not been used.
 3. Retrieve ephemeral public keys from Alice:
     * Validates the received ECDH ephemeral public key is on curve Ed448 and
       sets it as `their_ecdh`.
     * Validates that the received DH ephemeral public key is on the correct
       group and sets it as `their_dh`.
-4. At this point, the DAKE is complete for Bob:
+4. Sends Bob a Auth-I message (see [Auth-I message](#auth-i-message) section).
+5. At this point, the DAKE is complete for Bob:
     * Sets ratchet id `i` as 0.
-    * Sets `j` as 1.
+    * Sets `j` as 0 (which means she will ratchet again).
     * Calculates ECDH shared secret `K_ecdh`.
     * Calculates DH shared secret `k_dh` and `mix_key`.
     * Calculates Mixed shared secret `K = SHA3-512(K_ecdh || mix_key)`.
     * Calculates the SSID from shared secret: it is the first 8 bytes of `SHA3-256(0x00 || K)`.
     * Calculates the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = calculate_ratchet_keys(K)`.
     * [Decides which chain key he will use](#deciding-between-chain-keys).
+
+**Alice:**
+
+1. Receives an Auth-I message from Bob:
+    * Verify the authentication `sigma` (see [Auth-I message](#auth-i-message) section).
+2. At this point, the interactive DAKE is complete for Alice:
+    * Sets ratchet id `i` as 0.
+    * Sets `j` as 1.
+    * Calculates ECDH shared secret `K_ecdh`.
+    * Calculates DH shared secret `k_dh` and `mix_key`.
+    * Calculates Mixed shared secret `K = SHA3-512(K_ecdh || mix_key)`.
+    * Calculates the SSID from shared secret: the first 8 bytes of `SHA3-256(0x00 || K)`.
+    * Calculates the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = calculate_ratchet_keys(K)`.
+    * [Decides which chain key she will use](#deciding-between-chain-keys).
 
 #### Identity message
 
@@ -998,13 +968,20 @@ choice of DH and ECDH key. A valid Identity message is generated as follows:
   * secret key `b` (80 bytes).
   * public key `B`.
 
+To verify an Identity message:
+
+* Validate the User Profile.
+* Verify that the point `Y` received is on curve Ed448.
+* Verify that the DH public key `B` is from the correct group and that it
+  does not degenerate.
+
 An Identity message is an OTR message encoded as:
 
 ```
 Protocol version (SHORT)
   The version number of this protocol is 0x0004.
 Message type (BYTE)
-  The message has type 0x0F.
+  The message has type 0x08.
 Sender Instance tag (INT)
   The instance tag of the person sending this message.
 Receiver Instance tag (INT)
@@ -1020,44 +997,34 @@ B (MPI)
   this is NOT a POINT.
 ```
 
-#### DRE-Auth message
+#### Auth-R message
 
 This is the second message of the DAKE. Alice sends it to Bob to commit to a
 choice of her ECDH ephemeral key and her DH ephemeral key, and acknowledgment
 of Bob's ECDH ephemeral key and DH ephemeral key. This acknowledgement includes
 a validation that Bob's ECDH key is on the curve Ed448 and his DH key is in the
-correct group. The public ECDH ephemeral public keys and public DH ephemeral
-public keys are encrypted with DRE and authenticated with a NIZKPK.
+correct group.
 
-A valid DRE-Auth message is generated as follows:
+A valid Auth-R message is generated as follows:
 
-1. Create a user profile, as detailed [here](#creating-a-user-profile)
+1. Create a user profile, as detailed [here](#creating-a-user-profile).
 2. Generate an ephemeral ECDH key pair:
   * secret key `x` (56 bytes).
-  * public key `X`
+  * public key `X`.
 3. Generate an ephemeral DH key pair:
   * secret key `a` (80 bytes).
   * public key `A`.
-4. Pick random values `r` in Z_q and compute `K = G1 * r`.
-5. Compute symmetric key `K_enc = SHA3-256(K)`. K is hashed from 55 bytes to 32
-   bytes because XSalsa20 has a maximum key size of 32 bytes.
-6. Generate `m = Bobs_User_Profile || Alices_User_Profile || Y || X || B || A`.
-7. Pick a random 24 bytes `nonce` and compute `phi = XSalsa20-Poly1305_K_enc(m,
-   nonce)`.
-8. Compute `gamma = DREnc(PKb, PKa, K)`.
-9. Compute `sigma = Auth(Ha, za, {Hb, Ha, Y}, Bobs_User_Profile || Alices_User_Profile
-   || Y || B || gamma)`.
+4. Compute `t = 0x0 || Bobs_User_Profile || Alices_User_Profile || Y || X || B || A`.
+5. Compute `sigma = Auth(Pka, ska, {Pkb, Pka, Y}, t)`.
 
-To verify and decrypt the DRE-Auth message:
+To verify an Auth-R message:
 
-1. Validate user profile.
-2. Verify the `sigma` with [ROM Authentication](#rom-authentication)
-   `Verify({Ha, Hb, Y}, sigma, Bobs_User_Profile || Alices_User_Profile || Y || B || gamma)`.
-3. Decrypt the `gamma` with [ROM DRE](#rom-dre) `K = DRDec(PKb, PKa, skb, gamma)`.
-4. Compute symmetric key `K_dec = SHA3-256(K)`.
-5. Decrypt `m = XSalsa20-Poly1305_K_dec(phi, nonce)`.
+1. Validate the user profile, and extract `Pka` from it.
+2. Compute `t = 0x0 || Bobs_User_Profile || Alices_User_Profile || Y || X || B || A`.
+3. Verify the `sigma` with [SNIZKPK Authentication](#snizkpk-authentication),
+that is `sigma == Verify({Pkb, Pka, Y}, t)`.
 
-A DRE-Auth is an OTR message encoded as:
+An Auth-R is an OTR message encoded as:
 
 ```
 Protocol version (SHORT)
@@ -1070,18 +1037,58 @@ Receiver Instance tag (INT)
   The instance tag of the intended recipient.
 Sender's User Profile (USER-PROF)
   As described in the section 'Creating a User Profile'.
-gamma (DRE-M)
-  The Dual-receiver encrypted key.
+X (POINT)
+  The ephemeral public ECDH key.
+A (MPI)
+  The ephemeral public DH key. Note that even though this is in uppercase,
+  this is NOT a POINT.
 sigma (AUTH)
-  The Auth value.
-nonce (NONCE)
-  The nonce used to encrypt m.
-phi (DATA)
-  The encrypted message (Bobs_User_Profile || Alices_User_Profile || Y || X || B || A).
-  In practice, Bobs_User_Profile is the sender's profile and Alices_User_Profile is the
-  receiver's profile. In addition, Y and B are sender's ephemeral keys and X and A are the
-  receiver's ephemeral keys.
+  The SNIZKPK Auth value.
 ```
+
+#### Auth-I message
+
+This is the final message of the DAKE. Bob sends it to Alice to [complete with a
+description].
+
+A valid Auth-I message is generated as follows:
+
+1. Compute `t = 0x1 || Bobs_User_Profile || Alices_User_Profile || Y || X || B || A`.
+2. Compute `sigma = Auth(Pkb, skb, {Pkb, Pka, X}, t)`.
+
+To verify the Auth-I message:
+
+1. Compute `t = 0x1 || Bobs_User_Profile || Alices_User_Profile || Y || X || B || A`.
+2. Verify the `sigma` with [SNIZKPK Authentication](#snizkpk-authentication),
+that is `sigma == Verify({Pkb, Pka, X}, t)`.
+
+An Auth-I is an OTR message encoded as:
+
+```
+Protocol version (SHORT)
+  The version number of this protocol is 0x0004.
+Message type (BYTE)
+  The message has type 0x80.
+Sender Instance tag (INT)
+  The instance tag of the person sending this message.
+Receiver Instance tag (INT)
+  The instance tag of the intended recipient.
+sigma (AUTH)
+  The SNIZKPK Auth value.
+```
+
+## Offline Conversation Initialization
+
+TODO: Improve this, but a rough description of how it works is:
+
+1. You ask for a pre-key using a protocol to be defined in another spec.
+2. You send the last ZDH message + an encrypted data message.
+3. You keep ratcheting at the chain-key level to send additional messages.
+
+We should highlight the problems of keep using the same session for a long time
+and how OTR design uses a heartbeat to force key refresh, and how there's a
+trade-off between the duration of the conversation and the limited number of
+pre-keys.
 
 ## Data Exchange
 
@@ -1392,11 +1399,13 @@ START
   sent in this state are plaintext messages. If a TLV type 1 (Disconnect)
   message is sent in another state, transition to this state.
 
-DAKE_IN_PROGRESS
+WAITING_AUTH_R
 
-  This state is entered when a participant receives or sends an Identity
-  message. Data Messages created in this state are queued for delivery in the
-  next ENCRYPTED_MESSAGES state.
+  This is the Auth message sent by the Responder.
+
+WAITING_AUTH_I
+
+  This is the Auth message sent by the Initiator.
 
 ENCRYPTED_MESSAGES
 
@@ -1529,32 +1538,15 @@ If the Query message offers OTR version 3 and version 3 is allowed:
   * Send a version `3 D-H Commit Message`.
   * Transition authstate to `AUTHSTATE_AWAITING_DHKEY`.
 
-
-
 #### Receiving an Identity message
 
 If the state is `START`:
 
-  * Validate the Identity message. If any of the verifications fail, ignore the
-    message.
-    * Verify that the user profile signature is valid.
-    * Verify that the user profile is not expired.
-    * Verify that your versions are compatible with the versions in the user
-      profile.
-      * If your versions are incompatible with the versions in the message,
-        ignore the message
-      * Else, pick the highest compatible version and follow the OTR
-        specification for this version. Version prioritization is detailed
-        [here](#version-priority).
-    * If the highest compatible version is OTR version 4
-      * Verify that the point `Y` received is on curve Ed448.
-      * Verify that the DH public key `B` is from the correct group and that it
-        does not degenerate.
-      * If all validations succeed:
-        * send a DRE-Auth message
-        * transition to the `ENCRYPTED_MESSAGES` state.
+  * Validate the Identity message and ignore the message if it fails.
+  * Reply with an Auth-R message (TODO: link to section).
+  * Transition to the `WAITING_AUTH_R` state.
 
-If the state is `DAKE_IN_PROGRESS`:
+If the state is `WAITING_AUTH_R`:
 
 This indicates that both you and the other participant have sent Identity
 messages to each other. This can happen if they send you an Identity message
@@ -1562,89 +1554,65 @@ before receiving yours.
 
 To agree on an Identity message to use for this conversation:
 
+  * Validate the Identity message and ignore the message if it fails.
   * Compare the `X` (as a 56-byte unsigned big-endian value) you sent in your
     Identity message with the value from the message you received.
   * If yours is the lower hash value:
-    * Ignore the received Identity message.
+    * Ignore the received Identity message, but resend your Identity message.
   * Otherwise:
     * Forget your old `X` value that you sent earlier.
-    * Validate the Identity message. If any of the verifications fail, ignore
-      the message.
-      * Verify that the user profile signature is valid.
-      * Verify that the user profile is not expired.
-      * Verify that your versions are compatible with the versions in the user
-        profile.
-        * If your versions are incompatible with the versions in the message,
-          ignore the message
-        * Else, pick the highest compatible version and follow the OTR
-          specification for this version. Version prioritization is detailed
-          [here](#version-priority).
-    * If the highest compatible version is OTR version 4
-      * Verify that the point `Y` received is on curve Ed448.
-      * Verify that the DH public key `B` is from the correct group.
-      * If validation succeeds:
-        * Send a DRE-Auth message.
-        * Transition to the `ENCRYPTED_MESSAGES` state.
+    * Send an Auth-R message.
+    * Transition state to `WAITING_AUTH_R`.
+
+If the state is `WAITING_AUTH_I`:
+
+  * Forget the old `their_ecdh` and `their_dh` from the previously received
+    Identity message.
+  * Send a new Auth-R message with the new values received.
+
+There are a number of reasons this might happen, including:
+
+  * Your correspondent simply started a new AKE.
+  * Your correspondent resent his Identity Message, as specified above.
 
 If the state is `ENCRYPTED_MESSAGES`:
 
-  * Validate the Identity message. If any of the verifications fail, ignore the
-    message.
-    * Verify that the user profile signature is valid.
-    * Verify that the user profile is not expired.
-    * Verify that your versions are compatible with the versions in the user
-      profile.
-      * If your versions are incompatible with the versions in the message,
-        ignore the message
-      * Else, pick the highest compatible version and follow the OTR
-        specification for this version. Version prioritization is detailed
-        [here](#version-priority).
-    * If the highest compatible version is OTR version 4
-      * Verify that the point `Y` received is on curve Ed448.
-      * Verify that the DH public key `B` is from the correct group.
-      * If all validations succeed:
-        * send a DRE-Auth message
-        * stay in the `ENCRYPTED_MESSAGES` state.
+  * Ignore the message.
 
-#### Sending a DRE-Auth message
+#### Sending an Auth-R message
 
-* Compute the ECDH shared secret `K_ecdh`.
-* Compute the mix key `mix_key`.
-* Transition the state to `ENCRYPTED_MESSAGES`.
-* Initialize the double ratcheting.
-* Send a DRE-Auth Message.
+  * Generate an Auth-R Message.
+  * Transition the state to `WAITING_AUTH_I`.
 
-#### Receiving a DRE-Auth message
+#### Receiving an Auth-R message
 
-If the state is not `DAKE_IN_PROGRESS`:
+If the state is `WAITING_AUTH_R`:
+
+  * Validate the Auth-R message and ignore the message if it fails.
+  * Reply with an Auth-I message.
+  * Transition state to `WAITING_AUTH_I`.
+
+If the state is not `WAITING_AUTH_R`:
 
   * Ignore this message.
 
-If the state is `DAKE_IN_PROGRESS`:
+#### Sending an Auth-I message
 
-  * Verify that the Sender's User Profile. If any of the verifications fail, ignore the
-    message.
-    * Check that the profile is not expired
-    * Pick the highest compatible version indicated in the profile.
-      * If the versions advertised are not compatible with those that are supported,
-        ignore this message.
-      * Else, follow the specification for the highest compatible version.
-        Version prioritization is detailed [here](#version-priority)
-      * If the highest compatible version is version 4:
-        * If the auth `sigma` is valid:
-          * Decrypt the DRE key.
-          * Decrypt phi and verify:
-            * that our profile is the first in the message.
-            * that their user profile is not expired and matches the profile
-              in the Sender's User Profile section.
-            * that the point `X` received is on curve Ed448.
-            * that the DH public key `A` is from the correct group.
-            * that `Y` and `B` were previously sent in this session (and remain unused).
-            * If everything verifies:
-              * Compute the ECDH shared secret `K_ecdh`.
-              * Compute the mix key `mix_key`.
-              * Initialize the double ratcheting.
-              * Transition state to `ENCRYPTED_MESSAGES`.
+  * Send an Auth-I Message.
+  * Transition the state to `ENCRYPTED_MESSAGES`.
+  * Initialize the double ratcheting.
+
+#### Receiving an Auth-I message
+
+If the state is `WAITING_AUTH_I`:
+
+  * Validate the Auth-R message and ignore the message if it fails.
+  * Transition state to `ENCRYPTED_MESSAGES`.
+  * Initialize the double ratcheting.
+
+If the state is not `WAITING_AUTH_I`:
+
+  * Ignore this message.
 
 #### Sending an encrypted data message
 
@@ -1771,7 +1739,7 @@ the size of the fingerprint in the "Secret Information" section of OTRv3
 
 Lastly, OTRv4 uses Ed448 as the cryptographic primitive. This changes the way
 values are serialized and how they are computed. To define the SMP values
-under Ed448, we reuse the previously defined generator `G1` for Cramer-Shoup:
+under Ed448, we reuse the previously defined generator `G1` for ElGamal:
 
 ```
 G1 = (11781216126343694673728248434331006466518053535701637341687908214793940427
@@ -2267,127 +2235,7 @@ Forge Entire Transcript
 
 ## Appendices
 
-### ROM DRE
-
-The DRE scheme consists of three functions:
-
-`PK, sk = DRGen()`, a key generation function.
-
-`gamma = DREnc(PK1, PK2, K)`, an encryption function.
-
-`K = DRDec(PK1, PK2, ski, gamma) i ∈ {1, 2}` , a decryption function.
-
-#### Domain parameters
-
-The Cramer-Shoup scheme uses a group (`G`, `q`, `G1`, `G2`). This is a group
-with the same `q` as curve Ed448. The generators `G1` and `G2` are:
-
-```
-G1 = (1178121612634369467372824843433100646651805353570163734168790821479394042
-77809514858788439644911793978499419995990477371552926308078495, 19)
-
-= (0x297ea0ea2692ff1b4faff46098453a6a26adf733245f065c3c59d0709cecfa96147eaaf393
-2d94c63d96c170033f4ba0c7f0de840aed939f, 0x13)
-
-G2 = (16198104581588018595899223143190272311918511238122751222361431851896743243
-4013519584102297147218387513217725422122524316513263204161236914142188,
-17443011591827011924522432141214711554174683032038520272613022239901295213216602
-00204217838721145102661825010820238188238915121131226223
-)
-
-=(0xa162683a9e50b9093a63df8fbe1be7bf5570267a4b7aec8fb9bd432bf32887c3540ae5472fda
-264b84b1fedde1f3a5843fcca117450e8ebc,
-0xae2b000b3bb64677f5e0208d02937336ae441e03cb55141b1a8216ef5a8105d5d83cc8ccd95357
-1591664212fa6c14eebcee5b33d31fe2df)
-```
-
-Generator 1 (`G1`) is the base point of Ed448. Generator 2 (`G2`) was created
-following this post [\[13\]](#references) and with this code
-[\[9\]](#references) that works as follows:
-
-1. Select `x`, a "nothing up my sleeve" value (a value chosen above suspicion
-   of hidden properties). In this case, we choose `decaf_448_g2`.
-2. Hash the base point to prevent a theoretical backdoor defined by Stanislav
-   Smyshlaev: `hashed_base = SHAKE-256(base_point)`
-3. Hash the `x` into an array of 512 bits. These will be used as the uniform
-   random seed: `seed = SHAKE-256(x)`
-4. Hash the base point with the uniform random seed:
-   `encoded_point = SHAKE-256(hashed_base, seed)`
-5. Apply elligator 2 [\[14\]](#references). Use
-   `point_from_hash_uniform` from Mike Hamburg's Ed448 code
-   [\[15\]](#references) which maps a hash buffer to the curve:
-   `p = point_from_hash_uniform(encoded_point)`
-
-#### Dual Receiver Key Generation: DRGen()
-
-1. Pick random values `x1, x2, y1, y2, z` in Z_q.
-2. Compute group elements
-  - `C = G1 * x1 + G2 * x2`
-  - `D = G1 * y1 + G2 * y2`
-  - `H = G1 * z`.
-3. The public key is `PK = {C, D, H}` and the secret key is
-   `sk = {x1, x2, y1, y2, z}`.
-
-#### Dual Receiver Encryption: DREnc(PK1, PK2, K)
-
-Let `{C1, D1, H1} = PK1` and `{C2, D2, H2} = PK2`
-`C1`, `D1`, `H1`, `C2`, `D2`, and `H2` should be checked to verify
-they are on curve Ed448.
-
-1. Pick random values `k1, k2` in Z_q.
-2. For i ∈ {1, 2}:
-  1. Compute
-    - `U1i = G1 * ki`
-    - `U2i = G2 * ki`
-    - `Ei = (Hi * ki) + K`
-  2. Compute `αi = HashToScalar(U1i || U2i || Ei)`.
-  3. Compute `Vi = Ci * ki + Di * (ki * αi)`
-3. Generate a NIZKPK:
-  1. for i ∈ {1, 2}:
-    1. Pick random value `ti` in Z_q.
-    2. Compute
-      - `T1i = G1 * ti`
-      - `T2i = G2 * ti`
-      - `T3i = (Ci + Di * αi) * ti`
-  2. Compute `T4 = H1 * t1 - H2 * t2`.
-  3. Compute
-    - `gV = G1 || G2 || q`
-    - `pV = C1 || D1 || H1 || C2 || D2 || H2`
-    - `eV = U11 || U21 || E1 || V1 || α1 || U12 || U22 || E2 || V2 || α2`
-    - `zV = T11 || T21 || T31 || T12 || T22 || T32 || T4`
-    - `l = HashToScalar(gV || pV || eV || zV)`
-  4. Generate for i ∈ {1,2}:
-    1. Compute `ni = ti - l * ki (mod q)`.
-4. Send `gamma = (U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2)`.
-
-#### Dual Receiver Decryption: DRDec(PK1, PK2, ski, gamma):
-
-Let `{C1, D1, H1} = PK1`, `{C2, D2, H2} = PK2` and `{x1i, x2i, y1i, y2i, zi} =
-ski`.
-ski is the secret key of the person decrypting the message.
-`C1`, `D1`, `H1`, `C2`, `D2`, and `H2` should be checked to verify
-they are on curve Ed448.
-
-1. Parse `gamma` to retrieve components
-  `(U11, U21, E1, V1, U12, U22, E2, V2, l, n1, n2, nonce, phi) = gamma`.
-2. Verify NIZKPK:
-  1. for j ∈ {1, 2} compute:
-    1. `αj = HashToScalar(U1j || U2j || Ej)`
-    2. `T1j = G1 * nj + U1j * l`
-    3. `T2j = G2 * nj + U2j * l`
-    4. `T3j = (Cj + Dj * αj) * nj + Vj * l`
-  2. Compute `T4 = H1 * n1 - H2 * n2 + (E1-E2) * l`
-  3. Compute
-    - `gV = G1 || G2 || q`
-    - `pV = C1 || D1 || H1 || C2 || D2 || H2`
-    - `eV = U11 || U21 || E1 || V1 || α1 || U12 || U22 || E2 || V2 || α2`
-    - `zV = T11 || T21 || T31 || T12 || T22 || T32 || T4`
-    - `l' = HashToScalar(gV || pV || eV || zV)`
-  4. Verify `l' ≟ l`.
-  5. Verify `U1i * x1i + U2i * x2i + (U1i * y1i + U2i * y2i) * αi ≟ Vi`.
-3. Recover `K = Ei - U1i * zi`.
-
-### ROM Authentication
+### SNIZKPK Authentication
 
 The Authentication scheme consists of two functions:
 
@@ -2397,7 +2245,7 @@ The Authentication scheme consists of two functions:
 
 #### Domain parameters
 
-We reuse the previously defined G1 generator in Cramer-Shoup of DRE:
+We reuse the previously defined G1 generator in ElGamal of DRE:
 
 ```
 G1 = (11781216126343694673728248434331006466518053535701637341687908214793940427
