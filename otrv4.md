@@ -4,6 +4,9 @@ OTRv4 is a new version of OTR that provides a deniable authenticated key
 exchange and better forward secrecy through the use of double ratcheting. OTR
 works on top of an existing messaging protocol, like XMPP.
 
+???: The spec currently refers to DAKE meaning interactive DAKE. We need to
+replace it and identify when DAKE is used in the broader sense.
+
 ## Table of Contents
 
 1. [Main Changes over Version 3](#main-changes-over-version-3)
@@ -78,6 +81,8 @@ works on top of an existing messaging protocol, like XMPP.
   functions used to conduct honest conversations.
 
 ## High Level Overview
+
+TODO: Add the non-interactive overview.
 
 ```
 Alice                                            Bob
@@ -506,6 +511,7 @@ values are replaced by these events:
   [DRE-Auth Message](#dre-auth-message).
 * [When you send and receive a Data Message](#data-exchange)
 * [When you receive a TLV type 1 (Disconnect)](#receiving-a-tlv-type-1-disconnect-message)
+* ???: What about when you start a non-interactive AKE?
 
 ### Generating ECDH and DH keys
 
@@ -732,6 +738,8 @@ can be configurable. A recommended value is two weeks.
 
 #### Creating a User Profile Signature
 
+???: We need to review this: why is it specific to "decaf" signatures?
+
 The user profile signature is based on a variant of Schnorr's signature
 algorithm defined by Mike Hamburg. An overview of how the signature works
 can be found on [\[3\]](#references) and the [implementation function:
@@ -858,6 +866,7 @@ DSA signature (SIG):
   len byte unsigned s, big-endian
 ```
 
+???: Is this still a Schnorr Signature?
 SCHNORR-SIG refers to the `OTR version 4 signature`:
 
 ```
