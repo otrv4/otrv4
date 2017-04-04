@@ -353,13 +353,13 @@ Given s, compute:
 9. Compute `T = w * X`
 10. Construct the point `P` as `P = (X : Y : Z : T)`
 
-### Serializing Auth Messages
+### Serializing the SNIZKPK Authentication
 
-An Auth non-interactive zero-knowledge proof of knowledge is serialized as
-follows:
+A signature non-interactive zero-knowledge proof of knowledge (SNIZKPK) is
+serialized as follows:
 
 ```
-Auth message (AUTH):
+SNIZKPK Authentication (SNIZKPK):
   c1 (MPI)
   r1 (MPI)
   c2 (MPI)
@@ -1051,7 +1051,7 @@ X (POINT)
 A (MPI)
   The ephemeral public DH key. Note that even though this is in uppercase,
   this is NOT a POINT.
-sigma (AUTH)
+sigma (SNIZKPK)
   The SNIZKPK Auth value.
 ```
 
@@ -1082,7 +1082,7 @@ Sender Instance tag (INT)
   The instance tag of the person sending this message.
 Receiver Instance tag (INT)
   The instance tag of the intended recipient.
-sigma (AUTH)
+sigma (SNIZKPK)
   The SNIZKPK Auth value.
 ```
 
@@ -1341,7 +1341,7 @@ The instance tags, `index` and `total` values may have leading zeros.
 
 Note that fragments are not messages that can be fragmented: you can't fragment a fragment.
 
-### Receiving Fragments:
+### Receiving Fragments
 
 If you receive a message containing `?OTR|` (note that you'll need to check
 for this _before_ checking for any of the other `?OTR:` markers):
