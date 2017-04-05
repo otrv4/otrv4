@@ -1482,8 +1482,8 @@ WAITING_AUTH_I
 
 ENCRYPTED_MESSAGES
 
-  This state is entered after DRE-Auth message has been sent or it has been
-  received and validated. Messages sent in this state are encrypted.
+  This state is entered after DAKE is finished. This will happen after Auth-I
+  message is sent, received and validated. Messages sent in this state are encrypted.
 
 FINISHED
 
@@ -2318,7 +2318,7 @@ The Authentication scheme consists of two functions:
 
 #### Domain parameters
 
-We reuse the previously defined G1 generator in ElGamal of DRE:
+We reuse the previously defined G1 generator in elliptic curve parameters:
 
 ```
 G1 = (11781216126343694673728248434331006466518053535701637341687908214793940427
