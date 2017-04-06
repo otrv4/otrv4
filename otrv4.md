@@ -271,6 +271,14 @@ Hexadecimal value of dh_q:
 Note that this means that whenever you see an operation on a field element
 from the above group, the operation should be done modulo the prime `dh_p`.
 
+The following key derivation functions are used:
+
+```
+KDF_1(x) = SHA3-256("OTR4" || x)
+KDF_2(x) = SHA3-512("OTR4" || x)
+
+```
+
 ## Data Types
 
 OTRv4 uses many of the data types specified in OTRv3:
@@ -589,9 +597,9 @@ decide_between_chain_keys(Ca, Cb):
 
 ```
 derive_ratchet_keys(K):
-  R = SHA3-512(0x01 || K)
-  Ca = SHA3-512(0x02 || K)
-  Cb = SHA3-512(0x03 || K)
+  R = KDF_2(0x01 || K)
+  Ca = KDF_2(0x02 || K)
+  Cb = KDF_2(0x03 || K)
   return R, decide_between_chain_keys(Ca, Cb)
 ```
 
@@ -619,12 +627,12 @@ To rotate the mix key:
 
     * Generate the new DH key pair `our_dh = generateDH()`.
     * Calculate `k_dh = DH(our_dh.secret, their_dh.public)`.
-    * Calculate a `mix_key = SHA3-256(k_dh)`.
+    * Calculate a `mix_key = KDF_1(k_dh)`.
     * Securely delete `our_dh.secret`.
 
   Otherwise:
 
-   * Derive and securely overwrite `mix_key = SHA3-256(mix_key)`.
+   * Derive and securely overwrite `mix_key = KDF_1(mix_key)`.
 
 ### Deriving new chain keys
 
@@ -632,7 +640,7 @@ When sending data messages, you must derive the chain key:
 
 ```
 derive_chain_key(C, i, j):
-  C[i][j] = SHA3-512(C[i][j-1])
+  C[i][j] = KDF_2(C[i][j-1])
   return C[i][j]
 ```
 
@@ -643,7 +651,7 @@ When receiving data messages, you must compute the chain key:
 ```
 compute_chain_key(C, i, k):
   if C[i][k] does not exist:
-    C[i][k] = SHA3-512(compute_chain_key(C, i, k-1))
+    C[i][k] = KDF_2(compute_chain_key(C, i, k-1))
   return C[i][k]
 ```
 
@@ -653,8 +661,8 @@ When sending or receiving data messages, you must calculate the message keys:
 
 ```
 derive_enc_mac_keys(chain_key):
-  MKenc = SHA3-256(0x01 || chain_key)
-  MKmac = SHA3-512(0x02 || chain_key)
+  MKenc = KDF_1(0x01 || chain_key)
+  MKmac = KDF_2(0x02 || chain_key)
   return MKenc, MKmac
 ```
 
@@ -963,9 +971,9 @@ Bob will be initiating the DAKE with Alice.
     * Sets `j` as 0 (which means she will ratchet again).
     * Calculates ECDH shared secret `K_ecdh`.
     * Calculates DH shared secret `k_dh` and `mix_key`.
-    * Calculates Mixed shared secret `K = SHA3-512(K_ecdh || mix_key)`.
-    * Calculates the SSID from shared secret: it is the first 8 bytes of `SHA3-256(0x00 || K)`.
-    * Calculates the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = calculate_ratchet_keys(K)`.
+    * Calculates Mixed shared secret `K = KDF_2(K_ecdh || mix_key)`.
+    * Calculates the SSID from shared secret: it is the first 8 bytes of `KDF_1(0x00 || K)`.
+    * Calculates the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
     * [Decides which chain key he will use](#deciding-between-chain-keys).
 
 **Alice:**
@@ -977,9 +985,9 @@ Bob will be initiating the DAKE with Alice.
     * Sets `j` as 1.
     * Calculates ECDH shared secret `K_ecdh`.
     * Calculates DH shared secret `k_dh` and `mix_key`.
-    * Calculates Mixed shared secret `K = SHA3-512(K_ecdh || mix_key)`.
-    * Calculates the SSID from shared secret: the first 8 bytes of `SHA3-256(0x00 || K)`.
-    * Calculates the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = calculate_ratchet_keys(K)`.
+    * Calculates Mixed shared secret `K = KDF_2(K_ecdh || mix_key)`.
+    * Calculates the SSID from shared secret: the first 8 bytes of `KDF_1(0x00 || K)`.
+    * Calculates the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
     * [Decides which chain key she will use](#deciding-between-chain-keys).
 
 #### Identity message
@@ -1302,8 +1310,8 @@ Given a new ratchet:
     "Public ECDH Key" for the message. If a new public DH key is created in
     this process, it will be the "Public DH Key" for the message. If it is
     not created, then it will be empty.
-  * Calculate the `K = SHA3-512(K_ecdh || mix_key)`.
-  * Derive new set of keys `root[i], chain_s[i][0], chain_r[i][0] = calculate_ratchet_keys(K)`.
+  * Calculate the `K = KDF_2(K_ecdh || mix_key)`.
+  * Derive new set of keys `root[i], chain_s[i][0], chain_r[i][0] = derive_ratchet_keys(K)`.
   * Securely delete the root key and all chain keys from the ratchet `i-2`.
   * Securely delete `K`.
 
@@ -1333,7 +1341,7 @@ In both cases:
     from the protocol version to the encrypted message.
 
    ```
-   Authenticator = SHA3-512(MKmac || Data_message_sections)
+   Authenticator = KDF_2(MKmac || Data_message_sections)
    ```
 
   * Forget and reveal MAC keys. The conditions for revealing MAC keys is
@@ -2372,7 +2380,7 @@ m is the message to authenticate.
 
 This function is `hashToScalar(d)`: d is an array of bytes.
 
-1. Compute `h = SHA3-512(d)` as an unsigned value, big-endian.
+1. Compute `h = KDF_2(d)` as an unsigned value, big-endian.
 2. Return `h (mod q)`
 
 ### Modify an encrypted data message
