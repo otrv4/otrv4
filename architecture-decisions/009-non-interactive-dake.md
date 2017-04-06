@@ -5,7 +5,7 @@
 - Should OTRv4 provide a non-interactive AKE?
 - How should pre-keys be published and retrieved? How many? For how long?
 - How to associate pre-keys with instance tags? What about user profiles?
-- Should the protocol specify HOW to use interactive and non-intractive in
+- Should the protocol specify HOW to use interactive and non-interactive in
   a hybrid mode and how to automatically fallback from one to another?
 
 ### Context
@@ -14,18 +14,15 @@ OTRv3 only provides an interactive AKE and adding support to non-interactive
 AKE is an usability feature.
 
 A non-interactive DAKE starts by the receiver (R) requesting a pre-key for the
-initiator (I) from a untrusted server.
+initiator (I) from a untrusted server. I's long-term public key must be known by R.
 
 The receiver then generates their ephemeral keys and derives a shared secret
 (and initial root and chain keys) which can be used to send an encrypted data
-message together with his final message on the DAKE.
+message together with his final message on the non-interactive DAKE.
 
-The receiver can continue sending data mesages even without receiving a reply
+The receiver can continue sending data messages even without receiving a reply
 from the initiator, and forward secrecy is preserved by ratcheting the chain
 key.
-
-When the initiator receives the final message in the DAKE, they should verify
-if the pre-key
 
 An OTRv4 pre-key may contain:
 - one ephemeral ECDH key.
@@ -33,28 +30,38 @@ An OTRv4 pre-key may contain:
 - user profile.
 - instance tag.
 
-The initiator generates a set of pre-keys and publishes them to an untrusted
-server.
+#### Publishing pre-keys
+
+The initiator (I) should:
+
+1. Authenticate itself with the server by running an interactive DAKE.
+2. Include a ZKPK to prove they control the ephemeral secret key in the pre-key.
+3. Send the pre-key.
+4. Store the pre-key for future use.
+
+The server should:
+
+1. Verify the ZKPK.
+2. Associate the received pre-key with the long-term public key used in the DAKE.
+
+#### Retrieving pre-keys
+
+The receiver (R) should:
+
+1. Request from the server a pre-key for I's long-term public key.
+
+The server should:
+
+1. Reply with the pre-key if there's any, and remove from its storage.
+2. Reply with a special message if it could not find.
 
 #### Problem 1: Multiple clients
 
-OTR works in protocols that allow an user/account to be concurrently online in
-the network using multiple clients (or devices). This means messages addressed
-to client A may be received by client B and/or A with no guarantee or order.
-
-OTR makes use of instance tag to avoid problems in such networks, so a message
-is addressed to a particular OTR client if it's sent to the account that
-controls that device AND it contains the client's instance tag.
-
-Since pre-keys are ephemeral keys stored in a particular OTR client, messages
-in a non-interactive conversation have the risk of being completely lost if
-they are received by a client with a different instance tag and there's no
-guarantee that the underlying network protocol will ever deliver these messages
-to the corrrect client.
-
-Should we be specific in saying how this could possibly work in XMPP? Should we
-recommend that a client receiving offline messages from XMPP should keep them
-there if they are not addressed to this client's instance tags?
+OTR uses instance tags to distinguish between different clients. This can be
+solved by associating recipient long-term public keys with instance tags and
+preventing multiple client to share the same long-term public key. A client
+must distinguish between when a new long-term public key represents
+a new device or the retirement of the previous key.
 
 #### Problem 2: Multiple OTR wire protocol versions
 
@@ -66,11 +73,16 @@ for the case of XMMP, for example?
 
 #### Problem 3: Multiple DAKEs for multiple settings
 
-Having different DAKEs for interactive and non-interactive may increase
-complexity: should we have 2 DAKEs state machines? What should happen when you
+Having different DAKEs for interactive and non-interactive increases complexity:
+should we have 2 DAKEs state machines? What should happen when you
 receive a non-interactive DAKE message while waiting for an interactive DAKE
 message (and vice-versa)? Should we keep two sets of key materials? Is it worth
-the additional ammout of code?
+the additional amount of code?
+
+#### Problem 4: What to do when the server runs out of pre-keys?
+
+How other protocols solve this? Does it preserve partial participation
+deniability?
 
 ### Decision
 
