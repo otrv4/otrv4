@@ -393,15 +393,18 @@ SHA3-512 hash of the byte-level representation of the public key.
 
 Each TLV record is of the form:
 
+```
 Type (SHORT)
-  The type of this record. Records with unrecognized types should be ignored.
+  The type of this record. Records with unrecognized types should be ignored
 Length (SHORT)
   The length of the following field
-Value (len BYTEs) [where len is the value of the Length field]
-  Any pertinent data for the record type.
+Value (len BYTE) [where len is the value of the Length field]
+  Any pertinent data for the record type
+```
 
 OTRv4 supports the majority of the TLV record types from OTRv3. The ones not
-supported state so. They are:
+supported stated as so. They are:
+
 
 ```
 Type 0: Padding
@@ -447,6 +450,17 @@ Type 8: Extra symmetric key
   use-specific (which file, etc): there are no predefined uses.
   Note that the value of the key itself is not placed into the TLV; your peer
   will compute it on its own.
+```
+
+SMP Message TLVs (types 2-5) all carry data sharing the same general format:
+
+```
+MPI count (INT)
+  The number of MPIs contained in the remainder of the TLV.
+MPI 1 (MPI)
+  The first MPI of the TLV, serialized into a byte array.
+MPI 2 (MPI)
+  The second MPI of the TLV, serialized into a byte array.
 ```
 
 ### OTR Error Messages
@@ -1951,9 +1965,9 @@ generate zero-knowledge proofs that this message was created according to the
 protocol.
 4. Compute `G2a = G * a2` and `G3a = G * a3`.
 5. Generate a zero-knowledge proof that the value `a2` is known by setting
-`c2 = HashToScalar(1 || G * r2)` and `d2 = r2 - a2 * c2 mod q`.
+`c2 = HashToScalar(1 || G1 * r2)` and `d2 = r2 - a2 * c2 mod q`.
 6. Generate a zero-knowledge proof that the value `a3` is known by setting
-`c3 = HashToScalar(2 || G * r3)` and `d3 = r3 - a3 * c3 mod q`.
+`c3 = HashToScalar(2 || G1 * r3)` and `d3 = r3 - a3 * c3 mod q`.
 7. Store the values of `x`, `a2` and `a3` for use later in the protocol.
 
 
@@ -1985,7 +1999,7 @@ c3 (MPI), d3 (MPI)
 ### SMP message 2
 
 SMP message 2 is sent by Bob to complete the DH exchange to determine the new
-generators, g2 and g3. It also begins the construction of the values used in
+generators, `g2` and `g3`. It also begins the construction of the values used in
 the final comparison of the protocol. A valid SMP message 2 is generated as
 follows:
 
@@ -2010,7 +2024,6 @@ follows:
    `d5 = r5 - r4 * cp mod q` and `d6 = r6 - y * cp mod q`.
 11. Store the values of `G3a`, `G2`, `G3`, `b3`, `Pb` and `Qb` for use later
     in the protocol.
-
 
 The SMP message 2 has the following data:
 
@@ -2138,11 +2151,12 @@ Set smpstate to `SMPSTATE_EXPECT1` and send a SMP abort to Bob.
 If smpstate is `SMPSTATE_EXPECT2`:
 
 * Verify Bob's zero-knowledge proofs for `G2b`, `G3b`, `Pb` and `Qb`:
-    1. Check that `G2b`, `G3b`, `Pb` and `Qb` are on curve Ed448 and that they
-       do not degenerate.
-    2. Check that `c2 = HashToScalar(3 || G1 * d2 + G2b * c2)`.
-    3. Check that `c3 = HashToScalar(4 || G1 * d3 + G3b * c3)`.
-    4. Check that `cp = HashToScalar(5 || G3 * d5 + Pb * cp || G * d5 + G2 * d6 + Qb * cp)`.
+  1. Check that `G2b`, `G3b`, `Pb` and `Qb` are on curve Ed448 and that they
+     do not degenerate.
+  2. Check that `c2 = HashToScalar(3 || G1 * d2 + G2b * c2)`.
+  3. Check that `c3 = HashToScalar(4 || G1 * d3 + G3b * c3)`.
+  4. Check that `cp = HashToScalar(5 || G3 * d5 + Pb * cp || G1 * d5 + G2 * d6 +
+     Qb * cp)`.
 * Create SMP message 3 and send it to Bob.
 * Set smpstate to `SMPSTATE_EXPECT4`.
 
@@ -2180,8 +2194,7 @@ If smpstate is SMPSTATE_EXPECT4:
 
 * Verify Bob's zero-knowledge proof for Rb:
    1. Check that `Rb` is on curve Ed448 and that it does not degenerate.
-   2. Check that `Rb` is `>= 2` and `<= modulus-2`.
-   3. Check that `cr = HashToScalar(8 || G1 * d7 + G3 * cr || (Qa / Qb) * d7 + Rb * cr)`.
+   2. Check that `cr = HashToScalar(8 || G1 * d7 + G3 * cr || (Qa / Qb) * d7 + Rb * cr)`.
 
 * Check whether the protocol was successful:
     1. `Compute Rab = Rb * a3`.
