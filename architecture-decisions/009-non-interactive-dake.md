@@ -63,9 +63,9 @@ preventing multiple client to share the same long-term public key. A client
 must distinguish between when a new long-term public key represents
 a new device or the retirement of the previous key.
 
-#### Problem 2: Multiple OTR wire protocol versions
+#### Problem 2: Multiple OTR protocol versions
 
-Should pre-keys also contain information about which OTR wire protocol they
+Should pre-keys also contain information about which OTR protocol they
 belong to? Otherwise, how would we in the future allow OTRv4 and OTRv5 pre-keys?
 Should servers be required to provide an API to allow asking for pre-keys for
 specific OTR versions? Is this something possible to implement using only XEPs
