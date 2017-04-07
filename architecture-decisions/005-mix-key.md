@@ -8,7 +8,7 @@ would protect against post-conversation decryption of transcripts using those
 weaknesses.
 
 We believe this can be achieved by mixing another key obtained from a
-Diffie-Hellman exchange into the key material. This additional key will be
+Diffie-Hellman (DH) exchange into the key material. This additional key will be
 referred to as “mix key”.
 
 This proposal specifies:
@@ -21,10 +21,11 @@ This proposal does not change the Double Ratchet algorithm with the
 exception of how to derive root keys.
 
 The first 3072-bit DH key agreement takes place in the DAKE. See Nik Unger's
-paper [\[1\]](#references), which specifies Transitionally Secure Spawn. The difference to this
-entry in the paper is that we are trying to protect against elliptic curve
-weaknesses, and SIDH [\[2\]](#references) is specific for postquantum resistance. So we will
-instead use a classic Diffie Hellman key exchange.
+paper [\[1\]](#references), which specifies DAKEZ and ZDH as Quantum-Resistant
+Key Exchanges. The difference to this entry in the paper is that we are trying
+to protect against elliptic curve weaknesses, and SIDH [\[2\]](#references) is
+specific for postquantum resistance. So we will instead use a classic DH key
+exchange.
 
 The options for ratcheting/re-deriving this mix key are:
 
@@ -176,8 +177,7 @@ the mix key.
 **Diagram: Pattern of DH computations and key derivations in a conversation**
 
 This diagram describes when public keys should be sent and when Alice
-and Bob should compute the `mix_key` from a SHA3 or a new Diffie Hellman
-computation.
+and Bob should compute the `mix_key` from a SHA3 or a new DH computation.
 
 Both parties share knowledge of `M_0`, which is a `mix_key` established in
 the DAKE.
