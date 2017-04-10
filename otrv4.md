@@ -770,7 +770,7 @@ can be found on [\[3\]](#references) and [\[16\]](#references).
 OTRv4 uses the following steps to create a signature:
 
    ```
-   signature = sign(message, private_key)
+   signature = sign(message, secret_key)
    ```
 
 1. Derive an intermediary nonce by using SHAKE-256 of the message, of
