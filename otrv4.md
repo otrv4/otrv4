@@ -718,10 +718,11 @@ To create a user profile, assemble:
 3. Profile Expiration: Expiration date in standard Unix 64-bit format
    (seconds since the midnight starting Jan 1, 1970, UTC, ignoring leap
    seconds).
-4. ????: Profile Signature: One of the Ed448 secret key values (`z`) and its
-   generator (`G1`) is used to create signatures of the entire profile
-   excluding the signature itself. The size of the signature is 112 bytes. It is
-   created using the [Ed448 signature algorithm](#user-profile-signature).
+4. Profile Signature: The secret key value (`r`) and the generator (`G1`)
+   of the Ed448 long term public key is used to create signatures of the entire
+   profile excluding the signature itself. The size of the signature is 112
+   bytes. It is created using the
+   [Ed448 signature algorithm](#user-profile-signature).
 5. Transition Signature (optional): A signature of the profile excluding Profile
    Signatures and the user's OTRv3 DSA key. The Transition Signature enables
    contacts that trust user's version 3 DSA key to trust the user's profile in
@@ -762,13 +763,9 @@ can be configurable. A recommended value is two weeks.
 
 #### Creating a User Profile Signature
 
-???: We need to review this: why is it specific to "decaf" signatures?
-
 The user profile signature is based on a variant of Schnorr's signature
 algorithm defined by Mike Hamburg. An overview of how the signature works
-can be found on [\[3\]](#references) and the [implementation function:
-decaf\_448\_sign\_shake](https://sourceforge.net/p/ed448goldilocks/code/ci/decaf/tree/src/decaf_crypto.c#l117)
-provides more detail.
+can be found on [\[3\]](#references) and [\[16\]](#references).
 
 OTRv4 uses the following steps to create a signature:
 
@@ -776,39 +773,37 @@ OTRv4 uses the following steps to create a signature:
    signature = sign(message, private_key)
    ```
 
-1. Derive an intermediary nonce by using SHA3 SHAKE-256 of the message, of a random
-   value `random_v`, and of a specific string "decaf\_448\_sign\_shake". Decode
+1. Derive an intermediary nonce by using SHAKE-256 of the message, of
+   the ed448 secret key (`r`), and of a specific string "otr4_sign". Decode
    this value into a scalar and reduce it mod the order of the base point
    [q](#elliptic-curve-parameters).
+   // XXX: sha3-512 will probably work for this too.
 
    ```
-   random_v = new_random_value()
-   output = SHAKE-256(message || random_v || "decaf\_448\_sign\_shake")
-   intermediary_nonce = decode(output) % q
+   output = SHAKE-256("otr4_sign"|| secret_key || message)
+   intermediary_nonce = decode(outpu t) % q
    ```
 
 2. Use this intermediary nonce to create a temporary signature by computing
-   `nonce * G1` and encoding the output into an array of bytes.
+   `nonce * G1` and encode the output into an array of bytes.
 
    ```
    temporary_signature = encode(G1 * intermediary_nonce)
    ```
 
 3. Use SHAKE-256 to hash the message, the public key, and the temporary
-   signature. The `public_key` is the [`h` value](#dual-receiver-key-generation-drgen)
-   of the Ed448 public key. Decode this value into a scalar and reduce
-   it mod the order of the base point [q](#elliptic-curve-parameters).
+   signature. The `public_key` is the Ed448 long term public key (`H`). Decode
+   this value into a scalar and reduce it mod the order of the base point
+   [q](#elliptic-curve-parameters).
 
    ```
-   output = SHAKE256(message || public_key || temporary_signature)
+   output = SHAKE-256(message || public_key || temporary_signature)
    challenge = decode(output) % q
    ```
 
 4. Scalar multiply the challenge with the secret key. The `secret_key` is the
-   [`z`](#dual-receiver-key-generation-drgen) value of the Ed448 private
-   key.
-   Derive the final nonce by scalar subtracting the product of the
-   multiplication from the intermediary nonce.
+   the Ed448 long term private key (`r`). Derive the final nonce by scalar
+   subtracting the product of the multiplication from the intermediary nonce.
 
    ```
    nonce = intermediary_nonce - challenge * secret_key
@@ -820,19 +815,16 @@ OTRv4 uses the following steps to create a signature:
 
 #### Verify a User Profile Signature
 
-An overview of how to verify this signature can be found on the [implementation
-function: decaf\_448\_verify\_shake](https://sourceforge.net/p/ed448goldilocks/code/ci/decaf/tree/src/decaf_crypto.c#l163).
-
    ```
+   boolean valid
    valid = verify(signature, message, public_key)
    ```
 These are the steps to verify the signature:
 
-1. Derive a challenge by using a SHAKE-256 of the message, a public key, and
-   the temporary signature (the first 56 bytes of the signature). The public key
-   is the [`h`](#dual-receiver-key-generation-drgen) value of the Ed448
-   long term public key in the profile. Decode this value into a scalar and
-   reduce it mod the order of the base point [q](#elliptic-curve-parameters).
+1. Derive a challenge by using a SHAKE-256 of the message, the long term public
+   key (`H`), and the temporary signature (the first 56 bytes of the signature).
+   Decode this value into a scalar and reduce it mod the order of the base point
+   [q](#elliptic-curve-parameters).
 
    ```
    output = SHAKE-256(message || public_key || temporary_signature)
@@ -856,7 +848,8 @@ These are the steps to verify the signature:
    ```
 
 4. Compute: the addition of the multiplication of `G1` (the base point) with the
-   `nonce` and the multiplication of the `public_key_point` with the `challenge`.
+   `nonce` and the multiplication of the `public_key_point` with the
+   `challenge`.
 
    ```
    result_point  = G1 * nonce + public_key_point * challenge
@@ -868,6 +861,9 @@ These are the steps to verify the signature:
 #### User Profile Data Type
 
 ```
+Profile Expiration (PROF-EXP):
+  8 bytes signed value, big-endian
+
 User Profile (USER-PROF):
   Ed448 public key (ED448-PUBKEY)
   Versions (DATA)
@@ -875,8 +871,6 @@ User Profile (USER-PROF):
   Profile Signature (SCHNORR-SIG)
   (optional) Transitional Signature (SIG)
 
-Profile Expiration (PROF-EXP):
-  8 bytes signed value, big-endian
 ```
 
 SIG refers to the `OTR version 3 DSA Signature` with the structure. Refer to
@@ -890,7 +884,6 @@ DSA signature (SIG):
   len byte unsigned s, big-endian
 ```
 
-???: Is this still a Schnorr Signature?
 SCHNORR-SIG refers to the `OTR version 4 signature`:
 
 ```
@@ -2626,3 +2619,4 @@ AUTHSTATE_AWAITING_SIG
 14. https://elligator.cr.yp.to/elligator-20130828.pdf "Daniel J. Bernstein, Mike Hamburg, Anna Krasnova and Tanja Lange: Elligator: Elliptic-curve points
 indistinguishable from uniform random strings"
 15. https://sourceforge.net/p/ed448goldilocks/code/ci/decaf/tree/src/decaf_fast.c#l1125
+16. https://eprint.iacr.org/2012/309.pdf "Mike Hamburg: Fast and compact elliptic-curve cryptography"
