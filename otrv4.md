@@ -323,9 +323,16 @@ paper [\[6\]](#references). These functions work as follows:
 
 ### Encoding Ed448 Points
 
+This uses the "decaf" technique which removes the cofactor through quotients and
+isogenies. The internal representation of points is as "even" elements of a
+twisted Edwards curve with `a=-1`. Using this subgroup removes a factor of 2
+from the cofactor. The remaining factor of 2 or 4 is removed with a quotient
+group. When a point is written out to wire format, it is converted (by isogeny)
+to a Jacobi quartic curve. One of the 4 or 8 equivalent points on the Jacobi
+quartic is chosen.
+
 Using the Jacobi quartic, a point `P` can by encoded by the s-coordinate of the
-coset representative `(s, t)`, where `s` is non-negative and finite, and `t / s`
-is non-negative or infinite.
+coset representative `(s, t)`.
 
 We wish to compute `s` as `(1 ± sqrt(1 - (a * x)^2)) / a * x` and
 `t / s` as `∓ 2 * sqrt(1 - (a * x) ^ 2) / x * y`.
