@@ -1063,7 +1063,7 @@ An Auth-R is an OTR message encoded as:
 Protocol version (SHORT)
   The version number of this protocol is 0x0004.
 Message type (BYTE)
-  The message has type 0x00.
+  The message has type 0x91.
 Sender Instance tag (INT)
   The instance tag of the person sending this message.
 Receiver Instance tag (INT)
@@ -1101,7 +1101,7 @@ An Auth-I is an OTR message encoded as:
 Protocol version (SHORT)
   The version number of this protocol is 0x0004.
 Message type (BYTE)
-  The message has type 0x80.
+  The message has type 0x88.
 Sender Instance tag (INT)
   The instance tag of the person sending this message.
 Receiver Instance tag (INT)
