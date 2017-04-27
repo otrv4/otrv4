@@ -271,7 +271,6 @@ The following key derivation functions are used:
 ```
 KDF_1(x) = SHA3-256("OTR4" || x)
 KDF_2(x) = SHA3-512("OTR4" || x)
-
 ```
 
 ## Data Types
@@ -355,7 +354,6 @@ string `h` `h[0],...h[56]` represents the integer `h[0] + 2^8 * h[1] + ... + 2^4
       This can be done using a single modular powering for both the
       inversion of `v` and the square root:
       ```
-
                           (p+1)/4    3            (p-3)/4
                  x = (u/v)        = u  v (u^5 v^3)         (mod p)
        ```
