@@ -237,9 +237,6 @@ Hexadecimal value of dh_p:
 Generator (g3)
   2
 
-Cofactor (dh_c)
-  2
-
 Subprime (dh_q):
   (dh_p - 1) / 2
 
