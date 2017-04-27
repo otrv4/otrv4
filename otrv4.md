@@ -4,9 +4,6 @@ OTRv4 is a new version of OTR that provides a deniable authenticated key
 exchange and better forward secrecy through the use of double ratcheting. OTR
 works on top of an existing messaging protocol, like XMPP.
 
-???: The spec currently refers to DAKE meaning interactive DAKE. We need to
-replace it and identify when DAKE is used in the broader sense.
-
 ## Table of Contents
 
 1. [Main Changes over Version 3](#main-changes-over-version-3)
@@ -174,7 +171,7 @@ Equation
 	x^2 + y^2 = 1 - 39081 * x^2 * y^2
 
 Coordinates:
-	Extended Homogenous
+	Edwards
 
 Base point (G)
   (x=11781216126343694673728248434331006466518053535701637341687908214793
@@ -186,7 +183,7 @@ Base point (G)
    y=0x13)
 
 Cofactor (c)
-  1 (this cofactor value is due to the use of Decaf [\[6\]](#references))
+  4
 
 Identity point (I)
   (x=0,
@@ -209,8 +206,7 @@ Non-square element in Z_p (d)
 ```
 
 A scalar modulo `q` is a "field element", and should be encoded and decoded
-using the rules for multi-precision integers (MPIs). MPIs are defined on
-[Data Types](#data-types) section.
+as SCALAR types. These are defined in the [Data Types](#data-types) section.
 
 ### 3072-bit Diffie-Hellman Parameters
 
@@ -310,65 +306,67 @@ Message Authentication Code (MAC):
   64 bytes MAC data
 
 Ed448 point (POINT):
-  56 bytes data
+  57 bytes data //XXX: check
+
+Ed448 scalar (SCALAR):
+  57 bytes data //XXX: check
 
 User Profile (USER-PROF):
   Detailed in "User Profile Data Type" section
 ```
 
-In order to serialize and deserialize the point, use Encode and Decode as
-defined on Appendix A.1 (Encoding) and A.2 (Decoding) in Mike Hamburg's Decaf
-paper [\[6\]](#references). These functions work as follows:
+In order to encode and decode the `POINT` and `SCALAR`, refer to encoding and
+decoding section.
 
+### Encoding and Decoding
 
-### Encoding Ed448 Points
+#### Scalar
 
-This uses the "decaf" technique which removes the cofactor through quotients and
-isogenies. The internal representation of points is as "even" elements of a
-twisted Edwards curve with `a=-1`. Using this subgroup removes a factor of 2
-from the cofactor. The remaining factor of 2 or 4 is removed with a quotient
-group. When a point is written out to wire format, it is converted (by isogeny)
-to a Jacobi quartic curve. One of the 4 or 8 equivalent points on the Jacobi
-quartic is chosen.
+// XXX: decide between little and big endian.
 
-Using the Jacobi quartic, a point `P` can by encoded by the s-coordinate of the
-coset representative `(s, t)`.
+// XXX: are we interpreting as strings?
 
-We wish to compute `s` as `(1 ± sqrt(1 - (a * x)^2)) / a * x` and
-`t / s` as `∓ 2 * sqrt(1 - (a * x) ^ 2) / x * y`.
+Encoded in little-endian form as a 455-bit string, i.e., a 57-byte
+string `h` `h[0],...h[56]` represents the integer `h[0] + 2^8 * h[1] + ... + 2^448 * h[56]`.
 
-Note that from the curve equation, it is known that:
-`(1 - ax^2) * (1 - y^2) = 1 + (a * x)^2 * y^2 - (y^2 + (a * x)^2) = (a - d) * x^2 * y^2`,
-so that `sqrt(1 - (a * x^2)) / x * y = ± sqrt((a - d) / (1 - y^2))`.
+#### Point
 
-In extended homogenous coordinates:
-`1/x^2 = (a - (d * y)^2) / 1 - y^2) = ((a * Z)^2 - (d * Y)^2) / (Z^2 - Y^2)`,
-so that `1/x = ((a * Z * X) - (d * Y * T))/ (Z^2 - Y^2)`
+ A curve point `(x,y)`, with coordinates in the range `0 <= x,y < p`, is
+ encoded as follows:
 
-1. Compute `r = 1/ sqrt((a - d) * (Z + Y) * (Z - Y))`
-2. Compute `u = (a - d) * r`
-3. Compute `r = -r` if `-2 * u * Z` is negative
-4. Compute `s = | u * (r * ((a * Z * X) - (d * Y * T)) + Y) / a|`
+ 1. Encode the y-coordinate as a little-endian string of 57 bytes. The
+   final byte is always zero.
+ 2. Copy the least significant bit of the x-coordinate to the most
+    significant bit of the final byte. This is 1 if the x-coordinate is
+    negative or 0 if not.
 
-### Decoding Ed448 Points
+ It is decoded as follows:
 
-Given s, compute:
-`(x, y) = (2 * s / (1 + (a * s)^2),
-(1 - (a * s)^ 2 / sqrt(a^2 * s^4 + (2 * a - 4 * d) * s^2 + 1))`
+ 1. Interpret the string as an integer in little-endian representation.
+    Bit 455 of this number is the least significant bit of the x-coordinate.
+    Denote this value `x_0`.  The y-coordinate is recovered simply by
+    clearing this bit.  If the resulting value is `>= p`, decoding fails.
+2. To recover the x-coordinate, the curve equation implies
+   `x^2 = (y^2 - 1) / (d y^2 - 1) (mod p)`.  The denominator is always
+   non-zero mod p. `x` will be recovered by the 4-isogeny between this
+   Edwards curve and the Montgomery one
+   (`4*v*(u^2 - 1)/(u^4 - 2*u^2 + 4*v^2 + 1`):
+   1. Let `u = y^2 - 1` and `v = d y^2 - 1`.  To compute the square root of
+      `(u/v)` (`x^2`), compute the candidate root `x = (u/v)^((p+1)/4)`.
+      This can be done using a single modular powering for both the
+      inversion of `v` and the square root:
+      ```
 
-1. Compute `X = 2 * s`
-2. Compute `Z = 1 + a * s^2`
-3. Compute `u = Z^2 - (4 * d) * s^2`
-4. Check that `v` equals:
-   1. `1 / sqrt(u * s^2)` if `u * s^2` is square and non-zero
-   2. `0` if `u * s^2 = 0`
-   3. reject if `u * s^2` is not square
-5. Compute `v` = `-v` if `u * v` is negative
-6. Compute `w = v * s * (2 - Z)`
-7. Compute `w = w + 1` if `s = 0`
-8. Compute `Y = w * Z`
-9. Compute `T = w * X`
-10. Construct the point `P` as `P = (X : Y : Z : T)`
+                          (p+1)/4    3            (p-3)/4
+                 x = (u/v)        = u  v (u^5 v^3)         (mod p)
+       ```
+
+   3.  If `v * x^2 = u`, the recovered x-coordinate is `x`.  Otherwise, no
+       square root exists, and the decoding fails.
+3. Use the `x_0` bit to select the right square root.  If `x = 0`, and
+   `x_0 = 1`, decoding fails.  Otherwise, if `x_0 != x mod 2`, set
+   `x <-- p - x`.  Return the decoded point `(x,y)`.
+
 
 ### Serializing the SNIZKPK Authentication
 
