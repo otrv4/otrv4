@@ -315,32 +315,31 @@ decoding section.
 
 ### Encoding and Decoding
 
+This is as specified on [RFC8032] [\[17\]](#references).
+
 #### Scalar
 
 // XXX: decide between little and big endian.
-
-// XXX: are we interpreting as strings?
-
-Encoded in little-endian form as a 455-bit string, i.e., a 57-byte
-string `h` `h[0],...h[56]` represents the integer `h[0] + 2^8 * h[1] + ... + 2^448 * h[56]`.
+Encoded in little-endian form as a 57 bytes, i.e.,
+`h[0] + 2^8 * h[1] + ... + 2^448 * h[56]`.
 
 #### Point
 
- A curve point `(x,y)`, with coordinates in the range `0 <= x,y < p`, is
- encoded as follows:
+A curve point `(x,y)`, with coordinates in the range `0 <= x,y < p`, is
+encoded as follows:
 
- 1. Encode the y-coordinate as a little-endian string of 57 bytes. The
+1. Encode the y-coordinate as little-endian array of 57 bytes. The
    final byte is always zero.
- 2. Copy the least significant bit of the x-coordinate to the most
-    significant bit of the final byte. This is 1 if the x-coordinate is
-    negative or 0 if not.
+2. Copy the least significant bit of the x-coordinate to the most
+   significant bit of the final byte. This is 1 if the x-coordinate is
+   negative or 0 if not.
 
- It is decoded as follows:
+It is decoded as follows:
 
- 1. Interpret the string as an integer in little-endian representation.
-    Bit 455 of this number is the least significant bit of the x-coordinate.
-    Denote this value `x_0`.  The y-coordinate is recovered simply by
-    clearing this bit.  If the resulting value is `>= p`, decoding fails.
+1. Interpret last bit of byte 57 as the least significant bit of the x-coordinate.
+   Denote this value `x_0`.  The y-coordinate is recovered simply by
+   clearing this bit.  If the resulting value is `>= p`, decoding fails.
+// XXX: update with Hamburg's formula.
 2. To recover the x-coordinate, the curve equation implies
    `x^2 = (y^2 - 1) / (d y^2 - 1) (mod p)`.  The denominator is always
    non-zero mod p. `x` will be recovered by the 4-isogeny between this
@@ -380,6 +379,9 @@ SNIZKPK Authentication (SNIZKPK):
 
 ### Public keys and fingerprints
 
+For generation of the public key, refer to [RFC8032] [\[17\]](#references),
+section 5.2.5.
+
 OTRv4 introduces a new type of public key:
 
 ```
@@ -389,7 +391,7 @@ OTR4 public authentication Ed448 key (ED448-PUBKEY):
     Ed448 public keys have type 0x0010
 
     H (POINT)
-      H is the Ed448 public key generated (H = G * r).
+      H is the Ed448 public key generated as defined on [RFC8032].
 ```
 
 OTRv4 public keys have fingerprints, which are hex strings that serve as
@@ -717,11 +719,10 @@ To create a user profile, assemble:
 3. Profile Expiration: Expiration date in standard Unix 64-bit format
    (seconds since the midnight starting Jan 1, 1970, UTC, ignoring leap
    seconds).
-4. Profile Signature: The secret key value (`r`) and the generator (`G`)
-   of the Ed448 long term public key is used to create signatures of the entire
-   profile excluding the signature itself. The size of the signature is 112
-   bytes. It is created using the
-   [Ed448 signature algorithm](#user-profile-signature).
+4. Profile Signature: The secret key value (`r`) of the Ed448 long term public
+   key and a flag `F` (set to zero) are used to create signatures of the entire
+   profile excluding the signature itself. The size of the signature is 114
+   bytes.
 5. Transition Signature (optional): A signature of the profile excluding Profile
    Signatures and the user's OTRv3 DSA key. The Transition Signature enables
    contacts that trust user's version 3 DSA key to trust the user's profile in
@@ -760,102 +761,16 @@ Before the profile expires, the user must publish an updated profile with a
 new expiration date. The client establishes the frequency of expiration - this
 can be configurable. A recommended value is two weeks.
 
-#### Creating a User Profile Signature
+#### Create a User Profile Signature
 
-The user profile signature is based on a variant of Schnorr's signature
-algorithm defined by Mike Hamburg. An overview of how the signature works
-can be found on [\[3\]](#references) and [\[16\]](#references).
+XXX: is it ok to leave the context empty?
 
-OTRv4 uses the following steps to create a signature:
-
-   ```
-   signature = sign(message, secret_key)
-   ```
-
-1. Derive an intermediary nonce by using SHAKE-256 of the message, of
-   the ed448 secret key (`r`), and of a specific string "otr4_sign". Decode
-   this value into a scalar and reduce it mod the order of the base point
-   [q](#elliptic-curve-parameters).
-   // XXX: sha3-512 will probably work for this too.
-
-   ```
-   output = SHAKE-256("otr4_sign"|| secret_key || message)
-   intermediary_nonce = decode(outpu t) % q
-   ```
-
-2. Use this intermediary nonce to create a temporary signature by computing
-   `nonce * G` and encode the output into an array of bytes.
-
-   ```
-   temporary_signature = encode(G * intermediary_nonce)
-   ```
-
-3. Use SHAKE-256 to hash the message, the public key, and the temporary
-   signature. The `public_key` is the Ed448 long term public key (`H`). Decode
-   this value into a scalar and reduce it mod the order of the base point
-   [q](#elliptic-curve-parameters).
-
-   ```
-   output = SHAKE-256(message || public_key || temporary_signature)
-   challenge = decode(output) % q
-   ```
-
-4. Scalar multiply the challenge with the secret key. The `secret_key` is the
-   the Ed448 long term private key (`r`). Derive the final nonce by scalar
-   subtracting the product of the multiplication from the intermediary nonce.
-
-   ```
-   nonce = intermediary_nonce - challenge * secret_key
-   ```
-
-5. Concatenate the final nonce and the temporary signature into the signature.
-   The nonce and the temporary signature are each 56 bytes each, giving a total
-   size of 112 bytes.
+The user profile signature is generated as defined on [RFC8032] section 5.2.6.
+The flag `F` is set to `0` and the context `C` is left empty.
 
 #### Verify a User Profile Signature
 
-   ```
-   boolean valid
-   valid = verify(signature, message, public_key)
-   ```
-These are the steps to verify the signature:
-
-1. Derive a challenge by using a SHAKE-256 of the message, the long term public
-   key (`H`), and the temporary signature (the first 56 bytes of the signature).
-   Decode this value into a scalar and reduce it mod the order of the base point
-   [q](#elliptic-curve-parameters).
-
-   ```
-   output = SHAKE-256(message || public_key || temporary_signature)
-   challenge = decode(output) % q
-   ```
-
-2. Decode the temporary signature and the public key into points. This will
-   verify that the temporary signature and the public key are points on the
-   curve Ed448.
-
-   ```
-   temporary_signature_point = decode(temporary_signature)
-   public_key_point = decode(public_key)
-   ```
-
-3. Decode the nonce into a scalar. This will verify that the nonce is a scalar
-   within order of the base point.
-
-   ```
-   nonce = decode(nonce_bytes)
-   ```
-
-4. Compute: the addition of the multiplication of `G` (the base point) with the
-   `nonce` and the multiplication of the `public_key_point` with the
-   `challenge`.
-
-   ```
-   result_point  = G * nonce + public_key_point * challenge
-   ```
-
-5. Check that the `result_point` and the `temporary_signature_point` are equal.
-   If they are equal, the signature is valid.
+The user profile signature is verified as defined on [RFC8032] section 5.2.7.
 
 #### User Profile Data Type
 
@@ -887,7 +802,7 @@ SCHNORR-SIG refers to the `OTR version 4 signature`:
 
 ```
 Schnorr signature (SCHNORR-SIG):
-  (len is the expected length of the signature, which is 112 bytes)
+  (len is the expected length of the signature, which is 114 bytes)
   len byte unsigned value, big-endian
 ```
 
