@@ -336,7 +336,8 @@ encoded as follows:
 
 It is decoded as follows:
 
-1. Interpret last bit of byte 57 as the least significant bit of the x-coordinate.
+1. Interpret last bit of byte 57 as the least significant bit of the x
+   coordinate.
    Denote this value `x_0`.  The y-coordinate is recovered simply by
    clearing this bit.  If the resulting value is `>= p`, decoding fails.
 // XXX: update with Hamburg's formula.
@@ -902,7 +903,7 @@ choice of DH and ECDH key. A valid Identity message is generated as follows:
 
 1. Create a user profile, as detailed [here](#creating-a-user-profile).
 2. Generate an ephemeral ECDH key pair:
-  * secret key `y` (56 bytes).
+  * secret key `y` (57 bytes).
   * public key `Y`.
 3. Generate an ephemeral DH key pair:
   * secret key `b` (80 bytes).
@@ -949,7 +950,7 @@ A valid Auth-R message is generated as follows:
 
 1. Create a user profile, as detailed [here](#creating-a-user-profile).
 2. Generate an ephemeral ECDH key pair:
-  * secret key `x` (56 bytes).
+  * secret key `x` (57 bytes).
   * public key `X`.
 3. Generate an ephemeral DH key pair:
   * secret key `a` (80 bytes).
@@ -1555,7 +1556,7 @@ before receiving yours.
 To agree on an Identity message to use for this conversation:
 
   * Validate the Identity message and ignore the message if it fails.
-  * Compare the `X` (as a 56-byte unsigned big-endian value) you sent in your
+  * Compare the `X` (as a 57-byte unsigned big-endian value) you sent in your
     Identity message with the value from the message you received.
   * If yours is the lower hash value:
     * Ignore the received Identity message, but resend your Identity message.
