@@ -1772,10 +1772,10 @@ Assuming that Alice begins the exchange:
 * Computes `c2 = HashToScalar(3 || G * r2)` and `d2 = r2 - b2 * c2`.
 * Computes `c3 = HashToScalar(4 || G * r3)` and `d3 = r3 - b3 * c3`.
 * Computes `G2 = G2a * b2` and `G3 = G3a * b3`.
-* Computes `Pb = G3 * r4` and `Qb = G * r4 + G2 * y`, where y is the 'actual
+* Computes `Pb = G3 * r4` and `Qb = G * r4 + G2 * HashToScalar(y)`, where y is the 'actual
   secret'.
 * Computes `cp = HashToScalar(5 || G3 * r5 || G * r5 + G2 * r6)`, `d5 = r5 - r4 * cp`
-  and `d6 = r6 - y * cp`.
+  and `d6 = r6 - HashToScalar(y) * cp`.
 * Sends Alice a SMP message 2 with `G2b`, `c2`, `d2`, `G3b`, `c3`, `d3`, `Pb`,
   `Qb`, `cp`, `d5` and `d6`.
 
@@ -1785,10 +1785,10 @@ Assuming that Alice begins the exchange:
   and that they do not degenerate.
 * Computes `G2 = G2b * a2` and `G3 = G3b * a3`.
 * Picks random values `r4`, `r5`, `r6` and `r7` in `Z_q`.
-* Computes `Pa = G3 * r4` and `Qa = G * r4 + G2 * x`, where x is the 'actual
+* Computes `Pa = G3 * r4` and `Qa = G * r4 + G2 * HashToScalar(x)`, where x is the 'actual
   secret'.
 * Computes `cp = HashToScalar(6 || G3 * r5 || G * r5 + G2 * r6)`, `d5 = r5 - r4 * cp`
-  and `d6 = r6 - x * cp`.
+  and `d6 = r6 - HashToScalar(x) * cp`.
 * Computes `Ra = (Qa - Qb) * a3`.
 * Computes `cr = HashToScalar(7 || G * r7 || (Qa - Qb) * r7)` and `d7 = r7 - a3 * cr`.
 * Sends Bob a SMP message 3 with `Pa`, `Qa`, `cp`, `d5`, `d6`, `Ra`, `cr` and `d7`.
@@ -1846,23 +1846,10 @@ middle is capable of reading their communication either.
 ### SMP Hash function
 
 In the following actions, there are many places where a SHA3-512 hash of an
-integer followed by one or two Points is taken. This is defined as `HashToScalar(d)`.
-
-The input to this hash function is:
-
-```
-Version (BYTE)
-  This distinguishes calls to the hash function at different points in the
-  protocol, to prevent Alice from replaying Bob's zero knowledge proofs or
-  vice versa.
-
-First Point (POINT)
-  The first Point given as input, encoded in the usual way.
-
-Second Point (POINT)
-  The second Point given as input, if present, encoded in the usual way. If
-  only one Point is given as input, this field is simply omitted.
-```
+integer followed by another values is taken, this is defined as `HashToScalar(d)`,
+where the integer is a version to distinguish the calls to the hash function at
+different points in the protocol, to prevent Alice from replaying Bob's zero
+knowledge proofs or vice versa.
 
 ### SMP message 1
 
@@ -1931,10 +1918,10 @@ follows:
 7. Generate a zero-knowledge proof that the value `b3` is known by setting
 `c3 = HashToScalar(4 || G * r3)` and `d3 = r3 - b3 * c3 mod q`.
 8. Compute `G2 = G2a * b2` and `G3 = G3a * b3`.
-9. Compute `Pb = G3 * r4` and `Qb = G * r4 + G2 * y`.
+9. Compute `Pb = G3 * r4` and `Qb = G * r4 + G2 * HashToScalar(y)`.
 10. Generate a zero-knowledge proof that `Pb` and `Qb` were created according
    to the protocol by setting `cp = HashToScalar(5 || G3 * r5 || G * r5 + G2 * r6)`,
-   `d5 = r5 - r4 * cp mod q` and `d6 = r6 - y * cp mod q`.
+   `d5 = r5 - r4 * cp mod q` and `d6 = r6 - HashToScalar(y) * cp mod q`.
 11. Store the values of `G3a`, `G2`, `G3`, `b3`, `Pb` and `Qb` for use later
     in the protocol.
 
@@ -1976,10 +1963,10 @@ is generated as follows:
    be used to add a blinding factor to the final results, and to generate
    zero-knowledge proofs that this message was created honestly.
 3. Compute `G2 = G2b * a2` and `G3 = G3b * a3`.
-4. Compute `Pa = G3 * r4` and `Qa = G * r4 + G2 * x`.
+4. Compute `Pa = G3 * r4` and `Qa = G * r4 + G2 * HashToScalar(x)`.
 5. Generate a zero-knowledge proof that `Pa` and `Qa` were created according to
    the protocol by setting `cp = HashToScalar(6 || G3 * r5 || G * r5 + G2 * r6)`,
-   `d5 = r5 - r4 * cp mod q` and `d6 = r6 - x * cp mod q`.
+   `d5 = r5 - r4 * cp mod q` and `d6 = r6 - HashToScalar(x) * cp mod q`.
 6. Compute `Ra = (Qa - Qb) * a3`.
 7. Generate a zero-knowledge proof that `Ra` was created according to the
    protocol by setting `cr = HashToScalar(7 || G * r7 || (Qa - Qb) * r7)` and
