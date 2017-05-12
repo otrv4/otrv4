@@ -764,8 +764,6 @@ can be configurable. A recommended value is two weeks.
 
 #### Create a User Profile Signature
 
-XXX: is it ok to leave the context empty?
-
 The user profile signature is generated as defined on [RFC8032] section 5.2.6.
 The flag `F` is set to `0` and the context `C` is left empty.
 
