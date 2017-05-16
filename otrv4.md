@@ -2124,38 +2124,39 @@ honest conversations. This section will guide implementers to achieve this.
 The major utilities are:
 
 ```
+XXX: check if DH are needed
+
 Parse
   Parses OTR messages to the values of each of the fields in
-  a message. Parse will reuse the message parsing functionality of the spec.
+  a message.
 
 Modify Data Message
   If an encrypted data message cannot be read because we don't
   know the message key (or a key used to derive this message key) but it can
-  be guessed that the string `x` appears at a given offset in the message,
+  be guessed that the string `x` appears at a given place in the message,
   this method will replace the old text with some new desired text with
   the same length. For example, if the string "hi" is accurately guessed
   to be at the beginning of an encrypted message, it can be replaced with the
-  string "yo". In that way, a cryptographically valid data message can be
-  created with the new text.
+  string "yo". In that way, a valid data message can be created with the new
+  text.
 
   To achieve this, the XOR of the old text and the new text is XORed
-  again with the original encrypted message starting at the given offset.
-  After replacing parts of the encrypted message, the MAC tag is recalculated
-  with the revealed MAC key associated with this message number. Then the
-  new tag is attached to the data message, replacing the old value. A pseudocode
-  is included at the appendix.
+  with the original encrypted message starting at a given offset.
+  The MAC tag is recalculated with the revealed MAC key associated with this
+  message. Then the new tag is attached to the data message, replacing the old
+  value. A pseudocode is included at the appendix.
 
+  // XXX: check, might not be the same
   Modify Data Message reuses the spec function:
 
     1. MAC tag creation.
 
-Read and Forge
+Read and Forge Data Message
   Read and forge allows someone in possession of a chain key to decrypt OTR
   messages or modify them as forgeries. It takes three inputs: the chain key,
-  the OTR message and an optional new plain text message. If the new message is
-  included, the original text is replaced with the new message, and then a new
-  MAC tag, based on the new message is attached to the data message. This new
-  message is then displayed.
+  the OTR message and an optional new plain text message (optional). If a new
+  message is included, the original text is replaced with the new message and
+  a new MAC tag is attached to the data message.
 
   Read and Forge reuses the spec functions:
 
@@ -2166,8 +2167,8 @@ Read and Forge
 Forge AKE and Session Keys
   Any participant of an OTR conversation may forge an AKE with another
   participant as long as they have their profile. This function will take the
-  profile and the secret long term key of one participant and the profile of
-  another.
+  user profile and the secret long term key of one participant, and the user
+  profile of the other.
   It will then return an AKE transcript between the two parties. The
   participant's private key is required since it is used to authenticate the key
   exchange, but the resulting transcript is created in such a way that a
@@ -2185,26 +2186,19 @@ Show MAC Key
   the message key is ratcheted 3 times, and the third mac key is returned. 'Show
   MAC key' may be used with the ReMAC message in the case where a chain key has
   been compromised by an attacker, and the attacker wishes to forge messages.
-  Functionalities around deriving the MAC keys may be used to implement this
-  function.
 
 ReMAC Message
-  ReMAC Message will create a new OTRv4 Data Message from the input: new MAC
-  key, sender instance tag, receiver instance tag, flags, ratchet id, message
-  id, public ECDH Key, public DH key, nonce, encrypted message, and revealed MAC
-  keys. This function will use the input to create a new Data Message and create
-  a new authenticator for this message with the new MAC key provided. An
-  attacker may use this function to forge messages with a compromised MAC key.
-  Functionalities around creating MAC tags may be reused to implement this
-  function.
+  Make a new OTR Data Message, with the given pieces (the data part is already
+  encrypted).  MAC it with the given mackey. An attacker may use this function
+  to forge messages with a compromised MAC key.
 
 Forge Entire Transcript
   The Forge Entire Transcript function will allow one participant to completely
   forge a transcript between them and another person in a way that its forgery
   cannot be cryptographically proven. The input will be: one participant's
-  profile, their secret key, another person's profile, and a list of plain text
-  messages corresponding to what messages were exchanged. Each message in the
-  list will have the structure: 1) sender 2) plain text message, so that the
+  user profile, their secret key, another person's profile, and a list of plain
+  text messages corresponding to what messages were exchanged. Each message in
+  the list will have the structure: 1) sender 2) plain text message, so that the
   function may precisely create the desired transcript. The participant's
   private key is required since it is used to authenticate the key exchange, but
   the resulting transcript is created in such a way that a cryptographic expert
