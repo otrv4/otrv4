@@ -1953,7 +1953,7 @@ cp (MPI), d5 (MPI), d6 (MPI)
 ### SMP message 3
 
 SMP message 3 is Alice's final message in the SMP exchange. It has the last of
-the information required by Bob to determine if `x = y`. A valid SMP message 1
+the information required by Bob to determine if `x = y`. A valid SMP message 3
 is generated as follows:
 
 1. Validate that `G2b`, `G3b`, `Pb`, and `Qb` are on curve Ed448 and that they
