@@ -301,10 +301,10 @@ Message Authentication Code (MAC):
   64 bytes MAC data
 
 Ed448 point (POINT):
-  57 bytes data //XXX: check
+  57 bytes data
 
 Ed448 scalar (SCALAR):
-  57 bytes data //XXX: check
+  56 bytes data
 
 User Profile (USER-PROF):
   Detailed in "User Profile Data Type" section
@@ -319,9 +319,8 @@ This is as specified on [RFC8032] [\[17\]](#references).
 
 #### Scalar
 
-// XXX: decide between little and big endian.
-Encoded in little-endian form as a 57 bytes, i.e.,
-`h[0] + 2^8 * h[1] + ... + 2^448 * h[56]`.
+Encoded in little-endian form as a 56 bytes, i.e.,
+`h[0] + 2^8 * h[1] + ... + 2^448 * h[55]`.
 
 #### Point
 
@@ -1554,7 +1553,7 @@ before receiving yours.
 To agree on an Identity message to use for this conversation:
 
   * Validate the Identity message and ignore the message if it fails.
-  * Compare the `X` (as a 57-byte unsigned big-endian value) you sent in your
+  * Compare the `X` (as a 57-byte unsigned little-endian value) you sent in your
     Identity message with the value from the message you received.
   * If yours is the lower hash value:
     * Ignore the received Identity message, but resend your Identity message.
