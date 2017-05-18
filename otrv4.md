@@ -1081,11 +1081,11 @@ Verify & Decrypt message
       group and sets it as `their_dh`.
 3. Generates and sets `our_ecdh` as ephemeral ECDH keys.
 4. Generates and sets `our_dh` as ephemeral 3072-bit DH keys.
-5. Sends Bob an non-interactive auth message (see TODO section).
+5. Sends Bob a non-interactive auth message (see TODO section).
 
 **Bob:**
 
-1. Received the UNNAMED message.
+1. Receive the non-interactive auth message.
 
 ### Pre-key
 
@@ -1123,7 +1123,7 @@ A valid non-interactive Auth message is generated as follows:
 	* Encrypted message
 	* Authenticator 
 
-To verify an non-interactive Auth message:
+To verify a non-interactive Auth message:
 
 1. Validate the user profile, and extract `Pka` from it.
 2. Verifies the pre-key previously sent remains unused.
@@ -1142,7 +1142,7 @@ that is `sigma == Verify({Pkb, Pka, Y}, t)`.
 6. Verify the Auth Mac.
 7. Follow the section ["When you receive a Data Message"](when-you-receive-a-data-message) to verify the MAC of the message and decrypt it. 
 
-An non-interactive Auth is an OTR message encoded as:
+A non-interactive Auth is an OTR message encoded as:
 
 ```
 Protocol version (SHORT)
