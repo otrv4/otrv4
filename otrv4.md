@@ -1728,6 +1728,16 @@ If the state is not `WAITING_AUTH_I`:
 
   * Ignore this message.
 
+#### Sending an encrypted message to an offline participant
+
+1. Send a non-interactive auth message.
+2. Transition to `ENCRYPTED_MESSAGES` state.
+
+#### Receiving a non-interactive auth message
+
+1. Receive the non-interactive auth message.
+2. Transition to `ENCRYPTED_MESSAGES` state.
+
 #### Sending an encrypted data message
 
 The `ENCRYPTED_MESSAGES` state is the only state where a participant is allowed
