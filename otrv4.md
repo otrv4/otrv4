@@ -2090,12 +2090,12 @@ If smpstate is SMPSTATE_EXPECT4:
 
 * Verify Bob's zero-knowledge proof for Rb:
    1. Check that `Rb` is on curve Ed448 and that it does not degenerate.
-   2. Check that `cr = HashToScalar(8 || G * d7 + G3 * cr || (Qa / Qb) * d7 + Rb * cr)`.
+   2. Check that `cr = HashToScalar(8 || G * d7 + G3 * cr || (Qa - Qb) * d7 + Rb * cr)`.
 
 * Check whether the protocol was successful:
     1. `Compute Rab = Rb * a3`.
     2. Determine if `x = y` by checking the equivalent condition that
-       `(Pa / Pb) = Rab`.
+       `(Pa - Pb) = Rab`.
 
 Set smpstate to `SMPSTATE_EXPECT1`, as no more messages are expected
 from Bob.
