@@ -339,12 +339,12 @@ It is decoded as follows:
 2. To recover the x-coordinate, the curve equation implies
    `x^2 = (y^2 - 1) / (d * y^2 - 1) (mod p)`.  The denominator is always
    non-zero mod p.
-   1. Let `num = y^2 - 1` and `denom = d y^2 - 1`.  To compute the square root
+   1. Let `num = y^2 - 1` and `denom = d * y^2 - 1`.  To compute the square root
       of `(num/denom)`, compute the candidate root `x = (num/denom)^((p+1)/4)`.
       This can be done using a single modular powering for both the
       inversion of `denom` and the square root:
       ```
-           x = num ^ 3 * denom (num^5 * num^3) ^ (p-3)/4 (mod p)
+           x = ((num ^ 3) * denom * (num^5 * num^3) ^ ((p-3)/4)) (mod p)
       ```
 
    3.  If `denom * x^2 = num`, the recovered x-coordinate is `x`.  Otherwise, no
