@@ -773,7 +773,7 @@ User Profile (USER-PROF):
   Ed448 public key (ED448-PUBKEY)
   Versions (DATA)
   Profile Expiration (PROF-EXP)
-  Profile Signature (SCHNORR-SIG)
+  Profile Signature (EDDSA-SIG)
   (optional) Transitional Signature (SIG)
 
 ```
@@ -789,10 +789,10 @@ DSA signature (SIG):
   len byte unsigned s, big-endian
 ```
 
-SCHNORR-SIG refers to the `OTR version 4 signature`:
+EDDSA-SIG refers to the `OTR version 4 signature`:
 
 ```
-Schnorr signature (SCHNORR-SIG):
+Eddsa signature (EDDSA-SIG):
   (len is the expected length of the signature, which is 114 bytes)
   len byte unsigned value, big-endian
 ```
