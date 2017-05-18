@@ -259,7 +259,7 @@ Hexadecimal value of dh_q:
 Note that this means that whenever you see an operation on a field element
 from the above group, the operation should be done modulo the prime `dh_p`.
 
-// XXX: move these
+// TODO: move these
 The following key derivation functions are used:
 
 ```
@@ -453,7 +453,7 @@ Type 8: Extra symmetric key
   will compute it on its own.
 ```
 
-// XXX: change or delete this
+// TODO: change or delete this
 SMP Message TLVs (types 2-5) all carry data sharing the same general format:
 
 ```
@@ -466,7 +466,8 @@ MPI 2 (MPI)
 ```
 ### Shared session state: Phi
 
-// XXX: check the XMPP example, probably not the right one
+// TODO: check the XMPP example, probably not the right one
+// TODO: include me on menu
 The shared session state (Φ) is any session-specic protocol state available to
 both parties in the underlying protocol. For XMPP, for example, it will be the
 stream id.
@@ -992,7 +993,7 @@ sigma (SNIZKPK)
 
 #### Auth-I message
 
-// XXX: TODO
+// TODO
 This is the final message of the DAKE. Bob sends it to Alice to [complete with a
 description].
 
@@ -1871,7 +1872,7 @@ Lastly, OTRv4 uses Ed448 as the cryptographic primitive. This changes the way
 values are serialized and how they are computed. To define the SMP values
 under Ed448, we reuse the previously defined generator `G` for Ed448:
 
-// XXX: check this
+// TODO: check this
 ```
 G = (11781216126343694673728248434331006466518053535701637341687908214793940427
 7809514858788439644911793978499419995990477371552926308078495, 19)
@@ -2256,7 +2257,7 @@ honest conversations. This section will guide implementers to achieve this.
 The major utilities are:
 
 ```
-XXX: check if DH is needed
+TODO: check if DH is needed
 
 Parse
   Parses OTR messages to the values of each of the fields in
@@ -2278,7 +2279,7 @@ Modify Data Message
   message. Then the new tag is attached to the data message, replacing the old
   value. A pseudocode is included at the appendix.
 
-  // XXX: check, might not be the same
+  // TODO: check, might not be the same
   Modify Data Message reuses the spec function:
 
     1. MAC tag creation.
