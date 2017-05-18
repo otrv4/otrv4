@@ -177,10 +177,6 @@ Base point (G)
      9404277809514858788439644911793978499419995990477371552926308078495,
    y=19)
 
-  (x=0x297ea0ea2692ff1b4faff46098453a6a26adf733245f065c3c59d0709cecfa96147
-     eaaf3932d94c63d96c170033f4ba0c7f0de840aed939f,
-   y=0x13)
-
 Cofactor (c)
   4
 
@@ -193,12 +189,6 @@ Field prime (p)
 
 Order of base point (q) [prime; q < p; q * G = I]
   2^446 - 13818066809895115352007386748515426880336692474882178609894547503885
-
-Number of bytes in p (|p|)
-  56 bytes
-
-Number of bytes in q (|q|)
-  55 bytes
 
 Non-square element in Z_p (d)
   -39081
@@ -263,6 +253,7 @@ Hexadecimal value of dh_q:
 Note that this means that whenever you see an operation on a field element
 from the above group, the operation should be done modulo the prime `dh_p`.
 
+// XXX: move these
 The following key derivation functions are used:
 
 ```
@@ -315,7 +306,7 @@ decoding section.
 
 ### Encoding and Decoding
 
-This is as specified on [RFC8032] [\[17\]](#references).
+As specified on [RFC8032] [\[17\]](#references).
 
 #### Scalar
 
@@ -339,22 +330,18 @@ It is decoded as follows:
    coordinate.
    Denote this value `x_0`.  The y-coordinate is recovered simply by
    clearing this bit.  If the resulting value is `>= p`, decoding fails.
-// XXX: update with Hamburg's formula.
 2. To recover the x-coordinate, the curve equation implies
-   `x^2 = (y^2 - 1) / (d y^2 - 1) (mod p)`.  The denominator is always
-   non-zero mod p. `x` will be recovered by the 4-isogeny between this
-   Edwards curve and the Montgomery one
-   (`4*v*(u^2 - 1)/(u^4 - 2*u^2 + 4*v^2 + 1`):
-   1. Let `u = y^2 - 1` and `v = d y^2 - 1`.  To compute the square root of
-      `(u/v)` (`x^2`), compute the candidate root `x = (u/v)^((p+1)/4)`.
+   `x^2 = (y^2 - 1) / (d * y^2 - 1) (mod p)`.  The denominator is always
+   non-zero mod p.
+   1. Let `num = y^2 - 1` and `denom = d y^2 - 1`.  To compute the square root
+      of `(num/denom)`, compute the candidate root `x = (num/denom)^((p+1)/4)`.
       This can be done using a single modular powering for both the
-      inversion of `v` and the square root:
+      inversion of `denom` and the square root:
       ```
-                          (p+1)/4    3            (p-3)/4
-                 x = (u/v)        = u  v (u^5 v^3)         (mod p)
-       ```
+           x = num ^ 3 * denom (num^5 * num^3) ^ (p-3)/4 (mod p)
+      ```
 
-   3.  If `v * x^2 = u`, the recovered x-coordinate is `x`.  Otherwise, no
+   3.  If `denom * x^2 = num`, the recovered x-coordinate is `x`.  Otherwise, no
        square root exists, and the decoding fails.
 3. Use the `x_0` bit to select the right square root.  If `x = 0`, and
    `x_0 = 1`, decoding fails.  Otherwise, if `x_0 != x mod 2`, set
@@ -414,7 +401,6 @@ Value (len BYTE) [where len is the value of the Length field]
 OTRv4 supports the majority of the TLV record types from OTRv3. The ones not
 supported stated as so. They are:
 
-
 ```
 Type 0: Padding
   The value may be an arbitrary amount of data. This data should be ignored.
@@ -461,6 +447,7 @@ Type 8: Extra symmetric key
   will compute it on its own.
 ```
 
+// XXX: change or delete this
 SMP Message TLVs (types 2-5) all carry data sharing the same general format:
 
 ```
@@ -471,6 +458,12 @@ MPI 1 (MPI)
 MPI 2 (MPI)
   The second MPI of the TLV, serialized into a byte array.
 ```
+### Shared session state: Phi
+
+// XXX: check the XMPP example, probably not the right one
+The shared session state (Φ) is any session-specic protocol state available to
+both parties in the underlying protocol. For XMPP, for example, it will be the
+stream id.
 
 ### OTR Error Messages
 
@@ -785,8 +778,8 @@ User Profile (USER-PROF):
 
 ```
 
-SIG refers to the `OTR version 3 DSA Signature` with the structure. Refer to
-'DSA signature' on OTRv3 for more information:
+SIG refers to the `OTR version 3 DSA Signature`. Refer to 'DSA signature' on
+OTRv3 for more information:
 
 ```
 DSA signature (SIG):
@@ -841,7 +834,8 @@ Bob will be initiating the DAKE with Alice.
 1. Receives an Identity message from Bob:
     * Validates Bob's User Profile.
     * Picks the highest compatible version of OTR listed in Bob's profile.
-      If the versions are incompatible, Alice does not send any further messages.
+      If the versions are incompatible, Alice does not send any further
+      messages.
       Version prioritization is explained [here](#version-priority).
     * Validates the received ECDH ephemeral public key is on curve Ed448 and
       sets it as `their_ecdh`.
@@ -850,7 +844,6 @@ Bob will be initiating the DAKE with Alice.
 2. Generates and sets `our_ecdh` as ephemeral ECDH keys.
 3. Generates and sets `our_dh` as ephemeral 3072-bit DH keys.
 4. Sends Bob a Auth-R message (see [Auth-R message](#auth-r-message) section).
-
 
 **Bob:**
 
@@ -861,8 +854,8 @@ Bob will be initiating the DAKE with Alice.
       explained [here](#version-priority) If the versions are incompatible, Bob
       does not send any further messages.
     * Verify the authentication `sigma` (see [Auth-R message](#auth-r-message) section).
-    * Verify `(Y, B)` in the message is an Identity message that Bob previously sent
-      and has not been used.
+    * Verify `(Y, B)` in the message is an Identity message that Bob previously
+      sent and has not been used.
 3. Retrieve ephemeral public keys from Alice:
     * Validates the received ECDH ephemeral public key is on curve Ed448 and
       sets it as `their_ecdh`.
@@ -875,8 +868,10 @@ Bob will be initiating the DAKE with Alice.
     * Calculates ECDH shared secret `K_ecdh`.
     * Calculates DH shared secret `k_dh` and `mix_key`.
     * Calculates Mixed shared secret `K = KDF_2(K_ecdh || mix_key)`.
-    * Calculates the SSID from shared secret: it is the first 8 bytes of `KDF_1(0x00 || K)`.
-    * Calculates the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
+    * Calculates the SSID from shared secret: it is the first 8 bytes of
+      `KDF_1(0x00 || K)`.
+    * Calculates the first set of keys with
+      `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
     * [Decides which chain key he will use](#deciding-between-chain-keys).
 
 **Alice:**
@@ -889,7 +884,8 @@ Bob will be initiating the DAKE with Alice.
     * Calculates ECDH shared secret `K_ecdh`.
     * Calculates DH shared secret `k_dh` and `mix_key`.
     * Calculates Mixed shared secret `K = KDF_2(K_ecdh || mix_key)`.
-    * Calculates the SSID from shared secret: the first 8 bytes of `KDF_1(0x00 || K)`.
+    * Calculates the SSID from shared secret: the first 8 bytes of
+      `KDF_1(0x00 || K)`.
     * Calculates the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
     * [Decides which chain key she will use](#deciding-between-chain-keys).
 
@@ -952,13 +948,17 @@ A valid Auth-R message is generated as follows:
 3. Generate an ephemeral DH key pair:
   * secret key `a` (80 bytes).
   * public key `A`.
-4. Compute `t = 0x0 || Bobs_User_Profile || Alices_User_Profile || Y || X || B || A`.
+4. Compute `t = 0x0 || Bobs_User_Profile || Alices_User_Profile || Y || X || B || A || Φ`.
+   Φ is the shared session state as mention on the 'Shared session state: Phi'
+   section.
 5. Compute `sigma = Auth(Pka, ska, {Pkb, Pka, Y}, t)`.
 
 To verify an Auth-R message:
 
 1. Validate the user profile, and extract `Pka` from it.
-2. Compute `t = 0x0 || Bobs_User_Profile || Alices_User_Profile || Y || X || B || A`.
+2. Compute `t = 0x0 || Bobs_User_Profile || Alices_User_Profile || Y || X || B || A || Φ`.
+   Φ is the shared session state as mention on the 'Shared session state: Phi'
+   section.
 3. Verify the `sigma` with [SNIZKPK Authentication](#snizkpk-authentication),
 that is `sigma == Verify({Pkb, Pka, Y}, t)`.
 
@@ -986,17 +986,22 @@ sigma (SNIZKPK)
 
 #### Auth-I message
 
+// XXX: TODO
 This is the final message of the DAKE. Bob sends it to Alice to [complete with a
 description].
 
 A valid Auth-I message is generated as follows:
 
-1. Compute `t = 0x1 || Bobs_User_Profile || Alices_User_Profile || Y || X || B || A`.
+1. Compute `t = 0x1 || Bobs_User_Profile || Alices_User_Profile || Y || X || B || A || Φ`.
+   Φ is the shared session state as mention on the 'Shared session state: Phi'
+   section.
 2. Compute `sigma = Auth(Pkb, skb, {Pkb, Pka, X}, t)`.
 
 To verify the Auth-I message:
 
-1. Compute `t = 0x1 || Bobs_User_Profile || Alices_User_Profile || Y || X || B || A`.
+1. Compute `t = 0x1 || Bobs_User_Profile || Alices_User_Profile || Y || X || B || A || Φ`.
+   Φ is the shared session state as mention on the 'Shared session state: Phi'
+   section.
 2. Verify the `sigma` with [SNIZKPK Authentication](#snizkpk-authentication),
 that is `sigma == Verify({Pkb, Pka, X}, t)`.
 
@@ -1739,12 +1744,10 @@ Lastly, OTRv4 uses Ed448 as the cryptographic primitive. This changes the way
 values are serialized and how they are computed. To define the SMP values
 under Ed448, we reuse the previously defined generator `G` for Ed448:
 
+// XXX: check this
 ```
 G = (11781216126343694673728248434331006466518053535701637341687908214793940427
 7809514858788439644911793978499419995990477371552926308078495, 19)
-
-= (0x297ea0ea2692ff1b4faff46098453a6a26adf733245f065c3c59d0709cecfa96147eaaf3932
-d94c63d96c170033f4ba0c7f0de840aed939f, 0x13)
 ```
 
 ### SMP Overview
@@ -1757,8 +1760,8 @@ Assuming that Alice begins the exchange:
 * Picks random values `r2` and `r3` in `Z_q`.
 * Computes `c2 = HashToScalar(1 || G * r2)` and `d2 = r2 - a2 * c2`.
 * Computes `c3 = HashToScalar(2 || G * r3)` and `d3 = r3 - a3 * c3`.
-* Sends Bob a SMP message 1 with `G2a = G * a2`, `c2`, `d2`, `G3a = G * a3`, `c3`
-  and `d3`.
+* Sends Bob a SMP message 1 with `G2a = G * a2`, `c2`, `d2`, `G3a = G * a3`,
+  `c3` and `d3`.
 
 **Bob:**
 
@@ -1770,10 +1773,10 @@ Assuming that Alice begins the exchange:
 * Computes `c2 = HashToScalar(3 || G * r2)` and `d2 = r2 - b2 * c2`.
 * Computes `c3 = HashToScalar(4 || G * r3)` and `d3 = r3 - b3 * c3`.
 * Computes `G2 = G2a * b2` and `G3 = G3a * b3`.
-* Computes `Pb = G3 * r4` and `Qb = G * r4 + G2 * HashToScalar(y)`, where y is the 'actual
-  secret'.
-* Computes `cp = HashToScalar(5 || G3 * r5 || G * r5 + G2 * r6)`, `d5 = r5 - r4 * cp`
-  and `d6 = r6 - HashToScalar(y) * cp`.
+* Computes `Pb = G3 * r4` and `Qb = G * r4 + G2 * HashToScalar(y)`, where y is
+  the 'actual secret'.
+* Computes `cp = HashToScalar(5 || G3 * r5 || G * r5 + G2 * r6)`,
+  `d5 = r5 - r4 * cp` and `d6 = r6 - HashToScalar(y) * cp`.
 * Sends Alice a SMP message 2 with `G2b`, `c2`, `d2`, `G3b`, `c3`, `d3`, `Pb`,
   `Qb`, `cp`, `d5` and `d6`.
 
@@ -1783,13 +1786,15 @@ Assuming that Alice begins the exchange:
   and that they do not degenerate.
 * Computes `G2 = G2b * a2` and `G3 = G3b * a3`.
 * Picks random values `r4`, `r5`, `r6` and `r7` in `Z_q`.
-* Computes `Pa = G3 * r4` and `Qa = G * r4 + G2 * HashToScalar(x)`, where x is the 'actual
-  secret'.
-* Computes `cp = HashToScalar(6 || G3 * r5 || G * r5 + G2 * r6)`, `d5 = r5 - r4 * cp`
-  and `d6 = r6 - HashToScalar(x) * cp`.
+* Computes `Pa = G3 * r4` and `Qa = G * r4 + G2 * HashToScalar(x)`, where x is
+  the 'actual secret'.
+* Computes `cp = HashToScalar(6 || G3 * r5 || G * r5 + G2 * r6)`,
+  `d5 = r5 - r4 * cp` and `d6 = r6 - HashToScalar(x) * cp`.
 * Computes `Ra = (Qa - Qb) * a3`.
-* Computes `cr = HashToScalar(7 || G * r7 || (Qa - Qb) * r7)` and `d7 = r7 - a3 * cr`.
-* Sends Bob a SMP message 3 with `Pa`, `Qa`, `cp`, `d5`, `d6`, `Ra`, `cr` and `d7`.
+* Computes `cr = HashToScalar(7 || G * r7 || (Qa - Qb) * r7)` and
+  `d7 = r7 - a3 * cr`.
+* Sends Bob a SMP message 3 with `Pa`, `Qa`, `cp`, `d5`, `d6`, `Ra`, `cr` and
+  `d7`.
 
 **Bob:**
 
@@ -1798,7 +1803,8 @@ Assuming that Alice begins the exchange:
 * Picks a random value `r7` in `Z_q`.
 * Computes `Rb = (Qa - Qb) * b3`.
 * Computes `Rab = Ra * b3`.
-* Computes `cr = HashToScalar(8 || G * r7 || (Qa - Qb) * r7)` and `d7 = r7 - b3 * cr`.
+* Computes `cr = HashToScalar(8 || G * r7 || (Qa - Qb) * r7)` and
+  `d7 = r7 - b3 * cr`.
 * Checks whether `Rab == Pa - Pb`.
 * Sends Alice a SMP message 4 with `Rb`, `cr`, `d7`.
 
@@ -1810,10 +1816,10 @@ Assuming that Alice begins the exchange:
 * Checks whether `Rab == Pa - Pb`.
 
 If everything is done correctly, then `Rab` should hold the value of
-`(Pa - Pb) * ((G2 * a3 * b3) * (x - y))`, which means that the test at the end of the
-protocol will only succeed if `x == y`. Further, since `G2 * a3 * b3` is a random
-number not known to any party, if `x` is not equal to `y`, no other information
-is revealed.
+`(Pa - Pb) * ((G2 * a3 * b3) * (x - y))`, which means that the test at the end
+of the protocol will only succeed if `x == y`. Further, since `G2 * a3 * b3` is
+a random number not known to any party, if `x` is not equal to `y`, no other
+information is revealed.
 
 ### Secret information
 
@@ -1844,10 +1850,10 @@ middle is capable of reading their communication either.
 ### SMP Hash function
 
 In the following actions, there are many places where a SHA3-512 hash of an
-integer followed by another values is taken, this is defined as `HashToScalar(d)`,
-where the integer is a version to distinguish the calls to the hash function at
-different points in the protocol, to prevent Alice from replaying Bob's zero
-knowledge proofs or vice versa.
+integer followed by another values is taken, this is defined as
+`HashToScalar(d)`, where the integer is a version to distinguish the calls to
+the hash function at different points in the protocol, to prevent Alice from
+replaying Bob's zero knowledge proofs or vice versa.
 
 ### SMP message 1
 
@@ -1857,15 +1863,15 @@ generators, `g2` and `g3`. A valid SMP message 1 is generated as follows:
 1. Determine her secret input `x`, which is to be compared to Bob's secret
    `y`, as specified in the "Secret Information" section.
 2. Pick random values `a2` and `a3` in `Z_q`. These will be Alice's
-exponents for the DH exchange to pick generators.
+   exponents for the DH exchange to pick generators.
 3. Pick random values `r2` and `r3` in `Z_q`. These will be used to
-generate zero-knowledge proofs that this message was created according to the
-protocol.
+   generate zero-knowledge proofs that this message was created according to the
+   protocol.
 4. Compute `G2a = G * a2` and `G3a = G * a3`.
 5. Generate a zero-knowledge proof that the value `a2` is known by setting
-`c2 = HashToScalar(1 || G * r2)` and `d2 = r2 - a2 * c2 mod q`.
+   `c2 = HashToScalar(1 || G * r2)` and `d2 = r2 - a2 * c2 mod q`.
 6. Generate a zero-knowledge proof that the value `a3` is known by setting
-`c3 = HashToScalar(2 || G * r3)` and `d3 = r3 - a3 * c3 mod q`.
+   `c3 = HashToScalar(2 || G * r3)` and `d3 = r3 - a3 * c3 mod q`.
 7. Store the values of `x`, `a2` and `a3` for use later in the protocol.
 
 
@@ -1881,14 +1887,14 @@ question (DATA)
 G2a (POINT)
   Alice's half of the DH exchange to determine G2.
 
-c2 (MPI), d2 (MPI)
+c2 (SCALAR), d2 (SCALAR)
   A zero-knowledge proof that Alice knows the value associated with her
   transmitted value G2a.
 
 G3a (POINT)
   Alice's half of the DH exchange to determine G3.
 
-c3 (MPI), d3 (MPI)
+c3 (SCALAR), d3 (SCALAR)
   A zero-knowledge proof that Alice knows the value associated with her
   transmitted value G3a.
 
@@ -1912,13 +1918,14 @@ follows:
    zero-knowledge proofs that this message was created honestly.
 5. Compute `G2b = G * b2` and `G3b = G * b3`.
 6. Generate a zero-knowledge proof that the value `b2` is known by setting
-`c2 = HashToScalar(3 || G * r2)` and `d2 = r2 - b2 * c2 mod q`.
+   `c2 = HashToScalar(3 || G * r2)` and `d2 = r2 - b2 * c2 mod q`.
 7. Generate a zero-knowledge proof that the value `b3` is known by setting
-`c3 = HashToScalar(4 || G * r3)` and `d3 = r3 - b3 * c3 mod q`.
+   `c3 = HashToScalar(4 || G * r3)` and `d3 = r3 - b3 * c3 mod q`.
 8. Compute `G2 = G2a * b2` and `G3 = G3a * b3`.
 9. Compute `Pb = G3 * r4` and `Qb = G * r4 + G2 * HashToScalar(y)`.
 10. Generate a zero-knowledge proof that `Pb` and `Qb` were created according
-   to the protocol by setting `cp = HashToScalar(5 || G3 * r5 || G * r5 + G2 * r6)`,
+   to the protocol by setting
+   `cp = HashToScalar(5 || G3 * r5 || G * r5 + G2 * r6)`,
    `d5 = r5 - r4 * cp mod q` and `d6 = r6 - HashToScalar(y) * cp mod q`.
 11. Store the values of `G3a`, `G2`, `G3`, `b3`, `Pb` and `Qb` for use later
     in the protocol.
@@ -1929,14 +1936,14 @@ The SMP message 2 has the following data:
 G2b (POINT)
   Bob's half of the DH exchange to determine G2.
 
-c2 (MPI), d2 (MPI)
+c2 (SCALAR), d2 (SCALAR)
   A zero-knowledge proof that Bob knows the exponent associated with his
   transmitted value G2b.
 
 G3b (POINT)
   Bob's half of the DH exchange to determine G3.
 
-c3 (MPI), d3 (MPI)
+c3 (SCALAR), d3 (SCALAR)
   A zero-knowledge proof that Bob knows the exponent associated with his
   transmitted value G3b.
 
@@ -1944,7 +1951,7 @@ Pb (POINT), Qb (POINT)
   These values are used in the final comparison to determine if Alice and Bob
   share the same secret.
 
-cp (MPI), d5 (MPI), d6 (MPI)
+cp (SCALAR), d5 (SCALAR), d6 (SCALAR)
   A zero-knowledge proof that Pb and Qb were created according to the protocol
   given above.
 ```
@@ -1963,7 +1970,8 @@ is generated as follows:
 3. Compute `G2 = G2b * a2` and `G3 = G3b * a3`.
 4. Compute `Pa = G3 * r4` and `Qa = G * r4 + G2 * HashToScalar(x)`.
 5. Generate a zero-knowledge proof that `Pa` and `Qa` were created according to
-   the protocol by setting `cp = HashToScalar(6 || G3 * r5 || G * r5 + G2 * r6)`,
+   the protocol by setting
+   `cp = HashToScalar(6 || G3 * r5 || G * r5 + G2 * r6)`,
    `d5 = r5 - r4 * cp mod q` and `d6 = r6 - HashToScalar(x) * cp mod q`.
 6. Compute `Ra = (Qa - Qb) * a3`.
 7. Generate a zero-knowledge proof that `Ra` was created according to the
@@ -1979,7 +1987,7 @@ Pa (POINT), Qa (POINT)
   These values are used in the final comparison to determine if Alice and Bob
   share the same secret.
 
-cp (MPI), d5 (MPI), d6 (MPI)
+cp (SCALAR), d5 (SCALAR), d6 (SCALAR)
   A zero-knowledge proof that Pa and Qa were created according to the protocol
   given above.
 
@@ -1987,7 +1995,7 @@ Ra (POINT)
   This value is used in the final comparison to determine if Alice and Bob
   share the same secret.
 
-cr (MPI), d7 (MPI)
+cr (SCALAR), d7 (SCALAR)
   A zero-knowledge proof that Ra was created according to the protocol given
   above.
 ```
@@ -2014,7 +2022,7 @@ Rb (POINT)
   This value is used in the final comparison to determine if Alice and Bob
   share the same secret.
 
-cr (MPI), d7 (MPI)
+cr (SCALAR), d7 (SCALAR)
   A zero-knowledge proof that Rb was created according to the protocol given
   above.
 ```
@@ -2121,7 +2129,7 @@ honest conversations. This section will guide implementers to achieve this.
 The major utilities are:
 
 ```
-XXX: check if DH are needed
+XXX: check if DH is needed
 
 Parse
   Parses OTR messages to the values of each of the fields in
