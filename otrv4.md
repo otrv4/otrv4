@@ -2081,8 +2081,6 @@ If smpstate is `SMPSTATE_EXPECT3`:
 * Set smpstate to `SMPSTATE_EXPECT1`, as no more messages are expected from
   Alice.
 
-  `cr = HashToScalar(8 || G * r7 || (Qa - Qb) * r7)` and `d7 = r7 - b3 * cr mod q`.
-
 #### Receiving a SMP message 4
 
 If smpstate is not `SMPSTATE_EXPECT4`:
