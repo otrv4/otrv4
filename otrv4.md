@@ -405,7 +405,7 @@ Value (len BYTE) [where len is the value of the Length field]
 ```
 
 OTRv4 supports the majority of the TLV record types from OTRv3. The ones not
-supported stated as so. They are:
+supported are stated as so. They are:
 
 ```
 Type 0: Padding
@@ -541,8 +541,9 @@ values are replaced by these events:
 ### Generating ECDH and DH keys
 
 ```
+// TODO: prob the size does not matter
 generateECDH()
-  pick a random value r from Z_q
+  pick a random value r (57 bytes)
   return our_ecdh.public = G * r, our_ecdh.secret = r
 
 generateDH()
@@ -689,7 +690,7 @@ version 3, then this message is ignored.
 
 OTRv4 introduces a user profile. The user profile contains the Ed448
 long term public key, signed information about supported versions, a signed
-profile expiration date, and a singed optional transition signature.
+profile expiration date, and a signed optional transition signature.
 
 Each participant maintains a user profile for authentication in the DAKE and for
 publication. Publishing the user profile allows users to repudiate their
