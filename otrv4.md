@@ -807,6 +807,8 @@ Eddsa signature (EDDSA-SIG):
 
 ### Interactive Deniable Authenticated Key Exchange (DAKE)
 
+TODO: include what happens when two people send ZDH2 at the same time
+
 This section outlines the flow of the interactive DAKE. This is a way to
 mutually agree upon shared keys for the two parties and authenticate one another
 while providing participation deniability.

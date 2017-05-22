@@ -24,12 +24,6 @@ The receiver can continue sending data messages even without receiving a reply
 from the initiator, and forward secrecy is preserved by ratcheting the chain
 key.
 
-An OTRv4 pre-key may contain:
-- one ephemeral ECDH key.
-- one ephemeral DH key.
-- user profile.
-- instance tag.
-
 #### Publishing pre-keys
 
 The initiator (I) should:
@@ -63,31 +57,52 @@ preventing multiple client to share the same long-term public key. A client
 must distinguish between when a new long-term public key represents
 a new device or the retirement of the previous key.
 
+The client may receive multiple prekeys from a prekey server. The client must
+decide how to reply to them. Each prekey may have a different client associated
+with it and a different version.
+
 #### Problem 2: Multiple OTR protocol versions
 
-Should pre-keys also contain information about which OTR protocol they
-belong to? Otherwise, how would we in the future allow OTRv4 and OTRv5 pre-keys?
-Should servers be required to provide an API to allow asking for pre-keys for
-specific OTR versions? Is this something possible to implement using only XEPs
-for the case of XMMP, for example?
+Prekeys contain:
+
+```
+Protocol version (SHORT)
+Message type (BYTE)
+Sender instance tag (INT)
+User Profile (USER-PROF)
+I (POINT) ECDH public key
+B (MPI) DH public key
+  Note: Although this is capital, this is not a point.
+```
+
+Each client is expected to upload one prekey per version of OTR after version 4
+they support.
 
 #### Problem 3: Multiple DAKEs for multiple settings
 
-Having different DAKEs for interactive and non-interactive increases complexity:
-should we have 2 DAKEs state machines? What should happen when you
-receive a non-interactive DAKE message while waiting for an interactive DAKE
-message (and vice-versa)? Should we keep two sets of key materials? Is it worth
-the additional amount of code?
+Currently we have decided on one state machine that accounts for multiple DAKEs.
+The machine has the following states:
+* Start
+* Waiting for R Auth
+* Waiting for I Auth
+* Encrypted Message
+* Finished
 
-#### Problem 4: What to do when the server runs out of pre-keys?
+All of these states except the finished state may react to receiving the second
+message of a non-interactive DAKE by validating it, destroying the current key
+material and creating a new shared secret with the new message.
 
-How other protocols solve this? Does it preserve partial participation
+When Alice and Bob send each other the second message of the non-interactive
+DAKE at the same time, both will need to decide which set of keys will be used
+for their shared secret. Alice and Bob will use the same tie-breaking method
+described in the interactive DAKE to choose.
+
+#### Problem 4: The server runs out of Prekeys
+
+How other protocols solve this? And do they preserve partial participation
 deniability?
 
-### Decision
-
-We decided to postpone the decision to when we have the interactive.
+TODO
 
 ### Consequences
-
 TODO
