@@ -1,17 +1,9 @@
 ## ADR 8: Non-interactive DAKE
 
-### Braindump of questions
-
-- Should OTRv4 provide a non-interactive AKE?
-- How should pre-keys be published and retrieved? How many? For how long?
-- How to associate pre-keys with instance tags? What about user profiles?
-- Should the protocol specify HOW to use interactive and non-interactive in
-  a hybrid mode and how to automatically fallback from one to another?
-
 ### Context
 
 OTRv3 only provides an interactive AKE and adding support to non-interactive
-AKE is an usability feature.
+AKE is a usability feature.
 
 A non-interactive DAKE starts by the receiver (R) requesting a pre-key for the
 initiator (I) from a untrusted server. I's long-term public key must be known by R.
@@ -24,32 +16,17 @@ The receiver can continue sending data messages even without receiving a reply
 from the initiator, and forward secrecy is preserved by ratcheting the chain
 key.
 
-#### Publishing pre-keys
+#### Publishing and retrieving prekeys to a prekey server
 
-The initiator (I) should:
+Implementers are expected to create their own policy dictating how often their
+clients upload prekeys to the prekey server. This should be often enough to
+minimize instances of prekeys running out on the server. Ideally, participation
+deniability for the user is preserved in this process.
 
-1. Authenticate itself with the server by running an interactive DAKE.
-2. Include a ZKPK to prove they control the ephemeral secret key in the pre-key.
-3. Send the pre-key.
-4. Store the pre-key for future use.
+Interactions between OTRv4 clients and a prekey server are defined in a separate
+specification.
 
-The server should:
-
-1. Verify the ZKPK.
-2. Associate the received pre-key with the long-term public key used in the DAKE.
-
-#### Retrieving pre-keys
-
-The receiver (R) should:
-
-1. Request from the server a pre-key for I's long-term public key.
-
-The server should:
-
-1. Reply with the pre-key if there's any, and remove from its storage.
-2. Reply with a special message if it could not find.
-
-#### Problem 1: Multiple clients
+#### Multiple clients
 
 OTR uses instance tags to distinguish between different clients. This can be
 solved by associating recipient long-term public keys with instance tags and
@@ -61,7 +38,7 @@ The client may receive multiple prekeys from a prekey server. The client must
 decide how to reply to them. Each prekey may have a different client associated
 with it and a different version.
 
-#### Problem 2: Multiple OTR protocol versions
+#### Multiple OTR protocol versions
 
 Prekeys contain:
 
@@ -78,7 +55,7 @@ B (MPI) DH public key
 Each client is expected to upload one prekey per version of OTR after version 4
 they support.
 
-#### Problem 3: Multiple DAKEs for multiple settings
+#### Handling multiple DAKEs for multiple settings
 
 Currently we have decided on one state machine that accounts for multiple DAKEs.
 The machine has the following states:
@@ -97,12 +74,18 @@ DAKE at the same time, both will need to decide which set of keys will be used
 for their shared secret. Alice and Bob will use the same tie-breaking method
 described in the interactive DAKE to choose.
 
-#### Problem 4: The server runs out of Prekeys
+#### What to do when the server runs out of prekeys
 
-How other protocols solve this? And do they preserve partial participation
-deniability?
+When the server runs out of prekeys, OTRv4 expects client implementations to
+wait until a prekey is transmitted before continuing with a non-interactive
+DAKE.
 
-TODO
+This is purposely different from what we expect from protocols like the Signal
+Protocol. In Signal, when a prekey server runs out of prekeys, a default prekey
+is used until new prekeys are uploaded. With this method, the consequences for
+participation deniability are currently undefined, and we think this is risky.
 
-### Consequences
-TODO
+By waiting for the server to send prekeys, OTRv4 will be subject to DoS
+attacks when a server is compromised or the network is undermined to return a
+"no prekey exists" response from the server. This is preferred over the possible
+compromise of multiple non-interactive DAKEs due to the reuse of a prekey.
