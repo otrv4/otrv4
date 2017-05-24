@@ -49,7 +49,7 @@ For OTRv4, we decided to use the Double Ratchet algorithm for key management.
 Even though our network model is in-order, we can benefit from the per-message
 forward secrecy that the Double Ratchet algorithm provides.
 
-We decided that only the receiver will reveal MAC keys per message for simplicity.
+We decided that only the receiver will reveal MAC keys every ratchet.
 
 ### Consequences
 

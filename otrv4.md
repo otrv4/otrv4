@@ -1173,7 +1173,7 @@ A valid non-interactive Auth message is generated as follows:
 8. Follow the section ["When you send a Data Message"](when-you-send-a-data-message) to generate:
 	* Nonce
 	* Encrypted message
-	* Authenticator 
+	* Authenticator
 
 To verify a non-interactive Auth message:
 
@@ -1192,7 +1192,7 @@ that is `sigma == Verify({Pkb, Pka, Y}, t)`.
    * Calculates the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
    * [Decides which chain key he will use](#deciding-between-chain-keys).
 6. Verify the Auth Mac.
-7. Follow the section ["When you receive a Data Message"](when-you-receive-a-data-message) to verify the MAC of the message and decrypt it. 
+7. Follow the section ["When you receive a Data Message"](when-you-receive-a-data-message) to verify the MAC of the message and decrypt it.
 
 A non-interactive Auth is an OTR message encoded as:
 
@@ -1385,6 +1385,8 @@ Given a new ratchet:
   * Derive new set of keys `root[i], chain_s[i][0], chain_r[i][0] = derive_ratchet_keys(K)`.
   * Securely delete the root key and all chain keys from the ratchet `i-2`.
   * Securely delete `K`.
+  * Forget and reveal MAC keys. The conditions for revealing MAC keys is
+    stated in the [Revealing MAC keys](#revealing-mac-keys) section.
 
 Otherwise:
 
@@ -1415,9 +1417,6 @@ In both cases:
    Authenticator = KDF_2(MKmac || Data_message_sections)
    ```
 
-  * Forget and reveal MAC keys. The conditions for revealing MAC keys is
-    stated in the [Revealing MAC keys](#revealing-mac-keys) section.
-
 #### When you receive a Data Message:
 
 * Use the `message_id` to compute the receiving chain key, and calculate
@@ -1431,23 +1430,25 @@ encryption and mac keys.
 * Use the "mac key" (`MKmac`) to verify the MAC of the message. If the message
   verification fails, reject the message.
 
-Otherwise:
+  Otherwise:
 
-  * Decrypt the message using the "encryption key" (`MKenc`) and securely
+    * Decrypt the message using the "encryption key" (`MKenc`) and securely
     delete it.
-  * Securely delete receiving chain keys older than `message_id-1`.
-  * Set `j = 0` to indicate that a new DH-ratchet should happen the next time
+    * Securely delete receiving chain keys older than `message_id-1`.
+    * Set `j = 0` to indicate that a new DH-ratchet should happen the next time
     you send a message.
-  * Set `their_ecdh` as the "Public ECDH key" from the message.
-  * Set `their_dh` as the "Public DH Key" from the message, if it
+    * Set `their_ecdh` as the "Public ECDH key" from the message.
+    * Set `their_dh` as the "Public DH Key" from the message, if it
     is not NULL.
-  * Add the MKmac key to list `mac_keys_to_reveal`.
+    * Add the MKmac key to list `mac_keys_to_reveal`.
 
 ### Revealing MAC Keys
 
 We reveal old MAC keys to provide [forgeability of messages](#forging-transcripts).
 Old MAC keys are keys for already received messages and, therefore, will no
 longer be used to verify the authenticity of the message.
+
+//TODO: still using heartbeat?
 
 Data messages and heartbeat messages (data messages with a plaintext length of
 zero) reveal MAC keys. If a participant has not sent a data message in some
@@ -1456,8 +1457,7 @@ configurable amount of time, a heartbeat message is sent to reveal the MAC keys.
 Old MAC keys are formatted as a list of concatenated 64 byte values.
 
 A MAC key is added to `mac_keys_to_reveal` after a participant has verified
-a message associated with the MAC key or after they have discarded the
-encryption key associated with the MAC key.
+a message associated with the MAC key.
 
 ## Fragmentation
 
