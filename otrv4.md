@@ -86,7 +86,11 @@ works on top of an existing messaging protocol, like XMPP.
 
 ## High Level Overview
 
-TODO: Add the non-interactive overview.
+An OTRv4 conversation may begin when the two participants are online, called an
+interactive conversation, or when one participant is offline, called
+non-interactive.
+
+### Interactive Conversation
 
 ```
 Alice                                            Bob
@@ -99,15 +103,46 @@ Deniable Authenticated Key Exchange                 Deniable Authenticated Key E
 Exchanges Data Messages             <------------>  Exchanges Data Messages
 ```
 
-An OTRv4 conversation can begin after one participant requests a conversation.
+The interactive conversation can begin after one participant requests a conversation.
 This includes an advertisement of which versions they support. If the other
-participant supports OTRv4 as the highest compatible version, a deniable, authenticated
-key exchange (DAKE) is used to establish a secure channel. Encrypted messages are
-then exchanged in this secure channel with forward secrecy.
+participant supports OTRv4 as the highest compatible version, an interactive,
+deniable, authenticated key exchange (DAKE) is used to establish a secure
+channel. Encrypted messages are then exchanged in this secure channel with
+forward secrecy.
+
+### Non-interactive Conversation
+
+```
+Alice                        Prekey Server                  Bob
+--------------------------------------------------------------------------------
+                                    (<--------------------- Pre-conversation: Creates
+                                                            and sends a Prekey)
+Retreives Bob's  ----------------->
+Prekey
+
+Establishes Non-interactive ------------------------------->
+Conversation with Bob and
+sends the first Data Message
+
+Exchanges Data Messages <---------------------------------->  Exchanges Data Messages
+
+```
+
+In the non-interactive conversation flow, Alice first retrieves a Prekey message
+from a Prekey server. This Prekey was placed there by Bob before the
+conversation to allow other participants like Alice to send him encrypted
+messages while he is offline.
+
+### Interoperability between conversation types
+
+Implementers may allow interactive conversations to turn into non-interactive
+conversations. For example, Alice and Bob establish an interactive conversation,
+and then Bob goes offline. At that point, the client may allow Alice to continue
+sending encrypted messages to Bob through a non-interactive conversation.
+Although this will lower the security properties of the conversation for Alice
+with Bob, as explained [here](#security-properties), it is possible.
 
 ## Assumptions
-
-Both participants are online at the start of a conversation.
 
 Messages in a conversation can be exchanged over an insecure channel, where an
 attacker can eavesdrop or interfere with the encrypted messages.
@@ -129,13 +164,18 @@ adversaries. The only exception is the usage of a "mix key" to provide
 some post-conversation transcript protection against potential weaknesses with
 elliptic curves and the early arrival of quantum computers.
 
-In the DAKE, although access to one participant's private long term key is
-required for authentication, both participants can deny having used their
+In the interactive DAKE, although access to one participant's private long term
+key is required for authentication, both participants can deny having used their
 private long term keys in this process. An external cryptographic expert will
 be able to prove that one person between the two used their long term private
 key for the authentication, but they will not be able to identify whose key was
-used. This provides deniability for those participating in the DAKE, whereas
-the AKE of OTRv3 is not deniable.
+used. This provides deniability for both participants in the interactive DAKE,
+whereas the AKE of OTRv3 is not deniable.
+
+In the non-interactive DAKE, the initializer, Alice in the above overview, does
+not have participation deniability but Bob the receiver does. This is important
+to consider when deciding when to use non-interactive messages in an
+implementation of OTRv4.
 
 Once an OTRv4 channel has been created with the DAKE, all data messages
 transmitted through this channel are confidential and their integrity to the
@@ -489,7 +529,7 @@ Error Code List:
 
 ## Key management
 
-In the DAKE, OTRv4 makes use of long-term Ed448 keys, ephemeral Elliptic
+In both DAKEs, OTRv4 makes use of long-term Ed448 keys, ephemeral Elliptic
 Curve Diffie-Hellman (ECDH) keys, and ephemeral Diffie-Hellman (DH) keys.
 
 For exchanging data messages, OTRv4 makes use of both the DH ratchet (with ECDH)
@@ -673,26 +713,13 @@ derive_enc_mac_keys(chain_key):
 The state variables are set to `0` and the key variables are set to `NIL` for
 this channel.
 
-## Online Conversation Initialization
-
-OTRv4 will initialize through a [Query Message or a Whitespace
-Tag](#user-requests-to-start-an-otr-conversation). After this, the conversation
-is authenticated using the interactive DAKE.
-
-### Requesting conversation with older OTR versions
-
-Bob might respond to Alice's request or notification of willingness to start a
-conversation using OTRv3. If this is the case and Alice supports version 3,
-the protocol falls back to OTRv3 [\[7\]](#references). If Alice does not support
-version 3, then this message is ignored.
-
-### User Profile
+## User Profile
 
 OTRv4 introduces a user profile. The user profile contains the Ed448
 long term public key, signed information about supported versions, a signed
 profile expiration date, and a signed optional transition signature.
 
-Each participant maintains a user profile for authentication in the DAKE and for
+Each participant maintains a user profile for authentication in both DAKEs and for
 publication. Publishing the user profile allows users to repudiate their
 participation in OTRv4 conversations. When a user profile is published, it is
 available from a public location, such as a server. Each implementation may
@@ -709,7 +736,7 @@ Both parties include the user profile in the DAKE. Participants in the DAKE do
 not request the profile from the site of publication. Both the published profile
 and the profile used in the DAKE should match each other.
 
-#### Creating a User Profile
+### Creating a User Profile
 
 To create a user profile, assemble:
 
@@ -732,7 +759,7 @@ To create a user profile, assemble:
 After the profile is created, it must be published in a public place, like an
 untrusted server.
 
-#### Establishing Versions
+### Establishing Versions
 
 A valid versions string can be created by concatenating supported version
 numbers together in any order. For example, a user who supports versions 3 and 4
@@ -745,13 +772,13 @@ to OTR version 3, and thus do not support versions 2 and 1, i.e. version strings
 of "32" or "31". Any other string that is not "4", "3", "2" or "1" should be
 ignored.
 
-#### Validating a User Profile
+### Validating a User Profile
 
 * Verify that the user profile signature is valid.
 * Verify that the user profile is not expired.
 * Verify that the versions field contains "4".
 
-#### Renewing a Profile
+### Renewing a Profile
 
 If a renewed profile is not published in a public place, the user's
 participation deniability is at risk. Participation deniability is also at risk
@@ -762,16 +789,16 @@ Before the profile expires, the user must publish an updated profile with a
 new expiration date. The client establishes the frequency of expiration - this
 can be configurable. A recommended value is two weeks.
 
-#### Create a User Profile Signature
+### Create a User Profile Signature
 
 The user profile signature is generated as defined on [RFC8032] section 5.2.6.
 The flag `F` is set to `0` and the context `C` is left empty.
 
-#### Verify a User Profile Signature
+### Verify a User Profile Signature
 
 The user profile signature is verified as defined on [RFC8032] section 5.2.7.
 
-#### User Profile Data Type
+### User Profile Data Type
 
 ```
 Profile Expiration (PROF-EXP):
@@ -805,9 +832,20 @@ Eddsa signature (EDDSA-SIG):
   len byte unsigned value, big-endian
 ```
 
-### Interactive Deniable Authenticated Key Exchange (DAKE)
+## Online Conversation Initialization
 
-TODO: include what happens when two people send ZDH2 at the same time
+OTRv4 will initialize through a [Query Message or a Whitespace
+Tag](#user-requests-to-start-an-otr-conversation). After this, the conversation
+is authenticated using the interactive DAKE.
+
+### Requesting conversation with older OTR versions
+
+Bob might respond to Alice's request or notification of willingness to start a
+conversation using OTRv3. If this is the case and Alice supports version 3,
+the protocol falls back to OTRv3 [\[7\]](#references). If Alice does not support
+version 3, then this message is ignored.
+
+### Interactive Deniable Authenticated Key Exchange (DAKE)
 
 This section outlines the flow of the interactive DAKE. This is a way to
 mutually agree upon shared keys for the two parties and authenticate one another
@@ -1032,8 +1070,12 @@ sigma (SNIZKPK)
 
 ## Offline Conversation Initialization
 
-TODO: Improve this, but a rough description of how it works is:
+To begin an offline conversation, a prekey is retrieved from a prekey server.
+A non-interactive auth message is created using material in the prekey and the
+plaintext that the user wishes to send.
 
+TODO: include what happens when two people send ZDH2 at the same time
+TODO: Improve this, but a rough description of how it works is:
 1. You ask for a pre-key using a protocol to be defined in another spec.
 2. You send the last ZDH message + an encrypted data message.
 3. You keep ratcheting at the chain-key level to send additional messages.
