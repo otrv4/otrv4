@@ -570,13 +570,17 @@ Key variables:
 The previously mentioned state variables are incremented and the key variable
 values are replaced by these events:
 
-* When you start a new [DAKE](#dake-overview) by sending or receiving an
+* When you start a new [interactive DAKE](#interactive-dake-overview) by sending or receiving an
   [Identity message](#identity-message).
-* Upon completing the [DAKE](#dake-overview) by sending or receiving a
-  [DRE-Auth Message](#dre-auth-message).
-* [When you send and receive a Data Message](#data-exchange)
-* [When you receive a TLV type 1 (Disconnect)](#receiving-a-tlv-type-1-disconnect-message)
-* ???: What about when you start a non-interactive AKE?
+* When you complete the [interactive DAKE](#interactive-dake-overview) by sending an
+  [Auth-I Message](#auth-i-message).
+* When you complete the [interactive DAKE](#interactive-dake-overview) by receiving and validating an
+  [Auth-I Message](#auth-i-message).
+* When you [send a Data Message or receive a Data Message](#data-exchange)
+* When you [send a TLV type 1 (Disconnect)](#sending-a-tlv-type-1--disconnect--message)
+* When you [receive a TLV type 1 (Disconnect)](#receiving-a-tlv-type-1--disconnect--message)
+* When you complete a non-interactive DAKE by [sending a non-interactive auth message](#sending-an-encrypted-message-to-an-offline-participant)
+* When you complete a non-interactive DAKE by [receiving and validating a non-interactive auth message](#receiving-a-non-interactive-auth-message)
 
 ### Generating ECDH and DH keys
 
