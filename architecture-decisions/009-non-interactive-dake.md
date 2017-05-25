@@ -5,7 +5,7 @@
 OTRv3 only provides an interactive AKE and adding support to non-interactive
 AKE is a usability feature.
 
-A non-interactive DAKE starts by the receiver (R) requesting a pre-key for the
+A non-interactive DAKE starts by the receiver (R) requesting a prekey for the
 initiator (I) from a untrusted server. I's long-term public key must be known by R.
 
 The receiver then generates their ephemeral keys and derives a shared secret
