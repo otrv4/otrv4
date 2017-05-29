@@ -401,12 +401,12 @@ serialized as follows:
 
 ```
 SNIZKPK Authentication (SNIZKPK):
-  c1 (MPI)
-  r1 (MPI)
-  c2 (MPI)
-  r2 (MPI)
-  c3 (MPI)
-  r3 (MPI)
+  c1 (SCALAR)
+  r1 (SCALAR)
+  c2 (SCALAR)
+  r2 (SCALAR)
+  c3 (SCALAR)
+  r3 (SCALAR)
     Where (c1, r1, c2, r2, c3, r3) = Auth(A_2, a_2, {A_1, A_2, A_3}, m)
 ```
 
@@ -482,7 +482,6 @@ Type 7: SMP Message 1Q
   user-specified question.
 
 Type 8: Extra symmetric key
-  Only used by OTRv3, and not in OTRv4.
   If you wish to use the extra symmetric key, compute it as outlined in the
   section "Extra symmetric key" [\[2\]](#references). Then, send this 'type 8 TLV' to your
   peer to indicate that you'd like to use it. The value of the TLV begins with
@@ -510,7 +509,7 @@ MPI 2 (MPI)
 // TODO: include me on menu
 The shared session state (Φ) is any session-specic protocol state available to
 both parties in the underlying protocol. For XMPP, for example, it will be the
-stream id.
+jabber id.
 
 ### OTR Error Messages
 
@@ -1245,7 +1244,6 @@ Authenticator (MAC)
   from the protocol version to the end of the encrypted message.
 
 ```
-
 
 ### Publishing prekeys
 
