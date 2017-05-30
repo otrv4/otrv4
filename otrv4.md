@@ -706,26 +706,26 @@ this channel.
 
 ## User Profile
 
-OTRv4 introduces a user profile. The user profile contains the Ed448
-long term public key, signed information about supported versions, a signed
-profile expiration date, and a signed optional transition signature.
+OTRv4 introduces a user profile. The user profile contains the Ed448 long term
+public key, signed information about supported versions, a signed profile
+expiration date, and a signed optional transition signature.
 
-Each participant maintains a user profile for authentication in both DAKEs and for
-publication. Publishing the user profile allows users to repudiate their
-participation in OTRv4 conversations. When a user profile is published, it is
-available from a public location, such as a server. Each implementation may
-decide how to publish the profile. For example, one client may publish profiles
-to a server pool (similar to a keyserver pool, where PGP public keys can be
-published). Another client may use XMPP's publish-subscribe extension
-(XEP-0060 [\[8\]](#references)) for publishing profiles.
+Each participant maintains two instances of the same user profile. One instance
+is for authentication in both DAKEs. The other instance is for publication. A
+user is allowed to repudiate their participation in OTRv4 conversations by
+publishing their user profile.  When a user profile is published, it is
+available from a public location, such as a server.
+
+Each implementation may decide how to publish the profile. For example, one
+client may publish profiles to a server pool (similar to a keyserver pool, where
+PGP public keys can be published). Another client may use XMPP's publish-
+subscribe extension (XEP-0060 [\[8\]](#references)) for publishing profiles. A
+protocol for publication must be defined, but the definition is out of scope for
+this specification.
 
 When the user profile expires, it should be updated. Client implementation
 should determine the frequency of user's profile expiration and renewal. The
 recommended expiration time is two weeks.
-
-Both parties include the user profile in the DAKE. Participants in the DAKE do
-not request the profile from the site of publication. Both the published profile
-and the profile used in the DAKE should match each other.
 
 ### Creating a User Profile
 
