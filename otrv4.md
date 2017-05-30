@@ -1124,7 +1124,7 @@ Verify & Decrypt message
       group and sets it as `their_dh`.
 3. Generates and sets `our_ecdh` as ephemeral ECDH keys.
 4. Generates and sets `our_dh` as ephemeral 3072-bit DH keys.
-5. Sends Bob a non-interactive auth message (see TODO section).
+5. Sends Bob a non-interactive auth message.
 
 **Bob:**
 
