@@ -176,7 +176,7 @@ Thus, OTR4 expects implementers to immediately send a specific non-interactive
 MAC key reveal message once they receive, validate, and successfully decrypt a
 data message. This message does not contain encrypted plaintext provided by the
 user. Its purpose is to immediately reveal MAC keys to provide data message
-deniability for the other party.
+deniability for the other party, much like a "heartbeat" message in OTRv3.
 
 #### Decreased participation deniability for the initiator
 
