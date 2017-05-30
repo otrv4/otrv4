@@ -552,7 +552,7 @@ Key variables:
   'our_dh': our DH ephemeral key pair.
   'their_dh': their DH ephemeral public key.
   'mix_key': the SHA3-256 of the DH shared secret previously computed.
-  'mac_keys_to_reveal': the mac keys to be revealed in next data message sent.
+  'mac_keys_to_reveal': the MAC keys to be revealed in next data message sent.
 ```
 
 The previously mentioned state variables are incremented and the key variable
@@ -1100,14 +1100,14 @@ Bob                         Server                               Alice
 Publish prekey ------------->
 								....
                                      <------------ Request prekeys
-                                     Pre-keys -------------------->
+                                     Prekeys -------------------->
       <---------------------------------------- Non-interactive Auth message
 Verify & Decrypt message
 ```
 
 **Bob:**
 
-1. Generates an Identity and store it locally as a pre-key.
+1. Generates an Identity and store it locally as a prekey.
 2. Publishes the prekey to the untrusted server.
 
 **Alice:**
@@ -1383,14 +1383,14 @@ Otherwise:
 
 In both cases:
 
-  * Calculate the encryption key (`MKenc`) and the mac key (`MKmac`):
+  * Calculate the encryption key (`MKenc`) and the MAC key (`MKmac`):
 
    ```
    MKenc, MKmac = derive_enc_mac_keys(chain_s[i][j])
    ```
 
   * Get a random 24 bytes value to be the `nonce`.
-  * Use the encryption key to encrypt the message and the mac key to calculate
+  * Use the encryption key to encrypt the message and the MAC key to calculate
     its MAC:
 
    ```
@@ -1407,14 +1407,14 @@ In both cases:
 #### When you receive a Data Message:
 
 * Use the `message_id` to compute the receiving chain key, and calculate
-encryption and mac keys.
+encryption and MAC keys.
 
   ```
     compute_chain_key(chain_r, ratchet_id, message_id)
     MKenc, MKmac = derive_enc_mac_keys(chain_r[ratchet_id][message_id])
   ```
 
-* Use the "mac key" (`MKmac`) to verify the MAC of the message. If the message
+* Use the MAC key (`MKmac`) to verify the MAC of the message. If the message
   verification fails, reject the message.
 
   Otherwise:
@@ -2347,15 +2347,15 @@ Forge AKE and Session Keys
     2. Create a DRE-Auth message
 
 Show MAC Key
-  This function takes a chain key and a message key number and shows the mac key
+  This function takes a chain key and a message key number and shows the MAC key
   associated with those two values. For example, if the message key number is 3,
-  the message key is ratcheted 3 times, and the third mac key is returned. 'Show
+  the message key is ratcheted 3 times, and the third MAC key is returned. 'Show
   MAC key' may be used with the ReMAC message in the case where a chain key has
   been compromised by an attacker, and the attacker wishes to forge messages.
 
 ReMAC Message
   Make a new OTR Data Message, with the given pieces (the data part is already
-  encrypted).  MAC it with the given mackey. An attacker may use this function
+  encrypted).  MAC it with the given MAC key. An attacker may use this function
   to forge messages with a compromised MAC key.
 
 Forge Entire Transcript
