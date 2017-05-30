@@ -24,6 +24,7 @@ works on top of an existing messaging protocol, like XMPP.
 1. [Key management](#key-management)
    1. [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys)
    1. [Shared secrets](#shared-secrets)
+   1. [Key derivation functions](#key-derivation-functions)
    1. [Deciding between chain keys](#deciding-between-chain-keys)
    1. [Deriving Double Ratchet keys](#deriving-double-ratchet-keys)
    1. [Rotating ECDH keys and mix key](#rotating-ecdh-keys-and-mix-key)
@@ -86,9 +87,9 @@ works on top of an existing messaging protocol, like XMPP.
 
 ## High Level Overview
 
-An OTRv4 conversation may begin when the two participants are online, called an
-interactive conversation, or when one participant is offline, called
-non-interactive.
+An OTRv4 conversation may begin when the two participants are online (an
+interactive conversation) or when one participant is offline (non-interactive
+conversation).
 
 ### Interactive Conversation
 
@@ -128,19 +129,20 @@ Exchanges Data Messages <---------------------------------->  Exchanges Data Mes
 
 ```
 
-In the non-interactive conversation flow, Alice first retrieves a Prekey message
-from a Prekey server. This Prekey was placed there by Bob before the
-conversation to allow other participants like Alice to send him encrypted
-messages while he is offline.
+In the non-interactive conversation flow, Alice first retrieves a Prekey
+message from a Prekey server. This Prekey was placed there by Bob prior to
+the start of the conversation to allow other participants, like Alice, to send
+him encrypted messages while he is offline.
 
 ### Interoperability between conversation types
 
 Implementers may allow interactive conversations to turn into non-interactive
-conversations. For example, Alice and Bob establish an interactive conversation,
-and then Bob goes offline. At that point, the client may allow Alice to continue
-sending encrypted messages to Bob through a non-interactive conversation.
-Although this will lower the security properties of the conversation for Alice
-with Bob, as explained [here](#security-properties), it is possible.
+conversations. For example, Alice and Bob establish an interactive
+conversation, and then Bob goes offline. At that point, the client may allow
+Alice to continue sending encrypted messages to Bob through a non-interactive
+conversation. Although this will lower the security properties of the
+conversation for Alice with Bob, as explained [here](#security-properties), it
+is possible.
 
 ## Assumptions
 
@@ -165,16 +167,16 @@ some post-conversation transcript protection against potential weaknesses with
 elliptic curves and the early arrival of quantum computers.
 
 In the interactive DAKE, although access to one participant's private long term
-key is required for authentication, both participants can deny having used their
-private long term keys in this process. An external cryptographic expert will
-be able to prove that one person between the two used their long term private
-key for the authentication, but they will not be able to identify whose key was
-used. This provides deniability for both participants in the interactive DAKE,
-whereas the AKE of OTRv3 is not deniable.
+key is required for authentication, both participants can deny having used
+their private long term keys in this process. An external cryptographic expert
+will be able to prove that one person between the two used their long term
+private key for the authentication, but they will not be able to identify whose
+key was used. This provides deniability for both participants in the
+interactive DAKE. The AKE of OTRv3 is not deniable.
 
 In the non-interactive DAKE, the initializer, Alice in the above overview, does
-not have participation deniability but Bob the receiver does. This is important
-to consider when deciding when to use non-interactive messages in an
+not have participation deniability, but Bob the receiver does. Its is important
+to consider this when deciding to use non-interactive messages in an
 implementation of OTRv4.
 
 Once an OTRv4 channel has been created with the DAKE, all data messages
@@ -183,9 +185,9 @@ participants is protected. In addition, the MAC keys used to validate
 each message are revealed afterwards. This allows for forgeability of the data
 messages and consequent deniability of their contents.
 
-If key material used to encrypt a particular data message is compromised, previous
-messages are protected. In addition, future messages are protected by the Diffie-
-Hellman and Elliptic Curve Diffie-Hellman ratchets.
+If key material used to encrypt a particular data message is compromised,
+previous messages are protected. In addition, future messages are protected by
+the Diffie-Hellman and Elliptic Curve Diffie-Hellman ratchets.
 
 ## Notation and parameters
 
@@ -298,14 +300,6 @@ Hexadecimal value of dh_q:
 
 Note that this means that whenever you see an operation on a field element
 from the above group, the operation should be done modulo the prime `dh_p`.
-
-// TODO: move these
-The following key derivation functions are used:
-
-```
-KDF_1(x) = SHA3-256("OTR4" || x)
-KDF_2(x) = SHA3-512("OTR4" || x)
-```
 
 ## Data Types
 
@@ -483,9 +477,9 @@ Type 7: SMP Message 1Q
 
 Type 8: Extra symmetric key
   If you wish to use the extra symmetric key, compute it as outlined in the
-  section "Extra symmetric key" [\[2\]](#references). Then, send this 'type 8 TLV' to your
-  peer to indicate that you'd like to use it. The value of the TLV begins with
-  a 4-byte indication of what this symmetric key will be used for
+  section "Extra symmetric key" [\[2\]](#references). Then, send this 'type 8
+  TLV' to your peer to indicate that you'd like to use it. The value of the TLV
+  begins with a 4-byte indication of what this symmetric key will be used for
   (file transfer, voice encryption, etc). After that, the contents are
   use-specific (which file, etc): there are no predefined uses.
   Note that the value of the key itself is not placed into the TLV; your peer
@@ -520,13 +514,13 @@ Error Code List:
 In both DAKEs, OTRv4 makes use of long-term Ed448 keys, ephemeral Elliptic
 Curve Diffie-Hellman (ECDH) keys, and ephemeral Diffie-Hellman (DH) keys.
 
-For exchanging data messages, OTRv4 makes use of both the DH ratchet (with ECDH)
-and the symmetric-key ratchet from the Double Ratchet algorithm. If you wish to
-understand the Double Ratchet in more detail then please refer to the spec
-[\[2\]](#references) but to implement OTRv4 this is not necessary. OTRv4
-contains everything necessary to implement the Double Ratchet in this context. A
-cryptographic ratchet is a one-way mechanism for deriving new cryptographic keys
-from previous keys. New keys cannot be used to calculate the old keys.
+For exchanging data messages, OTRv4 makes use of both the DH ratchet (with
+ECDH) and the symmetric-key ratchet from the Double Ratchet algorithm. If you
+wish to understand the Double Ratchet in more detail then please refer to the
+spec [\[2\]](#references) but it is no necessary for implementing OTRv4. OTRv4
+contains everything necessary to implement the Double Ratchet in this context.
+A cryptographic ratchet is a one-way mechanism for deriving new cryptographic
+keys from previous keys. New keys cannot be used to calculate the old keys.
 
 OTRv4 adds 3072-bit (384-byte) DH keys, called the mix key pair, to the
 Double Ratchet algorithm. These keys are used to protect transcripts of data
@@ -558,14 +552,15 @@ Key variables:
 The previously mentioned state variables are incremented and the key variable
 values are replaced by these events:
 
-* When you start a new [interactive DAKE](#interactive-dake-overview) by sending or receiving an
-  [Identity message](#identity-message).
-* When you complete the [interactive DAKE](#interactive-dake-overview) by sending an
-  [Auth-I Message](#auth-i-message).
-* When you complete the [interactive DAKE](#interactive-dake-overview) by receiving and validating an
-  [Auth-I Message](#auth-i-message).
-* When you [send a Data Message or receive a Data Message](#data-exchange)
-* When you [send a TLV type 1 (Disconnect)](#sending-a-tlv-type-1--disconnect--message)
+* When you start a new [interactive DAKE](#interactive-dake-overview) by
+  sending or receiving an [Identity message](#identity-message).
+* When you complete the [interactive DAKE](#interactive-dake-overview) by
+  sending an [Auth-I Message](#auth-i-message).
+* When you complete the [interactive DAKE](#interactive-dake-overview) by
+  receiving and validating an [Auth-I Message](#auth-i-message).
+* When you [send a Data Message or receive a Data Message](#data-exchange).
+* When you
+  [send a TLV type 1 (Disconnect)](#sending-a-tlv-type-1--disconnect--message)
 * When you [receive a TLV type 1 (Disconnect)](#receiving-a-tlv-type-1--disconnect--message)
 * When you complete a non-interactive DAKE by [sending a non-interactive auth message](#sending-an-encrypted-message-to-an-offline-participant)
 * When you complete a non-interactive DAKE by [receiving and validating a non-interactive auth message](#receiving-a-non-interactive-auth-message)
@@ -574,8 +569,8 @@ values are replaced by these events:
 
 ```
 generateECDH()
-  pick a random value r (57 bytes)
-  return our_ecdh.public = G * r, our_ecdh.secret = r
+  pick a random value l (57 bytes)
+  return our_ecdh.public = G * l, our_ecdh.secret = l
 
 generateDH()
   pick a random value r (80 bytes)
@@ -599,6 +594,15 @@ K_ecdh:
 K:
   The mixed shared secret is the final shared secret derived from both the
   DH and ECDH shared secrets.
+```
+
+### Key derivation functions
+
+The following key derivation functions are used:
+
+```
+KDF_1(x) = SHA3-256("OTR4" || x)
+KDF_2(x) = SHA3-512("OTR4" || x)
 ```
 
 ### Deciding between chain keys
@@ -640,7 +644,7 @@ derive_ratchet_keys(K):
 
 Before sending the first reply (i.e. a new message considering a previous
 message has been received) the sender will rotate their ECDH keys and mix key.
-This is for the computation of K (see "Deriving Double Ratchet Keys"). The
+This is for the computation of `K` (see "Deriving Double Ratchet Keys"). The
 following data messages will advertise a new ratchet id as `i + 1`.
 
 Before rotating the keys:
@@ -717,11 +721,11 @@ publishing their user profile.  When a user profile is published, it is
 available from a public location, such as a server.
 
 Each implementation may decide how to publish the profile. For example, one
-client may publish profiles to a server pool (similar to a keyserver pool, where
-PGP public keys can be published). Another client may use XMPP's publish-
+client may publish profiles to a server pool (similar to a keyserver pool,
+where PGP public keys can be published). Another client may use XMPP's publish-
 subscribe extension (XEP-0060 [\[8\]](#references)) for publishing profiles. A
-protocol for publication must be defined, but the definition is out of scope for
-this specification.
+protocol for publication must be defined, but the definition is out of scope
+for this specification.
 
 When the user profile expires, it should be updated. Client implementation
 should determine the frequency of user's profile expiration and renewal. The
@@ -833,18 +837,18 @@ is authenticated using the interactive DAKE.
 
 Bob might respond to Alice's request or notification of willingness to start a
 conversation using OTRv3. If this is the case and Alice supports version 3,
-the protocol falls back to OTRv3 [\[7\]](#references). If Alice does not support
-version 3, then this message is ignored.
+the protocol falls back to OTRv3 [\[7\]](#references). If Alice does not
+support version 3, then this message is ignored.
 
 ### Interactive Deniable Authenticated Key Exchange (DAKE)
 
 This section outlines the flow of the interactive DAKE. This is a way to
-mutually agree upon shared keys for the two parties and authenticate one another
-while providing participation deniability.
+mutually agree upon shared keys for the two parties and authenticate one
+another while providing participation deniability.
 
 This protocol is derived from the DAKEZ protocol [\[1\]](#references), which
-uses a signature non-interactive zero-knowledge proof of knowledge (SNIZKPK) for
-authentication (Auth).
+uses a signature non-interactive zero-knowledge proof of knowledge (SNIZKPK)
+for authentication (Auth).
 
 Alice's long-term Ed448 key-pair is `(ska, PKa)` and Bob's long-term Ed448
 key-pair is `(skb, PKb)`. Both key pairs are generated by `PK = G * sk`.
@@ -864,7 +868,7 @@ Bob will be initiating the DAKE with Alice.
 
 **Bob:**
 
-1. Generates and sets `our_ecdh` as ephemeral  ECDH keys.
+1. Generates and sets `our_ecdh` as ephemeral ECDH keys.
 2. Generates and sets `our_dh` as ephemeral 3072-bit DH keys.
 3. Sends Alice an Identity message.
 
@@ -888,11 +892,12 @@ Bob will be initiating the DAKE with Alice.
 
 1. Receives Auth-R message from Alice:
     * Validates Alice's User Profile.
-    * Picks the highest compatible version of OTR listed on Alice's profile, and
-      follows the specification for this version. Version prioritization is
+    * Picks the highest compatible version of OTR listed on Alice's profile,
+      and follows the specification for this version. Version prioritization is
       explained [here](#version-priority) If the versions are incompatible, Bob
       does not send any further messages.
-    * Verify the authentication `sigma` (see [Auth-R message](#auth-r-message) section).
+    * Verify the authentication `sigma` (see [Auth-R message](#auth-r-message)
+      section).
     * Verify `(Y, B)` in the message is an Identity message that Bob previously
       sent and has not been used.
 3. Retrieve ephemeral public keys from Alice:
@@ -958,9 +963,9 @@ Message type (BYTE)
 Sender Instance tag (INT)
   The instance tag of the person sending this message.
 Receiver Instance tag (INT)
-  The instance tag of the intended recipient. For an Identity message, this will
-  often be 0 since the other party may not have identified its instance tag
-  yet.
+  The instance tag of the intended recipient. For an Identity message, this
+  will often be 0 since the other party may not have identified its instance
+  tag yet.
 Sender's User Profile (USER-PROF)
   As described in the section 'Creating a User Profile'.
 Y (POINT)
@@ -1025,9 +1030,8 @@ sigma (SNIZKPK)
 
 #### Auth-I message
 
-// TODO
-This is the final message of the DAKE. Bob sends it to Alice to [complete with a
-description].
+This is the final message of the DAKE. Bob sends it to Alice to verify the
+authentification `sigma`.
 
 A valid Auth-I message is generated as follows:
 
@@ -1061,33 +1065,35 @@ sigma (SNIZKPK)
 
 ## Offline Conversation Initialization
 
-To begin an offline conversation, a prekey is retrieved from an untrusted prekey server.
-A non-interactive auth message is created using material in the prekey and the
-plaintext that the user wishes to send.
+// TODO: inform that this uses ZDH
+To begin an offline conversation, a prekey is retrieved from an untrusted
+prekey server. The security of ZDH does not require trusting the
+server used to distribute prekeys. A non-interactive auth message is created
+using material in the prekey and the plaintext that the user wishes to send.
 
 TODO: include what happens when two people send ZDH2 at the same time
 TODO: Improve this, but a rough description of how it works is:
-1. You ask for a prekey using a protocol to be defined in another spec.
-2. You send the last ZDH message + an encrypted data message.
-3. You keep ratcheting at the chain-key level to send additional messages.
+1. Ask the untrusted server for a authentificated prekey using a protocol to be
+   defined in another spec.
+   TODO: should we insist in doing a DAKEZ with the server?
+2. Send the last ZDH message with an encrypted data message.
+3. Ratcheting at the chain-key level for sending additional messages.
 
 TODO: We should highlight the problems of keep using the same session for a long time
 and how OTR design uses a heartbeat to force key refresh, and how there's a
 trade-off between the duration of the conversation and the limited number of
 prekeys.
 
-TODO: Add a note about the server is untrusted and this is OK.
-
 ### Non-interactive Deniable Authenticated Key Exchange (DAKE)
 
 This section outlines the flow of the non-interactive DAKE. This is a way to
-mutually agree upon shared keys for the two parties and authenticate one another
-while providing participation deniability. Unlike the interactive DAKE, the
-non-interactive DAKE does not provide online deniability for the receiver.
+mutually agree upon shared keys for the two parties and authenticate one
+another while providing participation deniability. Unlike the interactive DAKE,
+the non-interactive DAKE does not provide online deniability for the receiver.
 
 This protocol is derived from the ZDH protocol [\[1\]](#references), which
-uses a signature non-interactive zero-knowledge proof of knowledge (SNIZKPK) for
-authentication (Auth).
+uses a signature non-interactive zero-knowledge proof of knowledge (SNIZKPK)
+for authentication (Auth).
 
 Alice's long-term Ed448 key-pair is `(ska, PKa)` and Bob's long-term Ed448
 key-pair is `(skb, PKb)`. Both key pairs are generated by `PK = G * sk`.
@@ -1112,11 +1118,12 @@ Verify & Decrypt message
 
 **Alice:**
 
-1. Request a prekey from the untrusted server.
+1. Requests a prekey from the untrusted server.
 2. For each prekey message received from the server:
     * Validates Bob's User Profile.
     * Picks the highest compatible version of OTR listed in Bob's profile.
-      If the versions are incompatible, Bob does not send any further. messages.
+      If the versions are incompatible, Bob does not send any further
+      messages.
       Version prioritization is explained [here](#version-priority).
     * Validates the received ECDH ephemeral public key is on curve Ed448 and
       sets it as `their_ecdh`.
@@ -1149,7 +1156,7 @@ A valid non-interactive Auth message is generated as follows:
   * public key `A`.
 4. At this point, the DAKE is complete for Bob:
 	* Sets ratchet id `i` as 0.
-	* Sets `j` as 0 (which means she will ratchet again)????
+	* Sets `j` as 0 TODO: (which means she will ratchet again)????
 	* Calculates ECDH shared secret `K_ecdh`.
 	* Calculates DH shared secret `k_dh` and `mix_key`.
 	* Calculates `κ = KDF_2(K_ecdh || ECDH(x, Pkb) || k_dh)`.
@@ -1192,7 +1199,7 @@ Protocol version (SHORT)
   The version number of this protocol is 0x0004.
 
 Message type (BYTE)
-  The message has type ???.
+  The message has type ???. TODO: set the type
 
 Sender Instance tag (INT)
   The instance tag of the person sending this message.
@@ -1246,9 +1253,9 @@ Or should these actions be defined in the protocol?
 ## Data Exchange
 
 This section describes how each participant will use the Double Ratchet
-algorithm to exchange [data messages](#data-message) initialized with the shared
-secret established in the DAKE. Detailed validation and processing of each data
-message is described in the [section on receiving encrypted data
+algorithm to exchange [data messages](#data-message) initialized with the
+shared secret established in the DAKE. Detailed validation and processing of
+each data message is described in the [section on receiving encrypted data
 messages](#receiving-an-encrypted-data-message).
 
 A message with an empty human-readable part (the plaintext is of zero length,
