@@ -492,21 +492,10 @@ Type 8: Extra symmetric key
   will compute it on its own.
 ```
 
-// TODO: change or delete this
-SMP Message TLVs (types 2-5) all carry data sharing the same general format:
-
-```
-MPI count (INT)
-  The number of MPIs contained in the remainder of the TLV.
-MPI 1 (MPI)
-  The first MPI of the TLV, serialized into a byte array.
-MPI 2 (MPI)
-  The second MPI of the TLV, serialized into a byte array.
-```
 ### Shared session state: Phi
 
 // TODO: check the XMPP example, probably not the right one
-// TODO: include me on menu
+
 The shared session state (Φ) is any session-specic protocol state available to
 both parties in the underlying protocol. For XMPP, for example, it will be the
 jabber id.
@@ -584,7 +573,6 @@ values are replaced by these events:
 ### Generating ECDH and DH keys
 
 ```
-// TODO: prob the size does not matter
 generateECDH()
   pick a random value r (57 bytes)
   return our_ecdh.public = G * r, our_ecdh.secret = r
@@ -2022,10 +2010,10 @@ middle is capable of reading their communication either.
 ### SMP Hash function
 
 In the following actions, there are many places where a SHA3-512 hash of an
-integer followed by another values is taken, this is defined as
-`HashToScalar(d)`, where the integer is a version to distinguish the calls to
-the hash function at different points in the protocol, to prevent Alice from
-replaying Bob's zero knowledge proofs or vice versa.
+integer followed by other values are taken. This is defined as
+`HashToScalar(d)`, where the integer is a number to distinguish the calls to
+the hash function at different points in the protocol. This done to prevent
+Alice from replaying Bob's zero knowledge proofs or vice versa.
 
 ### SMP message 1
 
@@ -2051,13 +2039,13 @@ The SMP message 1 has the following data:
 
 ```
 question (DATA)
-  A user-specified question, which is associated with the user-specified portion
-  of the secret.
+  A user-specified question, which is associated with the user-specified
+  portion of the secret.
   If there is no question input from the user, the length of this is 0 and the
   data is NULL.
 
 G2a (POINT)
-  Alice's half of the DH exchange to determine G2.
+  Alice's half of the ECDH exchange to determine G2.
 
 c2 (SCALAR), d2 (SCALAR)
   A zero-knowledge proof that Alice knows the value associated with her
@@ -2113,7 +2101,7 @@ c2 (SCALAR), d2 (SCALAR)
   transmitted value G2b.
 
 G3b (POINT)
-  Bob's half of the DH exchange to determine G3.
+  Bob's half of the ECDH exchange to determine G3.
 
 c3 (SCALAR), d3 (SCALAR)
   A zero-knowledge proof that Bob knows the exponent associated with his
