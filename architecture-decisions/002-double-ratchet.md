@@ -41,7 +41,7 @@ whereas in the second one MAC key is used for each message.
 Therefore, to reveal MAC keys in the Double Ratchet, we have two options:
 
 1. reveal one MAC key per message
-2. reveal a key that can be used to derive all the MAC keys in that ratchet.
+2. reveal a MAC keys per ratchet.
 
 ### Decision
 

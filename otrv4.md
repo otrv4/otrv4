@@ -1432,14 +1432,15 @@ encryption and mac keys.
 ### Revealing MAC Keys
 
 We reveal old MAC keys to provide [forgeability of messages](#forging-transcripts).
-Old MAC keys are keys for already received messages and, therefore, will no
+Old MAC keys are keys from already received messages and, therefore, will no
 longer be used to verify the authenticity of the message.
 
 //TODO: still using heartbeat?
 
-Data messages and heartbeat messages (data messages with a plaintext length of
-zero) reveal MAC keys. If a participant has not sent a data message in some
-configurable amount of time, a heartbeat message is sent to reveal the MAC keys.
+The first data message sent every ratchet and heartbeat messages (data messages
+with a plaintext length of zero) reveal MAC keys. If a participant has not sent
+a data message in some configurable amount of time, a heartbeat message is sent
+to reveal the MAC keys.
 
 Old MAC keys are formatted as a list of concatenated 64 byte values.
 
