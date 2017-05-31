@@ -1057,17 +1057,12 @@ sigma (SNIZKPK)
 
 ## Offline Conversation Initialization
 
-To begin an offline conversation, a prekey is retrieved from an untrusted
-prekey server. The security of ZDH does not require trusting the
-server used to distribute prekeys. A non-interactive auth message is created
-using material in the prekey and the plaintext that the user wishes to send.
-
-TODO: Improve this, but a rough description of how it works is:
-1. Ask the untrusted server for a authentificated prekey using a protocol to be
-   defined in another spec.
-   TODO: should we insist in doing a DAKEZ with the server?
-2. Send the last ZDH message with an encrypted data message.
-3. Ratcheting at the chain-key level for sending additional messages.
+To begin an offline conversation, a prekey is published to an unstrusted served
+and this action is seen as the start of a non-interactive DAKE. Then, a prekey
+is retrieved by the party attempting to send a message from the mentioned untrusted
+and this completes the non-interactive DAKE. The security of ZDH does not require
+trusting the server used to distribute prekeys. A non-interactive auth message is
+created using material in the prekey and the plaintext that the user wishes to send.
 
 ### Non-interactive Deniable Authenticated Key Exchange (DAKE)
 
