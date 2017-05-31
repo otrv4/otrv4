@@ -438,8 +438,7 @@ Value (len BYTE) [where len is the value of the Length field]
   Any pertinent data for the record type
 ```
 
-OTRv4 supports the majority of the TLV record types from OTRv3. The ones not
-supported are stated as so. They are:
+OTRv4 supports some TLV record types from OTRv3. The unsupported types are:
 
 ```
 Type 0: Padding
@@ -451,7 +450,7 @@ Type 1: Disconnected
 
 Type 2: SMP Message 1
   The value represents the initial message of the Socialist Millionaires'
-  Protocol (SMP), described below.
+  Protocol (SMP), described below (in OTRv3 spec).
 
 Type 3: SMP Message 2
   The value represents the second message in an instance of the SMP.
@@ -468,22 +467,11 @@ Type 6: SMP Abort Message
   human-readable part) with this TLV type to instruct the other party's client
   to abort the protocol. The associated length should be zero and the
   associated value should be empty. If you receive a TLV of this type,
-  you should change the SMP state to 'SMP_EXPECT1' (see below).
+  you should change the SMP state to 'SMP_EXPECT1' (see below in OTRv3 spec).
 
 Type 7: SMP Message 1Q
-  Only used by OTRv3, and not in OTRv4.
   Like a SMP Message 1, but its value begins with a NUL-terminated
   user-specified question.
-
-Type 8: Extra symmetric key
-  If you wish to use the extra symmetric key, compute it as outlined in the
-  section "Extra symmetric key" [\[2\]](#references). Then, send this 'type 8
-  TLV' to your peer to indicate that you'd like to use it. The value of the TLV
-  begins with a 4-byte indication of what this symmetric key will be used for
-  (file transfer, voice encryption, etc). After that, the contents are
-  use-specific (which file, etc): there are no predefined uses.
-  Note that the value of the key itself is not placed into the TLV; your peer
-  will compute it on its own.
 ```
 
 ### Shared session state: Phi
