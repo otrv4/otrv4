@@ -438,8 +438,7 @@ Value (len BYTE) [where len is the value of the Length field]
   Any pertinent data for the record type
 ```
 
-OTRv4 supports some TLV record types from OTRv3. The unsupported types are:
-
+OTRv4 supports some TLV record types from OTRv3. The supported types are:
 ```
 Type 0: Padding
   The value may be an arbitrary amount of data. This data should be ignored.
@@ -450,7 +449,8 @@ Type 1: Disconnected
 
 Type 2: SMP Message 1
   The value represents the initial message of the Socialist Millionaires'
-  Protocol (SMP), described below (in OTRv3 spec).
+  Protocol (SMP), described below (in Socialist Millionaires Protocol (SMP)).
+  Note that this represents TLV type 1 and 7 from OTRv3.
 
 Type 3: SMP Message 2
   The value represents the second message in an instance of the SMP.
@@ -467,11 +467,17 @@ Type 6: SMP Abort Message
   human-readable part) with this TLV type to instruct the other party's client
   to abort the protocol. The associated length should be zero and the
   associated value should be empty. If you receive a TLV of this type,
-  you should change the SMP state to 'SMP_EXPECT1' (see below in OTRv3 spec).
+  you should change the SMP state to 'SMP_EXPECT1' (see below in SMP section).
 
-Type 7: SMP Message 1Q
-  Like a SMP Message 1, but its value begins with a NUL-terminated
-  user-specified question.
+Type 8: Extra symmetric key
+  If you wish to use the extra symmetric key, compute it yourself as outlined
+  in the section "Extra symmetric key". Then send this type 8 TLV to your peer
+  to indicate that you'd like to use the extra symmetric key for something. The
+  value of the TLV begins with a 4-byte indication of what this symmetric key
+  will be used for (file transfer, voice encryption, etc) After that, the
+  contents are use-specific (which file, etc): there are no predefined uses.
+  Note that the value of the key itself is not placed into the TLV; your peer
+  will compute it on its own.
 ```
 
 ### Shared session state: Phi
@@ -1414,6 +1420,21 @@ encryption and MAC keys.
     * Set `their_dh` as the "Public DH Key" from the message, if it
     is not NULL.
     * Add the MKmac key to list `mac_keys_to_reveal`.
+
+### Extra symmetric key
+
+// TODO: how are we going to derive this key without secbytes?
+OTRv3 defines an additional symmetric key that can be derived by the
+communicating parties for use of application-specific purposes, such as file
+transfer, voice encryption, etc. When one party wishes to use the extra
+symmetric key, he or she creates a type `8 TLV` attached to a Data Message.
+The key itself is then derived using the same "secbytes" used to compute the
+encryption and MAC keys used to protect the Data Message. The extra symmetric
+key is derived by calculating `KDF_1(0xFF)`.
+
+Upon receipt of the Data Message containing the type 8 TLV, the recipient will
+compute the extra symmetric key in the same way. Note that the value of the
+extra symmetric key is not contained in the TLV itself.
 
 ### Revealing MAC Keys
 
