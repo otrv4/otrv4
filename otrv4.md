@@ -476,11 +476,9 @@ Type 7: SMP Message 1Q
 
 ### Shared session state: Phi
 
-// TODO: check the XMPP example, probably not the right one
-
 The shared session state (Φ) is any session-specic protocol state available to
 both parties in the underlying protocol. For XMPP, for example, it will be the
-jabber id.
+node "@" domain part of the jabber id, e.g. alice@jabber.net.
 
 ### OTR Error Messages
 
@@ -1053,24 +1051,17 @@ sigma (SNIZKPK)
 
 ## Offline Conversation Initialization
 
-// TODO: inform that this uses ZDH
 To begin an offline conversation, a prekey is retrieved from an untrusted
 prekey server. The security of ZDH does not require trusting the
 server used to distribute prekeys. A non-interactive auth message is created
 using material in the prekey and the plaintext that the user wishes to send.
 
-TODO: include what happens when two people send ZDH2 at the same time
 TODO: Improve this, but a rough description of how it works is:
 1. Ask the untrusted server for a authentificated prekey using a protocol to be
    defined in another spec.
    TODO: should we insist in doing a DAKEZ with the server?
 2. Send the last ZDH message with an encrypted data message.
 3. Ratcheting at the chain-key level for sending additional messages.
-
-TODO: We should highlight the problems of keep using the same session for a long time
-and how OTR design uses a heartbeat to force key refresh, and how there's a
-trade-off between the duration of the conversation and the limited number of
-prekeys.
 
 ### Non-interactive Deniable Authenticated Key Exchange (DAKE)
 
