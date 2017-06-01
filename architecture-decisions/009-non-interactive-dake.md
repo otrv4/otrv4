@@ -2,8 +2,8 @@
 
 ### Context
 
-OTRv3 only provides an interactive AKE and adding support to non-interactive AKE
-is a usability feature. The non-interactive DAKE below is based on the ZDH
+OTRv3 only provides an interactive AKE and adding support for a non-interactive
+AKE is a usability feature. The non-interactive DAKE below is based on the ZDH
 protocol. It starts when the receiver (R) requests a prekey for the initiator
 (I) from a untrusted server. I's long-term public key should be verified by R.
 
@@ -15,19 +15,21 @@ auth message.
 In the non-interactive DAKE, only one data message can be sent per use of a
 prekey. The reasons for this are in the section [Long-lived secret ephemeral key
 material](#long-lived-secret-ephemeral-key-material). This means that ratchets
-do not happen in the non-interactive case. Thus, an encryption key and a MAC key
-are derived from the shared secret, and after the non-interactive auth message
-is sent, all key material generated for this conversation is deleted.
+do not happen in the non-interactive case. Thus, one encryption key and one MAC
+key are derived from the shared secret, and after the non-interactive auth
+message is sent, all key material generated for this conversation is deleted.
 
 #### Long-lived secret ephemeral key material
 
 In OTR4, the window of key compromise is equivalent to how long it takes for the
 double ratchet to refresh the ephemeral key material (2 ratchets, including the
 first compromised ratchet) and how long a prekey remains unused before the user
-profile inside becomes expired. In non-interactive conversations, participants
-may not receive messages or reply to them for days, weeks, or months at a time.
-As a result, the window of compromise for these kind of conversations can be
-very long if no limitations are set. We would like to reduce this window.
+profile inside becomes expired. We recommend expiration to be a week long, so
+the window in that case is one week. In non-interactive conversations,
+participants may not receive messages or reply to them for days, weeks, or
+months at a time. As a result, the window of compromise for these kind of
+conversations can be very long if no limitations are set. We would like to
+reduce this window.
 
 If the DH and ECDH secret ephemeral keys are compromised for a participant,
 several things can happen. First, all messages sent encrypted with keys derived
@@ -60,15 +62,15 @@ sent by the same initiator are encrypted using shared secret derived from the
 prekey. If the receiver would like to reply, they must retrieve a prekey for the
 initiator and create a new non-interactive DAKE. This would minimize the impact
 of compromise to all of the sender's data messages in a ratchet. Replies by the
-uncompromised party are no longer compromised.
+uncompromised party are no longer revealed and manipulatable.
 
 In another similar solution, each non-interactive message must be created with a
 new prekey. Thus each non-interactive DAKE results in an encrypted channel that
 sends only one data message. As a result, ephemeral key material can be deleted
 immediately after a non-interactive message is sent or received. This maximally
 limits the effect of key compromise for both parties by revealing only one
-message to the attacker at a time. This eliminates continued MITM attacks to
-impersonate a participant or continuously compromise the channel. This also
+message to the attacker at a time. This also eliminates continued MITM attacks
+to impersonate a participant or continuously compromise the channel. This also
 forces prekeys to be used often--thus requiring their frequent removal from
 storage and resulting in a smaller window of compromise for prekeys.
 
