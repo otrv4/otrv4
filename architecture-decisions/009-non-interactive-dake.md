@@ -106,21 +106,23 @@ communication. This is only relevant for versions of OTR from 4 and onward.
 #### Publishing and retrieving prekeys from a prekey server
 
 Describing the details of interactions between OTRv4 clients and a prekey server
-are outside the scope of this specification. But OTRv4 will describe what
-is expected of implementers who interact with prekey servers.
+are outside the scope of this specification. Implementers are expected to create
+their own policy dictating how often their clients upload prekeys to the prekey
+server. Prekeys expire when their user profile expires. Thus new prekeys should
+be published to the prekey server before they expire to keep valid prekeys
+available. Uploading frequency should be determined to minimize how often
+prekeys run out on the server.
 
-Implementers are expected to create their own policy dictating how often their
-clients upload prekeys to the prekey server. This should be often enough to
-minimize the chance of prekeys running out on the server.
+A prekey should be published for every long term key that belongs to a user.
+This means that if Bob has a client which only supports OTRv4 and he uploads
+three long term keys for OTRv4 to his client, Bob's client must publish 3
+prekeys. If Bob uploads only two long term keys for OTRv4 and two long term keys
+for OTRvX which also supports prekeys to the same client, Bob will upload 4
+keys.
 
-A prekey should be published for every version of OTR they support which uses
-prekeys and every long term key that a client supports. Prekeys expire when
-their user profile expires. Thus new prekeys should be published to the prekey
-server before they expire to keep valid prekeys available.
-
-OTRv4 expects clients to decide how to handle receiving many different prekeys
-from the prekey server. For example, when Alice requests prekeys for Bob, any of
-the following may happen:
+When a client requests prekeys from a prekey server, many prekeys may be
+returned. For example, when Alice requests prekeys for Bob, any of the following
+may happen:
 
 1. Alice receives two prekeys for Bob because Bob uses two OTRv4 clients, one
    for his phone and one for his laptop. Each client maintains their own set of
@@ -131,7 +133,7 @@ the following may happen:
        a message only to the client with the key she trusts. If Alice trusts
        both keys, she may decide to send a message to one or both. If Alice does
        not trust either key, she may decide not to send a message or she may
-       send a message without validating the keys.
+       send messages without validating the keys.
     1. The two prekeys may have user profiles created with the same long term
        keys. If this key is trusted, Alice may decide to send a message to both
        client instances. Or Alice may decide to send a message only to the first
@@ -167,7 +169,7 @@ are received. Of course, many more may be received.
 
 To aid with this complexity, OTRv4 will give guidance on how to filter a list of
 given prekeys to remove invalid prekeys or identify invalid situations. But the
-decision on what to do with the remaining prekeys is up to the implementation.
+decision on what to do with the remaining prekeys is up to the implementer.
 
 Here is the guide.
 
@@ -197,10 +199,11 @@ If many prekeys are received:
         long term key within the use profile is trusted or not.
     If multiple valid prekeys remain:
         If there are several instance tags in the list of prekeys, decide
-        whether to send one message to each instance tag or to send multiple.
+        whether to send one message to each instance tag or to send multiple
+        messanges per instance tag.
         If there are keys that are untrusted and trusted in the list of
         prekeys, decide whether to send messages to prekeys that contain only
-        trusted long term keys in their user profile or not.
+        trusted long term keys or not.
 
 #### Multiple DAKEs in the OTR state machine
 
@@ -221,15 +224,15 @@ When the server runs out of prekeys, OTRv4 expects client implementations to
 wait until a prekey can be transmitted before continuing with a non-interactive
 DAKE.
 
-This is purposely different from what we expect from protocols like the Signal
-Protocol. In Signal, when a prekey server runs out of prekeys, a default prekey
-is used until new prekeys are uploaded. With this method, the consequences for
-participation deniability are currently undefined and thus risky.
+This is purposely different from what we expect from protocols like Signal. In
+Signal, when a prekey server runs out of prekeys, a default prekey is used until
+new prekeys are uploaded. With this method, the consequences for participation
+deniability are currently undefined and thus risky.
 
-By waiting for the server to send prekeys, OTRv4 will be subject to DoS
-attacks when a server is compromised or the network is undermined to return a
-"no prekey exists" response from the server. This is preferred over the possible
-compromise of multiple non-interactive DAKEs due to the reuse of a prekey.
+By waiting for the server to send prekeys, OTRv4 will be subject to DoS attacks
+when a server is compromised or the network is undermined to return a "no prekey
+exists" response from the server. This is preferred over the possible compromise
+of multiple non-interactive DAKEs due to the reuse of a prekey.
 
 #### Revealing MAC keys
 
@@ -251,9 +254,9 @@ OTRv3.
 
 OTRv4 will make it clear that non-interactive conversations have different,
 lower participation deniability properties for the initiator than interactive
-conversations. In addition, OTRv4 will leave it up to the implementer to know
-when it is appropriate to use non-interactive messages and how to convey this
-security loss.
+conversations. OTRv4 will also leave it up to the implementer to know when it is
+appropriate to use non-interactive messages and how to convey this security
+loss.
 
 In addition, implementers of OTRv4 may wish to support only interactive
 conversations or only non-interactive conversations. This is allowed.
@@ -334,12 +337,6 @@ Protocol version (SHORT)
 
 Message type (BYTE)
   The message has type 0x77.
-
-Sender's instance tag (INT)
-  The instance tag of the intended recipient.
-
-Receiver's instance tag (INT)
-  The instance tag of the person sending this message.
 
 Old MAC key to be revealed (MAC)
 ```
