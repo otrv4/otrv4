@@ -1418,14 +1418,12 @@ encryption and MAC keys.
 
 ### Extra symmetric key
 
-// TODO: how are we going to derive this key without secbytes?
 OTRv3 defines an additional symmetric key that can be derived by the
 communicating parties for use of application-specific purposes, such as file
 transfer, voice encryption, etc. When one party wishes to use the extra
 symmetric key, he or she creates a type `8 TLV` attached to a Data Message.
-The key itself is then derived using the same "secbytes" used to compute the
-encryption and MAC keys used to protect the Data Message. The extra symmetric
-key is derived by calculating `KDF_1(0xFF)`.
+The key itself is then derived from `K`. The extra symmetric
+key is derived by calculating `KDF_1(0xFF || K)`.
 
 Upon receipt of the Data Message containing the type 8 TLV, the recipient will
 compute the extra symmetric key in the same way. Note that the value of the
