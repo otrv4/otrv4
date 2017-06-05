@@ -474,7 +474,7 @@ Type 8: Extra symmetric key
   in the section "Extra symmetric key". Then send this type 8 TLV to your peer
   to indicate that you'd like to use the extra symmetric key for something. The
   value of the TLV begins with a 4-byte indication of what this symmetric key
-  will be used for (file transfer, voice encryption, etc) After that, the
+  will be used for (file transfer, voice encryption, etc). After that, the
   contents are use-specific (which file, etc): there are no predefined uses.
   Note that the value of the key itself is not placed into the TLV; your peer
   will compute it on its own.
@@ -1900,7 +1900,6 @@ Lastly, OTRv4 uses Ed448 as the cryptographic primitive. This changes the way
 values are serialized and how they are computed. To define the SMP values
 under Ed448, we reuse the previously defined generator `G` for Ed448:
 
-// TODO: check this
 ```
 G = (11781216126343694673728248434331006466518053535701637341687908214793940427
 7809514858788439644911793978499419995990477371552926308078495, 19)
