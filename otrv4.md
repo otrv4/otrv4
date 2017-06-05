@@ -1179,7 +1179,7 @@ Protocol version (SHORT)
   The version number of this protocol is 0x0004.
 
 Message type (BYTE)
-  The message has type ???. TODO: set the type
+  The message has type 0x04.
 
 Sender Instance tag (INT)
   The instance tag of the person sending this message.
