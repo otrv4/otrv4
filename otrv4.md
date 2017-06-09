@@ -1583,8 +1583,8 @@ Note:
 
 * The receiving instance tag must be specified and should match the
   instance tag the client uses to identify itself. Otherwise, the
-  message should be discarded and the user optionally warned. Nevertheless D-H
-  Commit and Identity messages may not specify the receiver's instance tag. In
+  message should be discarded and the user optionally warned. Nevertheless,
+  the Identity Message may not specify the receiver's instance tag. In
   this case the value is set to zero.
 * The protocol is initialized with the allowed versions (3 and/or 4).
 
