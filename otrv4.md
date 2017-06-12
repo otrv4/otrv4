@@ -486,7 +486,7 @@ To prevent attacks that rebind the DAKEZ transcript into different contexts, it
 is prudent to ensure that the DAKEZ session authenticates its context. For
 example, if the higher protocol ascribes some property to the connection,
 then the DAKEZ exchange should verify this property. Given state information
-`phi` associated with the higher-level context (e.g., a session identifier),
+`phi` associated with the higher-level context (e.g., a session identifier),
 DAKEZ authenticates that both parties share the same value for `phi`.
 
 The shared session state (Φ) is any session-specic protocol state available to
