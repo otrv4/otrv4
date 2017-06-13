@@ -134,16 +134,6 @@ message from a Prekey server. This Prekey was placed there by Bob prior to
 the start of the conversation to allow other participants, like Alice, to send
 him encrypted messages while he is offline.
 
-### Interoperability between conversation types
-
-Implementers may allow interactive conversations to turn into non-interactive
-conversations. For example, Alice and Bob establish an interactive
-conversation, and then Bob goes offline. At that point, the client may allow
-Alice to continue sending encrypted messages to Bob through a non-interactive
-conversation. Although this will lower the security properties of the
-conversation for Alice with Bob, as explained [here](#security-properties), it
-is possible.
-
 ## Assumptions
 
 Messages in a conversation can be exchanged over an insecure channel, where an
