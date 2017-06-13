@@ -296,8 +296,8 @@ If many prekeys are received:
         long term key within the use profile is trusted or not.
     If multiple valid prekeys remain:
         If there are keys that are untrusted and trusted in the list of
-        prekeys, decide whether or not to send messages to prekeys that
-        contain only trusted long term keys.
+        prekeys, decide whether or not to send messages to prekeys that contain
+        only trusted long term keys or.
         If there are several instance tags in the list of prekeys, decide
         whether to send one message per instance tag or to send multiple
         messages per instance tag.
@@ -324,8 +324,8 @@ The machine has the following states:
 * Finished
 
 All of these states except the finished state may receive the second message of
-a non-interactive DAKE. If an implementation of OTRv4 only wishes to use
-non-interactive conversations, then a state machine is not required.
+a non-interactive DAKE. If an implementation of OTRv4 only wishes to use non-
+interactive conversations, then no state machine is required.
 
 #### The prekey server runs out of prekeys
 
