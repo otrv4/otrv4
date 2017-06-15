@@ -732,9 +732,9 @@ To create a user profile, assemble:
    (seconds since the midnight starting Jan 1, 1970, UTC, ignoring leap
    seconds).
 4. Profile Signature: The secret key value (`r`) of the Ed448 long term public
-   key and a flag `F` (set to zero) are used to create signatures of the entire
-   profile excluding the signature itself. The size of the signature is 114
-   bytes.
+   key and a flag `F` (set to zero, as defined on [RFC]8032) are used to create
+   signatures of the entire profile excluding the signature itself. The size of
+   the signature is 114 bytes.
 5. Transition Signature (optional): A signature of the profile excluding Profile
    Signatures and the user's OTRv3 DSA key. The Transition Signature enables
    contacts that trust user's version 3 DSA key to trust the user's profile in
@@ -794,7 +794,6 @@ User Profile (USER-PROF):
   Profile Expiration (PROF-EXP)
   Profile Signature (EDDSA-SIG)
   (optional) Transitional Signature (SIG)
-
 ```
 
 SIG refers to the `OTR version 3 DSA Signature`. Refer to 'DSA signature' on
