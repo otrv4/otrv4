@@ -2280,11 +2280,9 @@ honest conversations. This section will guide implementers to achieve this.
 The major utilities are:
 
 ```
-TODO: check if DH is needed
-
 Parse
-  Parses OTR messages to the values of each of the fields in
-  a message.
+  Parses given OTR messages to the values of each of the fields in
+  a message. Show the values of all the fields.
 
 Modify Data Message
   If an encrypted data message cannot be read because we don't
@@ -2296,52 +2294,44 @@ Modify Data Message
   string "yo". In that way, a valid data message can be created with the new
   text.
 
-  To achieve this, the XOR of the old text and the new text is XORed
-  with the original encrypted message starting at a given offset.
-  The MAC tag is recalculated with the revealed MAC key associated with this
-  message. Then the new tag is attached to the data message, replacing the old
+  To achieve this:
+  - XOR the old text and the new text. Store this value.
+  - XOR the stored values again with the original encrypted message starting at
+    a given offset.
+  - Recalculate the MAC tag with the revealed MAC key associated with this
+  message. The new tag is attached to the data message, replacing the old
   value. A pseudocode is included at the appendix.
-
-  // TODO: check, might not be the same
-  Modify Data Message reuses the spec function:
-
-    1. MAC tag creation.
 
 Read and Forge Data Message
   Read and forge allows someone in possession of a chain key to decrypt OTR
   messages or modify them as forgeries. It takes three inputs: the chain key,
-  the OTR message and an optional new plain text message (optional). If a new
+  the OTR message and a new plain text message (optional). If a new
   message is included, the original text is replaced with the new message and
   a new MAC tag is attached to the data message.
 
-  Read and Forge reuses the spec functions:
-
-    1. Message parser
-    2. Decryption of a data message
-    3. MAC tag creation.
+  To achive this:
+  - Decrypt the data message with the corresponding message key derived from
+    the given chain key.
+  - If a new message is given, replace the message with that one, encrypt and
+    mac it accordingly.
 
 Forge AKE and Session Keys
   Any participant of an OTR conversation may forge an AKE with another
   participant as long as they have their profile. This function will take the
   user profile and the secret long term key of one participant, and the user
   profile of the other.
-  It will then return an AKE transcript between the two parties. The
+  It will return an AKE transcript between the two parties. The
   participant's private key is required since it is used to authenticate the key
   exchange, but the resulting transcript is created in such a way that a
   cryptographic expert cannot identify which profile owner authenticated the
   conversation.
-
-  This forging utility reuses the spec functions:
-
-    1. Create a Identity message
-    2. Create a DRE-Auth message
 
 Show MAC Key
   This function takes a chain key and a message key number and shows the MAC key
   associated with those two values. For example, if the message key number is 3,
   the message key is ratcheted 3 times, and the third MAC key is returned. 'Show
   MAC key' may be used with the ReMAC message in the case where a chain key has
-  been compromised by an attacker, and the attacker wishes to forge messages.
+  been compromised by an attacker and the attacker wishes to forge messages.
 
 ReMAC Message
   Make a new OTR Data Message, with the given pieces (the data part is already
@@ -2359,13 +2349,6 @@ Forge Entire Transcript
   private key is required since it is used to authenticate the key exchange, but
   the resulting transcript is created in such a way that a cryptographic expert
   cannot identify which profile owner authenticated the conversation.
-
-  This forging utility reuses the spec functions:
-
-    1. Create an Identity message
-    2. Create a DRE-Auth message
-    3. Create an encrypted data message
-    4. The protocol state machine
 ```
 
 ## Appendices
