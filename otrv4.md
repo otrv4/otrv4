@@ -1,6 +1,6 @@
 # OTR version 4
 
-OTRv4 is a new version of OTR that provides a deniable authenticated key
+OTR version 4 (OTRv4) provides a deniable authenticated key
 exchange and better forward secrecy through the use of double ratcheting. OTR
 works on top of an existing messaging protocol, like XMPP.
 
@@ -18,7 +18,7 @@ works on top of an existing messaging protocol, like XMPP.
    1. [Encoding and Decoding](#encoding-and-decoding)
    1. [Serializing the SNIZKPK Authentication](#serializing-the-snizkpk-authentication)
    1. [Public keys and fingerprints](#public-keys-and-fingerprints)
-   1. [TLV Types](#tlv-types)
+   1. [TLV Record Types](#tlv-record-types)
    1. [Shared session state: Phi](#shared-session-state-phi)
    1. [OTR Error Messages](#otr-error-messages)
 1. [Key management](#key-management)
@@ -38,7 +38,7 @@ works on top of an existing messaging protocol, like XMPP.
    1. [Interactive Deniable Authenticated Key Exchange (DAKE)](#interactive-deniable-authenticated-key-exchange-dake)
 1. [Offline Conversation Initialization](#offline-conversation-initialization)
    1. [Non-interactive Deniable Authenticated Key Exchange (DAKE)](#non-interactive-deniable-authenticated-key-exchange-dake)
-   1. [Pre-key](#pre-key)
+   1. [Prekey](#prekey)
    1. [Non-interactive Auth Message](#non-interactive-auth-message)
    1. [Publishing prekeys](#publishing-prekeys)
    1. [Obtaining prekeys](#obtaining-prekeys)
@@ -91,7 +91,7 @@ An OTRv4 conversation may begin when the two participants are online (an
 interactive conversation) or when one participant is offline (non-interactive
 conversation).
 
-### Interactive Conversation
+### Conversation with an Interactive DAKE
 
 ```
 Alice                                            Bob
@@ -104,21 +104,20 @@ Deniable Authenticated Key Exchange                 Deniable Authenticated Key E
 Exchanges Data Messages             <------------>  Exchanges Data Messages
 ```
 
-The interactive conversation can begin after one participant requests a conversation.
-This includes an advertisement of which versions they support. If the other
+The conversation can begin after one participant requests a conversation. This
+includes an advertisement of which versions they support. If the other
 participant supports OTRv4 as the highest compatible version, an interactive,
-deniable, authenticated key exchange (DAKE) is used to establish a secure
-channel. Encrypted messages are then exchanged in this secure channel with
-forward secrecy.
+DAKE is used to establish a secure channel. Encrypted messages are then
+exchanged in this secure channel with forward secrecy.
 
-### Non-interactive Conversation
+### Conversation with a Non-Interactive DAKE
 
 ```
 Alice                        Prekey Server                  Bob
 --------------------------------------------------------------------------------
                                     (<--------------------- Pre-conversation: Creates
                                                             and sends a Prekey)
-Retreives Bob's  ----------------->
+Retrieves Bob's  ----------------->
 Prekey
 
 Establishes Non-interactive ------------------------------->
@@ -129,10 +128,10 @@ Exchanges Data Messages <---------------------------------->  Exchanges Data Mes
 
 ```
 
-In the non-interactive conversation flow, Alice first retrieves a Prekey
-message from a Prekey server. This Prekey was placed there by Bob prior to
-the start of the conversation to allow other participants, like Alice, to send
-him encrypted messages while he is offline.
+In this conversation flow, Alice first retrieves a Prekey message from a prekey
+server. This prekey was uploaded by Bob's client prior to the start of the
+conversation to allow other participants, like Alice, to send him encrypted
+messages while he is offline.
 
 ## Assumptions
 
@@ -148,35 +147,35 @@ attacks to reduce availability.
 ## Security Properties
 
 OTRv4 does not take advantage of quantum resistant algorithms for several
-reasons. It aims to be easy to implement in today's environments within a
-year. Current quantum resistant algorithms and their respective
-implementations are not ready enough to fit in that time frame. As a result,
-the protections mentioned in the following paragraphs only apply to non-quantum
-adversaries. The only exception is the usage of a "mix key" to provide
+reasons. Mainly, OTRv4 aims to be a protocol that is easy to implement in
+today's environments within a year. Current quantum resistant algorithms and
+their respective implementations are not ready enough to allow for this
+implementation time frame. As a result, the protections mentioned in the
+following paragraphs only apply to non-quantum adversaries.
+
+The only exception is the usage of a "mix key" to provide
 some post-conversation transcript protection against potential weaknesses with
 elliptic curves and the early arrival of quantum computers.
 
 In the interactive DAKE, although access to one participant's private long term
 key is required for authentication, both participants can deny having used
-their private long term keys in this process. An external cryptographic expert
+their private long term keys. An external cryptographic expert
 will be able to prove that one person between the two used their long term
 private key for the authentication, but they will not be able to identify whose
 key was used. This provides deniability for both participants in the
-interactive DAKE. The AKE of OTRv3 is not deniable.
+interactive DAKE.
 
-In the non-interactive DAKE, the initializer, Alice in the above overview, does
-not have participation deniability, but Bob the receiver does. Its is important
-to consider this when deciding to use non-interactive messages in an
-implementation of OTRv4.
+In the non-interactive DAKE, the initializer (Alice, in the above overview) does
+not have participation deniability, but Bob, the receiver, does.
 
-Once an OTRv4 channel has been created with the DAKE, all data messages
-transmitted through this channel are confidential and their integrity to the
-participants is protected. In addition, the MAC keys used to validate
-each message are revealed afterwards. This allows for forgeability of the data
-messages and consequent deniability of their contents.
+Once a channel has been created with the DAKE, all data messages transmitted
+through this channel are confidential have integrity. After a MAC key used to
+validate a received message,  it is revealed in the next message that is sent.
+This allows for forgeability of the data messages and consequent deniability of
+their contents.
 
 If key material used to encrypt a particular data message is compromised,
-previous messages are protected. In addition, future messages are protected by
+previous messages are protected. Additionally, future messages are protected by
 the Diffie-Hellman and Elliptic Curve Diffie-Hellman ratchets.
 
 ## Notation and parameters
@@ -189,14 +188,14 @@ variables and arithmetic used in the specification.
 Scalars and secret keys are in lower case, such as `x` or `y`. Points and
 public keys are in upper case, such as `P` or `Q`.
 
-Addition and subtraction of elliptic curve points `A` and `B` are `A + B` and
-`A - B`. Addition of a point to another point generates a third point. Scalar
-multiplication of an elliptic curve point `B` with a scalar `a` yields a
-new point: `C = B * a`.
+Addition of elliptic curve points `A` and `B` is `A + B`. Subtraction is `A -
+B`. Addition of a point to another point generates a third point. Scalar
+multiplication of an elliptic curve point `B` with a scalar `a` yields a new
+point: `C = B * a`.
 
 The concatenation of byte sequences `I` and `J` is `I || J`. In this case, `I`
 and `J` represent a fixed-length byte sequence encoding the respective values.
-See section [Data Types](#data-types) for encoding and decoding details.
+See the section on [Data Types](#data-types) for encoding and decoding details.
 
 ### Elliptic Curve Parameters
 
@@ -232,8 +231,8 @@ Non-square element in Z_p (d)
   -39081
 ```
 
-A scalar modulo `q` is a "field element", and should be encoded and decoded
-as SCALAR types. These are defined in the [Data Types](#data-types) section.
+A scalar modulo `q` is a field element, and should be encoded and decoded
+as a SCALAR type, which is defined in the [Data Types](#data-types) section.
 
 ### 3072-bit Diffie-Hellman Parameters
 
@@ -288,8 +287,8 @@ Hexadecimal value of dh_q:
 
 ```
 
-Note that this means that whenever you see an operation on a field element
-from the above group, the operation should be done modulo the prime `dh_p`.
+Whenever you see an operation on a field element from this group, the
+operation should be done modulo the prime `dh_p`.
 
 ## Data Types
 
@@ -331,16 +330,16 @@ User Profile (USER-PROF):
   Detailed in "User Profile Data Type" section
 ```
 
-In order to encode and decode the `POINT` and `SCALAR`, refer to encoding and
-decoding section.
+In order to encode and decode `POINT` and `SCALAR` types, refer to the [Encoding and
+Decoding](#encoding-and-decoding) section.
 
 ### Encoding and Decoding
 
-As specified on [RFC8032] [\[17\]](#references).
+We follow the encoding and decoding schemes specified in RFC 8032 [\[17\]](#references).
 
 #### Scalar
 
-Encoded in little-endian form as a 56 bytes, i.e.,
+Encoded as a little-endian array of 56 bytes, e.g.
 `h[0] + 2^8 * h[1] + ... + 2^448 * h[55]`.
 
 #### Point
@@ -348,16 +347,15 @@ Encoded in little-endian form as a 56 bytes, i.e.,
 A curve point `(x,y)`, with coordinates in the range `0 <= x,y < p`, is
 encoded as follows:
 
-1. Encode the y-coordinate as little-endian array of 57 bytes. The
+1. Encode the y-coordinate as a little-endian array of 57 bytes. The
    final byte is always zero.
 2. Copy the least significant bit of the x-coordinate to the most
    significant bit of the final byte. This is 1 if the x-coordinate is
-   negative or 0 if not.
+   negative or 0 if it is not.
 
-It is decoded as follows:
+A curve point is decoded as follows:
 
-1. Interpret last bit of byte 57 as the least significant bit of the x
-   coordinate.
+1. Interpret last bit of byte 57 as the least significant bit of the x-coordinate.
    Denote this value `x_0`.  The y-coordinate is recovered simply by
    clearing this bit.  If the resulting value is `>= p`, decoding fails.
 2. To recover the x-coordinate, the curve equation implies
@@ -391,13 +389,8 @@ SNIZKPK Authentication (SNIZKPK):
   r2 (SCALAR)
   c3 (SCALAR)
   r3 (SCALAR)
-    Where (c1, r1, c2, r2, c3, r3) = Auth(A_2, a_2, {A_1, A_2, A_3}, m)
 ```
-
 ### Public keys and fingerprints
-
-For generation of the public key, refer to [RFC8032] [\[17\]](#references),
-section 5.2.5.
 
 OTRv4 introduces a new type of public key:
 
@@ -408,14 +401,17 @@ OTR4 public authentication Ed448 key (ED448-PUBKEY):
     Ed448 public keys have type 0x0010
 
     H (POINT)
-      H is the Ed448 public key generated as defined on [RFC8032].
+      H is the Ed448 public key generated as defined in RFC 8032.
 ```
 
-OTRv4 public keys have fingerprints, which are hex strings that serve as
+Public keys have fingerprints, which are hex strings that serve as
 identifiers for the public key. The fingerprint is calculated by taking the
 SHA3-512 hash of the byte-level representation of the public key.
 
-### TLV Types
+For generation of the public key, refer to RFC 8032 [\[17\]](#references),
+section 5.2.5.
+
+### TLV Record Types
 
 Each TLV record is of the form:
 
@@ -470,26 +466,26 @@ Type 8: Extra symmetric key
   will compute it on its own.
 ```
 
-### Shared session state: Phi
+### Shared Session State
 
-To prevent attacks that rebind the DAKEZ transcript into different contexts, it
-is prudent to ensure that the DAKEZ session authenticates its context. For
-example, if the higher protocol ascribes some property to the connection,
-then the DAKEZ exchange should verify this property. Given state information
-`phi` associated with the higher-level context (e.g., a session identifier),
-DAKEZ authenticates that both parties share the same value for `phi`.
+The DAKEZ session must authenticate its context to prevent attacks that rebind
+the DAKEZ transcript into different contexts. If the higher protocol ascribes
+some property to the connection, the DAKEZ exchange should verify this property.
+Given state information `phi` associated with the higher-level context (e.g., a
+session identifier), DAKEZ authenticates that both parties share the same value
+for `phi`.
 
-The shared session state (Φ) is any session-specic protocol state available to
-both parties in the higher protocol. For XMPP, for example, it will be the
-node "@" domain part of the jabber id, e.g. alice@jabber.net.
+The shared session state (Φ) is any session-specific protocol state available to
+both parties in the higher protocol. For example, in XMPP, it will be the
+node and domain identifiers of the Jabber identifier, e.g. alice@jabber.net.
 
 ### OTR Error Messages
 
 Any message containing the string "?OTR Error:" is an OTR Error Message. The
 following part of the message should contain human-readable details of the
-error. The message may also include a specific code at the beginning e.g. "?OTR
+error. The message may also include a specific code at the beginning, e.g. "?OTR
 Error: ERROR_N:". This code is used to identify which error is being
-received for optional internationalization of the message.
+received for optional localization of the message.
 
 Error Code List:
 
@@ -498,19 +494,13 @@ Error Code List:
     Message cannot be decrypted
 ```
 
-## Key management
+## Key Management
 
-In both DAKEs, OTRv4 makes use of long-term Ed448 keys, ephemeral Elliptic
+In both the interactive and non-interactive DAKEs, OTRv4 uses long-term Ed448 keys, ephemeral Elliptic
 Curve Diffie-Hellman (ECDH) keys, and ephemeral Diffie-Hellman (DH) keys.
 
-For exchanging data messages, OTRv4 makes use of both the DH ratchet (with
-ECDH) and the symmetric-key ratchet from the Double Ratchet algorithm. If you
-wish to understand the Double Ratchet in more detail then please refer to the
-spec [\[2\]](#references) but it is no necessary for implementing OTRv4. OTRv4
-contains everything necessary to implement the Double Ratchet in this context.
-A cryptographic ratchet is a one-way mechanism for deriving new cryptographic
-keys from previous keys. New keys cannot be used to calculate the old keys.
-
+For exchanging data messages, OTRv4 uses both the DH ratchet (with
+ECDH) and the symmetric-key ratchet from the Double Ratchet algorithm [\[2\]](#references).
 OTRv4 adds 3072-bit (384-byte) DH keys, called the mix key pair, to the
 Double Ratchet algorithm. These keys are used to protect transcripts of data
 messages in case ECC is broken. During the DAKE, both parties agree upon the
@@ -538,18 +528,14 @@ Key variables:
   'mac_keys_to_reveal': the MAC keys to be revealed in next data message sent.
 ```
 
-The previously mentioned state variables are incremented and the key variable
-values are replaced by these events:
+When these events occur, the state variables are incremented and the key variable
+values are replaced:
 
-* When you start a new [interactive DAKE](#interactive-dake-overview) by
-  sending or receiving an [Identity message](#identity-message).
-* When you complete the [interactive DAKE](#interactive-dake-overview) by
-  sending an [Auth-I Message](#auth-i-message).
-* When you complete the [interactive DAKE](#interactive-dake-overview) by
-  receiving and validating an [Auth-I Message](#auth-i-message).
-* When you [send a Data Message or receive a Data Message](#data-exchange).
-* When you
-  [send a TLV type 1 (Disconnect)](#sending-a-tlv-type-1--disconnect--message)
+* When you start a new [interactive DAKE](#interactive-dake-overview) by sending or receiving an [Identity message](#identity-message)
+* When you complete the [interactive DAKE](#interactive-dake-overview) by sending an [Auth-I Message](#auth-i-message)
+* When you complete the [interactive DAKE](#interactive-dake-overview) by receiving and validating an [Auth-I Message](#auth-i-message)
+* When you [send a Data Message or receive a Data Message](#data-exchange)
+* When you [send a TLV type 1 (Disconnect)](#sending-a-tlv-type-1--disconnect--message)
 * When you [receive a TLV type 1 (Disconnect)](#receiving-a-tlv-type-1--disconnect--message)
 * When you complete a non-interactive DAKE by [sending a non-interactive auth message](#sending-an-encrypted-message-to-an-offline-participant)
 * When you complete a non-interactive DAKE by [receiving and validating a non-interactive auth message](#receiving-a-non-interactive-auth-message)
@@ -558,8 +544,8 @@ values are replaced by these events:
 
 ```
 generateECDH()
-  pick a random value l (57 bytes)
-  return our_ecdh.public = G * l, our_ecdh.secret = l
+  pick a random value r (57 bytes)
+  return our_ecdh.public = G * r, our_ecdh.secret = r
 
 generateDH()
   pick a random value r (80 bytes)
@@ -570,15 +556,14 @@ generateDH()
 
 ```
 k_dh:
-  The serialized 3072-bit DH shared secret computed from a DH exchange.
+  The 3072-bit DH shared secret computed from a DH exchange, serialized as a big-endian unsigned integer.
   This is serialized as a big-endian unsigned integer.
 
 mix_key:
   A SHA3-256 hash of the shared DH key SHA3-256(k_dh).
 
 K_ecdh:
-  The serialized ECDH shared secret computed from an ECDH exchange.
-  This is serialized as a POINT.
+  The serialized ECDH shared secret computed from an ECDH exchange, serialized as a POINT.
 
 K:
   The mixed shared secret is the final shared secret derived from both the
@@ -747,20 +732,21 @@ untrusted server.
 
 A valid versions string can be created by concatenating supported version
 numbers together in any order. For example, a user who supports versions 3 and 4
-will have the version string "43" or "34" in their profile (2 bytes). A user who
-only supports version 4 will have "4" (1 byte). Thus, a version string has
+will have the 2-byte version string "43" or "34" in their profile. A user who
+only supports version 4 will have the 1-byte version string "4". Thus, a version string has
 varying size, and it is represented as a DATA type with its length specified.
 
-Invalid version strings contain "2" or "1". The OTRv4 specification supports up
-to OTR version 3, and thus do not support versions 2 and 1, i.e. version strings
-of "32" or "31". Any other string that is not "4", "3", "2" or "1" should be
-ignored.
+OTRv4 supports version 3 of OTR, but not versions 1 and 2. Therefore, invalid version strings contain a "2" or a "1".
+
+Any other version string that is not "4", "3", "2", or "1" should be ignored.
 
 ### Validating a User Profile
 
-* Verify that the user profile signature is valid.
-* Verify that the user profile is not expired.
-* Verify that the versions field contains "4".
+To validate a user profile, you must:
+
+* Verify that the user profile signature is valid
+* Verify that the user profile is not expired
+* Verify that the `Versions` field contains a string with "4"
 
 ### Renewing a Profile
 
@@ -775,12 +761,12 @@ can be configurable. A recommended value is two weeks.
 
 ### Create a User Profile Signature
 
-The user profile signature is generated as defined on [RFC8032] section 5.2.6.
+The user profile signature is generated as defined in RFC 8032 section 5.2.6.
 The flag `F` is set to `0` and the context `C` is left empty.
 
 ### Verify a User Profile Signature
 
-The user profile signature is verified as defined on [RFC8032] section 5.2.7.
+The user profile signature is verified as defined in RFC 8032 section 5.2.7.
 
 ### User Profile Data Type
 
@@ -796,8 +782,8 @@ User Profile (USER-PROF):
   (optional) Transitional Signature (SIG)
 ```
 
-SIG refers to the `OTR version 3 DSA Signature`. Refer to 'DSA signature' on
-OTRv3 for more information:
+SIG is the OTRv3 DSA Signature (from the protocol section
+"Public keys, signatures, and fingerprints"):
 
 ```
 DSA signature (SIG):
@@ -807,10 +793,10 @@ DSA signature (SIG):
   len byte unsigned s, big-endian
 ```
 
-EDDSA-SIG refers to the `OTR version 4 signature`:
+EDDSA-SIG refers to the OTR version 4 signature:
 
 ```
-Eddsa signature (EDDSA-SIG):
+EDDSA signature (EDDSA-SIG):
   (len is the expected length of the signature, which is 114 bytes)
   len byte unsigned value, big-endian
 ```
@@ -1974,7 +1960,7 @@ information is revealed.
 
 ### Secret information
 
-The secret information x and y compared during this protocol contains not only
+The secret information `x` and `y` compared during this protocol contains not only
 information entered by the users, but also information unique to the
 conversation in which SMP takes place. Specifically, the format is:
 
@@ -1994,7 +1980,7 @@ User-specified secret
 ```
 
 Then the SHA3-512 hash of the above is taken, and the digest becomes the
-actual secret (x or y) to be used in SMP. The additional fields insure that
+actual secret (`x` or `y`) to be used in SMP. The additional fields ensure that
 not only do both parties know the same secret input string, but no man-in-the-
 middle is capable of reading their communication either.
 
@@ -2300,8 +2286,11 @@ Modify Data Message
     a given offset.
   - Recalculate the MAC tag with the revealed MAC key associated with this
   message. The new tag is attached to the data message, replacing the old
-  value. A pseudocode is included at the appendix.
+  value.
+```
+[Pseudocode](#modify-an-encrypted-data-message) for modifying data messages is included in [Appendices](#appendices).
 
+```
 Read and Forge Data Message
   Read and forge allows someone in possession of a chain key to decrypt OTR
   messages or modify them as forgeries. It takes three inputs: the chain key,
@@ -2441,7 +2430,7 @@ choice of D-H encryption key (but the key itself is not yet revealed). This
 allows the secure session id to be much shorter than in OTRv1, while still
 preventing a man-in-the-middle attack on it.
 
-It consists of: the protocol version, the message type, the sender's instance
+The D-H Commit Message consists of the protocol version, the message type, the sender's instance
 tag, the receiver's instance tag, the encrypted sender's private key and the
 hashed sender's private key.
 
@@ -2653,3 +2642,4 @@ AUTHSTATE_AWAITING_SIG
 indistinguishable from uniform random strings"
 15. https://sourceforge.net/p/ed448goldilocks/code/ci/decaf/tree/src/decaf_fast.c#l1125
 16. https://eprint.iacr.org/2012/309.pdf "Mike Hamburg: Fast and compact elliptic-curve cryptography"
+17. https://tools.ietf.org/rfc/rfc8032.txt "S. Josefsson and I. Liusvaara: Edwards-Curve Digital Signature Algorithm (EdDSA)"; RFC 8032 (Informational); IETF; Jan 2017
