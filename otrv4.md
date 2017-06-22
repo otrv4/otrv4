@@ -614,7 +614,7 @@ derive_ratchet_keys(K):
   return R, decide_between_chain_keys(Ca, Cb)
 ```
 
-### Rotating ECDH keys and mix key
+### Rotating ECDH keys and mix key as sender
 
 Before sending the first reply (i.e. a new message considering a previous
 message has been received) the sender will rotate their ECDH keys and mix key.
@@ -624,13 +624,13 @@ following data messages will advertise a new ratchet id as `i + 1`.
 Before rotating the keys:
 
   * Increment the current ratchet id (`i`) by 1.
-  * Reset the next sent message id (`j`) to 0.
+  * Reset the next message id (`j`) to 0.
 
 To rotate the ECDH keys:
 
   * Generate a new ECDH key pair and assign it to `our_ecdh = generateECDH()`.
   * Calculate `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
-  * Securely delete `our_ecdh.secret`.
+  * Securely delete `our_ecdh.secret`. //TODO - this isn't currently happening, the ecdh secret is being deleted before generating new keys
 
 To rotate the mix key:
 
@@ -639,7 +639,34 @@ To rotate the mix key:
     * Generate the new DH key pair `our_dh = generateDH()`.
     * Calculate `k_dh = DH(our_dh.secret, their_dh.public)`.
     * Calculate a `mix_key = KDF_1(k_dh)`.
-    * Securely delete `our_dh.secret`.
+
+  Otherwise:
+
+   * Derive and securely overwrite `mix_key = KDF_1(mix_key)`.
+
+### Rotating ECDH keys and mix key as receiver
+
+Every ratchet, the receiver will rotate their ECDH keys and mix key.
+This is for the computation of `K` (see "Deriving Double Ratchet Keys").
+
+Before rotating the keys:
+
+  * Increment the current ratchet id (`i`) by 1.
+  * Reset the next message id (`j`) to 0.
+
+To rotate the ECDH keys:
+
+  * Retrieve the ECDH key from the received data message and assign it to their_ecdh.
+  * Calculate `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
+
+To rotate the mix key:
+
+  * If `i % 3 == 0`:
+
+    * Retrieve the DH key from the received data message and assign it to their_dh.
+    * Calculate `k_dh = DH(our_dh.secret, their_dh.public)`.
+    * Calculate a `mix_key = KDF_1(k_dh)`.
+    * Securely delete `our_dh.secret` (this should only be deleted after calculating the new mix key when receiving as new keys will be generated on the next DH rotation).
 
   Otherwise:
 
