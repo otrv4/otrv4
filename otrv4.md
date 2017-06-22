@@ -1719,6 +1719,8 @@ If the state is `ENCRYPTED_MESSAGES`:
 
 If the state is `WAITING_AUTH_R`:
 
+  * If the instance tag in the message is not instance tag you are currently
+    talking to, ignore the message.
   * Validate the Auth-R message and ignore the message if it fails.
   * Reply with an Auth-I message.
   * Transition state to `WAITING_AUTH_I`.
@@ -1737,6 +1739,8 @@ If the state is not `WAITING_AUTH_R`:
 
 If the state is `WAITING_AUTH_I`:
 
+  * If the instance tag in the message is not instance tag you are currently
+    talking to, ignore the message.
   * Validate the Auth-R message and ignore the message if it fails.
   * Transition state to `ENCRYPTED_MESSAGES`.
   * Initialize the double ratcheting.
@@ -1780,7 +1784,8 @@ If the version is 4:
     * To validate the data message:
       * Verify the MAC tag.
       * Check if the message version is allowed.
-      * Verify that the instance tags are consistent with those used in the DAKE.
+      * If the instance tag in the message is not instance tag you are currently
+        talking to, ignore the message.
       * Verify that the public ECDH key is on curve Ed448.
       * Verify that the public DH key is from the correct group.
 
@@ -1853,6 +1858,9 @@ Send a data message, encoding a message with an empty human-readable part, and
 TLV type 1. Transition to the `START` state.
 
 #### Receiving a TLV type 1 (Disconnect) Message
+
+If the instance tag in the message is not instance tag you are currently talking to,
+ignore the message.
 
 If the version is 4:
   If a TLV type 1 is received in the `START` state, stay in that state, else
@@ -2171,6 +2179,9 @@ detail how values are computed differently during some states.
 
 #### Receiving a SMP message 1
 
+If the instance tag in the message is not instance tag you are currently talking to,
+ignore the message.
+
 If smpstate is not `SMPSTATE_EXPECT1`:
 
 Set smpstate to `SMPSTATE_EXPECT1` and send a SMP abort to Alice.
@@ -2186,6 +2197,9 @@ If smpstate is `SMPSTATE_EXPECT1`:
 * Set smpstate to `SMPSTATE_EXPECT3`.
 
 #### Receiving a SMP message 2
+
+If the instance tag in the message is not instance tag you are currently talking to,
+ignore the message.
 
 If smpstate is not `SMPSTATE_EXPECT2`:
 
@@ -2204,6 +2218,9 @@ If smpstate is `SMPSTATE_EXPECT2`:
 * Set smpstate to `SMPSTATE_EXPECT4`.
 
 #### Receiving a SMP message 3
+
+If the instance tag in the message is not instance tag you are currently talking to,
+ignore the message.
 
 If smpstate is not `SMPSTATE_EXPECT3`:
 
@@ -2227,6 +2244,9 @@ If smpstate is `SMPSTATE_EXPECT3`:
   Alice.
 
 #### Receiving a SMP message 4
+
+If the instance tag in the message is not instance tag you are currently talking to,
+ignore the message.
 
 If smpstate is not `SMPSTATE_EXPECT4`:
 Set smpstate to `SMPSTATE_EXPECT1` and send a type 6 TLV (SMP abort) to Bob.
@@ -2488,6 +2508,9 @@ If authstate is `AUTHSTATE_AWAITING_SIG`:
 
 #### Receiving a D-H Key Message
 
+If the instance tag in the message is not instance tag you are currently talking to,
+ignore the message.
+
 If the message is version 3 and version 3 is not allowed, ignore this message.
 Otherwise:
 
@@ -2510,6 +2533,9 @@ If authstate is `AUTHSTATE_NONE`, `AUTHSTATE_AWAITING_REVEALSIG`, or
 
 #### Receiving a Signature Message
 
+If the instance tag in the message is not instance tag you are currently talking to,
+ignore the message.
+
 If version 3 is not allowed, ignore this message. Otherwise:
 
 If authstate is AUTHSTATE_AWAITING_SIG:
@@ -2524,6 +2550,9 @@ If authstate is AUTHSTATE_NONE, AUTHSTATE_AWAITING_DHKEY or AUTHSTATE_AWAITING_R
   * Ignore the message.
 
 #### Receiving a Reveal Signature Message
+
+If the instance tag in the message is not instance tag you are currently talking to,
+ignore the message.
 
 If version 3 is not allowed, ignore this message. Otherwise:
 
