@@ -1430,9 +1430,9 @@ encryption and MAC keys.
 OTRv3 defines an additional symmetric key that can be derived by the
 communicating parties for use of application-specific purposes, such as file
 transfer, voice encryption, etc. When one party wishes to use the extra
-symmetric key, he or she creates a type `8 TLV` attached to a Data Message.
-The key itself is then derived from `K`. The extra symmetric
-key is derived by calculating `KDF_1(0xFF || K)`.
+symmetric key, they create a type `8 TLV` attached to a Data Message. The key
+itself is then derived from `K`. The extra symmetric key is derived by
+calculating `KDF_1(0xFF || K)`.
 
 Upon receipt of the Data Message containing the type 8 TLV, the recipient will
 compute the extra symmetric key in the same way. Note that the value of the
@@ -1746,7 +1746,7 @@ If the state is `ENCRYPTED_MESSAGES`:
 
 If the state is `WAITING_AUTH_R`:
 
-  * If the instance tag in the message is not instance tag you are currently
+  * If the instance tag in the message is not the instance tag you are currently
     talking to, ignore the message.
   * Validate the Auth-R message and ignore the message if it fails.
   * Reply with an Auth-I message.
@@ -1766,7 +1766,7 @@ If the state is not `WAITING_AUTH_R`:
 
 If the state is `WAITING_AUTH_I`:
 
-  * If the instance tag in the message is not instance tag you are currently
+  * If the instance tag in the message is not the instance tag you are currently
     talking to, ignore the message.
   * Validate the Auth-R message and ignore the message if it fails.
   * Transition state to `ENCRYPTED_MESSAGES`.
@@ -1811,7 +1811,7 @@ If the version is 4:
     * To validate the data message:
       * Verify the MAC tag.
       * Check if the message version is allowed.
-      * If the instance tag in the message is not instance tag you are currently
+      * If the instance tag in the message is not the instance tag you are currently
         talking to, ignore the message.
       * Verify that the public ECDH key is on curve Ed448.
       * Verify that the public DH key is from the correct group.
@@ -1886,7 +1886,7 @@ TLV type 1. Transition to the `START` state.
 
 #### Receiving a TLV type 1 (Disconnect) Message
 
-If the instance tag in the message is not instance tag you are currently talking to,
+If the instance tag in the message is not the instance tag you are currently talking to,
 ignore the message.
 
 If the version is 4:
@@ -2206,7 +2206,7 @@ detail how values are computed differently during some states.
 
 #### Receiving a SMP message 1
 
-If the instance tag in the message is not instance tag you are currently talking to,
+If the instance tag in the message is not the instance tag you are currently talking to,
 ignore the message.
 
 If smpstate is not `SMPSTATE_EXPECT1`:
@@ -2225,7 +2225,7 @@ If smpstate is `SMPSTATE_EXPECT1`:
 
 #### Receiving a SMP message 2
 
-If the instance tag in the message is not instance tag you are currently talking to,
+If the instance tag in the message is not the instance tag you are currently talking to,
 ignore the message.
 
 If smpstate is not `SMPSTATE_EXPECT2`:
@@ -2246,7 +2246,7 @@ If smpstate is `SMPSTATE_EXPECT2`:
 
 #### Receiving a SMP message 3
 
-If the instance tag in the message is not instance tag you are currently talking to,
+If the instance tag in the message is not the instance tag you are currently talking to,
 ignore the message.
 
 If smpstate is not `SMPSTATE_EXPECT3`:
@@ -2272,7 +2272,7 @@ If smpstate is `SMPSTATE_EXPECT3`:
 
 #### Receiving a SMP message 4
 
-If the instance tag in the message is not instance tag you are currently talking to,
+If the instance tag in the message is not the instance tag you are currently talking to,
 ignore the message.
 
 If smpstate is not `SMPSTATE_EXPECT4`:
@@ -2535,7 +2535,7 @@ If authstate is `AUTHSTATE_AWAITING_SIG`:
 
 #### Receiving a D-H Key Message
 
-If the instance tag in the message is not instance tag you are currently talking to,
+If the instance tag in the message is not the instance tag you are currently talking to,
 ignore the message.
 
 If the message is version 3 and version 3 is not allowed, ignore this message.
@@ -2560,7 +2560,7 @@ If authstate is `AUTHSTATE_NONE`, `AUTHSTATE_AWAITING_REVEALSIG`, or
 
 #### Receiving a Signature Message
 
-If the instance tag in the message is not instance tag you are currently talking to,
+If the instance tag in the message is not the instance tag you are currently talking to,
 ignore the message.
 
 If version 3 is not allowed, ignore this message. Otherwise:
@@ -2578,7 +2578,7 @@ If authstate is AUTHSTATE_NONE, AUTHSTATE_AWAITING_DHKEY or AUTHSTATE_AWAITING_R
 
 #### Receiving a Reveal Signature Message
 
-If the instance tag in the message is not instance tag you are currently talking to,
+If the instance tag in the message is not the instance tag you are currently talking to,
 ignore the message.
 
 If version 3 is not allowed, ignore this message. Otherwise:
