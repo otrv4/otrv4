@@ -51,7 +51,7 @@ works on top of an existing messaging protocol, like XMPP.
 1. [The protocol state machine](#the-protocol-state-machine)
    1. [Protocol states](#protocol-states)
    1. [Protocol events](#protocol-events)
-1. [Socialist Millionaires Protocol (SMP)](#socialist-millionaires-protocol-smp)
+1. [Socialist Millionaires Protocol (SMP)](#socialist-millionaires-protocol--smp-)
    1. [SMP Overview](#smp-overview)
    1. [Secret information](#secret-information)
    1. [SMP Hash function](#smp-hash-function)
@@ -1901,17 +1901,18 @@ If the version is 3:
 
 ## Socialist Millionaires Protocol (SMP)
 
-SMP in version 4 shares the same TLVs and flow as SMP in OTRv3 with the
-following exceptions. For how OTRv3 handles SMP, please refer to the spec [\[2\]](#references).
+SMP in OTRv4 shares the same TLVs and flow as SMP in OTRv3 with the following
+exceptions. Please refer to the version 3 spec for details on how it handles
+SMP [\[2\]](#references).
 
-In OTRv3, SMP Message 1 is used when a user does not specify an SMP question
-and, if not, a SMP Message 1Q is used. OTRv4 is simplified to use only SMP
-Message 1 for both cases. When a question is not present, the user specified
-question section has length `0` and value `NULL`.
+In OTRv3, SMP Message 1 is used when the user does not specify an SMP question.
+If a question is supplied, SMP Message 1Q is used. OTRv4 is simplified to use
+only SMP Message 1 for both cases. When a question is not present, the user
+specified question section has length `0` and value `NULL`.
 
-OTRv4 creates fingerprints using SHA3-512, which increases their size. Thus,
-the size of the fingerprint in the "Secret Information" section of OTRv3
-[\[7\]](#references) should be 64 bytes in size.
+OTRv4 creates fingerprints using SHA3-512, which increases their size from
+OTRv3. Thus, the size of the fingerprint in the "Secret Information" section of
+OTRv3 [\[7\]](#references) should be 64 bytes.
 
 Lastly, OTRv4 uses Ed448 as the cryptographic primitive. This changes the way
 values are serialized and how they are computed. To define the SMP values
@@ -1921,6 +1922,9 @@ under Ed448, we reuse the previously defined generator `G` for Ed448:
 G = (11781216126343694673728248434331006466518053535701637341687908214793940427
 7809514858788439644911793978499419995990477371552926308078495, 19)
 ```
+
+The computations below use the SMP secret value explained
+[here](#secret-information).
 
 ### SMP Overview
 
@@ -1937,8 +1941,8 @@ Assuming that Alice begins the exchange:
 
 **Bob:**
 
-* Validates that `G2a` and `G3a` are on the curve Ed448, in the correct group
-  and that they do not degenerate.
+* Validates that `G2a` and `G3a` are on the curve Ed448, that they are in
+  the correct group, and that they do not degenerate.
 * Picks random values `b2` and `b3` in `Z_q`.
 * Picks random values `r2`, `r3`, `r4`, `r5` and `r6` in `Z_q`.
 * Computes `G2b = G * b2` and `G3b = G * b3`.
@@ -1946,7 +1950,7 @@ Assuming that Alice begins the exchange:
 * Computes `c3 = HashToScalar(4 || G * r3)` and `d3 = r3 - b3 * c3`.
 * Computes `G2 = G2a * b2` and `G3 = G3a * b3`.
 * Computes `Pb = G3 * r4` and `Qb = G * r4 + G2 * HashToScalar(y)`, where y is
-  the 'actual secret'.
+  the SMP secret value.
 * Computes `cp = HashToScalar(5 || G3 * r5 || G * r5 + G2 * r6)`,
   `d5 = r5 - r4 * cp` and `d6 = r6 - HashToScalar(y) * cp`.
 * Sends Alice a SMP message 2 with `G2b`, `c2`, `d2`, `G3b`, `c3`, `d3`, `Pb`,
@@ -1954,12 +1958,12 @@ Assuming that Alice begins the exchange:
 
 **Alice:**
 
-* Validates that `G2b` and `G3b` are on the curve Ed448, in the correct group
-  and that they do not degenerate.
+* Validates that `G2b` and `G3b` are on the curve Ed448, that they are in
+  the correct group and that they do not degenerate.
 * Computes `G2 = G2b * a2` and `G3 = G3b * a3`.
 * Picks random values `r4`, `r5`, `r6` and `r7` in `Z_q`.
 * Computes `Pa = G3 * r4` and `Qa = G * r4 + G2 * HashToScalar(x)`, where x is
-  the 'actual secret'.
+  the SMP secret value.
 * Computes `cp = HashToScalar(6 || G3 * r5 || G * r5 + G2 * r6)`,
   `d5 = r5 - r4 * cp` and `d6 = r6 - HashToScalar(x) * cp`.
 * Computes `Ra = (Qa - Qb) * a3`.
@@ -1970,8 +1974,8 @@ Assuming that Alice begins the exchange:
 
 **Bob:**
 
-* Validates that `Pa`, `Qa`, and `Ra` are on the curve Ed448, in the correct
-  group and that they do not degenerate.
+* Validates that `Pa`, `Qa`, and `Ra` are on the curve Ed448 that they are in
+  the correct group and that they do not degenerate.
 * Picks a random value `r7` in `Z_q`.
 * Computes `Rb = (Qa - Qb) * b3`.
 * Computes `Rab = Ra * b3`.
@@ -1982,22 +1986,25 @@ Assuming that Alice begins the exchange:
 
 **Alice:**
 
-* Validates that `Rb` is on curve Ed448, in the correct group and that they do
-  not degenerate.
+* Validates that `Rb` is on curve Ed448, that it is in the correct group, and
+  that it does not degenerate.
 * Computes `Rab = Rb * a3`.
 * Checks whether `Rab == Pa - Pb`.
 
-If everything is done correctly, then `Rab` should hold the value of
-`(Pa - Pb) * ((G2 * a3 * b3) * (x - y))`, which means that the test at the end
-of the protocol will only succeed if `x == y`. Further, since `G2 * a3 * b3` is
-a random number not known to any party, if `x` is not equal to `y`, no other
-information is revealed.
+If everything is done correctly, then `Rab` should hold the value of `(Pa - Pb)
+* ((G2 * a3 * b3) * (x - y))`. This test will only succeed if the secret
+information provided by each participant are equal (essentially `x == y`).
+Further, since `G2 * a3 * b3` is a random number not known to any party, if `x`
+is not equal to `y`, no other information is revealed.
 
 ### Secret information
 
-The secret information `x` and `y` compared during this protocol contains not only
-information entered by the users, but also information unique to the
-conversation in which SMP takes place. Specifically, the format is:
+The secret information `x` and `y` compared during this protocol contains not
+only information entered by the users, but also information unique to the
+conversation in which SMP takes place. This includes the Secure Session ID
+(SSID) whose creation is described [here](#non-interactive-auth-message).
+
+Specifically, the format is:
 
 ```
 Version (BYTE)
@@ -2008,37 +2015,36 @@ Initiator fingerprint (64 BYTE)
 Responder fingerprint (64 BYTE)
   The fingerprint that the party that did not initiate SMP is using in the
   current conversation.
-Secure Session ID
-  The ssid described previously.
+Secure Session ID or SSID
 User-specified secret
   The input string given by the user at runtime.
 ```
 
-Then the SHA3-512 hash of the above is taken, and the digest becomes the
-actual secret (`x` or `y`) to be used in SMP. The additional fields ensure that
-not only do both parties know the same secret input string, but no man-in-the-
+The SHA3-512 hash of the above is taken, and the digest becomes the SMP secret
+value (`x` or `y`) to be used in SMP. The additional fields ensure that not
+only do both parties know the same secret input string, but no man-in-the-
 middle is capable of reading their communication either.
 
 ### SMP Hash function
 
-In the following actions, there are many places where a SHA3-512 hash of an
-integer followed by other values are taken. This is defined as
-`HashToScalar(d)`, where the integer is a number to distinguish the calls to
-the hash function at different points in the protocol. This done to prevent
-Alice from replaying Bob's zero knowledge proofs or vice versa.
+There are many places where a SHA3-512 hash is taken of an integer followed by
+other values. This is defined as `HashToScalar(i || v)` where `i` is an integer
+used to distinguish the calls to the hash function and `v` is some value.
+Hashing is done in this way to prevent Alice from replaying Bob's zero
+knowledge proofs or vice versa.
 
 ### SMP message 1
 
-Alice sends SMP message 1 to begin a DH exchange to determine two new
+Alice sends SMP message 1 to begin a ECDH exchange to determine two new
 generators, `g2` and `g3`. A valid SMP message 1 is generated as follows:
 
 1. Determine her secret input `x`, which is to be compared to Bob's secret
-   `y`, as specified in the "Secret Information" section.
+   `y`, as specified in the [Secret Information section](#secret-information).
 2. Pick random values `a2` and `a3` in `Z_q`. These will be Alice's
-   exponents for the DH exchange to pick generators.
+   exponents for the ECDH exchange to pick generators.
 3. Pick random values `r2` and `r3` in `Z_q`. These will be used to
-   generate zero-knowledge proofs that this message was created according to the
-   protocol.
+   generate zero-knowledge proofs that this message was created according
+   to the SMP protocol.
 4. Compute `G2a = G * a2` and `G3a = G * a3`.
 5. Generate a zero-knowledge proof that the value `a2` is known by setting
    `c2 = HashToScalar(1 || G * r2)` and `d2 = r2 - a2 * c2 mod q`.
@@ -2047,14 +2053,13 @@ generators, `g2` and `g3`. A valid SMP message 1 is generated as follows:
 7. Store the values of `x`, `a2` and `a3` for use later in the protocol.
 
 
-The SMP message 1 has the following data:
+The SMP message 1 has the following data and format:
 
 ```
-question (DATA)
-  A user-specified question, which is associated with the user-specified
-  portion of the secret.
-  If there is no question input from the user, the length of this is 0 and the
-  data is NULL.
+Question (DATA)
+  A user-specified question, which is associated with the user-specified secret
+  information. If there is no question input from the user, the length of this is
+  0 and the data is NULL.
 
 G2a (POINT)
   Alice's half of the ECDH exchange to determine G2.
@@ -2064,7 +2069,7 @@ c2 (SCALAR), d2 (SCALAR)
   transmitted value G2a.
 
 G3a (POINT)
-  Alice's half of the DH exchange to determine G3.
+  Alice's half of the ECDH exchange to determine G3.
 
 c3 (SCALAR), d3 (SCALAR)
   A zero-knowledge proof that Alice knows the value associated with her
@@ -2079,12 +2084,12 @@ generators, `g2` and `g3`. It also begins the construction of the values used in
 the final comparison of the protocol. A valid SMP message 2 is generated as
 follows:
 
-1. Validate that `G2a` and `G3a` are on curve Ed448, in the correct group and
-   that they do not degenerate.
+1. Validate that `G2a` and `G3a` are on curve Ed448, that they are in the
+   correct group, and that they do not degenerate.
 2. Determine Bob's secret input `y`, which is to be compared to Alice's secret
    `x`.
-3. Pick random values `b2` and `b3` in `Z_q`. These will used for creating
-   generators.
+3. Pick random values `b2` and `b3` in `Z_q`. These will be used for creating
+   the generators `g2` and `g3`.
 4. Pick random values `r2`, `r3`, `r4`, `r5` and `r6` in `Z_q`. These
    will be used to add a blinding factor to the final results, and to generate
    zero-knowledge proofs that this message was created honestly.
@@ -2102,7 +2107,7 @@ follows:
 11. Store the values of `G3a`, `G2`, `G3`, `b3`, `Pb` and `Qb` for use later
     in the protocol.
 
-The SMP message 2 has the following data:
+The SMP message 2 has the following data and format:
 
 ```
 G2b (POINT)
@@ -2134,10 +2139,10 @@ SMP message 3 is Alice's final message in the SMP exchange. It has the last of
 the information required by Bob to determine if `x = y`. A valid SMP message 3
 is generated as follows:
 
-1. Validate that `G2b`, `G3b`, `Pb`, and `Qb` are on curve Ed448 and that they
-   do not degenerate.
+1. Validate that `G2b`, `G3b`, `Pb`, and `Qb` are on curve Ed448, that they
+   are in the correct group, and that they do not degenerate.
 2. Pick random values `r4`, `r5`, `r6` and `r7` in `Z_q`. These will
-   be used to add a blinding factor to the final results, and to generate
+   be used to add a blinding factor to the final results and to generate
    zero-knowledge proofs that this message was created honestly.
 3. Compute `G2 = G2b * a2` and `G3 = G3b * a3`.
 4. Compute `Pa = G3 * r4` and `Qa = G * r4 + G2 * HashToScalar(x)`.
@@ -2152,7 +2157,7 @@ is generated as follows:
 8. Store the values of `G3b`, `Pa - Pb`, `Qa - Qb` and `Ra` for use later in
    the protocol.
 
-The SMP message 3 has the following data:
+The SMP message 3 has the following data and format:
 
 ```
 Pa (POINT), Qa (POINT)
@@ -2178,16 +2183,16 @@ SMP message 4 is Bob's final message in the SMP exchange. It has the last of
 the information required by Alice to determine if `x = y`. A valid SMP message
 4 is generated as follows:
 
-1. Validate that `Pa`, `Qa`, and `Ra` are on curve Ed448 and that they do not
-   degenerate.
+1. Validate that `Pa`, `Qa`, and `Ra` are on curve Ed448, that they are from the
+   correct group, and that they do not degenerate.
 2. Pick a random value `r7` in `Z_q`. This will be used to generate
-Bob's final zero-knowledge proof that this message was created honestly.
+   Bob's final zero-knowledge proof that this message was created honestly.
 3. Compute `Rb = (Qa - Qb) * b3`.
 4. Generate a zero-knowledge proof that `Rb` was created according to the
    protocol by setting
    `cr = HashToScalar(8 || G * r7 || (Qa - Qb) * r7)` and `d7 = r7 - b3 * cr mod q`.
 
-The SMP message 4 has the following data:
+The SMP message 4 has the following data and format:
 
 ```
 Rb (POINT)
@@ -2195,14 +2200,13 @@ Rb (POINT)
   share the same secret.
 
 cr (SCALAR), d7 (SCALAR)
-  A zero-knowledge proof that Rb was created according to the protocol given
-  above.
+  A zero-knowledge proof that Rb was created according to this SMP protocol.
 ```
 
 ### The SMP state machine
 
-OTRv4 does not change the state machine for SMP. But the following sections
-detail how values are computed differently during some states.
+OTRv4 does not change the state machine for SMP from OTRv3. But the following
+sections detail how values are computed differently during some states.
 
 #### Receiving a SMP message 1
 
@@ -2216,8 +2220,8 @@ Set smpstate to `SMPSTATE_EXPECT1` and send a SMP abort to Alice.
 If smpstate is `SMPSTATE_EXPECT1`:
 
 * Verify Alice's zero-knowledge proofs for G2a and G3a:
-  1. Check that both `G2a` and `G3a` are on curve Ed448 and that they do not
-     degenerate.
+  1. Check that both `G2a` and `G3a` are on curve Ed448, that they are part of the
+     same group, and that they do not degenerate.
   2. Check that `c2 = HashToScalar(1 || G * d2 + G2a * c2)`.
   3. Check that `c3 = HashToScalar(2 || G * d3 + G3a * c3)`.
 * Create a SMP message 2 and send it to Alice.
@@ -2276,6 +2280,7 @@ If the instance tag in the message is not the instance tag you are currently tal
 ignore the message.
 
 If smpstate is not `SMPSTATE_EXPECT4`:
+
 Set smpstate to `SMPSTATE_EXPECT1` and send a type 6 TLV (SMP abort) to Bob.
 
 If smpstate is SMPSTATE_EXPECT4:
@@ -2283,14 +2288,12 @@ If smpstate is SMPSTATE_EXPECT4:
 * Verify Bob's zero-knowledge proof for Rb:
    1. Check that `Rb` is on curve Ed448 and that it does not degenerate.
    2. Check that `cr = HashToScalar(8 || G * d7 + G3 * cr || (Qa - Qb) * d7 + Rb * cr)`.
-
 * Check whether the protocol was successful:
     1. `Compute Rab = Rb * a3`.
     2. Determine if `x = y` by checking the equivalent condition that
        `(Pa - Pb) = Rab`.
-
-Set smpstate to `SMPSTATE_EXPECT1`, as no more messages are expected
-from Bob.
+* Set smpstate to `SMPSTATE_EXPECT1`, as no more messages are expected
+  from Bob.
 
 ## Implementation Notes
 
