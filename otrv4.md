@@ -2299,46 +2299,50 @@ If smpstate is SMPSTATE_EXPECT4:
 
 ### Considerations for networks that allow multiple devices
 
-When using a transport network that allows multiple devices to be simultaneously
-logged in with the same peer identifier, make sure to identify the other
-participant by its device-specific identifier and not only the peer identifier
-(for example, using XMPP full JID instead of bare JID). Doing so allows
-establishing an OTR channel at the same time with multiple devices from the
-other participant at the cost of how to expose this to the message client (for
-example, XMPP clients can decide to reply only to the device you have more
-recently received a message from).
+When using a transport network that allows multiple devices to be
+simultaneously logged in with the same peer identifier, make sure to identify
+the other participant by its device-specific identifier and not only the peer
+identifier (for example, using XMPP full JID instead of bare JID). Doing so
+allows establishing an OTR channel at the same time with multiple devices from
+the other participant at the cost of managing exposure of this to the message
+client (for example, XMPP clients can decide to reply only to the device you
+have more recently received a message from).
 
 ## Forging Transcripts
 
-OTRv4 strongly encourages that each implementation of this specification exposes
-an interface to produce forged transcripts with the same functions used for
-honest conversations. This section will guide implementers to achieve this.
+OTRv4 expects each implementation of this specification to expose an interface
+for producing forged transcripts. These forging operations must use the same
+functions used for honest conversations. This section will outline which
+operations must be exposed and include guidance to forge messages.
+
 The major utilities are:
 
 ```
 Parse
   Parses given OTR messages to the values of each of the fields in
-  a message. Show the values of all the fields.
+  a message. This shows the values of all the fields.
 
 Modify Data Message
-  If an encrypted data message cannot be read because we don't
+  If an encrypted data message cannot be read because you don't
   know the message key (or a key used to derive this message key) but it can
   be guessed that the string `x` appears at a given place in the message,
   this method will replace the old text with some new desired text with
-  the same length. For example, if the string "hi" is accurately guessed
-  to be at the beginning of an encrypted message, it can be replaced with the
-  string "yo". In that way, a valid data message can be created with the new
-  text.
+  the same length. The result is a valid OTR message containing the new text.
+  For example, if the string "hi" is accurately guessed to be at the beginning
+  of an encrypted message, it can be replaced with the string "yo". In that way,
+  a valid data message can be created with the new text.
 
   To achieve this:
   - XOR the old text and the new text. Store this value.
-  - XOR the stored values again with the original encrypted message starting at
+  - XOR the stored value again with the original encrypted message starting at
     a given offset.
   - Recalculate the MAC tag with the revealed MAC key associated with this
-  message. The new tag is attached to the data message, replacing the old
-  value.
+    message. The new tag is attached to the data message, replacing the old
+    value.
 ```
-[Pseudocode](#modify-an-encrypted-data-message) for modifying data messages is included in [Appendices](#appendices).
+
+[Pseudocode](#modify-an-encrypted-data-message) for modifying data messages is
+included in the [Appendices](#appendices).
 
 ```
 Read and Forge Data Message
@@ -2358,24 +2362,25 @@ Forge AKE and Session Keys
   Any participant of an OTR conversation may forge an AKE with another
   participant as long as they have their profile. This function will take the
   user profile and the secret long term key of one participant, and the user
-  profile of the other.
-  It will return an AKE transcript between the two parties. The
-  participant's private key is required since it is used to authenticate the key
-  exchange, but the resulting transcript is created in such a way that a
+  profile of the other. It will return an AKE transcript between the two parties.
+  The participant's private key is required since it is used to authenticate the
+  key exchange, but the resulting transcript is created in such a way that a
   cryptographic expert cannot identify which profile owner authenticated the
   conversation.
 
 Show MAC Key
   This function takes a chain key and a message key number and shows the MAC key
   associated with those two values. For example, if the message key number is 3,
-  the message key is ratcheted 3 times, and the third MAC key is returned. 'Show
-  MAC key' may be used with the ReMAC message in the case where a chain key has
-  been compromised by an attacker and the attacker wishes to forge messages.
+  the chain key is ratcheted 3 times, and the third MAC key is derived and
+  returned. 'Show MAC key' may be used with the ReMAC Message function below in
+  the case where a chain key has been compromised by an attacker and the attacker
+  wishes to forge messages.
 
 ReMAC Message
-  Make a new OTR Data Message, with the given pieces (the data part is already
-  encrypted).  MAC it with the given MAC key. An attacker may use this function
-  to forge messages with a compromised MAC key.
+  This will make a new OTR Data Message with a given MAC key and an original OTR
+  message. The user's message in the OTR message is already encrypted. A new MAC
+  tag will be generated and replaced for the message. An attacker may use this
+  function to forge messages with a compromised MAC key.
 
 Forge Entire Transcript
   The Forge Entire Transcript function will allow one participant to completely
