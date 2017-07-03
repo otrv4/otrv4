@@ -469,14 +469,14 @@ Type 8: Extra symmetric key
 ### Shared Session State
 
 The DAKEZ session must authenticate its context to prevent attacks that rebind
-the DAKEZ transcript into different contexts. If the higher protocol ascribes
+the DAKEZ transcript into different contexts. If the higher-level protocol ascribes
 some property to the connection, the DAKEZ exchange should verify this property.
 Given state information `phi` associated with the higher-level context (e.g., a
 session identifier), DAKEZ authenticates that both parties share the same value
 for `phi`.
 
 The shared session state (Φ) is any session-specific protocol state available to
-both parties in the higher protocol. For example, in XMPP, it will be the
+both parties in the higher-level protocol. For example, in XMPP, it will be the
 node and domain identifiers of the Jabber identifier, e.g. alice@jabber.net.
 
 ### OTR Error Messages
@@ -791,9 +791,47 @@ can be configurable. A recommended value is two weeks.
 The user profile signature is generated as defined in RFC 8032 section 5.2.6.
 The flag `F` is set to `0` and the context `C` is left empty.
 
+```
+The inputs to the signing procedure is the private key, a 57-octet
+   string, a flag F, which is 0 for Ed448, 1 for Ed448ph, context C of
+   at most 255 octets and a message M of arbitrary size.
+
+   1.  Hash the private key, 57-octets, using SHAKE256(x, 114).  Let h
+       denote the resulting digest.  Construct the secret scalar a from
+       the first half of the digest, and the corresponding public key A,
+       as described in the previous section.  Let prefix denote the
+       second half of the hash digest, h[57],...,h[113].
+
+   2.  Compute SHAKE256(dom(F, C) || prefix || M, 114), where M is the
+       message to be signed, F is 1 for Ed448ph, 0 for Ed448 and C is
+       the context to use.  Interpret the 114-octet digest as a little-
+       endian integer r.
+
+   3.  Compute the point [r]B.  For efficiency, do this by first
+       reducing r modulo L, the group order of B.  Let the string R be
+       the encoding of this point.
+
+   4.  Compute SHAKE256(dom(F, C) || R || A || M, 114), and interpret
+       the 114- octet digest as a little-endian integer k.
+
+   5.  Compute S = (r + k * a) mod L.  For efficiency, again reduce k
+       modulo L first.
+
+   6.  Form the signature of the concatenation of R (57 octets) and the
+       little-endian encoding of S (57 octets, the ten most significant
+       bits of the final octets are always zero).
+```
+
 ### Verify a User Profile Signature
 
 The user profile signature is verified as defined in RFC 8032 section 5.2.7.
+
+```
+ 1.  To verify a signature on a message M using context C and public
+       key A, with F being 0 for Ed448, 1 for Ed448ph, first split the
+       signature into two 57-octet halves.  Decode the first half as a
+       point R, and the second half as an integer S, in the range 0 <= s
+```
 
 ### User Profile Data Type
 
@@ -830,16 +868,16 @@ EDDSA signature (EDDSA-SIG):
 
 ## Online Conversation Initialization
 
-OTRv4 will initialize through a [Query Message or a Whitespace
-Tag](#user-requests-to-start-an-otr-conversation). After this, the conversation
-is authenticated using the interactive DAKE.
+OTRv4 initializes through a [Query Message or a Whitespace Tag](#user-requests-
+to-start-an-otr-conversation). After this, the conversation is authenticated
+using the interactive DAKE.
 
 ### Requesting conversation with older OTR versions
 
-Bob might respond to Alice's request or notification of willingness to start a
-conversation using OTRv3. If this is the case and Alice supports version 3,
+Bob might respond to Alice's request (or notification of willingness to start a
+conversation) using OTRv3. If this is the case and Alice supports version 3,
 the protocol falls back to OTRv3 [\[7\]](#references). If Alice does not
-support version 3, then this message is ignored.
+support version 3, this response is ignored.
 
 ### Interactive Deniable Authenticated Key Exchange (DAKE)
 
@@ -1236,20 +1274,21 @@ The protocol for publishing prekeys will be defined in another specification.
 
 ### Obtaining prekeys
 
-TODO: It is valid for the server to return more than one prekey. Should the client decide what actions to take when the server returns more than one prekey?
+TODO: It is valid for the server to return more than one prekey. Should the
+client decide what actions to take when the server returns more than one prekey?
 Or should these actions be defined in the protocol?
 
 ## Data Exchange
 
 This section describes how each participant will use the Double Ratchet
-algorithm to exchange [data messages](#data-message) initialized with the
-shared secret established in the DAKE. Detailed validation and processing of
-each data message is described in the [section on receiving encrypted data
-messages](#receiving-an-encrypted-data-message).
+algorithm to exchange [data messages](#data-message). The Double Ratchet is
+initialized with the shared secret established in the DAKE. Detailed validation
+and processing of each data message is described in the [section on receiving
+encrypted data messages](#receiving-an-encrypted-data-message).
 
-A message with an empty human-readable part (the plaintext is of zero length,
-or starts with a NULL) is a "heartbeat" packet, and should not be displayed to
-the user (but it is still useful for key rotations).
+A message with an empty human-readable part (the plaintext is of zero length, or
+starts with a NULL) is a "heartbeat" packet. This message is useful for key
+rotations and should not be displayed to the user.
 
 ```
 Alice                                                                           Bob
