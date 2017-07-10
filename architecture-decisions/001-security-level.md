@@ -49,9 +49,6 @@ timing attacks, and its nonce is safely generated at random (since it's
 significantly larger). XSalsa will be used with the following parameters: 20
 rounds, 192-bits nonces and 256-bit keys.
 
-We will use Poly-1305 for message authentication inside the Dual Receiver
-Encryption.
-
 We will use SHA3-512 as a key derivation function. We use the construct
 SHA3-512(key || secret) when a keyed cryptographic hash function is expected,
 and use the construct SHA3-512(counter || secret) to provide cryptographic
