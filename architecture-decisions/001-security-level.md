@@ -4,8 +4,8 @@
 
 Designing a new version of OTR is an opportunity to:
 
-- increase its security by using cryptographic primitives with a higher
-security level.
+- increase its security level by using cryptographic primitives with a higher
+security.
 - use elliptic curve cryptography for faster computations with the same
 security level.
 - replace current cryptographic primitives with modern alternatives.
@@ -43,6 +43,7 @@ We will use SHA3-512 as the cryptographic hash function. Since the security
 level of a hash is, in general, half the size of the output (because of the
 birthday paradox), this gives us an expected level of 256.
 
+// TODO: will the nonce be generated at random, or will it be L?
 We will use XSalsa as the stream cipher because it has a block size of 512 bits
 compared to AES' 128 block size. It is also faster than AES, immune to
 timing attacks, and its nonce is safely generated at random (since it's

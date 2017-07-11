@@ -13,8 +13,7 @@ reasons:
 Firstly, OTRv4 aims to be possible and easy to implement in today's environments
 in a reasonable time frame. OTRv4 only aims to lay the foundation for future
 changes by adding version rollback protection, a DAKE, upgrades of primitives,
-and a setup which will allow for the non-interactive conversations in the
-future.
+and non-interactive conversations.
 
 Secondly, current QC resistant algorithms and their respective libraries are not
 ready for incorporation. For example, production level libraries for SIDH and

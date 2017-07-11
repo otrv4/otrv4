@@ -342,3 +342,4 @@ By waiting for the server to send prekeys, OTRv4 will be subject to DoS attacks
 when a server is compromised or the network is undermined to return a "no prekey
 exists" response from the server. This is preferred over the possible compromise
 of multiple non-interactive DAKEs due to the reuse of a prekey.
+q

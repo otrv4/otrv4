@@ -73,6 +73,7 @@ works on top of an existing messaging protocol, like XMPP.
 
 ## Main Changes over Version 3
 
+// TODO: add non interactive
 - Security level raised to 224 bits and based on elliptic curve cryptography
   (ECC).
 - Additional protection against transcript decryption in the case of ECC

@@ -21,7 +21,7 @@ deniability properties in regard to an online and offline judge:
 - QuickSpawn: non-interactive that intentionally sacrifices online deniability
   for R for simplicity.
 
-TODO: Improve the summary of properties.
+// TODO: Improve the summary of properties.
 
 ### Decision
 
