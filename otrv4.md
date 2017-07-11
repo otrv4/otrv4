@@ -614,6 +614,7 @@ derive_ratchet_keys(K):
   return R, decide_between_chain_keys(Ca, Cb)
 ```
 
+// TODO: is this how the ratchet it will behave?
 ### Rotating ECDH keys and mix key as sender
 
 Before sending the first reply (i.e. a new message considering a previous
@@ -630,7 +631,7 @@ To rotate the ECDH keys:
 
   * Generate a new ECDH key pair and assign it to `our_ecdh = generateECDH()`.
   * Calculate `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
-  * Securely delete `our_ecdh.secret`. //TODO - this isn't currently happening, the ecdh secret is being deleted before generating new keys
+  * Securely delete `our_ecdh.secret`.
 
 To rotate the mix key:
 
