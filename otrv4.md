@@ -1195,12 +1195,11 @@ A valid non-interactive Auth message is generated as follows:
    * Calculates the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
    * [Decides which chain key he will use](#deciding-between-chain-keys).
 5. Compute `t = Bobs_User_Profile || Alices_User_Profile || Y || X || B || A || Φ`.
-6. Compute `Auth MAC = SHA3-256(Mk, t)`.
-7. Compute `sigma = Auth(Pka, ska, {Pkb, Pka, Y}, t)`.
-8. Follow the section ["When you send a Data Message"](when-you-send-a-data-message) to generate:
-	* Nonce
-	* Encrypted message
-	* Authenticator
+6. Compute `sigma = Auth(Pka, ska, {Pkb, Pka, Y}, t)`. While computing `sigma`, keep the first 192 bits
+   of the generated `c` value to be used as a nonce in the next step.
+7. Follow the section ["When you send a Data Message"](when-you-send-a-data-message) to generate an
+   encrypted message, using the nonce set in the previous step.
+8. Compute `Auth MAC = SHA3-256(Mk || t || encrypted_data_message)`.
 
 To verify a non-interactive Auth message:
 
@@ -1246,15 +1245,11 @@ A (MPI)
   The ephemeral public DH key. Note that even though this is in uppercase,
   this is NOT a POINT.
 
-Auth MAC
+Auth MAC (MAC)
   The SHA3 MAC with the appropriate MAC key (see above) for the message of the SNIZKPK.
 
 Sigma (SNIZKPK)
   The SNIZKPK Auth value.
-
-Nonce (NONCE)
-  The nonce used with XSalsa20 to create the encrypted message contained
-  in this packet.
 
 Encrypted message (DATA)
   Using the appropriate encryption key (see below) derived from the
@@ -1262,10 +1257,6 @@ Encrypted message (DATA)
   message), perform XSalsa20 encryption of the message. The nonce used for
   this operation is also included in the header of the data message
   packet.
-
-Authenticator (MAC)
-  The SHA3 MAC with the appropriate MAC key (see above) for everything:
-  from the protocol version to the end of the encrypted message.
 
 ```
 
@@ -1426,7 +1417,10 @@ In both cases:
    MKenc, MKmac = derive_enc_mac_keys(chain_s[i][j])
    ```
 
-  * Get a random 24 bytes value to be the `nonce`.
+  * When creating a non-interactive auth message, construct a `nonce` from the
+    first 24 bytes of the `c` variable created when constructing `sigma`. When
+    creating a regular data message, generate a new random 24 bytes value to be
+    the `nonce`.
   * Use the encryption key to encrypt the message and the MAC key to calculate
     its MAC:
 
@@ -1434,8 +1428,11 @@ In both cases:
    Encrypted_message = XSalsa20_Enc(MKenc, nonce, m)
    ```
 
-  * Use the MAC key to create a MAC tag. MAC all the sections of the data message
-    from the protocol version to the encrypted message.
+  * When creating a non-interactive auth message, do not create a MAC tag. This is
+    not necessary since the MAC tag created with the non-interactive DAKE includes
+    the data message. When creating a regular data message, use the MAC key to create
+    a MAC tag. MAC all the sections of the data message from the protocol version to
+    the encrypted message.
 
    ```
    Authenticator = KDF_2(MKmac || Data_message_sections)
