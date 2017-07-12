@@ -25,96 +25,77 @@ In OTR4, the window of key compromise is equivalent to how long it takes for the
 double ratchet to refresh the ephemeral key material (2 ratchets, including the
 first compromised ratchet) and how long a prekey remains unused before the user
 profile inside becomes expired. We recommend expiration to be a week long, so
-the window in that case is one week. In non-interactive conversations,
-participants may not receive messages or reply to them for days, weeks, or
-months at a time. As a result, the window of compromise for these kind of
-conversations can be very long if no limitations are set. We would like to
-reduce this window.
+the window in that case is one week. With offline  conversations, participants
+may not receive messages or reply to them for days, weeks, or months at a time.
+As a result, the window of compromise for these kind of conversations can be very
+long if no limitations are set. We would like to reduce this window.
 
-If the DH and ECDH secret ephemeral keys are compromised for a participant,
-several things can happen. First, all messages sent encrypted with keys derived
-from these compromised keys will be readable to the attacker. This includes
-messages sent by the compromised participant and the following ratchet of
-replies by the uncompromised participant. Second, all these readable messages
-may be manipulated by an active attacker. This can result in a [key-compromise
-impersonation
-attack](https://whispersystems.org/docs/specifications/x3dh/#key-compromise),
-where the active attacker impersonates other parties to the compromised
-participant. Third, an active attacker can compromise further ratchets by
-continuously substituting their keys to maintain the ability to eavesdrop on the
-compromised session.
+There are two attacks in this space that we primarily want to mitigate:
 
-The [Sesame
-protocol](https://whispersystems.org/docs/specifications/sesame/#session-expiration)
-offers one solution to limit the window of compromise by creating a timestamp
-for each new conversation. This timestamp is used to keep track of how long a
-conversation has been going on and thus trigger the use of a new prekey after a
-set time has past. The problem with this solution is that it trusts the server
-to send the correct time difference. If time difference messages from the server
-are manipulated, the timestamp cannot be relied upon. In addition, compromised
-participants cannot send a timestamp themselves since that information can be
-manipulated by the active attacker who has the private key material.
+The Initiator uploads the prekey, and the Responder completes the DAKE and
+attaches the first message. An active adversary capable of compromising devices
+can carry the following attacks that they shouldn't be able to:
+1. Initiator uploads a prekey. Responder replies, but the adversary
+intercepts and drops the message. The adversary compromises Initiator's
+prekey secret, and Initiator's identity secret key. The adversary can
+now retroactively decrypt the captured initial message.
+2. Initiator and Responder complete an exchange and engage in a
+conversation. At some point, the adversary captures and drops some
+messages to (for example) Initiator. Later, the adversary compromises
+Initiator's ephemeral secrets, revealing the message keys corresponding
+to the dropped messages. The adversary can now retroactively decrypt the
+captured messages.
 
-Another strategy is to limit the number of messages sent with these ephemeral
-keys. In one solution, each sender must always create a new ratchet with a new
-prekey when they want to send a non-interactive message. Additional messages
-sent by the same initiator are encrypted using the shared secret derived from the
-prekey. If the receiver would like to reply, they must retrieve a new prekey for the
-initiator and start a new non-interactive DAKE. This would minimize the impact
-of compromise to all of the sender's data messages in a ratchet. Replies by the
-uncompromised party are no longer revealed and manipulatable.
+The first attack is mitigated through the use of XZDH. XZDH uses signed prekeys
+with a relatively short expiration time. As a result, an attacker would need to
+compromise the secret part of the signed prekey before this expiration time
+along with the identity secret key in order to gain access to the message.
 
-In another similar solution, each non-interactive message must be created with a
-new prekey. Thus each non-interactive DAKE results in an encrypted channel that
-sends only one data message. As a result, ephemeral key material can be deleted
-immediately after a non-interactive message is sent or received. This maximally
-limits the effect of key compromise for both parties by revealing only one
-message to the attacker at a time. This also eliminates continued MITM attacks
-to impersonate a participant or continuously compromise the channel. Lastly,
-this forces prekeys to be used often--thus requiring their frequent removal from
-storage and resulting in a smaller window of compromise for prekeys.
+The second attack is mitigated in two ways. First, since it cannot be known
+whether a dropped message was created by an attacker, keys for dropped messages
+are never kept. Thus, if Alice receives message 3 from Bob, but she has not
+received message 1 and 2, Alice will derive the keys to validate and decrypt
+message 3. If the message is valid, all chain keys used for derivation are
+deleted. In this case, chain keys for message 1 and message 2 are deleted. This
+is acceptable since OTRv4 assumes in-order delivery of messages. As a result,
+messages received out of order will be ignored.
 
-The disadvantages of these two last solutions are that they require clients to
-set up servers with a large number of prekeys per participant and processes that
-require frequent replenishment of prekeys. Second, possession of participation
-deniability will switch frequently between both participants. This is because
-each reply results in participation deniability lost by the sender. So if Alice
-and Bob send the following non-interactive messages, one right after the other:
+Second, to fully defend against attack 2, sessions are expired if no new ECDH
+keys are generated within a certain amount of time. This encourages keys to be
+removed often with the cost of lost messages whose MAC keys cannot be revealed.
+For example, when Alice sets her session expiration time to be 2 hours, Bob must
+reply within that time and Alice must create a response to his reply (thus
+generating a new ECDH key) in order to reset the session expiration time for
+Alice. After two hours, Alice will delete all keys associated with this session.
+If she receives a message from Bob after two hours, she cannot decrypt the
+message and thus she cannot reveal the MAC key associated with it.
 
-```
-Alice                            Bob
-------------------------------------------------
-1) Hi ---------------------------->
-2)  <----------------------------- Hi
-3) How's it going? --------------->
-4)  <----------------------------- Good, you?
-```
+This session time is decided individually by each participant so it is possible
+for Alice to have an expiration time of two hours and Bob two weeks. OTRv4 spec In
+addition, for the first data message only, the receiver will start their
+expiration timer once the message is received. The reason why we use a timer and
+don't count events is that we are trying to determine whether something has not
+happened within a certain time frame. Thus, the timer can be compromised by
+clock errors. Some errors may cause the session to be deleted too early and
+result in undecryptable messages being received. Other errors may result in the
+clock not moving forward which would cause a session to never expire. To
+mitigate this, implementers should use secure and reliable clocks that cannot be
+manipulated by an attacker.
 
-Alice loses participation deniability for message 1 and 3, and Bob loses
-participation deniability for message 2 and 4.
-
-With all of these considerations, OTR4 will expect each non-interactive message
-to be created with a new prekey. This is the most effective means of minimizing
-the window of compromise, despite its effect on participation deniability and
-the increased usage of prekeys. This is a purposeful prioritization of data
-message security.
-
-#### Revealing MAC keys
-
-MAC keys can only be revealed when the data messages are received. This is
-because if the sender publishes them earlier, other parties can compromise the
-message before it is read by the intended recipient. As a result, if the
-receiver of a non-interactive message does not go online for days or weeks, the
-MAC keys for this message cannot be revealed within that time. Thus, OTR4
-expects implementations to immediately send a specific non-interactive reveal
-message once they receive, validate, and successfully decrypt the
-non-interactive auth message.
-
-The non-interactive reveal message does not contain encrypted plaintext provided
-by the user. Its purpose is to immediately reveal MAC keys to provide data
-message deniability for the other party, much like a "heartbeat" message in
-OTRv3. The format of this message is in the [message
-formats](#message-formats) section.
+The OTRv4 spec will give implementers a guide to determine the amount of time
+for session expiration. It is difficult to dictate a "good general expiration
+time" since many secure messaging scenarios exist with different security
+requirements. The session expiration is essentially an expiration on the last
+message's usability. Whether it is the implementer or the user, the time setter
+should feel comfortable with replies being unreadable and undeniable after this
+time with the consequence of protecting local key material from being obtained
+after this time has passed. For example, if the time is set to 15 minutes,
+messages received after 15 minutes are unreadable and undeniable, but an
+attacker must compromise the local keys within 15 minutes in order to read and
+tamper with the last message sent before that time. If the time is set to one
+month, this allows the responder to reply within that time, but if the local
+device is compromised within one month, an attacker may read and tamper with the
+last message sent.
 
 #### Message formats
 
@@ -310,9 +291,6 @@ lower participation deniability properties for the initiator than interactive
 conversations. OTRv4 will also leave it up to the implementer to decide when it
 is appropriate to use the non-interactive DAKE and how to convey this security
 loss.
-
-In addition, implementers of OTRv4 may wish to support only interactive
-conversations or only non-interactive conversations. This is allowed.
 
 #### Multiple DAKEs in the OTR state machine
 
