@@ -111,9 +111,9 @@ Exchanges Data Messages             <------------>  Exchanges Data Messages
 
 The conversation can begin after one participant requests a conversation. This
 includes an advertisement of which versions they support. If the other
-participant supports OTRv4 as the highest compatible version, an interactive,
-DAKE is used to establish a secure channel. Encrypted messages are then
-exchanged in this secure channel with forward secrecy.
+participant supports OTRv4, an interactive, DAKE can be used to establish a
+secure channel. Encrypted messages are then exchanged in this secure channel
+with forward secrecy.
 
 ### Conversation started by a Non-Interactive DAKE
 
@@ -936,10 +936,9 @@ Bob will be initiating the DAKE with Alice.
 
 1. Receives an Identity message from Bob:
     * Validates Bob's User Profile.
-    * Picks the highest compatible version of OTR listed in Bob's profile.
+    * Picks a compatible version of OTR listed in Bob's profile.
       If the versions are incompatible, Alice does not send any further
       messages.
-      Version prioritization is explained [here](#version-priority).
     * Validates the received ECDH ephemeral public key is on curve Ed448 and
       sets it as `their_ecdh`.
     * Validates that the received DH ephemeral public key is on the correct
@@ -952,10 +951,9 @@ Bob will be initiating the DAKE with Alice.
 
 1. Receives Auth-R message from Alice:
     * Validates Alice's User Profile.
-    * Picks the highest compatible version of OTR listed on Alice's profile,
-      and follows the specification for this version. Version prioritization is
-      explained [here](#version-priority) If the versions are incompatible, Bob
-      does not send any further messages.
+    * Picks a compatible version of OTR listed on Alice's profile,
+      and follows the specification for this version. If the versions are
+      incompatible, Bob does not send any further messages.
     * Verify the authentication `sigma` (see [Auth-R message](#auth-r-message)
       section).
     * Verify `(Y, B)` in the message is an Identity message that Bob previously
@@ -1174,10 +1172,9 @@ Verify & Decrypt message
 1. Requests a prekey from the untrusted server.
 2. For each prekey message received from the server:
     * Validates Bob's User Profile.
-    * Picks the highest compatible version of OTR listed in Bob's profile.
+    * Picks a compatible version of OTR listed in Bob's profile.
       If the versions are incompatible, Bob does not send any further
       messages.
-      Version prioritization is explained [here](#version-priority).
     * Validates the received ECDH ephemeral public key is on curve Ed448 and
       sets it as `their_ecdh`.
     * Validates that the received DH ephemeral public key is on the correct
@@ -1814,7 +1811,7 @@ These strings may be hidden from the user (for example, in an attribute of an
 HTML tag), and may be accompanied by an explanatory message ("Alice has
 requested an Off-the-Record private conversation."). If Bob is willing to use
 OTR with Alice (with a protocol version that Alice has offered), he should start
-the AKE according to the highest compatible version he supports.
+the AKE according to one compatible version he supports.
 
 ##### Whitespace Tags
 
