@@ -93,7 +93,7 @@ An OTRv4 conversation may begin when the two participants are online (an
 interactive conversation) or when one participant is offline (non-interactive
 conversation).
 
-### Conversation with an Interactive DAKE
+### Conversation started by an Interactive DAKE
 
 ```
 Alice                                            Bob
@@ -112,7 +112,7 @@ participant supports OTRv4 as the highest compatible version, an interactive,
 DAKE is used to establish a secure channel. Encrypted messages are then
 exchanged in this secure channel with forward secrecy.
 
-### Conversation with a Non-Interactive DAKE
+### Conversation started by a Non-Interactive DAKE
 
 ```
 Alice                        Prekey Server                  Bob
@@ -161,20 +161,22 @@ elliptic curves and the early arrival of quantum computers.
 
 In the interactive DAKE, although access to one participant's private long term
 key is required for authentication, both participants can deny having used
-their private long term keys. An external cryptographic expert
-will be able to prove that one person between the two used their long term
-private key for the authentication, but they will not be able to identify whose
-key was used. This provides deniability for both participants in the
-interactive DAKE.
+their private long term keys. An external cryptographic expert will be able to
+prove that one person between the two used their long term private key for the
+authentication, but they will not be able to identify whose key was used. In
+the case where an adversary has compromised one of the long term private keys,
+a cryptographic expert cannot prove whether the DAKE was forged by the
+adversary or legitimately created by the non-compromised participant. This
+provides deniability for both participants in the interactive DAKE.
 
 In the non-interactive DAKE, the initializer (Alice, in the above overview) does
 not have participation deniability, but Bob, the receiver, does.
 
 Once a channel has been created with the DAKE, all data messages transmitted
-through this channel are confidential have integrity. After a MAC key used to
-validate a received message,  it is revealed in the first message sent of the
-next ratchet. This allows for forgeability of the data messages and consequent
-deniability of their contents.
+through this channel are confidential and have integrity. After a MAC key is
+used to validate a received message, it is revealed in the first message sent
+in the next ratchet. This allows for forgeability of the data messages and
+consequent deniability of their contents.
 
 If key material used to encrypt a particular data message is compromised,
 previous messages are protected. Additionally, future messages are protected by
@@ -754,7 +756,7 @@ To create a user profile, assemble:
    key and a flag `F` (set to zero, as defined on [RFC]8032) are used to create
    signatures of the entire profile excluding the signature itself. The size of
    the signature is 114 bytes.
-5. Transition Signature (optional): A signature of the profile excluding Profile
+6. Transition Signature (optional): A signature of the profile excluding Profile
    Signatures and the user's OTRv3 DSA key. The Transition Signature enables
    contacts that trust user's version 3 DSA key to trust the user's profile in
    version 4. This is only used if the user supports versions 3 and 4.
@@ -798,8 +800,8 @@ The flag `F` is set to `0` and the context `C` is left empty.
 
 ```
 The inputs to the signing procedure is the private key, a 57-octet
-   string, a flag F, which is 0 for Ed448, 1 for Ed448ph, context C of
-   at most 255 octets and a message M of arbitrary size.
+string, a flag F, which is 0 for Ed448, 1 for Ed448ph, context C of
+at most 255 octets and a message M of arbitrary size.
 
    1.  Hash the private key, 57-octets, using SHAKE256(x, 114).  Let h
        denote the resulting digest.  Construct the secret scalar a from
@@ -833,9 +835,9 @@ The user profile signature is verified as defined in RFC 8032 section 5.2.7.
 
 ```
  1.  To verify a signature on a message M using context C and public
-       key A, with F being 0 for Ed448, 1 for Ed448ph, first split the
-       signature into two 57-octet halves.  Decode the first half as a
-       point R, and the second half as an integer S, in the range 0 <= s
+     key A, with F being 0 for Ed448, 1 for Ed448ph, first split the
+     signature into two 57-octet halves.  Decode the first half as a
+     point R, and the second half as an integer S, in the range 0 <= s
 ```
 
 ### User Profile Data Type
@@ -884,9 +886,9 @@ To validate a user profile, you must:
 
 ## Online Conversation Initialization
 
-OTRv4 initializes through a [Query Message or a Whitespace Tag](#user-requests-
-to-start-an-otr-conversation). After this, the conversation is authenticated
-using the interactive DAKE.
+Online OTRv4 conversations are initialized through a [Query Message or a
+Whitespace Tag](#user-requests-to-start-an-otr-conversation). After this, the
+conversation is authenticated using the interactive DAKE.
 
 ### Requesting conversation with older OTR versions
 
@@ -1414,8 +1416,8 @@ and processing of each data message is described in the [section on receiving
 encrypted data messages](#receiving-an-encrypted-data-message).
 
 A message with an empty human-readable part (the plaintext is of zero length, or
-starts with a NULL) is a "heartbeat" packet. This message is useful for key
-rotations and should not be displayed to the user.
+starts with a NULL) is a "heartbeat" message. This message is useful for key
+rotations and revealing MAC keys. It should not be displayed to the user.
 
 ```
 Alice                                                                           Bob
