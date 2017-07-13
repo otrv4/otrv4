@@ -707,7 +707,7 @@ When sending or receiving data messages, you must calculate the message keys:
 
 ```
 derive_enc_mac_keys(chain_key):
-  MKenc = KDF_1(0x01 || chain_key)
+  MKenc = take_first_256_bits(KDF_2(0x01 || chain_key))
   MKmac = KDF_2(0x02 || chain_key)
   return MKenc, MKmac
 ```
@@ -971,7 +971,7 @@ Bob will be initiating the DAKE with Alice.
     * Calculates DH shared secret `k_dh` and `mix_key`.
     * Calculates Mixed shared secret `K = KDF_2(K_ecdh || mix_key)`.
     * Calculates the SSID from shared secret: it is the first 8 bytes of
-      `KDF_1(0x00 || K)`.
+      `KDF_2(0x00 || K)`.
     * Calculates the first set of keys with
       `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
     * [Decides which chain key he will use](#deciding-between-chain-keys).
@@ -987,7 +987,7 @@ Bob will be initiating the DAKE with Alice.
     * Calculates DH shared secret `k_dh` and `mix_key`.
     * Calculates Mixed shared secret `K = KDF_2(K_ecdh || mix_key)`.
     * Calculates the SSID from shared secret: the first 8 bytes of
-      `KDF_1(0x00 || K)`.
+      `KDF_2(0x00 || K)`.
     * Calculates the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
     * [Decides which chain key she will use](#deciding-between-chain-keys).
 
@@ -1258,7 +1258,7 @@ A valid non-interactive Auth message is generated as follows:
 	* Calculates `κ = KDF_2(K_ecdh || ECDH(x, their_shared_prekey) || ECDH(x, Pkb) || k_dh)`.
 	* Computes the Auth MAC key `Mk = KDF_2(0x01 || κ)`.
 	* Computes the Mixed shared secret `K = KDF_2(0x02 || κ)`.
-	* Calculates the SSID from shared secret: it is the first 8 bytes of `KDF_1(0x00 || K)`.
+	* Calculates the SSID from shared secret: it is the first 8 bytes of `KDF_2(0x00 || K)`.
    * Calculates the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
    * [Decides which chain key he will use](#deciding-between-chain-keys).
 6. Compute `t = Bobs_User_Profile || Alices_User_Profile || Y || X || B || A || their_shared_prekey || Φ`.
@@ -1281,7 +1281,7 @@ To verify a non-interactive Auth message:
 	* Calculates `κ = KDF_2(K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(Ska, X) || k_dh)`.
 	* Computes the Auth MAC key `Mk = KDF_2(0x01 || κ)`.
 	* Computes the Mixed shared secret `K = KDF_2(0x02 || κ)`.
-	* Calculates the SSID from shared secret: it is the first 8 bytes of `KDF_1(0x00 || K)`.
+	* Calculates the SSID from shared secret: it is the first 8 bytes of `KDF_2(0x00 || K)`.
    * Calculates the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
    * [Decides which chain key he will use](#deciding-between-chain-keys).
 6. Verify the Auth Mac:
@@ -1605,7 +1605,7 @@ communicating parties for use of application-specific purposes, such as file
 transfer, voice encryption, etc. When one party wishes to use the extra
 symmetric key, they create a type `8 TLV` attached to a Data Message. The key
 itself is then derived from `K`. The extra symmetric key is derived by
-calculating `KDF_1(0xFF || K)`.
+calculating `KDF_2(0xFF || K)`.
 
 Upon receipt of the Data Message containing the type 8 TLV, the recipient will
 compute the extra symmetric key in the same way. Note that the value of the
