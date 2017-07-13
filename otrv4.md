@@ -1050,7 +1050,7 @@ A valid Auth-R message is generated as follows:
 3. Generate an ephemeral DH key pair:
   * secret key `a` (80 bytes).
   * public key `A`.
-4. Compute `t = 0x0 || Bobs_User_Profile || Alices_User_Profile || Y || X || B || A || Φ`.
+4. Compute `t = 0x0 || SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ)`.
    Φ is the shared session state as mention on the 'Shared session state: Phi'
    section.
 5. Compute `sigma = Auth(Pka, ska, {Pkb, Pka, Y}, t)`.
@@ -1058,7 +1058,7 @@ A valid Auth-R message is generated as follows:
 To verify an Auth-R message:
 
 1. Validate the user profile, and extract `Pka` from it.
-2. Compute `t = 0x0 || Bobs_User_Profile || Alices_User_Profile || Y || X || B || A || Φ`.
+2. Compute `t = 0x0 || SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ)`.
    Φ is the shared session state as mention on the 'Shared session state: Phi'
    section.
 3. Verify the `sigma` with [SNIZKPK Authentication](#snizkpk-authentication),
@@ -1093,14 +1093,14 @@ authentification `sigma`.
 
 A valid Auth-I message is generated as follows:
 
-1. Compute `t = 0x1 || Bobs_User_Profile || Alices_User_Profile || Y || X || B || A || Φ`.
+1. Compute `t = 0x1 || SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ)`.
    Φ is the shared session state as mention on the 'Shared session state: Phi'
    section.
 2. Compute `sigma = Auth(Pkb, skb, {Pkb, Pka, X}, t)`.
 
 To verify the Auth-I message:
 
-1. Compute `t = 0x1 || Bobs_User_Profile || Alices_User_Profile || Y || X || B || A || Φ`.
+1. Compute `t = 0x1 || SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ)`.
    Φ is the shared session state as mention on the 'Shared session state: Phi'
    section.
 2. Verify the `sigma` with [SNIZKPK Authentication](#snizkpk-authentication),
@@ -1261,7 +1261,7 @@ A valid non-interactive Auth message is generated as follows:
 	* Calculates the SSID from shared secret: it is the first 8 bytes of `KDF_2(0x00 || K)`.
    * Calculates the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
    * [Decides which chain key he will use](#deciding-between-chain-keys).
-6. Compute `t = Bobs_User_Profile || Alices_User_Profile || Y || X || B || A || their_shared_prekey || Φ`.
+6. Compute `t = SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ) || their_shared_prekey`.
 7. Compute `sigma = Auth(Pka, ska, {Pkb, Pka, Y}, t)`. While computing `sigma`, keep the first 192 bits
    of the generated `c` value to be used as a nonce in the next step.
 8. Follow the section ["When you send a Data Message"](when-you-send-a-data-message) to generate an
@@ -1272,7 +1272,7 @@ To verify a non-interactive Auth message:
 
 1. Validate the user profile, and extract `Pka` from it.
 2. Verifies that both ECDH and DH one-time use prekeys remain unused.
-3. Compute `t = Bobs_User_Profile || Alices_User_Profile || Y || X || B || A || our_shared_prekey.public || Φ`.
+3. Compute `t = SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ) || our_shared_prekey.public`.
 4. Verify the `sigma` with [SNIZKPK Authentication](#snizkpk-authentication),
    as in check `sigma == Verify({Pkb, Pka, Y}, t)`.
 5. Continue the DAKE for Alice:
