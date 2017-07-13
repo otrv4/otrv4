@@ -115,18 +115,18 @@ Prekey owner's User Profile (USER-PROF)
   As described in the section 'Creating a User Profile'.
 
 Y Prekey owner's ECDH public key (POINT)
-  First part of the one time use prekey value.
+  First part of the one-time use prekey value.
 
 B Prekey owner's DH public key (MPI)
-  Second part of the one time use prekey value. The ephemeral public DH
+  Second part of the one-time use prekey value. The ephemeral public DH
   key. Note that even though this is in uppercase, this is NOT a POINT.
-
-Z Shared prekey (POINT)
-  The prekey shared between different prekey messages.
-
-Shared prekey Signature (EDDSA-SIG)
-
 ```
+
+The public part of the shared prekey and its signature, which are essential to
+implementing XZDH, will be included in the published User Profile. The signature
+of the shared prekey must be published to be deniable because it is created
+using the participant's long term keys. We consider the signature of the user
+profile to be the signature of the shared prekey.
 
 A Non-interactive Auth Message has the format:
 ```
@@ -141,6 +141,13 @@ Sender Instance tag (INT)
 
 Prekey Owner's Instance tag (INT)
   The instance tag of the intended recipient.
+
+Y Prekey owner's ECDH public key (POINT)
+  First one-time use prekey value.
+
+B Prekey owner's DH public key (MPI)
+  Second one-time use prekey value. The ephemeral public DH
+  key. Note that even though this is in uppercase, this is NOT a POINT.
 
 Sender's User Profile (USER-PROF)
   As described in the section 'Creating a User Profile'.
@@ -183,8 +190,8 @@ keep valid prekey messages available.
 
 A prekey should be published for every long term key that belongs to a user.
 This means that if Bob has a client which only supports OTRv4 and he uploads
-three long term keys for OTRv4 to his client, Bob's client must publish 3
-prekeys. Also, if Bob uploads two long term keys for OTRv4 and two long term
+three long term keys for OTRv4 to his client, Bob's client must publish 3 prekey
+messages. Also, if Bob uploads two long term keys for OTRv4 and two long term
 keys for OTRvX which also supports prekey messages, Bob will upload 4 keys.
 
 When a client requests prekey messages from a prekey server, many prekey

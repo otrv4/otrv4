@@ -38,7 +38,8 @@ works on top of an existing messaging protocol, like XMPP.
    1. [Interactive Deniable Authenticated Key Exchange (DAKE)](#interactive-deniable-authenticated-key-exchange--dake-)
 1. [Offline Conversation Initialization](#offline-conversation-initialization)
    1. [Non-interactive Deniable Authenticated Key Exchange (DAKE)](#non-interactive-deniable-authenticated-key-exchange--dake-)
-   1. [Prekey](#prekey)
+   1. [Prekey Message](#prekey-message)
+   1. [Validating a Prekey Message](#validating-a-prekey-message)
    1. [Non-interactive Auth Message](#non-interactive-auth-message)
    1. [Publishing prekeys](#publishing-prekeys)
    1. [Obtaining prekeys](#obtaining-prekeys)
@@ -73,13 +74,13 @@ works on top of an existing messaging protocol, like XMPP.
 
 ## Main Changes over Version 3
 
-// TODO: add non interactive
 - Security level raised to 224 bits and based on elliptic curve cryptography
   (ECC).
 - Additional protection against transcript decryption in the case of ECC
   compromise.
 - The cryptographic primitives and protocols have been updated:
-  - Deniable authenticated key exchange using DAKEZ [\[1\]](#references).
+  - Deniable authenticated key exchanges using DAKEZ and XZDH [\[1\]](#references).
+    DAKEZ corresponds to online conversations and XZDH to offline conversations.
   - Key management using the Double Ratchet Algorithm [\[2\]](#references).
   - Upgraded SHA-1 and SHA-2 to SHA-3.
   - Switched from AES to XSalsa20.
@@ -117,9 +118,9 @@ exchanged in this secure channel with forward secrecy.
 Alice                        Prekey Server                  Bob
 --------------------------------------------------------------------------------
                                     (<--------------------- Pre-conversation: Creates
-                                                            and sends a Prekey)
+                                                            and sends a Prekey Message)
 Retrieves Bob's  ----------------->
-Prekey
+Prekey Message
 
 Establishes Non-interactive ------------------------------->
 Conversation with Bob and
@@ -130,8 +131,8 @@ Exchanges Data Messages <---------------------------------->  Exchanges Data Mes
 ```
 
 In this conversation flow, Alice first retrieves a Prekey message from a prekey
-server. This prekey was uploaded by Bob's client prior to the start of the
-conversation to allow other participants, like Alice, to send him encrypted
+server. This prekey message was uploaded by Bob's client prior to the start of
+the conversation to allow other participants, like Alice, to send him encrypted
 messages while he is offline.
 
 ## Assumptions
@@ -469,12 +470,12 @@ Type 8: Extra symmetric key
 
 ### Shared Session State
 
-The DAKEZ session must authenticate its context to prevent attacks that rebind
-the DAKEZ transcript into different contexts. If the higher-level protocol ascribes
-some property to the connection, the DAKEZ exchange should verify this property.
-Given state information `phi` associated with the higher-level context (e.g., a
-session identifier), DAKEZ authenticates that both parties share the same value
-for `phi`.
+Each of the two DAKEs must authenticate its context to prevent attacks that
+rebind the DAKE transcript into different contexts. If the higher-level
+protocol ascribes some property to the connection, the DAKE exchange should
+verify this property. Given the share dession state information `phi`
+associated with the higher-level context (e.g., a session identifier), the DAKE
+authenticates that both parties share the same value for `phi`.
 
 The shared session state (Φ) is any session-specific protocol state available to
 both parties in the higher-level protocol. For example, in XMPP, it will be the
@@ -714,8 +715,9 @@ this channel.
 ## User Profile
 
 OTRv4 introduces a user profile. The user profile contains the Ed448 long term
-public key, signed information about supported versions, a signed profile
-expiration date, and a signed optional transition signature.
+public key, a shared prekey for offline conversations, information about
+supported versions, a profile expiration date, a signature of all these, and an
+optional transition signature.
 
 Each participant maintains two instances of the same user profile. One instance
 is for authentication in both DAKEs. The other instance is for publication. A
@@ -745,7 +747,10 @@ To create a user profile, assemble:
 3. Profile Expiration: Expiration date in standard Unix 64-bit format
    (seconds since the midnight starting Jan 1, 1970, UTC, ignoring leap
    seconds).
-4. Profile Signature: The secret key value (`r`) of the Ed448 long term public
+4. Public Shared Prekey: An Ed448 Point used in multiple prekey messages. It adds some
+   protection against attacker modification of the first flow of the non-interactive
+   DAKE.
+5. Profile Signature: The secret key value (`r`) of the Ed448 long term public
    key and a flag `F` (set to zero, as defined on [RFC]8032) are used to create
    signatures of the entire profile excluding the signature itself. The size of
    the signature is 114 bytes.
@@ -769,15 +774,7 @@ OTRv4 supports version 3 of OTR, but not versions 1 and 2. Therefore, invalid ve
 
 Any other version string that is not "4", "3", "2", or "1" should be ignored.
 
-### Validating a User Profile
-
-To validate a user profile, you must:
-
-* Verify that the user profile signature is valid
-* Verify that the user profile is not expired
-* Verify that the `Versions` field contains a string with "4"
-
-### Renewing a Profile
+### Profile Expiration and Renewal
 
 If a renewed profile is not published in a public place, the user's
 participation deniability is at risk. Participation deniability is also at risk
@@ -787,6 +784,12 @@ profile received in the DAKE is considered invalid.
 Before the profile expires, the user must publish an updated profile with a
 new expiration date. The client establishes the frequency of expiration - this
 can be configurable. A recommended value is two weeks.
+
+### Create the Public Shared Prekey
+
+To create a shared prekey, generate and set `our_shared_prekey` as ephemeral ECDH keys:
+* secret key `e` (57 bytes)
+* public key `E`.
 
 ### Create a User Profile Signature
 
@@ -845,6 +848,8 @@ User Profile (USER-PROF):
   Ed448 public key (ED448-PUBKEY)
   Versions (DATA)
   Profile Expiration (PROF-EXP)
+  Public Shared Prekey (POINT)
+    The prekey shared between different prekey messages.
   Profile Signature (EDDSA-SIG)
   (optional) Transitional Signature (SIG)
 ```
@@ -867,6 +872,15 @@ EDDSA signature (EDDSA-SIG):
   (len is the expected length of the signature, which is 114 bytes)
   len byte unsigned value, big-endian
 ```
+
+### Validating a User Profile
+
+To validate a user profile, you must:
+
+* [Verify that the user profile signature is valid](#verify-a-user-profile-signature)
+* Verify that the user profile is not expired
+* Verify that the `Versions` field contains a string with "4"
+* Validate the public shared prekey is on the curve Ed448
 
 ## Online Conversation Initialization
 
@@ -1106,21 +1120,26 @@ sigma (SNIZKPK)
 
 ## Offline Conversation Initialization
 
-To begin an offline conversation, a prekey is published to an unstrusted served
-and this action is seen as the start of a non-interactive DAKE. Then, a prekey
-is retrieved by the party attempting to send a message from the mentioned untrusted
-and this completes the non-interactive DAKE. The security of ZDH does not require
-trusting the server used to distribute prekeys. A non-interactive auth message is
-created using material in the prekey and the plaintext that the user wishes to send.
+To begin an offline conversation, a prekey message is published to an
+unstrusted server and this action is seen as the start of a non-interactive
+DAKE. Then, the prekey message is retrieved by the party attempting to send a
+message to the publisher. A reply called the non-interactive auth
+message is created with the prekey and sent. This completes the DAKE.
+
+The offline DAKE is based on the XZDH protocol [\[1\]](#references). Like the
+interactive DAKE, it also uses a SNIZKPK for authentication (Auth).
 
 ### Non-interactive Deniable Authenticated Key Exchange (DAKE)
 
-This section outlines the flow of the non-interactive DAKE. This is a way to
-mutually agree upon shared keys for the two parties and authenticate one
-another while providing participation deniability. Unlike the interactive DAKE,
-the non-interactive DAKE does not provide online deniability for the receiver.
+The non-interactive DAKE is a way to mutually agree upon shared cryptographic
+keys while providing some participation deniability. Unlike the interactive
+DAKE, the non-interactive DAKE does not provide online deniability for the
+party that completes the DAKE by sending a non-interactive auth message. Client
+implementations are expected to understand the deniability risks when allowing
+users to complete a non-interactive DAKE. They are also expected to decide how
+to convey this security loss to the user.
 
-This protocol is derived from the ZDH protocol [\[1\]](#references), which
+This protocol is derived from the XZDH protocol [\[1\]](#references), which
 uses a signature non-interactive zero-knowledge proof of knowledge (SNIZKPK)
 for authentication (Auth).
 
@@ -1132,7 +1151,7 @@ key-pair is `(skb, PKb)`. Both key pairs are generated by `PK = G * sk`.
 ```
 Bob                         Server                               Alice
 ----------------------------------------------------------------------
-Publish prekey ------------->
+Publish prekey message ---->
 								....
                                      <------------ Request prekeys
                                      Prekeys -------------------->
@@ -1142,8 +1161,8 @@ Verify & Decrypt message
 
 **Bob:**
 
-1. Generates an Identity and store it locally as a prekey.
-2. Publishes the prekey to the untrusted server.
+1. Generates a [prekey message](#prekey-message).
+2. Publishes the prekey message to the untrusted server.
 
 **Alice:**
 
@@ -1166,9 +1185,53 @@ Verify & Decrypt message
 
 1. Receive the non-interactive auth message.
 
-### Prekey
+### Prekey message
 
-The prekey is an Identity message that is stored locally and published to an untrusted server.
+This message is created and published to a prekey server to allow offline
+conversations. Each prekey message contains the owner's user profile and two 2
+one-time use public prekey values.
+
+It is created as follows:
+
+1. Create a user profile, as detailed [here](#creating-a-user-profile).
+2. Create the first one-time use prekey by generating the ephemeral
+   ECDH key pair:
+   * secret key `y` (57 bytes).
+   * public key `Y`.
+3. Create the second one-time use prekey by generating the ephemeral
+   DH key pair:
+   * secret key `b` (80 bytes).
+   * public key `B`.
+
+```
+Protocol version (SHORT)
+  The version number of this protocol is 0x0004.
+
+Message type (BYTE)
+  The message has type 0x55.
+
+Prekey owner's instance tag (INT)
+  The instance tag of the client that created the prekey.
+
+Prekey owner's User Profile (USER-PROF)
+  As described in the section [Creating a User Profile](#creating-a-user-profile).
+
+Y Prekey owner's ECDH public key (POINT)
+  First one-time use prekey value.
+
+B Prekey owner's DH public key (MPI)
+  Second one-time use prekey value. The ephemeral public DH
+  key. Note that even though this is in uppercase, this is NOT a POINT.
+
+```
+
+### Validating a Prekey Message
+
+To validate a prekey message:
+* [Validate the user profile](#validating-a-user-profile)
+* Check that the ECDH public key `Y` is on curve Ed448.
+* Verify that the DH public key `B` is from the correct group and that it
+  does not degenerate.
 
 ### Non-interactive Auth Message
 
@@ -1178,47 +1241,64 @@ A valid non-interactive Auth message is generated as follows:
 
 1. Create a user profile, as detailed [here](#creating-a-user-profile).
 2. Generate an ephemeral ECDH key pair:
-  * secret key `x`.
+  * secret key `x` (57 bytes).
   * public key `X`.
 3. Generate an ephemeral DH key pair:
   * secret key `a` (80 bytes).
   * public key `A`.
-4. At this point, the DAKE is complete for Bob:
+4. [Validate the prekey message](#validating-a-prekey-message).
+5. At this point, the DAKE is complete for Bob:
 	* Sets ratchet id `i` as 0.
 	* Sets `j` as 0 TODO: (which means she will ratchet again)????
-	* Calculates ECDH shared secret `K_ecdh`.
-	* Calculates DH shared secret `k_dh` and `mix_key`.
-	* Calculates `κ = KDF_2(K_ecdh || ECDH(x, Pkb) || k_dh)`.
+	* Calculates ECDH shared secret `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
+	* Calculates DH shared secret `k_dh = DH(our_dh.secret, their_dh)` and `mix_key`.
+	* Extract the Public Shared Prekey from the user profile and set it as `their_shared_prekey`.
+	* Calculates `κ = KDF_2(K_ecdh || ECDH(x, their_shared_prekey) || ECDH(x, Pkb) || k_dh)`.
 	* Computes the Auth MAC key `Mk = KDF_2(0x01 || κ)`.
-	* Computes the Mixed shared secret `K = KDF_2(0x02 || κ)`.
+	* Computes the Mixed shared secret `K = KDF_2(0x02 || κ)`.
 	* Calculates the SSID from shared secret: it is the first 8 bytes of `KDF_1(0x00 || K)`.
    * Calculates the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
    * [Decides which chain key he will use](#deciding-between-chain-keys).
-5. Compute `t = Bobs_User_Profile || Alices_User_Profile || Y || X || B || A || Φ`.
-6. Compute `sigma = Auth(Pka, ska, {Pkb, Pka, Y}, t)`. While computing `sigma`, keep the first 192 bits
+6. Compute `t = Bobs_User_Profile || Alices_User_Profile || Y || X || B || A || their_shared_prekey || Φ`.
+7. Compute `sigma = Auth(Pka, ska, {Pkb, Pka, Y}, t)`. While computing `sigma`, keep the first 192 bits
    of the generated `c` value to be used as a nonce in the next step.
-7. Follow the section ["When you send a Data Message"](when-you-send-a-data-message) to generate an
+8. Follow the section ["When you send a Data Message"](when-you-send-a-data-message) to generate an
    encrypted message, using the nonce set in the previous step.
-8. Compute `Auth MAC = SHA3-256(Mk || t || encrypted_data_message)`.
+9. Compute `Auth MAC = SHA3-256(Mk || t || encrypted_data_message)`.
 
 To verify a non-interactive Auth message:
 
 1. Validate the user profile, and extract `Pka` from it.
-2. Verifies the prekey previously sent remains unused.
-3. Compute `t = Bobs_User_Profile || Alices_User_Profile || Y || X || B || A || Φ`.
+2. Verifies that both ECDH and DH one-time use prekeys remain unused.
+3. Compute `t = Bobs_User_Profile || Alices_User_Profile || Y || X || B || A || our_shared_prekey.public || Φ`.
 4. Verify the `sigma` with [SNIZKPK Authentication](#snizkpk-authentication),
-that is `sigma == Verify({Pkb, Pka, Y}, t)`.
-5. At this point, the DAKE is complete for Alice:
-	* Calculates ECDH shared secret `K_ecdh`.
-	* Calculates DH shared secret `k_dh` and `mix_key`.
-	* Calculates `κ = KDF_2(K_ecdh || ECDH(Ska, X) || k_dh)`.
+   as in check `sigma == Verify({Pkb, Pka, Y}, t)`.
+5. Continue the DAKE for Alice:
+	* Calculates ECDH shared secret `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
+	* Calculates DH shared secret `k_dh = DH(our_dh.secret, their_dh)` and `mix_key`.
+	* Calculates `κ = KDF_2(K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(Ska, X) || k_dh)`.
 	* Computes the Auth MAC key `Mk = KDF_2(0x01 || κ)`.
-	* Computes the Mixed shared secret `K = KDF_2(0x02 || κ)`.
+	* Computes the Mixed shared secret `K = KDF_2(0x02 || κ)`.
 	* Calculates the SSID from shared secret: it is the first 8 bytes of `KDF_1(0x00 || K)`.
    * Calculates the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
    * [Decides which chain key he will use](#deciding-between-chain-keys).
-6. Verify the Auth Mac.
-7. Follow the section ["When you receive a Data Message"](when-you-receive-a-data-message) to verify the MAC of the message and decrypt it.
+6. Verify the Auth Mac:
+   * Extract the encrypted data message.
+   * Compute `tag = SHA3-256(MK, || t || encrypted_data_message)`.
+   * Extract the Auth MAC from the message and verify that `tag` is equal to the Auth MAC. If it is not,
+     ignore the non-interactive auth message.
+7. Set the message ID `j = 1` and compute the receiving chain key and calculate the encryption key:
+   ```
+   compute_chain_key(chain_r, ratchet_id, j)
+   MKenc, MKmac = derive_enc_mac_keys(chain_r[ratchet_id][message_id])
+   ```
+8. Discard the `MKmac` key because it is not necessary for the first message delivered through a
+   non-interactive auth message.
+9. Setup the rest of the double ratchet key management system:
+    * Set `their_ecdh` as the "Sender's Public ECDH key" from the message.
+    * Set `their_dh` as the "Sender's Public DH Key" from the message, if it
+      is not NULL.
+    * Add the Auth MAC key to list `mac_keys_to_reveal`.
 
 A non-interactive Auth is an OTR message encoded as:
 
@@ -1234,6 +1314,13 @@ Sender Instance tag (INT)
 
 Receiver Instance tag (INT)
   The instance tag of the intended recipient.
+
+Y Receiver's ECDH public key (POINT)
+  First part of the one-time use prekey value.
+
+B Receiver's DH public key (MPI)
+  Second part of the one-time use prekey value. The ephemeral public DH
+  key. Note that even though this is in uppercase, this is NOT a POINT.
 
 Sender's User Profile (USER-PROF)
   As described in the section 'Creating a User Profile'.
@@ -1262,14 +1349,61 @@ Encrypted message (DATA)
 
 ### Publishing prekeys
 
-A OTRv4 client must generate a user's prekeys and upload them to a prekey server to publish them.
-The protocol for publishing prekeys will be defined in another specification.
+An OTRv4 client must generate a user's prekey messages and publish them to a
+prekey server. Implementers are expected to create their own policy dictating
+how often their clients upload prekey messages to the prekey server. Prekey
+messages expire when their user profile expires. Thus new prekey messages
+should be published to the prekey server before they expire to keep valid
+prekey messages available. In addition, one prekey message should be published
+for every long term key that belongs to a user. This means that if Bob uploads
+three long term keys for OTRv4 to his client, Bob's client must publish 3
+prekey messages.
 
-### Obtaining prekeys
+Details on how to interact with a prekey server to publish messages are outside
+the scope of this protocol.
 
-TODO: It is valid for the server to return more than one prekey. Should the
-client decide what actions to take when the server returns more than one prekey?
-Or should these actions be defined in the protocol?
+### Receiving prekeys
+
+Details on how prekey messages may be received from a prekey server are outside
+the scope of this protocol. This specification assumes that none, one, or more
+than one prekey messages may arrive. If the prekey server cannot return any
+prekey messages, the non-interactive DAKE must wait until one can be obtained.
+
+The following guide is meant to help implementers identify and remove invalid
+prekey messages and invalid situations.
+
+Use the following checks to validate a prekey message. If any of them fail,
+ignore the message:
+  * Check if the user profile is not expired
+  * Check if the OTR version of the prekey message matches one of the versions
+  * signed in the user profile contained in the prekey message
+  * Check if the user profile version is supported by the receiver
+
+If one prekey message is received:
+  * If the prekey message is valid, decide whether to send a non-interactive
+    auth message based on whether the long term key in the use profile is
+    trusted or not.
+
+If many prekey messages are received:
+  * Remove all invalid prekey messages.
+  * Remove all duplicate prekey messages in the list.
+  * If multiple valid messages remain, check for invalid situations:
+      * If multiple prekey messages exist with the same instance tag, the same version,
+        and the same long term keys in the user profile, then one of the messages is
+        invalid. The safest thing to do is to remove all prekey messages associated
+        with this situation.
+  * If one prekey message remains:
+      * Decide whether to send a message using this prekey message based on whether the
+        long term key within the use profile is trusted or not.
+  * If multiple valid prekey messages remain:
+      * If there are keys that are untrusted and trusted in the list of
+        messages, decide whether to only use messages that contain trusted long
+        term keys.
+      * If there are several instance tags in the list of prekey messages, decide
+        whether to send one message per instance tag or to send a message
+        only to one instance tag.
+          * If there are multiple prekey messages per instance tag, decide whether to
+            send multiple messages to the same instance tag.
 
 ## Data Exchange
 
@@ -1421,8 +1555,7 @@ In both cases:
     first 24 bytes of the `c` variable created when constructing `sigma`. When
     creating a regular data message, generate a new random 24 bytes value to be
     the `nonce`.
-  * Use the encryption key to encrypt the message and the MAC key to calculate
-    its MAC:
+  * Use the encryption key to encrypt the message:
 
    ```
    Encrypted_message = XSalsa20_Enc(MKenc, nonce, m)
@@ -1821,8 +1954,13 @@ If the state is not `WAITING_AUTH_I`:
 
 #### Receiving a non-interactive auth message
 
-1. Receive the non-interactive auth message.
-2. Transition to `ENCRYPTED_MESSAGES` state.
+If the state is `FINISHED`:
+    * Ignore the non-interactive auth message.
+
+Else:
+
+    * Receive the non-interactive auth message.
+    * Transition to `ENCRYPTED_MESSAGES` state.
 
 #### Sending an encrypted data message
 
@@ -1852,7 +1990,7 @@ If the version is 4:
       * If the instance tag in the message is not the instance tag you are currently
         talking to, ignore the message.
       * Verify that the public ECDH key is on curve Ed448.
-      * Verify that the public DH key is from the correct group.
+      * Verify that the public DH key is from the correct group and that it does not degenerate.
 
     * If the message is not valid in any of the above steps, discard it and
       optionally pass along a warning to the user.
