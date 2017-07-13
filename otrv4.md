@@ -87,6 +87,9 @@ works on top of an existing messaging protocol, like XMPP.
 - Explicit instructions for producing forged transcripts using the same
   functions used to conduct honest conversations.
 
+Reasons for the decisions made above and more are included in the [architectural
+decisions records](https://github.com/twstrike/otrv4/tree/master/architecture-decisions).
+
 ## High Level Overview
 
 An OTRv4 conversation may begin when the two participants are online (an

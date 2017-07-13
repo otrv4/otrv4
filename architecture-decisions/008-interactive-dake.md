@@ -1,4 +1,4 @@
-## ADR 8: DAKE
+## ADR 8: Interactive DAKE
 
 ### Context
 
@@ -8,10 +8,10 @@ properties: partial participation deniability and full message deniability.
 We believe the security of OTRv4 can be improved by employing a Deniable
 Authenticated Key Exchange (DAKE) protocol.
 
-The paper "Deniable Key Exchanges for Secure Messaging" [1] and
-"Improved Techniques for Implementing Strongly Deniable Authenticated Key
-Exchanges" [2] mentions a few DAKES and their message and participation
-deniability properties in regard to an online and offline judge:
+The paper "Deniable Key Exchanges for Secure Messaging" [1] and "Improved
+Strongly Deniable Authenticated Key Exchanges for Secure Messaging" [2]
+mentions a few DAKES and their message and participation deniability properties
+in regard to an online and offline judge:
 
 - RSDAKE:
 - Spawn * :
@@ -24,6 +24,8 @@ deniability properties in regard to an online and offline judge:
 // TODO: Improve the summary of properties.
 
 ### Decision
+
+// TODO: needs update about using DAKEZ
 
 We choose to use Spawn because:
 
