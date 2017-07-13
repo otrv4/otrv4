@@ -12,7 +12,7 @@ messages exchanged was done through the following three steps mechanism:
 3. Alice sends a message to Bob using her advertised key `privA` and
    acknowledged key `pubB`.
 
-Double Ratchet Algorithm [\[1\]](#references) is introduced, which allows:
+The Double Ratchet Algorithm [\[1\]](#references) is introduced, which allows:
 
 1. out-of-order messages
 2. per-message forward secrecy
@@ -31,12 +31,9 @@ are possible:
    after two ratchet generations.
 
 OTRv3 made the decision to reveal MAC keys only by the receiver per ratchet.
-If we want to use Double Ratcheting, the revealing MAC key can be done in
-this way immediately after receiving each message.
 
-One difference between revealing MAC keys in the three-step ratchet and in the
-Double Ratchet is that in the first one MAC key is used for each ratchet,
-whereas in the second one MAC key is used for each message.
+In addition, in the three step ratchet , a MAC key is used for each ratchet
+whereas, in double ratchet, a MAC key, is used for each message.
 
 Therefore, to reveal MAC keys in the Double Ratchet, we have two options:
 
@@ -45,21 +42,23 @@ Therefore, to reveal MAC keys in the Double Ratchet, we have two options:
 
 ### Decision
 
-For OTRv4, we decided to use the Double Ratchet algorithm for key management.
+For OTRv4, we decided to use the Double Ratchet Algorithm for key management.
 Even though our network model is in-order, we can benefit from the per-message
-forward secrecy that the Double Ratchet algorithm provides.
+forward secrecy that the Double Ratchet algorithm provides. In addition,
+although the double ratchet allows us to receive out-of-order messages, we do
+not support this functionality. Therefore, messages that are received later
+than expected will be ignored. Other reasons why this is benefitial are
+described in
+[009-non-interactive-dake.md](https://github.com/twstrike/otrv4/blob/master/architecture-decisions/009-non-interactive-dake.md).
 
 We decided that only the receiver will reveal MAC keys every ratchet.
 
 ### Consequences
 
-This changes the data exchange implementation for OTRv4 from previous versions.
-
-We achieve improved forward secrecy, as well as move from three steps to two
-steps when ratcheting.
-
-However, key management and ratcheting process become more complex because of
-the different types of keys involved.
+This heavily changes the data exchange implementation for OTRv4 from previous
+versions, but as a result we achieve improved forward secrecy. However, key
+management and ratcheting processes become more complex because of the
+many types of keys involved.
 
 ### References
 

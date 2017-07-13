@@ -9,13 +9,14 @@ versions they support. This message is sent as plaintext at the beginning of the
 protocol and can be intercepted and changed by a MITM in a rollback attack.
 
 With this attack, how can OTR ensure that participants will talk using the
-highest version supported by both parties? OTRv4 seeks to solve this problem.
-
-To address version rollback attacks on OTR, it was important for both parties to
-exchange verified version information without compromising their participation
-deniability and while keeping backwards compatibility with OTRv3.
+highest version supported by both parties? OTRv4 seeks to solve this problem
+for versions after 4.
 
 ### Decision
+
+To address version rollback attacks on OTR, both parties must exchange verified
+version information without compromising their participation deniability and
+while keeping backwards compatibility with OTRv3.
 
 We keep the use of query message for OTRv3 compatibility but it will work as a
 ping message.

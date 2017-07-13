@@ -56,7 +56,7 @@ rounds, 192-bits nonces and 256-bit keys.
 To save space in the creation of the last message in the non-interactive DAKE,
 the nonce will be the first 192 bits of the value `c` that is generated in the
 Auth function. In all other data message circumstances, the nonce is generated
-from randomness.
+randomly.
 
 The following KDFs are defined:
 ```
