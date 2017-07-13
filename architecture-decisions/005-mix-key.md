@@ -7,9 +7,11 @@ computers arriving earlier than predicted, we want an additional mechanism that
 would protect against post-conversation decryption of transcripts using those
 weaknesses.
 
+### Proposal
+
 We believe this can be achieved by mixing another key obtained from a
 Diffie-Hellman (DH) exchange into the key material. This additional key will be
-referred to as “mix key”.
+referred to as the “mix key”.
 
 This proposal specifies:
 
@@ -29,16 +31,18 @@ exchange.
 
 The options for ratcheting/re-deriving this mix key are:
 
-1. Obtain every mix key from a DH function which requires the other party to
-   contribute to the computation.
+1. Obtain a mix key from a DH function which requires the other party to
+   contribute to the computation each time a message is sent.
 2. Obtain a mix key with DH functions which requires the other party to
    contribute to the computation every n times. Between these derivations,
    the mix keys are obtained using a KDF that is seeded with the last DH
    key. We propose n = 3, but this can be adjusted depending on performance.
 
+We choose the second option.
+
 ### Algorithm
 
-From now, we will assume the 2nd option for ratcheting/re-deriving the mix-key where n = 3.
+We will assume n = 3.
 
 *k_dh = A_i, a_i*
 
@@ -48,25 +52,31 @@ through a key derivation function, both of which produce a 3072-bit public key.
 This key has a 128-bit security level according to Table 2: Comparable strengths
 in NIST’s Recommendation for Key Management, page 53 [\[3\]](#references).
 
-*generateDH function - generateDH()*
+**generateDH function: generateDH()**
 
 Generates a `A_i` and a `a_i`.
 
-*DH function - DH(a_i, B_i)*
+**DH function: DH(a_i, B_i)**
 
 Given `a_i`, a secret key, and `B_i`, a public key, generates a shared secret value: `k_dh`.
 
-*Key Derivation Function - SHA3-256(k_dh)*
+**Key Derivation Function: SHA3-256(k_dh)**
 
 Given a 3072-bit `k_dh`, generates a 256-bit SHA3-256 byte array: `mix_key`.
 
-*Key Derivation Function - SHA3-256(mix_key)*
+**Key Derivation Function: SHA3-256(mix_key)**
 
 Given `mix_key`, generates a 256-bit SHA3-256 byte array: a new `mix_key`.
 
 #### Considerations
 
-Transmitting the 3072-bit DH public key will increase the time to exchange messages. To mitigate this, the key won’t be transmitted every time the root and chain keys are changed. Instead, this key will be computed with a DH function every third time and the interim keys will be derived from the previous `mix_key`. To prevent dropped messages, when generating new DH keys, the public key will be sent in every message of that ratchet.
+Transmitting the 3072-bit DH public key will increase the time to exchange
+messages. To mitigate this, the key won’t be transmitted every time the root
+and chain keys are changed. Instead, this key will be computed with a DH
+function every third time and the interim keys will be derived from the
+previous `mix_key`. After generating new DH keys, the new public key will be
+sent in every message of that ratchet in order to allow transmission even if
+one of the messages is dropped.
 
 The mix key is to be mixed in at the root level with the ECDH key.
 
