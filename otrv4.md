@@ -621,7 +621,7 @@ derive_ratchet_keys(K):
   return R, decide_between_chain_keys(Ca, Cb)
 ```
 
-// TODO: is this how the ratchet it will behave?
+// TODO: is this how the ratchet will behave?
 ### Rotating ECDH keys and mix key as sender
 
 Before sending the first reply (i.e. a new message considering a previous
@@ -793,7 +793,7 @@ can be configurable. A recommended value is two weeks.
 ### Create the Public Shared Prekey
 
 To create a shared prekey, generate and set `our_shared_prekey` as ephemeral ECDH keys:
-* secret key `e` (57 bytes)
+* secret key `e` (57 bytes) // TODO: is this using the symmetric or the priv?
 * public key `E`.
 
 ### Create a User Profile Signature
@@ -802,25 +802,32 @@ The user profile signature is generated as defined in RFC 8032 section 5.2.6.
 The flag `F` is set to `0` and the context `C` is left empty.
 
 ```
-The inputs to the signing procedure is the private key, a 57-octet
-string, a flag F, which is 0 for Ed448, 1 for Ed448ph, context C of
-at most 255 octets and a message M of arbitrary size.
+The inputs to the signing procedure are the private key, a 57-octet
+string, a flag F, which is 0 and a message M of arbitrary size.
 
-   1.  Hash the private key, 57-octets, using SHAKE256(x, 114).  Let h
-       denote the resulting digest.  Construct the secret scalar a from
-       the first half of the digest, and the corresponding public key A,
-       as described in the previous section.  Let prefix denote the
+   // XXX: describe how to generate the symmetric key and what it is
+   // XXX: change the names of the params
+   // XXX: describe somwhere how to generate the public key. Distingish
+   between priv, secret and symmetric
+   1.  Hash the symmetric key using SHAKE256(x, 114).  Let 'h'
+       denote the resulting digest.  Construct the private key 'a' from
+       the first half of the digest, and the corresponding public key 'A',
+       as described in key generation section.  Let prefix denote the
        second half of the hash digest, h[57],...,h[113].
 
+   // XXX: define what the dom is and check Hamburg's code
+   // XXX: get rid of context
    2.  Compute SHAKE256(dom(F, C) || prefix || M, 114), where M is the
-       message to be signed, F is 1 for Ed448ph, 0 for Ed448 and C is
-       the context to use.  Interpret the 114-octet digest as a little-
+       message to be signed.  Interpret the 114-octet digest as a little-
        endian integer r.
 
+   // XXX: what is [r]B?
+   // XXX: put the group order on the params
    3.  Compute the point [r]B.  For efficiency, do this by first
        reducing r modulo L, the group order of B.  Let the string R be
        the encoding of this point.
 
+   // XXX: get rid of context
    4.  Compute SHAKE256(dom(F, C) || R || A || M, 114), and interpret
        the 114- octet digest as a little-endian integer k.
 
@@ -837,6 +844,7 @@ at most 255 octets and a message M of arbitrary size.
 The user profile signature is verified as defined in RFC 8032 section 5.2.7.
 
 ```
+// XXX: this is missing the SHAKE and verification
  1.  To verify a signature on a message M using context C and public
      key A, with F being 0 for Ed448, 1 for Ed448ph, first split the
      signature into two 57-octet halves.  Decode the first half as a
