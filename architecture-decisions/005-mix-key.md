@@ -9,44 +9,44 @@ weaknesses.
 
 ### Proposal
 
-We believe this can be achieved by mixing another key obtained from a
-Diffie-Hellman (DH) exchange into the key material. This additional key will be
-referred to as the “mix key”.
+We believe this protection can be achieved by mixing another key obtained from
+a Diffie-Hellman (DH) exchange into the key material. This additional key will
+be referred to as the “mix key”.
 
 This proposal specifies:
 
-1. Adding an extra key to mix in with the ECDH key when deriving a new
+1. Adding an extra key to mix in with the ECDH shared secret when deriving a new
    root key.
-2. An algorithm for ratcheting and deriving this mix key.
+2. An algorithm for ratcheting and deriving the mix key.
 
 This proposal does not change the Double Ratchet algorithm with the
 exception of how to derive root keys.
 
 The first 3072-bit DH key agreement takes place in the DAKE. See Nik Unger's
-paper [\[1\]](#references), which specifies DAKEZ and ZDH as Quantum-Resistant
-Key Exchanges. The difference to this entry in the paper is that we are trying
+paper [\[1\]](#references), which specifies DAKEZ, ZDH, and XZDH as quantum-resistant
+key exchanges. The difference to this entry in the paper is that we are trying
 to protect against elliptic curve weaknesses, and SIDH [\[2\]](#references) is
-specific for postquantum resistance. So we will instead use a classic DH key
+specific for post-quantum resistance. So we will instead use a classic DH key
 exchange.
 
 The options for ratcheting/re-deriving this mix key are:
 
 1. Obtain a mix key from a DH function which requires the other party to
-   contribute to the computation each time a message is sent.
-2. Obtain a mix key with DH functions which requires the other party to
+   contribute to the computation each time a new root key is derived.
+2. Obtain a mix key with DH functions which require the other party to
    contribute to the computation every n times. Between these derivations,
-   the mix keys are obtained using a KDF that is seeded with the last DH
-   key. We propose n = 3, but this can be adjusted depending on performance.
+   the mix keys are obtained using a key derivation function (KDF) that is seeded with the last DH
+   key. We propose n = 3, but n can be adjusted for performance.
 
-We choose the second option.
+We chose the second option.
 
 ### Algorithm
 
 We will assume n = 3.
 
-*k_dh = A_i, a_i*
+**k_dh = A_i, a_i**
 
-A mix key is a key that is added to the key derivation function used to produce
+A mix key is a key that is added to the KDF used to produce
 new root and chains keys. A mix key can be produced through a DH function and
 through a key derivation function, both of which produce a 3072-bit public key.
 This key has a 128-bit security level according to Table 2: Comparable strengths
@@ -72,13 +72,13 @@ Given `mix_key`, generates a 256-bit SHA3-256 byte array: a new `mix_key`.
 
 Transmitting the 3072-bit DH public key will increase the time to exchange
 messages. To mitigate this, the key won’t be transmitted every time the root
-and chain keys are changed. Instead, this key will be computed with a DH
+and chain keys are derived. Instead, this key will be computed with a DH
 function every third time and the interim keys will be derived from the
 previous `mix_key`. After generating new DH keys, the new public key will be
 sent in every message of that ratchet in order to allow transmission even if
 one of the messages is dropped.
 
-The mix key is to be mixed in at the root level with the ECDH key.
+The mix key will be mixed in at the root level with the ECDH key.
 
 #### Implementation
 
@@ -99,39 +99,41 @@ _When n is configured to equal 3_
 
 ```
 
-If we assume a message has been sent by Alice and Bob after the DAKE and we are now at ratchet 3:
+If we assume messages have been sent by Alice and Bob after the DAKE and we are now at ratchet 3:
 
 Alice                                                              Bob
 -----------------------------------------------------------------------------------------------------------------------
 Increases ratchet_id by one
-Generates new public key A_1 and secret key a_1
+Generates new public DH key A_1 and secret key a_1
 Derives a new DH shared secret using Bob's public key received during the DAKE (B_0)
     k_dh = DH(B_0, a_1)
 Derives the new mix key from the k_dh
     M_3 = SHA3-256(k_dh)
-Mixes the mix key with ECDH in the shared secret K
+Mixes the mix key with the ECDH shared secret to create the shared secret K_3
     K_3 = SHA3-512(ECDH_3 || M_3)
-Uses K in the SHA3-512 to generate root and chain keys
+Uses K_3 with SHA3-512 to generate root and chain keys
     R_3, Cs_3_0, Cr_3_0 = SHA3-512(R_2, K_3)
 Encrypts data message with a message key derived from Cs_3_0
 Sends data_message_3_0 with A_1 --------------------------------->
-                                                                   Generates new public key B_1 and secret key b_1
+                                                                   Generates new public DH key B_1 and secret key b_1
                                                                    Derives a new DH shared secret using Alice's public key received in the message (A_1)
                                                                        k_dh = DH(A_1, b_1)
                                                                    Derives the new mix key from the k_dh
                                                                        M_3 = SHA3-256(k_dh)
-                                                                   Mixes the mix key with ECDH in the shared secret K
+                                                                   Mixes the mix key with ECDH shared secret to create the shared secret K_3
                                                                        K_3 = SHA3-512(ECDH_3 || M_3)
-                                                                   Uses K in the SHA3 to generate root and chain keys
+                                                                   Uses K_3 with SHA3 to generate root and chain keys
                                                                        R_3, Cs_3_0, Cr_3_0 = KDF(R_2 || K_3)
                                                                    Decrypts received message with a message key derived from Cr_3_0
 
                                                                    Increases ratchet_id by one
                                                                    Derives a new mix key from the one derived in the previous ratchet
                                                                        M_4 = KDF(M_3)
-                                                                   Mixes the mix key with ECDH in the shared secret K
+                                                                   Generates new ECDH keys and uses Alice's ECDH public key (received in
+                                                                       data_message_3_0) to create ECDH shared secret (ECDH_4).
+                                                                   Mixes the mix key with ECDH_4 to create the shared secret K_4
                                                                        K_4 = SHA3-512(ECDH_4 || M_4)
-                                                                   Uses K in the SHA3-512 to generate root and chain keys
+                                                                   Uses K_4 with SHA3-512 to generate root and chain keys from root key 3 (R_3)
                                                                        R_4, Cs_4_0, Cr_4_0 = SHA3-512(R_3, K_4)
                                                                    Encrypts data message with a message key derived from Cr_4_0
                                 <--------------------------------  Sends data_message_4_0
@@ -147,7 +149,7 @@ If `ratchet_id % 3 == 0 && sending the first message of a new ratchet`
 
   * Compute the new mix key from a new DH computation e.g. `M_i =
         SHA3-256(DH(our_DH.secret, their_DH.public))`
-  * Send the new `mix_key`'s public key to the other party for further key computation.
+  * Send the new `mix_key`'s public key (our_DH.public) to the other party for further key computation.
 
 Otherwise
 

@@ -1490,9 +1490,6 @@ Flags (BYTE)
     example, you don't have the right keys), just ignore the message
     instead of producing an error or a notification to the user.
 
-Ratchet id (INT)
-  This should be set as sender's i.
-
 Message id (INT)
   This should be set with sender's j.
 
