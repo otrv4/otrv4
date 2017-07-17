@@ -1,44 +1,42 @@
-## ADR 8: Non-interactive DAKE
+## ADR 9: Non-interactive DAKE
 
 ### Context
 
-OTRv3 only provides an interactive AKE and adding support for a non-interactive
-AKE is a usability feature. The non-interactive DAKE below is based on the ZDH
-protocol. It starts when the receiver (R) requests a prekey for the initiator
-(I) from a untrusted server. I's long-term public key should be verified by R.
+The non-interactive DAKE below is based on the XZDH protocol. It starts when the
+Receiver requests the Initiator's prekey from a untrusted server. The
+Initiator's long-term public key should be verified by the Receiver.
 
-The receiver then generates their ephemeral keys and derives a shared secret
-which is used to send an encrypted data message together with the final message
-of the non-interactive DAKE. This second message is called the non-interactive
+The Receiver then generates their ephemeral keys and derives a shared secret.
+These are used to send an encrypted data message with the final message
+of the non-interactive DAKE, called the non-interactive
 auth message.
 
 In the non-interactive DAKE, only one data message can be sent per use of a
-prekey. The reasons for this are in the section [Long-lived secret ephemeral key
-material](#long-lived-secret-ephemeral-key-material). This means that ratchets
-do not happen in the non-interactive case. Thus, one encryption key and one MAC
-key are derived from the shared secret, and after the non-interactive auth
-message is sent, all key material generated for this conversation is deleted.
+prekey. The reasons for this are in the section on [long-lived secret ephemeral
+key material](#long-lived-secret-ephemeral-key-material). This means that
+ratchets do not happen in the non-interactive case. Thus, one encryption key and
+one MAC key are derived from the shared secret, and after the non-interactive
+auth message is sent, all key material generated for this conversation is
+deleted.
 
 #### Long-lived secret ephemeral key material
 
-In OTR4, the window of key compromise is equivalent to how long it takes for the
+In OTRv4, the window of key compromise is equivalent to how long it takes for the
 double ratchet to refresh the ephemeral key material (2 ratchets, including the
 first compromised ratchet) and how long a prekey remains unused before the user
 profile inside becomes expired. We recommend expiration to be a week long, so
-the window in that case is one week. With offline  conversations, participants
+the window of key compromise will be one week. With offline conversations, participants
 may not receive messages or reply to them for days, weeks, or months at a time.
 As a result, the window of compromise for these kind of conversations can be very
-long if no limitations are set. We would like to reduce this window.
+long if no limitations are set. We want to reduce this window.
 
-There are two attacks in this space that we primarily want to mitigate:
+Primarily, there are two attacks that we want to mitigate:
 
-The Initiator uploads the prekey, and the Responder completes the DAKE and
-attaches the first message. An active adversary capable of compromising devices
-can carry the following attacks that they shouldn't be able to:
 1. Initiator uploads a prekey. Responder replies, but the adversary
 intercepts and drops the message. The adversary compromises Initiator's
 prekey secret, and Initiator's identity secret key. The adversary can
 now retroactively decrypt the captured initial message.
+
 2. Initiator and Responder complete an exchange and engage in a
 conversation. At some point, the adversary captures and drops some
 messages to (for example) Initiator. Later, the adversary compromises
@@ -62,7 +60,7 @@ messages received out of order will be ignored.
 
 Second, to fully defend against attack 2, sessions are expired if no new ECDH
 keys are generated within a certain amount of time. This encourages keys to be
-removed often with the cost of lost messages whose MAC keys cannot be revealed.
+removed often at the cost of lost messages whose MAC keys cannot be revealed.
 For example, when Alice sets her session expiration time to be 2 hours, Bob must
 reply within that time and Alice must create a response to his reply (thus
 generating a new ECDH key) in order to reset the session expiration time for
@@ -71,7 +69,7 @@ If she receives a message from Bob after two hours, she cannot decrypt the
 message and thus she cannot reveal the MAC key associated with it.
 
 This session time is decided individually by each participant so it is possible
-for Alice to have an expiration time of two hours and Bob two weeks. OTRv4 spec In
+for Alice to have an expiration time of two hours and Bob two weeks. In
 addition, for the first data message only, the receiver will start their
 expiration timer once the message is received. The reason why we use a timer and
 don't count events is that we are trying to determine whether something has not
@@ -83,19 +81,17 @@ mitigate this, implementers should use secure and reliable clocks that cannot be
 manipulated by an attacker.
 
 The OTRv4 spec will give implementers a guide to determine the amount of time
-for session expiration. It is difficult to dictate a "good general expiration
-time" since many secure messaging scenarios exist with different security
+for session expiration. It is difficult to dictate a good general expiration
+time since many secure messaging scenarios exist with different security
 requirements. The session expiration is essentially an expiration on the last
-message's usability. Whether it is the implementer or the user, the time setter
-should feel comfortable with replies being unreadable and undeniable after this
-time with the consequence of protecting local key material from being obtained
-after this time has passed. For example, if the time is set to 15 minutes,
-messages received after 15 minutes are unreadable and undeniable, but an
-attacker must compromise the local keys within 15 minutes in order to read and
-tamper with the last message sent before that time. If the time is set to one
-month, this allows the responder to reply within that time, but if the local
-device is compromised within one month, an attacker may read and tamper with the
-last message sent.
+message's readability and deniability. The time setter (either the implementer
+or the user) should expect that replies are unreadable and undeniable after this
+time. For example, if the time is set to 15 minutes, messages received after 15
+minutes are unreadable and undeniable, but an attacker must compromise the local
+keys within 15 minutes in order to read and tamper with the last message sent
+before that time. If the time is set to one month, this allows the responder to
+reply within one month. However, if the device is compromised within one month,
+an attacker is able to read and tamper with the last message sent.
 
 #### Message formats
 
@@ -174,17 +170,16 @@ Encrypted message (DATA)
 
 #### Multiple OTR protocol versions
 
-Prekey messages contain version information, as detailed above. Each client is
+Prekey messages contain version information. Each client is
 expected to upload one prekey per supported version of OTR which uses
-non-interactive communication. This is only relevant for versions of OTR from 4
-and onward.
+non-interactive communication. This is only relevant for OTRv4 and subsequent versions.
 
 #### Publishing and retrieving prekey messages from a prekey server
 
 Describing the details of interactions between OTRv4 clients and a prekey server
 are outside the scope of this specification. Implementers are expected to create
 their own policy dictating how often their clients upload prekey messages to the
-prekey server. Prekey messages expire when their user profile expires. Thus new
+prekey server. Prekey messages expire when their user profile expires. Thus, new
 prekey messages should be published to the prekey server before they expire to
 keep valid prekey messages available.
 
@@ -192,7 +187,10 @@ A prekey should be published for every long term key that belongs to a user.
 This means that if Bob has a client which only supports OTRv4 and he uploads
 three long term keys for OTRv4 to his client, Bob's client must publish 3 prekey
 messages. Also, if Bob uploads two long term keys for OTRv4 and two long term
-keys for OTRvX which also supports prekey messages, Bob will upload 4 keys.
+keys for OTRvX (a future version of OTR) which also implements the non-
+interactive DAKE, Bob will upload 4 keys.
+
+#### Requesting prekey messages from a prekey server
 
 When a client requests prekey messages from a prekey server, many prekey
 messages may be returned. For example, when Alice requests prekey messages for
@@ -241,7 +239,7 @@ Bob, any of the following may happen:
 In the above example, these are the possible situations when only two prekey
 messages are received. Of course, many more may be received.
 
-To aid with this complexity, OTRv4 will give guidance on how to filter a list of
+To aid with this complexity, the specification includes a guide for filtering a list of
 given prekey messages to remove invalid messages or identify invalid situations. But the
 decision on what to do with the remaining messages is up to the implementer.
 
@@ -300,8 +298,8 @@ The machine has the following states:
 * Encrypted Message
 * Finished
 
-All of these states except the finished state may receive the second message of
-a non-interactive DAKE.
+All states, except the finished state, may receive the second message of a non-
+interactive DAKE.
 
 #### The prekey server runs out of prekey messages
 
