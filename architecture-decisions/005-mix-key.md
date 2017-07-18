@@ -2,34 +2,35 @@
 
 ### Context
 
-Because of potential weaknesses in elliptic curves and the potential of quantum
-computers arriving earlier than predicted, we want an additional mechanism that
-would protect against post-conversation decryption of transcripts using those
-weaknesses.
+We acknowledge that there may be potential weaknesses in elliptic curves and
+that quantum computers may arrive earlier than we predict. 
+
+We propose an additional mechanism for protecting transcripts against post-
+conversation decryption.
 
 ### Proposal
 
-We believe this protection can be achieved by mixing another key obtained from
-a Diffie-Hellman (DH) exchange into the key material. This additional key will
-be referred to as the “mix key”.
+We believe we can protect transcripts from post-conversation decryption by
+mixing another key obtained from a Diffie-Hellman (DH) exchange into the key
+material. This additional key is called the “mix key”.
 
 This proposal specifies:
 
-1. Adding an extra key to mix in with the ECDH shared secret when deriving a new
+1. The extra key to mix in with the ECDH shared secret when deriving a new
    root key.
 2. An algorithm for ratcheting and deriving the mix key.
 
-This proposal does not change the Double Ratchet algorithm with the
-exception of how to derive root keys.
+This proposal only changes how root keys are derived in the Double Ratchet algorithm.
 
 The first 3072-bit DH key agreement takes place in the DAKE. See Nik Unger's
-paper [\[1\]](#references), which specifies DAKEZ, ZDH, and XZDH as quantum-resistant
-key exchanges. The difference to this entry in the paper is that we are trying
-to protect against elliptic curve weaknesses, and SIDH [\[2\]](#references) is
-specific for post-quantum resistance. So we will instead use a classic DH key
-exchange.
+paper [\[1\]](#references), which specifies DAKEZ, ZDH, and XZDH as (optionally)
+quantum-resistant key exchanges. 
 
-The options for ratcheting/re-deriving this mix key are:
+We are trying to protect against elliptic curve weaknesses, and SIDH
+[\[2\]](#references) is specific for post-quantum resistance. Instead, we'll use
+a classic DH key exchange.
+
+We condidered two options for ratcheting/rederiving the mix key:
 
 1. Obtain a mix key from a DH function which requires the other party to
    contribute to the computation each time a new root key is derived.
@@ -42,19 +43,19 @@ We chose the second option.
 
 ### Algorithm
 
-We will assume n = 3.
+In this description of the algorithm's functions, we will assume n = 3.
 
 **k_dh = A_i, a_i**
 
 A mix key is a key that is added to the KDF used to produce
-new root and chains keys. A mix key can be produced through a DH function and
+new root and chain keys. A mix key can be produced through a DH function and
 through a key derivation function, both of which produce a 3072-bit public key.
 This key has a 128-bit security level according to Table 2: Comparable strengths
 in NIST’s Recommendation for Key Management, page 53 [\[3\]](#references).
 
 **generateDH function: generateDH()**
 
-Generates a `A_i` and a `a_i`.
+Generates `A_i` and `a_i`.
 
 **DH function: DH(a_i, B_i)**
 
@@ -62,7 +63,7 @@ Given `a_i`, a secret key, and `B_i`, a public key, generates a shared secret va
 
 **Key Derivation Function: SHA3-256(k_dh)**
 
-Given a 3072-bit `k_dh`, generates a 256-bit SHA3-256 byte array: `mix_key`.
+Given a 3072-bit shared secret value `k_dh`, generates a 256-bit SHA3-256 byte array: `mix_key`.
 
 **Key Derivation Function: SHA3-256(mix_key)**
 
@@ -70,7 +71,7 @@ Given `mix_key`, generates a 256-bit SHA3-256 byte array: a new `mix_key`.
 
 #### Considerations
 
-Transmitting the 3072-bit DH public key will increase the time to exchange
+Transmitting the 3072-bit DH public key will increase the time it takes to exchange
 messages. To mitigate this, the key won’t be transmitted every time the root
 and chain keys are derived. Instead, this key will be computed with a DH
 function every third time and the interim keys will be derived from the
@@ -219,8 +220,8 @@ M_9 = SHA3(DH(a_2, B_1))   -----9--------------A_2------>     M_9 = SHA3(DH(b_1,
 ### Performance
 
 Computation of g^a, g^b and g^a^b takes under a second using generator
-g = 2 and exponents a and b are 3072 bits long in an “Intel Core i7
-2.2GHz”
+g = 2. Exponents `a` and `b` are 3072 bits long in an Intel Core i7
+2.2GHz.
 
 | Operation           | Repeat times | Time per Operation |
 | ------------------- | ------------ | ------------------ |
@@ -229,17 +230,16 @@ g = 2 and exponents a and b are 3072 bits long in an “Intel Core i7
 
 ### Decision
 
-We’ve decide to use a 3072-bit key produced by
+We’ve decide to use a 3072-bit key produced by:
 
-1. a DH function which takes as argument the other party’s exponent through a data
-   message and produces a mix key.
-2. a KDF (SHA3-256) function which takes as argument the previous mix key to
-   produce a new one.
+1. a DH function which takes as an argument the other party’s exponent through a data
+   message to produce mix key.
+2. a KDF (SHA3-256) which uses the previous mix key to produce a new one.
 
-The DH function will run every n = 3 times because of the following reasons:
+The DH function will run every n = 3 times because:
 
 1. It is a small number so a particular key can only be compromised for a maximum
-   of 2\*n ratchets. This means that the maximum ratchets that will use the mix
+   of 2 \* n ratchets. This means that the maximum ratchets that will use the mix
    key or a key derived from the mix key is 6.
 2. The benefit of using an odd number is for simplicity of implementation. With an
    odd number, both Alice and Bob can generate a new public and secret key at the
@@ -273,13 +273,13 @@ From the IETF paper, RFC 3526 [\[4\]](#references):
   43DB5BFC E0FD108E 4B82D120 A93AD2CA FFFFFFFF FFFFFFFF
   ```
 * Generator g3: 2
-* The public keys should be 448-bit (56 bytes) long.
+* The public keys should be 448 bits (56 bytes) long.
 
 ### Consequences
 
-Using a 3072-bit DH function to produce the mix key extends data messages size in 56
-bytes of extra key material that may cause some transport protocols to fragment
-these messages.
+Using a 3072-bit DH function to produce the mix key increases the size of data
+messages by 56 bytes. of extra key material. The increased size may cause some
+transport protocols to fragment these messages.
 
 ### References
 
