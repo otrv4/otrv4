@@ -563,8 +563,8 @@ values are replaced:
 * When you complete the [interactive DAKE](#interactive-dake-overview) by sending an [Auth-I Message](#auth-i-message)
 * When you complete the [interactive DAKE](#interactive-dake-overview) by receiving and validating an [Auth-I Message](#auth-i-message)
 * When you [send a Data Message or receive a Data Message](#data-exchange)
-* When you [send a TLV type 1 (Disconnect)](#sending-a-tlv-type-1--disconnect--message)
-* When you [receive a TLV type 1 (Disconnect)](#receiving-a-tlv-type-1--disconnect--message)
+* When you [send a TLV type 1 (Disconnected)](#sending-a-tlv-type-1--disconnected--message)
+* When you [receive a TLV type 1 (Disconnected)](#receiving-a-tlv-type-1--disconnected--message)
 * When you complete a non-interactive DAKE by [sending a non-interactive auth message](#sending-an-encrypted-message-to-an-offline-participant)
 * When you complete a non-interactive DAKE by [receiving and validating a non-interactive auth message](#receiving-a-non-interactive-auth-message)
 
@@ -997,7 +997,7 @@ Bob will be initiating the DAKE with Alice.
       sets it as `their_ecdh`.
     * Validates that the received DH ephemeral public key is on the correct
       group and sets it as `their_dh`.
-4. Sends Bob a Auth-I message (see [Auth-I message](#auth-i-message) section).
+4. Sends Bob an Auth-I message (see [Auth-I message](#auth-i-message) section).
 5. At this point, the DAKE is complete for Bob:
     * Sets ratchet id `i` as 0.
     * Sets `j` as 0 (which means she will ratchet again).
@@ -1037,6 +1037,7 @@ choice of DH and ECDH key. A valid Identity message is generated as follows:
 3. Generate an ephemeral DH key pair:
   * secret key `b` (80 bytes).
   * public key `B`.
+4. Generate a 4-byte instance tag to use as the sender's instance tag. Additional messages in this conversation will continue to use this tag as the sender's instance tag. Also, this tag is used to filter future received messages. Messages intended for this instance of the client will have this number as the receiver's instance tag.
 
 To verify an Identity message:
 
@@ -1052,11 +1053,11 @@ Protocol version (SHORT)
   The version number of this protocol is 0x0004.
 Message type (BYTE)
   The message has type 0x08.
-Sender Instance tag (INT)
+Sender's instance tag (INT)
   The instance tag of the person sending this message.
-Receiver Instance tag (INT)
+Receiver's instance tag (INT)
   The instance tag of the intended recipient. For an Identity message, this
-  will often be 0 since the other party may not have identified its instance
+  will often be 0 since the other party may not have set its instance
   tag yet.
 Sender's User Profile (USER-PROF)
   As described in the section 'Creating a User Profile'.
@@ -1088,26 +1089,29 @@ A valid Auth-R message is generated as follows:
    Φ is the shared session state as mention on the 'Shared session state: Phi'
    section.
 5. Compute `sigma = Auth(Pka, ska, {Pkb, Pka, Y}, t)`.
+6. Generate a 4-byte instance tag to use as the sender's instance tag. Additional messages in this conversation will continue to use this tag as the sender's instance tag. Also, this tag is used to filter future received messages. Messages intended for this instance of the client will have this number as the receiver's instance tag.
+7. Use the sender's instance tag from the Identity Message as the receiver's instance tag.
 
 To verify an Auth-R message:
 
-1. Validate the user profile, and extract `Pka` from it.
-2. Compute `t = 0x0 || SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ)`.
+1. Check that the receiver's instance tag matches your sender's instance tag.
+2. Validate the user profile, and extract `Pka` from it.
+3. Compute `t = 0x0 || SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ)`.
    Φ is the shared session state as mention on the 'Shared session state: Phi'
    section.
-3. Verify the `sigma` with [SNIZKPK Authentication](#snizkpk-authentication),
+4. Verify the `sigma` with [SNIZKPK Authentication](#snizkpk-authentication),
 that is `sigma == Verify({Pkb, Pka, Y}, t)`.
 
-An Auth-R is an OTR message encoded as:
+An Auth-R message is an OTR message encoded as:
 
 ```
 Protocol version (SHORT)
   The version number of this protocol is 0x0004.
 Message type (BYTE)
   The message has type 0x91.
-Sender Instance tag (INT)
+Sender's instance tag (INT)
   The instance tag of the person sending this message.
-Receiver Instance tag (INT)
+Receiver's instance tag (INT)
   The instance tag of the intended recipient.
 Sender's User Profile (USER-PROF)
   As described in the section 'Creating a User Profile'.
@@ -1127,17 +1131,20 @@ authentification `sigma`.
 
 A valid Auth-I message is generated as follows:
 
+1. Check that the receiver's instance tag matches your sender's instance tag.
 1. Compute `t = 0x1 || SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ)`.
    Φ is the shared session state as mention on the 'Shared session state: Phi'
    section.
 2. Compute `sigma = Auth(Pkb, skb, {Pkb, Pka, X}, t)`.
+3. Continue to use the sender's instance tag.
 
 To verify the Auth-I message:
 
-1. Compute `t = 0x1 || SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ)`.
+1. Check that the receiver's instance tag matches your sender's instance tag.
+2. Compute `t = 0x1 || SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ)`.
    Φ is the shared session state as mention on the 'Shared session state: Phi'
    section.
-2. Verify the `sigma` with [SNIZKPK Authentication](#snizkpk-authentication),
+3. Verify the `sigma` with [SNIZKPK Authentication](#snizkpk-authentication),
 that is `sigma == Verify({Pkb, Pka, X}, t)`.
 
 An Auth-I is an OTR message encoded as:
@@ -1147,9 +1154,9 @@ Protocol version (SHORT)
   The version number of this protocol is 0x0004.
 Message type (BYTE)
   The message has type 0x88.
-Sender Instance tag (INT)
+Sender's instance tag (INT)
   The instance tag of the person sending this message.
-Receiver Instance tag (INT)
+Receiver's instance tag (INT)
   The instance tag of the intended recipient.
 sigma (SNIZKPK)
   The SNIZKPK Auth value.
@@ -1224,7 +1231,7 @@ Verify & Decrypt message
 ### Prekey message
 
 This message is created and published to a prekey server to allow offline
-conversations. Each prekey message contains the owner's user profile and two 2
+conversations. Each prekey message contains the owner's user profile and two
 one-time use public prekey values.
 
 It is created as follows:
@@ -1238,6 +1245,7 @@ It is created as follows:
    DH key pair:
    * secret key `b` (80 bytes).
    * public key `B`.
+4. Generate a 4-byte instance tag to use as the sender's instance tag. Additional messages in this conversation will continue to use this tag as the sender's instance tag. Also, this tag is used to filter future received messages. Messages intended for this instance of the client will have this number as the receiver's instance tag.
 
 ```
 Protocol version (SHORT)
@@ -1301,15 +1309,17 @@ A valid non-interactive Auth message is generated as follows:
 8. Follow the section ["When you send a Data Message"](when-you-send-a-data-message) to generate an
    encrypted message, using the nonce set in the previous step.
 9. Compute `Auth MAC = SHA3-256(Mk || t || encrypted_data_message)`.
+10. Generate a 4-byte instance tag to use as the sender's instance tag. Additional messages in this conversation will continue to use this tag as the sender's instance tag. Also, this tag is used to filter future received messages. Messages intended for this instance of the client will have this number as the receiver's instance tag.
 
 To verify a non-interactive Auth message:
 
-1. Validate the user profile, and extract `Pka` from it.
-2. Verifies that both ECDH and DH one-time use prekeys remain unused.
-3. Compute `t = SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ) || our_shared_prekey.public`.
-4. Verify the `sigma` with [SNIZKPK Authentication](#snizkpk-authentication),
+1. Check that the receiver's instance tag matches your sender's instance tag.
+2. Validate the user profile, and extract `Pka` from it.
+3. Verifies that both ECDH and DH one-time use prekeys remain unused.
+4. Compute `t = SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ) || our_shared_prekey.public`.
+5. Verify the `sigma` with [SNIZKPK Authentication](#snizkpk-authentication),
    as in check `sigma == Verify({Pkb, Pka, Y}, t)`.
-5. Continue the DAKE for Alice:
+6. Continue the DAKE for Alice:
 	* Calculates ECDH shared secret `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
 	* Calculates DH shared secret `k_dh = DH(our_dh.secret, their_dh)` and `mix_key`.
 	* Calculates `κ = KDF_2(K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(Ska, X) || k_dh)`.
@@ -1318,19 +1328,19 @@ To verify a non-interactive Auth message:
 	* Calculates the SSID from shared secret: it is the first 8 bytes of `KDF_2(0x00 || K)`.
    * Calculates the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
    * [Decides which chain key he will use](#deciding-between-chain-keys).
-6. Verify the Auth Mac:
+7. Verify the Auth Mac:
    * Extract the encrypted data message.
    * Compute `tag = SHA3-256(MK, || t || encrypted_data_message)`.
    * Extract the Auth MAC from the message and verify that `tag` is equal to the Auth MAC. If it is not,
      ignore the non-interactive auth message.
-7. Set the message ID `j = 1` and compute the receiving chain key and calculate the encryption key:
+8. Set the message ID `j = 1` and compute the receiving chain key and calculate the encryption key:
    ```
    compute_chain_key(chain_r, ratchet_id, j)
    MKenc, MKmac = derive_enc_mac_keys(chain_r[ratchet_id][message_id])
    ```
-8. Discard the `MKmac` key because it is not necessary for the first message delivered through a
+9. Discard the `MKmac` key because it is not necessary for the first message delivered through a
    non-interactive auth message.
-9. Setup the rest of the double ratchet key management system:
+10. Setup the rest of the double ratchet key management system:
     * Set `their_ecdh` as the "Sender's Public ECDH key" from the message.
     * Set `their_dh` as the "Sender's Public DH Key" from the message, if it
       is not NULL.
@@ -1345,10 +1355,10 @@ Protocol version (SHORT)
 Message type (BYTE)
   The message has type 0x04.
 
-Sender Instance tag (INT)
+Sender's instance tag (INT)
   The instance tag of the person sending this message.
 
-Receiver Instance tag (INT)
+Receiver's instance tag (INT)
   The instance tag of the intended recipient.
 
 Y Receiver's ECDH public key (POINT)
@@ -1499,10 +1509,10 @@ Protocol version (SHORT)
 Message type (BYTE)
   The Data Message has type 0x03.
 
-Sender Instance tag (INT)
+Sender's instance tag (INT)
   The instance tag of the person sending this message.
 
-Receiver Instance tag (INT)
+Receiver's instance tag (INT)
   The instance tag of the intended recipient.
 
 Flags (BYTE)
@@ -1604,7 +1614,11 @@ In both cases:
    Authenticator = KDF_2(MKmac || Data_message_sections)
    ```
 
+  * Continue to use the sender's instance tag.
+
 #### When you receive a Data Message:
+
+* Check that the receiver's instance tag matches your sender's instance tag.
 
 * Use the `message_id` to compute the receiving chain key, and calculate
 encryption and MAC keys.
@@ -1703,7 +1717,7 @@ for this _before_ checking for any of the other `?OTR:` markers):
   * Discard illegal fragment, if:
        * the recipient's own instance tag does not match the listed receiver
        instance tag
-       * and the listed receiver instance tag is not zero,
+       * and the listed receiver's instance tag is not zero,
     * then, discard the message and optionally pass a warning to the user.
     * `index` is 0
     * `total` is 0
@@ -1755,24 +1769,26 @@ required and if it will advertise OTR support.
 ```
 START
 
-  This is the state that is used before an OTR conversation is initiated.
-  The initial state, and the only way to subsequently enter this state is for
-  the user to explicitly request to do so via some UI operation. Messages
-  sent in this state are plaintext messages. If a TLV type 1 (Disconnect)
-  message is sent in another state, transition to this state.
+  This is the initial state before an OTR conversation starts. The only way to
+  enter this state is for the participant to explicitly request it via some UI
+  operation. Messages sent in this state are plaintext messages. If a TLV type 1
+  (Disconnected) message is sent in another state, transition to this state.
 
 WAITING_AUTH_R
 
-  This is the Auth message sent by the Responder.
+  This is the state used when a participant is waiting for an Auth-R message.
+  This state is entered after an Identity message is sent.
 
 WAITING_AUTH_I
 
-  This is the Auth message sent by the Initiator.
+  This is the state used when a participant is waiting for an Auth-I message.
+  This state is entered after sending an Auth-R message.
 
 ENCRYPTED_MESSAGES
 
-  This state is entered after DAKE is finished. This will happen after Auth-I
-  message is sent, received and validated. Messages sent in this state are encrypted.
+  This state is entered after the DAKE is finished. The DAKE is finished after
+  the Auth-I message is sent, received and validated. Messages sent in this
+  state are encrypted.
 
 FINISHED
 
@@ -1781,7 +1797,7 @@ FINISHED
   of the OTR conversation. For example, if Alice and Bob are having an OTR
   conversation, and Bob instructs his OTR client to end its private session
   with Alice (for example, by logging out), Alice will be notified of this,
-  and her client will switch to FINISHED mode. This prevents  Alice from
+  and her client will switch to the FINISHED state. This prevents  Alice from
   accidentally sending a message to Bob in plaintext (consider what happens
   if Alice was in the middle of typing a private message to Bob when he
   suddenly logs out, just as Alice hits Enter.)
@@ -1789,17 +1805,8 @@ FINISHED
 
 ### Protocol events
 
-The following sections will outline the actions that the protocol should
-implement.
-
-Note:
-
-* The receiving instance tag must be specified and should match the
-  instance tag the client uses to identify itself. Otherwise, the
-  message should be discarded and the user optionally warned. Nevertheless,
-  the Identity Message may not specify the receiver's instance tag. In
-  this case the value is set to zero.
-* The protocol is initialized with the allowed versions (3 and/or 4).
+The following sections outline the actions that the protocol should implement.
+Note that the protocol is initialized with the allowed versions (3 and/or 4).
 
 #### User requests to start an OTR conversation
 
@@ -1819,7 +1826,7 @@ required. The version string is constructed as follows:
 
 If she is willing to use OTR version 3, she appends a byte identifier for the
 versions in question, followed by "?". The byte identifier for OTR version 3
-is "3", and similarly for 4. Thus, if she is willing to use OTR versions 3 and
+is "3", and "4" for 4. Thus, if she is willing to use OTR versions 3 and
 4, the following identifier would be "34". The order of the identifiers
 between the "v" and the "?" does not matter, but none should be listed more
 than once. The OTRv4 specification only supports versions 3 and higher. Thus,
@@ -1861,8 +1868,8 @@ bytes indicating the version of OTR Alice is willing to use:
     "\x20\x20\x09\x09\x20\x09\x20\x20" to indicate a willingness to use OTR version 4 with Bob
 ```
 
-If Bob is willing to use OTR with Alice (with the protocol version that Alice
-has offered), he should start the AKE. On the other hand, if Alice receives a
+If Bob is willing to use OTR with Alice, with the protocol version that Alice
+has offered, he should start the AKE. On the other hand, if Alice receives a
 plaintext message from Bob (rather than an initiation of the AKE), she should
 stop sending him a whitespace tag.
 
@@ -1870,7 +1877,7 @@ stop sending him a whitespace tag.
 
 Display the message to the user.
 
-If the state is `ENCRYPTED_MESSAGES`, `DAKE_IN_PROGRESS`, or `FINISHED`:
+If the state is `ENCRYPTED_MESSAGES` or `FINISHED`:
 
   * The user should be warned that the message received was unencrypted.
 
@@ -1881,7 +1888,7 @@ Remove the whitespace tag and display the message to the user.
 If the tag offers OTR version 4 and version 4 is allowed:
 
   * Send an Identity message.
-  * Transition the state to `DAKE_IN_PROGRESS`.
+  * Transition the state to `WAITING_AUTH_R`.
 
 Otherwise if the tag offers OTR version 3 and version 3 is allowed:
 
@@ -1893,7 +1900,7 @@ Otherwise if the tag offers OTR version 3 and version 3 is allowed:
 If the Query Message offers OTR version 4 and version 4 is allowed:
 
   * Send an Identity message.
-  * Transition the state to `DAKE_IN_PROGRESS`.
+  * Transition the state to `WAITING_AUTH_R`.
 
 If the Query message offers OTR version 3 and version 3 is allowed:
 
@@ -1904,38 +1911,44 @@ If the Query message offers OTR version 3 and version 3 is allowed:
 
 If the state is `START`:
 
-  * Validate the Identity message and ignore the message if it fails.
-  * Reply with an Auth-R message.
-  * Transition to the `WAITING_AUTH_R` state.
+  * Validate the Identity message. Ignore the message if validation fails.
+  * If validation succeeds:
+    * Remember the sender's instance tag to use as the receiver's instance tag for future messages.
+    * Reply with an Auth-R message.
+    * Transition to the `WAITING_AUTH_R` state.
 
 If the state is `WAITING_AUTH_R`:
 
-This indicates that both you and the other participant have sent Identity
-messages to each other. This can happen if they send you an Identity message
-before receiving yours.
+  ```
+  You and the other participant have sent Identity messages to each other.
+  This can happen if they send you an Identity message before receiving
+  yours. Only one Identity message must be chosen for use.
+  ```
 
-To agree on an Identity message to use for this conversation:
-
-  * Validate the Identity message and ignore the message if it fails.
-  * Compare the `X` (as a 57-byte unsigned little-endian value) you sent in your
-    Identity message with the value from the message you received.
-  * If yours is the lower hash value:
-    * Ignore the received Identity message, but resend your Identity message.
-  * Otherwise:
-    * Forget your old `X` value that you sent earlier.
-    * Send an Auth-R message.
-    * Transition state to `WAITING_AUTH_R`.
+  * Validate the Identity message. Ignore the message if validation fails.
+  * If validation succeeds:
+    * Compare the `X` (as a 57-byte unsigned little-endian value) you sent in your
+      Identity message with the value from the message you received.
+    * If yours is the lower hash value:
+      * Ignore the received Identity message, but resend your Identity message.
+    * Otherwise:
+      * Forget your old `X` value that you sent earlier.
+      * Send an Auth-R message.
+      * Transition state to `WAITING_AUTH_I`.
 
 If the state is `WAITING_AUTH_I`:
 
-  * Forget the old `their_ecdh` and `their_dh` from the previously received
-    Identity message.
-  * Send a new Auth-R message with the new values received.
-
-There are a number of reasons this might happen, including:
-
-  * Your correspondent simply started a new AKE.
-  * Your correspondent resent his Identity Message, as specified above.
+  ```
+  There are a number of reasons that you may receive an Identity Message in this state.
+  Perhaps your correspondent simply started a new AKE or they resent their Identity
+  Message.
+  ```
+  
+  * Validate the Identity message. Ignore the message if validation fails.
+  * If validation succeeds:
+    * Forget the old `their_ecdh` and `their_dh` from the previously received
+      Identity message.
+    * Send a new Auth-R message with the new values received.
 
 If the state is `ENCRYPTED_MESSAGES`:
 
@@ -1950,11 +1963,14 @@ If the state is `ENCRYPTED_MESSAGES`:
 
 If the state is `WAITING_AUTH_R`:
 
-  * If the instance tag in the message is not the instance tag you are currently
-    talking to, ignore the message.
-  * Validate the Auth-R message and ignore the message if it fails.
-  * Reply with an Auth-I message.
-  * Transition state to `WAITING_AUTH_I`.
+  * If the receiver's instance tag in the message is not the sender's instance tag you are currently
+    using, ignore the message.
+  * Validate the Auth-R message. Ignore the message if validation fails. Stay in state `WAITING_AUTH_R`.
+
+    If validation succeeds:
+
+    * Reply with an Auth-I message.
+    * Transition state to `ENCRYPTED_MESSAGES`.
 
 If the state is not `WAITING_AUTH_R`:
 
@@ -1970,9 +1986,11 @@ If the state is not `WAITING_AUTH_R`:
 
 If the state is `WAITING_AUTH_I`:
 
-  * If the instance tag in the message is not the instance tag you are currently
-    talking to, ignore the message.
-  * Validate the Auth-R message and ignore the message if it fails.
+  * If the receiver's instance tag in the message is not the sender's instance tag you are currently using, ignore this message.
+  * Validate the Auth-I message. Ignore the message if validation fails. Stay in state `WAITING_AUTH_I`.
+
+  If validation succeeds:
+
   * Transition state to `ENCRYPTED_MESSAGES`.
   * Initialize the double ratcheting.
 
@@ -2000,8 +2018,9 @@ Else:
 The `ENCRYPTED_MESSAGES` state is the only state where a participant is allowed
 to send encrypted data messages.
 
-If the state is `START` or `DAKE_IN_PROGRESS`, queue the message for encrypting
-and sending when the participant transitions to the `ENCRYPTED_MESSAGES` state.
+If the state is `START`, `WAITING_AUTH_R`, or `WAITING_AUTH_I`, queue the
+message for encrypting and sending when the participant transitions to the
+`ENCRYPTED_MESSAGES` state.
 
 If the state is `FINISHED`, the participant must start another OTR conversation
 to send encrypted messages.
@@ -2021,7 +2040,7 @@ If the version is 4:
       * Verify the MAC tag.
       * Check if the message version is allowed.
       * If the instance tag in the message is not the instance tag you are currently
-        talking to, ignore the message.
+        using, ignore the message.
       * Verify that the public ECDH key is on curve Ed448.
       * Verify that the public DH key is from the correct group and that it does not degenerate.
 
@@ -2059,6 +2078,8 @@ Protocol.
   If msgstate is `MSGSTATE_ENCRYPTED`:
 
     * Verify the information (MAC, keyids, ctr value, etc.) in the message.
+    * If the instance tag in the message is not the instance tag you are currently
+      using, ignore the message.
     * If the verification succeeds:
       * Decrypt the message and display the human-readable part (if non-empty)
         to the user.
@@ -2082,31 +2103,32 @@ Protocol.
 * Detect if an error code exists in the form "ERROR__x" where x is a number.
 * If the error code exists in the spec, display the human-readable error message
   to the user.
-* Display the message in the user configured language.
+* Display the message in the language configured by the user.
 
-If using version 3 and it is expected that the AKE will start when receiving a message:
+If using version 3 and expecting that the AKE will start when receiving a message:
 
   * Reply with a query message
 
 #### User requests to end an OTR conversation
 
-Send a data message, encoding a message with an empty human-readable part, and
+Send a data message, encoding the message with an empty human-readable part, and
 TLV type 1. Transition to the `START` state.
 
-#### Receiving a TLV type 1 (Disconnect) Message
+#### Receiving a TLV type 1 (Disconnected) Message
 
-If the instance tag in the message is not the instance tag you are currently talking to,
-ignore the message.
+If the instance tag in the message is not the instance tag you are currently
+using, ignore the message.
 
 If the version is 4:
-  If a TLV type 1 is received in the `START` state, stay in that state, else
-  transition to the START state and [reset the state variables and key
-  variables](#resetting-state-variables-and-key-variables). Resetting state
-  variables and key variables
+
+  * If a TLV type 1 is received in the `START` state:
+
+      * Stay in that state, else transition to the START state and [reset the state variables and key variables](#resetting-state-variables-and-key-variables).
 
 If the version is 3:
+
   * Transition to 'MSGSTATE_FINISHED'.
-  * Inform the user that its correspondent has closed its end of the private connection.
+  * Inform the user that their correspondent has closed their end of the private connection.
 
 ## Socialist Millionaires Protocol (SMP)
 
@@ -2419,8 +2441,8 @@ sections detail how values are computed differently during some states.
 
 #### Receiving a SMP message 1
 
-If the instance tag in the message is not the instance tag you are currently talking to,
-ignore the message.
+If the instance tag in the message is not the instance tag you are currently
+using, ignore the message.
 
 If smpstate is not `SMPSTATE_EXPECT1`:
 
@@ -2438,8 +2460,8 @@ If smpstate is `SMPSTATE_EXPECT1`:
 
 #### Receiving a SMP message 2
 
-If the instance tag in the message is not the instance tag you are currently talking to,
-ignore the message.
+If the instance tag in the message is not the instance tag you are currently
+using, ignore the message.
 
 If smpstate is not `SMPSTATE_EXPECT2`:
 
@@ -2459,8 +2481,8 @@ If smpstate is `SMPSTATE_EXPECT2`:
 
 #### Receiving a SMP message 3
 
-If the instance tag in the message is not the instance tag you are currently talking to,
-ignore the message.
+If the instance tag in the message is not the instance tag you are currently
+using, ignore the message.
 
 If smpstate is not `SMPSTATE_EXPECT3`:
 
@@ -2485,8 +2507,8 @@ If smpstate is `SMPSTATE_EXPECT3`:
 
 #### Receiving a SMP message 4
 
-If the instance tag in the message is not the instance tag you are currently talking to,
-ignore the message.
+If the instance tag in the message is not the instance tag you are currently
+using, ignore the message.
 
 If smpstate is not `SMPSTATE_EXPECT4`:
 
@@ -2752,8 +2774,8 @@ If authstate is `AUTHSTATE_AWAITING_SIG`:
 
 #### Receiving a D-H Key Message
 
-If the instance tag in the message is not the instance tag you are currently talking to,
-ignore the message.
+If the instance tag in the message is not the instance tag you are currently
+using, ignore the message.
 
 If the message is version 3 and version 3 is not allowed, ignore this message.
 Otherwise:
@@ -2777,8 +2799,8 @@ If authstate is `AUTHSTATE_NONE`, `AUTHSTATE_AWAITING_REVEALSIG`, or
 
 #### Receiving a Signature Message
 
-If the instance tag in the message is not the instance tag you are currently talking to,
-ignore the message.
+If the instance tag in the message is not the instance tag you are currently
+using, ignore the message.
 
 If version 3 is not allowed, ignore this message. Otherwise:
 
@@ -2795,8 +2817,8 @@ If authstate is AUTHSTATE_NONE, AUTHSTATE_AWAITING_DHKEY or AUTHSTATE_AWAITING_R
 
 #### Receiving a Reveal Signature Message
 
-If the instance tag in the message is not the instance tag you are currently talking to,
-ignore the message.
+If the instance tag in the message is not the instance tag you are currently
+using, ignore the message.
 
 If version 3 is not allowed, ignore this message. Otherwise:
 
@@ -2833,7 +2855,7 @@ It consists of: the protocol version, the message type, the sender's instance
 tag, the receiver's instance tag, the encrypted signature and the MAC of the
 signature.
 
-#### Sending a TLV type 1 (Disconnect) Message
+#### Sending a TLV type 1 (Disconnected) Message
 
 If the user requests to close its private connection, you may send
 a message (possibly with an empty human-readable part) containing a record
