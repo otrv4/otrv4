@@ -30,7 +30,7 @@ We are trying to protect against elliptic curve weaknesses, and SIDH
 [\[2\]](#references) is specific for post-quantum resistance. Instead, we'll use
 a classic DH key exchange.
 
-We condidered two options for ratcheting/rederiving the mix key:
+We considered two options for ratcheting/rederiving the mix key:
 
 1. Obtain a mix key from a DH function which requires the other party to
    contribute to the computation each time a new root key is derived.
