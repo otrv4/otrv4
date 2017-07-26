@@ -1645,9 +1645,9 @@ encryption and MAC keys.
 
 ### Extra symmetric key
 
-OTRv3 defines an additional symmetric key that can be derived by the
-communicating parties for use of application-specific purposes, such as file
-transfer, voice encryption, etc. When one party wishes to use the extra
+Like OTRv3, OTRv4 defines an additional symmetric key that can be derived by
+the communicating parties for use of application-specific purposes, such as
+file transfer, voice encryption, etc. When one party wishes to use the extra
 symmetric key, they create a type `8 TLV` attached to a Data Message. The key
 itself is then derived from `K`. The extra symmetric key is derived by
 calculating `KDF_2(0xFF || K)`.
@@ -1676,10 +1676,9 @@ an encoded OTR message. In that event, the sender may choose to split the
 message into a number of fragments. This section describes the format for the
 fragments.
 
-OTRv4 has the same message fragmentation as OTRv3, without compatibility with
-OTRv2. This means that OTRv4 and OTRv3 perform fragmentation in the same way,
-with the same format. Thus, message parsing should happen after the message has
-been reassembled.
+OTRv4 and OTRv3 perform fragmentation in the same way, with the same format.
+Thus, message parsing should happen after the message has been defragmented.
+This also keeps OTRv4 from being compatible with OTRv2.
 
 All OTRv4 clients must be able to assemble received fragments, but performing
 fragmentation on outgoing messages is optional.
@@ -2071,9 +2070,6 @@ If the version is 4:
        (configurable) time, send a "heartbeat" message.
 
 If the version is 3:
-
-Note that the states, messages and keys referred here are specific of OTRv3
-Protocol.
 
   If msgstate is `MSGSTATE_ENCRYPTED`:
 
