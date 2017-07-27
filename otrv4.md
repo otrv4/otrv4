@@ -463,8 +463,7 @@ Type 1: Disconnected
 
 Type 2: SMP Message 1
   The value represents the initial message of the Socialist Millionaires'
-  Protocol (SMP), described below (in Socialist Millionaires Protocol (SMP)).
-  Note that this represents TLV type 1 and 7 from OTRv3.
+  Protocol (SMP). Note that this represents TLV type 1 and 7 from OTRv3.
 
 Type 3: SMP Message 2
   The value represents the second message in an instance of the SMP.
@@ -893,8 +892,8 @@ User Profile (USER-PROF):
   (optional) Transitional Signature (SIG)
 ```
 
-SIG is the OTRv3 DSA Signature (from the protocol section
-"Public keys, signatures, and fingerprints"):
+SIG is the DSA Signature. It is the same signature used in in OTRv3.
+From the OTRv3 protocol section "Public keys, signatures, and fingerprints":
 
 ```
 DSA signature (SIG):
@@ -2128,32 +2127,33 @@ If the version is 3:
 
 ## Socialist Millionaires Protocol (SMP)
 
-SMP in OTRv4 shares the same TLVs and flow as SMP in OTRv3 with the following
-exceptions. Please refer to the version 3 spec for details on how it handles
-SMP [\[2\]](#references).
+The Socialist Millionaires Protocol allows two parties with secret information
+(`x` and `y`, respectively) to check whether (`x==y`) without revealing any
+additional information about the secrets.
 
-In OTRv3, SMP Message 1 is used when the user does not specify an SMP question.
-If a question is supplied, SMP Message 1Q is used. OTRv4 is simplified to use
-only SMP Message 1 for both cases. When a question is not present, the user
-specified question section has length `0` and value `NULL`.
+OTRv4 makes a few changes to SMP:
 
-OTRv4 creates fingerprints using SHA3-512, which increases their size from
-OTRv3. Thus, the size of the fingerprint in the "Secret Information" section of
-OTRv3 [\[7\]](#references) should be 64 bytes.
+  * OTRv4 uses Ed448 as the cryptographic primitive. This changes the way
+  values are serialized and how they are computed. To define the SMP values
+  under Ed448, we reuse the previously defined generator `G` for Ed448:
 
-Lastly, OTRv4 uses Ed448 as the cryptographic primitive. This changes the way
-values are serialized and how they are computed. To define the SMP values
-under Ed448, we reuse the previously defined generator `G` for Ed448:
+  ```
+  G = (11781216126343694673728248434331006466518053535701637341687908214793940427
+  7809514858788439644911793978499419995990477371552926308078495, 19)
+  ```
 
-```
-G = (11781216126343694673728248434331006466518053535701637341687908214793940427
-7809514858788439644911793978499419995990477371552926308078495, 19)
-```
+  * OTRv4 creates fingerprints using SHA3-512. This increases the size of fingerprints.
 
-The computations below use the SMP secret value explained
-[here](#secret-information).
+  * SMP in OTRv4 uses all of the [type/length/value (TLV) record types](#tlv-
+  * record-types) as OTRv3, except SMP Message 1Q. When SMP Message 1Q is used
+  * in OTRv4, SMP Message 1 is used in OTRv4. When a question is not present,
+  * the user specified question section has length `0` and value `NULL`. In
+  * OTRv3, SMP Message 1 is used when the user does not specify an SMP question.
+  * If a question is supplied, SMP Message 1Q is used.
 
 ### SMP Overview
+
+The computations below use the [SMP secret value](#secret-information).
 
 Assuming that Alice begins the exchange:
 
