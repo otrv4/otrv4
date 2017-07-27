@@ -414,14 +414,20 @@ OTR4 public authentication Ed448 key (ED448-PUBKEY):
       H is the Ed448 public key generated as defined in RFC 8032.
 ```
 
-Public keys have fingerprints, which are hex strings that serve as
-identifiers for the public key. The fingerprint is calculated by taking the
-SHA3-512 hash of the byte-level representation of the public key.
+Public keys have fingerprints, which are hex strings that serve as identifiers
+for the public key. The full OTRv4 fingerprint is calculated by taking the
+sha3-512 hash of the byte-level representation of the public key. To
+authenticate a long-term key pair, the [Socialist Millionaire's
+Protocol](#socialist-millionaires-protocol--smp-) and manual fingerprint
+comparison may be used. For the first, the full fingerprint is included in the
+authentication. To make manual comparison easier, two versions of the
+fingerprint may be used:
 
-For generation of the public key, refer to RFC 8032 [\[17\]](#references),
-section 5.2.5.
+* Truncation to 56 bytes (224-bit security level)
+* Truncation to 32 bytes (128-bit security level)
 
-The public key is generated as follows:
+The public key is generated as follows (refer to RFC 8032[\[17\]](#references),
+for more information on key generation):
 
 ```
 The symmetric key is 57 bytes of cryptographically secure random data.
@@ -2142,7 +2148,8 @@ OTRv4 makes a few changes to SMP:
   7809514858788439644911793978499419995990477371552926308078495, 19)
   ```
 
-  * OTRv4 creates fingerprints using SHA3-512. This increases the size of fingerprints.
+  * OTRv4 creates fingerprints using SHA3-512. This increases the size of
+    fingerprints to 64 bytes.
 
   * SMP in OTRv4 uses all of the [type/length/value (TLV) record types](#tlv-
   * record-types) as OTRv3, except SMP Message 1Q. When SMP Message 1Q is used

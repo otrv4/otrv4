@@ -31,9 +31,8 @@ transcripts of OTRv4 will have classic Diffie-Hellman ~128-bit security.
 To achieve ~224-bit elliptic curve security, we chose the curve Ed448 for the
 generation of ECDH. In relation to secrets generated with ECDH, we use SHA3-512
 and SHAKE256 as hash functions since, individually, both give 256-bit security.
-We use the SHA3-512 hash function for generating fingerprints for long-lived
-public keys. Although Ed448 does not have as much published cryptanalysis as
-Curve25519, it has a similar construction to Curve25519 [\[1\]](#references).
+Although Ed448 does not have as much published cryptanalysis as Curve25519, it
+has a similar construction to Curve25519 [\[1\]](#references).
 
 To achieve classic Diffie-Hellman ~128-bit security, we use a mix key, which is
 described in [ADR 5](https://github.com/twstrike/otrv4/blob/master/architecture-
@@ -59,6 +58,16 @@ When a keyed cryptographic hash function is expected, we set `x = key || secret`
 To provide cryptographic domain separation when multiple values need to be
 derived from the same secret, we set `x = counter || secret`, where the counter
 changes for each situation.
+
+In OTRv4, long-lived key authentication can happen by using SMP or comparing
+fingerprints. We use the SHA3-512 hash function for generating fingerprints
+from the long-lived public keys. This results in a long 512-bit (64 byte)
+fingerprint. The full length fingerprint will be used for SMP authentication.
+But to make manual fingerprint comparison easier, OTRv4 will allow 2 different
+truncation levels for implementers to choose from:
+
+* Truncation to 56 bytes (224-bit security level)
+* Truncation to 32 bytes (128-bit security level)
 
 ### Consequences
 
