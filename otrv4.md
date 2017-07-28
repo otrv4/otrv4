@@ -504,7 +504,7 @@ Type 8: Extra symmetric key
 Each of the two DAKEs must authenticate its context to prevent attacks that
 rebind the DAKE transcript into different contexts. If the higher-level
 protocol ascribes some property to the connection, the DAKE exchange should
-verify this property. Given the share dession state information `phi`
+verify this property. Given the shared session state information `phi`
 associated with the higher-level context (e.g., a session identifier), the DAKE
 authenticates that both parties share the same value for `phi`.
 
@@ -1077,7 +1077,7 @@ B (MPI)
 
 This is the second message of the DAKE. Alice sends it to Bob to commit to a
 choice of her ECDH ephemeral key and her DH ephemeral key, and acknowledgment
-of Bob's ECDH ephemeral key and DH ephemeral key. This acknowledgement includes
+of Bob's ECDH ephemeral key and DH ephemeral key. This acknowledgment includes
 a validation that Bob's ECDH key is on the curve Ed448 and his DH key is in the
 correct group.
 
@@ -1132,7 +1132,7 @@ sigma (SNIZKPK)
 #### Auth-I message
 
 This is the final message of the DAKE. Bob sends it to Alice to verify the
-authentification `sigma`.
+authentication `sigma`.
 
 A valid Auth-I message is generated as follows:
 
@@ -1170,7 +1170,7 @@ sigma (SNIZKPK)
 ## Offline Conversation Initialization
 
 To begin an offline conversation, a prekey message is published to an
-unstrusted server and this action is seen as the start of a non-interactive
+untrusted server and this action is seen as the start of a non-interactive
 DAKE. Then, the prekey message is retrieved by the party attempting to send a
 message to the publisher. A reply called the non-interactive auth
 message is created with the prekey and sent. This completes the DAKE.
@@ -2586,7 +2586,7 @@ Read and Forge Data Message
   message is included, the original text is replaced with the new message and
   a new MAC tag is attached to the data message.
 
-  To achive this:
+  To achieve this:
   - Decrypt the data message with the corresponding message key derived from
     the given chain key.
   - If a new message is given, replace the message with that one, encrypt and
