@@ -419,6 +419,23 @@ OTR4 public authentication Ed448 key (ED448-PUBKEY):
     H (POINT)
       H is the Ed448 public key generated as defined in RFC 8032.
 ```
+The public key is generated as follows (refer to RFC 8032[\[17\]](#references),
+for more information on key generation):
+
+```
+The symmetric key is 57 bytes of cryptographically secure random data.
+
+1. Hash the 57-byte symmetric key using SHAKE256(symmetric_key). Store the
+   digest in a 114-bytes large buffer, denoted 'h'.  Only the lower 57 bytes
+   are used for generating the public key.
+2. Prune the buffer: the two least significant bits of the first
+   octet are cleared, all eight bits the last octet are cleared, and the
+   highest bit of the second to last octet is set.
+3. Interpret the buffer as the little-endian integer, forming a
+   secret scalar 's'.  Perform a known-base-point scalar multiplication s *
+   'Base point (G) of the twisted edwards curve'. Let 'H' be the result of this
+   multiplication.
+```
 
 Public keys have fingerprints, which are hex strings that serve as identifiers
 for the public key. The full OTRv4 fingerprint is calculated by taking the
@@ -431,23 +448,6 @@ fingerprint may be used:
 
 * Truncation to 56 bytes (224-bit security level)
 * Truncation to 32 bytes (128-bit security level)
-
-The public key is generated as follows (refer to RFC 8032[\[17\]](#references),
-for more information on key generation):
-
-```
-The symmetric key is 57 bytes of cryptographically secure random data.
-
-1. Hash the 57-byte symmetric key using SHAKE256(symmetric). Store the
-   digest in a 114-bytes large buffer, denoted 'h'.  Only the lower 57 bytes
-   are used for generating the public key.
-2. Prune the buffer: the two least significant bits of the first
-   octet are cleared, all eight bits the last octet are cleared, and the
-   highest bit of the second to last octet is set.
-3. Interpret the buffer as the little-endian integer, forming a
-   secret scalar 's'.  Perform a known-base-point scalar multiplication s *
-   Base_point'. Let 'H' be the result of this multiplication.
-```
 
 ### TLV Record Types
 
@@ -823,7 +823,7 @@ can be configurable. A recommended value is two weeks.
 ### Create the Public Shared Prekey
 
 To create a shared prekey, generate and set `our_shared_prekey` as ephemeral ECDH keys:
-* secret key `e` (57 bytes) // TODO: is this using the symmetric or the priv?
+* secret key `e` (57 bytes)
 * public key `E`.
 
 ### Create a User Profile Signature
@@ -832,35 +832,33 @@ The user profile signature is generated as defined in RFC 8032 section 5.2.6.
 The flag `F` is set to `0` and the context `C` is left empty.
 
 ```
-// TODO: change var names and follow the uppercase, lowercase style for points
-or scalars
-
 The inputs to the signing function are the symmetric key (57 bytes, defined on
 'Public keys and fingerprints'. Note that the symmetric key is 57 bytes), a flag
-'F', which is 0, and a message 'M' of arbitrary size.
+'f', which is 0, a context 'c', which is empty, and a message 'm' of arbitrary
+size.
 
-   1.  Hash the symmetric key: 'SHAKE256(symmetric)'.  Store the first 114 bytes
-       of the digest on 'h'. Construct the secret key 's' from
-       the first half of the digest (57 bytes), and the corresponding public
+   1.  Hash the symmetric key: 'SHAKE256(symmetric_key)'.  Store the first 114
+       bytes of the digest on 'digest'. Construct the secret key 's' from
+       the first half of 'digest' (57 bytes), and the corresponding public
        key 'H', as defined on 'Public keys and fingerprints' section.
-       Let 'nonce' denote the second half of the hash digest (from
-       h[57] to h[113]).
+       Let 'nonce' denote the second half of 'digest' (from digest[57] to
+       digest[113]).
 
-   2.  Compute SHAKE256("SigEd448" || 'nonce' || M). Let 'r' be the 114-byte
-       digest.
+   2.  Compute SHAKE256("SigEd448" || f || || len(c) || c || 'nonce' || M). Let
+       'r' be the 114-byte digest.
 
-   3.  Multiply the scalar 'r' by the base point. B.  For efficiency, do this by
-       first reducing 'r' modulo 'q', the group order of B.  Let 'nonce_point'
+   3.  Multiply the scalar 'r' by the base point. For efficiency, do this by
+       first reducing 'r' modulo 'q', the group order.  Let 'nonce_point'
        be the encoding of this point.
 
-   4.  Compute SHAKE256("SigEd448" || 'nonce_point' || H || M). Let 'challenge'
-       be the encoded 114-byte digest.
+   4.  Compute SHAKE256("SigEd448" || f || || len(c) || c || 'nonce_point' || H
+       || m). Let 'challenge' be the encoded 114-byte digest.
 
-   5.  Compute 'S = (r + 'challenge' * s) mod q'.  For efficiency, reduce
+   5.  Compute 'sig = (r + 'challenge' * s) mod q'.  For efficiency, reduce
        'challenge' modulo q.
 
    6.  Form the signature of the concatenation of 'nonce_point' (57 bytes) and
-       the little-endian encoding of 'S' (57 bytes, the ten most significant
+       the little-endian encoding of 'sig' (57 bytes, the ten most significant
        bits are always zero).
 ```
 
@@ -874,8 +872,8 @@ The user profile signature is verified as defined in RFC 8032 section 5.2.7.
     first half as a 'nonce_point', and the second half as 'S'. Decode the public
     key 'H' as a point.  If any of the decodings fail (including 'S' being out
     of range), the signature is invalid.
-2.  Compute SHAKE256("SigEd448" || 'nonce_point' || H || M). Let 'challenge'
-    be the 114-byte encoded digest.
+2.  Compute SHAKE256("SigEd448" || f || || len(c) || c || 'nonce_point' || H ||
+    m). Let 'challenge' be the 114-byte encoded digest.
 3.  Check the group equation 'S' == 'nonce_point' + 'challenge' * H'.
 ```
 
