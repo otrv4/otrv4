@@ -217,15 +217,10 @@ Coordinates:
 	Edwards
 
 Base point (G)
-  (x=11781216126343694673728248434331006466518053535701637341687908214793
-     9404277809514858788439644911793978499419995990477371552926308078495,
-   y=19)
-
-  On the twisted edwards curve:
-   (x=2245800402959243001876043340998960362467896416325641342461254616869
-      50415467406032909029192869357953282578032075146446173674602635247710,
-    y=2988192100784814926760179304439306734375440401540802420959282413723
-      31506189835876003536878655418784733982303233503462500531545062832660)
+  (x=22458004029592430018760433409989603624678964163256413424612546168695
+     0415467406032909029192869357953282578032075146446173674602635247710,
+   y=29881921007848149267601793044393067343754404015408024209592824137233
+     1506189835876003536878655418784733982303233503462500531545062832660)
 
 Cofactor (c)
   4
@@ -433,8 +428,7 @@ The symmetric key is 57 bytes of cryptographically secure random data.
    highest bit of the second to last octet is set.
 3. Interpret the buffer as the little-endian integer, forming a
    secret scalar 's'.  Perform a known-base-point scalar multiplication s *
-   'Base point (G) of the twisted edwards curve'. Let 'H' be the result of this
-   multiplication.
+   'Base point (G)'. Let 'H' be the result of this multiplication.
 ```
 
 Public keys have fingerprints, which are hex strings that serve as identifiers
@@ -782,9 +776,9 @@ To create a user profile, assemble:
 3. Profile Expiration: Expiration date in standard Unix 64-bit format
    (seconds since the midnight starting Jan 1, 1970, UTC, ignoring leap
    seconds).
-4. Public Shared Prekey: An Ed448 Point used in multiple prekey messages. It adds some
-   protection against attacker modification of the first flow of the non-interactive
-   DAKE.
+4. Public Shared Prekey: An Ed448 Point used in multiple prekey messages. It
+   adds some protection against attacker modification of the first flow of the
+   non-interactive DAKE.
 5. Profile Signature: The secret key value (`r`) of the Ed448 long term public
    key and a flag `F` (set to zero, as defined on [RFC]8032) are used to create
    signatures of the entire profile excluding the signature itself. The size of
@@ -847,18 +841,18 @@ size.
    2.  Compute SHAKE256("SigEd448" || f || || len(c) || c || 'nonce' || M). Let
        'r' be the 114-byte digest.
 
-   3.  Multiply the scalar 'r' by the base point. For efficiency, do this by
+   3.  Multiply the scalar 'r' by the Base Point (G). For efficiency, do this by
        first reducing 'r' modulo 'q', the group order.  Let 'nonce_point'
        be the encoding of this point.
 
    4.  Compute SHAKE256("SigEd448" || f || || len(c) || c || 'nonce_point' || H
        || m). Let 'challenge' be the encoded 114-byte digest.
 
-   5.  Compute 'sig = (r + 'challenge' * s) mod q'.  For efficiency, reduce
+   5.  Compute 'S = (r + 'challenge' * s) mod q'.  For efficiency, reduce
        'challenge' modulo q.
 
    6.  Form the signature of the concatenation of 'nonce_point' (57 bytes) and
-       the little-endian encoding of 'sig' (57 bytes, the ten most significant
+       the little-endian encoding of 'S' (57 bytes, the ten most significant
        bits are always zero).
 ```
 
@@ -867,11 +861,11 @@ size.
 The user profile signature is verified as defined in RFC 8032 section 5.2.7.
 
 ```
-1.  To verify a signature on a message 'M' using the public key 'H', with F
-    being 0, first split the signature into two 57-byte halves.  Decode the
-    first half as a 'nonce_point', and the second half as 'S'. Decode the public
-    key 'H' as a point.  If any of the decodings fail (including 'S' being out
-    of range), the signature is invalid.
+1.  To verify a signature on a message 'm' using the public key 'H', with f
+    being 0, and c empty, split the signature into two 57-byte halves. Decode
+    the first half as a 'nonce_point', and the second half as 'S'. Decode the
+    public key 'H' as a point.  If any of the decodings fail (including 'S'
+    being out of range), the signature is invalid.
 2.  Compute SHAKE256("SigEd448" || f || || len(c) || c || 'nonce_point' || H ||
     m). Let 'challenge' be the 114-byte encoded digest.
 3.  Check the group equation 'S' == 'nonce_point' + 'challenge' * H'.
