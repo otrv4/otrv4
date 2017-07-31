@@ -221,6 +221,12 @@ Base point (G)
      9404277809514858788439644911793978499419995990477371552926308078495,
    y=19)
 
+  On the twisted edwards curve:
+   (x=2245800402959243001876043340998960362467896416325641342461254616869
+      50415467406032909029192869357953282578032075146446173674602635247710,
+    y=2988192100784814926760179304439306734375440401540802420959282413723
+      31506189835876003536878655418784733982303233503462500531545062832660)
+
 Cofactor (c)
   4
 
@@ -435,11 +441,9 @@ The symmetric key is 57 bytes of cryptographically secure random data.
 1. Hash the 57-byte symmetric key using SHAKE256(symmetric). Store the
    digest in a 114-bytes large buffer, denoted 'h'.  Only the lower 57 bytes
    are used for generating the public key.
-// TODO: this is clamping. State it somewhere?
 2. Prune the buffer: the two least significant bits of the first
    octet are cleared, all eight bits the last octet are cleared, and the
    highest bit of the second to last octet is set.
-// TODO: include the base point.
 3. Interpret the buffer as the little-endian integer, forming a
    secret scalar 's'.  Perform a known-base-point scalar multiplication s *
    Base_point'. Let 'H' be the result of this multiplication.
@@ -828,16 +832,12 @@ The user profile signature is generated as defined in RFC 8032 section 5.2.6.
 The flag `F` is set to `0` and the context `C` is left empty.
 
 ```
-// TODO: I guess context and flag are not needed to be stated. Just for
-compatibility with RCF?
 // TODO: change var names and follow the uppercase, lowercase style for points
 or scalars
-// TODO: note that the secret key is here 57. For the rest of the spec is 56.
-// add a note?
 
 The inputs to the signing function are the symmetric key (57 bytes, defined on
-Public keys and fingerprints'), a flag 'F', which is 0, and a message 'M' of
-arbitrary size.
+'Public keys and fingerprints'. Note that the symmetric key is 57 bytes), a flag
+'F', which is 0, and a message 'M' of arbitrary size.
 
    1.  Hash the symmetric key: 'SHAKE256(symmetric)'.  Store the first 114 bytes
        of the digest on 'h'. Construct the secret key 's' from
@@ -849,8 +849,6 @@ arbitrary size.
    2.  Compute SHAKE256("SigEd448" || 'nonce' || M). Let 'r' be the 114-byte
        digest.
 
-   // TODO: add the base point of eddsa. Note that this might change. Refer to
-   RFC 7748. Check the code.
    3.  Multiply the scalar 'r' by the base point. B.  For efficiency, do this by
        first reducing 'r' modulo 'q', the group order of B.  Let 'nonce_point'
        be the encoding of this point.
@@ -878,7 +876,6 @@ The user profile signature is verified as defined in RFC 8032 section 5.2.7.
     of range), the signature is invalid.
 2.  Compute SHAKE256("SigEd448" || 'nonce_point' || H || M). Let 'challenge'
     be the 114-byte encoded digest.
-// TODO: does not need to check cofactor, is this ok?
 3.  Check the group equation 'S' == 'nonce_point' + 'challenge' * H'.
 ```
 
@@ -1947,7 +1944,7 @@ If the state is `WAITING_AUTH_I`:
   Perhaps your correspondent simply started a new AKE or they resent their Identity
   Message.
   ```
-  
+
   * Validate the Identity message. Ignore the message if validation fails.
   * If validation succeeds:
     * Forget the old `their_ecdh` and `their_dh` from the previously received
