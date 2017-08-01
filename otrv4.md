@@ -645,7 +645,6 @@ derive_ratchet_keys(K):
   return R, decide_between_chain_keys(Ca, Cb)
 ```
 
-// TODO: is this how the ratchet will behave?
 ### Rotating ECDH keys and mix key as sender
 
 Before sending the first reply (i.e. a new message considering a previous
@@ -1287,7 +1286,7 @@ A valid non-interactive Auth message is generated as follows:
 4. [Validate the prekey message](#validating-a-prekey-message).
 5. At this point, the DAKE is complete for Bob:
 	* Sets ratchet id `i` as 0.
-	* Sets `j` as 0 TODO: (which means she will ratchet again)????
+	* Sets `j` as 0
 	* Calculates ECDH shared secret `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
 	* Calculates DH shared secret `k_dh = DH(our_dh.secret, their_dh)` and `mix_key`.
 	* Extract the Public Shared Prekey from the user profile and set it as `their_shared_prekey`.
