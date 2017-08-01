@@ -120,6 +120,7 @@ with forward secrecy.
 ```
 Alice                        Prekey Server                  Bob
 --------------------------------------------------------------------------------
+// TODO: why is this in parentheses?
                                     (<--------------------- Pre-conversation: Creates
                                                             and sends a Prekey Message)
 Retrieves Bob's  ----------------->
@@ -143,9 +144,10 @@ messages while he is offline.
 Messages in a conversation can be exchanged over an insecure channel, where an
 attacker can eavesdrop or interfere with the encrypted messages.
 
-The network model provides in-order delivery of messages, and some messages
-may not be delivered.
+The network model provides in-order delivery of messages and, therefore some
+messages may not be delivered.
 
+// TODO: availability?
 OTRv4 does not protect against an active attacker performing Denial of Service
 attacks to reduce availability.
 
@@ -158,9 +160,9 @@ their respective implementations are not ready enough to allow for this
 implementation time frame. As a result, the protections mentioned in the
 following paragraphs only apply to non-quantum adversaries.
 
-The only exception is the usage of a "mix key" to provide
-some post-conversation transcript protection against potential weaknesses with
-elliptic curves and the early arrival of quantum computers.
+The only exception is the usage of a "mix key" to provide some post-conversation
+transcript protection against potential weaknesses of elliptic curves and the
+early arrival of quantum computers.
 
 In the interactive DAKE, although access to one participant's private long term
 key is required for authentication, both participants can deny having used
@@ -232,6 +234,7 @@ Identity point (I)
 Field prime (p)
   2^448 - 2^224 - 1
 
+// TODO: check this
 Order of base point (q) [prime; q < p; q * G = I]
   2^446 - 13818066809895115352007386748515426880336692474882178609894547503885
 
@@ -316,7 +319,7 @@ Multi-precision integers (MPI):
   4 byte unsigned len, big-endian
   len byte unsigned value, big-endian
   (MPIs must use the minimum-length encoding; i.e. no leading 0x00 bytes.
-   This is important when calculating public key fingerprints.)
+   This is important when calculating public key fingerprints)
 Opaque variable-length data (DATA):
   4 byte unsigned len, big-endian
   len byte data
@@ -341,8 +344,8 @@ User Profile (USER-PROF):
   Detailed in "User Profile Data Type" section
 ```
 
-In order to encode and decode `POINT` and `SCALAR` types, refer to the [Encoding and
-Decoding](#encoding-and-decoding) section.
+In order to encode and decode `POINT` and `SCALAR` types, refer to the
+[Encoding and Decoding](#encoding-and-decoding) section.
 
 ### Encoding and Decoding
 
@@ -366,7 +369,8 @@ encoded as follows:
 
 A curve point is decoded as follows:
 
-1. Interpret last bit of byte 57 as the least significant bit of the x-coordinate.
+1. Interpret last bit of byte 57 as the least significant bit of the
+   x-coordinate.
    Denote this value `x_0`.  The y-coordinate is recovered simply by
    clearing this bit.  If the resulting value is `>= p`, decoding fails.
 2. To recover the x-coordinate, the curve equation implies
@@ -379,8 +383,7 @@ A curve point is decoded as follows:
       ```
            x = ((num ^ 3) * denom * (num^5 * num^3) ^ ((p-3)/4)) (mod p)
       ```
-
-   3.  If `denom * x^2 = num`, the recovered x-coordinate is `x`.  Otherwise, no
+   2.  If `denom * x^2 = num`, the recovered x-coordinate is `x`.  Otherwise, no
        square root exists, and the decoding fails.
 3. Use the `x_0` bit to select the right square root.  If `x = 0`, and
    `x_0 = 1`, decoding fails.  Otherwise, if `x_0 != x mod 2`, set
@@ -401,6 +404,7 @@ SNIZKPK Authentication (SNIZKPK):
   c3 (SCALAR)
   r3 (SCALAR)
 ```
+
 ### Public keys and fingerprints
 
 OTRv4 introduces a new type of public key:
@@ -414,6 +418,7 @@ OTR4 public authentication Ed448 key (ED448-PUBKEY):
     H (POINT)
       H is the Ed448 public key generated as defined in RFC 8032.
 ```
+
 The public key is generated as follows (refer to RFC 8032[\[17\]](#references),
 for more information on key generation):
 
@@ -457,6 +462,7 @@ Value (len BYTE) [where len is the value of the Length field]
 ```
 
 OTRv4 supports some TLV record types from OTRv3. The supported types are:
+
 ```
 Type 0: Padding
   The value may be an arbitrary amount of data. This data should be ignored.
@@ -493,7 +499,7 @@ Type 8: Extra symmetric key
   value of the TLV begins with a 4-byte indication of what this symmetric key
   will be used for (file transfer, voice encryption, etc). After that, the
   contents are use-specific (which file, etc): there are no predefined uses.
-  Note that the value of the key itself is not placed into the TLV; your peer
+  Note that the value of the key itself is not placed into the TLV, your peer
   will compute it on its own.
 ```
 
@@ -502,9 +508,9 @@ Type 8: Extra symmetric key
 Each of the two DAKEs must authenticate its context to prevent attacks that
 rebind the DAKE transcript into different contexts. If the higher-level
 protocol ascribes some property to the connection, the DAKE exchange should
-verify this property. Given the shared session state information `phi`
+verify this property. Given a shared session state information `phi`
 associated with the higher-level context (e.g., a session identifier), the DAKE
-authenticates that both parties share the same value for `phi`.
+authenticates that both parties share the same value for `phi` (Φ).
 
 The shared session state (Φ) is any session-specific protocol state available to
 both parties in the higher-level protocol. For example, in XMPP, it will be the
@@ -527,11 +533,12 @@ Error Code List:
 
 ## Key Management
 
-In both the interactive and non-interactive DAKEs, OTRv4 uses long-term Ed448 keys, ephemeral Elliptic
-Curve Diffie-Hellman (ECDH) keys, and ephemeral Diffie-Hellman (DH) keys.
+In both the interactive and non-interactive DAKEs, OTRv4 uses long-term Ed448
+keys, ephemeral Elliptic Curve Diffie-Hellman (ECDH) keys, and ephemeral
+Diffie-Hellman (DH) keys.
 
-For exchanging data messages, OTRv4 uses both the DH ratchet (with
-ECDH) and the symmetric-key ratchet from the Double Ratchet algorithm [\[2\]](#references).
+For exchanging data messages, OTRv4 uses both the DH ratchet (with ECDH) and the
+symmetric-key ratchet from the Double Ratchet algorithm [\[2\]](#references).
 OTRv4 adds 3072-bit (384-byte) DH keys, called the mix key pair, to the
 Double Ratchet algorithm. These keys are used to protect transcripts of data
 messages in case ECC is broken. During the DAKE, both parties agree upon the
@@ -548,7 +555,7 @@ State variables:
   k: the current receiving message id.
 
 Key variables:
-  'root[i]': the Root key for the ratchet i.
+  'root[i]': the root key for the ratchet i.
   'chain_s[i][j]': the sending chain key for the message j in the ratchet i.
   'chain_r[i][k]': the receiving chain key for the message k in the ratchet i.
   'our_ecdh': our current ECDH ephemeral key pair.
@@ -556,11 +563,12 @@ Key variables:
   'our_dh': our DH ephemeral key pair.
   'their_dh': their DH ephemeral public key.
   'mix_key': the SHA3-256 of the DH shared secret previously computed.
+  // TODO: this prob does not belong here
   'mac_keys_to_reveal': the MAC keys to be revealed in next data message sent.
 ```
 
-When these events occur, the state variables are incremented and the key variable
-values are replaced:
+When these events occur, the state variables are incremented and the key
+variable values are replaced:
 
 * When you start a new [interactive DAKE](#interactive-dake-overview) by sending or receiving an [Identity message](#identity-message)
 * When you complete the [interactive DAKE](#interactive-dake-overview) by sending an [Auth-I Message](#auth-i-message)
@@ -575,7 +583,7 @@ values are replaced:
 
 ```
 generateECDH()
-  pick a random value r (57 bytes)
+  pick a random value r (57 bytes) // TODO: this is prob 56
   return our_ecdh.public = G * r, our_ecdh.secret = r
 
 generateDH()
@@ -587,18 +595,18 @@ generateDH()
 
 ```
 k_dh:
-  The 3072-bit DH shared secret computed from a DH exchange, serialized as a big-endian unsigned integer.
-  This is serialized as a big-endian unsigned integer.
+  The 3072-bit DH shared secret computed from a DH exchange, serialized as a
+  big-endian unsigned integer.
 
 mix_key:
-  A SHA3-256 hash of the shared DH key SHA3-256(k_dh).
+  A SHA3-256 hash of the shared DH key SHA3-256(k_dh). // TODO: change to KDF_1?
 
 K_ecdh:
   The serialized ECDH shared secret computed from an ECDH exchange, serialized as a POINT.
 
 K:
   The mixed shared secret is the final shared secret derived from both the
-  DH and ECDH shared secrets.
+  DH and ECDH shared secrets. // TODO: is this also a hash? with what SHA?
 ```
 
 ### Key derivation functions
@@ -673,7 +681,7 @@ To rotate the mix key:
 
   Otherwise:
 
-   * Derive and securely overwrite `mix_key = KDF_1(mix_key)`.
+   * Derive and securely overwrite `mix_key = KDF_1(mix_key)`. // TODO: or securely delete?
 
 ### Rotating ECDH keys and mix key as receiver
 
@@ -694,14 +702,17 @@ To rotate the mix key:
 
   * If `i % 3 == 0`:
 
-    * Retrieve the DH key from the received data message and assign it to their_dh.
+    * Retrieve the DH key from the received data message and assign it to
+      `their_dh`.
     * Calculate `k_dh = DH(our_dh.secret, their_dh.public)`.
     * Calculate a `mix_key = KDF_1(k_dh)`.
-    * Securely delete `our_dh.secret` (this should only be deleted after calculating the new mix key when receiving as new keys will be generated on the next DH rotation).
+    * Securely delete `our_dh.secret` (this should only be deleted after
+      calculating the new mix key when receiving as new keys will be generated
+      on the next DH rotation). // TODO: is this parenthesis comment necessary?
 
   Otherwise:
 
-   * Derive and securely overwrite `mix_key = KDF_1(mix_key)`.
+   * Derive and securely overwrite `mix_key = KDF_1(mix_key)`. // TODO: or securely delete?
 
 ### Deriving new chain keys
 
@@ -730,7 +741,8 @@ When sending or receiving data messages, you must calculate the message keys:
 
 ```
 derive_enc_mac_keys(chain_key):
-  MKenc = take_first_256_bits(KDF_2(0x01 || chain_key))
+  MKenc = take_first_256_bits(KDF_2(0x01 || chain_key)) // TODO: maybe define
+  what take_first_256_bits is?
   MKmac = KDF_2(0x02 || chain_key)
   return MKenc, MKmac
 ```
@@ -762,7 +774,8 @@ for this specification.
 
 When the user profile expires, it should be updated. Client implementation
 should determine the frequency of user's profile expiration and renewal. The
-recommended expiration time is two weeks.
+recommended expiration time is two weeks. // TODO: does the long term public key
+and shared prekey expire with the user profile? A long term public key is therefore only 2 weeks long?
 
 ### Creating a User Profile
 
@@ -779,7 +792,7 @@ To create a user profile, assemble:
    adds some protection against attacker modification of the first flow of the
    non-interactive DAKE.
 5. Profile Signature: The secret key value (`r`) of the Ed448 long term public
-   key and a flag `F` (set to zero, as defined on [RFC]8032) are used to create
+   key and a flag `f` (set to zero, as defined on [RFC]8032) are used to create
    signatures of the entire profile excluding the signature itself. The size of
    the signature is 114 bytes.
 6. Transition Signature (optional): A signature of the profile excluding Profile
@@ -795,8 +808,9 @@ untrusted server.
 A valid versions string can be created by concatenating supported version
 numbers together in any order. For example, a user who supports versions 3 and 4
 will have the 2-byte version string "43" or "34" in their profile. A user who
-only supports version 4 will have the 1-byte version string "4". Thus, a version string has
-varying size, and it is represented as a DATA type with its length specified.
+only supports version 4 will have the 1-byte version string "4". Thus, a version
+string has varying size, and it is represented as a DATA type with its length
+specified.
 
 OTRv4 supports version 3 of OTR, but not versions 1 and 2. Therefore, invalid version strings contain a "2" or a "1".
 
@@ -811,18 +825,21 @@ profile received in the DAKE is considered invalid.
 
 Before the profile expires, the user must publish an updated profile with a
 new expiration date. The client establishes the frequency of expiration - this
-can be configurable. A recommended value is two weeks.
+can be configurable. A recommended value is two weeks. // TODO: should it be
+stated when to publish the new one prior to expiration of old one, or just
+'before' is enough?
 
 ### Create the Public Shared Prekey
 
 To create a shared prekey, generate and set `our_shared_prekey` as ephemeral ECDH keys:
-* secret key `e` (57 bytes)
+* secret key `e` (57 bytes) // TODO: is this 57?
 * public key `E`.
 
 ### Create a User Profile Signature
 
 The user profile signature is generated as defined in RFC 8032 section 5.2.6.
-The flag `F` is set to `0` and the context `C` is left empty.
+The flag `f` is set to `0` and the context `C` is left empty. It is generated
+as follows:
 
 ```
 The inputs to the signing function are the symmetric key (57 bytes, defined on
@@ -830,44 +847,49 @@ The inputs to the signing function are the symmetric key (57 bytes, defined on
 'f', which is 0, a context 'c', which is empty, and a message 'm' of arbitrary
 size.
 
-   1.  Hash the symmetric key: 'SHAKE256(symmetric_key)'.  Store the first 114
+   1.  Hash the symmetric key: 'SHAKE-256(symmetric_key)'.  Store the first 114
        bytes of the digest on 'digest'. Construct the secret key 's' from
        the first half of 'digest' (57 bytes), and the corresponding public
        key 'H', as defined on 'Public keys and fingerprints' section.
-       Let 'nonce' denote the second half of 'digest' (from digest[57] to
+       Let 'nonce' denote the second half of the 'digest' (from digest[57] to
        digest[113]).
 
-   2.  Compute SHAKE256("SigEd448" || f || || len(c) || c || 'nonce' || M). Let
+   2.  Compute SHAKE-256("SigEd448" || f || len(c) || c || 'nonce' || M). Let
        'r' be the 114-byte digest.
 
    3.  Multiply the scalar 'r' by the Base Point (G). For efficiency, do this by
        first reducing 'r' modulo 'q', the group order.  Let 'nonce_point'
-       be the encoding of this point.
+       be the encoding of this point. // TODO: this is a point but encoded..
+       should it be in uppercase?
 
-   4.  Compute SHAKE256("SigEd448" || f || || len(c) || c || 'nonce_point' || H
+   4.  Compute SHAKE-256("SigEd448" || f || len(c) || c || 'nonce_point' || H
        || m). Let 'challenge' be the encoded 114-byte digest.
 
-   5.  Compute 'S = (r + 'challenge' * s) mod q'.  For efficiency, reduce
-       'challenge' modulo q.
+   5.  Compute 'challenge_scalar = (r + 'challenge' * s) mod q'.  For
+       efficiency, reduce 'challenge' modulo q. // TODO: should it be stated
+       that 'challenge' by reducing is a scalar?
 
    6.  Form the signature of the concatenation of 'nonce_point' (57 bytes) and
-       the little-endian encoding of 'S' (57 bytes, the ten most significant
-       bits are always zero).
+       the little-endian encoding of 'challenge_scalar' (57 bytes, the ten most
+       significant bits are always zero).
 ```
 
 ### Verify a User Profile Signature
 
 The user profile signature is verified as defined in RFC 8032 section 5.2.7.
+It is done as follows:
 
 ```
-1.  To verify a signature on a message 'm' using the public key 'H', with f
-    being 0, and c empty, split the signature into two 57-byte halves. Decode
-    the first half as a 'nonce_point', and the second half as 'S'. Decode the
-    public key 'H' as a point.  If any of the decodings fail (including 'S'
-    being out of range), the signature is invalid.
-2.  Compute SHAKE256("SigEd448" || f || || len(c) || c || 'nonce_point' || H ||
+1.  To verify a signature on a message 'm' using the public key 'H', with 'f'
+    being 0, and 'c' being empty, split the signature into two 57-byte halves.
+    Decode the first half as a 'nonce_point' as POINT, and the second half as
+    'challenge_scalar' as SCALAR. Decode the public key 'H' as a point. If any
+    of the decodings fail (including 'challenge_scalar' being out of range), the
+    signature is invalid.
+2.  Compute SHAKE-256("SigEd448" || f || len(c) || c || 'nonce_point' || H ||
     m). Let 'challenge' be the 114-byte encoded digest.
-3.  Check the group equation 'S' == 'nonce_point' + 'challenge' * H'.
+3.  Check the group equation 'challenge_scalar' == 'nonce_point' + 'challenge' *
+    H'.
 ```
 
 ### User Profile Data Type
@@ -886,7 +908,7 @@ User Profile (USER-PROF):
   (optional) Transitional Signature (SIG)
 ```
 
-SIG is the DSA Signature. It is the same signature used in in OTRv3.
+`SIG` is the DSA Signature. It is the same signature used in in OTRv3.
 From the OTRv3 protocol section "Public keys, signatures, and fingerprints":
 
 ```
@@ -897,7 +919,7 @@ DSA signature (SIG):
   len byte unsigned s, big-endian
 ```
 
-EDDSA-SIG refers to the OTR version 4 signature:
+`EDDSA-SIG` refers to the OTR version 4 signature:
 
 ```
 EDDSA signature (EDDSA-SIG):
@@ -912,7 +934,7 @@ To validate a user profile, you must:
 * [Verify that the user profile signature is valid](#verify-a-user-profile-signature)
 * Verify that the user profile is not expired
 * Verify that the `Versions` field contains a string with "4"
-* Validate the public shared prekey is on the curve Ed448
+* Validate that the public shared prekey is on the curve Ed448
 
 ## Online Conversation Initialization
 
@@ -947,8 +969,8 @@ Alice                                           Bob
 ---------------------------------------------------
        Query Message or Whitespace Tag -------->
        <----------------------- Identity message
-       DRE-R ---------------------------------->
-       <---------------------------------- DRE-I
+       Auth-R --------------------------------->
+       <--------------------------------- Auth-I
 ```
 
 Bob will be initiating the DAKE with Alice.
@@ -993,7 +1015,7 @@ Bob will be initiating the DAKE with Alice.
 4. Sends Bob an Auth-I message (see [Auth-I message](#auth-i-message) section).
 5. At this point, the DAKE is complete for Bob:
     * Sets ratchet id `i` as 0.
-    * Sets `j` as 0 (which means she will ratchet again).
+    * Sets `j` as 0 (which means he will ratchet again).
     * Calculates ECDH shared secret `K_ecdh`.
     * Calculates DH shared secret `k_dh` and `mix_key`.
     * Calculates Mixed shared secret `K = KDF_2(K_ecdh || mix_key)`.
@@ -1038,6 +1060,8 @@ To verify an Identity message:
 * Verify that the point `Y` received is on curve Ed448.
 * Verify that the DH public key `B` is from the correct group and that it
   does not degenerate.
+  // TODO: does this degenerate? Maybe stating that '>= 2 and <= modulus-2' is
+  the check.
 
 An Identity message is an OTR message encoded as:
 
@@ -1082,18 +1106,23 @@ A valid Auth-R message is generated as follows:
    Φ is the shared session state as mention on the 'Shared session state: Phi'
    section.
 5. Compute `sigma = Auth(Pka, ska, {Pkb, Pka, Y}, t)`.
-6. Generate a 4-byte instance tag to use as the sender's instance tag. Additional messages in this conversation will continue to use this tag as the sender's instance tag. Also, this tag is used to filter future received messages. Messages intended for this instance of the client will have this number as the receiver's instance tag.
-7. Use the sender's instance tag from the Identity Message as the receiver's instance tag.
+6. Generate a 4-byte instance tag to use as the sender's instance tag.
+   Additional messages in this conversation will continue to use this tag as the
+   sender's instance tag. Also, this tag is used to filter future received
+   messages. Messages intended for this instance of the client will have this
+   number as the receiver's instance tag.
+7. Use the sender's instance tag from the Identity Message as the receiver's
+   instance tag.
 
 To verify an Auth-R message:
 
 1. Check that the receiver's instance tag matches your sender's instance tag.
-2. Validate the user profile, and extract `Pka` from it.
+2. Validate the user profile and extract `Pka` from it.
 3. Compute `t = 0x0 || SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ)`.
    Φ is the shared session state as mention on the 'Shared session state: Phi'
    section.
 4. Verify the `sigma` with [SNIZKPK Authentication](#snizkpk-authentication),
-that is `sigma == Verify({Pkb, Pka, Y}, t)`.
+   that is `sigma == Verify({Pkb, Pka, Y}, t)`.
 
 An Auth-R message is an OTR message encoded as:
 
@@ -1138,7 +1167,7 @@ To verify the Auth-I message:
    Φ is the shared session state as mention on the 'Shared session state: Phi'
    section.
 3. Verify the `sigma` with [SNIZKPK Authentication](#snizkpk-authentication),
-that is `sigma == Verify({Pkb, Pka, X}, t)`.
+   that is `sigma == Verify({Pkb, Pka, X}, t)`.
 
 An Auth-I is an OTR message encoded as:
 
@@ -1159,9 +1188,9 @@ sigma (SNIZKPK)
 
 To begin an offline conversation, a prekey message is published to an
 untrusted server and this action is seen as the start of a non-interactive
-DAKE. Then, the prekey message is retrieved by the party attempting to send a
-message to the publisher. A reply called the non-interactive auth
-message is created with the prekey and sent. This completes the DAKE.
+DAKE. The prekey message is retrieved by the party attempting to send a
+message to the publisher. A reply called the non-interactive auth message is
+created with the prekey and sent. This completes the DAKE.
 
 The offline DAKE is based on the XZDH protocol [\[1\]](#references). Like the
 interactive DAKE, it also uses a SNIZKPK for authentication (Auth).
@@ -1198,7 +1227,8 @@ Verify & Decrypt message
 
 **Bob:**
 
-1. Generates a [prekey message](#prekey-message).
+1. Generates a [prekey message](#prekey-message), as described in the section
+   [Prekey message](#prekey-message).
 2. Publishes the prekey message to the untrusted server.
 
 **Alice:**
@@ -1209,8 +1239,8 @@ Verify & Decrypt message
     * Picks a compatible version of OTR listed in Bob's profile.
       If the versions are incompatible, Bob does not send any further
       messages.
-    * Validates the received ECDH ephemeral public key is on curve Ed448 and
-      sets it as `their_ecdh`.
+    * Validates that the received ECDH ephemeral public key is on curve Ed448
+      and sets it as `their_ecdh`.
     * Validates that the received DH ephemeral public key is on the correct
       group and sets it as `their_dh`.
 3. Generates and sets `our_ecdh` as ephemeral ECDH keys.
@@ -1232,13 +1262,17 @@ It is created as follows:
 1. Create a user profile, as detailed [here](#creating-a-user-profile).
 2. Create the first one-time use prekey by generating the ephemeral
    ECDH key pair:
-   * secret key `y` (57 bytes).
+   * secret key `y` (57 bytes). // TODO: is this 57?
    * public key `Y`.
 3. Create the second one-time use prekey by generating the ephemeral
    DH key pair:
    * secret key `b` (80 bytes).
    * public key `B`.
-4. Generate a 4-byte instance tag to use as the sender's instance tag. Additional messages in this conversation will continue to use this tag as the sender's instance tag. Also, this tag is used to filter future received messages. Messages intended for this instance of the client will have this number as the receiver's instance tag.
+4. Generate a 4-byte instance tag to use as the sender's instance tag.
+   Additional messages in this conversation will continue to use this tag as the
+   sender's instance tag. Also, this tag is used to filter future received
+   messages. Messages intended for this instance of the client will have this
+   number as the receiver's instance tag.
 
 ```
 Protocol version (SHORT)
@@ -1265,6 +1299,7 @@ B Prekey owner's DH public key (MPI)
 ### Validating a Prekey Message
 
 To validate a prekey message:
+
 * [Validate the user profile](#validating-a-user-profile)
 * Check that the ECDH public key `Y` is on curve Ed448.
 * Verify that the DH public key `B` is from the correct group and that it
@@ -1276,9 +1311,11 @@ This message terminates the non-interactive AKE and also contains an encrypted d
 
 A valid non-interactive Auth message is generated as follows:
 
+// TODO: state that this is Bob?
+
 1. Create a user profile, as detailed [here](#creating-a-user-profile).
 2. Generate an ephemeral ECDH key pair:
-  * secret key `x` (57 bytes).
+  * secret key `x` (57 bytes). // TODO: is this 57?
   * public key `X`.
 3. Generate an ephemeral DH key pair:
   * secret key `a` (80 bytes).
@@ -1293,22 +1330,31 @@ A valid non-interactive Auth message is generated as follows:
 	* Calculates `κ = KDF_2(K_ecdh || ECDH(x, their_shared_prekey) || ECDH(x, Pkb) || k_dh)`.
 	* Computes the Auth MAC key `Mk = KDF_2(0x01 || κ)`.
 	* Computes the Mixed shared secret `K = KDF_2(0x02 || κ)`.
-	* Calculates the SSID from shared secret: it is the first 8 bytes of `KDF_2(0x00 || K)`.
+	* Calculates the SSID from shared secret: it is the first 8 bytes of
+	  `KDF_2(0x00 || K)`.
    * Calculates the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
-   * [Decides which chain key he will use](#deciding-between-chain-keys).
+   * [Decides which chain key will used](#deciding-between-chain-keys).
 6. Compute `t = SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ) || their_shared_prekey`.
-7. Compute `sigma = Auth(Pka, ska, {Pkb, Pka, Y}, t)`. While computing `sigma`, keep the first 192 bits
-   of the generated `c` value to be used as a nonce in the next step.
-8. Follow the section ["When you send a Data Message"](when-you-send-a-data-message) to generate an
+7. Compute `sigma = Auth(Pka, ska, {Pkb, Pka, Y}, t)`. While computing `sigma`,
+   keep the first 192 bits of the generated `c` value to be used as a nonce in
+   the next step. //TODO: is this also for interactive?
+8. Follow the section
+   ["When you send a Data Message"](when-you-send-a-data-message) to generate an
    encrypted message, using the nonce set in the previous step.
 9. Compute `Auth MAC = SHA3-256(Mk || t || encrypted_data_message)`.
-10. Generate a 4-byte instance tag to use as the sender's instance tag. Additional messages in this conversation will continue to use this tag as the sender's instance tag. Also, this tag is used to filter future received messages. Messages intended for this instance of the client will have this number as the receiver's instance tag.
+10. Generate a 4-byte instance tag to use as the sender's instance tag.
+    Additional messages in this conversation will continue to use this tag as
+    the sender's instance tag. Also, this tag is used to filter future received
+    messages. Messages intended for this instance of the client will have this
+    number as the receiver's instance tag.
 
 To verify a non-interactive Auth message:
 
+// TODO: state that this is Alice?
+
 1. Check that the receiver's instance tag matches your sender's instance tag.
 2. Validate the user profile, and extract `Pka` from it.
-3. Verifies that both ECDH and DH one-time use prekeys remain unused.
+3. Verify that both ECDH and DH one-time use prekeys remain unused.
 4. Compute `t = SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ) || our_shared_prekey.public`.
 5. Verify the `sigma` with [SNIZKPK Authentication](#snizkpk-authentication),
    as in check `sigma == Verify({Pkb, Pka, Y}, t)`.
@@ -1318,25 +1364,29 @@ To verify a non-interactive Auth message:
 	* Calculates `κ = KDF_2(K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(Ska, X) || k_dh)`.
 	* Computes the Auth MAC key `Mk = KDF_2(0x01 || κ)`.
 	* Computes the Mixed shared secret `K = KDF_2(0x02 || κ)`.
-	* Calculates the SSID from shared secret: it is the first 8 bytes of `KDF_2(0x00 || K)`.
+	* Calculates the SSID from shared secret: it is the first 8 bytes of
+	  `KDF_2(0x00 || K)`.
    * Calculates the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
    * [Decides which chain key he will use](#deciding-between-chain-keys).
 7. Verify the Auth Mac:
    * Extract the encrypted data message.
    * Compute `tag = SHA3-256(MK, || t || encrypted_data_message)`.
-   * Extract the Auth MAC from the message and verify that `tag` is equal to the Auth MAC. If it is not,
-     ignore the non-interactive auth message.
-8. Set the message ID `j = 1` and compute the receiving chain key and calculate the encryption key:
+   * Extract the Auth MAC from the message and verify that `tag` is equal to the
+     Auth MAC. If it is not, ignore the non-interactive auth message.
+8. Set the message ID `j = 1` and compute the receiving chain key and calculate
+   the encryption key:
+
    ```
    compute_chain_key(chain_r, ratchet_id, j)
    MKenc, MKmac = derive_enc_mac_keys(chain_r[ratchet_id][message_id])
    ```
-9. Discard the `MKmac` key because it is not necessary for the first message delivered through a
-   non-interactive auth message.
+
+9. Discard the `MKmac` key because as it is not necessary for the first message
+   delivered through a non-interactive auth message.
 10. Setup the rest of the double ratchet key management system:
     * Set `their_ecdh` as the "Sender's Public ECDH key" from the message.
     * Set `their_dh` as the "Sender's Public DH Key" from the message, if it
-      is not NULL.
+      is not `NIL`.
     * Add the Auth MAC key to list `mac_keys_to_reveal`.
 
 A non-interactive Auth is an OTR message encoded as:
@@ -1372,7 +1422,8 @@ A (MPI)
   this is NOT a POINT.
 
 Auth MAC (MAC)
-  The SHA3 MAC with the appropriate MAC key (see above) for the message of the SNIZKPK.
+  The SHA3 MAC with the appropriate MAC key (see above) for the message of the
+  SNIZKPK.
 
 Sigma (SNIZKPK)
   The SNIZKPK Auth value.
@@ -1415,7 +1466,7 @@ Use the following checks to validate a prekey message. If any checks fail,
 ignore the message:
 
   * Check if the user profile is not expired
-  * Check if the OTR version of the prekey message matches one of the versions 
+  * Check if the OTR version of the prekey message matches one of the versions
     signed in the user profile contained in the prekey message
   * Check if the user profile version is supported by the receiver
 
@@ -1430,22 +1481,22 @@ If many prekey messages are received:
   * Remove all invalid prekey messages.
   * Remove all duplicate prekey messages in the list.
   * If multiple valid messages remain, check for invalid situations:
-      * If multiple prekey messages exist with the same instance tag, the same version,
-        and the same long term keys in the user profile, then one of the messages is
-        invalid. The safest thing to do is to remove all prekey messages associated
-        with this situation.
+      * If multiple prekey messages exist with the same instance tag, the same
+        version, and the same long term keys in the user profile, then one of
+        the messages is invalid. The safest thing to do is to remove all prekey
+        messages associated with this situation.
   * If one prekey message remains:
-      * Decide whether to send a message using this prekey message based on whether the
-        long term key within the use profile is trusted or not.
+      * Decide whether to send a message using this prekey message based on
+        whether the long term key within the use profile is trusted or not.
   * If multiple valid prekey messages remain:
       * If there are keys that are untrusted and trusted in the list of
         messages, decide whether to only use messages that contain trusted long
         term keys.
-      * If there are several instance tags in the list of prekey messages, decide
-        whether to send one message per instance tag or to send a message
+      * If there are several instance tags in the list of prekey messages,
+        decide whether to send one message per instance tag or to send a message
         only to one instance tag.
-          * If there are multiple prekey messages per instance tag, decide whether to
-            send multiple messages to the same instance tag.
+      * If there are multiple prekey messages per instance tag, decide
+        whether to send multiple messages to the same instance tag.
 
 ## Data Exchange
 
@@ -1600,11 +1651,11 @@ In both cases:
    Encrypted_message = XSalsa20_Enc(MKenc, nonce, m)
    ```
 
-  * When creating a non-interactive auth message, do not create a MAC tag. This is
-    not necessary since the MAC tag created with the non-interactive DAKE includes
-    the data message. When creating a regular data message, use the MAC key to create
-    a MAC tag. MAC all the sections of the data message from the protocol version to
-    the encrypted message.
+  * When creating a non-interactive auth message, do not create a MAC tag. This
+    is not necessary since the MAC tag created with the non-interactive DAKE
+    includes the data message. When creating a regular data message, use the MAC
+    key to create a MAC tag. MAC all the sections of the data message from the
+    protocol version to the encrypted message.
 
    ```
    Authenticator = KDF_2(MKmac || Data_message_sections)
@@ -1646,7 +1697,8 @@ the communicating parties for use of application-specific purposes, such as
 file transfer, voice encryption, etc. When one party wishes to use the extra
 symmetric key, they create a type `8 TLV` attached to a Data Message. The key
 itself is then derived from `K`. The extra symmetric key is derived by
-calculating `KDF_2(0xFF || K)`.
+calculating `KDF_2(0xFF || K)`. // TODO: state that only the first bytes are
+used
 
 Upon receipt of the Data Message containing the type 8 TLV, the recipient will
 compute the extra symmetric key in the same way. Note that the value of the
@@ -1655,6 +1707,7 @@ extra symmetric key is not contained in the TLV itself.
 ### Revealing MAC Keys
 
 We reveal old MAC keys to provide [forgeability of messages](#forging-transcripts).
+
 Old MAC keys are keys from already received messages and, therefore, will no
 longer be used to verify the authenticity of the message.
 
@@ -1924,6 +1977,7 @@ If the state is `WAITING_AUTH_R`:
   * If validation succeeds:
     * Compare the `X` (as a 57-byte unsigned little-endian value) you sent in your
       Identity message with the value from the message you received.
+    // TODO: this case might be unreachable
     * If yours is the lower hash value:
       * Ignore the received Identity message, but resend your Identity message.
     * Otherwise:
