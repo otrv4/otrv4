@@ -1412,19 +1412,22 @@ prekey messages, the non-interactive DAKE must wait until one can be obtained.
 The following guide is meant to help implementers identify and remove invalid
 prekey messages and invalid situations.
 
-Use the following checks to validate a prekey message. If any of them fail,
+Use the following checks to validate a prekey message. If any checks fail,
 ignore the message:
+
   * Check if the user profile is not expired
-  * Check if the OTR version of the prekey message matches one of the versions
-  * signed in the user profile contained in the prekey message
+  * Check if the OTR version of the prekey message matches one of the versions 
+    signed in the user profile contained in the prekey message
   * Check if the user profile version is supported by the receiver
 
 If one prekey message is received:
+
   * If the prekey message is valid, decide whether to send a non-interactive
     auth message based on whether the long term key in the use profile is
     trusted or not.
 
 If many prekey messages are received:
+
   * Remove all invalid prekey messages.
   * Remove all duplicate prekey messages in the list.
   * If multiple valid messages remain, check for invalid situations:
@@ -1847,9 +1850,9 @@ the AKE according to one compatible version he supports.
 ##### Whitespace Tags
 
 If Alice wishes to communicate to Bob that she is willing to use OTR, she can
-attach a special whitespace tag to any plaintext message she sends him. This tag
-may occur anywhere in the message, and may be hidden from the user (as in the
-[Query Messages](#query-messages), above).
+attach a special whitespace tag to any plaintext message she sends him. Like
+[Query Messages](#query-messages), whitespace tags may occur anywhere in the
+message, and may be hidden from the user.
 
 The tag consists of the following 16 bytes, followed by one or more sets of 8
 bytes indicating the version of OTR Alice is willing to use:
@@ -1999,6 +2002,7 @@ If the state is not `WAITING_AUTH_I`:
 #### Receiving a non-interactive auth message
 
 If the state is `FINISHED`:
+
     * Ignore the non-interactive auth message.
 
 Else:
@@ -2731,6 +2735,7 @@ If authstate is `AUTHSTATE_NONE`:
     `AUTHSTATE_AWAITING_REVEALSIG`.
 
 If authstate is `AUTHSTATE_AWAITING_DHKEY`:
+
   * This indicates that you have already sent a `D-H Commit message` to your
     peer, but that it either didn't receive it, or just didn't receive it yet
     and has sent you one as well. The symmetry will be broken by comparing the
@@ -2738,18 +2743,22 @@ If authstate is `AUTHSTATE_AWAITING_DHKEY`:
     considered as 32-byte unsigned big-endian values.
 
   * If yours is the higher hash value:
+
     * Ignore the incoming `D-H Commit message`, but resend your
       `D-H Commit message`.
 
   * Otherwise:
+
     * Forget the old encrypted `gx` value that you sent earlier, and pretend
       you're in `AUTHSTATE_NONE`. For example, reply with a `D-H Key Message`,
       and transition `authstate` to `AUTHSTATE_AWAITING_REVEALSIG`.
 
 If authstate is `AUTHSTATE_AWAITING_REVEALSIG`:
+
   * Retransmit your `D-H Key Message` (the same one you sent when you entered
     `AUTHSTATE_AWAITING_REVEALSIG`). Forget the old `D-H Commit message` and
     use this new one instead.
+
     There are a number of reasons this might happen, including:
 
     * Your correspondent simply started a new AKE.
@@ -2761,6 +2770,7 @@ If authstate is `AUTHSTATE_AWAITING_REVEALSIG`:
       will see each of the `D-H Key Messages` sent.
 
 If authstate is `AUTHSTATE_AWAITING_SIG`:
+
   * Reply with a new `D-H Key message` and transition authstate to
     `AUTHSTATE_AWAITING_REVEALSIG`.
 
@@ -2773,6 +2783,7 @@ If the message is version 3 and version 3 is not allowed, ignore this message.
 Otherwise:
 
 If authstate is `AUTHSTATE_AWAITING_DHKEY`:
+
   * Reply with a `Reveal Signature Message` and transition authstate to
     `AUTHSTATE_AWAITING_SIG`.
 
@@ -2787,6 +2798,7 @@ If authstate is `AUTHSTATE_AWAITING_SIG`:
 
 If authstate is `AUTHSTATE_NONE`, `AUTHSTATE_AWAITING_REVEALSIG`, or
 `AUTHSTATE_V1_SETUP`:
+
   * Ignore the message.
 
 #### Receiving a Signature Message
@@ -2797,6 +2809,7 @@ using, ignore the message.
 If version 3 is not allowed, ignore this message. Otherwise:
 
 If authstate is AUTHSTATE_AWAITING_SIG:
+
   * Decrypt the encrypted signature, and verify the signature and the MACs. If everything checks out:
 
     * Transition authstate to AUTHSTATE_NONE.
@@ -2804,7 +2817,9 @@ If authstate is AUTHSTATE_AWAITING_SIG:
     * If there is a recent stored message, encrypt it and send it as a Data Message.
 
   * Otherwise, ignore the message.
+
 If authstate is AUTHSTATE_NONE, AUTHSTATE_AWAITING_DHKEY or AUTHSTATE_AWAITING_REVEALSIG:
+
   * Ignore the message.
 
 #### Receiving a Reveal Signature Message
@@ -2815,6 +2830,7 @@ using, ignore the message.
 If version 3 is not allowed, ignore this message. Otherwise:
 
 If authstate is AUTHSTATE_AWAITING_REVEALSIG:
+
   * Use the received value of r to decrypt the value of gx received in the D-H Commit Message, and verify the hash therein.
   * Decrypt the encrypted signature, and verify the signature and the MACs. If everything checks out:
 
@@ -2824,7 +2840,9 @@ If authstate is AUTHSTATE_AWAITING_REVEALSIG:
     * If there is a recent stored message, encrypt it and send it as a Data Message.
 
   * Otherwise, ignore the message.
+
 If authstate is AUTHSTATE_NONE, AUTHSTATE_AWAITING_DHKEY or AUTHSTATE_AWAITING_SIG:
+
   * Ignore the message.
 
 #### Reveal Signature Message
