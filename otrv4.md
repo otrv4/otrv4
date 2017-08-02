@@ -120,7 +120,6 @@ with forward secrecy.
 ```
 Alice                        Prekey Server                  Bob
 --------------------------------------------------------------------------------
-// TODO: why is this in parentheses?
                                     (<--------------------- Pre-conversation: Creates
                                                             and sends a Prekey Message)
 Retrieves Bob's  ----------------->
@@ -135,9 +134,9 @@ Exchanges Data Messages <---------------------------------->  Exchanges Data Mes
 ```
 
 In this conversation flow, Alice first retrieves a Prekey message from a prekey
-server. This prekey message was uploaded by Bob's client prior to the start of
-the conversation to allow other participants, like Alice, to send him encrypted
-messages while he is offline.
+server. Prior to the start of the conversation, this prekey message was uploaded
+by Bob's client to a server. This was done in order to allow other participants,
+like Alice, to send him encrypted messages while he is offline.
 
 ## Assumptions
 
@@ -148,6 +147,7 @@ The network model provides in-order delivery of messages and, therefore some
 messages may not be delivered.
 
 // TODO: availability?
+
 OTRv4 does not protect against an active attacker performing Denial of Service
 attacks to reduce availability.
 
@@ -180,7 +180,7 @@ not have participation deniability, but Bob, the receiver, does.
 Once a channel has been created with the DAKE, all data messages transmitted
 through this channel are confidential and have integrity. After a MAC key is
 used to validate a received message, it is revealed in the first message sent
-in the next ratchet. This allows for forgeability of the data messages and
+in the next ratchet. This allows forgeability of the data messages and
 consequent deniability of their contents.
 
 If key material used to encrypt a particular data message is compromised,
@@ -205,6 +205,9 @@ point: `C = B * a`.
 The concatenation of byte sequences `I` and `J` is `I || J`. In this case, `I`
 and `J` represent a fixed-length byte sequence encoding the respective values.
 See the section on [Data Types](#data-types) for encoding and decoding details.
+
+A scalar modulo `q` is a field element, and should be encoded and decoded
+as a SCALAR type, which is defined in the [Data Types](#data-types) section.
 
 ### Elliptic Curve Parameters
 
@@ -234,16 +237,12 @@ Identity point (I)
 Field prime (p)
   2^448 - 2^224 - 1
 
-// TODO: check this
 Order of base point (q) [prime; q < p; q * G = I]
   2^446 - 13818066809895115352007386748515426880336692474882178609894547503885
 
 Non-square element in Z_p (d)
   -39081
 ```
-
-A scalar modulo `q` is a field element, and should be encoded and decoded
-as a SCALAR type, which is defined in the [Data Types](#data-types) section.
 
 ### 3072-bit Diffie-Hellman Parameters
 
@@ -340,6 +339,9 @@ Ed448 point (POINT):
 Ed448 scalar (SCALAR):
   56 bytes data
 
+Ed448 secret scalar (SECRET_SCALAR):
+  57 bytes data
+
 User Profile (USER-PROF):
   Detailed in "User Profile Data Type" section
 ```
@@ -354,7 +356,7 @@ We follow the encoding and decoding schemes specified in RFC 8032 [\[17\]](#refe
 #### Scalar
 
 Encoded as a little-endian array of 56 bytes, e.g.
-`h[0] + 2^8 * h[1] + ... + 2^448 * h[55]`.
+`h[0] + 2^8 * h[1] + ... + 2^448 * h[55]`. Take into account that the `SECRET_SCALAR` (the ones used for public key generation) is 57 bytes long.
 
 #### Point
 
@@ -369,10 +371,9 @@ encoded as follows:
 
 A curve point is decoded as follows:
 
-1. Interpret last bit of byte 57 as the least significant bit of the
-   x-coordinate.
-   Denote this value `x_0`.  The y-coordinate is recovered simply by
-   clearing this bit.  If the resulting value is `>= p`, decoding fails.
+1. Interpret the last bit of byte 57 as the least significant bit of the
+   x-coordinate. Denote this value `x_0`.  The y-coordinate is recovered simply
+   by clearing this bit.  If the resulting value is `>= p`, decoding fails.
 2. To recover the x-coordinate, the curve equation implies
    `x^2 = (y^2 - 1) / (d * y^2 - 1) (mod p)`.  The denominator is always
    non-zero mod p.
@@ -388,7 +389,6 @@ A curve point is decoded as follows:
 3. Use the `x_0` bit to select the right square root.  If `x = 0`, and
    `x_0 = 1`, decoding fails.  Otherwise, if `x_0 != x mod 2`, set
    `x <-- p - x`.  Return the decoded point `(x,y)`.
-
 
 ### Serializing the SNIZKPK Authentication
 
@@ -415,6 +415,9 @@ OTR4 public authentication Ed448 key (ED448-PUBKEY):
   Pubkey type (SHORT)
     Ed448 public keys have type 0x0010
 
+    s (SECRET_SCALAR)
+      s is the Ed448 secret scalar generated as defined in RFC 8032.
+
     H (POINT)
       H is the Ed448 public key generated as defined in RFC 8032.
 ```
@@ -423,15 +426,15 @@ The public key is generated as follows (refer to RFC 8032[\[17\]](#references),
 for more information on key generation):
 
 ```
-The symmetric key is 57 bytes of cryptographically secure random data.
+The symmetric key (SYM_KEY) is 57 bytes of cryptographically secure random data.
 
-1. Hash the 57-byte symmetric key using SHAKE256(symmetric_key). Store the
+1. Hash the 57-byte symmetric key using SHAKE-256(SYM_KEY). Store the
    digest in a 114-bytes large buffer, denoted 'h'.  Only the lower 57 bytes
    are used for generating the public key.
 2. Prune the buffer: the two least significant bits of the first
-   octet are cleared, all eight bits the last octet are cleared, and the
+   octet are cleared, all eight bits of the last octet are cleared, and the
    highest bit of the second to last octet is set.
-3. Interpret the buffer as the little-endian integer, forming a
+3. Interpret the buffer as the little-endian integer, forming the
    secret scalar 's'.  Perform a known-base-point scalar multiplication s *
    'Base point (G)'. Let 'H' be the result of this multiplication.
 ```
@@ -445,8 +448,11 @@ comparison may be used. For the first, the full fingerprint is included in the
 authentication. To make manual comparison easier, two versions of the
 fingerprint may be used:
 
-* Truncation to 56 bytes (224-bit security level)
-* Truncation to 32 bytes (128-bit security level)
+// TODO: are we using the first bytes?
+
+* Use of the 56 bytes from the `SHA3-512(byte(H))` (224-bit security level)
+* Use of the first 32 bytes from the `SHA3-512(byte(H))` (128-bit security
+  level)
 
 ### TLV Record Types
 
@@ -494,7 +500,7 @@ Type 6: SMP Abort Message
 
 Type 8: Extra symmetric key
   If you wish to use the extra symmetric key, compute it yourself as outlined
-  in the section "Extra symmetric key". Then send this type 8 TLV to your peer
+  in the section "Extra symmetric key". Then send this 'type 8 TLV' to your peer
   to indicate that you'd like to use the extra symmetric key for something. The
   value of the TLV begins with a 4-byte indication of what this symmetric key
   will be used for (file transfer, voice encryption, etc). After that, the
@@ -505,16 +511,18 @@ Type 8: Extra symmetric key
 
 ### Shared Session State
 
-Each of the two DAKEs must authenticate its context to prevent attacks that
-rebind the DAKE transcript into different contexts. If the higher-level
-protocol ascribes some property to the connection, the DAKE exchange should
-verify this property. Given a shared session state information `phi`
-associated with the higher-level context (e.g., a session identifier), the DAKE
-authenticates that both parties share the same value for `phi` (Φ).
+Both the interactive and non-interactive DAKE must authenticate their contexts
+to prevent attacks that rebind the DAKE transcript into different contexts. If
+the higher-level protocol ascribes some property to the connection, the DAKE
+exchange should verify this property. Given a shared session state information
+`phi` (e.g., a session identifier) associated with the higher-level context
+(e.g., XMPP), the DAKE authenticates that both parties share the same value for
+`phi` (Φ).
 
-The shared session state (Φ) is any session-specific protocol state available to
-both parties in the higher-level protocol. For example, in XMPP, it will be the
-node and domain identifiers of the Jabber identifier, e.g. alice@jabber.net.
+Therefore, the shared session state (Φ) is any session-specific protocol state
+available to both parties in the higher-level protocol. For example, in XMPP, it
+will be the node and domain identifiers of the Jabber identifier, e.g.
+`alice@jabber.net`.
 
 ### OTR Error Messages
 
@@ -563,27 +571,36 @@ Key variables:
   'our_dh': our DH ephemeral key pair.
   'their_dh': their DH ephemeral public key.
   'mix_key': the SHA3-256 of the DH shared secret previously computed.
-  // TODO: this prob does not belong here
-  'mac_keys_to_reveal': the MAC keys to be revealed in next data message sent.
+  'mac_keys_to_reveal': the MAC keys to be revealed in the first data message
+  sent of the next ratchet.
 ```
+
+// TODO: does this happen in all of them?
 
 When these events occur, the state variables are incremented and the key
 variable values are replaced:
 
-* When you start a new [interactive DAKE](#interactive-dake-overview) by sending or receiving an [Identity message](#identity-message)
-* When you complete the [interactive DAKE](#interactive-dake-overview) by sending an [Auth-I Message](#auth-i-message)
-* When you complete the [interactive DAKE](#interactive-dake-overview) by receiving and validating an [Auth-I Message](#auth-i-message)
+* When you start a new [interactive DAKE](#interactive-dake-overview) by sending
+  or receiving an [Identity message](#identity-message)
+* When you complete the [interactive DAKE](#interactive-dake-overview) by
+  sending an [Auth-I Message](#auth-i-message)
+* When you complete the [interactive DAKE](#interactive-dake-overview) by
+  receiving and validating an [Auth-I Message](#auth-i-message)
 * When you [send a Data Message or receive a Data Message](#data-exchange)
 * When you [send a TLV type 1 (Disconnected)](#sending-a-tlv-type-1--disconnected--message)
 * When you [receive a TLV type 1 (Disconnected)](#receiving-a-tlv-type-1--disconnected--message)
-* When you complete a non-interactive DAKE by [sending a non-interactive auth message](#sending-an-encrypted-message-to-an-offline-participant)
-* When you complete a non-interactive DAKE by [receiving and validating a non-interactive auth message](#receiving-a-non-interactive-auth-message)
+* When you complete a non-interactive DAKE by
+  [sending a non-interactive auth message](#sending-an-encrypted-message-to-an-offline-participant)
+* When you complete a non-interactive DAKE by
+  [receiving and validating a non-interactive auth message](#receiving-a-non-interactive-auth-message)
 
 ### Generating ECDH and DH keys
 
 ```
+// TODO: not actually generated as this. This is also clamped.
+
 generateECDH()
-  pick a random value r (57 bytes) // TODO: this is prob 56
+  pick a random value r (57 bytes)
   return our_ecdh.public = G * r, our_ecdh.secret = r
 
 generateDH()
@@ -602,7 +619,8 @@ mix_key:
   A SHA3-256 hash of the shared DH key SHA3-256(k_dh). // TODO: change to KDF_1?
 
 K_ecdh:
-  The serialized ECDH shared secret computed from an ECDH exchange, serialized as a POINT.
+  The serialized ECDH shared secret computed from an ECDH exchange, serialized
+  as a POINT.
 
 K:
   The mixed shared secret is the final shared secret derived from both the
