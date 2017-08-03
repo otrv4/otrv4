@@ -1392,9 +1392,8 @@ A valid non-interactive Auth message is generated as follows:
 4. [Validate the prekey message](#validating-a-prekey-message).
 5. Compute `t = SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ) || their_shared_prekey`.
 7. Compute `sigma = Auth(Pka, ska, {Pkb, Pka, Y}, t)`. While computing `sigma`,
-   keep the first 192 bits of the generated `c` value to be used as a nonce in
-   the next step. //TODO: is this also for interactive?
-   // TODO: to say here the c value is quite confusing // Say this is nonce
+   keep the first 192 bits of the generated `c` value to be used as a `nonce` in
+   the next step.
 8. A message can be optionally attached at this point. Follow the section
    ["When you send a Data Message"](when-you-send-a-data-message) to generate an
    encrypted message, using the nonce set in the previous step. This will be
@@ -1513,8 +1512,7 @@ ignore the message:
 If one prekey message is received:
 
   * If the prekey message is valid, decide whether to send a non-interactive
-    auth message based on whether the long term key in the use profile is
-    trusted or not.
+    auth message if the long term key in the use profile is trusted or not.
 
 If many prekey messages are received:
 
@@ -1526,8 +1524,8 @@ If many prekey messages are received:
         the messages is invalid. The safest thing to do is to remove all prekey
         messages associated with this situation.
   * If one prekey message remains:
-      * Decide whether to send a message using this prekey message based on
-        whether the long term key within the use profile is trusted or not.
+      * Decide whether to send a message using this prekey message if the long
+        term key within the use profile is trusted or not.
   * If multiple valid prekey messages remain:
       * If there are keys that are untrusted and trusted in the list of
         messages, decide whether to only use messages that contain trusted long
@@ -1655,17 +1653,19 @@ has been set to `0`, keys should be rotated.
 
 Given a new ratchet:
 
-  * Rotate the ECDH keys and mix key, see "Rotating ECDH keys and mix key" section.
+  * Rotate the ECDH keys and mix key, see "Rotating ECDH keys and mix key"
+    section.
     The new ECDH public key created by the sender with this process will be the
     "Public ECDH Key" for the message. If a new public DH key is created in
     this process, it will be the "Public DH Key" for the message. If it is
     not created, then it will be empty.
   * Calculate the `K = KDF_2(K_ecdh || mix_key)`.
-  * Derive new set of keys `root[i], chain_s[i][0], chain_r[i][0] = derive_ratchet_keys(K)`.
+  * Derive new set of keys
+    `root[i], chain_s[i][0], chain_r[i][0] = derive_ratchet_keys(K)`.
   * Securely delete the root key and all chain keys from the ratchet `i-2`.
   * Securely delete `K`.
-  * Forget and reveal MAC keys. The conditions for revealing MAC keys is
-    stated in the [Revealing MAC keys](#revealing-mac-keys) section.
+  * If present, forget and reveal MAC keys. The conditions for revealing MAC
+    keys are stated in the [Revealing MAC keys](#revealing-mac-keys) section.
 
 Otherwise:
 
@@ -1682,9 +1682,9 @@ In both cases:
    ```
 
   * When creating a non-interactive auth message, construct a `nonce` from the
-    first 24 bytes of the `c` variable created when constructing `sigma`. When
-    creating a regular data message, generate a new random 24 bytes value to be
-    the `nonce`.
+    first 24 bytes of the `c` variable created when constructing `sigma`. See
+    SNIZKPK Authentication section. When creating a regular data message,
+    generate a new random 24 bytes value to be the `nonce`.
   * Use the encryption key to encrypt the message:
 
    ```
@@ -1737,8 +1737,7 @@ the communicating parties for use of application-specific purposes, such as
 file transfer, voice encryption, etc. When one party wishes to use the extra
 symmetric key, they create a type `8 TLV` attached to a Data Message. The key
 itself is then derived from `K`. The extra symmetric key is derived by
-calculating `KDF_2(0xFF || K)`. // TODO: state that only the first bytes are
-used
+calculating `KDF_2(0xFF || K)`. // TODO: are only the first bytes used?
 
 Upon receipt of the Data Message containing the type 8 TLV, the recipient will
 compute the extra symmetric key in the same way. Note that the value of the
@@ -1746,17 +1745,14 @@ extra symmetric key is not contained in the TLV itself.
 
 ### Revealing MAC Keys
 
-We reveal old MAC keys to provide [forgeability of messages](#forging-transcripts).
-
-Old MAC keys are keys from already received messages and, therefore, will no
-longer be used to verify the authenticity of the message.
-
-The first data message sent every ratchet reveals MAC keys.
-
-Old MAC keys are formatted as a list of concatenated 64 byte values.
+Old MAC keys are keys from already received messages and that, therefore, will
+no longer be used to verify the authenticity of the message. We reveal them in
+order to provide [forgeability of messages](#forging-transcripts).
 
 A MAC key is added to `mac_keys_to_reveal` after a participant has verified
-a message associated with the MAC key.
+a message associated with that MAC key. Old MAC keys are formatted as a list of
+concatenated 64 byte values. The first data message sent every ratchet reveals
+them.
 
 ## Fragmentation
 
@@ -1854,6 +1850,8 @@ required and if it will advertise OTR support.
 
 ### Protocol states
 
+// TODO: is there a state for non interactive Auth? How will this be handled?
+
 ```
 START
 
@@ -1950,7 +1948,8 @@ The tag consists of the following 16 bytes, followed by one or more sets of 8
 bytes indicating the version of OTR Alice is willing to use:
 
 ```
-  Always send "\x20\x09\x20\x20\x09\x09\x09\x09" "\x20\x09\x20\x09\x20\x09\x20\x20",
+  Always send "\x20\x09\x20\x20\x09\x09\x09\x09"
+  "\x20\x09\x20\x09\x20\x09\x20\x20",
   followed by one or more of:
     "\x20\x20\x09\x09\x20\x20\x09\x09" to indicate a willingness to use OTR version 3 with Bob
     "\x20\x20\x09\x09\x20\x09\x20\x20" to indicate a willingness to use OTR version 4 with Bob
@@ -1997,11 +1996,16 @@ If the Query message offers OTR version 3 and version 3 is allowed:
 
 #### Receiving an Identity message
 
+// TODO: what will happen if state is `AUTH_R` or `AUTH_I` and a prekey is requested?
+
+// If one is on state `WAITING_AUTH_I` and a noninteractive is received?
+
 If the state is `START`:
 
   * Validate the Identity message. Ignore the message if validation fails.
   * If validation succeeds:
-    * Remember the sender's instance tag to use as the receiver's instance tag for future messages.
+    * Remember the sender's instance tag to use as the receiver's instance tag
+      for future messages.
     * Reply with an Auth-R message.
     * Transition to the `WAITING_AUTH_R` state.
 
@@ -2028,9 +2032,10 @@ If the state is `WAITING_AUTH_R`:
 If the state is `WAITING_AUTH_I`:
 
   ```
-  There are a number of reasons that you may receive an Identity Message in this state.
-  Perhaps your correspondent simply started a new AKE or they resent their Identity
-  Message.
+  There are a number of reasons that you may receive an Identity Message in this
+  state.
+  Perhaps your correspondent simply started a new AKE or they resent their
+  Identity Message.
   ```
 
   * Validate the Identity message. Ignore the message if validation fails.
@@ -2052,9 +2057,10 @@ If the state is `ENCRYPTED_MESSAGES`:
 
 If the state is `WAITING_AUTH_R`:
 
-  * If the receiver's instance tag in the message is not the sender's instance tag you are currently
-    using, ignore the message.
-  * Validate the Auth-R message. Ignore the message if validation fails. Stay in state `WAITING_AUTH_R`.
+  * If the receiver's instance tag in the message is not the sender's instance
+    tag you are currently using, ignore the message.
+  * Validate the Auth-R message. Ignore the message if validation fails. Stay in
+    state `WAITING_AUTH_R`.
 
     If validation succeeds:
 
@@ -2075,8 +2081,10 @@ If the state is not `WAITING_AUTH_R`:
 
 If the state is `WAITING_AUTH_I`:
 
-  * If the receiver's instance tag in the message is not the sender's instance tag you are currently using, ignore this message.
-  * Validate the Auth-I message. Ignore the message if validation fails. Stay in state `WAITING_AUTH_I`.
+  * If the receiver's instance tag in the message is not the sender's instance
+    tag you are currently using, ignore this message.
+  * Validate the Auth-I message. Ignore the message if validation fails. Stay in
+    state `WAITING_AUTH_I`.
 
   If validation succeeds:
 
@@ -2105,6 +2113,8 @@ Else:
 
 #### Sending an encrypted data message
 
+// TODO: what happens in non interactive case?
+
 The `ENCRYPTED_MESSAGES` state is the only state where a participant is allowed
 to send encrypted data messages.
 
@@ -2127,12 +2137,13 @@ If the version is 4:
   Otherwise:
 
     * To validate the data message:
-      * Verify the MAC tag.
+      * Verify the MAC tag. // TODO: state what happens in non-interative
       * Check if the message version is allowed.
-      * If the instance tag in the message is not the instance tag you are currently
-        using, ignore the message.
+      * If the instance tag in the message is not the instance tag you are
+        currently using, ignore the message.
       * Verify that the public ECDH key is on curve Ed448.
-      * Verify that the public DH key is from the correct group and that it does not degenerate.
+      * Verify that the public DH key is from the correct group and that it does
+        not degenerate.
 
     * If the message is not valid in any of the above steps, discard it and
       optionally pass along a warning to the user.
@@ -2140,22 +2151,22 @@ If the version is 4:
     * Use the ratchet id and the message id to compute the corresponding
       decryption key. Try to decrypt the message.
 
-      * If the message cannot be decrypted and the `IGNORE_UNREADABLE` flag is not
-      set:
+      * If the message cannot be decrypted and the 'IGNORE_UNREADABLE' flag is
+        not set:
         * Inform the user that an unreadable encrypted message was received.
         * Reply with an Error Message with ERROR_1.
 
-      * If the message cannot be decrypted and the `IGNORE_UNREADABLE` flag is
-      set:
+      * If the message cannot be decrypted and the 'IGNORE_UNREADABLE' flag is
+        set:
         * Ignore it instead of producing an error or a notification to the user.
 
       * If the message can be decrypted:
         * Display the human-readable part (if it contains any) to the user. SMP
-        TLVs should be addressed according to the SMP state machine.
+          TLVs should be addressed according to the SMP state machine.
         * Rotate root, chain and mix keys as appropriate.
-        * If the received message contains a TLV type 1 (Disconnected) [TLV Types](#TLV-Types)
-          forget all encryption keys for this correspondent and transition the
-          state to `FINISHED`.
+        * If the received message contains a TLV type 1 (Disconnected):
+          * Forget all encryption keys for this correspondent and transition the
+            state to 'FINISHED'.
 
      * If you have not sent a message to this correspondent in some
        (configurable) time, send a "heartbeat" message.
@@ -2165,18 +2176,19 @@ If the version is 3:
   If msgstate is `MSGSTATE_ENCRYPTED`:
 
     * Verify the information (MAC, keyids, ctr value, etc.) in the message.
-    * If the instance tag in the message is not the instance tag you are currently
-      using, ignore the message.
+    * If the instance tag in the message is not the instance tag you are
+      currently using, ignore the message.
     * If the verification succeeds:
       * Decrypt the message and display the human-readable part (if non-empty)
         to the user.
       * Update the D-H encryption keys, if necessary.
       * If you have not sent a message to this correspondent in some
         (configurable) time, send a "heartbeat" message, consisting of a Data
-	Message encoding an empty plaintext. The heartbeat message should have
-	the `IGNORE_UNREADABLE` flag set.
+        Message encoding an empty plaintext. The heartbeat message should have
+        the 'IGNORE_UNREADABLE' flag set.
       * If the received message contains a TLV type 1, forget all encryption
-         keys for this correspondent, and transition msgstate to `MSGSTATE_FINISHED`.
+        keys for this correspondent, and transition msgstate to
+        'MSGSTATE_FINISHED'.
     * Otherwise, inform the user that an unreadable encrypted message was
       received, and reply with an Error Message.
 
@@ -2230,19 +2242,22 @@ OTRv4 makes a few changes to SMP:
   under Ed448, we reuse the previously defined generator `G` for Ed448:
 
   ```
-  G = (11781216126343694673728248434331006466518053535701637341687908214793940427
-  7809514858788439644911793978499419995990477371552926308078495, 19)
+  G = (x=22458004029592430018760433409989603624678964163256413424612546168695
+     0415467406032909029192869357953282578032075146446173674602635247710,
+     y=29881921007848149267601793044393067343754404015408024209592824137233
+     1506189835876003536878655418784733982303233503462500531545062832660)
   ```
 
   * OTRv4 creates fingerprints using SHA3-512. This increases the size of
-    fingerprints to 64 bytes.
+    fingerprints to 64 bytes. // TODO: does this still apply?
 
-  * SMP in OTRv4 uses all of the [type/length/value (TLV) record types](#tlv-
-  * record-types) as OTRv3, except SMP Message 1Q. When SMP Message 1Q is used
-  * in OTRv4, SMP Message 1 is used in OTRv4. When a question is not present,
-  * the user specified question section has length `0` and value `NULL`. In
-  * OTRv3, SMP Message 1 is used when the user does not specify an SMP question.
-  * If a question is supplied, SMP Message 1Q is used.
+  * SMP in OTRv4 uses all of the
+    [type/length/value (TLV) record types](#tlv-record-types) as OTRv3, except
+    for SMP Message 1Q. When SMP Message 1Q is used in OTRv4, SMP Message 1 is
+    used in OTRv4. When a question is not present, the user specified question
+    section has length `0` and value `NULL`. In OTRv3, SMP Message 1 is used
+    when the user does not specify an SMP question. If a question is supplied,
+    SMP Message 1Q is used.
 
 ### SMP Overview
 
@@ -2262,7 +2277,7 @@ Assuming that Alice begins the exchange:
 **Bob:**
 
 * Validates that `G2a` and `G3a` are on the curve Ed448, that they are in
-  the correct group, and that they do not degenerate.
+  the correct group and that they do not degenerate.
 * Picks random values `b2` and `b3` in `Z_q`.
 * Picks random values `r2`, `r3`, `r4`, `r5` and `r6` in `Z_q`.
 * Computes `G2b = G * b2` and `G3b = G * b3`.
@@ -2335,7 +2350,7 @@ Initiator fingerprint (64 BYTE)
 Responder fingerprint (64 BYTE)
   The fingerprint that the party that did not initiate SMP is using in the
   current conversation.
-Secure Session ID or SSID
+Secure Session ID or SSID // TODO: put the type of this
 User-specified secret
   The input string given by the user at runtime.
 ```
