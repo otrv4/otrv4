@@ -2745,11 +2745,11 @@ The Authentication scheme consists of two functions:
 We reuse the previously defined G generator in elliptic curve parameters:
 
 ```
-G = (11781216126343694673728248434331006466518053535701637341687908214793940427
-7809514858788439644911793978499419995990477371552926308078495, 19)
+G = (x=22458004029592430018760433409989603624678964163256413424612546168695
+       0415467406032909029192869357953282578032075146446173674602635247710,
+     y=29881921007848149267601793044393067343754404015408024209592824137233
+       1506189835876003536878655418784733982303233503462500531545062832660)
 
-= (0x297ea0ea2692ff1b4faff46098453a6a26adf733245f065c3c59d0709cecfa96147eaaf393
-2d94c63d96c170033f4ba0c7f0de840aed939f, 0x13)
 ```
 
 #### Authentication: Auth(A1, a1, {A1, A2, A3}, m):
@@ -2955,10 +2955,10 @@ If authstate is AUTHSTATE_NONE, AUTHSTATE_AWAITING_DHKEY or AUTHSTATE_AWAITING_S
 
 #### Reveal Signature Message
 
-This is the third message of the OTRv3 AKE. Bob sends it to Alice, revealing his D-H
-encryption key (and thus opening an encrypted channel), and also authenticating
-himself (and the parameters of the channel, preventing a man-in-the-middle
-attack on the channel itself) to Alice.
+This is the third message of the OTRv3 AKE. Bob sends it to Alice, revealing his
+D-H encryption key (and thus opening an encrypted channel), and also
+authenticating himself (and the parameters of the channel, preventing a
+man-in-the-middle attack on the channel itself) to Alice.
 
 It consists of: the protocol version, the message type, the sender's instance
 tag, the receiver's instance tag, the encrypted signature and the MAC of the
