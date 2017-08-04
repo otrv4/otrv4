@@ -107,7 +107,7 @@ If we assume messages have been sent by Alice and Bob after the DAKE and we are
 now at ratchet 3:
 
 Alice                                                Bob
-------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------
 * Increases ratchet_id by one
 * Generates new public DH key A_1 and
   secret key a_1
@@ -129,32 +129,31 @@ Alice                                                Bob
                                                        secret key b_1
                                                      * Derives a new DH shared secret using Alice's
                                                        public key received in the message (A_1)
-                                                                       k_dh = DH(A_1, b_1)
+                                                         k_dh = DH(A_1, b_1)
                                                      * Derives the new mix key from the k_dh
-                                                                       M_3 = SHA3-256(k_dh)
+                                                         M_3 = SHA3-256(k_dh)
                                                      * Mixes the mix key with the ECDH shared secret
                                                        to create the shared secret K_3
-                                                                       K_3 = SHA3-512(ECDH_3 || M_3)
+                                                         K_3 = SHA3-512(ECDH_3 || M_3)
                                                      * Uses K_3 with SHA3 to generate root
                                                        and chain keys
-                                                                       R_3, Cs_3_0, Cr_3_0 = KDF(R_2 || K_3)
+                                                         R_3, Cs_3_0, Cr_3_0 = KDF(R_2 || K_3)
                                                      * Decrypts received message with a message key
                                                        derived from Cr_3_0
-
-                                                                   Increases ratchet_id by one
+                                                     * Increases ratchet_id by one
                                                      * Derives a new mix key from the one
                                                        derived in the previous ratchet
-                                                                       M_4 = KDF(M_3)
+                                                         M_4 = KDF(M_3)
                                                      * Generates new ECDH keys and uses Alice's ECDH
                                                        public key (received in
                                                                        data_message_3_0) to create ECDH
                                                        shared secret (ECDH_4).
                                                      * Mixes the mix key with ECDH_4 to create the shared
                                                        secret K_4
-                                                                       K_4 = SHA3-512(ECDH_4 || M_4)
+                                                          K_4 = SHA3-512(ECDH_4 || M_4)
                                                       * Uses K_4 with SHA3-512 to generate root and chain
                                                         keys from root key 3 (R_3)
-                                                                       R_4, Cs_4_0, Cr_4_0 = SHA3-512(R_3, K_4)
+                                                           R_4, Cs_4_0, Cr_4_0 = SHA3-512(R_3, K_4)
                                                       * Encrypts data message with a message key derived
                                                         from Cr_4_0
                                 <-------------------  * Sends data_message_4_0
