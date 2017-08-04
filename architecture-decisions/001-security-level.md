@@ -39,15 +39,16 @@ described in [ADR 5](https://github.com/twstrike/otrv4/blob/master/architecture-
 it has a security level of 128 bits.
 
 We will use XSalsa20 as our stream cipher because it has a block size of 512
-bits compared to AES' block size of 128 bits. XSalsa20 is faster than AES and immune to
-timing attacks. Since its nonce is significantly larger, it is safely generated
-randomly. It takes 2<sup>249</sup> simple operations against XSalsa20 reduced to
-8 rounds to break the cipher.
+bits compared to AES' block size of 128 bits. XSalsa20 is faster than AES and
+immune to timing attacks. Since its nonce is significantly larger, it is safely
+generated randomly. It takes 2<sup>249</sup> simple operations against XSalsa20
+reduced to 8 rounds to break the cipher.
 
 XSalsa20 will be used with the following parameters: 20 rounds, 192-bits nonces,
 and 256-bit keys.
 
 The following KDFs are defined:
+
 ```
 KDF_1(x) = SHA3-256("OTR4" || x)
 KDF_2(x) = SHA3-512("OTR4" || x)
@@ -73,7 +74,8 @@ truncation levels for implementers to choose from:
 Choosing Ed448 requires implementations of Ed448 curve equations, and SMP
 primitives have changed to Ed448.
 
-The size of fingerprints has increased to 64 bytes.
+The size of fingerprints has increased to 64 bytes. // TODO: was this 32 or 64,
+depending on what you want?
 
 ### References
 

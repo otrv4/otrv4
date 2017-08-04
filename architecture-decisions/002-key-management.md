@@ -27,8 +27,8 @@ revealing MAC keys is done immediately by both participants in a conversation
 
 1. Only the receiver can reveal MAC keys, which gives weaker deniability as
    it puts full trust in receiver
-2. Both the sender and receiver can reveal MAC keys, but the sender must reveal only
-   after two ratchet generations
+2. Both the sender and receiver can reveal MAC keys, but the sender must reveal
+   only after two ratchet generations
 
 OTRv3 made the decision to only allow the receiver to reveal MAC keys.
 
@@ -44,18 +44,17 @@ Even though our network model assumes in-order message delivery, we can benefit
 from the per-message forward secrecy that the Double Ratchet algorithm provides.
 Although the Double Ratchet allows us to receive out-of-order messages, we do
 not support this: messages that are received later than expected will be
-ignored. Other reasons for this decision are described in [the ADR for the Non-
-Interactive DAKE](https://github.com/twstrike/otrv4/blob/master/architecture-
-decisions/009-non-interactive-dake.md).
+ignored. Other reasons for this decision are described in
+[the ADR for the Non-Interactive DAKE](https://github.com/twstrike/otrv4/blob/master/architecture-decisions/009-non-interactive-dake.md).
 
-We decided that only the receiver will reveal MAC keys every ratchet.
+We decided that only the receiver will reveal MAC keys on the first message
+sent of every ratchet.
 
 ### Consequences
 
 This heavily changes the data exchange implementation from previous
-versions. We achieve improved forward secrecy, but key
-management and ratcheting processes become more complex because of the
-many types of keys involved.
+versions. We achieve improved forward secrecy, but key management and ratcheting
+processes become more complex because of the many types of keys involved.
 
 ### References
 

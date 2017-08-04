@@ -834,6 +834,12 @@ To create a user profile, assemble:
    contacts that trust user's version 3 DSA key to trust the user's profile in
    version 4. This is only used if the user supports versions 3 and 4.
 
+// TODO: may it should be said that it works like:
+if transition_signature : a = sig((longterm_pub, expiration, prekey), DSA_key)
+then sig(a, eddsa)
+else
+sig((longterm_pub, expiration, prekey), eddsa)
+
 After the profile is created, it must be published in a public place, like an
 untrusted server.
 
