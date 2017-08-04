@@ -125,8 +125,8 @@ Alice                                                 Bob
 * Encrypts data message with a message key
   derived from Cs_3_0
 * Sends data_message_3_0 with A_1 ----------------->
-                                                     * Generates new public DH key B_1 and
-                                                       secret key b_1
+                                                     * Generates new public DH key B_1 and secret
+                                                       key b_1
                                                      * Derives a new DH shared secret using Alice's
                                                        public key received in the message (A_1)
                                                          k_dh = DH(A_1, b_1)
@@ -141,12 +141,11 @@ Alice                                                 Bob
                                                      * Decrypts received message with a message key
                                                        derived from Cr_3_0
                                                      * Increases ratchet_id by one
-                                                     * Derives a new mix key from the one
-                                                       derived in the previous ratchet
+                                                     * Derives a new mix key from the one derived in the
+                                                       previous ratchet
                                                          M_4 = KDF(M_3)
                                                      * Generates new ECDH keys and uses Alice's ECDH
-                                                       public key (received in
-                                                       data_message_3_0) to create ECDH
+                                                       public key (received in data_message_3_0) to create ECDH
                                                        shared secret (ECDH_4).
                                                      * Mixes the mix key with ECDH_4 to create the shared
                                                        secret K_4
