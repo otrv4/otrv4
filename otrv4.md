@@ -1309,16 +1309,18 @@ Verify & Decrypt message
 
 1. Receive a non-interactive auth message from Alice.
 2. At this point, the non-interactive DAKE is complete for Bob:
+   * Sets ratchet id `i` as 0. // TODO: is this so?
+   * Sets `j` as 1.
    * Calculates ECDH shared secret `K_ecdh`.
-	* Calculates DH shared secret `k_dh` and `mix_key`.
-	* Calculates `κ = KDF_2(K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(Ska, X) || k_dh)`.
-	* Computes the Auth MAC key `Mk = KDF_2(0x01 || κ)`.
-	* Computes the Mixed shared secret `K = KDF_2(0x02 || κ)`.
-	* Calculates the SSID from shared secret: it is the first 8 bytes of
+   * Calculates DH shared secret `k_dh` and `mix_key`.
+   * Calculates `κ = KDF_2(K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(Ska, X) || k_dh)`.
+   * Computes the Auth MAC key `Mk = KDF_2(0x01 || κ)`.
+   * Computes the Mixed shared secret `K = KDF_2(0x02 || κ)`.
+   * Calculates the SSID from shared secret: it is the first 8 bytes of
 	  `KDF_2(0x00 || K)`.
-   * Calculates the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
-   * [Decides which chain key he will use](#deciding-between-chain-keys).
-   * Verify the non-interactive auth message (see Non-interactive Auth Message
+	* Calculates the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
+	* [Decides which chain key he will use](#deciding-between-chain-keys).
+	* Verify the non-interactive auth message (see Non-interactive Auth Message
      section).
    // TODO: put link
 

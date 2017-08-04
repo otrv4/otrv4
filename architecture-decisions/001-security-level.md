@@ -30,7 +30,7 @@ transcripts of OTRv4 will have classic Diffie-Hellman ~128-bit security.
 
 To achieve ~224-bit elliptic curve security, we chose the curve Ed448 for the
 generation of ECDH. In relation to secrets generated with ECDH, we use SHA3-512
-and SHAKE256 as hash functions since, individually, both give 256-bit security.
+and SHAKE-256 as hash functions since, individually, both give 256-bit security.
 Although Ed448 does not have as much published cryptanalysis as Curve25519, it
 has a similar construction to Curve25519 [\[1\]](#references).
 
