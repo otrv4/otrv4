@@ -135,8 +135,8 @@ Alice                                                Bob
                                                      * Mixes the mix key with the ECDH shared secret
                                                        to create the shared secret K_3
                                                          K_3 = SHA3-512(ECDH_3 || M_3)
-                                                     * Uses K_3 with SHA3 to generate root
-                                                       and chain keys
+                                                     * Uses K_3 with SHA3 to generate root and chain
+                                                       keys
                                                          R_3, Cs_3_0, Cr_3_0 = KDF(R_2 || K_3)
                                                      * Decrypts received message with a message key
                                                        derived from Cr_3_0
@@ -146,7 +146,7 @@ Alice                                                Bob
                                                          M_4 = KDF(M_3)
                                                      * Generates new ECDH keys and uses Alice's ECDH
                                                        public key (received in
-                                                                       data_message_3_0) to create ECDH
+                                                       data_message_3_0) to create ECDH
                                                        shared secret (ECDH_4).
                                                      * Mixes the mix key with ECDH_4 to create the shared
                                                        secret K_4
