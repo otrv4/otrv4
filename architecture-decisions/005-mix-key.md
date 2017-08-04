@@ -106,8 +106,8 @@ _When n is configured to equal 3_
 If we assume messages have been sent by Alice and Bob after the DAKE and we are
 now at ratchet 3:
 
-Alice                                                Bob
------------------------------------------------------------------------------------------
+Alice                                                 Bob
+---------------------------------------------------------------------------------------------
 * Increases ratchet_id by one
 * Generates new public DH key A_1 and
   secret key a_1
@@ -156,24 +156,25 @@ Alice                                                Bob
                                                            R_4, Cs_4_0, Cr_4_0 = SHA3-512(R_3, K_4)
                                                       * Encrypts data message with a message key derived
                                                         from Cr_4_0
-                                <-------------------  * Sends data_message_4_0
+                                  <-----------------  * Sends data_message_4_0
 ```
 
 **Alice or Bob sends the first message in a ratchet (a first reply)**
 
-The ratchet identifier `ratchet_id` increases every time a greater `ratchet_id` is
-received or a new message is being sent and signals the machine to ratchet, i.e.
-`ratchet_id += 1`
+The ratchet identifier `ratchet_id` increases every time a greater `ratchet_id`
+is received or a new message is being sent and signals the machine to ratchet,
+i.e. `ratchet_id += 1`
 
 If `ratchet_id % 3 == 0 && sending the first message of a new ratchet`
 
-  * Compute the new mix key from a new DH computation e.g. `M_i =
-        SHA3-256(DH(our_DH.secret, their_DH.public))`
-  * Send the new `mix_key`'s public key (our_DH.public) to the other party for further key computation.
+  * Compute the new mix key from a new DH computation e.g.
+    `M_i = SHA3-256(DH(our_DH.secret, their_DH.public))`.
+  * Send the new `mix_key`'s public key (our_DH.public) to the other party for
+    further key computation.
 
 Otherwise
 
-  * Compute the new mix key `M_i = SHA3-256(M_(i-1))`
+  * Compute the new mix key `M_i = SHA3-256(M_(i-1))`.
 
 **Alice or Bob send a follow-up message**
 
@@ -187,32 +188,32 @@ If `ratchet_id % 6 == 3 || ratchet_id % 6 == 0`
 
 **Alice or Bob receive the first message in a ratchet**
 
-The ratchet_id will need to be increased, so `ratchet_id += 1`
+The `ratchet_id` will need to be increased, so `ratchet_id += 1`
 
 If `ratchet_id % 6 == 3 || ratchet_id % 6 == 0`
 
-   * A new public key should be attached to the message. If it is not, reject the
-     message.
+   * A new public key should be attached to the message. If it is not, reject
+     the message.
 
 Otherwise:
 
    * Compute the new mix key from a new DH computation e.g.
-        `M_i = SHA3-256(DH(our_DH.secret, their_DH.public))`
+     `M_i = SHA3-256(DH(our_DH.secret, their_DH.public))`
    * Use `M_i` to decrypt the received message.
 
 **Alice or Bob receive a follow up message**
 
 If the `ratchet_id` is not greater than the current state of `ratchet_id`, then
-this is not a new ratchet. In this case there is no further action to be taken for
-the mix key.
+this is not a new ratchet. In this case there is no further action to be taken
+for the mix key.
 
 **Diagram: Pattern of DH computations and key derivations in a conversation**
 
-This diagram describes when public keys should be sent and when Alice
-and Bob should compute the `mix_key` from a SHA3 or a new DH computation.
+This diagram describes when public keys should be sent and when Alice and Bob
+should compute the `mix_key` from a SHA3 or a new DH computation.
 
-Both parties share knowledge of `M_0`, which is a `mix_key` established in
-the DAKE.
+Both parties share knowledge of `M_0`, which is a `mix_key` established in the
+DAKE.
 
 Given
 
@@ -238,8 +239,8 @@ M_9 = SHA3(DH(a_2, B_1))   -----9--------------A_2------>     M_9 = SHA3(DH(b_1,
 
 ### Performance
 
-Computation of g^a, g^b and g^a^b takes under a second using generator
-g = 2. Exponents `a` and `b` are 3072 bits long in an Intel Core i7
+Computation of `g^a`, `g^b` and `g^a^b` takes under a second when using the
+generator `g = 2`. Exponents `a` and `b` are 3072 bits long in an Intel Core i7
 2.2GHz.
 
 | Operation           | Repeat times | Time per Operation |
@@ -251,28 +252,31 @@ g = 2. Exponents `a` and `b` are 3072 bits long in an Intel Core i7
 
 We’ve decide to use a 3072-bit key produced by:
 
-1. a DH function which takes as an argument the other party’s exponent through a data
-   message to produce mix key.
+1. a DH function which takes as an argument the other party’s exponent through a
+   data message to produce mix key.
 2. a KDF (SHA3-256) which uses the previous mix key to produce a new one.
 
 The DH function will run every n = 3 times because:
 
-1. It is a small number so a particular key can only be compromised for a maximum
-   of 2 \* n ratchets. This means that the maximum ratchets that will use the mix
-   key or a key derived from the mix key is 6.
-2. The benefit of using an odd number is for simplicity of implementation. With an
-   odd number, both Alice and Bob can generate a new public and secret key at the
-   same time as sending the public key and compute a new mix key from a DH
-   function. However, with an even number, Alice would need to generate and send a
-   key in a different ratchet to the one where the public key would be used. This
-   happens because the public key would only be used in a mix key computed from a
-   new DH function on even numbers of ratchet_ids so only Bob would be the sender
-   at these times.
+1. It is a small number so a particular key can only be compromised for a
+   maximum of 2 * n ratchets. This means that the maximum ratchets that will
+   use the mix key or a key derived from the mix key is 6.
+2. The benefit of using an odd number is for simplicity of implementation. With
+   an odd number, both Alice and Bob can generate a new public and secret key at
+   the same time as sending the public key and compute a new mix key from a DH
+   function. However, with an even number, Alice would need to generate and send
+   a key in a different ratchet to the one where the public key would be used.
+   This happens because the public key would only be used in a mix key computed
+   from a new DH function on even numbers of ratchet_ids so only Bob would be
+   the sender at these times.
 
-From the IETF paper, RFC 3526 [\[4\]](#references):
+The group used for this key is the one assigned with id 15 in the IETF paper,
+RFC 3526 [\[4\]](#references):
 
-* Prime is: 2^3072 - 2^3008 - 1 + 2^64 * { [2^2942 pi] + 1690314 }
+* Prime is:
+  2^3072 - 2^3008 - 1 + 2^64 * (integer_part_of(2^2942 * π) + 1690314)
 * Hex value:
+
   ```
   FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1
   29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD
@@ -292,12 +296,12 @@ From the IETF paper, RFC 3526 [\[4\]](#references):
   43DB5BFC E0FD108E 4B82D120 A93AD2CA FFFFFFFF FFFFFFFF
   ```
 * Generator g3: 2
-* The public keys should be 448 bits (56 bytes) long.
+* The public keys should be 448 bits (56 bytes) long. // TODO: this is not right. The digest is 56, but the pub maybe 384.
 
 ### Consequences
 
 Using a 3072-bit DH function to produce the mix key increases the size of data
-messages by 56 bytes. of extra key material. The increased size may cause some
+messages by 56 bytes of extra key material. The increased size may cause some
 transport protocols to fragment these messages.
 
 ### References
