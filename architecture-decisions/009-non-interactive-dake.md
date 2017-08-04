@@ -8,8 +8,7 @@ Initiator's long-term public key should be verified by the Receiver.
 
 The Receiver then generates their ephemeral keys and derives a shared secret.
 These are used to send an encrypted data message with the final message
-of the non-interactive DAKE, called the non-interactive
-auth message.
+of the non-interactive DAKE, called the non-interactive auth message.
 
 In the non-interactive DAKE, only one data message can be sent per use of a
 prekey. The reasons for this are in the section on [long-lived secret ephemeral
@@ -21,28 +20,29 @@ deleted.
 
 #### Long-lived secret ephemeral key material
 
-In OTRv4, the window of key compromise is equivalent to how long it takes for the
-double ratchet to refresh the ephemeral key material (2 ratchets, including the
-first compromised ratchet) and how long a prekey remains unused before the user
-profile inside becomes expired. We recommend expiration to be a week long, so
-the window of key compromise will be one week. With offline conversations, participants
-may not receive messages or reply to them for days, weeks, or months at a time.
-As a result, the window of compromise for these kind of conversations can be very
-long if no limitations are set. We want to reduce this window.
+In OTRv4, the window of key compromise is equivalent to how long it takes for
+the double ratchet to refresh the ephemeral key material (2 ratchets, including
+the first compromised ratchet) and how long a prekey remains unused before the
+user profile inside becomes expired. We recommend expiration to be a week long,
+so the window of key compromise will be one week. With offline conversations,
+participants may not receive messages or reply to them for days, weeks, or
+months at a time. As a result, the window of compromise for these kind of
+conversations can be very long if no limitations are set. We want to reduce this
+window.
 
 Primarily, there are two attacks that we want to mitigate:
 
-1. Initiator uploads a prekey. Responder replies, but the adversary
-intercepts and drops the message. The adversary compromises Initiator's
-prekey secret, and Initiator's identity secret key. The adversary can
-now retroactively decrypt the captured initial message.
+1. Initiator uploads a prekey. Responder replies, but the adversary intercepts
+   and drops the message. The adversary compromises Initiator's prekey secret,
+   and Initiator's identity secret key. The adversary can now retroactively
+   decrypt the captured initial message. // TODO: responder first asks for this
+   prekey?
 
-2. Initiator and Responder complete an exchange and engage in a
-conversation. At some point, the adversary captures and drops some
-messages to (for example) Initiator. Later, the adversary compromises
-Initiator's ephemeral secrets, revealing the message keys corresponding
-to the dropped messages. The adversary can now retroactively decrypt the
-captured messages.
+2. Initiator and Responder complete an exchange and engage in a conversation. At
+   some point, the adversary captures and drops some messages to (for example)
+   Initiator. Later, the adversary compromises Initiator's ephemeral secrets,
+   revealing the message keys corresponding to the dropped messages. The
+   adversary can now retroactively decrypt the captured messages.
 
 The first attack is mitigated through the use of XZDH. XZDH uses signed prekeys
 with a relatively short expiration time. As a result, an attacker would need to
@@ -125,6 +125,7 @@ using the participant's long term keys. We consider the signature of the user
 profile to be the signature of the shared prekey.
 
 A Non-interactive Auth Message has the format:
+
 ```
 Protocol version (SHORT)
   The version number of this protocol is 0x0004.
@@ -170,9 +171,9 @@ Encrypted message (DATA)
 
 #### Multiple OTR protocol versions
 
-Prekey messages contain version information. Each client is
-expected to upload one prekey per supported version of OTR which uses
-non-interactive communication. This is only relevant for OTRv4 and subsequent versions.
+Prekey messages contain version information. Each client is expected to upload
+one prekey per supported version of OTR which uses non-interactive
+communication. This is only relevant for OTRv4 and subsequent versions.
 
 #### Publishing and retrieving prekey messages from a prekey server
 
@@ -196,54 +197,59 @@ When a client requests prekey messages from a prekey server, many prekey
 messages may be returned. For example, when Alice requests prekey messages for
 Bob, any of the following may happen:
 
-1. Alice receives two prekey messages for Bob because Bob uses two OTRv4 clients, one
-   for his phone and one for his laptop. Each client maintains their own set of
-   prekey messages on the same prekey server. These two prekey messages will be different by
-   instance tag. This scenario can also follow different paths:
-    1. The two prekey messages may have user profiles created with different long term
-       keys. At this point, if Alice trusts only one key, she may decide to send
-       a message only to the client with the key she trusts. If Alice trusts
-       both keys, she may decide to send a message to one or both. If Alice does
-       not trust either key, she may decide not to send a message or she may
-       send messages without validating the keys.
-    1. The two prekey messages may have user profiles created with the same long term
-       key. If this key is trusted, Alice may decide to send a message to both
-       client instances. Or Alice may decide to send a message only to the first
-       prekey message received. If Alice does not trust the key, she may decide not to
-       send a message or send an message to both instances without validating
-       the keys.
-1. Alice receives two prekey messages for Bob with different user profiles but the same
-   instance tag. This can only validly happen if Bob's client supports two
-   different versions of OTR that use prekey messages or if the long term key used in
-   each message's user profile is different.
+1. Alice receives two prekey messages for Bob because Bob uses two OTRv4
+   clients, one for his phone and one for his laptop. Each client maintains
+   their own set of prekey messages on the same prekey server. These two prekey
+   messages will be different by instance tag. This scenario can also follow
+   different paths:
+
+    1. The two prekey messages may have user profiles created with different
+       long term keys. At this point, if Alice trusts only one key, she may
+       decide to send a message only to the client with the key she trusts. If
+       Alice trusts both keys, she may decide to send a message to one or both.
+       If Alice does not trust either key, she may decide not to send a message
+       or she may send messages without validating the keys.
+    2. The two prekey messages may have user profiles created with the same long
+       term key. If this key is trusted, Alice may decide to send a message to
+       both client instances. Or Alice may decide to send a message only to the
+       first prekey message received. If Alice does not trust the key, she may
+       decide not to send a message or send an message to both instances without
+       validating the keys.
+
+2. Alice receives two prekey messages for Bob with different user profiles but
+   the same instance tag. This can only validly happen if Bob's client supports
+   two different versions of OTR that use prekey messages or if the long term
+   key used in each message's user profile is different.
+
     1. If the versions and the long term keys used in the messages are the
        same, and they are compatible with Alice's version, one of the prekey
-       messages must be invalid, but Alice cannot know which. She should not send a
-       message using either prekey message.
-    1. If the prekey message versions are the same and the version is supported by
-       Alice, but the long term keys are different from each other, Alice should
-       look at whether she trusts the keys. If she trusts both, she may send a
-       message to both. If she trusts only one, she may decide to only send one
-       message or she may send a message to the untrusted key as well. If she
-       trusts neither, she may not send any messages or she may decide to send a
-       message to one or both, despite the risks.
-    1. If the prekey message versions are different and Alice supports both versions,
-       Alice may choose to send a message with both versions or only with one,
-       depending on whether she trusts the long term key or keys associated with
-       them.
-    1. If the prekey message versions are different and Alice supports only one, then
-       she can only send a message with the prekey message she supports. If the long
-       term key associated with this message is untrusted, she may decide not to
-       send a message. If it is trusted, she may send a message.
+       messages must be invalid, but Alice cannot know which. She should not
+       send a message using either prekey message.
+    2. If the prekey message versions are the same and the version is supported
+       by Alice, but the long term keys are different from each other, Alice
+       should look at whether she trusts the keys. If she trusts both, she may
+       send a message to both. If she trusts only one, she may decide to only
+       send one message or she may send a message to the untrusted key as well.
+       If she trusts neither, she may not send any messages or she may decide to
+       send a message to one or both, despite the risks.
+    3. If the prekey message versions are different and Alice supports both
+       versions, Alice may choose to send a message with both versions or only
+       with one, depending on whether she trusts the long term key or keys
+       associated with them.
+    4. If the prekey message versions are different and Alice supports only one,
+       then she can only send a message with the prekey message she supports. If
+       the long term key associated with this message is untrusted, she may
+       decide not to send a message. If it is trusted, she may send a message.
 
 In the above example, these are the possible situations when only two prekey
 messages are received. Of course, many more may be received.
 
-To aid with this complexity, the specification includes a guide for filtering a list of
-given prekey messages to remove invalid messages or identify invalid situations. But the
-decision on what to do with the remaining messages is up to the implementer.
+To aid with this complexity, the specification includes a guide for filtering a
+list of given prekey messages to remove invalid messages or identify invalid
+situations. But the decision on what to do with the remaining messages is up to
+the implementer.
 
-Here is the guide.
+Here is the guide:
 
 To validate a prekey message, use the following checks. If any of them fail, ignore the message:
 
@@ -263,22 +269,22 @@ If many prekey messages are received:
     Remove all invalid prekey messages.
     Remove all duplicate prekey messages in the list.
     If multiple valid messages remain, check for invalid situations:
-        If multiple prekey messages exist with the same instance tag, the same version,
-        and the same long term keys in the user profile, then one of the
-        messages is invalid. The safest thing to do is to remove all the prekeys
-        associated with this situation.
+        If multiple prekey messages exist with the same instance tag, the same
+        version, and the same long term keys in the user profile, then one of
+        the messages is invalid. The safest thing to do is to remove all the
+        prekeys associated with this situation.
     If one prekey message remains:
-        Decide whether to send a message using this prekey message based on whether the
-        long term key within the use profile is trusted or not.
+        Decide whether to send a message using this prekey message based on
+        whether the long term key within the use profile is trusted or not.
     If multiple valid prekey messages remain:
         If there are keys that are untrusted and trusted in the list of
         messages, decide whether to only use messages that contain trusted long
         term keys.
-        If there are several instance tags in the list of prekey messages, decide
-        whether to send one message per instance tag or to send a message
-        only to one instance tag.
-            If there are multiple prekey messages per instance tag, decide whether to
-            send multiple messages to the same instance tag.
+        If there are several instance tags in the list of prekey messages,
+        decide whether to send one message per instance tag or to send a message
+        only to one instance tag. If there are multiple prekey messages per
+        instance tag, decide whether to send multiple messages to the same
+        instance tag.
 
 #### Decreased participation deniability for the initiator
 
@@ -292,6 +298,7 @@ loss.
 
 Currently we have decided on one state machine that can receive multiple DAKEs.
 The machine has the following states:
+
 * Start
 * Waiting for R Auth
 * Waiting for I Auth
@@ -303,16 +310,17 @@ interactive DAKE.
 
 #### The prekey server runs out of prekey messages
 
-When the server runs out of prekey messages, OTRv4 expects client implementations to
-wait until a prekey message can be transmitted before continuing with a non-interactive
-DAKE.
+When the server runs out of prekey messages, OTRv4 expects client
+implementations to wait until a prekey message can be transmitted before
+continuing with a non-interactive DAKE.
 
 This is purposely different from what we expect from protocols like Signal. In
-Signal, when a prekey server runs out of messages, a default message is used until
-new messages are uploaded. With this method, the consequences for participation
-deniability are currently undefined and thus risky.
+Signal, when a prekey server runs out of messages, a default message is used
+until new messages are uploaded. With this method, the consequences for
+participation deniability are currently undefined and thus risky.
 
-By waiting for the server to send prekey messages, OTRv4 will be subject to DoS attacks
-when a server is compromised or the network is undermined to return a "no prekey
-message exists" response from the server. This is preferred over the possible compromise
-of multiple non-interactive DAKEs due to the reuse of a prekey message.
+By waiting for the server to send prekey messages, OTRv4 will be subject to DoS
+attacks when a server is compromised or the network is undermined to return a
+"no prekey message exists" response from the server. This is preferred over the
+possible compromise of multiple non-interactive DAKEs due to the reuse of a
+prekey message.

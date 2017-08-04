@@ -825,6 +825,9 @@ To create a user profile, assemble:
 
    // TODO: against modification or against compromise?
 
+   // TODO: here I think it should be stated prekey expiration and session
+   expiration.
+
 5. Profile Signature: The secret key value (`r`) of the Ed448 long term public
    key, the flag `f` (set to zero, as defined on [RFC]8032) and the empty
    context `c` are used to create signatures of the entire profile excluding the

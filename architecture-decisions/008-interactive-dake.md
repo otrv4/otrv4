@@ -10,8 +10,8 @@ We believe the security of OTRv4 can be improved by employing a Deniable
 Authenticated Key Exchange (DAKE) protocol. This would allow both parties to
 deny having participated in the conversation.  A DAKE is strongly deniable when
 its transcripts retain deniability even when long term key material has been
-compromised and when an outside tries to collude one participant in order to
-reveal that a particular person is talking with them.
+compromised and when an outside party tries to collude one participant in order
+to reveal that a particular person is talking with them.
 
 ### Decision
 
@@ -21,7 +21,8 @@ Implementing Strongly Deniable Authenticated Key Exchanges"
 Goldberg's research since it does not use Dual Receiver Encryption and digital
 signatures like RSDAKE. Instead, it uses a signature non-interactive zero
 knowledge proof of knowledge (SNIZKPK) for the authentication. It also has a
-shared session state variable that guards against misbinding of the context.
+shared session state (`phi`) variable that guards against misbinding of the
+context.
 
 ### Consequences
 

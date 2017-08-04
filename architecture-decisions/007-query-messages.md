@@ -14,12 +14,12 @@ version will simply ignore it), and is always answered by a compatible client
 In OTRv3, query messages are used to:
 
   * **Start an OTR session**: if both participants are willing to use OTRv3,
-  the query message causes both to start the AKE, and by its end both have the
-  same D-H key and transition from `MSGSTATE_PLAINTEXT` to
-  `MSGSTATE_ENCRYPTED`.
+  the query message causes both to start the AKE, and when it is finished,
+  both participants have the same D-H key and transition from
+  `MSGSTATE_PLAINTEXT` to `MSGSTATE_ENCRYPTED`.
 
   * **Force a key rotation**: forward secrecy depends on
-  advertising/acknowledging new D-H keys. The same key is reused until a
+  advertising/acknowledging of new D-H keys. The same key is reused until a
   message from the other peer is received (heartbeats are intended to address
   this issue). Because a new AKE behaves exactly like a normal key rotation,
   there is no loss of messages.
@@ -37,7 +37,7 @@ with a slightly difference in the semantics:
   double ratchet.
 
 * Query messages can be sent at any time but when the participant is already
-  on `ENCRYPTED_MESSAGES`.
+  in `ENCRYPTED_MESSAGES` state.
 
 Allowing query messages to be sent on `ENCRYPTED_MESSAGES` causes a new DAKE
 to be started while a conversation already exists. In this case, messages from
