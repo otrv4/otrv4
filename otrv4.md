@@ -406,7 +406,7 @@ SNIZKPK Authentication (SNIZKPK):
   r3 (SCALAR)
 ```
 
-### Public keys and fingerprints
+### Public keys, Shared Prekeys and fingerprints
 
 OTRv4 introduces a new type of public key:
 
@@ -423,8 +423,25 @@ OTR4 public authentication Ed448 key (ED448-PUBKEY):
       H is the Ed448 public key generated as defined in RFC 8032.
 ```
 
-The public key is generated as follows (refer to RFC 8032[\[17\]](#references),
-for more information on key generation):
+OTRv4's public shared prekey is defined as follows:
+
+```
+OTR4 public shared prekey (ED448-SHARED-PREKEY):
+
+  SharedPreKey type (SHORT)
+    Ed448 shared prekeys have type 0x0010
+    // TODO: what is the type? does this need a type?
+
+    d (SECRET_SCALAR)
+      d is the Ed448 secret scalar generated as defined in RFC 8032.
+
+    D (POINT)
+      D is the Ed448 shared prekey generated the same way as the public key in
+      RFC 8032.
+```
+
+The public key and shared prekey is generated as follows (refer to
+RFC 8032[\[17\]](#references), for more information on key generation):
 
 ```
 The symmetric key (SYM_KEY) is 57 bytes of cryptographically secure random data.
@@ -436,8 +453,9 @@ The symmetric key (SYM_KEY) is 57 bytes of cryptographically secure random data.
    octet are cleared, all eight bits of the last octet are cleared, and the
    highest bit of the second to last octet is set.
 3. Interpret the buffer as the little-endian integer, forming the
-   secret scalar 's'.  Perform a known-base-point scalar multiplication s *
-   'Base point (G)'. Let 'H' be the result of this multiplication.
+   secret scalar 's' or 'd'.  Perform a known-base-point scalar multiplication
+   's * Base point (G)' or 'd * Base point (G)'. Let 'H' or 'D' be the result of
+   this multiplication.
 ```
 
 Public keys have fingerprints, which are hex strings that serve as identifiers
@@ -817,18 +835,16 @@ To create a user profile, assemble:
 3. Profile Expiration: Expiration date in standard Unix 64-bit format
    (seconds since the midnight starting Jan 1, 1970, UTC, ignoring leap
    seconds).
-4. Public Shared Prekey: An Ed448 Point used in multiple prekey messages. It
-   adds partial protection against attacker modification of the first flow of
-   the non-interactive DAKE.
-
-   // TODO: is this just a Point or a Public key?
-
-   // TODO: against modification or against compromise?
+4. Public Shared Prekey: An Ed448 Public Key used in multiple prekey messages.
+   It adds partial protection against an attacker that modifies the first flow
+   of the non-interactive DAKE and that compromises the party's secret long term
+   key. For its generation, refer to
+   [Public keys, shared prekeys and fingerprints](#public-keys-shared-prekeys-and-fingerprints) section.
 
    // TODO: here I think it should be stated prekey expiration and session
    expiration.
 
-5. Profile Signature: The secret key value (`r`) of the Ed448 long term public
+5. Profile Signature: The secret key value `r` of the Ed448 long term public
    key, the flag `f` (set to zero, as defined on [RFC]8032) and the empty
    context `c` are used to create signatures of the entire profile excluding the
    signature itself. The size of the signature is 114 bytes.
@@ -871,14 +887,6 @@ new expiration date. The client establishes the frequency of expiration - this
 can be configurable. A recommended value is two weeks. // TODO: should it be
 stated when to publish the new one prior to expiration of old one, or just
 'before' is enough?
-
-### Create the Public Shared Prekey
-
-To create a shared prekey, generate and set `our_shared_prekey` as ephemeral ECDH keys:
-
-* secret key `e` (57 bytes) // TODO: this will probably involve clamping and a
-  generation ala public key.
-* public key `E`.
 
 ### Create a User Profile Signature
 
@@ -944,11 +952,13 @@ Profile Expiration (PROF-EXP):
   8 bytes signed value, big-endian
 
 User Profile (USER-PROF):
-  Ed448 public key (ED448-PUBKEY)
+  Ed448 public key (ED448-PUBKEY) // TODO: this is only the public part, yet
+  ED448-PUBKEY type seems to imply the secret part as well.
   Versions (DATA)
   Profile Expiration (PROF-EXP)
-  Public Shared Prekey (POINT) // TODO: looks like this might be a public key
-    The prekey shared between different prekey messages.
+  Public Shared Prekey (ED448-SHARED-PREKEY) // TODO: this is only the public
+  part, yet ED448-SHARED-PREKEY type seems to imply the secret part as well.
+    The shared prekey used between different prekey messages.
   Profile Signature (EDDSA-SIG)
   (optional) Transitional Signature (SIG)
 ```
