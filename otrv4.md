@@ -416,9 +416,6 @@ OTR4 public authentication Ed448 key (ED448-PUBKEY):
   Pubkey type (SHORT)
     Ed448 public keys have type 0x0010
 
-    s (SECRET_SCALAR)
-      s is the Ed448 secret scalar generated as defined in RFC 8032.
-
     H (POINT)
       H is the Ed448 public key generated as defined in RFC 8032.
 ```
@@ -432,19 +429,17 @@ OTR4 public shared prekey (ED448-SHARED-PREKEY):
     Ed448 shared prekeys have type 0x0010
     // TODO: what is the type? does this need a type?
 
-    d (SECRET_SCALAR)
-      d is the Ed448 secret scalar generated as defined in RFC 8032.
-
     D (POINT)
       D is the Ed448 shared prekey generated the same way as the public key in
       RFC 8032.
 ```
 
-The public key and shared prekey is generated as follows (refer to
+The public key and shared prekey are generated as follows (refer to
 RFC 8032[\[17\]](#references), for more information on key generation):
 
 ```
 The symmetric key (SYM_KEY) is 57 bytes of cryptographically secure random data.
+The secret scalars 's' and 'd' are defined as SECRET_SCALAR.
 
 1. Hash the 57-byte symmetric key using SHAKE-256(SYM_KEY). Store the
    digest in a 114-bytes large buffer, denoted 'h'.  Only the lower 57 bytes
@@ -844,10 +839,11 @@ To create a user profile, assemble:
    // TODO: here I think it should be stated prekey expiration and session
    expiration.
 
-5. Profile Signature: The secret key value `r` of the Ed448 long term public
-   key, the flag `f` (set to zero, as defined on [RFC]8032) and the empty
-   context `c` are used to create signatures of the entire profile excluding the
-   signature itself. The size of the signature is 114 bytes.
+5. Profile Signature: The symmetric key, the flag `f` (set to zero, as defined
+   on [RFC]8032) and the empty context `c` are used to create signatures of the
+   entire profile excluding the signature itself. The size of the signature is
+   114 bytes. For its generation, refer to
+   [Create a user profile signature](#create-a-user-profile-signature) section.
 6. Transition Signature (optional): A signature of the profile excluding Profile
    Signatures and the user's OTRv3 DSA key. The Transition Signature enables
    contacts that trust user's version 3 DSA key to trust the user's profile in
@@ -952,12 +948,10 @@ Profile Expiration (PROF-EXP):
   8 bytes signed value, big-endian
 
 User Profile (USER-PROF):
-  Ed448 public key (ED448-PUBKEY) // TODO: this is only the public part, yet
-  ED448-PUBKEY type seems to imply the secret part as well.
+  Ed448 public key (ED448-PUBKEY)
   Versions (DATA)
   Profile Expiration (PROF-EXP)
-  Public Shared Prekey (ED448-SHARED-PREKEY) // TODO: this is only the public
-  part, yet ED448-SHARED-PREKEY type seems to imply the secret part as well.
+  Public Shared Prekey (ED448-SHARED-PREKEY)
     The shared prekey used between different prekey messages.
   Profile Signature (EDDSA-SIG)
   (optional) Transitional Signature (SIG)
