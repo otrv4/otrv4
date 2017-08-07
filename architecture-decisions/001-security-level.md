@@ -64,18 +64,18 @@ fingerprints. We use the SHA3-512 hash function for generating fingerprints
 from the long-lived public keys. This results in a long 512-bit (64 byte)
 fingerprint. The full length fingerprint will be used for SMP authentication.
 But to make manual fingerprint comparison easier, OTRv4 will allow 2 different
-truncation levels for implementers to choose from:
+sizes of the fingerprint for implementers to choose from:
 
-* Truncation to 56 bytes (224-bit security level)
-* Truncation to 32 bytes (128-bit security level)
+* Truncate the output of the hash to 56 bytes (224-bit security level)
+* Truncate the output of the hash to 32 bytes (128-bit security level)
 
 ### Consequences
 
 Choosing Ed448 requires implementations of Ed448 curve equations, and SMP
 primitives have changed to Ed448.
 
-The size of fingerprints has increased to 64 bytes. // TODO: was this 32 or 64,
-depending on what you want?
+The size of fingerprints can be increased to 32 bytes or 56 bytes depending on
+what version the implementor chooses.
 
 ### References
 

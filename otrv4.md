@@ -209,6 +209,8 @@ See the section on [Data Types](#data-types) for encoding and decoding details.
 A scalar modulo `q` is a field element, and should be encoded and decoded
 as a SCALAR type, which is defined in the [Data Types](#data-types) section.
 
+The byte representation of a value `x` is defined as `byte(x)`
+
 ### Elliptic Curve Parameters
 
 OTRv4 uses the Ed448-Goldilocks [\[3\]](#references) elliptic curve
@@ -463,9 +465,9 @@ authentication. To make manual comparison easier, two versions of the
 fingerprint may be used:
 
 // TODO: are we using the first bytes?
-// TODO: add some notation for byte, like OCTET(x): The octet with value x
 
-* Use of the 56 bytes from the `SHA3-512(byte(H))` (224-bit security level)
+* Use of the first 56 bytes from the `SHA3-512(byte(H))` (224-bit security
+  level)
 * Use of the first 32 bytes from the `SHA3-512(byte(H))` (128-bit security
   level)
 
@@ -899,9 +901,9 @@ size.
    1.  Hash the symmetric key: 'SHAKE-256(symmetric_key)'. Store the first 114
        bytes of the digest on 'digest'. Construct the secret key 'sk' from
        the first half of 'digest' (57 bytes), and the corresponding public
-       key 'H', as defined on 'Public keys and fingerprints' section.
-       Let 'nonce' denote the second half of the 'digest' (from digest[57] to
-       digest[113]).
+       key 'H', as defined on 'Public keys, Shared Prekeys and fingerprints'
+       section. Let 'nonce' denote the second half of the 'digest' (from
+       digest[57] to digest[113]).
 
    2.  Compute SHAKE-256("SigEd448" || f || len(c) || c || 'nonce' || M). Let
        'r' be the 114-byte digest.
@@ -2270,8 +2272,10 @@ OTRv4 makes a few changes to SMP:
      1506189835876003536878655418784733982303233503462500531545062832660)
   ```
 
-  * OTRv4 creates fingerprints using SHA3-512. This increases the size of
-    fingerprints to 64 bytes. // TODO: does this still apply?
+  * OTRv4 creates fingerprints using SHA3-512. As stated previously, two
+    versions of the fingerprint can be used:
+      * Use of the first 56 bytes from the `SHA3-512(byte(H))`
+      * Use of the first 32 bytes from the `SHA3-512(byte(H))`
 
   * SMP in OTRv4 uses all of the
     [type/length/value (TLV) record types](#tlv-record-types) as OTRv3, except
