@@ -232,7 +232,7 @@ Base point (G)
 Cofactor (c)
   4
 
-Identity point (I)
+Identity element (I)
   (x=0,
    y=1)
 
@@ -245,6 +245,15 @@ Order of base point (q) [prime; q < p; q * G = I]
 Non-square element in Z_p (d)
   -39081
 ```
+
+#### Verifying a point on curve
+
+To verify that a point (`X`) is on curve Ed448-Goldilocks:
+
+1. Check that `X` is not equal to the indentity element (`I`).
+2. Check that `X` lies on the curve.
+3. Check that `q * X = I`.
+
 
 ### 3072-bit Diffie-Hellman Parameters
 
@@ -463,8 +472,6 @@ Protocol](#socialist-millionaires-protocol--smp-) and manual fingerprint
 comparison may be used. For the first, the full fingerprint is included in the
 authentication. To make manual comparison easier, two versions of the
 fingerprint may be used:
-
-// TODO: are we using the first bytes?
 
 * Use of the first 56 bytes from the `SHA3-512(byte(H))` (224-bit security
   level)
@@ -784,8 +791,7 @@ When sending or receiving data messages, you must calculate the message keys:
 
 ```
 derive_enc_mac_keys(chain_key):
-  MKenc = take_first_256_bits(KDF_2(0x01 || chain_key)) // TODO: maybe define
-  what take_first_256_bits is?
+  MKenc = take_first_256_bits(KDF_2(0x01 || chain_key))
   MKmac = KDF_2(0x02 || chain_key)
   return MKenc, MKmac
 ```
@@ -916,8 +922,8 @@ size.
        || m). Let 'challenge' be the encoded 114-byte digest.
 
    5.  Compute 'challenge_scalar = (r + 'challenge' * sk) mod q'.  For
-       efficiency, reduce 'challenge' modulo q. // TODO: should it be stated
-       that 'challenge' by reducing is a scalar?
+       efficiency, reduce 'challenge' modulo q. This will make 'challenge' a
+       SCALAR.
 
    6.  Form the signature of the concatenation of 'nonce_point' (57 bytes) and
        the little-endian encoding of 'challenge_scalar' (57 bytes, the ten most
@@ -985,8 +991,8 @@ To validate a user profile, you must:
 * [Verify that the user profile signature is valid](#verify-a-user-profile-signature)
 * Verify that the user profile is not expired
 * Verify that the `Versions` field contains a string with "4"
-* Validate that the public shared prekey is on the curve Ed448 // TODO:
-  might be wise to add all of the verifications on the curve
+* Validate that the public shared prekey is on the curve Ed448. See
+  [Verifying a point on curve](#verifying-a-point-on-curve) section for details.
 
 ## Online Conversation Initialization
 
@@ -1045,6 +1051,8 @@ Bob will be initiating the DAKE with Alice.
       messages.
     * Validates the received ECDH ephemeral public key is on curve Ed448 and
       sets it as `their_ecdh`.
+      See [Verifying a point on curve](#verifying-a-point-on-curve) section for
+      details.
     * Validates that the received DH ephemeral public key is on the correct
       group and sets it as `their_dh`.
 2. Generates and sets `our_ecdh` as ephemeral ECDH keys.
@@ -1065,6 +1073,8 @@ Bob will be initiating the DAKE with Alice.
 3. Retrieve ephemeral public keys from Alice:
     * Validates the received ECDH ephemeral public key is on curve Ed448 and
       sets it as `their_ecdh`.
+      See [Verifying a point on curve](#verifying-a-point-on-curve) section for
+      details.
     * Validates that the received DH ephemeral public key is on the correct
       group and sets it as `their_dh`.
 4. Sends Bob an Auth-I message (see [Auth-I message](#auth-i-message) section).
@@ -1117,7 +1127,8 @@ choice of DH and ECDH key. A valid Identity message is generated as follows:
 To verify an Identity message:
 
 * Validate the User Profile.
-* Verify that the point `Y` received is on curve Ed448.
+* Verify that the point `Y` received is on curve Ed448. See
+  [Verifying a point on curve](#verifying-a-point-on-curve) section for details.
 * Verify that the DH public key `B` is from the correct group and that it
   does not degenerate.
   // TODO: does this degenerate? Maybe stating that '>= 2 and <= modulus-2' is
@@ -1306,6 +1317,8 @@ Verify & Decrypt message
       messages.
     * Validates that the received ECDH ephemeral public key is on curve Ed448
       and sets it as `their_ecdh`.
+      See [Verifying a point on curve](#verifying-a-point-on-curve) section for
+      details.
     * Validates that the received DH ephemeral public key is on the correct
       group and sets it as `their_dh`.
 3. Generates and sets `our_ecdh` as ephemeral ECDH keys.
@@ -1395,7 +1408,8 @@ B Prekey owner's DH public key (MPI)
 To validate a prekey message:
 
 * [Validate the user profile](#validating-a-user-profile)
-* Check that the ECDH public key `Y` is on curve Ed448.
+* Check that the ECDH public key `Y` is on curve Ed448. See
+  [Verifying a point on curve](#verifying-a-point-on-curve) section for details.
 * Verify that the DH public key `B` is from the correct group and that it
   does not degenerate.
 
@@ -2165,7 +2179,8 @@ If the version is 4:
       * Check if the message version is allowed.
       * If the instance tag in the message is not the instance tag you are
         currently using, ignore the message.
-      * Verify that the public ECDH key is on curve Ed448.
+      * Verify that the public ECDH key is on curve Ed448. See 'Verifying a
+        point on curve' section for details.
       * Verify that the public DH key is from the correct group and that it does
         not degenerate.
 
@@ -2347,8 +2362,8 @@ Assuming that Alice begins the exchange:
 
 **Alice:**
 
-* Validates that `Rb` is on curve Ed448, that it is in the correct group, and
-  that it does not degenerate.
+* Validates that `Rb` is on curve Ed448. See
+  [Verifying a point on curve](#verifying-a-point-on-curve) section for details.
 * Computes `Rab = Rb * a3`.
 * Checks whether `Rab == Pa - Pb`.
 
@@ -2648,7 +2663,9 @@ Set smpstate to `SMPSTATE_EXPECT1` and send a type 6 TLV (SMP abort) to Bob.
 If smpstate is SMPSTATE_EXPECT4:
 
 * Verify Bob's zero-knowledge proof for Rb:
-   1. Check that `Rb` is on curve Ed448 and that it does not degenerate.
+   1. Check that `Rb` is on curve Ed448. See
+      [Verifying a point on curve](#verifying-a-point-on-curve) section for
+      details.
    2. Check that `cr = HashToScalar(8 || G * d7 + G3 * cr || (Qa - Qb) * d7 + Rb * cr)`.
 * Check whether the protocol was successful:
     1. `Compute Rab = Rb * a3`.

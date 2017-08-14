@@ -66,8 +66,8 @@ fingerprint. The full length fingerprint will be used for SMP authentication.
 But to make manual fingerprint comparison easier, OTRv4 will allow 2 different
 sizes of the fingerprint for implementers to choose from:
 
-* Truncate the output of the hash to 56 bytes (224-bit security level)
-* Truncate the output of the hash to 32 bytes (128-bit security level)
+* Truncate the output of the hash to the first 56 bytes (224-bit security level)
+* Truncate the output of the hash to the first 32 bytes (128-bit security level)
 
 ### Consequences
 
