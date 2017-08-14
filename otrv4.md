@@ -366,7 +366,7 @@ In order to encode and decode `POINT` and `SCALAR` types, refer to the
 
 ### Encoding and Decoding
 
-We follow the encoding and decoding schemes specified in RFC 8032 [\[18\]](#references).
+We follow the encoding and decoding schemes specified in RFC 8032 [\[10\]](#references).
 
 #### Scalar
 
@@ -450,7 +450,7 @@ OTR4 public shared prekey (ED448-SHARED-PREKEY):
 ```
 
 The public key and shared prekey are generated as follows (refer to
-RFC 8032[\[18\]](#references), for more information on key generation):
+RFC 8032[\[10\]](#references), for more information on key generation):
 
 ```
 The symmetric key (sym_key) is 57 bytes of cryptographically secure random data.
@@ -828,7 +828,7 @@ available from a public location, such as a server.
 Each implementation may decide how to publish the profile. For example, one
 client may publish profiles to a server pool (similar to a keyserver pool,
 where PGP public keys can be published). Another client may use XMPP's publish-
-subscribe extension (XEP-0060 [\[9\]](#references)) for publishing profiles. A
+subscribe extension (XEP-0060 [\[8\]](#references)) for publishing profiles. A
 protocol for publication must be defined, but the definition is out of scope
 for this specification.
 
@@ -837,6 +837,41 @@ should determine the frequency of user's profile expiration and renewal. The
 recommended expiration time is two weeks.
 
 // TODO: does the long term public key and shared prekey expire with the user profile? A long term public key is therefore only 2 weeks long?
+
+### User Profile Data Type
+
+```
+Profile Expiration (PROF-EXP):
+  8 bytes signed value, big-endian
+
+User Profile (USER-PROF):
+  Ed448 public key (ED448-PUBKEY)
+  Versions (DATA)
+  Profile Expiration (PROF-EXP)
+  Public Shared Prekey (ED448-SHARED-PREKEY)
+    The shared prekey used between different prekey messages.
+  Profile Signature (EDDSA-SIG)
+  (optional) Transitional Signature (SIG)
+```
+
+`SIG` is the DSA Signature. It is the same signature used in in OTRv3.
+From the OTRv3 protocol section "Public keys, signatures, and fingerprints":
+
+```
+DSA signature (SIG):
+  (len is the length of the DSA public parameter q, which in current
+  implementations is 20 bytes)
+  len byte unsigned r, big-endian
+  len byte unsigned s, big-endian
+```
+
+`EDDSA-SIG` refers to the OTR version 4 signature:
+
+```
+EDDSA signature (EDDSA-SIG) [\[9\]](#references):
+  (len is the expected length of the signature, which is 114 bytes)
+  len byte unsigned value, big-endian
+```
 
 ### Creating a User Profile
 
@@ -960,41 +995,6 @@ It is done as follows:
     H'.
 ```
 
-### User Profile Data Type
-
-```
-Profile Expiration (PROF-EXP):
-  8 bytes signed value, big-endian
-
-User Profile (USER-PROF):
-  Ed448 public key (ED448-PUBKEY)
-  Versions (DATA)
-  Profile Expiration (PROF-EXP)
-  Public Shared Prekey (ED448-SHARED-PREKEY)
-    The shared prekey used between different prekey messages.
-  Profile Signature (EDDSA-SIG)
-  (optional) Transitional Signature (SIG)
-```
-
-`SIG` is the DSA Signature. It is the same signature used in in OTRv3.
-From the OTRv3 protocol section "Public keys, signatures, and fingerprints":
-
-```
-DSA signature (SIG):
-  (len is the length of the DSA public parameter q, which in current
-  implementations is 20 bytes)
-  len byte unsigned r, big-endian
-  len byte unsigned s, big-endian
-```
-
-`EDDSA-SIG` refers to the OTR version 4 signature:
-
-```
-EDDSA signature (EDDSA-SIG):
-  (len is the expected length of the signature, which is 114 bytes)
-  len byte unsigned value, big-endian
-```
-
 ### Validating a User Profile
 
 To validate a user profile, you must:
@@ -1015,7 +1015,7 @@ conversation is authenticated using the interactive DAKE.
 
 Bob might respond to Alice's request (or notification of willingness to start a
 conversation) using OTRv3. If this is the case and Alice supports version 3,
-the protocol falls back to OTRv3 [\[8\]](#references). If Alice does not
+the protocol falls back to OTRv3 [\[7\]](#references). If Alice does not
 support version 3, this response is ignored.
 
 ### Interactive Deniable Authenticated Key Exchange (DAKE)
@@ -3099,16 +3099,18 @@ AUTHSTATE_AWAITING_SIG
 4. https://mikehamburg.com/papers/goldilocks/goldilocks.pdf "M. Hamburg: Ed448-Goldilocks, a new elliptic curve"
 5. http://www.ietf.org/rfc/rfc7748.txt "A. Langley, M. Hamburg, and S. Turner: Elliptic Curves for Security.” Internet Engineering Task Force; RFC 7748 (Informational); IETF, Jan-2016"
 6. https://www.ietf.org/rfc/rfc3526.txt "M. Kojo: More Modular Exponential (MODP) Diffie-Hellman groups for Internet Key Exchange (IKE)"
+7. https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html "Off-the-Record Messaging Protocol version 3"
+8. https://xmpp.org/extensions/xep-0060.pdf "P. Millard, P. Saint-Andre and R. Meijer: XEP-0060: Publish-Subscribe"
+9. https://tools.ietf.org/html/draft-irtf-cfrg-eddsa-05 "S. Josefsson and I. Liusvaara: Edwards-curve Digital Signature Algorithm (EdDSA)"
+10. https://tools.ietf.org/rfc/rfc8032.txt "S. Josefsson and I. Liusvaara: Edwards-Curve Digital Signature Algorithm (EdDSA)"; RFC 8032 (Informational); IETF; Jan 2017
+
+### Further Reading
+
+1. https://github.com/twstrike/cramershoup/blob/master/src/test.c#L60
+2. https://ed25519.cr.yp.to/python/ed25519.py "Daniel Bernstein: ed25519"
+3. https://ed25519.cr.yp.to/ed25519-20110926.pdf "Daniel Bernstein, Niels Duif, Tanja Lange, Peter Schwabe and Bo-Yin Yang: High-speed high-security signatures"
+4. https://moderncrypto.org/mail-archive/curves/2017/000840.html
+5. https://elligator.cr.yp.to/elligator-20130828.pdf "Daniel J. Bernstein, Mike Hamburg, Anna Krasnova and Tanja Lange: Elligator: Elliptic-curve points indistinguishable from uniform random strings"
+6. https://sourceforge.net/p/ed448goldilocks/code/ci/decaf/tree/src/decaf_fast.c#l1125
 7. https://eprint.iacr.org/2015/673.pdf "Mike Hamburg: Decaf: Eliminating cofactors through point compression"
-8. https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html "Off-the-Record Messaging Protocol version 3"
-9. https://xmpp.org/extensions/xep-0060.pdf "P. Millard, P. Saint-Andre and R. Meijer: XEP-0060: Publish-Subscribe"
-10. https://github.com/twstrike/cramershoup/blob/master/src/test.c#L60
-11. https://ed25519.cr.yp.to/python/ed25519.py "Daniel Bernstein: ed25519"
-12. https://ed25519.cr.yp.to/ed25519-20110926.pdf "Daniel Bernstein, Niels Duif, Tanja Lange, Peter Schwabe and Bo-Yin Yang: High-speed high-security signatures"
-13. https://tools.ietf.org/html/draft-irtf-cfrg-eddsa-05 "S. Josefsson and I. Liusvaara: Edwards-curve Digital Signature Algorithm (EdDSA)"
-14. https://moderncrypto.org/mail-archive/curves/2017/000840.html
-15. https://elligator.cr.yp.to/elligator-20130828.pdf "Daniel J. Bernstein, Mike Hamburg, Anna Krasnova and Tanja Lange: Elligator: Elliptic-curve points
-indistinguishable from uniform random strings"
-16. https://sourceforge.net/p/ed448goldilocks/code/ci/decaf/tree/src/decaf_fast.c#l1125
-17. https://eprint.iacr.org/2012/309.pdf "Mike Hamburg: Fast and compact elliptic-curve cryptography"
-18. https://tools.ietf.org/rfc/rfc8032.txt "S. Josefsson and I. Liusvaara: Edwards-Curve Digital Signature Algorithm (EdDSA)"; RFC 8032 (Informational); IETF; Jan 2017
+8. https://eprint.iacr.org/2012/309.pdf "Mike Hamburg: Fast and compact elliptic-curve cryptography"
