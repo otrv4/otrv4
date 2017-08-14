@@ -74,16 +74,16 @@ works on top of an existing messaging protocol, like XMPP.
 
 ## Main Changes over Version 3
 
-- Security level raised to 224 bits and based on elliptic curve cryptography
+- Security level raised to 224 bits and based on Elliptic Curve Cryptography
   (ECC).
 - Additional protection against transcript decryption in the case of ECC
   compromise.
 - The cryptographic primitives and protocols have been updated:
   - Deniable authenticated key exchanges using DAKEZ and XZDH [\[1\]](#references).
-    DAKEZ corresponds to online conversations and XZDH to offline conversations.
+    DAKEZ corresponds to interactive conversations and XZDH to non-interactive conversations.
   - Key management using the Double Ratchet Algorithm [\[2\]](#references).
   - Upgraded SHA-1 and SHA-2 to SHA-3.
-  - Switched from AES to XSalsa20.
+  - Switched from AES to XSalsa20 [\[3\]](#references).
 - Explicit instructions for producing forged transcripts using the same
   functions used to conduct honest conversations.
 
@@ -211,8 +211,8 @@ The byte representation of a value `x` is defined as `byte(x)`
 
 ### Elliptic Curve Parameters
 
-OTRv4 uses the Ed448-Goldilocks [\[3\]](#references) elliptic curve
-[\[4\]](#references), which defines the following parameters:
+OTRv4 uses the Ed448-Goldilocks [\[4\]](#references) elliptic curve
+[\[5\]](#references), which defines the following parameters:
 
 ```
 Equation
@@ -256,7 +256,7 @@ To verify that a point (`X`) is on curve Ed448-Goldilocks:
 ### 3072-bit Diffie-Hellman Parameters
 
 For the Diffie-Hellman group computations, the group is the one defined in RFC
-3526 [\[5\]](#references) with a 3072-bit modulus (hex, big-endian):
+3526 [\[6\]](#references) with a 3072-bit modulus (hex, big-endian):
 
 ```
 Prime (dh_p):
@@ -366,7 +366,7 @@ In order to encode and decode `POINT` and `SCALAR` types, refer to the
 
 ### Encoding and Decoding
 
-We follow the encoding and decoding schemes specified in RFC 8032 [\[17\]](#references).
+We follow the encoding and decoding schemes specified in RFC 8032 [\[18\]](#references).
 
 #### Scalar
 
@@ -450,7 +450,7 @@ OTR4 public shared prekey (ED448-SHARED-PREKEY):
 ```
 
 The public key and shared prekey are generated as follows (refer to
-RFC 8032[\[17\]](#references), for more information on key generation):
+RFC 8032[\[18\]](#references), for more information on key generation):
 
 ```
 The symmetric key (sym_key) is 57 bytes of cryptographically secure random data.
@@ -828,7 +828,7 @@ available from a public location, such as a server.
 Each implementation may decide how to publish the profile. For example, one
 client may publish profiles to a server pool (similar to a keyserver pool,
 where PGP public keys can be published). Another client may use XMPP's publish-
-subscribe extension (XEP-0060 [\[8\]](#references)) for publishing profiles. A
+subscribe extension (XEP-0060 [\[9\]](#references)) for publishing profiles. A
 protocol for publication must be defined, but the definition is out of scope
 for this specification.
 
@@ -1015,7 +1015,7 @@ conversation is authenticated using the interactive DAKE.
 
 Bob might respond to Alice's request (or notification of willingness to start a
 conversation) using OTRv3. If this is the case and Alice supports version 3,
-the protocol falls back to OTRv3 [\[7\]](#references). If Alice does not
+the protocol falls back to OTRv3 [\[8\]](#references). If Alice does not
 support version 3, this response is ignored.
 
 ### Interactive Deniable Authenticated Key Exchange (DAKE)
@@ -3095,19 +3095,20 @@ AUTHSTATE_AWAITING_SIG
 
 1. http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf "N. Unger, I. Goldberg: Improved Strongly Deniable Authenticated Key Exchanges for Secure Messaging"
 2. https://whispersystems.org/docs/specifications/doubleratchet "Trevor Perrin (editor), Moxie Marlinspike: The Double Ratchet Algorithm"
-3. https://mikehamburg.com/papers/goldilocks/goldilocks.pdf "M. Hamburg: Ed448-Goldilocks, a new elliptic curve"
-4. http://www.ietf.org/rfc/rfc7748.txt "A. Langley, M. Hamburg, and S. Turner: Elliptic Curves for Security.” Internet Engineering Task Force; RFC 7748 (Informational); IETF, Jan-2016"
-5. https://www.ietf.org/rfc/rfc3526.txt "M. Kojo: More Modular Exponential (MODP) Diffie-Hellman groups for Internet Key Exchange (IKE)"
-6. https://eprint.iacr.org/2015/673.pdf "Mike Hamburg: Decaf: Eliminating cofactors through point compression"
-7. https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html "Off-the-Record Messaging Protocol version 3"
-8. https://xmpp.org/extensions/xep-0060.pdf "P. Millard, P. Saint-Andre and R. Meijer: XEP-0060: Publish-Subscribe"
-9. https://github.com/twstrike/cramershoup/blob/master/src/test.c#L60
-10. https://ed25519.cr.yp.to/python/ed25519.py "Daniel Bernstein: ed25519"
-11. https://ed25519.cr.yp.to/ed25519-20110926.pdf "Daniel Bernstein, Niels Duif, Tanja Lange, Peter Schwabe and Bo-Yin Yang: High-speed high-security signatures"
-12. https://tools.ietf.org/html/draft-irtf-cfrg-eddsa-05 "S. Josefsson and I. Liusvaara: Edwards-curve Digital Signature Algorithm (EdDSA)"
-13. https://moderncrypto.org/mail-archive/curves/2017/000840.html
-14. https://elligator.cr.yp.to/elligator-20130828.pdf "Daniel J. Bernstein, Mike Hamburg, Anna Krasnova and Tanja Lange: Elligator: Elliptic-curve points
+3. https://cr.yp.to/snuffle/xsalsa-20081128.pdf "Daniel J. Bernstein: Extending the Salsa20 Nonce"
+4. https://mikehamburg.com/papers/goldilocks/goldilocks.pdf "M. Hamburg: Ed448-Goldilocks, a new elliptic curve"
+5. http://www.ietf.org/rfc/rfc7748.txt "A. Langley, M. Hamburg, and S. Turner: Elliptic Curves for Security.” Internet Engineering Task Force; RFC 7748 (Informational); IETF, Jan-2016"
+6. https://www.ietf.org/rfc/rfc3526.txt "M. Kojo: More Modular Exponential (MODP) Diffie-Hellman groups for Internet Key Exchange (IKE)"
+7. https://eprint.iacr.org/2015/673.pdf "Mike Hamburg: Decaf: Eliminating cofactors through point compression"
+8. https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html "Off-the-Record Messaging Protocol version 3"
+9. https://xmpp.org/extensions/xep-0060.pdf "P. Millard, P. Saint-Andre and R. Meijer: XEP-0060: Publish-Subscribe"
+10. https://github.com/twstrike/cramershoup/blob/master/src/test.c#L60
+11. https://ed25519.cr.yp.to/python/ed25519.py "Daniel Bernstein: ed25519"
+12. https://ed25519.cr.yp.to/ed25519-20110926.pdf "Daniel Bernstein, Niels Duif, Tanja Lange, Peter Schwabe and Bo-Yin Yang: High-speed high-security signatures"
+13. https://tools.ietf.org/html/draft-irtf-cfrg-eddsa-05 "S. Josefsson and I. Liusvaara: Edwards-curve Digital Signature Algorithm (EdDSA)"
+14. https://moderncrypto.org/mail-archive/curves/2017/000840.html
+15. https://elligator.cr.yp.to/elligator-20130828.pdf "Daniel J. Bernstein, Mike Hamburg, Anna Krasnova and Tanja Lange: Elligator: Elliptic-curve points
 indistinguishable from uniform random strings"
-15. https://sourceforge.net/p/ed448goldilocks/code/ci/decaf/tree/src/decaf_fast.c#l1125
-16. https://eprint.iacr.org/2012/309.pdf "Mike Hamburg: Fast and compact elliptic-curve cryptography"
-17. https://tools.ietf.org/rfc/rfc8032.txt "S. Josefsson and I. Liusvaara: Edwards-Curve Digital Signature Algorithm (EdDSA)"; RFC 8032 (Informational); IETF; Jan 2017
+16. https://sourceforge.net/p/ed448goldilocks/code/ci/decaf/tree/src/decaf_fast.c#l1125
+17. https://eprint.iacr.org/2012/309.pdf "Mike Hamburg: Fast and compact elliptic-curve cryptography"
+18. https://tools.ietf.org/rfc/rfc8032.txt "S. Josefsson and I. Liusvaara: Edwards-Curve Digital Signature Algorithm (EdDSA)"; RFC 8032 (Informational); IETF; Jan 2017
