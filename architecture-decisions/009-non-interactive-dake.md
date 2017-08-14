@@ -23,12 +23,12 @@ deleted.
 In OTRv4, the window of key compromise is equivalent to how long it takes for
 the double ratchet to refresh the ephemeral key material (2 ratchets, including
 the first compromised ratchet) and how long a prekey remains unused before the
-user profile inside becomes expired. We recommend expiration to be a week long,
-so the window of key compromise will be one week. With offline conversations,
-participants may not receive messages or reply to them for days, weeks, or
-months at a time. As a result, the window of compromise for these kind of
-conversations can be very long if no limitations are set. We want to reduce this
-window.
+user profile becomes expired. We recommend expiration of the user profile to be
+a week long, so the window of key compromise will be one week. This is done as
+with offline conversations, participants may not receive messages or reply to
+them for days, weeks, or months at a time. As a result, the window of compromise
+for these kind of conversations can be very long if no limitations are set. We
+set an expiration date to reduce this window of compromise.
 
 Primarily, there are two attacks that we want to mitigate:
 

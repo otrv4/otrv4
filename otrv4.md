@@ -1,5 +1,7 @@
 # OTR version 4
 
+// TODO: state the session expiration time
+
 OTR version 4 (OTRv4) provides a deniable authenticated key
 exchange and better forward secrecy through the use of double ratcheting. OTR
 works on top of an existing messaging protocol, like XMPP.
@@ -834,9 +836,8 @@ for this specification.
 
 When the user profile expires, it should be updated. Client implementation
 should determine the frequency of user's profile expiration and renewal. The
-recommended expiration time is two weeks.
-
-// TODO: does the long term public key and shared prekey expire with the user profile? A long term public key is therefore only 2 weeks long?
+recommended expiration time is one week. Note, though, that the long term public
+key has its own expiration time.
 
 ### User Profile Data Type
 
@@ -889,25 +890,18 @@ To create a user profile, assemble:
    of the non-interactive DAKE and that compromises the party's secret long term
    key. For its generation, refer to
    [Public keys, shared prekeys and fingerprints](#public-keys-shared-prekeys-and-fingerprints) section.
-
-   // TODO: here I think it should be stated prekey expiration and session
-   expiration.
-
+   This key should expire when the user profile expires.
 5. Profile Signature: The symmetric key, the flag `f` (set to zero, as defined
    on [RFC]8032) and the empty context `c` are used to create signatures of the
    entire profile excluding the signature itself. The size of the signature is
    114 bytes. For its generation, refer to
    [Create a user profile signature](#create-a-user-profile-signature) section.
-6. Transition Signature (optional): A signature of the profile excluding Profile
-   Signatures and the user's OTRv3 DSA key. The Transition Signature enables
-   parties that trust user's version 3 DSA key to trust the user's profile in
-   version 4. This is only used if the user supports versions 3 and 4.
-
-// TODO: may it should be said that it works like:
-if transition_signature : a = sig((longterm_pub, expiration, prekey), DSA_key)
-then sig(a, eddsa)
-else
-sig((longterm_pub, expiration, prekey), eddsa)
+6. Transition Signature (optional): A signature of the profile excluding the
+   Profile Signature and the user's OTRv3 DSA key. The Transition Signature
+   enables parties that trust user's version 3 DSA key to trust the user's
+   profile in version 4. This is only used if the user supports versions 3
+   and 4. For more information, refer to
+   [Create a user profile signature](#create-a-user-profile-signature) section.
 
 After the profile is created, it must be published in a public place, like an
 untrusted server.
@@ -933,22 +927,36 @@ if the only publicly available profile is expired. For that reason, an expired
 profile received in the DAKE is considered invalid.
 
 Before the profile expires, the user must publish an updated profile with a
-new expiration date. The client establishes the frequency of expiration - this
-can be configurable. A recommended value is two weeks. // TODO: should it be
-stated when to publish the new one prior to expiration of old one, or just
-'before' is enough?
+new expiration date. The client establishes the frequency of expiration and
+when to publish (before the current user profile expires). Note that this can be
+configurable. A recommended value is one week.
 
 ### Create a User Profile Signature
 
-The user profile signature is generated as defined in RFC 8032 section 5.2.6.
-The flag `f` is set to `0` and the context `C` is left empty. It is generated
-as follows:
+If version 3 and 4 are supported:
+
+   * Concatenate `Ed448 public key || Versions || Profile Expiration || Public
+     Shared Prekey`. Denote this value `m`.
+   * Sign `m` with the user's OTRv3 DSA key. Denote this value
+     `Transition Signature`.
+   * Sign `m || Transition Signature`  with the symmetric key, as stated below.
+     Denote this value `Profile Signature`.
+
+If only version 4 is supported:
+
+   * Concatenate `Ed448 public key || Versions || Profile Expiration || Public
+     Shared Prekey`. Denote this value `m`.
+   * Sign `m` with the symmetric key, as stated below. Denote this value
+     `Profile Signature`.
+
+The user profile signature for version 4 is generated as defined in RFC 8032
+section 5.2.6. The flag `f` is set to `0` and the context `C` is left empty. It
+is generated as follows:
 
 ```
-The inputs to the signing function are the symmetric key (57 bytes, defined on
-'Public keys and fingerprints'. Note that the symmetric key is 57 bytes), a flag
-'f', which is 0, a context 'c', which is empty, and a message 'm' of arbitrary
-size.
+The inputs are the symmetric key (57 bytes, defined on 'Public keys and
+fingerprints'. Note that the symmetric key is 57 bytes), a flag 'f', which is 0,
+a context 'c', which is empty, and a message 'm'.
 
    1.  Hash the symmetric key: 'SHAKE-256(symmetric_key)'. Store the first 114
        bytes of the digest on 'digest'. Construct the secret key 'sk' from
@@ -957,7 +965,7 @@ size.
        section. Let 'nonce' denote the second half of the 'digest' (from
        digest[57] to digest[113]).
 
-   2.  Compute SHAKE-256("SigEd448" || f || len(c) || c || 'nonce' || M). Let
+   2.  Compute SHAKE-256("SigEd448" || f || len(c) || c || 'nonce' || m). Let
        'r' be the 114-byte digest.
 
    3.  Multiply the scalar 'r' by the Base Point (G). For efficiency, do this by
