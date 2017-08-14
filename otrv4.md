@@ -146,10 +146,8 @@ attacker can eavesdrop or interfere with the encrypted messages.
 The network model provides in-order delivery of messages and, therefore some
 messages may not be delivered.
 
-// TODO: availability?
-
 OTRv4 does not protect against an active attacker performing Denial of Service
-attacks to reduce availability.
+attacks.
 
 ## Security Properties
 
@@ -314,6 +312,12 @@ Hexadecimal value of dh_q:
 Whenever you see an operation on a field element from this group, the
 operation should be done modulo the prime `dh_p`.
 
+#### Verifying a integer on the dh group
+
+To verify that a integer (`X`) is on the group with a 3072-bit modulus:
+
+1. Check that `X` is `>= 2` and `<= dh_p - 2`.
+
 ## Data Types
 
 OTRv4 uses many of the data types specified in OTRv3:
@@ -453,11 +457,11 @@ The symmetric key (sym_key) is 57 bytes of cryptographically secure random data.
 The secret scalar 'sk' is defined as SECRET_SCALAR.
 
 1. Hash the 57-byte symmetric key using SHAKE-256(sym_key). Store the
-   digest in a 114-bytes large buffer, denoted 'h'.  Only the lower 57 bytes
+   digest in a 114-bytes large buffer.  Only the lower 57 bytes (denoted 'h')
    are used for generating the public key.
-2. Prune the buffer: the two least significant bits of the first
-   octet are cleared, all eight bits of the last octet are cleared, and the
-   highest bit of the second to last octet is set.
+2. Prune the buffer 'h': the two least significant bits of the first
+   byte are cleared, all eight bits of the last byte are cleared, and the
+   highest bit of the second to last byte is set.
 3. Interpret the buffer as the little-endian integer, forming the
    secret scalar 'sk'.  Perform a known-base-point scalar multiplication
    'sk * Base point (G)'. If the result is for the 'ED448-PUBKEY', store it in
@@ -621,11 +625,14 @@ variable values are replaced:
 ### Generating ECDH and DH keys
 
 ```
-// TODO: not actually generated as this. This is also clamped.
-
 generateECDH()
-  pick a random value r (57 bytes)
-  return our_ecdh.public = G * r, our_ecdh.secret = r
+  - pick a random value r (57 bytes)
+  - generate 'h' = take_last_57_bytes(SHAKE-256(r)).
+  - prune 'h': the two least significant bits of the first byte are cleared, all
+    eight bits of the last byte are cleared, and the highest bit of the second
+    to last byte is set.
+  - encode 'h' as SCALAR. Denote this value 's'.
+  - return our_ecdh.public = G * s, our_ecdh.secret = s
 
 generateDH()
   pick a random value r (80 bytes)
