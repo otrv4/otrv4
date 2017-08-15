@@ -1323,8 +1323,6 @@ Publish prekey message ---->
 Verify & Decrypt message
 ```
 
-// TODO: the order is weird
-
 **Bob:**
 
 1. Generates a [prekey message](#prekey-message), as described in the section
@@ -1711,7 +1709,7 @@ Nonce (NONCE)
 Encrypted message (DATA)
   Using the appropriate encryption key (see below) derived from the
   sender's and recipient's DH public keys (with the keyids given in this
-  message), perform XSalsa20 encryption of the message. The nonce used for
+  message), perform a XSalsa20 encryption of the message. The nonce used for
   this operation is also included in the header of the data message
   packet.
 
@@ -1732,7 +1730,7 @@ has been set to `0`, keys should be rotated.
 Given a new ratchet:
 
   * Rotate the ECDH keys and mix key, see "Rotating ECDH keys and mix key"
-    section.
+    section. // TODO: put link
     The new ECDH public key created by the sender with this process will be the
     "Public ECDH Key" for the message. If a new public DH key is created in
     this process, it will be the "Public DH Key" for the message. If it is
@@ -1762,7 +1760,7 @@ In both cases:
   * When creating a non-interactive auth message, construct a `nonce` from the
     first 24 bytes of the `c` variable generated when constructing `sigma`. See
     SNIZKPK Authentication section. When creating a regular data message,
-    generate a new random 24 bytes value to be the `nonce`.
+    generate a new random 24 bytes value to be the `nonce`. // TODO: put link
   * Use the encryption key to encrypt the message:
 
    ```
@@ -1770,10 +1768,10 @@ In both cases:
    ```
 
   * When creating a non-interactive auth message, do not create a MAC tag. This
-    is not necessary since the MAC tag created with the non-interactive DAKE
-    includes the data message. When creating a regular data message, use the MAC
-    key to create a MAC tag. MAC all the sections of the data message from the
-    protocol version to the encrypted message.
+    is not necessary since the MAC tag created in the non-interactive DAKE
+    (`Auth MAC`) already authentifies the data message. In any other case, use
+    the MAC key to create a MAC tag. MAC all the sections of the data message
+    from the protocol version to the encrypted message.
 
    ```
    Authenticator = KDF_2(MKmac || Data_message_sections)
@@ -1793,19 +1791,23 @@ encryption and MAC keys.
     MKenc, MKmac = derive_enc_mac_keys(chain_r[ratchet_id][message_id])
   ```
 
-* Use the MAC key (`MKmac`) to verify the MAC of the message. If the message
-  verification fails, reject the message.
+* Use the MAC key (`MKmac`) to verify the MAC of the message.In the case of a
+  non-interactive auth message, verify it with the `Auth Mac` as defined in the
+  [Non-interactive Auth Message](#non-interactive-auth-message) section.
+
+  If the verification fails:
+
+    * Reject the message
 
   Otherwise:
 
     * Decrypt the message using the "encryption key" (`MKenc`) and securely
-    delete it.
+      delete the key.
     * Securely delete receiving chain keys older than `message_id-1`.
     * Set `j = 0` to indicate that a new DH-ratchet should happen the next time
-    you send a message.
+      you send a message.
     * Set `their_ecdh` as the "Public ECDH key" from the message.
-    * Set `their_dh` as the "Public DH Key" from the message, if it
-    is not NULL.
+    * Set `their_dh` as the "Public DH Key" from the message, if it is not NULL.
     * Add the MKmac key to list `mac_keys_to_reveal`.
 
 ### Extra symmetric key
@@ -1813,9 +1815,8 @@ encryption and MAC keys.
 Like OTRv3, OTRv4 defines an additional symmetric key that can be derived by
 the communicating parties for use of application-specific purposes, such as
 file transfer, voice encryption, etc. When one party wishes to use the extra
-symmetric key, they create a type `8 TLV` attached to a Data Message. The key
-itself is then derived from `K`. The extra symmetric key is derived by
-calculating `KDF_2(0xFF || K)`. // TODO: are only the first bytes used?
+symmetric key, they create a type `8 TLV` attached to a Data Message. The extra
+symmetric key is derived by calculating `KDF_2(0xFF || K)`.
 
 Upon receipt of the Data Message containing the type 8 TLV, the recipient will
 compute the extra symmetric key in the same way. Note that the value of the
@@ -1823,14 +1824,14 @@ extra symmetric key is not contained in the TLV itself.
 
 ### Revealing MAC Keys
 
-Old MAC keys are keys from already received messages and that, therefore, will
-no longer be used to verify the authenticity of the message. We reveal them in
-order to provide [forgeability of messages](#forging-transcripts).
+Old MAC keys are keys from already received messages and that will no longer be
+used to verify the authenticity of the message. We reveal them in order to
+provide [forgeability of messages](#forging-transcripts).
 
 A MAC key is added to `mac_keys_to_reveal` after a participant has verified
-a message associated with that MAC key. Old MAC keys are formatted as a list of
-concatenated 64 byte values. The first data message sent every ratchet reveals
-them.
+the message associated with that MAC key. Old MAC keys are formatted as a list
+of concatenated 64 byte values. The first data message sent every ratchet
+reveals them.
 
 ## Fragmentation
 
