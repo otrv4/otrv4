@@ -82,7 +82,8 @@ works on top of an existing messaging protocol, like XMPP.
   compromise.
 - The cryptographic primitives and protocols have been updated:
   - Deniable authenticated key exchanges using DAKEZ and XZDH [\[1\]](#references).
-    DAKEZ corresponds to interactive conversations and XZDH to non-interactive conversations.
+    DAKEZ corresponds to conversations when both parties are online (interactive) and
+    XZDH to conversations when one person is offline (non-interactive).
   - Key management using the Double Ratchet Algorithm [\[2\]](#references).
   - Upgraded SHA-1 and SHA-2 to SHA-3.
   - Switched from AES to XSalsa20 [\[3\]](#references).
@@ -113,7 +114,7 @@ Exchanges Data Messages             <------------>  Exchanges Data Messages
 
 The conversation can begin after one participant requests a conversation. This
 includes an advertisement of which versions they support. If the other
-participant supports OTRv4, an interactive, DAKE can be used to establish a
+participant supports OTRv4, an interactive DAKE can be used to establish a
 secure channel. Encrypted messages are then exchanged in this secure channel
 with forward secrecy.
 
@@ -145,7 +146,7 @@ like Alice, to send him encrypted messages while he is offline.
 Messages in a conversation can be exchanged over an insecure channel, where an
 attacker can eavesdrop or interfere with the encrypted messages.
 
-The network model provides in-order delivery of messages and, therefore some
+The network model provides in-order delivery of messages therefore some
 messages may not be delivered.
 
 OTRv4 does not protect against an active attacker performing Denial of Service
@@ -155,7 +156,7 @@ attacks.
 
 OTRv4 does not take advantage of quantum resistant algorithms for several
 reasons. Mainly, OTRv4 aims to be a protocol that is easy to implement in
-today's environments within a year. Current quantum resistant algorithms and
+today's environments and within a year. Current quantum resistant algorithms and
 their respective implementations are not ready enough to allow for this
 implementation time frame. As a result, the protections mentioned in the
 following paragraphs only apply to non-quantum adversaries.
