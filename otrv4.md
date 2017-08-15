@@ -1138,10 +1138,12 @@ This is the first message of the DAKE. Bob sends it to Alice to commit to a
 choice of DH and ECDH key. A valid Identity message is generated as follows:
 
 1. Create a user profile, as detailed [here](#creating-a-user-profile).
-2. Generate an ephemeral ECDH key pair: // TODO: state how this is generated
+2. Generate an ephemeral ECDH key pair, as defined in
+   [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
   * secret key `y` (57 bytes).
   * public key `Y`.
-3. Generate an ephemeral DH key pair:
+3. Generate an ephemeral DH key pair, as defined in
+   [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
   * secret key `b` (80 bytes).
   * public key `B`.
 4. Generate a 4-byte instance tag to use as the sender's instance tag.
@@ -1192,10 +1194,12 @@ correct group.
 A valid Auth-R message is generated as follows:
 
 1. Create a user profile, as detailed [here](#creating-a-user-profile).
-2. Generate an ephemeral ECDH key pair: // TODO: state how this is generated
+2. Generate an ephemeral ECDH key pair, as defined in
+   [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
   * secret key `x` (57 bytes).
   * public key `X`.
-3. Generate an ephemeral DH key pair:
+3. Generate an ephemeral DH key pair, as defined in
+   [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
   * secret key `a` (80 bytes).
   * public key `A`.
 4. Compute `t = 0x0 || SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ)`.
@@ -1396,11 +1400,13 @@ It is created as follows:
 
 1. Create a user profile, as detailed [here](#creating-a-user-profile).
 2. Create the first one-time use prekey by generating the ephemeral
-   ECDH key pair: // TODO: state how
+   ECDH key pair, as defined in
+   [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
    * secret key `y` (57 bytes).
    * public key `Y`.
 3. Create the second one-time use prekey by generating the ephemeral
-   DH key pair:
+   DH key pair, as defined in
+   [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
    * secret key `b` (80 bytes).
    * public key `B`.
 4. Generate a 4-byte instance tag to use as the sender's instance tag.
@@ -1450,9 +1456,11 @@ A valid non-interactive Auth message is generated as follows:
 
 1. Create a user profile, as detailed [here](#creating-a-user-profile).
 2. Generate an ephemeral ECDH key pair:
-  * secret key `x` (57 bytes). // TODO: state how
+  * secret key `x` (57 bytes), as defined in
+   [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
   * public key `X`.
-3. Generate an ephemeral DH key pair:
+3. Generate an ephemeral DH key pair, as defined in
+   [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
   * secret key `a` (80 bytes).
   * public key `A`.
 4. [Validate the prekey message](#validating-a-prekey-message).
@@ -1543,11 +1551,11 @@ Sigma (SNIZKPK)
   The SNIZKPK Auth value.
 
 Encrypted message (DATA)
-  // TODO: state the sections
-  Using the appropriate encryption key (see below) derived from the
-  sender's and recipient's DH public keys (with the keyids given in this
-  message), perform a XSalsa20 encryption of the message. The nonce used for
-  this operation is also included in the header of the data message packet.
+  Using the appropriate encryption key (see 'When you send a Data Message'
+  section) derived from the sender's and recipient's public keys (with the
+  keyids given in this message), perform a XSalsa20 encryption of the message.
+  The nonce used for this operation is also included in the header of the data
+  message packet.
 ```
 
 // TODO: does this belog to this section?
@@ -2420,7 +2428,9 @@ is not equal to `y`, no other information is revealed.
 The secret information `x` and `y` compared during this protocol contains not
 only information entered by the users, but also information unique to the
 conversation in which SMP takes place. This includes the Secure Session ID
-(SSID) whose creation is described [here](#non-interactive-auth-message).
+(SSID) whose creation is described
+[here](#interactive-deniable-authenticated-key-exchange-dake)
+and [here](#non-interactive-auth-message) .
 
 Specifically, the format is:
 
@@ -2433,7 +2443,7 @@ Initiator fingerprint (64 BYTE)
 Responder fingerprint (64 BYTE)
   The fingerprint that the party that did not initiate SMP is using in the
   current conversation.
-Secure Session ID or SSID // TODO: put the type of this
+Secure Session ID or SSID (8 BYTE)
 User-specified secret
   The input string given by the user at runtime.
 ```
