@@ -29,7 +29,7 @@ works on top of an existing messaging protocol, like XMPP.
    1. [Key derivation functions](#key-derivation-functions)
    1. [Deciding between chain keys](#deciding-between-chain-keys)
    1. [Deriving Double Ratchet keys](#deriving-double-ratchet-keys)
-   1. [Rotating ECDH keys and mix key](#rotating-ecdh-keys-and-mix-key)
+   1. [Rotating ECDH keys and brace key](#rotating-ecdh-keys-and-brace-key)
    1. [Deriving new chain keys](#deriving-new-chain-keys)
    1. [Computing chain keys](#computing-chain-keys)
    1. [Calculating encryption and MAC keys](#calculating-encryption-and-mac-keys)
@@ -161,7 +161,7 @@ their respective implementations are not ready enough to allow for this
 implementation time frame. As a result, the protections mentioned in the
 following paragraphs only apply to non-quantum adversaries.
 
-The only exception is the usage of a "mix key" to provide some post-conversation
+The only exception is the usage of a "brace key" to provide some post-conversation
 transcript protection against potential weaknesses of elliptic curves and the
 early arrival of quantum computers.
 
@@ -578,12 +578,12 @@ Diffie-Hellman (DH) keys.
 
 For exchanging data messages, OTRv4 uses both the DH ratchet (with ECDH) and the
 symmetric-key ratchet from the Double Ratchet algorithm [\[2\]](#references).
-OTRv4 adds 3072-bit (384-byte) DH keys, called the mix key pair, to the
+OTRv4 adds 3072-bit (384-byte) DH keys, called the brace key pair, to the
 Double Ratchet algorithm. These keys are used to protect transcripts of data
 messages in case ECC is broken. During the DAKE, both parties agree upon the
 first set of DH keys. Then, during every third DH ratchet in the Double
-Ratchet, a new key is agreed upon. Between each DH mix key ratchet, both sides
-will conduct a symmetric mix key ratchet.
+Ratchet, a new key is agreed upon. Between each DH brace key ratchet, both sides
+will conduct a symmetric brace key ratchet.
 
 The following variables keep state as the ratchet moves forward:
 
@@ -601,7 +601,7 @@ Key variables:
   'their_ecdh': their ECDH ephemeral public key.
   'our_dh': our DH ephemeral key pair.
   'their_dh': their DH ephemeral public key.
-  'mix_key': the SHA3-256 of the DH shared secret previously computed.
+  'brace_key': the SHA3-256 of the DH shared secret previously computed.
   'mac_keys_to_reveal': the MAC keys to be revealed in the first data message
     sent of the next ratchet.
 ```
@@ -658,7 +658,7 @@ k_dh:
   The 3072-bit DH shared secret computed from a DH exchange, serialized as a
   big-endian unsigned integer.
 
-mix_key:
+brace_key:
   A hash of the shared DH key: 'KDF_1(k_dh)'.
 
 K_ecdh:
@@ -667,7 +667,7 @@ K_ecdh:
 
 K:
   The mixed shared secret is the final shared secret derived from both the
-  DH and ECDH shared secrets: KDF_2(K_ecdh || mix_key)
+  DH and ECDH shared secrets: KDF_2(K_ecdh || brace_key)
 ```
 
 ### Generating shared secrets
@@ -715,10 +715,10 @@ derive_ratchet_keys(K):
   return R, decide_between_chain_keys(Ca, Cb)
 ```
 
-### Rotating ECDH keys and mix key as sender
+### Rotating ECDH keys and brace key as sender
 
 Before sending the first reply (i.e. a new message considering a previous
-message has been received) the sender will rotate their ECDH keys and mix key.
+message has been received) the sender will rotate their ECDH keys and brace key.
 This is for the computation of `K` (see "Deriving Double Ratchet Keys"). The
 following data messages will advertise a new ratchet id as `i + 1`. // TODO:
 put link
@@ -734,21 +734,21 @@ To rotate the ECDH keys:
   * Calculate `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
   * Securely delete `our_ecdh.secret`.
 
-To rotate the mix key:
+To rotate the brace key:
 
   * If `i % 3 == 0`:
 
     * Generate the new DH key pair `our_dh = generateDH()`.
     * Calculate `k_dh = DH(our_dh.secret, their_dh.public)`.
-    * Calculate a `mix_key = KDF_1(k_dh)`.
+    * Calculate a `brace_key = KDF_1(k_dh)`.
 
   Otherwise:
 
-   * Derive and securely overwrite `mix_key = KDF_1(mix_key)`.
+   * Derive and securely overwrite `brace_key = KDF_1(brace_key)`.
 
-### Rotating ECDH keys and mix key as receiver
+### Rotating ECDH keys and brace key as receiver
 
-Every ratchet, the receiver will rotate their ECDH keys and mix key.
+Every ratchet, the receiver will rotate their ECDH keys and brace key.
 This is for the computation of `K` (see "Deriving Double Ratchet Keys"). //
 TODO: put link
 
@@ -763,21 +763,21 @@ To rotate the ECDH keys:
     their_ecdh.
   * Calculate `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
 
-To rotate the mix key:
+To rotate the brace key:
 
   * If `i % 3 == 0`:
 
     * Retrieve the DH key from the received data message and assign it to
       `their_dh`.
     * Calculate `k_dh = DH(our_dh.secret, their_dh.public)`.
-    * Calculate a `mix_key = KDF_1(k_dh)`.
+    * Calculate a `brace_key = KDF_1(k_dh)`.
     * Securely delete `our_dh.secret` (this should only be deleted after
-      calculating the new mix key when receiving as new keys will be generated
+      calculating the new brace key when receiving as new keys will be generated
       on the next DH rotation). // TODO: is this parenthesis comment necessary?
 
   Otherwise:
 
-   * Derive and securely overwrite `mix_key = KDF_1(mix_key)`.
+   * Derive and securely overwrite `brace_key = KDF_1(brace_key)`.
 
 ### Deriving new chain keys
 
@@ -1107,8 +1107,8 @@ Bob will be initiating the DAKE with Alice.
     * Sets ratchet id `i` as 0.
     * Sets `j` as 0 (which means he will ratchet again).
     * Calculates ECDH shared secret `K_ecdh`.
-    * Calculates DH shared secret `k_dh` and `mix_key`.
-    * Calculates Mixed shared secret `K = KDF_2(K_ecdh || mix_key)`.
+    * Calculates DH shared secret `k_dh` and `brace_key`.
+    * Calculates Mixed shared secret `K = KDF_2(K_ecdh || brace_key)`.
     * Calculates the SSID from shared secret: the first 8 bytes of
       `KDF_2(0x00 || K)`.
     * Calculates the first set of keys with
@@ -1124,8 +1124,8 @@ Bob will be initiating the DAKE with Alice.
     * Sets ratchet id `i` as 0.
     * Sets `j` as 1.
     * Calculates ECDH shared secret `K_ecdh`.
-    * Calculates DH shared secret `k_dh` and `mix_key`.
-    * Calculates Mixed shared secret `K = KDF_2(K_ecdh || mix_key)`.
+    * Calculates DH shared secret `k_dh` and `brace_key`.
+    * Calculates Mixed shared secret `K = KDF_2(K_ecdh || brace_key)`.
     * Calculates the SSID from shared secret: the first 8 bytes of
       `KDF_2(0x00 || K)`.
     * Calculates the first set of keys with
@@ -1356,7 +1356,7 @@ Verify & Decrypt message
 	* Calculates ECDH shared secret
 	  `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
 	* Calculates DH shared secret `k_dh = DH(our_dh.secret, their_dh)`
-	  and `mix_key`.
+	  and `brace_key`.
 	* Computes `κ` as defined in
 	  [Non-interactive Auth Message](#non-interactive-auth-message).
    * Calculates the Mixed shared secret `K = KDF_2(0x02 || κ)`.
@@ -1372,7 +1372,7 @@ Verify & Decrypt message
 
 1. Receive a non-interactive auth message from Alice.
 2. Calculates ECDH shared secret `K_ecdh`.
-3. Calculates DH shared secret `k_dh` and `mix_key`.
+3. Calculates DH shared secret `k_dh` and `brace_key`.
 4. Calculates `κ = KDF_2(K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(Ska, X) || k_dh)`.
 5. Computes the Auth MAC key `Mk = KDF_2(0x01 || κ)`.
 6. Computes the Mixed shared secret `K = KDF_2(0x02 || κ)`.
@@ -1730,13 +1730,13 @@ has been set to `0`, keys should be rotated.
 
 Given a new ratchet:
 
-  * Rotate the ECDH keys and mix key, see "Rotating ECDH keys and mix key"
+  * Rotate the ECDH keys and brace key, see "Rotating ECDH keys and brace key"
     section. // TODO: put link
     The new ECDH public key created by the sender with this process will be the
     "Public ECDH Key" for the message. If a new public DH key is created in
     this process, it will be the "Public DH Key" for the message. If it is
     not created, then it will be empty.
-  * Calculate the `K = KDF_2(K_ecdh || mix_key)`.
+  * Calculate the `K = KDF_2(K_ecdh || brace_key)`.
   * Derive new set of keys
     `root[i], chain_s[i][0], chain_r[i][0] = derive_ratchet_keys(K)`.
   * Securely delete the root key and all chain keys from the ratchet `i-2`.
@@ -2244,7 +2244,7 @@ If the version is 4:
       * If the message can be decrypted:
         * Display the human-readable part (if it contains any) to the user. SMP
           TLVs should be addressed according to the SMP state machine.
-        * Rotate root, chain and mix keys as appropriate.
+        * Rotate root, chain and brace keys as appropriate.
         * If the received message contains a TLV type 1 (Disconnected):
           * Forget all encryption keys for this correspondent and transition the
             state to 'FINISHED'.

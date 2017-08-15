@@ -34,8 +34,8 @@ and SHAKE-256 as hash functions since, individually, both give 256-bit security.
 Although Ed448 does not have as much published cryptanalysis as Curve25519, it
 has a similar construction to Curve25519 [\[1\]](#references).
 
-To achieve classic Diffie-Hellman ~128-bit security, we use a mix key, which is
-described in [ADR 5](https://github.com/twstrike/otrv4/blob/master/architecture-decisions/005-mix-key.md). We only use SHA3-256 when we use the mix key because
+To achieve classic Diffie-Hellman ~128-bit security, we use a brace key, which is
+described in [ADR 5](https://github.com/twstrike/otrv4/blob/master/architecture-decisions/005-brace-key.md). We only use SHA3-256 when we use the brace key because
 it has a security level of 128 bits.
 
 We will use XSalsa20 as our stream cipher because it has a block size of 512

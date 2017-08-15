@@ -1,4 +1,4 @@
-## ADR 5: Mix Keys
+## ADR 5: Brace keys
 
 ### Context
 
@@ -12,13 +12,13 @@ conversation decryption.
 
 We believe we can protect transcripts from post-conversation decryption by
 mixing another key obtained from a Diffie-Hellman (DH) exchange into the key
-material. This additional key is called the “mix key”.
+material. This additional key is called the “brace key”.
 
 This proposal specifies:
 
 1. The extra key to mix in with the ECDH shared secret when deriving a new
    root key.
-2. An algorithm for ratcheting and deriving the mix key.
+2. An algorithm for ratcheting and deriving the brace key.
 
 This proposal only changes how root keys are derived in the Double Ratchet algorithm.
 
@@ -30,13 +30,13 @@ We are trying to protect against elliptic curve weaknesses, and SIDH
 [\[2\]](#references) is specific for post-quantum resistance. Instead, we'll use
 a classic DH key exchange.
 
-We considered two options for ratcheting/rederiving the mix key:
+We considered two options for ratcheting/rederiving the brace key:
 
-1. Obtain a mix key from a DH function which requires the other party to
+1. Obtain a brace key from a DH function which requires the other party to
    contribute to the computation each time a new root key is derived.
-2. Obtain a mix key with DH functions which require the other party to
+2. Obtain a brace key with DH functions which require the other party to
    contribute to the computation every n times. Between these derivations,
-   the mix keys are obtained using a key derivation function (KDF) that is
+   the brace keys are obtained using a key derivation function (KDF) that is
    seeded with the last DH key. We propose n = 3, but n can be adjusted for
    performance.
 
@@ -48,8 +48,8 @@ In this description of the algorithm's functions, we will assume n = 3.
 
 **k_dh = A_i, a_i**
 
-A mix key is a key that is added to the KDF used to produce new root and chain
-keys. A mix key can be produced through a DH function and through a key
+A brace key is a key that is added to the KDF used to produce new root and chain
+keys. A brace key can be produced through a DH function and through a key
 derivation function, both of which produce a 3072-bit public key. This key has a
 128-bit security level according to Table 2: Comparable strengths in NIST’s
 Recommendation for Key Management, page 53 [\[3\]](#references).
@@ -65,11 +65,11 @@ Given `a_i`, a secret key, and `B_i`, a public key, generates a shared secret va
 **Key Derivation Function: SHA3-256(k_dh)**
 
 Given a 3072-bit shared secret value `k_dh`, the SHA3-256 generates a 256-bit
-digest: `mix_key`.
+digest: `brace_key`.
 
-**Key Derivation Function: SHA3-256(mix_key)**
+**Key Derivation Function: SHA3-256(brace_key)**
 
-Given `mix_key`, the SHA3-256 generates a 256-bit digest: a new `mix_key`.
+Given `brace_key`, the SHA3-256 generates a 256-bit digest: a new `brace_key`.
 
 #### Considerations
 
@@ -77,11 +77,11 @@ Transmitting the 3072-bit DH public key will increase the time it takes to
 exchange messages. To mitigate this, the key won’t be transmitted every time the
 root and chain keys are derived. Instead, this key will be computed with a DH
 function every third time and the interim keys will be derived from the
-previous `mix_key`. After generating new DH keys, the new public key will be
+previous `brace_key`. After generating new DH keys, the new public key will be
 sent in every message of that ratchet in order to allow transmission even if
 one of the messages is dropped.
 
-The mix key will be mixed in at the root level with the ECDH key.
+The brace key will be mixed in at the root level with the ECDH key.
 
 #### Implementation
 
@@ -89,16 +89,16 @@ Alice's DH keypair = `(a_i, A_i)`
 
 Bob's DH keypair = `(b_i, B_i)`
 
-`mix_key` = in this document, it will be referred to as `M_i` for ease.
+`brace_key` = in this document, it will be referred to as `M_i` for ease.
 
-Every root key derivation requires both an ECDH key and a mix key. For the
-purposes of this explanation, we will only discuss the mix key.
+Every root key derivation requires both an ECDH key and a brace key. For the
+purposes of this explanation, we will only discuss the brace key.
 
 `n` is the number of root key derivations before performing a new DH
 computation.
 
-The interim root key derivations will use a mix key derived from a SHA3-256
-using the previous mix key as the seed.
+The interim root key derivations will use a brace key derived from a SHA3-256
+using the previous brace key as the seed.
 
 _When n is configured to equal 3_
 
@@ -114,9 +114,9 @@ Alice                                                 Bob
 * Derives a new DH shared secret using Bob's
   public key received during the DAKE (B_0)
     k_dh = DH(B_0, a_1)
-* Derives the new mix key from the k_dh
+* Derives the new brace key from the k_dh
     M_3 = SHA3-256(k_dh)
-* Mixes the mix key with the ECDH shared
+* Mixes the brace key with the ECDH shared
   secret to create the shared secret K_3
     K_3 = SHA3-512(ECDH_3 || M_3)
 * Uses K_3 with SHA3-512 to generate root
@@ -130,9 +130,9 @@ Alice                                                 Bob
                                                      * Derives a new DH shared secret using Alice's
                                                        public key received in the message (A_1)
                                                          k_dh = DH(A_1, b_1)
-                                                     * Derives the new mix key from the k_dh
+                                                     * Derives the new brace key from the k_dh
                                                          M_3 = SHA3-256(k_dh)
-                                                     * Mixes the mix key with the ECDH shared secret
+                                                     * Mixes the brace key with the ECDH shared secret
                                                        to create the shared secret K_3
                                                          K_3 = SHA3-512(ECDH_3 || M_3)
                                                      * Uses K_3 with SHA3 to generate root and chain
@@ -141,13 +141,13 @@ Alice                                                 Bob
                                                      * Decrypts received message with a message key
                                                        derived from Cr_3_0
                                                      * Increases ratchet_id by one
-                                                     * Derives a new mix key from the one derived in the
+                                                     * Derives a new brace key from the one derived in the
                                                        previous ratchet
                                                          M_4 = KDF(M_3)
                                                      * Generates new ECDH keys and uses Alice's ECDH
                                                        public key (received in data_message_3_0) to create ECDH
                                                        shared secret (ECDH_4).
-                                                     * Mixes the mix key with ECDH_4 to create the shared
+                                                     * Mixes the brace key with ECDH_4 to create the shared
                                                        secret K_4
                                                           K_4 = SHA3-512(ECDH_4 || M_4)
                                                       * Uses K_4 with SHA3-512 to generate root and chain
@@ -166,14 +166,14 @@ i.e. `ratchet_id += 1`
 
 If `ratchet_id % 3 == 0 && sending the first message of a new ratchet`
 
-  * Compute the new mix key from a new DH computation e.g.
+  * Compute the new brace key from a new DH computation e.g.
     `M_i = SHA3-256(DH(our_DH.secret, their_DH.public))`.
-  * Send the new `mix_key`'s public key (our_DH.public) to the other party for
+  * Send the new `brace_key`'s public key (our_DH.public) to the other party for
     further key computation.
 
 Otherwise
 
-  * Compute the new mix key `M_i = SHA3-256(M_(i-1))`.
+  * Compute the new brace key `M_i = SHA3-256(M_(i-1))`.
 
 **Alice or Bob send a follow-up message**
 
@@ -196,7 +196,7 @@ If `ratchet_id % 6 == 3 || ratchet_id % 6 == 0`
 
 Otherwise:
 
-   * Compute the new mix key from a new DH computation e.g.
+   * Compute the new brace key from a new DH computation e.g.
      `M_i = SHA3-256(DH(our_DH.secret, their_DH.public))`
    * Use `M_i` to decrypt the received message.
 
@@ -204,14 +204,14 @@ Otherwise:
 
 If the `ratchet_id` is not greater than the current state of `ratchet_id`, then
 this is not a new ratchet. In this case there is no further action to be taken
-for the mix key.
+for the brace key.
 
 **Diagram: Pattern of DH computations and key derivations in a conversation**
 
 This diagram describes when public keys should be sent and when Alice and Bob
-should compute the `mix_key` from a SHA3 or a new DH computation.
+should compute the `brace_key` from a SHA3 or a new DH computation.
 
-Both parties share knowledge of `M_0`, which is a `mix_key` established in the
+Both parties share knowledge of `M_0`, which is a `brace_key` established in the
 DAKE.
 
 Given
@@ -252,20 +252,20 @@ generator `g = 2`. Exponents `a` and `b` are 3072 bits long in an Intel Core i7
 We’ve decide to use a 3072-bit key produced by:
 
 1. a DH function which takes as an argument the other party’s exponent through a
-   data message to produce mix key.
-2. a KDF (SHA3-256) which uses the previous mix key to produce a new one.
+   data message to produce brace key.
+2. a KDF (SHA3-256) which uses the previous brace key to produce a new one.
 
 The DH function will run every n = 3 times because:
 
 1. It is a small number so a particular key can only be compromised for a
    maximum of 2 * n ratchets. This means that the maximum ratchets that will
-   use the mix key or a key derived from the mix key is 6.
+   use the brace key or a key derived from the brace key is 6.
 2. The benefit of using an odd number is for simplicity of implementation. With
    an odd number, both Alice and Bob can generate a new public and secret key at
-   the same time as sending the public key and compute a new mix key from a DH
+   the same time as sending the public key and compute a new brace key from a DH
    function. However, with an even number, Alice would need to generate and send
    a key in a different ratchet to the one where the public key would be used.
-   This happens because the public key would only be used in a mix key computed
+   This happens because the public key would only be used in a brace key computed
    from a new DH function on even numbers of ratchet_ids so only Bob would be
    the sender at these times.
 
@@ -299,7 +299,7 @@ RFC 3526 [\[4\]](#references):
 
 ### Consequences
 
-Using a 3072-bit DH function to produce the mix key increases the size of data
+Using a 3072-bit DH function to produce the brace key increases the size of data
 messages by 56 bytes of extra key material. The increased size may cause some
 transport protocols to fragment these messages.
 

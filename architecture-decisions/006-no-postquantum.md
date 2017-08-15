@@ -27,6 +27,6 @@ OTRv4 does not use any algorithms which aim to provide effective resistance to
 attacks by quantum computers. If elliptic curve cryptography and 3072-bit
 Diffie-Hellman can be attacked by quantum computers in the next upcoming years,
 OTRv4's primitives will become unsafe and unusable. However, the use of a
-3072-bit Diffie-Hellman "mix key" is used partly due to the potential of quantum
+3072-bit Diffie-Hellman "brace key" is used partly due to the potential of quantum
 computers arriving earlier than predicted. We want extra protection against
 post-conversation decryption of transcripts in this case.
