@@ -1354,35 +1354,38 @@ Verify & Decrypt message
 6. At this point, the non-interactive DAKE is complete for Alice:
 	* Sets ratchet id `i` as 0.
 	* Sets `j` as 0
-	* Calculates ECDH shared secret `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
-	* Calculates DH shared secret `k_dh = DH(our_dh.secret, their_dh)` and `mix_key`.
-	* Computes `κ = KDF_2(K_ecdh || ECDH(x, their_shared_prekey) || ECDH(x, Pkb) || k_dh)`.
-   * Calculates the Auth MAC key `Mk = KDF_2(0x01 || κ)`.
+	* Calculates ECDH shared secret
+	  `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
+	* Calculates DH shared secret `k_dh = DH(our_dh.secret, their_dh)`
+	  and `mix_key`.
+	* Computes `κ` as defined in
+	  [Non-interactive Auth Message](#non-interactive-auth-message).
    * Calculates the Mixed shared secret `K = KDF_2(0x02 || κ)`.
    * Calculates the SSID from shared secret: it is the first 8 bytes of
      `KDF_2(0x00 || K)`.
-   * Calculates the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
+   * Calculates the first set of keys with
+     `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
    * [Decides which chain key she will used](#deciding-between-chain-keys).
-7. Sends Bob a non-interactive auth message.
+7. Sends Bob a non-interactive auth message. See
+   [Non-interactive Auth Message](#non-interactive-auth-message) section.
 
 **Bob:**
 
 1. Receive a non-interactive auth message from Alice.
-2. At this point, the non-interactive DAKE is complete for Bob:
-   * Sets ratchet id `i` as 0. // TODO: is this so?
+2. Calculates ECDH shared secret `K_ecdh`.
+3. Calculates DH shared secret `k_dh` and `mix_key`.
+4. Calculates `κ = KDF_2(K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(Ska, X) || k_dh)`.
+5. Computes the Auth MAC key `Mk = KDF_2(0x01 || κ)`.
+6. Computes the Mixed shared secret `K = KDF_2(0x02 || κ)`.
+7. 	Verifies the non-interactive auth message. See
+    [Non-interactive Auth Message](#non-interactive-auth-message) section.
+8. At this point, the non-interactive DAKE is complete for Bob:
+   * Sets ratchet id `i` as 0.
    * Sets `j` as 1.
-   * Calculates ECDH shared secret `K_ecdh`.
-   * Calculates DH shared secret `k_dh` and `mix_key`.
-   * Calculates `κ = KDF_2(K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(Ska, X) || k_dh)`.
-   * Computes the Auth MAC key `Mk = KDF_2(0x01 || κ)`.
-   * Computes the Mixed shared secret `K = KDF_2(0x02 || κ)`.
    * Calculates the SSID from shared secret: it is the first 8 bytes of
 	  `KDF_2(0x00 || K)`.
 	* Calculates the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
 	* [Decides which chain key he will use](#deciding-between-chain-keys).
-	* Verify the non-interactive auth message (see Non-interactive Auth Message
-     section).
-   // TODO: put link
 
 ### Prekey message
 
@@ -1454,17 +1457,25 @@ A valid non-interactive Auth message is generated as follows:
   * secret key `a` (80 bytes).
   * public key `A`.
 4. [Validate the prekey message](#validating-a-prekey-message).
-5. Compute `t = SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ) || their_shared_prekey`.
-7. Compute `sigma = Auth(Pka, ska, {Pkb, Pka, Y}, t)`. While computing `sigma`,
+5. Computes
+   `κ = KDF_2(K_ecdh || ECDH(x, their_shared_prekey) || ECDH(x, Pkb) || k_dh)`.
+   This is needed for the generation of the Mixed shared secret. //TODO: maybe
+   put this in a different section.
+6. Calculates the Auth MAC key `Mk = KDF_2(0x01 || κ)`.
+7. Compute `t = SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ) || their_shared_prekey`.
+8. Compute `sigma = Auth(Pka, ska, {Pkb, Pka, Y}, t)`. When computing `sigma`,
    keep the first 192 bits of the generated `c` value to be used as a `nonce` in
-   the next step.
-8. A message can be optionally attached at this point. Follow the section
+   the next step. Refer to [SNIZKPK Authentication](#SNIZKPK-Authentication)
+   for details.
+9. A message can be optionally attached at this point. It is recommended to do
+   so. Follow the section
    ["When you send a Data Message"](when-you-send-a-data-message) to generate an
    encrypted message, using the nonce set in the previous step. This will be
-   referred as `encrypted_data_message`. //TODO: make optional, default
-9. Compute `Auth MAC = SHA3-256(Mk || t || encrypted_data_message)`. `Mk` is the
-   Auth MAC key value computed in the overview.
-10. Generate a 4-byte instance tag to use as the sender's instance tag.
+   referred as `encrypted_data_message`.
+10. If an encrypted message is attached, compute
+    `Auth MAC = SHA3-256(Mk || t || encrypted_data_message)`. Otherwise, compute
+    `Auth MAC = SHA3-256(Mk || t)`.
+11. Generate a 4-byte instance tag to use as the sender's instance tag.
     Additional messages in this conversation will continue to use this tag as
     the sender's instance tag. Also, this tag is used to filter future received
     messages. Messages intended for this instance of the client will have this
@@ -1476,8 +1487,9 @@ To verify a non-interactive Auth message:
 2. Validate the user profile, and extract `Pka` from it.
 3. Verify that both ECDH and DH one-time use prekeys remain unused.
 4. Compute `t = SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ) || our_shared_prekey.public`.
-5. Verify the `sigma` with [SNIZKPK Authentication](#snizkpk-authentication),
-   as in check `sigma == Verify({Pkb, Pka, Y}, t)`.
+5. Verify the `sigma` with [SNIZKPK Authentication](#snizkpk-authentication).
+   See [Verification: Verify({A1, A2, A3}, sigma, m)](#verification-verifya1-a2-a3-sigma-m)
+   for details.
 6. If present, extract the `encrypted_data_message`.
 7. Compute `tag = SHA3-256(MK, || t)` or
    `tag = SHA3-256(MK, || t || encrypted_data_message)` if a message was
@@ -1490,7 +1502,7 @@ To verify a non-interactive Auth message:
    ["When you receive a Data Message"](when-you-receive-a-data-message) section.
    Keep in mind that the `MKmac` should be discarded as it is not necessary for
    the first message delivered through a non-interactive auth message.
-   Nevertheless, add the Auth MAC key to list `mac_keys_to_reveal`.
+   Nevertheless, add the Auth MAC key to the list `mac_keys_to_reveal`.
 
 A non-interactive Auth is an OTR message encoded as:
 
@@ -1532,12 +1544,11 @@ Sigma (SNIZKPK)
   The SNIZKPK Auth value.
 
 Encrypted message (DATA)
+  // TODO: state the sections
   Using the appropriate encryption key (see below) derived from the
   sender's and recipient's DH public keys (with the keyids given in this
-  message), perform XSalsa20 encryption of the message. The nonce used for
-  this operation is also included in the header of the data message
-  packet.
-
+  message), perform a XSalsa20 encryption of the message. The nonce used for
+  this operation is also included in the header of the data message packet.
 ```
 
 // TODO: does this belog to this section?
@@ -1550,8 +1561,8 @@ messages expire when their user profile expires. Thus new prekey messages
 should be published to the prekey server before they expire to keep valid
 prekey messages available. In addition, one prekey message should be published
 for every long term key that belongs to a user. This means that if Bob uploads
-three long term keys for OTRv4 to his client, Bob's client must publish 3
-prekey messages.
+3 long term keys for OTRv4 to his client, Bob's client must publish 3 prekey
+messages.
 
 Details on how to interact with a prekey server to publish messages are outside
 the scope of this protocol.
@@ -1569,15 +1580,17 @@ prekey messages and invalid situations.
 Use the following checks to validate a prekey message. If any checks fail,
 ignore the message:
 
-  * Check if the user profile is not expired
-  * Check if the OTR version of the prekey message matches one of the versions
+  * Check that the user profile is not expired
+  * Check that the OTR version of the prekey message matches one of the versions
     signed in the user profile contained in the prekey message
   * Check if the user profile version is supported by the receiver
 
 If one prekey message is received:
 
+  * Validate the prekey message.
   * If the prekey message is valid, decide whether to send a non-interactive
-    auth message if the long term key in the use profile is trusted or not.
+    auth message depending on whether the long term key in the use profile is
+    trusted or not.
 
 If many prekey messages are received:
 
@@ -1588,9 +1601,9 @@ If many prekey messages are received:
         version, and the same long term keys in the user profile, then one of
         the messages is invalid. The safest thing to do is to remove all prekey
         messages associated with this situation.
-  * If one prekey message remains:
-      * Decide whether to send a message using this prekey message if the long
-        term key within the use profile is trusted or not.
+        * If one valid prekey message remains:
+          * Decide whether to send a message using this prekey message depending
+            on whether the long term key in the use profile is trusted or not.
   * If multiple valid prekey messages remain:
       * If there are keys that are untrusted and trusted in the list of
         messages, decide whether to only use messages that contain trusted long
