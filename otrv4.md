@@ -251,14 +251,14 @@ Non-square element in Z_p (d)
 
 To verify that a point (`X`) is on curve Ed448-Goldilocks:
 
-1. Check that `X` is not equal to the indentity element (`I`).
+1. Check that `X` is not equal to the identity element (`I`).
 2. Check that `X` lies on the curve.
 3. Check that `q * X = I`.
 
 
 ### 3072-bit Diffie-Hellman Parameters
 
-For the Diffie-Hellman group computations, the group is the one defined in RFC
+For the Diffie-Hellman (DH) group computations, the group is the one defined in RFC
 3526 [\[6\]](#references) with a 3072-bit modulus (hex, big-endian):
 
 ```
@@ -315,9 +315,9 @@ Hexadecimal value of dh_q:
 Whenever you see an operation on a field element from this group, the
 operation should be done modulo the prime `dh_p`.
 
-#### Verifying a integer on the dh group
+#### Verifying an integer on the DH group
 
-To verify that a integer (`X`) is on the group with a 3072-bit modulus:
+To verify that an integer (`X`) is on the group with a 3072-bit modulus:
 
 1. Check that `X` is `>= 2` and `<= dh_p - 2`.
 
