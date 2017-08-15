@@ -719,9 +719,9 @@ derive_ratchet_keys(K):
 
 Before sending the first reply (i.e. a new message considering a previous
 message has been received) the sender will rotate their ECDH keys and brace key.
-This is for the computation of `K` (see "Deriving Double Ratchet Keys"). The
-following data messages will advertise a new ratchet id as `i + 1`. // TODO:
-put link
+This is for the computation of `K` (see
+[Deriving Double Ratchet Keys](#deriving-double-ratchet-keys)). The
+following data messages will advertise a new ratchet id as `i + 1`.
 
 Before rotating the keys:
 
@@ -749,8 +749,10 @@ To rotate the brace key:
 ### Rotating ECDH keys and brace key as receiver
 
 Every ratchet, the receiver will rotate their ECDH keys and brace key.
-This is for the computation of `K` (see "Deriving Double Ratchet Keys"). //
-TODO: put link
+This is for the computation of `K` (see
+[Deriving Double Ratchet Keys](#deriving-double-ratchet-keys)). The
+following data messages will advertise a new ratchet id as `i + 1`.
+//TODO: does that happen?
 
 Before rotating the keys:
 
@@ -1203,8 +1205,8 @@ A valid Auth-R message is generated as follows:
   * secret key `a` (80 bytes).
   * public key `A`.
 4. Compute `t = 0x0 || SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ)`.
-   Φ is the shared session state as mention on the 'Shared session state: Phi'
-   section. // TODO: add the link
+   Φ is the shared session state as mention on the
+   [Shared session state](#shared-session-state) section.
 5. Compute `sigma = Auth(Pka, ska, {Pkb, Pka, Y}, t)`.
 6. Generate a 4-byte instance tag to use as the sender's instance tag.
    Additional messages in this conversation will continue to use this tag as the
@@ -1219,8 +1221,8 @@ To verify an Auth-R message:
 1. Check that the receiver's instance tag matches your sender's instance tag.
 2. Validate the user profile and extract `Pka` from it.
 3. Compute `t = 0x0 || SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ)`.
-   Φ is the shared session state as mention on the 'Shared session state: Phi'
-   section. // TODO: add link
+   Φ is the shared session state as mention on the
+   [Shared session state](#shared-session-state) section.
 4. Verify the `sigma` with [SNIZKPK Authentication](#snizkpk-authentication),
    that is `sigma == Verify({Pkb, Pka, Y}, t)`.
 
@@ -1255,8 +1257,8 @@ A valid Auth-I message is generated as follows:
 
 1. Check that the receiver's instance tag matches your sender's instance tag.
 1. Compute `t = 0x1 || SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ)`.
-   Φ is the shared session state as mention on the 'Shared session state: Phi'
-   section. // TODO: add link
+   Φ is the shared session state as mention on the
+   [Shared session state](#shared-session-state) section.
 2. Compute `sigma = Auth(Pkb, skb, {Pkb, Pka, X}, t)`.
 3. Continue to use the sender's instance tag.
 
@@ -1264,8 +1266,8 @@ To verify the Auth-I message:
 
 1. Check that the receiver's instance tag matches your sender's instance tag.
 2. Compute `t = 0x1 || SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ)`.
-   Φ is the shared session state as mention on the 'Shared session state: Phi'
-   section. // TODO: add link
+   Φ is the shared session state as mention on the
+   [Shared session state](#shared-session-state) section.
 3. Verify the `sigma` with [SNIZKPK Authentication](#snizkpk-authentication),
    that is `sigma == Verify({Pkb, Pka, X}, t)`.
 
@@ -1738,8 +1740,9 @@ has been set to `0`, keys should be rotated.
 
 Given a new ratchet:
 
-  * Rotate the ECDH keys and brace key, see "Rotating ECDH keys and brace key"
-    section. // TODO: put link
+  * Rotate the ECDH keys and brace key, see
+    [Rotating ECDH keys and brace key as sender](#rotating-ecdh-keys-and-brace-key-as-sender)
+    section.
     The new ECDH public key created by the sender with this process will be the
     "Public ECDH Key" for the message. If a new public DH key is created in
     this process, it will be the "Public DH Key" for the message. If it is
@@ -1768,8 +1771,9 @@ In both cases:
 
   * When creating a non-interactive auth message, construct a `nonce` from the
     first 24 bytes of the `c` variable generated when constructing `sigma`. See
-    SNIZKPK Authentication section. When creating a regular data message,
-    generate a new random 24 bytes value to be the `nonce`. // TODO: put link
+    [SNIZKPK Authentication](#snizkpk-authentication) section. When creating a
+    regular data message, generate a new random 24 bytes value to be the
+    `nonce`.
   * Use the encryption key to encrypt the message:
 
    ```
