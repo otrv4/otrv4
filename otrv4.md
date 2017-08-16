@@ -1,52 +1,73 @@
 # OTR version 4
 
-// TODO: state the session expiration time
-
-OTR version 4 (OTRv4) provides a deniable authenticated key
-exchange and better forward secrecy through the use of double ratcheting. OTR
-works on top of an existing messaging protocol, like XMPP.
+OTR version 4 (OTRv4) provides a deniable authenticated key exchange and better
+forward secrecy through the use of double ratcheting. OTR works on top of an
+existing messaging protocol, like XMPP.
 
 ## Table of Contents
 
 1. [Main Changes over Version 3](#main-changes-over-version-3)
 1. [High Level Overview](#high-level-overview)
+   1. [Conversation started by an Interactive DAKE](#conversation-started-by-an-interactive-dake)
+   1. [Conversation started by a Non-Interactive DAKE](#conversation-started-by-a-non-interactive-dake)
 1. [Assumptions](#assumptions)
 1. [Security Properties](#security-properties)
 1. [Notation and parameters](#notation-and-parameters)
    1. [Notation](#notation)
    1. [Elliptic Curve Parameters](#elliptic-curve-parameters)
+      1. [Verifying a point on curve](#verifying-a-point-on-curve)
    1. [3072-bit Diffie-Hellman Parameters](#L3072-bit-diffie-hellman-parameters)
+      1. [Verifying an integer on the DH group](#verifying-an-integer-on-the-dh-group)
 1. [Data Types](#data-types)
    1. [Encoding and Decoding](#encoding-and-decoding)
    1. [Serializing the SNIZKPK Authentication](#serializing-the-snizkpk-authentication)
-   1. [Public keys and fingerprints](#public-keys-and-fingerprints)
+   1. [Public keys, Shared Prekeys and fingerprints](#public-keys-shared-prekeys-and-fingerprints)
    1. [TLV Record Types](#tlv-record-types)
    1. [Shared session state](#shared-session-state)
    1. [OTR Error Messages](#otr-error-messages)
 1. [Key management](#key-management)
+   1. [Key derivation functions](#key-derivation-functions)
    1. [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys)
    1. [Shared secrets](#shared-secrets)
-   1. [Key derivation functions](#key-derivation-functions)
+   1. [Generating shared secrets](#generating-shared-secrets)
    1. [Deciding between chain keys](#deciding-between-chain-keys)
    1. [Deriving Double Ratchet keys](#deriving-double-ratchet-keys)
-   1. [Rotating ECDH keys and brace key](#rotating-ecdh-keys-and-brace-key)
+   1. [Rotating ECDH keys and brace key as sender](#rotating-ecdh-keys-and-brace-key-as-sender)
+   1. [Rotating ECDH keys and brace key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
    1. [Deriving new chain keys](#deriving-new-chain-keys)
    1. [Computing chain keys](#computing-chain-keys)
    1. [Calculating encryption and MAC keys](#calculating-encryption-and-mac-keys)
    1. [Resetting state variables and key variables](#resetting-state-variables-and-key-variables)
+   1. [Session expiration](#session-expiration)
+1. [User Profile](#user-profile)
+   1. [User Profile Data Type](#user-profile-data-type)
+   1. [Creating a User Profile](#creating-a-user-profile)
+   1. [Establishing Versions](#establishing-versions)
+   1. [Profile Expiration and Renewal](#establishing-versions)
+   1. [Create a User Profile Signature](#create-a-user-profile-signature)
+   1. [Verify a User Profile Signature](#verify-a-user-profile-signature)
+   1. [Validating a User Profile](#validating-a-user-profile)
 1. [Online Conversation Initialization](#online-conversation-initialization)
    1. [Requesting conversation with older OTR versions](#requesting-conversation-with-older-otr-versions)
-   1. [User Profile](#user-profile)
    1. [Interactive Deniable Authenticated Key Exchange (DAKE)](#interactive-deniable-authenticated-key-exchange--dake-)
+      1. [Interactive DAKE Overview](#interactive-dake-overview)
+      1. [Identity message](#identity-message)
+      1. [Auth-R message](#auth-r-message)
+      1. [Auth-I message](#auth-i-message)
 1. [Offline Conversation Initialization](#offline-conversation-initialization)
    1. [Non-interactive Deniable Authenticated Key Exchange (DAKE)](#non-interactive-deniable-authenticated-key-exchange--dake-)
-   1. [Prekey Message](#prekey-message)
-   1. [Validating a Prekey Message](#validating-a-prekey-message)
-   1. [Non-Interactive-Auth Message](#non-interactive-auth-message)
-   1. [Publishing prekeys](#publishing-prekeys)
-   1. [Obtaining prekeys](#obtaining-prekeys)
+      1. [Non-interactive DAKE Overview](#non-interactive-dake-overview)
+      1. [Prekey Message](#prekey-message)
+      1. [Validating a Prekey Message](#validating-a-prekey-message)
+      1. [Non-Interactive-Auth Message](#non-interactive-auth-message)
+      1. [Publishing Prekeys Messages](#publishing-prekeys-messages)
+      1. [Obtaining Prekeys Messages](#receiving-prekeys-messages)
 1. [Data Exchange](#data-exchange)
    1. [Data Message](#data-message)
+      1. [Data Message Format](#data-message-format)
+      1. [When you send a Data Message:](#when-you-send-a-data-message)
+      1. [When you receive a Data Message:](#when-you-receive-a-data-message)
+   1. [Extra Symmetric Key](#extra-symmetric-key)
    1. [Revealing MAC Keys](#revealing-mac-keys)
 1. [Fragmentation](#fragmentation)
    1. [Transmitting Fragments](#transmitting-fragments)
@@ -73,6 +94,7 @@ works on top of an existing messaging protocol, like XMPP.
    1. [OTRv3 Specific Encoded Messages](#otrv3-specific-encoded-messages)
    1. [OTRv3 Protocol State Machine](#otrv3-protocol-state-machine)
    1. [References](#references)
+   1. [Further Reading](#further-reading)
 
 ## Main Changes over Version 3
 
@@ -82,8 +104,9 @@ works on top of an existing messaging protocol, like XMPP.
   compromise.
 - The cryptographic primitives and protocols have been updated:
   - Deniable authenticated key exchanges using DAKEZ and XZDH [\[1\]](#references).
-    DAKEZ corresponds to conversations when both parties are online (interactive) and
-    XZDH to conversations when one person is offline (non-interactive).
+    DAKEZ corresponds to conversations when both parties are online
+    (interactive) and XZDH to conversations when one person is offline
+    (non-interactive).
   - Key management using the Double Ratchet Algorithm [\[2\]](#references).
   - Upgraded SHA-1 and SHA-2 to SHA-3.
   - Switched from AES to XSalsa20 [\[3\]](#references).
@@ -258,8 +281,8 @@ To verify that a point (`X`) is on curve Ed448-Goldilocks:
 
 ### 3072-bit Diffie-Hellman Parameters
 
-For the Diffie-Hellman (DH) group computations, the group is the one defined in RFC
-3526 [\[6\]](#references) with a 3072-bit modulus (hex, big-endian):
+For the Diffie-Hellman (DH) group computations, the group is the one defined in
+RFC 3526 [\[6\]](#references) with a 3072-bit modulus (hex, big-endian):
 
 ```
 Prime (dh_p):
@@ -317,9 +340,9 @@ operation should be done modulo the prime `dh_p`.
 
 #### Verifying an integer on the DH group
 
-To verify that an integer (`X`) is on the group with a 3072-bit modulus:
+To verify that an integer (`x`) is on the group with a 3072-bit modulus:
 
-1. Check that `X` is `>= g3` and `<= dh_p - g3`.
+1. Check that `x` is `>= g3` and `<= dh_p - g3`.
 
 ## Data Types
 
@@ -453,7 +476,7 @@ OTR4 public shared prekey (ED448-SHARED-PREKEY):
 ```
 
 The public key and shared prekey are generated as follows (refer to
-RFC 8032[\[10\]](#references), for more information on key generation):
+RFC 8032 [\[10\]](#references), for more information on key generation):
 
 ```
 The symmetric key (sym_key) is 57 bytes of cryptographically secure random data.
