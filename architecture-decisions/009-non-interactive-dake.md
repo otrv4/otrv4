@@ -10,7 +10,7 @@ The Receiver then generates their ephemeral keys and derives a shared secret.
 These are used to send an encrypted data message with the final message
 of the non-interactive DAKE, called the non-interactive auth message.
 
-In the non-interactive DAKE, only one data message can be sent per use of a
+In the non-interactive DAKE, only one data message can be sent per use of
 prekey. The reasons for this are in the section on [long-lived secret ephemeral
 key material](#long-lived-secret-ephemeral-key-material). This means that
 ratchets do not happen in the non-interactive case. Thus, one encryption key and
@@ -156,7 +156,8 @@ A Sender's DH Public key (MPI)
   this is NOT a POINT.
 
 Auth MAC (MAC)
-  The SHA3 MAC with the appropriate MAC key (see above) for the message of the SNIZKPK.
+  The SHA3 MAC with the appropriate MAC key (see above) for the message of the
+  SNIZKPK.
 
 Sigma (SNIZKPK)
   The SNIZKPK Auth value.

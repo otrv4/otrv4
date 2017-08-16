@@ -1450,9 +1450,12 @@ To validate a prekey message:
   [Verifying an integer on the dh group](#verifying-an-integer-on-the-dh-group)
   section for details.
 
-### Non-interactive Auth Message
+### Non-Interactive-Auth Message
 
-This message terminates the non-interactive AKE and also contains an encrypted data message.
+This message terminates the non-interactive AKE and might also contain an
+encrypted data message. This is highly reccommened as only one data message can
+be sent per use of both one-time prekeys. This means that only one ratchet
+happens in this case.
 
 A valid non-interactive Auth message is generated as follows:
 
@@ -1500,20 +1503,20 @@ To verify a non-interactive Auth message:
    See [Verification: Verify({A1, A2, A3}, sigma, m)](#verification-verifya1-a2-a3-sigma-m)
    for details.
 6. If present, extract the `encrypted_data_message`.
-7. Compute `tag = SHA3-256(MK, || t)` or
-   `tag = SHA3-256(MK, || t || encrypted_data_message)` if a message was
-   attached.
+7. If a message was attached, compute
+   `tag = SHA3-256(MK, || t || encrypted_data_message)`. Otherwise, compute
+   `tag = SHA3-256(MK, || t)`.
 8. Verify the Auth Mac:
-   * Extract the Auth MAC from the non-interactive Auth message and verify that
-     `tag` is equal to the Auth MAC. If it is not, ignore the non-interactive
-     auth message.
+   * Extract the Auth MAC from the Non-Interactive-Auth message and verify that
+     `tag` is equal to the Auth MAC. If it is not, ignore the
+     Non-Interactive-Auth message.
 9. If an `encrypted_data_message` was present, decrypt it by following
    ["When you receive a Data Message"](when-you-receive-a-data-message) section.
    Keep in mind that the `MKmac` should be discarded as it is not necessary for
-   the first message delivered through a non-interactive auth message.
-   Nevertheless, add the Auth MAC key to the list `mac_keys_to_reveal`.
+   the first message delivered through a Non-Interactive-Auth message.
+   Nevertheless, add the `Auth MAC` key to the list `mac_keys_to_reveal`.
 
-A non-interactive Auth is an OTR message encoded as:
+A Non-Interactive-Auth is an OTR message encoded as:
 
 ```
 Protocol version (SHORT)
