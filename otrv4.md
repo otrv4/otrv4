@@ -460,7 +460,7 @@ The symmetric key (sym_key) is 57 bytes of cryptographically secure random data.
 The secret scalar 'sk' is defined as SECRET_SCALAR.
 
 1. Hash the 57-byte symmetric key using SHAKE-256(sym_key). Store the
-   digest in a 114-bytes large buffer.  Only the lower 57 bytes (denoted 'h')
+   digest in a 114-byte large buffer.  Only the lower 57 bytes (denoted 'h')
    are used for generating the public key.
 2. Prune the buffer 'h': the two least significant bits of the first
    byte are cleared, all eight bits of the last byte are cleared, and the
@@ -847,7 +847,7 @@ key has its own expiration time.
 
 ```
 Profile Expiration (PROF-EXP):
-  8 bytes signed value, big-endian
+  8 byte signed value, big-endian
 
 User Profile (USER-PROF):
   Ed448 public key (ED448-PUBKEY)
@@ -1846,7 +1846,7 @@ provide [forgeability of messages](#forging-transcripts).
 
 A MAC key is added to `mac_keys_to_reveal` after a participant has verified
 the message associated with that MAC key. Old MAC keys are formatted as a list
-of concatenated 64 byte values. The first data message sent every ratchet
+of concatenated 64-byte values. The first data message sent every ratchet
 reveals them.
 
 ## Fragmentation
@@ -2447,13 +2447,13 @@ Specifically, the format is:
 ```
 Version (BYTE)
   The version of SMP used. The version described here is 1.
-Initiator fingerprint (64 BYTE)
+Initiator fingerprint (64 BYTEs)
   The fingerprint that the party initiating SMP is using in the current
   conversation.
-Responder fingerprint (64 BYTE)
+Responder fingerprint (64 BYTEs)
   The fingerprint that the party that did not initiate SMP is using in the
   current conversation.
-Secure Session ID or SSID (8 BYTE)
+Secure Session ID or SSID (8 BYTEs)
 User-specified secret
   The input string given by the user at runtime.
 ```
