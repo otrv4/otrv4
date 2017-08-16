@@ -818,6 +818,37 @@ derive_enc_mac_keys(chain_key):
 The state variables are set to `0` and the key variables are set to `NIL` for
 this channel.
 
+### Session expiration
+
+// TODO: define what is session and what should be deleted.
+// TODO: define a session expiration time
+
+To defend against an attacker that captures some messages and compromises their
+ephemeral secrets, sessions should be expired if no new ECDH keys are generated
+within a certain amount of time. Expiration of the session means that all keys
+associated with the session are securely deleted.
+
+This session expiration time is decided individually by each party so it is
+possible for a party to have an expiration time of two hours and another party
+to set it to two weeks. For the first data message, the session expiration time
+is set by the receiver once this message is received.
+
+This session expiration time is set up as a timer. This timer can be compromised
+by clock errors. Some errors may cause the session to be deleted too early and
+result in undecryptable messages being received. Other errors may result in the
+clock not moving forward which would cause a session to never expire. To
+mitigate this, implementers should use secure and reliable clocks that cannot be
+manipulated by an attacker.
+
+The session expiration time encourages keys to be deleted often at the cost of
+having lost messages whose MAC keys cannot be revealed. For example, when Alice
+sets her session expiration time to be 2 hours, Bob must reply within that time
+frame. In order to reset Alices' session expiration time, Bob must reply and
+Alice must create a response to his reply. After two hours, Alice will delete
+all keys associated with this session. If she receives a message from Bob after
+two hours, she cannot decrypt the message and thus she cannot reveal the MAC key
+associated with it.
+
 ## User Profile
 
 OTRv4 introduces a user profile. The user profile contains the Ed448 long term

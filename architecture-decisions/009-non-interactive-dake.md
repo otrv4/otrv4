@@ -10,6 +10,7 @@ The Receiver then generates their ephemeral keys and derives a shared secret.
 These are used to send an encrypted data message with the final message
 of the non-interactive DAKE, called the non-interactive auth message.
 
+// TODO: change this
 In the non-interactive DAKE, only one data message can be sent per use of
 prekey. The reasons for this are in the section on [long-lived secret ephemeral
 key material](#long-lived-secret-ephemeral-key-material). This means that
@@ -307,7 +308,7 @@ The machine has the following states:
 * Finished
 
 All states, except the finished state, may receive the second message of a non-
-interactive DAKE.
+interactive DAKE, called the Non-Interactive-Auth.
 
 #### The prekey server runs out of prekey messages
 
@@ -322,6 +323,6 @@ participation deniability are currently undefined and thus risky.
 
 By waiting for the server to send prekey messages, OTRv4 will be subject to DoS
 attacks when a server is compromised or the network is undermined to return a
-"no prekey message exists" response from the server. This is preferred over the
-possible compromise of multiple non-interactive DAKEs due to the reuse of a
+"no prekey message available" response from the server. This is preferred over
+the possible compromise of multiple non-interactive DAKEs due to the reuse of a
 prekey message.
