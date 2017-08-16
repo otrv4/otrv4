@@ -161,9 +161,9 @@ their respective implementations are not ready enough to allow for this
 implementation time frame. As a result, the protections mentioned in the
 following paragraphs only apply to non-quantum adversaries.
 
-The only exception is the usage of a "brace key" to provide some post-conversation
-transcript protection against potential weaknesses of elliptic curves and the
-early arrival of quantum computers.
+The only exception is the usage of a "brace key" to provide some
+post-conversation transcript protection against potential weaknesses of elliptic
+curves and the early arrival of quantum computers.
 
 In the interactive DAKE, although access to one participant's private long term
 key is required for authentication, both participants can deny having used
@@ -319,7 +319,7 @@ operation should be done modulo the prime `dh_p`.
 
 To verify that an integer (`X`) is on the group with a 3072-bit modulus:
 
-1. Check that `X` is `>= 2` and `<= dh_p - 2`.
+1. Check that `X` is `>= g3` and `<= dh_p - g3`.
 
 ## Data Types
 
@@ -1332,9 +1332,13 @@ Verify & Decrypt message
 
 **Bob:**
 
-1. Generates a [prekey message](#prekey-message), as described in the section
+// TODO: clarify that this is X and Y
+
+1. Generates and sets `our_ecdh` as ephemeral ECDH keys.
+2. Generates and sets `our_dh` as ephemeral 3072-bit DH keys.
+3. Generates a [prekey message](#prekey-message), as described in the section
    [Prekey message](#prekey-message).
-2. Publishes the prekey message to the untrusted server.
+4. Publishes the prekey message to the untrusted server.
 
 **Alice:**
 
@@ -1389,7 +1393,8 @@ Verify & Decrypt message
    * Sets `j` as 1.
    * Calculates the SSID from shared secret: it is the first 8 bytes of
 	  `KDF_2(0x00 || K)`.
-	* Calculates the first set of keys with `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
+	* Calculates the first set of keys with
+	  `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
 	* [Decides which chain key he will use](#deciding-between-chain-keys).
 
 ### Prekey message
@@ -1453,9 +1458,7 @@ To validate a prekey message:
 ### Non-Interactive-Auth Message
 
 This message terminates the non-interactive DAKE and might also contain an
-encrypted data message. This is highly reccommened as only one data message can
-be sent per use of both one-time prekeys. This means that only one ratchet
-happens in this case.
+encrypted data message. This is highly reccommened.
 
 A valid Non-Interactive-Auth message is generated as follows:
 
@@ -1986,8 +1989,6 @@ FINISHED
 
 The following sections outline the actions that the protocol should implement.
 Note that the protocol is initialized with the allowed versions (3 and/or 4).
-
-// TODO: only apllied to interactive?
 
 #### User requests to start an OTR conversation
 
