@@ -42,7 +42,7 @@ works on top of an existing messaging protocol, like XMPP.
    1. [Non-interactive Deniable Authenticated Key Exchange (DAKE)](#non-interactive-deniable-authenticated-key-exchange--dake-)
    1. [Prekey Message](#prekey-message)
    1. [Validating a Prekey Message](#validating-a-prekey-message)
-   1. [Non-interactive Auth Message](#non-interactive-auth-message)
+   1. [Non-Interactive-Auth Message](#non-interactive-auth-message)
    1. [Publishing prekeys](#publishing-prekeys)
    1. [Obtaining prekeys](#obtaining-prekeys)
 1. [Data Exchange](#data-exchange)
@@ -621,9 +621,9 @@ variable values are replaced:
 * When you [send a TLV type 1 (Disconnected)](#sending-a-tlv-type-1--disconnected--message)
 * When you [receive a TLV type 1 (Disconnected)](#receiving-a-tlv-type-1--disconnected--message)
 * When you complete a non-interactive DAKE by
-  [sending a non-interactive auth message](#sending-an-encrypted-message-to-an-offline-participant)
+  [sending a Non-Interactive-Auth message](#sending-an-encrypted-message-to-an-offline-participant)
 * When you complete a non-interactive DAKE by
-  [receiving and validating a non-interactive auth message](#receiving-a-non-interactive-auth-message)
+  [receiving and validating a Non-Interactive-Auth message](#receiving-a-non-interactive-auth-message)
 
 ### Key derivation functions
 
@@ -1291,7 +1291,7 @@ sigma (SNIZKPK)
 To begin an offline conversation, a prekey message is published to an untrusted
 server and this action is seen as the start of a non-interactive DAKE. The
 prekey message is retrieved by the party attempting to send a message to the
-publisher. A reply called the non-interactive auth message is created with the
+publisher. A reply called the Non-Interactive-Auth message is created with the
 prekey and sent. This completes the DAKE.
 
 The offline DAKE is based on the XZDH protocol [\[1\]](#references). Like the
@@ -1302,7 +1302,7 @@ interactive DAKE, it also uses a SNIZKPK for authentication (Auth).
 The non-interactive DAKE is a way to mutually agree upon shared cryptographic
 keys while providing some participation deniability. Unlike the interactive
 DAKE, the non-interactive DAKE does not provide online deniability for the
-party that completes the DAKE by sending a non-interactive auth message. Client
+party that completes the DAKE by sending a Non-Interactive-Auth message. Client
 implementations are expected to understand this deniability risk when allowing
 users to complete a non-interactive DAKE. They are also expected to decide how
 to convey this security loss to the user.
@@ -1326,7 +1326,7 @@ Publish prekey message ---->
 								....
                                      <------------ Request prekeys
                                      Prekeys -------------------->
-      <---------------------------------------- Non-interactive Auth message
+      <---------------------------------------- Non-Interactive-Auth message
 Verify & Decrypt message
 ```
 
@@ -1364,26 +1364,26 @@ Verify & Decrypt message
 	* Calculates DH shared secret `k_dh = DH(our_dh.secret, their_dh)`
 	  and `brace_key`.
 	* Computes `κ` as defined in
-	  [Non-interactive Auth Message](#non-interactive-auth-message).
+	  [Non-Interactive-Auth Message](#non-interactive-auth-message).
    * Calculates the Mixed shared secret `K = KDF_2(0x02 || κ)`.
    * Calculates the SSID from shared secret: it is the first 8 bytes of
      `KDF_2(0x00 || K)`.
    * Calculates the first set of keys with
      `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
    * [Decides which chain key she will used](#deciding-between-chain-keys).
-7. Sends Bob a non-interactive auth message. See
-   [Non-interactive Auth Message](#non-interactive-auth-message) section.
+7. Sends Bob a Non-Interactive-Auth message. See
+   [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 
 **Bob:**
 
-1. Receive a non-interactive auth message from Alice.
+1. Receive a Non-Interactive-Auth message from Alice.
 2. Calculates ECDH shared secret `K_ecdh`.
 3. Calculates DH shared secret `k_dh` and `brace_key`.
 4. Calculates `κ = KDF_2(K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(Ska, X) || k_dh)`.
 5. Computes the Auth MAC key `Mk = KDF_2(0x01 || κ)`.
 6. Computes the Mixed shared secret `K = KDF_2(0x02 || κ)`.
-7. 	Verifies the non-interactive auth message. See
-    [Non-interactive Auth Message](#non-interactive-auth-message) section.
+7. 	Verifies the Non-Interactive-Auth message. See
+    [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 8. At this point, the non-interactive DAKE is complete for Bob:
    * Sets ratchet id `i` as 0.
    * Sets `j` as 1.
@@ -1452,12 +1452,12 @@ To validate a prekey message:
 
 ### Non-Interactive-Auth Message
 
-This message terminates the non-interactive AKE and might also contain an
+This message terminates the non-interactive DAKE and might also contain an
 encrypted data message. This is highly reccommened as only one data message can
 be sent per use of both one-time prekeys. This means that only one ratchet
 happens in this case.
 
-A valid non-interactive Auth message is generated as follows:
+A valid Non-Interactive-Auth message is generated as follows:
 
 1. Create a user profile, as detailed [here](#creating-a-user-profile).
 2. Generate an ephemeral ECDH key pair:
@@ -1493,7 +1493,7 @@ A valid non-interactive Auth message is generated as follows:
     messages. Messages intended for this instance of the client will have this
     number as the receiver's instance tag.
 
-To verify a non-interactive Auth message:
+To verify a Non-Interactive-Auth message:
 
 1. Check that the receiver's instance tag matches your sender's instance tag.
 2. Validate the user profile, and extract `Pka` from it.
@@ -1563,8 +1563,7 @@ Encrypted message (DATA)
   message packet.
 ```
 
-// TODO: does this belog to this section?
-### Publishing prekeys
+### Publishing Prekeys Messages
 
 An OTRv4 client must generate a user's prekey messages and publish them to a
 prekey server. Implementers are expected to create their own policy dictating
@@ -1579,7 +1578,7 @@ messages.
 Details on how to interact with a prekey server to publish messages are outside
 the scope of this protocol.
 
-### Receiving prekeys
+### Receiving Prekeys Messages
 
 Details on how prekey messages may be received from a prekey server are outside
 the scope of this protocol. This specification assumes that none, one, or more
@@ -1772,7 +1771,7 @@ In both cases:
    MKenc, MKmac = derive_enc_mac_keys(chain_s[i][j])
    ```
 
-  * When creating a non-interactive auth message, construct a `nonce` from the
+  * When creating a Non-Interactive-Auth message, construct a `nonce` from the
     first 24 bytes of the `c` variable generated when constructing `sigma`. See
     [SNIZKPK Authentication](#snizkpk-authentication) section. When creating a
     regular data message, generate a new random 24 bytes value to be the
@@ -1783,7 +1782,7 @@ In both cases:
    Encrypted_message = XSalsa20_Enc(MKenc, nonce, m)
    ```
 
-  * When creating a non-interactive auth message, do not create a MAC tag. This
+  * When creating a Non-Interactive-Auth message, do not create a MAC tag. This
     is not necessary since the MAC tag created in the non-interactive DAKE
     (`Auth MAC`) already authentifies the data message. In any other case, use
     the MAC key to create a MAC tag. MAC all the sections of the data message
@@ -1807,9 +1806,9 @@ encryption and MAC keys.
     MKenc, MKmac = derive_enc_mac_keys(chain_r[ratchet_id][message_id])
   ```
 
-* Use the MAC key (`MKmac`) to verify the MAC of the message.In the case of a
-  non-interactive auth message, verify it with the `Auth Mac` as defined in the
-  [Non-interactive Auth Message](#non-interactive-auth-message) section.
+* Use the MAC key (`MKmac`) to verify the MAC of the message. In the case of a
+  Non-Interactive-Auth message, verify it with the `Auth Mac` as defined in the
+  [Non-interactive-Auth Message](#non-interactive-auth-message) section.
 
   If the verification fails:
 
@@ -1967,7 +1966,7 @@ ENCRYPTED_MESSAGES
 
   This state is entered after the DAKE is finished. The interactive DAKE is
   finished after the Auth-I message is sent, received and validated. The
-  non-interactive DAKE is finished when the Non-interactive Auth message is
+  non-interactive DAKE is finished when the Non-Interactive-Auth message is
   sent, received and validated. Messages sent in this state are encrypted.
 
 FINISHED
@@ -2231,7 +2230,7 @@ If the version is 4:
   Otherwise:
 
     * To validate the data message:
-      * Verify the MAC tag. In the case of a non-interactive auth message,
+      * Verify the MAC tag. In the case of a Non-Interactive-Auth message,
         verify it with the Auth Mac as defined in the 'Non-Interactive-Auth
         Message' section.
       * Check if the message version is allowed.
