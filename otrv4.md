@@ -180,9 +180,9 @@ not have participation deniability, but Bob, the receiver, does.
 
 Once a channel has been created with the DAKE, all data messages transmitted
 through this channel are confidential and have integrity. After a MAC key is
-used to validate a received message, it is revealed in the first message sent
-in the next ratchet. This allows forgeability of the data messages and
-consequent deniability of their contents.
+used by a party to validate a received message, they will reveal the MAC key
+in the next message they send (i.e in the next ratchet). This allows
+forgeability of the data messages and consequent deniability of their contents.
 
 If key material used to encrypt a particular data message is compromised,
 previous messages are protected. Additionally, future messages are protected by
