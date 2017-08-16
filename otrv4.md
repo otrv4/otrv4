@@ -1942,8 +1942,6 @@ required and if it will advertise OTR support.
 
 ### Protocol states
 
-// TODO: is there a state for non interactive Auth? How will this be handled?
-
 ```
 START
 
@@ -1964,9 +1962,10 @@ WAITING_AUTH_I
 
 ENCRYPTED_MESSAGES
 
-  This state is entered after the DAKE is finished. The DAKE is finished after
-  the Auth-I message is sent, received and validated. Messages sent in this
-  state are encrypted.
+  This state is entered after the DAKE is finished. The interactive DAKE is
+  finished after the Auth-I message is sent, received and validated. The
+  non-interactive DAKE is finished when the Non-interactive Auth message is
+  sent, received and validated. Messages sent in this state are encrypted.
 
 FINISHED
 
@@ -1985,6 +1984,8 @@ FINISHED
 
 The following sections outline the actions that the protocol should implement.
 Note that the protocol is initialized with the allowed versions (3 and/or 4).
+
+// TODO: only apllied to interactive?
 
 #### User requests to start an OTR conversation
 
@@ -2020,14 +2021,14 @@ Example query messages:
 "?OTRv?"
     A bizarre claim that Alice would like to start an OTR conversation, but is
     unwilling to speak any version of the protocol. Although this is
-    syntactically valid, the receiver will not reply.
+    syntactically valid, the receiver will not reply when receiving this.
 ```
 
 These strings may be hidden from the user (for example, in an attribute of an
 HTML tag), and may be accompanied by an explanatory message ("Alice has
 requested an Off-the-Record private conversation."). If Bob is willing to use
 OTR with Alice (with a protocol version that Alice has offered), he should start
-the AKE according to one compatible version he supports.
+the AKE or DAKE according to one compatible version he supports.
 
 ##### Whitespace Tags
 
@@ -2043,14 +2044,16 @@ bytes indicating the version of OTR Alice is willing to use:
   Always send "\x20\x09\x20\x20\x09\x09\x09\x09"
   "\x20\x09\x20\x09\x20\x09\x20\x20",
   followed by one or more of:
-    "\x20\x20\x09\x09\x20\x20\x09\x09" to indicate a willingness to use OTR version 3 with Bob
-    "\x20\x20\x09\x09\x20\x09\x20\x20" to indicate a willingness to use OTR version 4 with Bob
+    "\x20\x20\x09\x09\x20\x20\x09\x09"
+  to indicate a willingness to use OTR version 3 with Bob
+    "\x20\x20\x09\x09\x20\x09\x20\x20"
+  to indicate a willingness to use OTR version 4 with Bob
 ```
 
 If Bob is willing to use OTR with Alice, with the protocol version that Alice
-has offered, he should start the AKE. On the other hand, if Alice receives a
-plaintext message from Bob (rather than an initiation of the AKE), she should
-stop sending him a whitespace tag.
+has offered, he should start the AKE or DAKE. On the other hand, if Alice
+receives a plaintext message from Bob (rather than an initiation of the AKE or
+DAKE), she should stop sending him a whitespace tag.
 
 #### Receiving plaintext without the whitespace tag
 
@@ -2088,10 +2091,6 @@ If the Query message offers OTR version 3 and version 3 is allowed:
 
 #### Receiving an Identity message
 
-// TODO: what will happen if state is `AUTH_R` or `AUTH_I` and a prekey is requested?
-
-// If one is on state `WAITING_AUTH_I` and a noninteractive is received?
-
 If the state is `START`:
 
   * Validate the Identity message. Ignore the message if validation fails.
@@ -2111,8 +2110,8 @@ If the state is `WAITING_AUTH_R`:
 
   * Validate the Identity message. Ignore the message if validation fails.
   * If validation succeeds:
-    * Compare the `X` (as a 57-byte unsigned little-endian value) you sent in your
-      Identity message with the value from the message you received.
+    * Compare the `X` (as a 57-byte unsigned little-endian value) you sent in
+      your Identity message with the value from the message you received.
     // TODO: this case might be unreachable
     * If yours is the lower hash value:
       * Ignore the received Identity message, but resend your Identity message.
@@ -2189,23 +2188,23 @@ If the state is not `WAITING_AUTH_I`:
 
 #### Sending an encrypted message to an offline participant
 
-1. Send a non-interactive auth message.
-2. Transition to `ENCRYPTED_MESSAGES` state.
+  * Send a Non-Interactive-Auth message.
+  * Transition to `ENCRYPTED_MESSAGES` state.
 
-#### Receiving a non-interactive auth message
+#### Receiving a Non-Interactive-Auth message
 
 If the state is `FINISHED`:
 
-    * Ignore the non-interactive auth message.
+  * Ignore the message.
 
 Else:
 
-    * Receive the non-interactive auth message.
-    * Transition to `ENCRYPTED_MESSAGES` state.
+  * If the receiver's instance tag in the message is not the sender's instance
+    tag you are currently using, ignore this message.
+  * Receive and validate the Non-Interactive-Auth message.
+  * Transition to `ENCRYPTED_MESSAGES` state.
 
 #### Sending an encrypted data message
-
-// TODO: what happens in non interactive case?
 
 The `ENCRYPTED_MESSAGES` state is the only state where a participant is allowed
 to send encrypted data messages.
@@ -2229,7 +2228,9 @@ If the version is 4:
   Otherwise:
 
     * To validate the data message:
-      * Verify the MAC tag. // TODO: state what happens in non-interative
+      * Verify the MAC tag. In the case of a non-interactive auth message,
+        verify it with the Auth Mac as defined in the 'Non-Interactive-Auth
+        Message' section.
       * Check if the message version is allowed.
       * If the instance tag in the message is not the instance tag you are
         currently using, ignore the message.
@@ -2315,12 +2316,14 @@ If the version is 4:
 
   * If a TLV type 1 is received in the `START` state:
 
-      * Stay in that state, else transition to the START state and [reset the state variables and key variables](#resetting-state-variables-and-key-variables).
+      * Stay in that state, else transition to the START state and
+        [reset the state variables and key variables](#resetting-state-variables-and-key-variables).
 
 If the version is 3:
 
-  * Transition to 'MSGSTATE_FINISHED'.
-  * Inform the user that their correspondent has closed their end of the private connection.
+  * Transition to `MSGSTATE_FINISHED`.
+  * Inform the user that their correspondent has closed their end of the private
+    connection.
 
 ## Socialist Millionaires Protocol (SMP)
 
@@ -2920,9 +2923,9 @@ choice of D-H encryption key (but the key itself is not yet revealed). This
 allows the secure session id to be much shorter than in OTRv1, while still
 preventing a man-in-the-middle attack on it.
 
-The D-H Commit Message consists of the protocol version, the message type, the sender's instance
-tag, the receiver's instance tag, the encrypted sender's private key and the
-hashed sender's private key.
+The D-H Commit Message consists of the protocol version, the message type, the
+sender's instance tag, the receiver's instance tag, the encrypted sender's
+private key and the hashed sender's private key.
 
 #### D-H Key Message
 
@@ -2935,6 +2938,7 @@ and the MAC of the signature.
 #### Receiving a D-H Commit Message
 
 If the message is version 3 and version 3 is not allowed, ignore the message.
+
 Otherwise:
 
 If authstate is `AUTHSTATE_NONE`:
@@ -2988,6 +2992,7 @@ If the instance tag in the message is not the instance tag you are currently
 using, ignore the message.
 
 If the message is version 3 and version 3 is not allowed, ignore this message.
+
 Otherwise:
 
 If authstate is `AUTHSTATE_AWAITING_DHKEY`:
@@ -3014,19 +3019,21 @@ If authstate is `AUTHSTATE_NONE`, `AUTHSTATE_AWAITING_REVEALSIG`, or
 If the instance tag in the message is not the instance tag you are currently
 using, ignore the message.
 
-If version 3 is not allowed, ignore this message. Otherwise:
+If version 3 is not allowed, ignore this message.
 
-If authstate is AUTHSTATE_AWAITING_SIG:
+Otherwise:
+
+If authstate is `AUTHSTATE_AWAITING_SIG`:
 
   * Decrypt the encrypted signature, and verify the signature and the MACs. If everything checks out:
 
-    * Transition authstate to AUTHSTATE_NONE.
-    * Transition msgstate to MSGSTATE_ENCRYPTED.
+    * Transition authstate to `AUTHSTATE_NONE`.
+    * Transition msgstate to `MSGSTATE_ENCRYPTED`.
     * If there is a recent stored message, encrypt it and send it as a Data Message.
 
   * Otherwise, ignore the message.
 
-If authstate is AUTHSTATE_NONE, AUTHSTATE_AWAITING_DHKEY or AUTHSTATE_AWAITING_REVEALSIG:
+If authstate is `AUTHSTATE_NONE`, `AUTHSTATE_AWAITING_DHKEY` or `AUTHSTATE_AWAITING_REVEALSIG`:
 
   * Ignore the message.
 
@@ -3035,21 +3042,24 @@ If authstate is AUTHSTATE_NONE, AUTHSTATE_AWAITING_DHKEY or AUTHSTATE_AWAITING_R
 If the instance tag in the message is not the instance tag you are currently
 using, ignore the message.
 
-If version 3 is not allowed, ignore this message. Otherwise:
+If version 3 is not allowed, ignore this message.
 
-If authstate is AUTHSTATE_AWAITING_REVEALSIG:
+Otherwise:
 
-  * Use the received value of r to decrypt the value of gx received in the D-H Commit Message, and verify the hash therein.
+If authstate is `AUTHSTATE_AWAITING_REVEALSIG`:
+
+  * Use the received value of r to decrypt the value of gx received in the D-H
+    Commit Message, and verify the hash therein.
   * Decrypt the encrypted signature, and verify the signature and the MACs. If everything checks out:
 
     * Reply with a Signature Message.
-    * Transition authstate to AUTHSTATE_NONE.
-    * Transition msgstate to MSGSTATE_ENCRYPTED.
+    * Transition authstate to `AUTHSTATE_NONE`.
+    * Transition msgstate to `MSGSTATE_ENCRYPTED`.
     * If there is a recent stored message, encrypt it and send it as a Data Message.
 
   * Otherwise, ignore the message.
 
-If authstate is AUTHSTATE_NONE, AUTHSTATE_AWAITING_DHKEY or AUTHSTATE_AWAITING_SIG:
+If authstate is `AUTHSTATE_NONE`, `AUTHSTATE_AWAITING_DHKEY` or `AUTHSTATE_AWAITING_SIG`:
 
   * Ignore the message.
 
@@ -3062,7 +3072,7 @@ man-in-the-middle attack on the channel itself) to Alice.
 
 It consists of: the protocol version, the message type, the sender's instance
 tag, the receiver's instance tag, the encrypted signature and the MAC of the
-signature
+signature.
 
 #### Signature Message
 
@@ -3078,7 +3088,7 @@ signature.
 If the user requests to close its private connection, you may send
 a message (possibly with an empty human-readable part) containing a record
 with TLV type 1 just before you discard the session keys. You should then
-transition to 'MSGSTATE_PLAINTEXT'.
+transition to `MSGSTATE_PLAINTEXT`.
 
 ### OTRv3 Protocol State Machine
 
