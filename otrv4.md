@@ -21,7 +21,7 @@ existing messaging protocol, like XMPP.
 1. [Data Types](#data-types)
    1. [Encoding and Decoding](#encoding-and-decoding)
    1. [Serializing the SNIZKPK Authentication](#serializing-the-snizkpk-authentication)
-   1. [Public keys, Shared Prekeys and fingerprints](#public-keys-shared-prekeys-and-fingerprints)
+   1. [Public keys, Shared Prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
    1. [TLV Record Types](#tlv-record-types)
    1. [Shared session state](#shared-session-state)
    1. [OTR Error Messages](#otr-error-messages)
@@ -447,7 +447,7 @@ SNIZKPK Authentication (SNIZKPK):
   r3 (SCALAR)
 ```
 
-### Public keys, Shared Prekeys and fingerprints
+### Public keys, Shared Prekeys and Fingerprints
 
 OTRv4 introduces a new type of public key:
 
@@ -498,7 +498,7 @@ Public keys have fingerprints, which are hex strings that serve as identifiers
 for the public key. The full OTRv4 fingerprint is calculated by taking the
 SHA3-512 hash of the byte-level representation of the public key. To
 authenticate a long-term key pair, the [Socialist Millionaire's
-Protocol](#socialist-millionaires-protocol--smp-) and manual fingerprint
+Protocol](#socialist-millionaires-protocol-smp) and manual fingerprint
 comparison may be used. For the first, the full fingerprint is included in the
 authentication. To make manual comparison easier, two versions of the
 fingerprint may be used:
@@ -640,10 +640,11 @@ variable values are replaced:
   sending an [Auth-I Message](#auth-i-message)
 * When you complete the [interactive DAKE](#interactive-dake-overview) by
   receiving and validating an [Auth-I Message](#auth-i-message)
-* When you [send a Data Message or receive a Data Message](#data-exchange)
-* When you [send a TLV type 1 (Disconnected)](#sending-a-tlv-type-1--disconnected--message)
-* When you [receive a TLV type 1 (Disconnected)](#receiving-a-tlv-type-1--disconnected--message)
-* When you complete a non-interactive DAKE by
+* When you [send a Data Message](#when-you-send-a-data-message) or
+  [receive a Data Message](#when-you-receive-a-data-message)
+* When you [send a TLV type 1 (Disconnected)](#sending-a-tlv-type-1-disconnected-message)
+* When you [receive a TLV type 1 (Disconnected)](#receiving-a-tlv-type-1-disconnected-message)
+* f
   [sending a Non-Interactive-Auth message](#sending-an-encrypted-message-to-an-offline-participant)
 * When you complete a non-interactive DAKE by
   [receiving and validating a Non-Interactive-Auth message](#receiving-a-non-interactive-auth-message)
@@ -946,7 +947,7 @@ To create a user profile, assemble:
    It adds partial protection against an attacker that modifies the first flow
    of the non-interactive DAKE and that compromises the party's secret long term
    key. For its generation, refer to
-   [Public keys, shared prekeys and fingerprints](#public-keys-shared-prekeys-and-fingerprints) section.
+   [Public keys, shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints) section.
    This key should expire when the user profile expires.
 5. Profile Signature: The symmetric key, the flag `f` (set to zero, as defined
    on [RFC]8032) and the empty context `c` are used to create signatures of the
@@ -1018,7 +1019,7 @@ a context 'c', which is empty, and a message 'm'.
    1.  Hash the symmetric key: 'SHAKE-256(symmetric_key)'. Store the first 114
        bytes of the digest on 'digest'. Construct the secret key 'sk' from
        the first half of 'digest' (57 bytes), and the corresponding public
-       key 'H', as defined on 'Public keys, Shared Prekeys and fingerprints'
+       key 'H', as defined on 'Public keys, Shared Prekeys and Fingerprints'
        section. Let 'nonce' denote the second half of the 'digest' (from
        digest[57] to digest[113]).
 
@@ -1095,7 +1096,7 @@ for authentication (Auth).
 
 Alice's long-term Ed448 key-pair is `(ska, PKa)` and Bob's long-term Ed448
 key-pair is `(skb, PKb)`. Both key pairs are generated as stated on the
-[Public keys, shared prekeys and fingerprints](#public-keys-shared-prekeys-and-fingerprints) section.
+[Public keys, shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints) section.
 
 #### Interactive DAKE Overview
 
@@ -1190,7 +1191,8 @@ Bob will be initiating the DAKE with Alice.
 This is the first message of the DAKE. Bob sends it to Alice to commit to a
 choice of DH and ECDH key. A valid Identity message is generated as follows:
 
-1. Create a user profile, as detailed [here](#creating-a-user-profile).
+1. Create a user profile, as defined in
+   [Creating a user profile](#creating-a-user-profile) section.
 2. Generate an ephemeral ECDH key pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
   * secret key `y` (57 bytes).
@@ -1246,7 +1248,8 @@ correct group.
 
 A valid Auth-R message is generated as follows:
 
-1. Create a user profile, as detailed [here](#creating-a-user-profile).
+1. Create a user profile, as detailed as defined in
+   [Creating a user profile](#creating-a-user-profile) section.
 2. Generate an ephemeral ECDH key pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
   * secret key `x` (57 bytes).
@@ -1319,8 +1322,8 @@ To verify the Auth-I message:
 2. Compute `t = 0x1 || SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ)`.
    Φ is the shared session state as mention on the
    [Shared session state](#shared-session-state) section.
-3. Verify the `sigma` with [SNIZKPK Authentication](#snizkpk-authentication),
-   that is `sigma == Verify({Pkb, Pka, X}, t)`.
+3. Verify the `sigma` as defined on
+   [SNIZKPK Authentication](#verification-verifya1-a2-a3-sigma-m).
 
 An Auth-I is an OTR message encoded as:
 
@@ -1364,7 +1367,7 @@ for authentication (Auth).
 
 Alice's long-term Ed448 key-pair is `(ska, PKa)` and Bob's long-term Ed448
 key-pair is `(skb, PKb)`. Both key pairs are generated as stated on the
-[Public keys, shared prekeys and fingerprints](#public-keys-shared-prekeys-and-fingerprints) section.
+[Public keys, shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints) section.
 
 #### Non-interactive DAKE Overview
 
@@ -1383,7 +1386,7 @@ Verify & Decrypt message
 
 1. Generates and sets `our_ecdh` as ephemeral ECDH keys.
 2. Generates and sets `our_dh` as ephemeral 3072-bit DH keys.
-3. Generates a [prekey message](#prekey-message), as described in the section
+3. Generates a prekey message, as described in the section
    [Prekey message](#prekey-message).
 4. Publishes the prekey message to the untrusted server.
 
@@ -1452,7 +1455,8 @@ one-time use public prekey values.
 
 It is created as follows:
 
-1. Create a user profile, as detailed [here](#creating-a-user-profile).
+1. Create a user profile, as defined in
+   [Creating a user profile](#creating-a-user-profile) section.
 2. Create the first one-time use prekey by generating the ephemeral
    ECDH key pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
@@ -1509,7 +1513,8 @@ encrypted data message. This is highly reccommened.
 
 A valid Non-Interactive-Auth message is generated as follows:
 
-1. Create a user profile, as detailed [here](#creating-a-user-profile).
+1. Create a user profile, as defined in
+   [Creating a user profile](#creating-a-user-profile) section.
 2. Generate an ephemeral ECDH key pair:
   * secret key `x` (57 bytes), as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
@@ -1526,11 +1531,11 @@ A valid Non-Interactive-Auth message is generated as follows:
 7. Compute `t = SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ) || their_shared_prekey`.
 8. Compute `sigma = Auth(Pka, ska, {Pkb, Pka, Y}, t)`. When computing `sigma`,
    keep the first 192 bits of the generated `c` value to be used as a `nonce` in
-   the next step. Refer to [SNIZKPK Authentication](#SNIZKPK-Authentication)
+   the next step. Refer to [SNIZKPK Authentication](#snizkpk-authentication)
    for details.
 9. A message can be optionally attached at this point. It is recommended to do
    so. Follow the section
-   ["When you send a Data Message"](when-you-send-a-data-message) to generate an
+   [When you send a Data Message](#when-you-send-a-data-message) to generate an
    encrypted message, using the nonce set in the previous step. This will be
    referred as `encrypted_data_message`.
 10. If an encrypted message is attached, compute
@@ -1560,7 +1565,7 @@ To verify a Non-Interactive-Auth message:
      `tag` is equal to the Auth MAC. If it is not, ignore the
      Non-Interactive-Auth message.
 9. If an `encrypted_data_message` was present, decrypt it by following
-   ["When you receive a Data Message"](when-you-receive-a-data-message) section.
+   [When you receive a Data Message](#when-you-receive-a-data-message) section.
    Keep in mind that the `MKmac` should be discarded as it is not necessary for
    the first message delivered through a Non-Interactive-Auth message.
    Nevertheless, add the `Auth MAC` key to the list `mac_keys_to_reveal`.
@@ -1679,8 +1684,8 @@ If many prekey messages are received:
 This section describes how each participant will use the Double Ratchet
 algorithm to exchange [data messages](#data-message). The Double Ratchet is
 initialized with the shared secret established in the DAKE. Detailed validation
-and processing of each data message is described in the [section on receiving
-encrypted data messages](#receiving-an-encrypted-data-message).
+and processing of each data message is described in the [receiving
+encrypted data messages](#receiving-an-encrypted-data-message) section.
 
 A message with an empty human-readable part (the plaintext is of zero length, or
 starts with a NULL) is a "heartbeat" message. This message is useful for key
@@ -1795,8 +1800,8 @@ Given a new ratchet:
     [Rotating ECDH keys and brace key as sender](#rotating-ecdh-keys-and-brace-key-as-sender)
     section.
     The new ECDH public key created by the sender with this process will be the
-    "Public ECDH Key" for the message. If a new public DH key is created in
-    this process, it will be the "Public DH Key" for the message. If it is
+    'Public ECDH Key' for the message. If a new public DH key is created in
+    this process, it will be the 'Public DH Key' for the message. If it is
     not created, then it will be empty.
   * Calculate the `K = KDF_2(K_ecdh || brace_key)`.
   * Derive new set of keys
@@ -1857,7 +1862,7 @@ encryption and MAC keys.
 
 * Use the MAC key (`MKmac`) to verify the MAC of the message. In the case of a
   Non-Interactive-Auth message, verify it with the `Auth Mac` as defined in the
-  [Non-interactive-Auth Message](#non-interactive-auth-message) section.
+  [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 
   If the verification fails:
 
@@ -2408,7 +2413,7 @@ OTRv4 makes a few changes to SMP:
 
 ### SMP Overview
 
-The computations below use the [SMP secret value](#secret-information).
+The computations below use the [SMP secret information](#secret-information).
 
 Assuming that Alice begins the exchange:
 
