@@ -111,8 +111,3 @@ support it.
 
 We will support a conversation using version 3 if we don't find any user profile
 and the client allows it.
-
-### References
-
-1. https://tools.ietf.org/rfc/rfc8032.txt "S. Josefsson and I. Liusvaara: Edwards-Curve Digital Signature Algorithm (EdDSA)"; RFC 8032 (Informational); IETF; Jan 2017
-2. https://tools.ietf.org/html/draft-irtf-cfrg-eddsa-05 "S. Josefsson and I. Liusvaara: Edwards-curve Digital Signature Algorithm (EdDSA)"
