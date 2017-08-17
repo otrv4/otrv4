@@ -629,8 +629,6 @@ Key variables:
     sent of the next ratchet.
 ```
 
-// TODO: does this happen in all of them?
-
 When these events occur, the state variables are incremented and the key
 variable values are replaced:
 
@@ -860,14 +858,14 @@ This session expiration time is set up as a timer. This timer can be compromised
 by clock errors. Some errors may cause the session to be deleted too early and
 result in undecryptable messages being received. Other errors may result in the
 clock not moving forward which would cause a session to never expire. To
-mitigate this, implementers should use secure and reliable clocks that cannot be
+mitigate this, implementers should use secure and reliable clocks that can't be
 manipulated by an attacker.
 
 The session expiration time encourages keys to be deleted often at the cost of
 having lost messages whose MAC keys cannot be revealed. For example, when Alice
 sets her session expiration time to be 2 hours, Bob must reply within that time
 frame. In order to reset Alices' session expiration time, Bob must reply and
-Alice must create a response to his reply. After two hours, Alice will delete
+Alice must create a response to this reply. After two hours, Alice will delete
 all keys associated with this session. If she receives a message from Bob after
 two hours, she cannot decrypt the message and thus she cannot reveal the MAC key
 associated with it.

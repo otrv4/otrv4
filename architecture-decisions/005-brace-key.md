@@ -294,8 +294,8 @@ RFC 3526 [\[4\]](#references):
   BBE11757 7A615D6C 770988C0 BAD946E2 08E24FA0 74E5AB31
   43DB5BFC E0FD108E 4B82D120 A93AD2CA FFFFFFFF FFFFFFFF
   ```
+
 * Generator g3: 2
-* The public keys should be 448 bits (56 bytes) long. // TODO: this is not right. The digest is 56, but the pub maybe 384.
 
 ### Consequences
 
