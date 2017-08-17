@@ -775,7 +775,6 @@ Every ratchet, the receiver will rotate their ECDH keys and brace key.
 This is for the computation of `K` (see
 [Deriving Double Ratchet Keys](#deriving-double-ratchet-keys)). The
 following data messages will advertise a new ratchet id as `i + 1`.
-//TODO: does that happen?
 
 Before rotating the keys:
 
@@ -798,7 +797,7 @@ To rotate the brace key:
     * Calculate a `brace_key = KDF_1(k_dh)`.
     * Securely delete `our_dh.secret` (this should only be deleted after
       calculating the new brace key when receiving as new keys will be generated
-      on the next DH rotation). // TODO: is this parenthesis comment necessary?
+      on the next DH rotation).
 
   Otherwise:
 
@@ -1094,8 +1093,6 @@ This protocol is derived from the DAKEZ protocol [\[1\]](#references), which
 uses a signature non-interactive zero-knowledge proof of knowledge (SNIZKPK)
 for authentication (Auth).
 
-// TODO: this refers to `H` and `sk`. Refer them as that?
-
 Alice's long-term Ed448 key-pair is `(ska, PKa)` and Bob's long-term Ed448
 key-pair is `(skb, PKb)`. Both key pairs are generated as stated on the
 [Public keys, shared prekeys and fingerprints](#public-keys-shared-prekeys-and-fingerprints) section.
@@ -1365,8 +1362,6 @@ This protocol is derived from the XZDH protocol [\[1\]](#references), which
 uses a signature non-interactive zero-knowledge proof of knowledge (SNIZKPK)
 for authentication (Auth).
 
-// TODO: this refers to `H` and `sk`. Refer them as that?
-
 Alice's long-term Ed448 key-pair is `(ska, PKa)` and Bob's long-term Ed448
 key-pair is `(skb, PKb)`. Both key pairs are generated as stated on the
 [Public keys, shared prekeys and fingerprints](#public-keys-shared-prekeys-and-fingerprints) section.
@@ -1385,8 +1380,6 @@ Verify & Decrypt message
 ```
 
 **Bob:**
-
-// TODO: clarify that this is X and Y
 
 1. Generates and sets `our_ecdh` as ephemeral ECDH keys.
 2. Generates and sets `our_dh` as ephemeral 3072-bit DH keys.
@@ -1528,8 +1521,7 @@ A valid Non-Interactive-Auth message is generated as follows:
 4. [Validate the prekey message](#validating-a-prekey-message).
 5. Computes
    `κ = KDF_2(K_ecdh || ECDH(x, their_shared_prekey) || ECDH(x, Pkb) || k_dh)`.
-   This is needed for the generation of the Mixed shared secret. //TODO: maybe
-   put this in a different section.
+   This is needed for the generation of the Mixed shared secret.
 6. Calculates the Auth MAC key `Mk = KDF_2(0x01 || κ)`.
 7. Compute `t = SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ) || their_shared_prekey`.
 8. Compute `sigma = Auth(Pka, ska, {Pkb, Pka, Y}, t)`. When computing `sigma`,
