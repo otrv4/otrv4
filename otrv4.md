@@ -272,10 +272,11 @@ Non-square element in Z_p (d)
 
 #### Verifying a point on curve
 
-To verify that a point (`X`) is on curve Ed448-Goldilocks:
+To verify that a point (`X = x, y`) is on curve Ed448-Goldilocks:
 
 1. Check that `X` is not equal to the identity element (`I`).
-2. Check that `X` lies on the curve.
+2. Check that `X` lies on the curve: `x` and `y` are on the interval
+   `[0, q - 1]`
 3. Check that `q * X = I`.
 
 
