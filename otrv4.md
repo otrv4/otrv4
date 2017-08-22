@@ -2275,24 +2275,25 @@ to send encrypted messages.
 
 If the version is 4:
 
-  If the state is not `ENCRYPTED_MESSAGES`:
+* If the state is not `ENCRYPTED_MESSAGES`:
 
-    * Inform the user that an unreadable encrypted message was received.
-    * Reply with an Error Message with ERROR_1.
+  * Inform the user that an unreadable encrypted message was received.
+  * Reply with an Error Message with 'ERROR_1'.
 
-  Otherwise:
+* Otherwise:
 
-    * To validate the data message:
-      * Verify the MAC tag. In the case of a Non-Interactive-Auth message,
-        verify it with the Auth Mac as defined in the 'Non-Interactive-Auth
-        Message' section.
-      * Check if the message version is allowed.
-      * If the instance tag in the message is not the instance tag you are
-        currently using, ignore the message.
-      * Verify that the public ECDH key is on curve Ed448. See 'Verifying a
-        point on curve' section for details.
-      * Verify that the public DH key is from the correct group and that it does
-        not degenerate.
+  * Validate the data message:
+     * Verify the MAC tag. In the case of a Non-Interactive-Auth message,
+       verify it with the Auth Mac as defined in the [Non-Interactive-Auth
+       Message](#non-interactive-auth-message) section.
+     * Check if the message version is allowed.
+     * If the instance tag in the message is not the instance tag you are
+       currently using, ignore the message.
+     * Verify that the public ECDH key is on curve Ed448. See
+       [Verifying a point on curve](#verifying-a-point-on-curve) for details.
+     * Verify that the public DH key is from the correct group. See
+       [Verifying an integer on the dh group](#verifying-an-integer-on-the-dh-group)
+       section for details.
 
     * If the message is not valid in any of the above steps, discard it and
       optionally pass along a warning to the user.
@@ -2303,7 +2304,7 @@ If the version is 4:
       * If the message cannot be decrypted and the 'IGNORE_UNREADABLE' flag is
         not set:
         * Inform the user that an unreadable encrypted message was received.
-        * Reply with an Error Message with ERROR_1.
+        * Reply with an Error Message with 'ERROR_1'.
 
       * If the message cannot be decrypted and the 'IGNORE_UNREADABLE' flag is
         set:
@@ -2322,7 +2323,7 @@ If the version is 4:
 
 If the version is 3:
 
-  If msgstate is `MSGSTATE_ENCRYPTED`:
+* If msgstate is `MSGSTATE_ENCRYPTED`:
 
     * Verify the information (MAC, keyids, ctr value, etc.) in the message.
     * If the instance tag in the message is not the instance tag you are
