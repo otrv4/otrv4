@@ -1346,7 +1346,7 @@ sigma (SNIZKPK)
 To begin an offline conversation, a prekey message is published to an untrusted
 server and this action is seen as the start of a non-interactive DAKE. The
 prekey message is retrieved by the party attempting to send a message to the
-publisher. A reply called the Non-Interactive-Auth message is created with the
+publisher. A reply, called the Non-Interactive-Auth message, is created with the
 prekey and sent. This completes the DAKE.
 
 The offline DAKE is based on the XZDH protocol [\[1\]](#references). Like the
