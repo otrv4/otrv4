@@ -485,8 +485,8 @@ RFC 8032 [\[10\]](#references), for more information on key generation):
 The symmetric key (sym_key) is 57 bytes of cryptographically secure random data.
 The secret scalar 'sk' is defined as SECRET_SCALAR.
 
-1. Hash the 57-byte symmetric key using SHAKE-256(sym_key). Store the
-   digest in a 114-byte large buffer.  Only the lower 57 bytes (denoted 'h')
+1. Hash the 57-byte symmetric key ('sym_key') using SHAKE-256(sym_key). Store
+   the digest in a 114-byte large buffer.  Only the lower 57 bytes (denoted 'h')
    are used for generating the public key.
 2. Prune the buffer 'h': the two least significant bits of the first
    byte are cleared, all eight bits of the last byte are cleared, and the
@@ -495,6 +495,7 @@ The secret scalar 'sk' is defined as SECRET_SCALAR.
    secret scalar 'sk'.  Perform a known-base-point scalar multiplication
    'sk * Base point (G)'. If the result is for the 'ED448-PUBKEY', store it in
    'H'.  If the result is for the 'ED448-SHARED-PREKEY', store it in 'D'.
+4. Securely delete 'sk' and 'sym_key'.
 ```
 
 Public keys have fingerprints, which are hex strings that serve as identifiers
