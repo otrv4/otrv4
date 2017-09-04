@@ -1642,7 +1642,7 @@ than one prekey messages may arrive. If the prekey server cannot return any
 prekey messages, the non-interactive DAKE must wait until one can be obtained.
 
 The following guide is meant to help implementers identify and remove invalid
-prekey messages and invalid situations.
+prekey messages.
 
 Use the following checks to validate a prekey message. If any checks fail,
 ignore the message:
@@ -1663,21 +1663,15 @@ If many prekey messages are received:
 
   * Remove all invalid prekey messages.
   * Remove all duplicate prekey messages in the list.
-  * If multiple valid messages remain, check for invalid situations:
-      * If multiple prekey messages exist with the same instance tag, the same
-        version, and the same long term keys in the user profile, then one of
-        the messages is invalid. The safest thing to do is to remove all prekey
-        messages associated with this situation.
-        * If one valid prekey message remains:
-          * Decide whether to send a message using this prekey message depending
-            on whether the long term key in the use profile is trusted or not.
+  * If one prekey message remains:
+      * Decide whether to send a message using this prekey message if the long
+        term key within the use profile is trusted or not.
   * If multiple valid prekey messages remain:
       * If there are keys that are untrusted and trusted in the list of
         messages, decide whether to only use messages that contain trusted long
         term keys.
       * If there are several instance tags in the list of prekey messages,
-        decide whether to send one message per instance tag or to send a message
-        only to one instance tag.
+        decide which instance tags to send messages to.
       * If there are multiple prekey messages per instance tag, decide
         whether to send multiple messages to the same instance tag.
 

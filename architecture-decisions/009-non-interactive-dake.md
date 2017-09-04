@@ -4,20 +4,11 @@
 
 The non-interactive DAKE below is based on the XZDH protocol. It starts when the
 Receiver requests the Initiator's prekey from a untrusted server. The
-Initiator's long-term public key should be verified by the Receiver.
-
-The Receiver then generates their ephemeral keys and derives a shared secret.
-These are used to send an encrypted data message with the final message
-of the non-interactive DAKE, called the non-interactive auth message.
-
-// TODO: change this
-In the non-interactive DAKE, only one data message can be sent per use of
-prekey. The reasons for this are in the section on [long-lived secret ephemeral
-key material](#long-lived-secret-ephemeral-key-material). This means that
-ratchets do not happen in the non-interactive case. Thus, one encryption key and
-one MAC key are derived from the shared secret, and after the non-interactive
-auth message is sent, all key material generated for this conversation is
-deleted.
+Initiator's long-term public key should be verified by the Receiver. The
+Receiver then generates their ephemeral keys and derives a shared secret. These
+are used to start the double ratchet and send an encrypted data message with the
+final message of the non-interactive DAKE, called the non-interactive auth
+message.
 
 #### Long-lived secret ephemeral key material
 
@@ -51,13 +42,13 @@ compromise the secret part of the signed prekey before this expiration time
 along with the identity secret key in order to gain access to the message.
 
 The second attack is mitigated in two ways. First, since it cannot be known
-whether a dropped message was created by an attacker, keys for dropped messages
-are never kept. Thus, if Alice receives message 3 from Bob, but she has not
-received message 1 and 2, Alice will derive the keys to validate and decrypt
-message 3. If the message is valid, all chain keys used for derivation are
-deleted. In this case, chain keys for message 1 and message 2 are deleted. This
-is acceptable since OTRv4 assumes in-order delivery of messages. As a result,
-messages received out of order will be ignored.
+whether a message was dropped by an attacker, keys for dropped messages are
+never kept. Thus, if Alice receives message 3 from Bob, but she has not received
+message 1 and 2, Alice will derive the keys to validate and decrypt message 3.
+If the message is valid, all chain keys used for derivation are deleted. In this
+case, chain keys for message 1 and message 2 are deleted. This is acceptable
+since OTRv4 assumes in-order delivery of messages. As a result, messages
+received out of order will be ignored.
 
 Second, to fully defend against attack 2, sessions are expired if no new ECDH
 keys are generated within a certain amount of time. This encourages keys to be
@@ -65,21 +56,22 @@ removed often at the cost of lost messages whose MAC keys cannot be revealed.
 For example, when Alice sets her session expiration time to be 2 hours, Bob must
 reply within that time and Alice must create a response to his reply (thus
 generating a new ECDH key) in order to reset the session expiration time for
-Alice. After two hours, Alice will delete all keys associated with this session.
-If she receives a message from Bob after two hours, she cannot decrypt the
-message and thus she cannot reveal the MAC key associated with it.
+Alice. If Alice does not generate a new ECDH key in two hours, Alice will delete
+all keys associated with this session. If she receives a message from Bob using
+the expired session, she cannot decrypt the message and thus she cannot reveal
+the MAC key associated with it.
 
-This session time is decided individually by each participant so it is possible
-for Alice to have an expiration time of two hours and Bob two weeks. In
-addition, for the first data message only, the receiver will start their
-expiration timer once the message is received. The reason why we use a timer and
-don't count events is that we are trying to determine whether something has not
-happened within a certain time frame. Thus, the timer can be compromised by
-clock errors. Some errors may cause the session to be deleted too early and
-result in undecryptable messages being received. Other errors may result in the
-clock not moving forward which would cause a session to never expire. To
-mitigate this, implementers should use secure and reliable clocks that cannot be
-manipulated by an attacker.
+This session time is decided individually by each participant or by the client
+they use so it is possible for Alice to have an expiration time of two hours and
+Bob two weeks. In addition, for the first data message only, the receiver will
+start their expiration timer once the message is received. The reason why we use
+a timer and don't count events is that we are trying to determine whether
+something has not happened within a certain time frame. Thus, the timer can be
+compromised by clock errors. Some errors may cause the session to be deleted too
+early and result in undecryptable messages being received. Other errors may
+result in the clock not moving forward which would cause a session to never
+expire. To mitigate this, implementers should use secure and reliable clocks
+that cannot be manipulated by an attacker.
 
 The OTRv4 spec will give implementers a guide to determine the amount of time
 for session expiration. It is difficult to dictate a good general expiration
@@ -90,9 +82,10 @@ or the user) should expect that replies are unreadable and undeniable after this
 time. For example, if the time is set to 15 minutes, messages received after 15
 minutes are unreadable and undeniable, but an attacker must compromise the local
 keys within 15 minutes in order to read and tamper with the last message sent
-before that time. If the time is set to one month, this allows the responder to
-reply within one month. However, if the device is compromised within one month,
-an attacker is able to read and tamper with the last message sent.
+before that time passes. If the time is set to one month, this allows the
+responder to reply within one month. However, if the device is compromised
+within one month, an attacker is able to read and tamper with the last message
+sent.
 
 #### Message formats
 
@@ -263,18 +256,13 @@ To validate a prekey message, use the following checks. If any of them fail, ign
 If one prekey message is received:
 
     If the prekey message is valid, decide whether to send a non-interactive
-    auth message based on whether the long term key in the use profile is
+    auth message based on whether the long term key in the user profile is
     trusted or not.
 
 If many prekey messages are received:
 
     Remove all invalid prekey messages.
     Remove all duplicate prekey messages in the list.
-    If multiple valid messages remain, check for invalid situations:
-        If multiple prekey messages exist with the same instance tag, the same
-        version, and the same long term keys in the user profile, then one of
-        the messages is invalid. The safest thing to do is to remove all the
-        prekeys associated with this situation.
     If one prekey message remains:
         Decide whether to send a message using this prekey message based on
         whether the long term key within the use profile is trusted or not.
@@ -283,10 +271,9 @@ If many prekey messages are received:
         messages, decide whether to only use messages that contain trusted long
         term keys.
         If there are several instance tags in the list of prekey messages,
-        decide whether to send one message per instance tag or to send a message
-        only to one instance tag. If there are multiple prekey messages per
-        instance tag, decide whether to send multiple messages to the same
-        instance tag.
+        decide which instance tags to send messages to.
+        If there are multiple prekey messages per instance tag, decide whether
+        to send multiple messages to the same instance tag.
 
 #### Decreased participation deniability for the initiator
 
