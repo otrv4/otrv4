@@ -203,8 +203,8 @@ not have participation deniability, but Bob, the receiver, does.
 
 Once a channel has been created with the DAKE, all data messages transmitted
 through this channel are confidential and have integrity. After a MAC key is
-used by a party to validate a received message, it is added to a list. Those
-MAC keys are revealed in the first message sent of the next ratchet. This allows
+used by a party to validate a received message, it is added to a list. Those MAC
+keys are revealed in the first message sent of the next ratchet. This allows
 forgeability of the data messages and consequent deniability of their contents.
 
 If key material used to encrypt a particular data message is compromised,
@@ -478,8 +478,8 @@ OTR4 public shared prekey (ED448-SHARED-PREKEY):
       RFC 8032.
 ```
 
-The public key and shared prekey are generated as follows (refer to
-RFC 8032 [\[10\]](#references), for more information on key generation):
+The public key and shared prekey are generated as follows (refer to RFC 8032
+[\[10\]](#references), for more information on key generation):
 
 ```
 The symmetric key (sym_key) is 57 bytes of cryptographically secure random data.
@@ -646,7 +646,7 @@ variable values are replaced:
   [receive a Data Message](#when-you-receive-a-data-message)
 * When you [send a TLV type 1 (Disconnected)](#sending-a-tlv-type-1-disconnected-message)
 * When you [receive a TLV type 1 (Disconnected)](#receiving-a-tlv-type-1-disconnected-message)
-* f
+* When you complete a non-interactive DAKE by
   [sending a Non-Interactive-Auth message](#sending-an-encrypted-message-to-an-offline-participant)
 * When you complete a non-interactive DAKE by
   [receiving and validating a Non-Interactive-Auth message](#receiving-a-non-interactive-auth-message)
@@ -1469,13 +1469,13 @@ It is created as follows:
 
 1. Create a user profile, as defined in
    [Creating a user profile](#creating-a-user-profile) section.
-2. Create the first one-time use prekey by generating the ephemeral
-   ECDH key pair, as defined in
+2. Create the first one-time use prekey by generating the ephemeral ECDH key
+   pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
    * secret key `y` (57 bytes).
    * public key `Y`.
-3. Create the second one-time use prekey by generating the ephemeral
-   DH key pair, as defined in
+3. Create the second one-time use prekey by generating the ephemeral DH key
+   pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
    * secret key `b` (80 bytes).
    * public key `B`.
@@ -1538,7 +1538,7 @@ A valid Non-Interactive-Auth message is generated as follows:
 4. [Validate the prekey message](#validating-a-prekey-message).
 5. Computes
    `κ = KDF_2(K_ecdh || ECDH(x, their_shared_prekey) || ECDH(x, Pkb) || k_dh)`.
-   This is needed for the generation of the Mixed shared secret.
+   This value is needed for the generation of the Mixed shared secret.
 6. Calculates the Auth MAC key `Mk = KDF_2(0x01 || κ)`.
 7. Compute `t = SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ) || their_shared_prekey`.
 8. Compute `sigma = Auth(Pka, ska, {Pkb, Pka, Y}, t)`. When computing `sigma`,
@@ -1569,7 +1569,7 @@ To verify a Non-Interactive-Auth message:
    See [Verification: Verify({A1, A2, A3}, sigma, m)](#verification-verifya1-a2-a3-sigma-m)
    for details.
 6. If present, extract the `encrypted_data_message`.
-7. If a message was attached, compute
+7. If an encrypted data message was attached, compute
    `tag = SHA3-256(MK, || t || encrypted_data_message)`. Otherwise, compute
    `tag = SHA3-256(MK, || t)`.
 8. Verify the Auth Mac:
@@ -1831,22 +1831,24 @@ In both cases:
    MKenc, MKmac = derive_enc_mac_keys(chain_s[i][j])
    ```
 
-  * When creating a Non-Interactive-Auth message, construct a `nonce` from the
-    first 24 bytes of the `c` variable generated when constructing `sigma`. See
+  * When creating a Non-Interactive-Auth message, if an encrypted message
+    will be attached to it, construct a `nonce` from the first 24 bytes of the
+    `c` variable generated when creating `sigma`. See
     [SNIZKPK Authentication](#snizkpk-authentication) section. When creating a
-    regular data message, generate a new random 24 bytes value to be the
-    `nonce`.
+    regular data message (interactive or non-interactive), generate a new random
+    24 bytes value to be the `nonce`.
   * Use the encryption key to encrypt the message:
 
    ```
    Encrypted_message = XSalsa20_Enc(MKenc, nonce, m)
    ```
 
-  * When creating a Non-Interactive-Auth message, do not create a MAC tag. This
-    is not necessary since the MAC tag created in the non-interactive DAKE
-    (`Auth MAC`) already authentifies the data message. In any other case, use
-    the MAC key to create a MAC tag. MAC all the sections of the data message
-    from the protocol version to the encrypted message.
+  * When creating a Non-Interactive-Auth message and when an encrypted
+    data message has been attached to it, do not create a MAC tag. This is not
+    necessary since the MAC tag created in the non-interactive DAKE (`Auth MAC`)
+    already authentifies this first data message. In any other case, use the MAC
+    key to create a MAC tag. MAC all the sections of the data message from the
+    protocol version to the encrypted message.
 
    ```
    Authenticator = KDF_2(MKmac || Data_message_sections)
@@ -1867,7 +1869,8 @@ encryption and MAC keys.
   ```
 
 * Use the MAC key (`MKmac`) to verify the MAC of the message. In the case of a
-  Non-Interactive-Auth message, verify it with the `Auth Mac` as defined in the
+  Non-Interactive-Auth message and when an encrypted data message has been
+  attached to it, verify it with the `Auth Mac` as defined in the
   [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 
   If the verification fails:
@@ -2007,10 +2010,11 @@ required and if it will advertise OTR support.
 ```
 START
 
-  This is the initial state before an OTR conversation starts. The only way to
-  enter this state is for the participant to explicitly request it via some UI
-  operation. Messages sent in this state are plaintext messages. If a TLV type 1
-  (Disconnected) message is sent in another state, transition to this state.
+  This is the initial state before an OTR conversation starts. For the
+  participant, the only way to enter this state is for the participant to
+  explicitly request it via some UI operation. Messages sent in this state are
+  plaintext messages. If a TLV type 1 (Disconnected) message is sent in another
+  state, transition to this state.
 
 WAITING_AUTH_R
 
