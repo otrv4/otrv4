@@ -848,14 +848,14 @@ this channel.
 To defend against an attacker that captures some messages and compromises their
 ephemeral secrets, sessions should be expired if no new ECDH keys are generated
 within a certain amount of time. Expiration of the session means that when a
-time has happened, all keys associated with the session are securely deleted and
+time has happened, all keys associated with that session are securely deleted
 and the protocol state machine trasitions to `START` state.
 
 A session is the period when two parties engage in an otr-conversation with each
 other. It starts with the first message of the DAKE and ends when a party
 requests to close its private connection (by, for example, sending a TLV type 1
-(Disconnected) Message) or when the session expiration time has happened. Before
-ending the session, its keys should have been securely deleted. This means:
+(Disconnected) Message) or when the session expiration time has occured. Before
+closing the session, the keys should be securely deleted. This means:
 
 1. Securely delete the root key and all chain keys.
 2. Securely delete the ECDH keys, DH keys and brace key.
