@@ -845,18 +845,28 @@ this channel.
 
 ### Session expiration
 
-// TODO: define what is session and what should be deleted.
-// TODO: define a session expiration time
-
 To defend against an attacker that captures some messages and compromises their
 ephemeral secrets, sessions should be expired if no new ECDH keys are generated
-within a certain amount of time. Expiration of the session means that all keys
-associated with the session are securely deleted.
+within a certain amount of time. Expiration of the session means that when a
+time has happened, all keys associated with the session are securely deleted and
+and the protocol state machine trasitions to `START` state.
+
+A session is the period when two parties engage in an otr-conversation with each
+other. It starts with the first message of the DAKE and ends when a party
+requests to close its private connection (by, for example, sending a TLV type 1
+(Disconnected) Message) or when the session expiration time has happened. Before
+ending the session, its keys should have been securely deleted. This means:
+
+1. Securely delete the root key and all chain keys.
+2. Securely delete the ECDH keys, DH keys and brace key.
+3. Securely delete `K`.
+5. Securely delete the `ssid` and any `old_mac_keys` that remain unrevealed.
 
 This session expiration time is decided individually by each party so it is
 possible for a party to have an expiration time of two hours and another party
 to set it to two weeks. For the first data message, the session expiration time
-is set by the receiver once this message is received.
+is set by the receiver once this message is received. We reccommend setting it
+to two weeks.
 
 This session expiration time is set up as a timer. This timer can be compromised
 by clock errors. Some errors may cause the session to be deleted too early and
