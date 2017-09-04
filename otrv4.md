@@ -849,12 +849,12 @@ To defend against an attacker that captures some messages and compromises their
 ephemeral secrets, sessions should be expired if no new ECDH keys are generated
 within a certain amount of time. Expiration of the session means that when a
 time has happened, all keys associated with that session are securely deleted
-and the protocol state machine trasitions to `START` state.
+and the protocol state machine transitions to `START` state.
 
 A session is the period when two parties engage in an otr-conversation with each
 other. It starts with the first message of the DAKE and ends when a party
 requests to close its private connection (by, for example, sending a TLV type 1
-(Disconnected) Message) or when the session expiration time has occured. Before
+(Disconnected) Message) or when the session expiration time has occurred. Before
 closing the session, the keys should be securely deleted. This means:
 
 1. Securely delete the root key and all chain keys.
@@ -865,14 +865,14 @@ closing the session, the keys should be securely deleted. This means:
 This session expiration time is decided individually by each party so it is
 possible for a party to have an expiration time of two hours and another party
 to set it to two weeks. For the first data message, the session expiration time
-is set by the receiver once this message is received. We reccommend setting it
+is set by the receiver once this message is received. We recommend setting it
 to two weeks.
 
 This session expiration time is set up as a timer. This timer can be compromised
 by clock errors. Some errors may cause the session to be deleted too early and
 result in undecryptable messages being received. Other errors may result in the
 clock not moving forward which would cause a session to never expire. To
-mitigate this, implementers should use secure and reliable clocks that can't be
+mitigate this, implementors should use secure and reliable clocks that can't be
 manipulated by an attacker.
 
 The session expiration time encourages keys to be deleted often at the cost of
