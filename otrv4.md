@@ -1051,7 +1051,7 @@ a context 'c', which is empty, and a message 'm'.
 
    6.  Form the signature of the concatenation of 'nonce_point' (57 bytes) and
        the little-endian encoding of 'challenge_scalar' (57 bytes, the ten most
-       significant bits are always zero). 'challenge_scalar' should be enconded
+       significant bits are always zero). 'challenge_scalar' should be encoded
        as a SCALAR.
 ```
 
@@ -1521,7 +1521,7 @@ To validate a prekey message:
 ### Non-Interactive-Auth Message
 
 This message terminates the non-interactive DAKE and might also contain an
-encrypted data message. This is highly reccommened.
+encrypted data message. This is highly recommended.
 
 A valid Non-Interactive-Auth message is generated as follows:
 
