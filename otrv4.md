@@ -1624,7 +1624,7 @@ Sigma (SNIZKPK)
 Encrypted message (DATA)
   Using the appropriate encryption key (see 'When you send a Data Message'
   section) derived from the sender's and recipient's public keys (with the
-  keyids given in this message), perform a XSalsa20 encryption of the message.
+  keyids given in this message), perform an XSalsa20 encryption of the message.
   The nonce used for this operation is also included in the header of the data
   message packet.
 ```
@@ -1782,7 +1782,7 @@ Nonce (NONCE)
 Encrypted message (DATA)
   Using the appropriate encryption key (see below) derived from the
   sender's and recipient's DH public keys (with the keyids given in this
-  message), perform a XSalsa20 encryption of the message. The nonce used for
+  message), perform an XSalsa20 encryption of the message. The nonce used for
   this operation is also included in the header of the data message
   packet.
 
