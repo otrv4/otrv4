@@ -105,7 +105,7 @@ existing messaging protocol, like XMPP.
 - The cryptographic primitives and protocols have been updated:
   - Deniable authenticated key exchanges using DAKEZ and XZDH [\[1\]](#references).
     DAKEZ corresponds to conversations when both parties are online
-    (interactive) and XZDH to conversations when one person is offline
+    (interactive) and XZDH to conversations when one party is offline
     (non-interactive).
   - Key management using the Double Ratchet Algorithm [\[2\]](#references).
   - Upgraded SHA-1 and SHA-2 to SHA-3.
@@ -3056,7 +3056,9 @@ If authstate is `AUTHSTATE_AWAITING_SIG`:
 If the instance tag in the message is not the instance tag you are currently
 using, ignore the message.
 
-If the message is version 3 and version 3 is not allowed, ignore this message.
+If the message is version 3 and version 3 is not allowed:
+
+  * Ignore this message.
 
 Otherwise:
 
@@ -3090,11 +3092,13 @@ Otherwise:
 
 If authstate is `AUTHSTATE_AWAITING_SIG`:
 
-  * Decrypt the encrypted signature, and verify the signature and the MACs. If everything checks out:
+  * Decrypt the encrypted signature, and verify the signature and the MACs. If
+    everything checks out:
 
     * Transition authstate to `AUTHSTATE_NONE`.
     * Transition msgstate to `MSGSTATE_ENCRYPTED`.
-    * If there is a recent stored message, encrypt it and send it as a Data Message.
+    * If there is a recent stored message, encrypt it and send it as a Data
+      Message.
 
   * Otherwise, ignore the message.
 
@@ -3107,7 +3111,9 @@ If authstate is `AUTHSTATE_NONE`, `AUTHSTATE_AWAITING_DHKEY` or `AUTHSTATE_AWAIT
 If the instance tag in the message is not the instance tag you are currently
 using, ignore the message.
 
-If version 3 is not allowed, ignore this message.
+If version 3 is not allowed:
+
+   * Ignore this message.
 
 Otherwise:
 
@@ -3115,14 +3121,18 @@ If authstate is `AUTHSTATE_AWAITING_REVEALSIG`:
 
   * Use the received value of r to decrypt the value of gx received in the D-H
     Commit Message, and verify the hash therein.
-  * Decrypt the encrypted signature, and verify the signature and the MACs. If everything checks out:
+  * Decrypt the encrypted signature, and verify the signature and the MACs. If
+    everything checks out:
 
     * Reply with a Signature Message.
     * Transition authstate to `AUTHSTATE_NONE`.
     * Transition msgstate to `MSGSTATE_ENCRYPTED`.
-    * If there is a recent stored message, encrypt it and send it as a Data Message.
+    * If there is a recent stored message, encrypt it and send it as a Data
+      Message.
 
-  * Otherwise, ignore the message.
+  * Otherwise:
+
+    * Ignore the message.
 
 If authstate is `AUTHSTATE_NONE`, `AUTHSTATE_AWAITING_DHKEY` or `AUTHSTATE_AWAITING_SIG`:
 
@@ -3150,10 +3160,10 @@ signature.
 
 #### Sending a TLV type 1 (Disconnected) Message
 
-If the user requests to close its private connection, you may send
-a message (possibly with an empty human-readable part) containing a record
-with TLV type 1 just before you discard the session keys. You should then
-transition to `MSGSTATE_PLAINTEXT`.
+If the user requests to close its private connection, you may send a message
+(possibly with an empty human-readable part) containing a record with TLV type 1
+just before you discard the session keys. You should then transition to
+`MSGSTATE_PLAINTEXT`.
 
 ### OTRv3 Protocol State Machine
 
