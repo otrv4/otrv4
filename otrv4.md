@@ -1626,7 +1626,9 @@ Encrypted message (DATA)
   section) derived from the sender's and recipient's public keys (with the
   keyids given in this message), perform an XSalsa20 encryption of the message.
   The nonce used for this operation is also included in the header of the data
-  message packet.
+  message packet. XSalsa20 is a stream cipher and so no padding is required. If
+  you *want* to do message padding (to disguise the length of your message), use
+  the Padding TLV of type 0.
 ```
 
 ### Publishing Prekeys Messages
