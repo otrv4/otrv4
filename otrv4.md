@@ -103,7 +103,9 @@ existing messaging protocol, like XMPP.
 - Additional protection against transcript decryption in the case of ECC
   compromise.
 - The cryptographic primitives and protocols have been updated:
-  - Deniable authenticated key exchanges using DAKEZ and XZDH [\[1\]](#references).
+  - Deniable authenticated key exchanges (DAKE) using "DAKE with Zero Knowledge"
+    (DAKEZ) and "Extended Zero-knowledge Diffie-Hellman" (XZDH)
+    [\[1\]](#references).
     DAKEZ corresponds to conversations when both parties are online
     (interactive) and XZDH to conversations when one party is offline
     (non-interactive).
