@@ -138,8 +138,8 @@ Exchanges Data Messages             <------------>  Exchanges Data Messages
 ```
 
 The conversation can begin after one participant requests a conversation. This
-includes an advertisement of which versions they support. If the other
-participant supports OTRv4, an interactive DAKE can be used to establish a
+includes an advertisement of which versions the participant supports. If the
+other participant supports OTRv4, an interactive DAKE can be used to establish a
 secure channel. Encrypted messages are then exchanged in this secure channel
 with forward secrecy.
 
@@ -169,7 +169,7 @@ like Alice, to send him encrypted messages while he is offline.
 ## Assumptions
 
 Messages in a conversation can be exchanged over an insecure channel, where an
-attacker can eavesdrop or interfere with the encrypted messages.
+attacker can eavesdrop or interfere with the messages.
 
 The network model provides in-order delivery of messages therefore some
 messages may not be delivered.
@@ -183,7 +183,7 @@ OTRv4 does not take advantage of quantum resistant algorithms for several
 reasons. Mainly, OTRv4 aims to be a protocol that is easy to implement in
 today's environments and within a year. Current quantum resistant algorithms and
 their respective implementations are not ready enough to allow for this
-implementation time frame. As a result, the protections mentioned in the
+implementation time frame. As a result, the properties mentioned in the
 following paragraphs only apply to non-quantum adversaries.
 
 The only exception is the usage of a "brace key" to provide some
@@ -203,11 +203,12 @@ provides deniability for both participants in the interactive DAKE.
 In the non-interactive DAKE, the initializer (Alice, in the above overview) does
 not have participation deniability, but Bob, the receiver, does.
 
-Once a channel has been created with the DAKE, all data messages transmitted
-through this channel are confidential and have integrity. After a MAC key is
-used by a party to validate a received message, it is added to a list. Those MAC
-keys are revealed in the first message sent of the next ratchet. This allows
-forgeability of the data messages and consequent deniability of their contents.
+Once a conversation has been established with the DAKE, all data messages
+transmitted in it are confidential and retain their integrity. After a MAC
+key is used by a party to validate a received message, it is added to a list.
+Those MAC keys are revealed in the first message sent of the next ratchet. This
+allows forgeability of the data messages and consequent deniability of their
+contents.
 
 If key material used to encrypt a particular data message is compromised,
 previous messages are protected. Additionally, future messages are protected by
@@ -229,8 +230,9 @@ multiplication of an elliptic curve point `B` with a scalar `a` yields a new
 point: `C = B * a`.
 
 The concatenation of byte sequences `I` and `J` is `I || J`. In this case, `I`
-and `J` represent a fixed-length byte sequence encoding the respective values.
-See the section on [Data Types](#data-types) for encoding and decoding details.
+and `J` represent a fixed-length byte sequence encoding of the respective
+values. See the section on [Data Types](#data-types) for encoding and decoding
+details.
 
 A scalar modulo `q` is a field element, and should be encoded and decoded
 as a SCALAR type, which is defined in the [Data Types](#data-types) section.
@@ -397,7 +399,7 @@ In order to encode and decode `POINT` and `SCALAR` types, refer to the
 
 ### Encoding and Decoding
 
-We follow the encoding and decoding schemes specified in RFC 8032 [\[10\]](#references).
+This describes the encoding and decoding schemes specified in RFC 8032 [\[10\]](#references).
 
 #### Scalar
 
