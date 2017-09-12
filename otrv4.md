@@ -507,9 +507,8 @@ for the public key. The full OTRv4 fingerprint is calculated by taking the
 SHA3-512 hash of the byte-level representation of the public key. To
 authenticate a long-term key pair, the [Socialist Millionaire's
 Protocol](#socialist-millionaires-protocol-smp) and manual fingerprint
-comparison may be used. For the first, the full fingerprint is included in the
-authentication. To make manual comparison easier, two versions of the
-fingerprint may be used:
+comparison may be used. To make the comparison easier, two versions of the
+fingerprint can be used:
 
 * Use of the first 56 bytes from the `SHA3-512(byte(H))` (224-bit security
   level)
@@ -802,9 +801,7 @@ To rotate the brace key:
       `their_dh`.
     * Calculate `k_dh = DH(our_dh.secret, their_dh.public)`.
     * Calculate a `brace_key = KDF_1(k_dh)`.
-    * Securely delete `our_dh.secret` (this should only be deleted after
-      calculating the new brace key when receiving as new keys will be generated
-      on the next DH rotation).
+    * Securely delete `our_dh.secret`.
 
   Otherwise:
 
