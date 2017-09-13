@@ -574,10 +574,10 @@ Type 8: Extra symmetric key
 Both the interactive and non-interactive DAKE must authenticate their contexts
 to prevent attacks that rebind the DAKE transcript into different contexts. If
 the higher-level protocol ascribes some property to the connection, the DAKE
-exchange should verify this property. Given a shared session state information
-`phi` (e.g., a session identifier) associated with the higher-level context
-(e.g., XMPP), the DAKE authenticates that both parties share the same value for
-`phi` (Φ).
+exchange should verify this property. A session is created when a new OTRv4
+conversation begins. Given a shared session state information `phi` (e.g., a
+session identifier) associated with the higher-level context (e.g., XMPP), the
+DAKE authenticates that both parties share the same value for `phi` (Φ).
 
 Therefore, the shared session state (Φ) is any session-specific protocol state
 available to both parties in the higher-level protocol. For example, in XMPP, it
@@ -845,44 +845,54 @@ this channel.
 
 ### Session expiration
 
-To defend against an attacker that captures some messages and compromises their
-ephemeral secrets, sessions should be expired if no new ECDH keys are generated
-within a certain amount of time. Expiration of the session means that when a
-time has happened, all keys associated with that session are securely deleted
-and the protocol state machine transitions to `START` state.
+An attacker may capture some messages with the plan to compromise their
+ephemeral secrets at a later time. To mitigate against this, message keys
+should be deleted regularly. OTRv4 implements this by detecting whether a new
+ECDH key has been generated within a certain amount of time. If it hasn't, then
+the session is expired.
 
-A session is the period when two parties engage in an otr-conversation with each
-other. It starts with the first message of the DAKE and ends when a party
-requests to close its private connection (by, for example, sending a TLV type 1
-(Disconnected) Message) or when the session expiration time has occurred. Before
-closing the session, the keys should be securely deleted. This means:
+To expire the session:
+1. Send a TLV type 1 (Disconnected) Message
+2. Securely delete all keys and data associated with the conversation. This includes:
+   a. The root key and all chain keys.
+   b. The ECDH keys, DH keys and brace key.
+   c. `K`.
+   c. The `ssid` and any `old_mac_keys` that remain unrevealed.
+3. Transition the protocol state machine to `START`
 
-1. Securely delete the root key and all chain keys.
-2. Securely delete the ECDH keys, DH keys and brace key.
-3. Securely delete `K`.
-5. Securely delete the `ssid` and any `old_mac_keys` that remain unrevealed.
+The session expiration time is decided individually by each party so it is
+possible for one person to use an expiration time of two hours and the other
+party to use two weeks. The client implementer should decide what the
+appropriate expiration time is for their particular circumstance.
 
-This session expiration time is decided individually by each party so it is
-possible for a party to have an expiration time of two hours and another party
-to set it to two weeks. For the first data message, the session expiration time
-is set by the receiver once this message is received. We recommend setting it
-to two weeks.
+The session expiration encourages keys to be deleted often at the cost of
+having lost messages whose MAC keys cannot be revealed. For example, if Alice
+sets her session expiration time to be 2 hours, in order to reset Alice's
+session expiration timer Bob must create a reply and Alice must create a
+response to this reply. If this does not happen within two hours, Alice will
+expire her session and delete all keys associated with this conversation. If
+she receives a message from Bob after two hours, she cannot decrypt the message
+and thus she cannot reveal the MAC key associated with it.
 
-This session expiration time is set up as a timer. This timer can be compromised
-by clock errors. Some errors may cause the session to be deleted too early and
-result in undecryptable messages being received. Other errors may result in the
-clock not moving forward which would cause a session to never expire. To
-mitigate this, implementors should use secure and reliable clocks that can't be
-manipulated by an attacker.
+It is also possible for the heartbeat messages to keep a session from expiring.
+Sticking with the above example of Alice's 2 hour session expiration time, Bob
+or Bob's client may send a heartbeat message every minute. In addition, Alice's
+client may send a heartbeat every five minutes. Thus, as long as both Bob and
+Alice's clients are online and sending heartbeat messages, Alice's session will
+not expire. But if Bob's client turns off or goes offline for at least two
+hours, Alice's session will expire.
 
-The session expiration time encourages keys to be deleted often at the cost of
-having lost messages whose MAC keys cannot be revealed. For example, when Alice
-sets her session expiration time to be 2 hours, Bob must reply within that time
-frame. In order to reset Alices' session expiration time, Bob must reply and
-Alice must create a response to this reply. After two hours, Alice will delete
-all keys associated with this session. If she receives a message from Bob after
-two hours, she cannot decrypt the message and thus she cannot reveal the MAC key
-associated with it.
+The session expiration timer begins at different times for the sender and the
+receiver of the first data message in a conversation. The sender begins their
+timer when they calculate their first ECDH message. The receiver begins their
+timer when they receive the first data message.
+
+Since the session expiration uses a timer, it can be compromised by clock
+errors. Some errors may cause the session to be deleted too early and result in
+undecryptable messages being received. Other errors may result in the clock not
+moving forward which would cause a session to never expire. To mitigate this,
+implementers should use secure and reliable clocks that can't be manipulated by
+an attacker.
 
 ## User Profile
 
