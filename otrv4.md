@@ -2188,7 +2188,6 @@ If the state is `WAITING_AUTH_R`:
   * If validation succeeds:
     * Compare the `X` (as a 57-byte unsigned little-endian value) you sent in
       your Identity message with the value from the message you received.
-    // TODO: this case might be unreachable
     * If yours is the lower hash value:
       * Ignore the received Identity message, but resend your Identity message.
     * Otherwise:

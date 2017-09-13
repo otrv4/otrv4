@@ -27,8 +27,7 @@ Primarily, there are two attacks that we want to mitigate:
 1. Initiator uploads a prekey. Responder replies, but the adversary intercepts
    and drops the message. The adversary compromises Initiator's prekey secret,
    and Initiator's identity secret key. The adversary can now retroactively
-   decrypt the captured initial message. // TODO: responder first asks for this
-   prekey?
+   decrypt the captured initial message.
 
 2. Initiator and Responder complete an exchange and engage in a conversation. At
    some point, the adversary captures and drops some messages to (for example)
