@@ -474,8 +474,7 @@ OTRv4's public shared prekey is defined as follows:
 OTR4 public shared prekey (ED448-SHARED-PREKEY):
 
   SharedPreKey type (SHORT)
-    Ed448 shared prekeys have type 0x0010
-    // TODO: what is the type? does this need a type?
+    Ed448 shared prekeys have type 0x0011
 
     D (POINT)
       D is the Ed448 shared prekey generated the same way as the public key in
