@@ -110,7 +110,7 @@ existing messaging protocol, such as XMPP.
     (interactive) and XZDH to conversations when one party is offline
     (non-interactive).
   - Key management using the Double Ratchet Algorithm [\[2\]](#references).
-  - Upgraded SHA-1 and SHA-2 to SHA-3.
+  - Upgraded SHA-1 and SHA-2 to SHAKE.
   - Switched from AES to XSalsa20 [\[3\]](#references).
 - Explicit instructions for producing forged transcripts using the same
   functions used to conduct honest conversations.
@@ -503,15 +503,12 @@ The secret scalar 'sk' is defined as SECRET_SCALAR.
 
 Public keys have fingerprints, which are hex strings that serve as identifiers
 for the public key. The full OTRv4 fingerprint is calculated by taking the
-SHA3-512 hash of the byte-level representation of the public key. To
+SHAKE-256 hash of the byte-level representation of the public key. To
 authenticate a long-term key pair, the [Socialist Millionaire's
 Protocol](#socialist-millionaires-protocol-smp) and manual fingerprint
-comparison may be used. To make the comparison easier, two versions of the
-fingerprint can be used:
+comparison may be used. The fingerprint is generated as:
 
-* Use of the first 56 bytes from the `SHA3-512(byte(H))` (224-bit security
-  level)
-* Use of the first 32 bytes from the `SHA3-512(byte(H))` (128-bit security
+* Use of the first 56 bytes from the `SHAKE-256(byte(H))` (256-bit security
   level)
 
 ### TLV Record Types
@@ -630,7 +627,7 @@ Key variables:
   'their_ecdh': their ECDH ephemeral public key.
   'our_dh': our DH ephemeral key pair.
   'their_dh': their DH ephemeral public key.
-  'brace_key': the SHA3-256 of the DH shared secret previously computed.
+  'brace_key': the SHAKE-256 of the DH shared secret previously computed.
   'mac_keys_to_reveal': the MAC keys to be revealed in the first data message
     sent of the next ratchet.
 ```
@@ -658,8 +655,8 @@ variable values are replaced:
 The following key derivation functions are used:
 
 ```
-KDF_1(x) = SHA3-256("OTR4" || x)
-KDF_2(x) = SHA3-512("OTR4" || x)
+KDF_1(x) = take_first_32_bytes(SHAKE-256("OTR4" || x))
+KDF_2(x) = take_first_64_bytes(SHAKE-256("OTR4" || x))
 ```
 
 ### Generating ECDH and DH keys
@@ -833,7 +830,7 @@ When sending or receiving data messages, you must calculate the message keys:
 
 ```
 derive_enc_mac_keys(chain_key):
-  MKenc = take_first_256_bits(KDF_2(0x01 || chain_key))
+  MKenc = KDF_1(0x01 || chain_key)
   MKmac = KDF_2(0x02 || chain_key)
   return MKenc, MKmac
 ```
@@ -1282,7 +1279,7 @@ A valid Auth-R message is generated as follows:
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
   * secret key `a` (80 bytes).
   * public key `A`.
-4. Compute `t = 0x0 || SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ)`.
+4. Compute `t = 0x0 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(Φ)`.
    Φ is the shared session state as mention on the
    [Shared session state](#shared-session-state) section.
 5. Compute `sigma = Auth(Pka, ska, {Pkb, Pka, Y}, t)`.
@@ -1298,7 +1295,7 @@ To verify an Auth-R message:
 
 1. Check that the receiver's instance tag matches your sender's instance tag.
 2. Validate the user profile and extract `Pka` from it.
-3. Compute `t = 0x0 || SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ)`.
+3. Compute `t = 0x0 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(Φ)`.
    Φ is the shared session state as mention on the
    [Shared session state](#shared-session-state) section.
 4. Verify the `sigma` with [SNIZKPK Authentication](#snizkpk-authentication),
@@ -1334,7 +1331,7 @@ authentication `sigma`.
 A valid Auth-I message is generated as follows:
 
 1. Check that the receiver's instance tag matches your sender's instance tag.
-1. Compute `t = 0x1 || SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ)`.
+1. Compute `t = 0x1 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(Φ)`.
    Φ is the shared session state as mention on the
    [Shared session state](#shared-session-state) section.
 2. Compute `sigma = Auth(Pkb, skb, {Pkb, Pka, X}, t)`.
@@ -1343,7 +1340,7 @@ A valid Auth-I message is generated as follows:
 To verify the Auth-I message:
 
 1. Check that the receiver's instance tag matches your sender's instance tag.
-2. Compute `t = 0x1 || SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ)`.
+2. Compute `t = 0x1 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(Φ)`.
    Φ is the shared session state as mention on the
    [Shared session state](#shared-session-state) section.
 3. Verify the `sigma` as defined on
@@ -1552,7 +1549,7 @@ A valid Non-Interactive-Auth message is generated as follows:
    `κ = KDF_2(K_ecdh || ECDH(x, their_shared_prekey) || ECDH(x, Pkb) || k_dh)`.
    This value is needed for the generation of the Mixed shared secret.
 6. Calculates the Auth MAC key `Mk = KDF_2(0x01 || κ)`.
-7. Compute `t = SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ) || their_shared_prekey`.
+7. Compute `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(Φ) || their_shared_prekey`.
 8. Compute `sigma = Auth(Pka, ska, {Pkb, Pka, Y}, t)`. When computing `sigma`,
    keep the first 192 bits of the generated `c` value to be used as a `nonce` in
    the next step. Refer to [SNIZKPK Authentication](#snizkpk-authentication)
@@ -1563,8 +1560,8 @@ A valid Non-Interactive-Auth message is generated as follows:
    encrypted message, using the nonce set in the previous step. This will be
    referred as `encrypted_data_message`.
 10. If an encrypted message is attached, compute
-    `Auth MAC = SHA3-256(Mk || t || encrypted_data_message)`. Otherwise, compute
-    `Auth MAC = SHA3-256(Mk || t)`.
+    `Auth MAC = KDF_1(Mk || t || encrypted_data_message)`. Otherwise, compute
+    `Auth MAC = KDF_1(Mk || t)`.
 11. Generate a 4-byte instance tag to use as the sender's instance tag.
     Additional messages in this conversation will continue to use this tag as
     the sender's instance tag. Also, this tag is used to filter future received
@@ -1576,14 +1573,14 @@ To verify a Non-Interactive-Auth message:
 1. Check that the receiver's instance tag matches your sender's instance tag.
 2. Validate the user profile, and extract `Pka` from it.
 3. Verify that both ECDH and DH one-time use prekeys remain unused.
-4. Compute `t = SHA3-512(Bobs_User_Profile) || SHA3-512(Alices_User_Profile) || Y || X || B || A || SHA3-512(Φ) || our_shared_prekey.public`.
+4. Compute `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(Φ) || our_shared_prekey.public`.
 5. Verify the `sigma` with [SNIZKPK Authentication](#snizkpk-authentication).
    See [Verification: Verify({A1, A2, A3}, sigma, m)](#verification-verifya1-a2-a3-sigma-m)
    for details.
 6. If present, extract the `encrypted_data_message`.
 7. If an encrypted data message was attached, compute
-   `tag = SHA3-256(MK, || t || encrypted_data_message)`. Otherwise, compute
-   `tag = SHA3-256(MK, || t)`.
+   `tag = KDF_1(MK, || t || encrypted_data_message)`. Otherwise, compute
+   `tag = KDF_1(MK, || t)`.
 8. Verify the Auth Mac:
    * Extract the Auth MAC from the Non-Interactive-Auth message and verify that
      `tag` is equal to the Auth MAC. If it is not, ignore the
@@ -1627,7 +1624,7 @@ A (MPI)
   this is NOT a POINT.
 
 Auth MAC (MAC)
-  The SHA3 MAC with the appropriate MAC key (see above) for the message of the
+  The MAC with the appropriate MAC key (see above) of the message of the
   SNIZKPK.
 
 Sigma (SNIZKPK)
@@ -1801,7 +1798,7 @@ Encrypted message (DATA)
   packet.
 
 Authenticator (MAC)
-  The SHA3 MAC with the appropriate MAC key (see below) for everything:
+  The MAC with the appropriate MAC key (see below) of everything:
   from the protocol version to the end of the encrypted message.
 
 Old MAC keys to be revealed (DATA)
@@ -2422,10 +2419,9 @@ OTRv4 makes a few changes to SMP:
      1506189835876003536878655418784733982303233503462500531545062832660)
   ```
 
-  * OTRv4 creates fingerprints using SHA3-512. As stated previously, two
-    versions of the fingerprint can be used:
-      * Use of the first 56 bytes from the `SHA3-512(byte(H))`
-      * Use of the first 32 bytes from the `SHA3-512(byte(H))`
+  * OTRv4 creates fingerprints using SHAKE-256. The fingerprint is generated as:
+
+      * Use of the first 56 bytes from the `SHAKE-512(byte(H))`
 
   * SMP in OTRv4 uses all of the
     [type/length/value (TLV) record types](#tlv-record-types) as OTRv3, except
@@ -2502,7 +2498,7 @@ Assuming that Alice begins the exchange:
 * Computes `Rab = Rb * a3`.
 * Checks whether `Rab == Pa - Pb`.
 
-If everything is done correctly, then `Rab` should hold the value of 
+If everything is done correctly, then `Rab` should hold the value of
 `(Pa - Pb) * ((G2 * a3 * b3) * (x - y))`.  This test will only succeed if the secret
 information provided by each participant are equal (essentially `x == y`).
 Further, since `G2 * a3 * b3` is a random number not known to any party, if `x`
@@ -2533,18 +2529,18 @@ User-specified secret
   The input string given by the user at runtime.
 ```
 
-The SHA3-512 hash of the above is taken, and the digest becomes the SMP secret
-value (`x` or `y`) to be used in SMP. The additional fields ensure that not
-only do both parties know the same secret input string, but no man-in-the-
-middle is capable of reading their communication either.
+The first 64 bytes of a SHAKE-256 hash of the above is taken, and the digest
+becomes the SMP secret value (`x` or `y`) to be used in SMP. The additional
+fields ensure that not only do both parties know the same secret input string,
+but no man-in-the-middle is capable of reading their communication either.
 
 ### SMP Hash function
 
-There are many places where a SHA3-512 hash is taken of an integer followed by
-other values. This is defined as `HashToScalar(i || v)` where `i` is an integer
-used to distinguish the calls to the hash function and `v` is some value.
-Hashing is done in this way to prevent Alice from replaying Bob's zero
-knowledge proofs or vice versa.
+There are many places where the first 64 bytes of a SHAKE-256 hash are taken of
+an integer followed by other values. This is defined as `HashToScalar(i || v)`
+where `i` is an integer used to distinguish the calls to the hash function and
+`v` is some value. Hashing is done in this way to prevent Alice from replaying
+Bob's zero knowledge proofs or vice versa.
 
 ### SMP message 1
 
