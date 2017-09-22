@@ -2,7 +2,7 @@
 
 OTR version 4 (OTRv4) provides a deniable authenticated key exchange and better
 forward secrecy through the use of double ratcheting. OTR works on top of an
-existing messaging protocol, like XMPP.
+existing messaging protocol, such as XMPP.
 
 ## Table of Contents
 
@@ -163,7 +163,7 @@ Exchanges Data Messages <---------------------------------->  Exchanges Data Mes
 
 In this conversation flow, Alice first retrieves a Prekey message from a prekey
 server. Prior to the start of the conversation, this prekey message was uploaded
-by Bob's client to a server. This was done in order to allow other participants,
+by Bob's client to a server. This is done in order to allow other participants,
 like Alice, to send him encrypted messages while he is offline.
 
 ## Assumptions
@@ -171,7 +171,7 @@ like Alice, to send him encrypted messages while he is offline.
 Messages in a conversation can be exchanged over an insecure channel, where an
 attacker can eavesdrop or interfere with the messages.
 
-The network model provides in-order delivery of messages therefore some
+The network model provides in-order delivery of messages, however some
 messages may not be delivered.
 
 OTRv4 does not protect against an active attacker performing Denial of Service
@@ -179,10 +179,10 @@ attacks.
 
 ## Security Properties
 
-OTRv4 does not take advantage of quantum resistant algorithms for several
-reasons. Mainly, OTRv4 aims to be a protocol that is easy to implement in
-today's environments and within a year. Current quantum resistant algorithms and
-their respective implementations are not ready enough to allow for this
+OTRv4 does not take advantage of quantum resistant algorithms. There are several
+reasons for this. Mainly, OTRv4 aims to be a protocol that is easy to implement
+in today's environments and within a year. Current quantum resistant algorithms
+and their respective implementations are not ready enough to allow for this
 implementation time frame. As a result, the properties mentioned in the
 following paragraphs only apply to non-quantum adversaries.
 
@@ -279,7 +279,7 @@ Non-square element in Z_p (d)
 To verify that a point (`X = x, y`) is on curve Ed448-Goldilocks:
 
 1. Check that `X` is not equal to the identity element (`I`).
-2. Check that `X` lies on the curve: `x` and `y` are on the interval
+2. Check that `X` lies on the curve: `x` and `y` are on in interval
    `[0, q - 1]`
 3. Check that `q * X = I`.
 
@@ -489,7 +489,7 @@ The symmetric key (sym_key) is 57 bytes of cryptographically secure random data.
 The secret scalar 'sk' is defined as SECRET_SCALAR.
 
 1. Hash the 57-byte symmetric key ('sym_key') using SHAKE-256(sym_key). Store
-   the digest in a 114-byte large buffer.  Only the lower 57 bytes (denoted 'h')
+   the digest in a 114-byte buffer.  Only the lower 57 bytes (denoted 'h')
    are used for generating the public key.
 2. Prune the buffer 'h': the two least significant bits of the first
    byte are cleared, all eight bits of the last byte are cleared, and the
@@ -995,7 +995,8 @@ only supports version 4 will have the 1-byte version string "4". Thus, a version
 string has varying size, and it is represented as a DATA type with its length
 specified.
 
-OTRv4 supports version 3 of OTR, but not versions 1 and 2. Therefore, invalid version strings contain a "2" or a "1".
+A compliant OTRv4 implementation is required to support version 3 of OTR, but
+not versions 1 and 2. Therefore, invalid version strings contain a "2" or a "1".
 
 Any other version string that is not "4", "3", "2", or "1" should be ignored.
 
@@ -1013,7 +1014,8 @@ configurable. A recommended value is one week.
 
 ### Create a User Profile Signature
 
-If version 3 and 4 are supported:
+If version 3 and 4 are supported, and the user have a pre-existing OTRv3 long
+term key:
 
    * Concatenate `Ed448 public key || Versions || Profile Expiration || Public
      Shared Prekey`. Denote this value `m`.
@@ -1089,7 +1091,7 @@ To validate a user profile, you must:
 
 * [Verify that the user profile signature is valid](#verify-a-user-profile-signature)
 * Verify that the user profile is not expired
-* Verify that the `Versions` field contains a string with "4"
+* Verify that the `Versions` field contains the character "4"
 * Validate that the public shared prekey is on the curve Ed448. See
   [Verifying a point on curve](#verifying-a-point-on-curve) section for details.
 
@@ -2500,8 +2502,8 @@ Assuming that Alice begins the exchange:
 * Computes `Rab = Rb * a3`.
 * Checks whether `Rab == Pa - Pb`.
 
-If everything is done correctly, then `Rab` should hold the value of `(Pa - Pb)
-* ((G2 * a3 * b3) * (x - y))`. This test will only succeed if the secret
+If everything is done correctly, then `Rab` should hold the value of 
+`(Pa - Pb) * ((G2 * a3 * b3) * (x - y))`.  This test will only succeed if the secret
 information provided by each participant are equal (essentially `x == y`).
 Further, since `G2 * a3 * b3` is a random number not known to any party, if `x`
 is not equal to `y`, no other information is revealed.
