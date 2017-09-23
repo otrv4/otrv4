@@ -149,7 +149,7 @@ A Sender's DH Public key (MPI)
   this is NOT a POINT.
 
 Auth MAC (MAC)
-  The SHA3 MAC with the appropriate MAC key (see above) for the message of the
+  The MAC with the appropriate MAC key (see above) of the message of the
   SNIZKPK.
 
 Sigma (SNIZKPK)
