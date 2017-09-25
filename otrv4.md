@@ -1560,8 +1560,8 @@ A valid Non-Interactive-Auth message is generated as follows:
    encrypted message, using the nonce set in the previous step. This will be
    referred as `encrypted_data_message`.
 10. If an encrypted message is attached, compute
-    `Auth MAC = KDF_1(Mk || t || encrypted_data_message)`. Otherwise, compute
-    `Auth MAC = KDF_1(Mk || t)`.
+    `Auth MAC = KDF_2(Mk || t || encrypted_data_message)`. Otherwise, compute
+    `Auth MAC = KDF_2(Mk || t)`.
 11. Generate a 4-byte instance tag to use as the sender's instance tag.
     Additional messages in this conversation will continue to use this tag as
     the sender's instance tag. Also, this tag is used to filter future received
@@ -1579,11 +1579,11 @@ To verify a Non-Interactive-Auth message:
    for details.
 6. If present, extract the `encrypted_data_message`.
 7. If an encrypted data message was attached, compute
-   `tag = KDF_1(MK, || t || encrypted_data_message)`. Otherwise, compute
-   `tag = KDF_1(MK, || t)`.
+   `Auth MAC = KDF_2(MK, || t || encrypted_data_message)`. Otherwise, compute
+   `Auth MAC = KDF_2(MK, || t)`.
 8. Verify the Auth Mac:
    * Extract the Auth MAC from the Non-Interactive-Auth message and verify that
-     `tag` is equal to the Auth MAC. If it is not, ignore the
+     it is equal to the one calculated. If it is not, ignore the
      Non-Interactive-Auth message.
 9. If an `encrypted_data_message` was present, decrypt it by following
    [When you receive a Data Message](#when-you-receive-a-data-message) section.
