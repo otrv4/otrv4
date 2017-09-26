@@ -110,7 +110,7 @@ existing messaging protocol, such as XMPP.
     (interactive) and XZDH to conversations when one party is offline
     (non-interactive).
   - Key management using the Double Ratchet Algorithm [\[2\]](#references).
-  - Upgraded SHA-1 and SHA-2 to SHAKE.
+  - Upgraded SHA-1 and SHA-2 to SHAKE-256.
   - Switched from AES to XSalsa20 [\[3\]](#references).
 - Explicit instructions for producing forged transcripts using the same
   functions used to conduct honest conversations.
@@ -508,7 +508,7 @@ authenticate a long-term key pair, the [Socialist Millionaire's
 Protocol](#socialist-millionaires-protocol-smp) and manual fingerprint
 comparison may be used. The fingerprint is generated as:
 
-* Use of the first 56 bytes from the `SHAKE-256(byte(H))` (256-bit security
+* Use of the first 56 bytes from the `SHAKE-256(byte(H))` (224-bit security
   level)
 
 ### TLV Record Types
@@ -2421,7 +2421,7 @@ OTRv4 makes a few changes to SMP:
 
   * OTRv4 creates fingerprints using SHAKE-256. The fingerprint is generated as:
 
-      * Use of the first 56 bytes from the `SHAKE-512(byte(H))`
+      * Use of the first 56 bytes from the `SHAKE-256(byte(H))`
 
   * SMP in OTRv4 uses all of the
     [type/length/value (TLV) record types](#tlv-record-types) as OTRv3, except

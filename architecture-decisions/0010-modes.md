@@ -39,5 +39,3 @@ complexity of the specification and implementation.
 Furthermore, 'OTRv4 only' mode will only support version 4 of OTR. The User
 Profile, therefore will only allow the 1-byte version string "4". It will also
 not allow the Transition Signature parameter.
-
-//TODO: define a mode without saying 'specified in OTRv3' or similar

@@ -62,14 +62,14 @@ Generates `A_i` and `a_i`.
 
 Given `a_i`, a secret key, and `B_i`, a public key, generates a shared secret value: `k_dh`.
 
-**Key Derivation Function: SHA3-256(k_dh)**
+**Key Derivation Function: SHAKE-256(k_dh)**
 
-Given a 3072-bit shared secret value `k_dh`, the SHA3-256 generates a 256-bit
+Given a 3072-bit shared secret value `k_dh`, the SHAKE-256 generates a 32-byte
 digest: `brace_key`.
 
-**Key Derivation Function: SHA3-256(brace_key)**
+**Key Derivation Function: SHAKE-256(brace_key)**
 
-Given `brace_key`, the SHA3-256 generates a 256-bit digest: a new `brace_key`.
+Given `brace_key`, the SHAKE-256 generates a 32-byte digest: a new `brace_key`.
 
 #### Considerations
 
@@ -115,12 +115,12 @@ Alice                                                 Bob
   public key received during the DAKE (B_0)
     k_dh = DH(B_0, a_1)
 * Derives the new brace key from the k_dh
-    M_3 = SHA3-256(k_dh)
+    M_3 = take_first_32_bytes(SHAKE-256("OTR4" || k_dh))
 * Mixes the brace key with the ECDH shared
   secret to create the shared secret K_3
-    K_3 = SHA3-512(ECDH_3 || M_3)
-* Uses K_3 with SHA3-512 to generate root
-  and chain keys
+    K_3 = take_first_64_bytes(SHAKE-256("OTR4" || ECDH_3 || M_3))
+* Uses K_3 with take_first_64_bytes(SHAKE-256)
+  to generate root and chain keys
     R_3, Cs_3_0, Cr_3_0 = SHA3-512(R_2, K_3)
 * Encrypts data message with a message key
   derived from Cs_3_0
@@ -131,12 +131,12 @@ Alice                                                 Bob
                                                        public key received in the message (A_1)
                                                          k_dh = DH(A_1, b_1)
                                                      * Derives the new brace key from the k_dh
-                                                         M_3 = SHA3-256(k_dh)
+                                                         M_3 = take_first_32_bytes(SHAKE-256("OTR4" || k_dh))
                                                      * Mixes the brace key with the ECDH shared secret
                                                        to create the shared secret K_3
-                                                         K_3 = SHA3-512(ECDH_3 || M_3)
-                                                     * Uses K_3 with SHA3 to generate root and chain
-                                                       keys
+                                                         K_3 = take_first_64_bytes(SHAKE-256("OTR4" || ECDH_3 || M_3))
+                                                     * Uses K_3 with take_first_64_bytes(SHAKE-256) to
+                                                         generate root and chain keys
                                                          R_3, Cs_3_0, Cr_3_0 = KDF(R_2 || K_3)
                                                      * Decrypts received message with a message key
                                                        derived from Cr_3_0
@@ -149,10 +149,11 @@ Alice                                                 Bob
                                                        shared secret (ECDH_4).
                                                      * Mixes the brace key with ECDH_4 to create the shared
                                                        secret K_4
-                                                          K_4 = SHA3-512(ECDH_4 || M_4)
-                                                      * Uses K_4 with SHA3-512 to generate root and chain
-                                                        keys from root key 3 (R_3)
-                                                           R_4, Cs_4_0, Cr_4_0 = SHA3-512(R_3, K_4)
+                                                          K_4 = take_first_64_bytes(SHAKE-256("OTR4" || ECDH_4 || M_4))
+                                                      * Uses K_4 with take_first_64_bytes(SHAKE-256)
+                                                        to generate root and chain keys from root key 3 (R_3)
+                                                        R_4, Cs_4_0, Cr_4_0 =
+                                                        take_first_64_bytes(SHAKE-256("OTR4" || R_3 || K_4))
                                                       * Encrypts data message with a message key derived
                                                         from Cr_4_0
                                   <-----------------  * Sends data_message_4_0
@@ -167,13 +168,15 @@ i.e. `ratchet_id += 1`
 If `ratchet_id % 3 == 0 && sending the first message of a new ratchet`
 
   * Compute the new brace key from a new DH computation e.g.
-    `M_i = SHA3-256(DH(our_DH.secret, their_DH.public))`.
+    `M_i = take_first_32_bytes(SHAKE-256("OTR4" || (DH(our_DH.secret,
+    their_DH.public))))`.
   * Send the new `brace_key`'s public key (our_DH.public) to the other party for
     further key computation.
 
 Otherwise
 
-  * Compute the new brace key `M_i = SHA3-256(M_(i-1))`.
+  * Compute the new brace key
+    `M_i = take_first_32_bytes(SHAKE-256("OTR4" ||M_(i-1)))`.
 
 **Alice or Bob send a follow-up message**
 
@@ -197,7 +200,8 @@ If `ratchet_id % 6 == 3 || ratchet_id % 6 == 0`
 Otherwise:
 
    * Compute the new brace key from a new DH computation e.g.
-     `M_i = SHA3-256(DH(our_DH.secret, their_DH.public))`
+     `M_i = take_first_32_bytes(SHAKE-256("OTR4" || (DH(our_DH.secret,
+    their_DH.public))))`.
    * Use `M_i` to decrypt the received message.
 
 **Alice or Bob receive a follow up message**
@@ -225,15 +229,15 @@ If Alice sends the first message:
     Alice                 ratchet_id        public_key           Bob
 ---------------------------------------------------------------------------------------
 
-M_1 = SHA3(M_0)            -----1----------------------->     M_1 = SHA3(M_0)
-M_2 = SHA3(M_1)            <----2------------------------     M_2 = SHA3(M_1)
-M_3 = SHA3(DH(a_1, B_0))   -----3--------------A_1------>     M_3 = SHA3(DH(b_0, A_1))
-M_4 = SHA3(M_3)            <----4------------------------     M_4 = SHA3(M_3)
-M_5 = SHA3(M_4)            -----5----------------------->     M_5 = SHA3(M_4)
-M_6 = SHA3(DH(a_1, B_1))   <----6--------------B_1-------     M_6 = SHA3(DH(b_1, A_1))
-M_7 = SHA3(M_6)            -----7----------------------->     M_7 = SHA3(M_6)
-M_8 = SHA3(M_7)            <----8------------------------     M_8 = SHA3(M_7)
-M_9 = SHA3(DH(a_2, B_1))   -----9--------------A_2------>     M_9 = SHA3(DH(b_1, A_2))
+M_1 = SHAKE(M_0)            -----1----------------------->     M_1 = SHAKE(M_0)
+M_2 = SHAKE(M_1)            <----2------------------------     M_2 = SHAKE(M_1)
+M_3 = SHAKE(DH(a_1, B_0))   -----3--------------A_1------>     M_3 = SHA3(DH(b_0, A_1))
+M_4 = SHAKE(M_3)            <----4------------------------     M_4 = SHAKE(M_3)
+M_5 = SHAKE(M_4)            -----5----------------------->     M_5 = SHAKE(M_4)
+M_6 = SHAKE(DH(a_1, B_1))   <----6--------------B_1-------     M_6 = SHAKE(DH(b_1, A_1))
+M_7 = SHAKE(M_6)            -----7----------------------->     M_7 = SHAKE(M_6)
+M_8 = SHAKE(M_7)            <----8------------------------     M_8 = SHAKE(M_7)
+M_9 = SHAKE(DH(a_2, B_1))   -----9--------------A_2------>     M_9 = SHAKE(DH(b_1, A_2))
 ```
 
 ### Performance

@@ -29,14 +29,16 @@ curve cryptography. In the case that elliptic curves are broken, data message
 transcripts of OTRv4 will have classic Diffie-Hellman ~128-bit security.
 
 To achieve ~224-bit elliptic curve security, we chose the curve Ed448 for the
-generation of ECDH. In relation to secrets generated with ECDH, we use SHA3-512
-and SHAKE-256 as hash functions since, individually, both give 256-bit security.
-Although Ed448 does not have as much published cryptanalysis as Curve25519, it
-has a similar construction to Curve25519 [\[1\]](#references).
+generation of ECDH. In relation to secrets generated with ECDH, we use SHAKE-256
+as the hash function since it gives give 256-bit security if the output is 64
+bytes and 128 if the output is 32 bytes. Although Ed448 does not have as much
+published cryptanalysis as Curve25519, it has a similar construction to
+Curve25519 [\[1\]](#references).
 
-To achieve classic Diffie-Hellman ~128-bit security, we use a brace key, which is
-described in [ADR 5](https://github.com/twstrike/otrv4/blob/master/architecture-decisions/005-brace-key.md). We only use SHA3-256 when we use the brace key because
-it has a security level of 128 bits.
+To achieve classic Diffie-Hellman ~128-bit security, we use a brace key, which
+is described in [ADR 5](https://github.com/twstrike/otrv4/blob/master/architecture-decisions/005-brace-key.md).
+We only use SHAKE-256 with an output of 32 bytes when we use the brace key
+because it has a security level of 128 bits.
 
 We will use XSalsa20 as our stream cipher because it has a block size of 512
 bits compared to AES' block size of 128 bits. XSalsa20 is faster than AES and
@@ -50,32 +52,27 @@ and 256-bit keys.
 The following KDFs are defined:
 
 ```
-KDF_1(x) = SHA3-256("OTR4" || x)
-KDF_2(x) = SHA3-512("OTR4" || x)
+KDF_1(x) = take_first_32_bytes(SHAKE-256("OTR4" || x))
+KDF_2(x) = take_first_64_bytes(SHAKE-256("OTR4" || x))
 ```
 
-When a keyed cryptographic hash function is expected, we set `x = key || secret`.
-To provide cryptographic domain separation when multiple values need to be
-derived from the same secret, we set `x = counter || secret`, where the counter
-changes for each situation.
+When a keyed cryptographic hash function is expected, we set
+`x = key || secret`. To provide cryptographic domain separation when multiple
+values need to be derived from the same secret, we set `x = counter || secret`,
+where the counter changes for each situation.
 
 In OTRv4, long-lived key authentication can happen by using SMP or comparing
-fingerprints. We use the SHA3-512 hash function for generating fingerprints
-from the long-lived public keys. This results in a long 512-bit (64 byte)
-fingerprint. The full length fingerprint will be used for SMP authentication.
-But to make manual fingerprint comparison easier, OTRv4 will allow 2 different
-sizes of the fingerprint for implementers to choose from:
-
-* Truncate the output of the hash to the first 56 bytes (224-bit security level)
-* Truncate the output of the hash to the first 32 bytes (128-bit security level)
+fingerprints. We take the first 56 bytes of the SHAKE-256 hash function for
+generating fingerprints from the long-lived public keys. This results in a long
+448-bit (56 byte) fingerprint. The full length fingerprint will be used for SMP
+authentication.
 
 ### Consequences
 
 Choosing Ed448 requires implementations of Ed448 curve equations, and SMP
 primitives have changed to Ed448.
 
-The size of fingerprints can be increased to 32 bytes or 56 bytes depending on
-what version the implementor chooses.
+The size of fingerprints is increased to 56 bytesq.
 
 ### References
 
