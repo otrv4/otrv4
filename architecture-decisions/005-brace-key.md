@@ -97,8 +97,8 @@ purposes of this explanation, we will only discuss the brace key.
 `n` is the number of root key derivations before performing a new DH
 computation.
 
-The interim root key derivations will use a brace key derived from a SHA3-256
-using the previous brace key as the seed.
+The interim root key derivations will use a brace key derived from a
+`take_first_32_bytes(SHAKE-256)` using the previous brace key as the seed.
 
 _When n is configured to equal 3_
 
@@ -115,13 +115,16 @@ Alice                                                 Bob
   public key received during the DAKE (B_0)
     k_dh = DH(B_0, a_1)
 * Derives the new brace key from the k_dh
-    M_3 = take_first_32_bytes(SHAKE-256("OTR4" || k_dh))
+    M_3 =
+    take_first_32_bytes(SHAKE-256("OTR4" || k_dh))
 * Mixes the brace key with the ECDH shared
   secret to create the shared secret K_3
-    K_3 = take_first_64_bytes(SHAKE-256("OTR4" || ECDH_3 || M_3))
+    K_3 =
+    take_first_64_bytes(SHAKE-256("OTR4" || ECDH_3 || M_3))
 * Uses K_3 with take_first_64_bytes(SHAKE-256)
   to generate root and chain keys
-    R_3, Cs_3_0, Cr_3_0 = SHA3-512(R_2, K_3)
+    R_3, Cs_3_0, Cr_3_0 =
+    take_first_64_bytes(SHAKE-256("OTR4" || R_2 || K_3)
 * Encrypts data message with a message key
   derived from Cs_3_0
 * Sends data_message_3_0 with A_1 ----------------->
@@ -213,7 +216,7 @@ for the brace key.
 **Diagram: Pattern of DH computations and key derivations in a conversation**
 
 This diagram describes when public keys should be sent and when Alice and Bob
-should compute the `brace_key` from a SHA3 or a new DH computation.
+should compute the `brace_key` from a SHAKE or a new DH computation.
 
 Both parties share knowledge of `M_0`, which is a `brace_key` established in the
 DAKE.
@@ -231,7 +234,7 @@ If Alice sends the first message:
 
 M_1 = SHAKE(M_0)            -----1----------------------->     M_1 = SHAKE(M_0)
 M_2 = SHAKE(M_1)            <----2------------------------     M_2 = SHAKE(M_1)
-M_3 = SHAKE(DH(a_1, B_0))   -----3--------------A_1------>     M_3 = SHA3(DH(b_0, A_1))
+M_3 = SHAKE(DH(a_1, B_0))   -----3--------------A_1------>     M_3 = SHAKE(DH(b_0, A_1))
 M_4 = SHAKE(M_3)            <----4------------------------     M_4 = SHAKE(M_3)
 M_5 = SHAKE(M_4)            -----5----------------------->     M_5 = SHAKE(M_4)
 M_6 = SHAKE(DH(a_1, B_1))   <----6--------------B_1-------     M_6 = SHAKE(DH(b_1, A_1))
@@ -257,7 +260,8 @@ We’ve decide to use a 3072-bit key produced by:
 
 1. a DH function which takes as an argument the other party’s exponent through a
    data message to produce brace key.
-2. a KDF (SHA3-256) which uses the previous brace key to produce a new one.
+2. a KDF (take_first_32_bytes(SHAKE-256)) which uses the previous brace key to
+   produce a new one.
 
 The DH function will run every n = 3 times because:
 
