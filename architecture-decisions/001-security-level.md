@@ -36,7 +36,7 @@ published cryptanalysis as Curve25519, it has a similar construction to
 Curve25519 [\[1\]](#references).
 
 To achieve classic Diffie-Hellman ~128-bit security, we use a brace key, which
-is described in [ADR 5](https://github.com/twstrike/otrv4/blob/master/architecture-decisions/005-brace-key.md).
+is described in [ADR 5](https://github.com/otrv4/otrv4/blob/master/architecture-decisions/005-brace-key.md).
 We only use SHAKE-256 with an output of 32 bytes when we use the brace key
 because it has a security level of 128 bits.
 

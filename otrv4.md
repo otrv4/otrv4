@@ -116,7 +116,7 @@ existing messaging protocol, such as XMPP.
   functions used to conduct honest conversations.
 
 Reasons for the decisions made above and more are included in the [architectural
-decisions records](https://github.com/twstrike/otrv4/tree/master/architecture-decisions).
+decisions records](https://github.com/otrv4/otrv4/tree/master/architecture-decisions).
 
 ## High Level Overview
 

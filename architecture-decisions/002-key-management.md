@@ -40,12 +40,14 @@ Therefore, to reveal MAC keys in the Double Ratchet, we have two options:
 ### Decision
 
 For OTRv4, we decided to use the Double Ratchet Algorithm for key management.
-Even though our network model assumes in-order message delivery, we can benefit
-from the per-message forward secrecy that the Double Ratchet algorithm provides.
+Even though our network model assumes in-order message delivery, we can
+benefit from the per-message forward secrecy that the Double Ratchet
+algorithm provides.
+
 Although the Double Ratchet allows us to receive out-of-order messages, we do
 not support this: messages that are received later than expected will be
 ignored. Other reasons for this decision are described in
-[the ADR for the Non-Interactive DAKE](https://github.com/twstrike/otrv4/blob/master/architecture-decisions/009-non-interactive-dake.md).
+[the ADR for the Non-Interactive DAKE](https://github.com/otrv4/otrv4/blob/master/architecture-decisions/009-non-interactive-dake.md).
 
 We decided that only the receiver will reveal MAC keys on the first message
 sent of every ratchet.

@@ -28,7 +28,7 @@ We introduce a user profile to OTRv4 that includes:
 2. Versions supported in the form of a Query Message string
 3. Expiration date of the User Profile
 4. Public Shared Prekey which is required for the [non-interactive
-   DAKE](https://github.com/twstrike/otrv4/blob/master/architecture-decisions/009-non-interactive-dake.md)
+   DAKE](https://github.com/otrv4/otrv4/blob/master/architecture-decisions/009-non-interactive-dake.md)
    protocol.
 5. Profile signature of the above 4 parts
 6. Transition Signature (optional): A signature of the profile excluding
