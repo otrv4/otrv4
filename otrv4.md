@@ -420,9 +420,9 @@ encoded as follows:
 
 A curve point is decoded as follows:
 
-1. Interpret the last bit of byte 57 as the least significant bit of the
-   x-coordinate. Denote this value `x_0`.  The y-coordinate is recovered simply
-   by clearing this bit.  If the resulting value is `>= p`, decoding fails.
+1. Interpret bit 455 as the least significant bit of the x-coordinate. Denote
+   this value `x_0`.  The y-coordinate is recovered simply by clearing this bit.
+   If the resulting value is `>= p`, decoding fails.
 2. To recover the x-coordinate, the curve equation implies
    `x^2 = (y^2 - 1) / (d * y^2 - 1) (mod p)`.  The denominator is always
    non-zero mod p.
