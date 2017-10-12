@@ -399,7 +399,7 @@ In order to encode and decode `POINT` and `SCALAR` types, refer to the
 
 ### Encoding and Decoding
 
-This describes the encoding and decoding schemes specified in RFC 8032 [\[10\]](#references).
+This describes the encoding and decoding schemes specified in RFC 8032 [\[9\]](#references).
 
 #### Scalar
 
@@ -482,7 +482,7 @@ OTR4 public shared prekey (ED448-SHARED-PREKEY):
 ```
 
 The public key and shared prekey are generated as follows (refer to RFC 8032
-[\[10\]](#references), for more information on key generation):
+[\[9\]](#references), for more information on key generation):
 
 ```
 The symmetric key (sym_key) is 57 bytes of cryptographically secure random data.
@@ -3240,9 +3240,4 @@ AUTHSTATE_AWAITING_SIG
 6. https://www.ietf.org/rfc/rfc3526.txt "M. Kojo: More Modular Exponential (MODP) Diffie-Hellman groups for Internet Key Exchange (IKE)"
 7. https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html "Off-the-Record Messaging Protocol version 3"
 8. https://xmpp.org/extensions/xep-0060.pdf "P. Millard, P. Saint-Andre and R. Meijer: XEP-0060: Publish-Subscribe"
-9. https://tools.ietf.org/html/draft-irtf-cfrg-eddsa-05 "S. Josefsson and I. Liusvaara: Edwards-curve Digital Signature Algorithm (EdDSA)"
-10. https://tools.ietf.org/rfc/rfc8032.txt "S. Josefsson and I. Liusvaara: Edwards-Curve Digital Signature Algorithm (EdDSA)"; RFC 8032 (Informational); IETF; Jan 2017
-
-### Further Reading
-
-1. https://eprint.iacr.org/2012/309.pdf "Mike Hamburg: Fast and compact elliptic-curve cryptography"
+9. https://tools.ietf.org/html/rfc8032 "S. Josefsson and I. Liusvaara: Edwards-curve Digital Signature Algorithm (EdDSA)"
