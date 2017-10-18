@@ -932,7 +932,7 @@ User Profile (USER-PROF):
   (optional) Transitional Signature (SIG)
 ```
 
-`SIG` is the DSA Signature. It is the same signature used in in OTRv3.
+`SIG` is the DSA Signature. It is the same signature as used in OTRv3.
 From the OTRv3 protocol section "Public keys, signatures, and fingerprints":
 
 ```
@@ -1011,7 +1011,7 @@ configurable. A recommended value is one week.
 
 ### Create a User Profile Signature
 
-If version 3 and 4 are supported, and the user have a pre-existing OTRv3 long
+If version 3 and 4 are supported, and the user has a pre-existing OTRv3 long
 term key:
 
    * Concatenate `Ed448 public key || Versions || Profile Expiration || Public
@@ -1087,7 +1087,7 @@ It is done as follows:
 To validate a user profile, you must:
 
 * [Verify that the user profile signature is valid](#verify-a-user-profile-signature)
-* Verify that the user profile is not expired
+* Verify that the user profile has not expired
 * Verify that the `Versions` field contains the character "4"
 * Validate that the public shared prekey is on the curve Ed448. See
   [Verifying a point on curve](#verifying-a-point-on-curve) section for details.
