@@ -555,15 +555,15 @@ Type 6: SMP Abort Message
   associated value should be empty. If you receive a TLV of this type,
   you should change the SMP state to 'SMP_EXPECT1' (see below in SMP section).
 
-Type 8: Extra symmetric key
+Type 7: Extra symmetric key
   If you wish to use the extra symmetric key, compute it yourself as outlined
-  in the section "Extra symmetric key". Then send this 'type 8 TLV' to your peer
+  in the section "Extra symmetric key". Then send this 'type 7 TLV' to your peer
   to indicate that you'd like to use the extra symmetric key for something. The
   value of the TLV begins with a 4-byte indication of what this symmetric key
   will be used for (file transfer, voice encryption, etc). After that, the
   contents are use-specific (which file, etc): there are no predefined uses.
   Note that the value of the key itself is not placed into the TLV, your peer
-  will compute it on its own.
+  will compute it on its own. Note that this represents TLV type 8 from OTRv3.
 ```
 
 ### Shared Session State
