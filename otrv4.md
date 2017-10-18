@@ -1821,6 +1821,8 @@ Given a new ratchet:
     this process, it will be the 'Public DH Key' for the message. If it is
     not created, then it will be empty.
   * Calculate the `K = KDF_2(K_ecdh || brace_key)`.
+  * Calculate the SSID: the first 8 bytes of `KDF_2(0x00 || K)`.
+  * If needed, calculate the extra symmetric key: `KDF_2(0xFF || K)`.
   * Derive new set of keys
     `root[i], chain_s[i][0], chain_r[i][0] = derive_ratchet_keys(K)`.
   * Securely delete the root key and all chain keys from the ratchet `i-2`.
