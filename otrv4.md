@@ -3,8 +3,7 @@
 ```
 Disclaimer
 
-This protocol specification is a draft. It's currently under
-constant revision.
+This protocol specification is a draft. It's currently under constant revision.
 ```
 
 OTR version 4 (OTRv4) provides a deniable authenticated key exchange and better
