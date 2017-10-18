@@ -1,5 +1,12 @@
 # OTR version 4
 
+```
+Disclaimer
+
+This protocol specification is a draft. It's currently under
+constant revision.
+```
+
 OTR version 4 (OTRv4) provides a deniable authenticated key exchange and better
 forward secrecy through the use of double ratcheting. OTR works on top of an
 existing messaging protocol, such as XMPP.
