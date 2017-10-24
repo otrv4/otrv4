@@ -1649,7 +1649,7 @@ Encrypted message (DATA)
   the Padding TLV of type 0.
 ```
 
-### Publishing Prekeys Messages
+### Publishing Prekey Messages
 
 An OTRv4 client must generate a user's prekey messages and publish them to a
 prekey server. Implementers are expected to create their own policy dictating
@@ -1664,7 +1664,7 @@ messages.
 Details on how to interact with a prekey server to publish messages are outside
 the scope of this protocol.
 
-### Receiving Prekeys Messages
+### Receiving Prekey Messages
 
 Details on how prekey messages may be received from a prekey server are outside
 the scope of this protocol. This specification assumes that none, one, or more
