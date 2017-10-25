@@ -855,12 +855,15 @@ ECDH key has been generated within a certain amount of time. If it hasn't, then
 the session is expired.
 
 To expire the session:
+
 1. Send a TLV type 1 (Disconnected) Message
 2. Securely delete all keys and data associated with the conversation. This includes:
-   a. The root key and all chain keys.
-   b. The ECDH keys, DH keys and brace key.
-   c. `K`.
-   c. The `ssid` and any `old_mac_keys` that remain unrevealed.
+
+   1. The root key and all chain keys.
+   2. The ECDH keys, DH keys and brace key.
+   3. `K`.
+   4. The `ssid` and any `old_mac_keys` that remain unrevealed.
+
 3. Transition the protocol state machine to `START`
 
 The session expiration time is decided individually by each party so it is
