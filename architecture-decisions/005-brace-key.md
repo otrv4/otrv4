@@ -122,9 +122,9 @@ Alice                                                 Bob
     K_3 =
     take_first_64_bytes(SHAKE-256("OTR4" || ECDH_3 || M_3))
 * Uses K_3 with take_first_64_bytes(SHAKE-256)
-  to generate root and chain keys
+  to generate root and chain keys from root key 2 (R_2)
     R_3, Cs_3_0, Cr_3_0 =
-    take_first_64_bytes(SHAKE-256("OTR4" || R_2 || K_3)
+    take_first_64_bytes(SHAKE-256("OTR4" || SHAKE-256(R_2 || K_3)))
 * Encrypts data message with a message key
   derived from Cs_3_0
 * Sends data_message_3_0 with A_1 ----------------->
@@ -139,8 +139,9 @@ Alice                                                 Bob
                                                        to create the shared secret K_3
                                                          K_3 = take_first_64_bytes(SHAKE-256("OTR4" || ECDH_3 || M_3))
                                                      * Uses K_3 with take_first_64_bytes(SHAKE-256) to
-                                                         generate root and chain keys
-                                                         R_3, Cs_3_0, Cr_3_0 = KDF(R_2 || K_3)
+                                                         generate root and chain keys from root key 2 (R-2)
+                                                         R_3, Cs_3_0, Cr_3_0 =
+                                                         take_first_64_bytes(SHAKE-256("OTR4" || SHAKE-256(R_2 || K_3)))
                                                      * Decrypts received message with a message key
                                                        derived from Cr_3_0
                                                      * Increases ratchet_id by one
@@ -156,7 +157,7 @@ Alice                                                 Bob
                                                       * Uses K_4 with take_first_64_bytes(SHAKE-256)
                                                         to generate root and chain keys from root key 3 (R_3)
                                                         R_4, Cs_4_0, Cr_4_0 =
-                                                        take_first_64_bytes(SHAKE-256("OTR4" || R_3 || K_4))
+                                                        take_first_64_bytes(SHAKE-256("OTR4" || SHAKE-256(R_3 || K_4)))
                                                       * Encrypts data message with a message key derived
                                                         from Cr_4_0
                                   <-----------------  * Sends data_message_4_0
