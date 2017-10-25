@@ -622,7 +622,7 @@ The following variables keep state as the ratchet moves forward:
 ```
 State variables:
   i: the current ratchet id.
-  j: the current sending message id
+  j: the current sending message id.
   k: the current receiving message id.
 
 Key variables:
@@ -739,12 +739,13 @@ decide_between_chain_keys(Ca, Cb):
 ### Deriving Double Ratchet keys
 
 ```
-derive_ratchet_keys(K):
-  R = KDF_2(0x01 || K)
-  Ca = KDF_2(0x02 || K)
-  Cb = KDF_2(0x03 || K)
+derive_ratchet_keys(R_i-1, K):
+  R_i = KDF_2(0x01 || R_i-1 || K)
+  Ca = KDF_2(0x02 || R_i-1 || K)
+  Cb = KDF_2(0x03 || R_i-1 || K)
   return R, decide_between_chain_keys(Ca, Cb)
 ```
+NOTE: If no R is supplied (as for the first ratchet), then each hash should be in the form: KDF_2(0x0n || K) where n is the appropriate value as above.
 
 ### Rotating ECDH keys and brace key as sender
 
@@ -1744,7 +1745,7 @@ Derive MKenc & MKmac
 Verify MAC, Decrypt message 1_0
 
 Receive data message 1_1
-Recover receiving chain key 1_1
+Compute receiving chain key 1_1
 Derive MKenc & MKmac
 Verify MAC, Decrypt message 1_1
 ```
@@ -1833,7 +1834,7 @@ Given a new ratchet:
   * Calculate the SSID: the first 8 bytes of `KDF_2(0x00 || K)`.
   * If needed, calculate the extra symmetric key: `KDF_2(0xFF || K)`.
   * Derive new set of keys
-    `root[i], chain_s[i][0], chain_r[i][0] = derive_ratchet_keys(K)`.
+    `root[i], chain_s[i][0], chain_r[i][0] = derive_ratchet_keys(root[i-1], K)`.
   * Securely delete the root key and all chain keys from the ratchet `i-2`.
   * Securely delete `K`.
   * If present, forget and reveal MAC keys. The conditions for revealing MAC
