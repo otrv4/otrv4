@@ -559,7 +559,8 @@ Type 6: SMP Abort Message
   human-readable part) with this TLV type to instruct the other party's client
   to abort the protocol. The associated length should be zero and the
   associated value should be empty. If you receive a TLV of this type,
-  you should change the SMP state to 'SMP_EXPECT1' (see below in SMP section).
+  you should change the SMP state to 'SMPSTATE_EXPECT1' (see below in SMP
+  section).
 
 Type 7: Extra symmetric key
   If you wish to use the extra symmetric key, compute it yourself as outlined
