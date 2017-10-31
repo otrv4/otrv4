@@ -286,7 +286,7 @@ To verify that a point (`X = x, y`) is on curve Ed448-Goldilocks:
 
 1. Check that `X` is not equal to the identity element (`I`).
 2. Check that `X` lies on the curve: `x` and `y` are on in interval
-   `[0, q - 1]`
+   `(0, q - 1]`
 3. Check that `q * X = I`.
 
 
