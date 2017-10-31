@@ -2200,8 +2200,10 @@ If the state is `WAITING_AUTH_R`:
   * If validation succeeds:
     * Compare the `X` (as a 57-byte unsigned little-endian value) you sent in
       your Identity message with the value from the message you received.
-    * If yours is the lower hash value:
+    * If yours is the higher hash value:
       * Ignore the received Identity message, but resend your Identity message.
+        This will make the other side have the lower hash value and, therefore,
+        keep going as stated below.
     * Otherwise:
       * Forget your old `X` value that you sent earlier.
       * Send an Auth-R message.
