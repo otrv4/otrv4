@@ -2205,7 +2205,7 @@ If the state is `WAITING_AUTH_R`:
         This will make the other side have the lower hash value and, therefore,
         keep going as stated below.
     * Otherwise:
-      * Forget your old `X` value that you sent earlier.
+      * Forget your old `B` value that you sent earlier.
       * Send an Auth-R message.
       * Transition state to `WAITING_AUTH_I`.
 
