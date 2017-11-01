@@ -2198,8 +2198,8 @@ If the state is `WAITING_AUTH_R`:
 
   * Validate the Identity message. Ignore the message if validation fails.
   * If validation succeeds:
-    * Compare the `X` (as a 57-byte unsigned little-endian value) you sent in
-      your Identity message with the value from the message you received.
+    * Compare the `B` you sent in your Identity message with the value from the
+      message you received.
     * If yours is the higher hash value:
       * Ignore the received Identity message, but resend your Identity message.
         This will make the other side have the lower hash value and, therefore,
