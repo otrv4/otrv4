@@ -64,7 +64,6 @@ existing messaging protocol, such as XMPP.
    1. [Non-interactive Deniable Authenticated Key Exchange (DAKE)](#non-interactive-deniable-authenticated-key-exchange-dake)
       1. [Non-interactive DAKE Overview](#non-interactive-dake-overview)
       1. [Prekey Message](#prekey-message)
-      1. [Validating a Prekey Message](#validating-a-prekey-message)
       1. [Non-Interactive-Auth Message](#non-interactive-auth-message)
       1. [Publishing Prekey Messages](#publishing-prekey-messages)
       1. [Receiving Prekey Messages](#receiving-prekey-messages)
@@ -1480,7 +1479,7 @@ Verify & Decrypt message
 	  `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
 	* [Decides which chain key he will use](#deciding-between-chain-keys).
 
-### Prekey message
+#### Prekey message
 
 This message is created and published to a prekey server to allow offline
 conversations. Each prekey message contains the owner's user profile and two
@@ -1528,9 +1527,7 @@ B Prekey owner's DH public key (MPI)
 
 ```
 
-### Validating a Prekey Message
-
-To validate a prekey message:
+To verify a prekey message:
 
 * [Validate the user profile](#validating-a-user-profile)
 * Check that the ECDH public key `Y` is on curve Ed448. See
@@ -1539,7 +1536,7 @@ To validate a prekey message:
   [Verifying an integer on the dh group](#verifying-an-integer-on-the-dh-group)
   section for details.
 
-### Non-Interactive-Auth Message
+#### Non-Interactive-Auth Message
 
 This message terminates the non-interactive DAKE and might also contain an
 encrypted data message. This is highly recommended.
@@ -1652,7 +1649,7 @@ Encrypted message (DATA)
   the Padding TLV of type 0.
 ```
 
-### Publishing Prekey Messages
+#### Publishing Prekey Messages
 
 An OTRv4 client must generate a user's prekey messages and publish them to a
 prekey server. Implementers are expected to create their own policy dictating
@@ -1667,7 +1664,7 @@ messages.
 Details on how to interact with a prekey server to publish messages are outside
 the scope of this protocol.
 
-### Receiving Prekey Messages
+#### Receiving Prekey Messages
 
 Details on how prekey messages may be received from a prekey server are outside
 the scope of this protocol. This specification assumes that none, one, or more
