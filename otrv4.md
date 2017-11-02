@@ -286,7 +286,7 @@ To verify that a point (`X = x, y`) is on curve Ed448-Goldilocks:
 
 1. Check that `X` is not equal to the identity element (`I`).
 2. Check that `X` lies on the curve: `x` and `y` are on in interval
-   `(0, q - 1]`
+   `[0, q - 1]`
 3. Check that `q * X = I`.
 
 
@@ -2740,13 +2740,14 @@ using, ignore the message.
 
 If smpstate is not `SMPSTATE_EXPECT1`:
 
-Set smpstate to `SMPSTATE_EXPECT1` and send a SMP abort to Alice.
+  * Set smpstate to `SMPSTATE_EXPECT1` and send a SMP abort to Alice.
 
 If smpstate is `SMPSTATE_EXPECT1`:
 
 * Verify Alice's zero-knowledge proofs for G2a and G3a:
-  1. Check that both `G2a` and `G3a` are on curve Ed448, that they are part of the
-     same group, and that they do not degenerate.
+  1. Check that both `G2a` and `G3a` are on curve Ed448. See
+     [Verifying a point on curve](#verifying-a-point-on-curve) section for
+     details.
   2. Check that `c2 = HashToScalar(1 || G * d2 + G2a * c2)`.
   3. Check that `c3 = HashToScalar(2 || G * d3 + G3a * c3)`.
 * Create a SMP message 2 and send it to Alice.
@@ -2759,13 +2760,14 @@ using, ignore the message.
 
 If smpstate is not `SMPSTATE_EXPECT2`:
 
-Set smpstate to `SMPSTATE_EXPECT1` and send a SMP abort to Bob.
+  * Set smpstate to `SMPSTATE_EXPECT1` and send a SMP abort to Bob.
 
 If smpstate is `SMPSTATE_EXPECT2`:
 
 * Verify Bob's zero-knowledge proofs for `G2b`, `G3b`, `Pb` and `Qb`:
-  1. Check that `G2b`, `G3b`, `Pb` and `Qb` are on curve Ed448 and that they
-     do not degenerate.
+  1. Check that `G2b`, `G3b`, `Pb` and `Qb` are on curve Ed448. See
+     [Verifying a point on curve](#verifying-a-point-on-curve) section for
+     details.
   2. Check that `c2 = HashToScalar(3 || G * d2 + G2b * c2)`.
   3. Check that `c3 = HashToScalar(4 || G * d3 + G3b * c3)`.
   4. Check that `cp = HashToScalar(5 || G3 * d5 + Pb * cp || G * d5 + G2 * d6 +
@@ -2780,13 +2782,14 @@ using, ignore the message.
 
 If smpstate is not `SMPSTATE_EXPECT3`:
 
-Set smpstate to `SMPSTATE_EXPECT1` and send a SMP abort to Bob.
+  * Set smpstate to `SMPSTATE_EXPECT1` and send a SMP abort to Bob.
 
 If smpstate is `SMPSTATE_EXPECT3`:
 
 * Verify Alice's zero-knowledge proofs for `Pa`, `Qa` and `Ra`:
-  1. Check that `Pa`, `Qa` and `Ra` are on curve Ed448 and that they do not
-     degenerate.
+  1. Check that `Pa`, `Qa` and `Ra` are on curve Ed448. See
+     [Verifying a point on curve](#verifying-a-point-on-curve) section for
+     details.
   2. Check that `cp = HashToScalar(6 || G3 * d5 + Pa * cp || G * d5 + G2 * d6 +
      Qa * cp)`.
   3. Check that `cr = HashToScalar(7 || G * d7 + G3a * cr || (Qa - Qb) * d7 +
@@ -2806,9 +2809,9 @@ using, ignore the message.
 
 If smpstate is not `SMPSTATE_EXPECT4`:
 
-Set smpstate to `SMPSTATE_EXPECT1` and send a type 6 TLV (SMP abort) to Bob.
+  * Set smpstate to `SMPSTATE_EXPECT1` and send a type 6 TLV (SMP abort) to Bob.
 
-If smpstate is SMPSTATE_EXPECT4:
+If smpstate is `SMPSTATE_EXPECT4`:
 
 * Verify Bob's zero-knowledge proof for Rb:
    1. Check that `Rb` is on curve Ed448. See
