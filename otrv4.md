@@ -1619,13 +1619,6 @@ Sender's instance tag (INT)
 Receiver's instance tag (INT)
   The instance tag of the intended recipient.
 
-Y Receiver's ECDH public key (POINT)
-  First part of the one-time use prekey value.
-
-B Receiver's DH public key (MPI)
-  Second part of the one-time use prekey value. The ephemeral public DH
-  key. Note that even though this is in uppercase, this is NOT a POINT.
-
 Sender's User Profile (USER-PROF)
   As described in the section 'Creating a User Profile'.
 
@@ -1637,7 +1630,7 @@ A (MPI)
   this is NOT a POINT.
 
 Auth MAC (MAC)
-  The MAC with the appropriate MAC key (see above) of the message of the
+  The MAC with the appropriate MAC key (see above) of the message for the
   SNIZKPK.
 
 Sigma (SNIZKPK)

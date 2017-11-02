@@ -126,25 +126,19 @@ Protocol version (SHORT)
 Message type (BYTE)
   The message has type 0x66.
 
-Sender Instance tag (INT)
+Sender's instance tag (INT)
   The instance tag of the person sending this message.
 
-Prekey Owner's Instance tag (INT)
+Receiver's instance tag (INT)
   The instance tag of the intended recipient.
-
-Y Prekey owner's ECDH public key (POINT)
-  First one-time use prekey value.
-
-B Prekey owner's DH public key (MPI)
-  Second one-time use prekey value. The ephemeral public DH
-  key. Note that even though this is in uppercase, this is NOT a POINT.
 
 Sender's User Profile (USER-PROF)
   As described in the section 'Creating a User Profile'.
 
-X Sender's ECDH Public Key (POINT)
+X (POINT)
+  The ephemeral public ECDH key.
 
-A Sender's DH Public key (MPI)
+A (MPI)
   The ephemeral public DH key. Note that even though this is in uppercase,
   this is NOT a POINT.
 
