@@ -167,7 +167,7 @@ Exchanges Data Messages <---------------------------------->  Exchanges Data Mes
 ```
 
 In this conversation flow, Alice first retrieves a Prekey message from a prekey
-server. Prior to the start of the conversation, this prekey message was uploaded
+server. Prior to the start of the conversation, this Prekey message was uploaded
 by Bob's client to a server. This is done in order to allow other participants,
 like Alice, to send him encrypted messages while he is offline.
 
@@ -1221,7 +1221,9 @@ Bob will be initiating the DAKE with Alice.
 #### Identity message
 
 This is the first message of the DAKE. Bob sends it to Alice to commit to a
-choice of DH and ECDH key. A valid Identity message is generated as follows:
+choice of DH and ECDH key.
+
+A valid Identity message is generated as follows:
 
 1. Create a user profile, as defined in
    [Creating a user profile](#creating-a-user-profile) section.
@@ -1348,7 +1350,7 @@ A valid Auth-I message is generated as follows:
 2. Compute `sigma = Auth(Pkb, skb, {Pkb, Pka, X}, t)`.
 3. Continue to use the sender's instance tag.
 
-To verify the Auth-I message:
+To verify an Auth-I message:
 
 1. Check that the receiver's instance tag matches your sender's instance tag.
 2. Compute `t = 0x1 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(Φ)`.
@@ -1374,9 +1376,9 @@ sigma (SNIZKPK)
 
 ## Offline Conversation Initialization
 
-To begin an offline conversation, a prekey message is published to an untrusted
+To begin an offline conversation, a Prekey message is published to an untrusted
 server and this action is seen as the start of a non-interactive DAKE. The
-prekey message is retrieved by the party attempting to send a message to the
+Prekey message is retrieved by the party attempting to send a message to the
 publisher. A reply, called the Non-Interactive-Auth message, is created with the
 prekey and sent. This completes the DAKE.
 
@@ -1404,28 +1406,28 @@ key-pair is `(skb, PKb)`. Both key pairs are generated as stated on the
 #### Non-interactive DAKE Overview
 
 ```
-Bob                         Server                               Alice
+Bob                            Server                               Alice
 ----------------------------------------------------------------------
-Publish prekey message ---->
+Publish a Prekey message ---->
 								....
-                                     <------------ Request prekeys
-                                     Prekeys -------------------->
+                                     <------------ Request Prekey messages
+                                     Prekeys messages ------------->
       <---------------------------------------- Non-Interactive-Auth message
-Verify & Decrypt message
+Verify and decrypt message if included
 ```
 
 **Bob:**
 
 1. Generates and sets `our_ecdh` as ephemeral ECDH keys.
 2. Generates and sets `our_dh` as ephemeral 3072-bit DH keys.
-3. Generates a prekey message, as described in the section
+3. Generates a Prekey message, as described in the section
    [Prekey message](#prekey-message).
-4. Publishes the prekey message to the untrusted server.
+4. Publishes the Prekey message to the untrusted server.
 
 **Alice:**
 
-1. Requests a prekey from the untrusted server.
-2. For each prekey message received from the server:
+1. Requests prekey messages from the untrusted server.
+2. For each Prekey message received from the server:
     * Validates Bob's User Profile.
     * Picks a compatible version of OTR listed in Bob's profile.
       If the versions are incompatible, Alice does not send any further
@@ -1482,10 +1484,10 @@ Verify & Decrypt message
 #### Prekey message
 
 This message is created and published to a prekey server to allow offline
-conversations. Each prekey message contains the owner's user profile and two
+conversations. Each Prekey message contains the owner's user profile and two
 one-time use public prekey values.
 
-It is created as follows:
+A valid Prekey message is generated as follows:
 
 1. Create a user profile, as defined in
    [Creating a user profile](#creating-a-user-profile) section.
@@ -1504,6 +1506,17 @@ It is created as follows:
    sender's instance tag. Also, this tag is used to filter future received
    messages. Messages intended for this instance of the client will have this
    number as the receiver's instance tag.
+
+To verify a Prekey message:
+
+* [Validate the user profile](#validating-a-user-profile)
+* Check that the ECDH public key `Y` is on curve Ed448. See
+  [Verifying a point on curve](#verifying-a-point-on-curve) section for details.
+* Verify that the DH public key `B` is from the correct group. See
+  [Verifying an integer on the dh group](#verifying-an-integer-on-the-dh-group)
+  section for details.
+
+A Prekey is an OTR message encoded as:
 
 ```
 Protocol version (SHORT)
@@ -1527,15 +1540,6 @@ B Prekey owner's DH public key (MPI)
 
 ```
 
-To verify a prekey message:
-
-* [Validate the user profile](#validating-a-user-profile)
-* Check that the ECDH public key `Y` is on curve Ed448. See
-  [Verifying a point on curve](#verifying-a-point-on-curve) section for details.
-* Verify that the DH public key `B` is from the correct group. See
-  [Verifying an integer on the dh group](#verifying-an-integer-on-the-dh-group)
-  section for details.
-
 #### Non-Interactive-Auth Message
 
 This message terminates the non-interactive DAKE and might also contain an
@@ -1553,11 +1557,11 @@ A valid Non-Interactive-Auth message is generated as follows:
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
   * secret key `a` (80 bytes).
   * public key `A`.
-4. [Validate the prekey message](#validating-a-prekey-message).
-5. Computes
+4. Verify the Prekey message.
+5. Compute
    `κ = KDF_2(K_ecdh || ECDH(x, their_shared_prekey) || ECDH(x, Pkb) || k_dh)`.
    This value is needed for the generation of the Mixed shared secret.
-6. Calculates the Auth MAC key `Mk = KDF_2(0x01 || κ)`.
+6. Calculate the Auth MAC key `Mk = KDF_2(0x01 || κ)`.
 7. Compute `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(Φ) || their_shared_prekey`.
 8. Compute `sigma = Auth(Pka, ska, {Pkb, Pka, Y}, t)`. When computing `sigma`,
    keep the first 192 bits of the generated `c` value to be used as a `nonce` in
@@ -1656,7 +1660,7 @@ prekey server. Implementers are expected to create their own policy dictating
 how often their clients upload prekey messages to the prekey server. Prekey
 messages expire when their user profile expires. Thus new prekey messages
 should be published to the prekey server before they expire to keep valid
-prekey messages available. In addition, one prekey message should be published
+prekey messages available. In addition, one Prekey message should be published
 for every long term key that belongs to a user. This means that if Bob uploads
 3 long term keys for OTRv4 to his client, Bob's client must publish 3 prekey
 messages.
@@ -1674,7 +1678,7 @@ prekey messages, the non-interactive DAKE must wait until one can be obtained.
 The following guide is meant to help implementers identify and remove invalid
 prekey messages.
 
-Use the following checks to validate a prekey message. If any checks fail,
+Use the following checks to validate a Prekey message. If any checks fail,
 ignore the message:
 
   * Check that the user profile is not expired
@@ -1682,10 +1686,10 @@ ignore the message:
     signed in the user profile contained in the prekey message
   * Check if the user profile version is supported by the receiver
 
-If one prekey message is received:
+If one Prekey message is received:
 
-  * Validate the prekey message.
-  * If the prekey message is valid, decide whether to send a non-interactive
+  * Validate the Prekey message.
+  * If the Prekey message is valid, decide whether to send a non-interactive
     auth message depending on whether the long term key in the use profile is
     trusted or not.
 
@@ -1693,8 +1697,8 @@ If many prekey messages are received:
 
   * Remove all invalid prekey messages.
   * Remove all duplicate prekey messages in the list.
-  * If one prekey message remains:
-      * Decide whether to send a message using this prekey message if the long
+  * If one Prekey message remains:
+      * Decide whether to send a message using this Prekey message if the long
         term key within the use profile is trusted or not.
   * If multiple valid prekey messages remain:
       * If there are keys that are untrusted and trusted in the list of
