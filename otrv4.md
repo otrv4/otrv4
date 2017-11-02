@@ -1188,7 +1188,7 @@ Bob will be initiating the DAKE with Alice.
       group and sets it as `their_dh`. See
       [Verifying an integer on the dh group](#verifying-an-integer-on-the-dh-group)
       section for details.
-4. Sends Alice an Auth-I message (see [Auth-I message](#auth-i-message
+4. Sends Alice an Auth-I message (see [Auth-I message](#auth-i-message)
    section).
 5. At this point, the DAKE is complete for Bob:
     * Sets ratchet id `i` as 0.
