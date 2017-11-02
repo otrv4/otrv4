@@ -1166,7 +1166,7 @@ Bob will be initiating the DAKE with Alice.
       section for details.
 2. Generates and sets `our_ecdh` as ephemeral ECDH keys.
 3. Generates and sets `our_dh` as ephemeral 3072-bit DH keys.
-4. Sends Bob a Auth-R message (see [Auth-R message](#auth-r-message) section).
+4. Sends Bob an Auth-R message (see [Auth-R message](#auth-r-message) section).
 
 **Bob:**
 
@@ -1188,7 +1188,8 @@ Bob will be initiating the DAKE with Alice.
       group and sets it as `their_dh`. See
       [Verifying an integer on the dh group](#verifying-an-integer-on-the-dh-group)
       section for details.
-4. Sends Bob an Auth-I message (see [Auth-I message](#auth-i-message) section).
+4. Sends Alice an Auth-I message (see [Auth-I message](#auth-i-message
+   section).
 5. At this point, the DAKE is complete for Bob:
     * Sets ratchet id `i` as 0.
     * Sets `j` as 0 (which means he will ratchet again).
@@ -2559,7 +2560,7 @@ Bob's zero knowledge proofs or vice versa.
 
 ### SMP message 1
 
-Alice sends SMP message 1 to begin a ECDH exchange to determine two new
+Alice sends SMP message 1 to begin an ECDH exchange to determine two new
 generators, `g2` and `g3`. A valid SMP message 1 is generated as follows:
 
 1. Determine her secret input `x`, which is to be compared to Bob's secret
@@ -2603,7 +2604,7 @@ c3 (SCALAR), d3 (SCALAR)
 
 ### SMP message 2
 
-SMP message 2 is sent by Bob to complete the DH exchange to determine the new
+SMP message 2 is sent by Bob to complete the ECDH exchange to determine the new
 generators, `g2` and `g3`. It also begins the construction of the values used in
 the final comparison of the protocol. A valid SMP message 2 is generated as
 follows:
