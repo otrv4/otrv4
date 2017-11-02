@@ -535,6 +535,9 @@ OTRv4 supports some TLV record types from OTRv3. The supported types are:
 Type 0: Padding
   The value may be an arbitrary amount of data. This data should be ignored.
   This type can be used to disguise the length of a plaintext message.
+  XSalsa20, the algorith used for encryption of the message, is a stream cipher
+  and so no padding is required. If you want to do message padding (to disguise
+  the length of your message), use this TLV.
 
 Type 1: Disconnected
   Closes the connection.
@@ -1641,9 +1644,7 @@ Encrypted message (DATA)
   section) derived from the sender's and recipient's public keys (with the
   keyids given in this message), perform an XSalsa20 encryption of the message.
   The nonce used for this operation is also included in the header of the data
-  message packet. XSalsa20 is a stream cipher and so no padding is required. If
-  you want to do message padding (to disguise the length of your message), use
-  the Padding TLV of type 0.
+  message packet.
 ```
 
 #### Publishing Prekey Messages
