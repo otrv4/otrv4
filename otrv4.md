@@ -2674,7 +2674,7 @@ is generated as follows:
 7. Generate a zero-knowledge proof that `Ra` was created according to the
    protocol by setting `cr = HashToScalar(7 || G * r7 || (Qa - Qb) * r7)` and
    `d7 = r7 - a3 * cr mod q`.
-8. Store the values of `G3b`, `Pa - Pb`, `Qa - Qb` and `Ra` for use later in
+8. Store the values of `G3b`, `Pa - Pb`, `Qa - Qb` and `a3` for use later in
    the protocol.
 
 The SMP message 3 has the following data and format:
@@ -2813,7 +2813,7 @@ If smpstate is `SMPSTATE_EXPECT4`:
    1. Check that `Rb` is on curve Ed448. See
       [Verifying a point on curve](#verifying-a-point-on-curve) section for
       details.
-   2. Check that `cr = HashToScalar(8 || G * d7 + G3 * cr || (Qa - Qb) * d7 + Rb * cr)`.
+   2. Check that `cr = HashToScalar(8 || G * d7 + G3b * cr || (Qa - Qb) * d7 + Rb * cr)`.
 * Check whether the protocol was successful:
     1. `Compute Rab = Rb * a3`.
     2. Determine if `x = y` by checking the equivalent condition that
