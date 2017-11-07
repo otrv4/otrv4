@@ -1469,9 +1469,9 @@ Verify and decrypt message if included
 1. Receive a Non-Interactive-Auth message from Alice.
 2. Calculates ECDH shared secret `K_ecdh`.
 3. Calculates DH shared secret `k_dh` and `brace_key`.
-4. Calculates `κ = KDF_2(K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(Ska, X) || k_dh)`.
-5. Computes the Auth MAC key `Mk = KDF_2(0x01 || κ)`.
-6. Computes the Mixed shared secret `K = KDF_2(0x02 || κ)`.
+4. Calculates `tmp_k = KDF_2(K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(Ska, X) || k_dh)`.
+5. Computes the Auth MAC key `auth_mac_k = KDF_2(0x01 || tmp_k)`.
+6. Computes the Mixed shared secret `K = KDF_2(0x02 || tmp_k)`.
 7. 	Verifies the Non-Interactive-Auth message. See
     [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 8. At this point, the non-interactive DAKE is complete for Bob:
@@ -1561,9 +1561,9 @@ A valid Non-Interactive-Auth message is generated as follows:
   * public key `A`.
 4. Verify the Prekey message.
 5. Compute
-   `κ = KDF_2(K_ecdh || ECDH(x, their_shared_prekey) || ECDH(x, Pkb) || k_dh)`.
+   `tmp_k = KDF_2(K_ecdh || ECDH(x, their_shared_prekey) || ECDH(x, Pkb) || k_dh)`.
    This value is needed for the generation of the Mixed shared secret.
-6. Calculate the Auth MAC key `Mk = KDF_2(0x01 || κ)`.
+6. Calculate the Auth MAC key `auth_mac_k = KDF_2(0x01 || tmp_k)`.
 7. Compute `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(Φ) || their_shared_prekey`.
 8. Compute `sigma = Auth(Pka, ska, {Pkb, Pka, Y}, t)`. When computing `sigma`,
    keep the first 192 bits of the generated `c` value to be used as a `nonce` in
@@ -1575,8 +1575,9 @@ A valid Non-Interactive-Auth message is generated as follows:
    encrypted message, using the nonce set in the previous step. This will be
    referred as `encrypted_data_message`.
 10. If an encrypted message is attached, compute
-    `Auth MAC = KDF_2(Mk || t || encrypted_data_message)`. Otherwise, compute
-    `Auth MAC = KDF_2(Mk || t)`.
+    `Auth MAC = KDF_2(auth_mac_k || t || encrypted_data_message)`.
+    Otherwise, compute
+    `Auth MAC = KDF_2(auth_mac_k || t)`.
 11. Generate a 4-byte instance tag to use as the sender's instance tag.
     Additional messages in this conversation will continue to use this tag as
     the sender's instance tag. Also, this tag is used to filter future received
@@ -1594,8 +1595,9 @@ To verify a Non-Interactive-Auth message:
    for details.
 6. If present, extract the `encrypted_data_message`.
 7. If an encrypted data message was attached, compute
-   `Auth MAC = KDF_2(MK, || t || encrypted_data_message)`. Otherwise, compute
-   `Auth MAC = KDF_2(MK, || t)`.
+   `Auth MAC = KDF_2(auth_mac_k, || t || encrypted_data_message)`.
+   Otherwise, compute
+   `Auth MAC = KDF_2(auth_mac_k, || t)`.
 8. Verify the Auth Mac:
    * Extract the Auth MAC from the Non-Interactive-Auth message and verify that
      it is equal to the one calculated. If it is not, ignore the
