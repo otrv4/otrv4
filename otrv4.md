@@ -959,7 +959,7 @@ DSA signature (SIG):
 `EDDSA-SIG` refers to the OTR version 4 signature:
 
 ```
-EDDSA signature (EDDSA-SIG) [\[9\]](#references):
+EDDSA signature (EDDSA-SIG):
   (len is the expected length of the signature, which is 114 bytes)
   len byte unsigned value, big-endian
 ```
@@ -2440,6 +2440,7 @@ OTRv4 makes a few changes to SMP:
     section has length `0` and value `NULL`. In OTRv3, SMP Message 1 is used
     when the user does not specify an SMP question. If a question is supplied,
     SMP Message 1Q is used.
+  * SMP in OTRv4 uses the same SMP State Machine as OTRv3.
 
 ### SMP Overview
 
@@ -2549,7 +2550,7 @@ but no man-in-the-middle is capable of reading their communication either.
 There are many places where the first 64 bytes of a SHAKE-256 hash are taken of
 an integer followed by other values. This is defined as `HashToScalar(i || v)`
 where `i` is an integer used to distinguish the calls to the hash function and
-`v` is some value. Hashing is done in this way to prevent Alice from replaying
+`v` is some values. Hashing is done in this way to prevent Alice from replaying
 Bob's zero knowledge proofs or vice versa.
 
 ### SMP message 1
