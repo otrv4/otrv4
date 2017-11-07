@@ -1444,7 +1444,7 @@ Verify and decrypt message if included
       section for details.
 3. Generates and sets `our_ecdh` as ephemeral ECDH keys.
 4. Generates and sets `our_dh` as ephemeral 3072-bit DH keys.
-5. Extracts the Public Shared Prekey from the user profile and set it as
+5. Extracts the Public Shared Prekey from Bob's user profile and set it as
    `their_shared_prekey`.
 6. At this point, the non-interactive DAKE is complete for Alice:
 	* Sets ratchet id `i` as 0.
