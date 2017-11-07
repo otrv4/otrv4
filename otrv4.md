@@ -1453,9 +1453,9 @@ Verify and decrypt message if included
 	  `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
 	* Calculates DH shared secret `k_dh = DH(our_dh.secret, their_dh)`
 	  and `brace_key`.
-	* Computes `κ` as defined in
+	* Computes `tmp_k` as defined in
 	  [Non-Interactive-Auth Message](#non-interactive-auth-message).
-   * Calculates the Mixed shared secret `K = KDF_2(0x02 || κ)`.
+   * Calculates the Mixed shared secret `K = KDF_2(0x02 || tmp_k)`.
    * Calculates the SSID from shared secret: it is the first 8 bytes of
      `KDF_2(0x00 || K)`.
    * Calculates the first set of keys with
