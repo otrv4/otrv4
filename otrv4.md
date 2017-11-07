@@ -2440,7 +2440,10 @@ OTRv4 makes a few changes to SMP:
     section has length `0` and value `NULL`. In OTRv3, SMP Message 1 is used
     when the user does not specify an SMP question. If a question is supplied,
     SMP Message 1Q is used.
-  * SMP in OTRv4 uses the same SMP State Machine as OTRv3.
+  * SMP in OTRv4 uses the same SMP State Machine as OTRv3, with the exception
+    that `SMPSTATE_EXPECT1` only accepts SMP Message 1. Note that this
+    state machine has no effect on type 0 or type 1 TLVs, which are always
+    allowed.
 
 ### SMP Overview
 
@@ -2727,7 +2730,8 @@ cr (SCALAR), d7 (SCALAR)
 ### The SMP state machine
 
 OTRv4 does not change the state machine for SMP from OTRv3. But the following
-sections detail how values are computed differently during some states.
+sections detail how values are computed differently during some states. Each
+case assumes that the protocol state is `ENCRYPTED_MESSAGES`.
 
 #### Receiving a SMP message 1
 
