@@ -587,7 +587,7 @@ DAKE authenticates that both parties share the same value for `phi` (Φ).
 
 Therefore, the shared session state (Φ) is any session-specific protocol state
 available to both parties in the higher-level protocol. For example, in XMPP, it
-will be the node and domain identifiers of the Jabber identifier, e.g.
+will be the node and domain parts of the Jabber identifier, e.g.
 `alice@jabber.net`.
 
 ### OTR Error Messages
@@ -1595,9 +1595,9 @@ To verify a Non-Interactive-Auth message:
    for details.
 6. If present, extract the `encrypted_data_message`.
 7. If an encrypted data message was attached, compute
-   `Auth MAC = KDF_2(auth_mac_k, || t || encrypted_data_message)`.
+   `Auth MAC = KDF_2(auth_mac_k || t || encrypted_data_message)`.
    Otherwise, compute
-   `Auth MAC = KDF_2(auth_mac_k, || t)`.
+   `Auth MAC = KDF_2(auth_mac_k || t)`.
 8. Verify the Auth Mac:
    * Extract the Auth MAC from the Non-Interactive-Auth message and verify that
      it is equal to the one calculated. If it is not, ignore the
