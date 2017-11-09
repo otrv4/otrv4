@@ -1562,7 +1562,7 @@ A valid Non-Interactive-Auth message is generated as follows:
    `tmp_k = KDF_2(K_ecdh || ECDH(x, their_shared_prekey) || ECDH(x, Pkb) || k_dh)`.
    This value is needed for the generation of the Mixed shared secret.
 6. Calculate the Auth MAC key `auth_mac_k = KDF_2(0x01 || tmp_k)`.
-7. Compute `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(Φ) || their_shared_prekey`.
+7. Compute `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || their_shared_prekey || KDF_2(Φ)`.
 8. Compute `sigma = Auth(Pka, ska, {Pkb, Pka, Y}, t)`. When computing `sigma`,
    keep the first 192 bits of the generated `c` value to be used as a `nonce` in
    the next step. Refer to [SNIZKPK Authentication](#snizkpk-authentication)
@@ -1587,7 +1587,7 @@ To verify a Non-Interactive-Auth message:
 1. Check that the receiver's instance tag matches your sender's instance tag.
 2. Validate the user profile, and extract `Pka` from it.
 3. Verify that both ECDH and DH one-time use prekeys remain unused.
-4. Compute `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(Φ) || our_shared_prekey.public`.
+4. Compute `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || our_shared_prekey.public || KDF_2(Φ)`.
 5. Verify the `sigma` with [SNIZKPK Authentication](#snizkpk-authentication).
    See [Verification: Verify({A1, A2, A3}, sigma, m)](#verification-verifya1-a2-a3-sigma-m)
    for details.
