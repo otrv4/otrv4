@@ -352,7 +352,7 @@ operation should be done modulo the prime `dh_p`.
 
 To verify that an integer (`x`) is on the group with a 3072-bit modulus:
 
-1. Check that `x` is `>= g3` and `<= dh_q - g3`.
+1. Check that `x` is `>= g3` and `<= dh_p - g3`.
 2. Compute `x ^ q mod p`. If `result == 1`, the integer is a valid element.
    Otherwise the integer is an invalid element.
 
