@@ -1831,7 +1831,7 @@ Given a new ratchet:
   * If needed, calculate the extra symmetric key: `KDF_2(0xFF || K)`.
   * Derive new set of keys
     `root[i], chain_s[i][0], chain_r[i][0] = derive_ratchet_keys(root[i-1], K)`.
-  * Securely delete the root key and all chain keys from the ratchet `i-2`.
+  * Securely delete the root key and all chain keys from the ratchet `i-1`.
   * Securely delete `K`.
   * If present, forget and reveal MAC keys. The conditions for revealing MAC
     keys are stated in the [Revealing MAC keys](#revealing-mac-keys) section.
