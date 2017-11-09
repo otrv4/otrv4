@@ -1444,7 +1444,7 @@ Verify and decrypt message if included
       section for details.
 3. Generates and sets `our_ecdh` as ephemeral ECDH keys.
 4. Generates and sets `our_dh` as ephemeral 3072-bit DH keys.
-5. Extracts the Public Shared Prekey from Bob's user profile and set it as
+5. Extracts the Public Shared Prekey from Bob's user profile and sets it as
    `their_shared_prekey`.
 6. At this point, the non-interactive DAKE is complete for Alice:
 	* Sets ratchet id `i` as 0.
@@ -1494,13 +1494,11 @@ A valid Prekey message is generated as follows:
 1. Create a user profile, as defined in
    [Creating a user profile](#creating-a-user-profile) section.
 2. Create the first one-time use prekey by generating the ephemeral ECDH key
-   pair, as defined in
-   [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
+   pair, as defined in [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
    * secret key `y` (57 bytes).
    * public key `Y`.
 3. Create the second one-time use prekey by generating the ephemeral DH key
-   pair, as defined in
-   [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
+   pair, as defined in [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
    * secret key `b` (80 bytes).
    * public key `B`.
 4. Generate a 4-byte instance tag to use as the sender's instance tag.
