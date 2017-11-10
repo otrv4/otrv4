@@ -572,7 +572,7 @@ Type 7: Extra symmetric key
   will be used for (file transfer, voice encryption, etc). After that, the
   contents are use-specific (which file, etc): there are no predefined uses.
   Note that the value of the key itself is not placed into the TLV, your peer
-  will compute it on its own. Note that this represents TLV type 8 from OTRv3.
+  will compute it on its own. This TLV represents TLV type 8 from OTRv3.
 ```
 
 ### Shared Session State
@@ -588,7 +588,9 @@ DAKE authenticates that both parties share the same value for `phi` (Φ).
 Therefore, the shared session state (Φ) is any session-specific protocol state
 available to both parties in the higher-level protocol. For example, in XMPP, it
 will be the node and domain parts of the Jabber identifier, e.g.
-`alice@jabber.net`.
+`alice@jabber.net`. In an application that assigns some attribute to users
+before a conversation (e.g., a networked game in which players take on specific
+roles), the expected attributes (expressed in fixed length) should be included.
 
 ### OTR Error Messages
 
