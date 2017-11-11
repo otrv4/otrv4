@@ -1457,7 +1457,8 @@ Verify and decrypt message if included
 	  and `brace_key`.
 	* Computes `tmp_k` as defined in
 	  [Non-Interactive-Auth Message](#non-interactive-auth-message).
-   * Calculates the Mixed shared secret `K = KDF_2(0x02 || tmp_k)`.
+   * Calculates the Mixed shared secret `K = KDF_2(0x02 || tmp_k)`. Securely
+     delete `tmp_k`.
    * Calculates the SSID from shared secret: it is the first 8 bytes of
      `KDF_2(0x00 || K)`.
    * Calculates the first set of keys with
@@ -1473,7 +1474,8 @@ Verify and decrypt message if included
 3. Calculates DH shared secret `k_dh` and `brace_key`.
 4. Calculates `tmp_k = KDF_2(K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(Ska, X) || k_dh)`.
 5. Computes the Auth MAC key `auth_mac_k = KDF_2(0x01 || tmp_k)`.
-6. Computes the Mixed shared secret `K = KDF_2(0x02 || tmp_k)`.
+6. Computes the Mixed shared secret `K = KDF_2(0x02 || tmp_k)`. Securely
+   delete `tmp_k`.
 7. 	Verifies the Non-Interactive-Auth message. See
     [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 8. At this point, the non-interactive DAKE is complete for Bob:
