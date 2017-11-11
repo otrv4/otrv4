@@ -2528,9 +2528,19 @@ only information entered by the users, but also information unique to the
 conversation in which SMP takes place. This includes the Secure Session ID
 (SSID) whose creation is described
 [here](#interactive-deniable-authenticated-key-exchange-dake)
-and [here](#non-interactive-auth-message) .
+and [here](#non-interactive-auth-message). If the user requests to see this
+Secure Session ID, it should be displayed as two 32-bit bigendian unsigned
+values, for example, in C language, "%08x" format. If the party transmitted the
+Auth-R message during the DAKE, then display the first 32 bits in bold, and the
+second 32 bits in non-bold. If the user transmitted the Auth-I message instead,
+display the first 32 bits in non-bold, and the second 32 bits in bold. This
+Secure Session ID can be used by the parties to verify (say, over the telephone,
+assuming the parties recognize each others' voices) that there is no
+man-in-the-middle by having each side read his bold part to the other. Note that
+this only needs to be done in the event that the users do not trust that their
+long-term keys have not been compromised.
 
-Specifically, the format is:
+The format for the secret information is:
 
 ```
 Version (BYTE)
