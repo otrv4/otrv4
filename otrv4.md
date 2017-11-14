@@ -1192,7 +1192,8 @@ Bob will be initiating the DAKE with Alice.
       group and sets it as `their_dh`. See
       [Verifying an integer on the dh group](#verifying-an-integer-on-the-dh-group)
       section for details.
-4. Sends Alice an Auth-I message (see [Auth-I message](#auth-i-message section).
+4. Sends Alice an Auth-I message
+   (see [Auth-I message](#auth-i-message section)).
 5. At this point, the DAKE is complete for Bob:
     * Sets ratchet id `i` as 0.
     * Sets `j` as 0 (which means he will ratchet again).
@@ -1472,7 +1473,7 @@ Verify and decrypt message if included
 1. Receive a Non-Interactive-Auth message from Alice.
 2. Calculates ECDH shared secret `K_ecdh`.
 3. Calculates DH shared secret `k_dh` and `brace_key`.
-4. Calculates `tmp_k = KDF_2(K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(Ska, X) || k_dh)`.
+4. Calculates `tmp_k = KDF_2(K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(ska, X) || k_dh)`.
 5. Computes the Auth MAC key `auth_mac_k = KDF_2(0x01 || tmp_k)`.
 6. Computes the Mixed shared secret `K = KDF_2(0x02 || tmp_k)`. Securely
    delete `tmp_k`.
