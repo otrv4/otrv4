@@ -98,8 +98,7 @@ existing messaging protocol, such as XMPP.
    1. [Modify an encrypted data message](#modify-an-encrypted-data-message)
    1. [OTRv3 Specific Encoded Messages](#otrv3-specific-encoded-messages)
    1. [OTRv3 Protocol State Machine](#otrv3-protocol-state-machine)
-   1. [References](#references)
-   1. [Further Reading](#further-reading)
+1. [References](#references)
 
 ## Main Changes over Version 3
 
@@ -3264,7 +3263,7 @@ AUTHSTATE_AWAITING_SIG
 
 ```
 
-### References
+## References
 
 1. Goldberg, I. and Unger, N. (2016). *Improved Strongly Deniable Authenticated
    Key Exchanges for Secure Messaging*, Waterloo, Canada: University of
