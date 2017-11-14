@@ -3266,12 +3266,28 @@ AUTHSTATE_AWAITING_SIG
 
 ### References
 
-1. http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf "N. Unger, I. Goldberg: Improved Strongly Deniable Authenticated Key Exchanges for Secure Messaging"
-2. https://whispersystems.org/docs/specifications/doubleratchet "Trevor Perrin (editor), Moxie Marlinspike: The Double Ratchet Algorithm"
-3. https://cr.yp.to/snuffle/xsalsa-20081128.pdf "Daniel J. Bernstein: Extending the Salsa20 Nonce"
-4. https://mikehamburg.com/papers/goldilocks/goldilocks.pdf "M. Hamburg: Ed448-Goldilocks, a new elliptic curve"
-5. http://www.ietf.org/rfc/rfc7748.txt "A. Langley, M. Hamburg, and S. Turner: Elliptic Curves for Security.” Internet Engineering Task Force; RFC 7748 (Informational); IETF, Jan-2016"
-6. https://www.ietf.org/rfc/rfc3526.txt "M. Kojo: More Modular Exponential (MODP) Diffie-Hellman groups for Internet Key Exchange (IKE)"
-7. https://otr.cypherpunks.ca/Protocol-v3-4.0.0.html "Off-the-Record Messaging Protocol version 3"
-8. https://xmpp.org/extensions/xep-0060.pdf "P. Millard, P. Saint-Andre and R. Meijer: XEP-0060: Publish-Subscribe"
-9. https://tools.ietf.org/html/rfc8032 "S. Josefsson and I. Liusvaara: Edwards-curve Digital Signature Algorithm (EdDSA)"
+1. Goldberg, I. and Unger, N. (2016). *Improved Strongly Deniable Authenticated
+   Key Exchanges for Secure Messaging*, Waterloo, Canada: University of
+   Waterloo. Available at:
+   http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf
+2. Perrin, T and Marlinspike, M. (2016). *The Double Ratchet Algorithm*.
+   [online]signal.org. Available at:
+   https://whispersystems.org/docs/specifications/doubleratchet
+3. Bernstein, D. (2008). *Extending the Salsa20 Nonce*, Chicago,
+   USA: The University of Illinois at Chicago. Available at:
+   https://cr.yp.to/snuffle/xsalsa-20081128.pdf
+4. Hamburg, M. (2015). *Ed448-Goldilocks, a new elliptic curve*, NIST ECC
+   workshop. Available at: https://eprint.iacr.org/2015/625.pdf
+5. Hamburg, M., Langley, A. and Turner, S. (2016). *Elliptic Curves for
+   Security*, Internet Engineering Task Force, RFC 7748. Available at:
+   http://www.ietf.org/rfc/rfc7748.txt
+6. Kojo, M. (2003). *More Modular Exponential (MODP) Diffie-Hellman groups for
+   Internet Key Exchange (IKE)*, Internet Engineering Task Force,
+   RFC 3525. Available at: https://www.ietf.org/rfc/rfc3526.txt
+7. *Off-the-Record Messaging Protocol version 3*. Available at:
+   https://otr.cypherpunks.ca/Protocol-v3-4.1.1.html
+8. Meijer, R., Millard, P. and Saint-Andre, P. (2017). *XEP-0060:
+   Publish-Subscribe* Available at: https://xmpp.org/extensions/xep-0060.pdf
+9. Josefsson, S. and Liusvaara, I. (2017). *Edwards-curve Digital Signature
+   Algorithm (EdDSA)*, Internet Engineering Task Force, RFC 8032. Available at:
+   https://tools.ietf.org/html/rfc8032
