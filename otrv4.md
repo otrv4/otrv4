@@ -2055,7 +2055,8 @@ ENCRYPTED_MESSAGES
   This state is entered after the DAKE is finished. The interactive DAKE is
   finished after the Auth-I message is sent, received and validated. The
   non-interactive DAKE is finished when the Non-Interactive-Auth message is
-  sent, received and validated. Messages sent in this state are encrypted.
+  sent, and when it is received and validated. Messages sent in this state are
+  encrypted.
 
 FINISHED
 
@@ -2067,7 +2068,7 @@ FINISHED
   and her client will switch to the FINISHED state. This prevents  Alice from
   accidentally sending a message to Bob in plaintext (consider what happens
   if Alice was in the middle of typing a private message to Bob when he
-  suddenly logs out, just as Alice hits Enter.)
+  suddenly logs out, just as Alice hits the 'enter' key).
 ```
 
 ### Protocol events
@@ -2312,7 +2313,7 @@ If the version is 4:
 * If the state is not `ENCRYPTED_MESSAGES`:
 
   * Inform the user that an unreadable encrypted message was received.
-  * Reply with an Error Message with 'ERROR_1'.
+  * Reply with an Error Message with `ERROR_1`.
 
 * Otherwise:
 
@@ -2335,22 +2336,27 @@ If the version is 4:
     * Use the ratchet id and the message id to compute the corresponding
       decryption key. Try to decrypt the message.
 
-      * If the message cannot be decrypted and the 'IGNORE_UNREADABLE' flag is
+      * If the message cannot be decrypted and the `IGNORE_UNREADABLE` flag is
         not set:
-        * Inform the user that an unreadable encrypted message was received.
-        * Reply with an Error Message with 'ERROR_1'.
 
-      * If the message cannot be decrypted and the 'IGNORE_UNREADABLE' flag is
+          * Inform the user that an unreadable encrypted message was received.
+          * Reply with an Error Message with `ERROR_1`.
+
+      * If the message cannot be decrypted and the `IGNORE_UNREADABLE` flag is
         set:
-        * Ignore it instead of producing an error or a notification to the user.
+
+          * Ignore it instead of producing an error or a notification to the
+            user.
 
       * If the message can be decrypted:
-        * Display the human-readable part (if it contains any) to the user. SMP
-          TLVs should be addressed according to the SMP state machine.
-        * Rotate root, chain and brace keys as appropriate.
-        * If the received message contains a TLV type 1 (Disconnected):
-          * Forget all encryption keys for this correspondent and transition the
-            state to 'FINISHED'.
+
+          * Display the human-readable part (if it contains any) to the user.
+            SMP TLVs should be addressed according to the SMP state machine.
+          * Rotate root, chain and brace keys as appropriate.
+          * If the received message contains a TLV type 1 (Disconnected):
+
+             * Forget all encryption keys for this correspondent and transition
+               the state to `FINISHED`.
 
      * If you have not sent a message to this correspondent in some
        (configurable) time, send a "heartbeat" message.
