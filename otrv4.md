@@ -1568,7 +1568,7 @@ A valid Non-Interactive-Auth message is generated as follows:
 6. Calculate the Auth MAC key `auth_mac_k = KDF_2(0x01 || tmp_k)`.
 7. Compute `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || their_shared_prekey || KDF_2(Φ)`.
 8. Compute `sigma = Auth(Pka, ska, {Pkb, Pka, Y}, t)`. When computing `sigma`,
-   keep the first 192 bits of the generated `c` value to be used as a `nonce` in
+   keep the first 24 bytes of the generated `c` value to be used as a `nonce` in
    the next step. Refer to [SNIZKPK Authentication](#snizkpk-authentication)
    for details.
 9. A message can be optionally attached at this point. It is recommended to do
