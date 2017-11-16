@@ -2359,7 +2359,8 @@ If the version is 4:
                the state to `FINISHED`.
 
      * If you have not sent a message to this correspondent in some
-       (configurable) time, send a "heartbeat" message.
+       (configurable) time, send a "heartbeat" message. The heartbeat message
+       should have the `IGNORE_UNREADABLE` flag set.
 
 If the version is 3:
 
@@ -2375,10 +2376,10 @@ If the version is 3:
       * If you have not sent a message to this correspondent in some
         (configurable) time, send a "heartbeat" message, consisting of a Data
         Message encoding an empty plaintext. The heartbeat message should have
-        the 'IGNORE_UNREADABLE' flag set.
+        the `IGNORE_UNREADABLE` flag set.
       * If the received message contains a TLV type 1, forget all encryption
         keys for this correspondent, and transition msgstate to
-        'MSGSTATE_FINISHED'.
+        `MSGSTATE_FINISHED`.
     * Otherwise, inform the user that an unreadable encrypted message was
       received, and reply with an Error Message.
 
