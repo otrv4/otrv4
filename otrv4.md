@@ -589,7 +589,7 @@ available to both parties in the higher-level protocol. For example, in XMPP, it
 will be the node and domain parts of the Jabber identifier, e.g.
 `alice@jabber.net`. In an application that assigns some attribute to users
 before a conversation (e.g., a networked game in which players take on specific
-roles), the expected attributes (expressed in fixed length) should be included.
+roles), the expected attributes (expressed in fixed length) should be included.
 
 ### OTR Error Messages
 
