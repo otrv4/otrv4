@@ -1472,7 +1472,7 @@ Verify and decrypt message if included
 1. Receive a Non-Interactive-Auth message from Alice.
 2. Calculates ECDH shared secret `K_ecdh`.
 3. Calculates DH shared secret `k_dh` and `brace_key`.
-4. Calculates `tmp_k = KDF_2(K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(ska, X) || k_dh)`.
+4. Calculates `tmp_k = KDF_2(K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(ska, X) || brace_key)`.
 5. Computes the Auth MAC key `auth_mac_k = KDF_2(0x01 || tmp_k)`.
 6. Computes the Mixed shared secret `K = KDF_2(0x02 || tmp_k)`. Securely
    delete `tmp_k`.
@@ -1563,7 +1563,7 @@ A valid Non-Interactive-Auth message is generated as follows:
   * public key `A`.
 4. Verify the Prekey message.
 5. Compute
-   `tmp_k = KDF_2(K_ecdh || ECDH(x, their_shared_prekey) || ECDH(x, Pkb) || k_dh)`.
+   `tmp_k = KDF_2(K_ecdh || ECDH(x, their_shared_prekey) || ECDH(x, Pkb) || brace_key)`.
    This value is needed for the generation of the Mixed shared secret.
 6. Calculate the Auth MAC key `auth_mac_k = KDF_2(0x01 || tmp_k)`.
 7. Compute `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || their_shared_prekey || KDF_2(Φ)`.
