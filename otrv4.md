@@ -1635,19 +1635,20 @@ A (MPI)
   The ephemeral public DH key. Note that even though this is in uppercase,
   this is NOT a POINT.
 
-Auth MAC (MAC)
-  The MAC with the appropriate MAC key (see above) of the message for the
-  SNIZKPK.
-
 Sigma (SNIZKPK)
   The SNIZKPK Auth value.
 
-Encrypted message (DATA)
+Encrypted message (DATA) (optional)
   Using the appropriate encryption key (see 'When you send a Data Message'
   section) derived from the sender's and recipient's public keys (with the
   keyids given in this message), perform an XSalsa20 encryption of the message.
   The nonce used for this operation is also included in the header of the data
   message packet.
+
+Auth MAC (MAC)
+  The MAC with the appropriate MAC key (see above) of the message (t) for the
+  SNIZKPK. When an encrypted message is attached, this is also the MAC if the
+  this message.
 ```
 
 #### Publishing Prekey Messages
