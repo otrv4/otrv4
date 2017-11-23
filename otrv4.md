@@ -1638,6 +1638,13 @@ A (MPI)
 Sigma (SNIZKPK)
   The SNIZKPK Auth value.
 
+Message id (INT) (optional: if an encrypted message is attached)
+  This should be set with sender's j.
+
+Nonce (NONCE) (optional: if an encrypted message is attached)
+  The nonce used with XSalsa20 to create the encrypted message contained
+  in this packet.
+
 Encrypted message (DATA) (optional)
   Using the appropriate encryption key (see 'When you send a Data Message'
   section) derived from the sender's and recipient's public keys (with the
