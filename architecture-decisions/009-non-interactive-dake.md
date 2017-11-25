@@ -149,7 +149,14 @@ Auth MAC (MAC)
 Sigma (SNIZKPK)
   The SNIZKPK Auth value.
 
-Encrypted message (DATA)
+Message id (INT) (optional: if an encrypted message is attached)
+  This should be set with sender's j.
+
+Nonce (NONCE) (optional: if an encrypted message is attached)
+  The nonce used with XSalsa20 to create the encrypted message contained
+  in this packet.
+
+Encrypted message (DATA) (optional)
   Using the appropriate encryption key (see below) derived from the
   sender's and recipient's DH public keys (with the keyids given in this
   message), perform XSalsa20 encryption of the message. The nonce used for
