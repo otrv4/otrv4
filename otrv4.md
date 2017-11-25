@@ -1472,7 +1472,8 @@ Verify and decrypt message if included
 1. Receive a Non-Interactive-Auth message from Alice.
 2. Calculates ECDH shared secret `K_ecdh`.
 3. Calculates DH shared secret `k_dh` and `brace_key`.
-4. Calculates `tmp_k = KDF_2(K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(ska, X) || brace_key)`.
+4. Calculates `tmp_k = KDF_2(K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(ska, X) || brace_key)`. For the definition of `X`, see
+   the [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 5. Computes the Auth MAC key `auth_mac_k = KDF_2(0x01 || tmp_k)`.
 6. Computes the Mixed shared secret `K = KDF_2(0x02 || tmp_k)`. Securely
    delete `tmp_k`.
@@ -1577,7 +1578,7 @@ A valid Non-Interactive-Auth message is generated as follows:
    encrypted message, using the nonce set in the previous step. This will be
    referred as `encrypted_data_message`.
 10. If an encrypted message is attached, compute
-    `Auth MAC = KDF_2(auth_mac_k || t || encrypted_data_message)`.
+    `Auth MAC = KDF_2(auth_mac_k || t || (message_id || nonce ||encrypted_data_message))`.
     Otherwise, compute
     `Auth MAC = KDF_2(auth_mac_k || t)`.
 11. Generate a 4-byte instance tag to use as the sender's instance tag.
@@ -1597,7 +1598,7 @@ To verify a Non-Interactive-Auth message:
    for details.
 6. If present, extract the `encrypted_data_message`.
 7. If an encrypted data message was attached, compute
-   `Auth MAC = KDF_2(auth_mac_k || t || encrypted_data_message)`.
+   `Auth MAC = KDF_2(auth_mac_k || t || (message_id || nonce ||encrypted_data_message))`.
    Otherwise, compute
    `Auth MAC = KDF_2(auth_mac_k || t)`.
 8. Verify the Auth Mac:
