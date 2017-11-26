@@ -6,8 +6,9 @@ Otrv4 is a protocol that aims to:
 
 1. Be an alternative to current messaging applications that work in synchronous
    and asynchronous messaging environments.
-2. Be a comprehensive and up-to-date specification: update cryptographic
-   primitives and increase the security level of the whole protocol to 224 bits.
+2. Be a comprehensive and up-to-date specification: it updates cryptographic
+   primitives and increase the security level of the whole protocol to 224
+   bits.
 3. Provide better deniability properties.
 4. Be compatible with OTRv3 and be useful for instant messaging protocols
    (e.g. XMPP).
@@ -20,7 +21,7 @@ can and may be also implemented in other modes.
 
 ### Decision
 
-To attain all of the purposes of OTRv4, the specification will describe
+To attain all of the purposes of OTRv4, the specification can work in
 two modes:
 
 1. OTRv4 only: a always encrypted mode. This mode will not know how to handle
@@ -38,4 +39,4 @@ complexity of the specification and implementation.
 
 Furthermore, 'OTRv4 only' mode will only support version 4 of OTR. The User
 Profile, therefore will only allow the 1-byte version string "4". It will also
-not allow the Transition Signature parameter.
+not allow the Transition Signature parameter on the same profile.
