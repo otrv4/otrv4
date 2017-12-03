@@ -599,11 +599,13 @@ error. The message may also include a specific code at the beginning, e.g. "?OTR
 Error: ERROR_N:". This code is used to identify which error is being
 received for optional localization of the message.
 
-Error Code List:
+Currently, the following errors are supported:
 
 ```
   ERROR_1:
     Message cannot be decrypted
+  ERROR_2:
+    Message not in private
 ```
 
 ## Key Management
@@ -2322,7 +2324,7 @@ If the version is 4:
 * If the state is not `ENCRYPTED_MESSAGES`:
 
   * Inform the user that an unreadable encrypted message was received.
-  * Reply with an Error Message with `ERROR_1`.
+  * Reply with an Error Message with `ERROR_2`.
 
 * Otherwise:
 
@@ -2331,19 +2333,21 @@ If the version is 4:
        verify it with the Auth Mac as defined in the [Non-Interactive-Auth
        Message](#non-interactive-auth-message) section.
      * Check if the message version is allowed.
-     * If the instance tag in the message is not the instance tag you are
-       currently using, ignore the message.
+     * Check that the instance tag in the message is the instance tag you are
+       currently using.
      * Verify that the public ECDH key is on curve Ed448. See
        [Verifying a point on curve](#verifying-a-point-on-curve) for details.
      * Verify that the public DH key is from the correct group. See
        [Verifying an integer on the dh group](#verifying-an-integer-on-the-dh-group)
        section for details.
 
-    * If the message is not valid in any of the above steps, discard it and
-      optionally pass along a warning to the user.
+    * If the message is not valid in any of the above steps,
+      * Discard it and optionally pass along a warning to the user.
 
-    * Use the ratchet id and the message id to compute the corresponding
-      decryption key. Try to decrypt the message.
+    * Otherwise:
+
+      * Use the ratchet id and the message id to compute the corresponding
+        decryption key. Try to decrypt the message.
 
       * If the message cannot be decrypted and the `IGNORE_UNREADABLE` flag is
         not set:
@@ -2359,7 +2363,7 @@ If the version is 4:
 
       * If the message can be decrypted:
 
-          * Display the human-readable part (if it contains any) to the user.
+          * Display the human-readable part (if non empty) to the user.
             SMP TLVs should be addressed according to the SMP state machine.
           * Rotate root, chain and brace keys as appropriate.
           * If the received message contains a TLV type 1 (Disconnected):
@@ -2367,18 +2371,22 @@ If the version is 4:
              * Forget all encryption keys for this correspondent and transition
                the state to `FINISHED`.
 
-     * If you have not sent a message to this correspondent in some
-       (configurable) time, send a "heartbeat" message. The heartbeat message
-       should have the `IGNORE_UNREADABLE` flag set.
+          * If you have not sent a message to this correspondent in some
+            (configurable) time, send a "heartbeat" message. The heartbeat
+            message should have the `IGNORE_UNREADABLE` flag set.
 
 If the version is 3:
 
 * If msgstate is `MSGSTATE_ENCRYPTED`:
 
-    * Verify the information (MAC, keyids, ctr value, etc.) in the message.
+    * Verify the information (MAC, keyids, ctr value, etc) in the message.
     * If the instance tag in the message is not the instance tag you are
-      currently using, ignore the message.
+      currently using:
+
+      * Discard the message and optionally warn the user.
+
     * If the verification succeeds:
+
       * Decrypt the message and display the human-readable part (if non-empty)
         to the user.
       * Update the D-H encryption keys, if necessary.
@@ -2390,33 +2398,39 @@ If the version is 3:
         keys for this correspondent, and transition msgstate to
         `MSGSTATE_FINISHED`.
     * Otherwise, inform the user that an unreadable encrypted message was
-      received, and reply with an Error Message.
+      received, and reply with an Error Message, as defined on OTRv3 protocol.
 
   If msgstate is `MSGSTATE_PLAINTEXT` or `MSGSTATE_FINISHED`:
 
-    * Inform the user that an unreadable encrypted message was received, and
-      reply with an Error Message.
+   * Inform the user that an unreadable encrypted message was received, and
+     reply with an Error Message.
 
 #### Receiving an Error Message
 
-* Detect if an error code exists in the form "ERROR__x" where x is a number.
-* If the error code exists in the spec, display the human-readable error message
-  to the user.
-* Display the message in the language configured by the user.
+* Detect if an error code exists in the form "ERROR_x" where x is a number.
+* If the error code exists in the spec,
+  * Display the human-readable error message to the user.
 
-If using version 3 and expecting that the AKE will start when receiving a message:
+* Otherwise:
+  * Display the message in the language configured by the user.
+
+If using version 3 and expecting that the AKE will start when receiving a OTR
+Error message (when policy `ERROR_START_AKE` is set):
 
   * Reply with a query message
 
 #### User requests to end an OTR conversation
 
-Send a data message, encoding the message with an empty human-readable part, and
-TLV type 1. Transition to the `START` state.
+* Send a data message with an encoding of the message with an empty
+  human-readable part, and the TLV type 1.
+* Transition to the `START` state.
 
 #### Receiving a TLV type 1 (Disconnected) Message
 
-If the instance tag in the message is not the instance tag you are currently
-using, ignore the message.
+* If the instance tag in the message is not the instance tag you are currently
+  using:
+
+  * Discard the message and optionally warn the user.ignore the message.
 
 If the version is 4:
 
@@ -2762,7 +2776,10 @@ cr (SCALAR), d7 (SCALAR)
 
 OTRv4 does not change the state machine for SMP from OTRv3. But the following
 sections detail how values are computed differently during some states. Each
-case assumes that the protocol state is `ENCRYPTED_MESSAGES`.
+case assumes that the protocol state is `ENCRYPTED_MESSAGES`. It must be taken
+into account that state `SMPSTATE_EXPECT1` is reached whenever an error occurs
+or SMP is aborted. In that case, the protocol must be restarted from the
+beginning.
 
 #### Receiving a SMP message 1
 
