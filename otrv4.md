@@ -1970,16 +1970,18 @@ OTR message as follows:
     a Data Message would start with `?OTR:AAQD` and end with `.`.
   * Break it up into sufficiently small pieces. Let this number of pieces be
   `total`, and the pieces be `piece[1],piece[2],...,piece[total]`.
-  * Transmit `total` OTRv4 fragmented messages with the following structure:
+  * Transmit `total` OTRv4 fragmented messages with the following (printf-like)
+    structure:
 
   ```
-  ?OTR|sender_instance|receiver_instance,index,total,piece[index],
+  "?OTR|%x|%x,%hu,%hu,%s," , sender_instance, receiver_instance, index, total,
+  piece[index]
   ```
 
 The message should begin with `?OTR|` and end with `,`.
 
 Note that `index` and `total` are unsigned short ints (2 bytes), and each has
-a maximum value of 65535. Also, each `piece[index]` must be non-empty.
+a maximum value of 65535. Each `piece[index]` must be non-empty.
 The instance tags, `index` and `total` values may have leading zeros.
 
 Note that fragments are not messages that can be fragmented: you can't fragment a fragment.
@@ -1989,12 +1991,13 @@ Note that fragments are not messages that can be fragmented: you can't fragment 
 If you receive a message containing `?OTR|` (note that you'll need to check
 for this _before_ checking for any of the other `?OTR:` markers):
 
-  * Parse it, extracting instance tags, `index`, `total`, and `piece[index]`.
-  * Discard illegal fragment, if:
-       * the recipient's own instance tag does not match the listed receiver
-       instance tag
-       * and the listed receiver's instance tag is not zero,
-    * then, discard the message and optionally pass a warning to the user.
+  * Parse it (as the previous printf structure) extracting the instance tags,
+    `index`, `total`, and `piece[index]`.
+  * Discard the message and optionally pass a warning to the user, if:
+    * the recipient's own instance tag does not match the listed receiver
+      instance tag
+    * the listed receiver's instance tag is not zero
+  * Discard the illegal fragment, if:
     * `index` is 0
     * `total` is 0
     * `index` is bigger than total
