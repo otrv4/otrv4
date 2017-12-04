@@ -617,10 +617,10 @@ roles), the expected attributes (expressed in fixed length) should be included.
 
 ### OTR Error Messages
 
-Any message containing the string "?OTR Error:" is an OTR Error Message. The
+Any message containing the string "?OTR Error: " is an OTR Error Message. The
 following part of the message should contain human-readable details of the
 error. The message may also include a specific code at the beginning, e.g. "?OTR
-Error: ERROR_N:". This code is used to identify which error is being
+Error: ERROR_N: ". This code is used to identify which error is being
 received for optional localization of the message.
 
 Currently, the following errors are supported:
@@ -2368,7 +2368,7 @@ If the version is 4:
        [Verifying an integer on the dh group](#verifying-an-integer-on-the-dh-group)
        section for details.
 
-    * If the message is not valid in any of the above steps,
+    * If the message is not valid in any of the above steps:
       * Discard it and optionally pass along a warning to the user.
 
     * Otherwise:
