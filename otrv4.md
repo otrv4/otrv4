@@ -28,6 +28,7 @@ existing messaging protocol, such as XMPP.
    1. [Encoding and Decoding](#encoding-and-decoding)
    1. [Serializing the SNIZKPK Authentication](#serializing-the-snizkpk-authentication)
    1. [Public keys, Shared Prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
+   1. [Instace Tags](#instance-tags)
    1. [TLV Record Types](#tlv-record-types)
    1. [Shared session state](#shared-session-state)
    1. [OTR Error Messages](#otr-error-messages)
@@ -514,6 +515,29 @@ comparison may be used. The fingerprint is generated as:
 
 * Use of the first 56 bytes from the `SHAKE-256(byte(H))` (224-bit security
   level)
+
+### Instance Tags
+
+Clients include instance tags in all OTR version 4 messages. Instance tags are
+32-bit values that are intended to be persistent. If the same client is logged
+into the same account from multiple locations, the intention is that the client
+will have different instance tags at each location. OTR version 4 messages
+(fragmented and unfragmented) include the source and destination instance tags.
+If a client receives a message that lists a destination instance tag different
+from its own, the client should discard the message.
+
+The smallest valid instance tag is `0x00000100`. It is appropriate to set the
+destination instance tag to `0` when an actual destination instance tag is not
+known at the time the message is prepared. If a client receives a message with
+the sender instance tag set to less than `0x00000100`, it should discard the
+message. Similarly, if a client receives a message with the recipient instance
+tag set to greater than `0` but less than `0x00000100`, it should discard the
+message.
+
+This practice avoids an issue on IM networks that always relay all messages to
+all sessions of a client who is logged in multiple times. In this situation, OTR
+clients can attempt to establish an OTR session indefinitely if there are
+interleaving messages from each of the sessions.
 
 ### TLV Record Types
 
