@@ -2444,11 +2444,11 @@ If the version is 3:
 #### Receiving an Error Message
 
 * Detect if an error code exists in the form "ERROR_x" where x is a number.
-* If the error code exists in the spec,
+* If the error code exists in the spec:
   * Display the human-readable error message to the user.
 
 * Otherwise:
-  * Display the message in the language configured by the user.
+  * Ignore the message.
 
 If using version 3 and expecting that the AKE will start when receiving a OTR
 Error message (when policy `ERROR_START_AKE` is set):
