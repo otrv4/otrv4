@@ -404,7 +404,9 @@ In order to encode and decode `POINT` and `SCALAR` types, refer to the
 
 ### Encoding and Decoding
 
-This describes the encoding and decoding schemes specified in RFC 8032 [\[9\]](#references).
+This describes the encoding and decoding schemes specified in RFC 8032
+[\[9\]](#references) for scalars and points. It also describes the encoding of
+the OTR messages that should be transmitted encoded.
 
 #### Scalar
 
@@ -443,6 +445,12 @@ A curve point is decoded as follows:
 3. Use the `x_0` bit to select the right square root.  If `x = 0`, and
    `x_0 = 1`, decoding fails.  Otherwise, if `x_0 != x mod 2`, set
    `x <-- p - x`.  Return the decoded point `(x,y)`.
+
+#### Encoded Messages
+
+OTR messages must be base-64 encoded. To transmit one of these messages,
+construct an ASCII string: the five bytes "?OTR:", the base-64 encoding of the
+binary form of the message and the byte ".".
 
 ### Serializing the SNIZKPK Authentication
 
@@ -621,7 +629,8 @@ Any message containing the string "?OTR Error: " is an OTR Error Message. The
 following part of the message should contain human-readable details of the
 error. The message may also include a specific code at the beginning, e.g. "?OTR
 Error: ERROR_N: ". This code is used to identify which error is being
-received for optional localization of the message.
+received for optional localization of the message. OTR Error Messages are
+unencoded: they are not base-64 encoded binary.
 
 Currently, the following errors are supported:
 
