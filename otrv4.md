@@ -1554,7 +1554,7 @@ Protocol version (SHORT)
   The version number of this protocol is 0x0004.
 
 Message type (BYTE)
-  The message has type 0x55.
+  The message has type 0x0F.
 
 Prekey owner's instance tag (INT)
   The instance tag of the client that created the prekey.
@@ -1644,7 +1644,7 @@ Protocol version (SHORT)
   The version number of this protocol is 0x0004.
 
 Message type (BYTE)
-  The message has type 0x04.
+  The message has type 0x8D.
 
 Sender's instance tag (INT)
   The instance tag of the person sending this message.
