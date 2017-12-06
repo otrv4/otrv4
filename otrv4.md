@@ -3100,20 +3100,46 @@ allows the secure session id to be much shorter than in OTRv1, while still
 preventing a man-in-the-middle attack on it.
 
 The D-H Commit Message consists of the protocol version, the message type, the
-sender's instance tag, the receiver's instance tag, the encrypted sender's
-private key and the hashed sender's private key.
+sender's instance tag, the receiver's instance tag, the encoded encrypted
+sender's public key and the hashed sender's public key.
 
 #### D-H Key Message
 
 This is the second message of OTRv3 AKE. Alice sends it to Bob.
 
 It consists of: the protocol version, the message type, the sender's instance
+tag, the receiver's instance tag and the public key.
+
+#### Reveal Signature Message
+
+This is the third message of the OTRv3 AKE. Bob sends it to Alice, revealing his
+D-H encryption key (and thus opening an encrypted channel), and also
+authenticating himself (and the parameters of the channel, preventing a
+man-in-the-middle attack on the channel itself) to Alice.
+
+It consists of: the protocol version, the message type, the sender's instance
 tag, the receiver's instance tag, the revealed key, the encrypted signature and
-and the MAC of the signature.
+the MAC of the signature.
+
+#### Signature Message
+
+This is the final message of the OTRv3 AKE. Alice sends it to Bob,
+authenticating herself and the channel parameters to him.
+
+It consists of: the protocol version, the message type, the sender's instance
+tag, the receiver's instance tag, the encrypted signature and the MAC of the
+signature.
+
+#### Data Message
+
+In OTRv3, this message is used to transmit a private message to the
+correspondent. It is also used to reveal old MAC keys.
 
 #### Receiving a D-H Commit Message
 
-If the message is version 3 and version 3 is not allowed, ignore the message.
+If the message is version 3 and version 3 is not allowed:
+
+  * Ignore the message.
 
 Otherwise:
 
@@ -3127,8 +3153,8 @@ If authstate is `AUTHSTATE_AWAITING_DHKEY`:
   * This indicates that you have already sent a `D-H Commit message` to your
     peer, but that it either didn't receive it, or just didn't receive it yet
     and has sent you one as well. The symmetry will be broken by comparing the
-    hashed `gx` you sent in your `D-H Commit Message` with the one you received,
-    considered as 32-byte unsigned big-endian values.
+    hashed `g^x` you sent in your `D-H Commit Message` with the one you
+    received, considered as 32-byte unsigned big-endian values.
 
   * If yours is the higher hash value:
 
@@ -3137,7 +3163,7 @@ If authstate is `AUTHSTATE_AWAITING_DHKEY`:
 
   * Otherwise:
 
-    * Forget the old encrypted `gx` value that you sent earlier, and pretend
+    * Forget the old encrypted `g^x` value that you sent earlier, and pretend
       you're in `AUTHSTATE_NONE`. For example, reply with a `D-H Key Message`,
       and transition `authstate` to `AUTHSTATE_AWAITING_REVEALSIG`.
 
@@ -3165,7 +3191,9 @@ If authstate is `AUTHSTATE_AWAITING_SIG`:
 #### Receiving a D-H Key Message
 
 If the instance tag in the message is not the instance tag you are currently
-using, ignore the message.
+using:
+
+  * Ignore the message.
 
 If the message is version 3 and version 3 is not allowed:
 
@@ -3192,12 +3220,48 @@ If authstate is `AUTHSTATE_NONE`, `AUTHSTATE_AWAITING_REVEALSIG`, or
 
   * Ignore the message.
 
-#### Receiving a Signature Message
+#### Receiving a Reveal Signature Message
 
 If the instance tag in the message is not the instance tag you are currently
 using, ignore the message.
 
-If version 3 is not allowed, ignore this message.
+If version 3 is not allowed:
+
+   * Ignore this message.
+
+Otherwise:
+
+If authstate is `AUTHSTATE_AWAITING_REVEALSIG`:
+
+  * Use the received value of `r` to decrypt the value of `g^x` received in the
+    D-H Commit Message, and verify the hash therein.
+  * Decrypt the encrypted signature, and verify the signature and the MACs. If
+    everything checks out:
+
+    * Reply with a Signature Message.
+    * Transition authstate to `AUTHSTATE_NONE`.
+    * Transition msgstate to `MSGSTATE_ENCRYPTED`.
+    * If there is a recent stored message, encrypt it and send it as a Data
+      Message.
+
+  * Otherwise:
+
+    * Ignore the message.
+
+If authstate is `AUTHSTATE_NONE`, `AUTHSTATE_AWAITING_DHKEY` or `AUTHSTATE_AWAITING_SIG`:
+
+  * Ignore the message.
+
+#### Receiving a Signature Message
+
+If the instance tag in the message is not the instance tag you are currently
+using:
+
+  * Ignore the message.
+
+If version 3 is not allowed:
+
+  * Ignore this message.
 
 Otherwise:
 
@@ -3216,58 +3280,6 @@ If authstate is `AUTHSTATE_AWAITING_SIG`:
 If authstate is `AUTHSTATE_NONE`, `AUTHSTATE_AWAITING_DHKEY` or `AUTHSTATE_AWAITING_REVEALSIG`:
 
   * Ignore the message.
-
-#### Receiving a Reveal Signature Message
-
-If the instance tag in the message is not the instance tag you are currently
-using, ignore the message.
-
-If version 3 is not allowed:
-
-   * Ignore this message.
-
-Otherwise:
-
-If authstate is `AUTHSTATE_AWAITING_REVEALSIG`:
-
-  * Use the received value of r to decrypt the value of gx received in the D-H
-    Commit Message, and verify the hash therein.
-  * Decrypt the encrypted signature, and verify the signature and the MACs. If
-    everything checks out:
-
-    * Reply with a Signature Message.
-    * Transition authstate to `AUTHSTATE_NONE`.
-    * Transition msgstate to `MSGSTATE_ENCRYPTED`.
-    * If there is a recent stored message, encrypt it and send it as a Data
-      Message.
-
-  * Otherwise:
-
-    * Ignore the message.
-
-If authstate is `AUTHSTATE_NONE`, `AUTHSTATE_AWAITING_DHKEY` or `AUTHSTATE_AWAITING_SIG`:
-
-  * Ignore the message.
-
-#### Reveal Signature Message
-
-This is the third message of the OTRv3 AKE. Bob sends it to Alice, revealing his
-D-H encryption key (and thus opening an encrypted channel), and also
-authenticating himself (and the parameters of the channel, preventing a
-man-in-the-middle attack on the channel itself) to Alice.
-
-It consists of: the protocol version, the message type, the sender's instance
-tag, the receiver's instance tag, the encrypted signature and the MAC of the
-signature.
-
-#### Signature Message
-
-This is the final message of the OTRv3 AKE. Alice sends it to Bob,
-authenticating herself and the channel parameters to him.
-
-It consists of: the protocol version, the message type, the sender's instance
-tag, the receiver's instance tag, the encrypted signature and the MAC of the
-signature.
 
 #### Sending a TLV type 1 (Disconnected) Message
 
