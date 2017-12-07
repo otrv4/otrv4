@@ -2466,7 +2466,7 @@ Error message (when policy `ERROR_START_AKE` is set):
 * If the instance tag in the message is not the instance tag you are currently
   using:
 
-  * Discard the message and optionally warn the user.ignore the message.
+  * Discard the message and optionally warn the user.
 
 If the version is 4:
 
