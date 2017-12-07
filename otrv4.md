@@ -28,7 +28,7 @@ existing messaging protocol, such as XMPP.
    1. [Encoding and Decoding](#encoding-and-decoding)
    1. [Serializing the SNIZKPK Authentication](#serializing-the-snizkpk-authentication)
    1. [Public keys, Shared Prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
-   1. [Instace Tags](#instance-tags)
+   1. [Instance Tags](#instance-tags)
    1. [TLV Record Types](#tlv-record-types)
    1. [Shared session state](#shared-session-state)
    1. [OTR Error Messages](#otr-error-messages)
@@ -406,7 +406,7 @@ In order to encode and decode `POINT` and `SCALAR` types, refer to the
 
 This describes the encoding and decoding schemes specified in RFC 8032
 [\[9\]](#references) for scalars and points. It also describes the encoding of
-the OTR messages that should be transmitted encoded.
+the OTRv4 messages that should be transmitted encoded.
 
 #### Scalar
 
@@ -448,7 +448,7 @@ A curve point is decoded as follows:
 
 #### Encoded Messages
 
-OTR messages must be base-64 encoded. To transmit one of these messages,
+OTRv4 messages must be base-64 encoded. To transmit one of these messages,
 construct an ASCII string: the five bytes "?OTR:", the base-64 encoding of the
 binary form of the message and the byte ".".
 
@@ -784,7 +784,8 @@ derive_ratchet_keys(R_i-1, K):
   Cb = KDF_2(0x03 || KDF_2(R_i-1 || K))
   return R, decide_between_chain_keys(Ca, Cb)
 ```
-NOTE: If no R is supplied (as for the first ratchet), then each value should be derived from KDF_2(0x0n || K) where n is the appropriate value as above.
+NOTE: If no R is supplied (as for the first ratchet), then each value should be
+derived from KDF_2(0x0n || K) where n is the appropriate value as above.
 
 ### Rotating ECDH keys and brace key as sender
 
@@ -897,7 +898,8 @@ the session is expired.
 To expire the session:
 
 1. Send a TLV type 1 (Disconnected) Message
-2. Securely delete all keys and data associated with the conversation. This includes:
+2. Securely delete all keys and data associated with the conversation.
+   This includes:
 
    1. The root key and all chain keys.
    2. The ECDH keys, DH keys and brace key.
@@ -1015,8 +1017,8 @@ To create a user profile, assemble:
    It adds partial protection against an attacker that modifies the first flow
    of the non-interactive DAKE and that compromises the party's secret long term
    key. For its generation, refer to
-   [Public keys, shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints) section.
-   This key should expire when the user profile expires.
+   [Public keys, shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
+   section. This key should expire when the user profile expires.
 5. Profile Signature: The symmetric key, the flag `f` (set to zero, as defined
    on [RFC]8032) and the empty context `c` are used to create signatures of the
    entire profile excluding the signature itself. The size of the signature is
@@ -1440,7 +1442,8 @@ for authentication (Auth).
 
 Alice's long-term Ed448 key-pair is `(ska, PKa)` and Bob's long-term Ed448
 key-pair is `(skb, PKb)`. Both key pairs are generated as stated on the
-[Public keys, shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints) section.
+[Public keys, shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
+section.
 
 #### Non-interactive DAKE Overview
 
@@ -1507,8 +1510,9 @@ Verify and decrypt message if included
 1. Receive a Non-Interactive-Auth message from Alice.
 2. Calculates ECDH shared secret `K_ecdh`.
 3. Calculates DH shared secret `k_dh` and `brace_key`.
-4. Calculates `tmp_k = KDF_2(K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(ska, X) || brace_key)`. For the definition of `X`, see
-   the [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
+4. Calculates `tmp_k = KDF_2(K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(ska, X) || brace_key)`.
+   For the definition of `X`, see the [Non-Interactive-Auth Message](#non-interactive-auth-message)
+   section.
 5. Computes the Auth MAC key `auth_mac_k = KDF_2(0x01 || tmp_k)`.
 6. Computes the Mixed shared secret `K = KDF_2(0x02 || tmp_k)`. Securely
    delete `tmp_k`.
@@ -2013,7 +2017,7 @@ OTR message as follows:
 
 The message should begin with `?OTR|` and end with `,`.
 
-Note that `index` and `total` are unsigned short ints (2 bytes), and each has
+Note that `index` and `total` are unsigned short int (2 bytes), and each has
 a maximum value of 65535. Each `piece[index]` must be non-empty.
 The instance tags, `index` and `total` values may have leading zeros.
 
@@ -3277,7 +3281,8 @@ If authstate is `AUTHSTATE_AWAITING_SIG`:
 
   * Otherwise, ignore the message.
 
-If authstate is `AUTHSTATE_NONE`, `AUTHSTATE_AWAITING_DHKEY` or `AUTHSTATE_AWAITING_REVEALSIG`:
+If authstate is `AUTHSTATE_NONE`, `AUTHSTATE_AWAITING_DHKEY`
+or `AUTHSTATE_AWAITING_REVEALSIG`:
 
   * Ignore the message.
 
