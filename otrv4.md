@@ -571,11 +571,12 @@ Type 0: Padding
   the length of your message), use this TLV.
 
 Type 1: Disconnected
-  Closes the connection.
+  Closes the connection. This TLV should have the 'IGNORE_UNREADABLE' flag set.
 
 Type 2: SMP Message 1
   The value represents the initial message of the Socialist Millionaires'
   Protocol (SMP). Note that this represents TLV type 1 and 7 from OTRv3.
+  This TLV should have the 'IGNORE_UNREADABLE' flag set.
 
 Type 3: SMP Message 2
   The value represents the second message in an instance of the SMP.
@@ -593,7 +594,7 @@ Type 6: SMP Abort Message
   to abort the protocol. The associated length should be zero and the
   associated value should be empty. If you receive a TLV of this type,
   you should change the SMP state to 'SMPSTATE_EXPECT1' (see below in SMP
-  section).
+  section). This TLV should have the 'IGNORE_UNREADABLE' flag set.
 
 Type 7: Extra symmetric key
   If you wish to use the extra symmetric key, compute it yourself as outlined
@@ -604,6 +605,7 @@ Type 7: Extra symmetric key
   contents are use-specific (which file, etc): there are no predefined uses.
   Note that the value of the key itself is not placed into the TLV, your peer
   will compute it on its own. This TLV represents TLV type 8 from OTRv3.
+  This TLV should have the 'IGNORE_UNREADABLE' flag set.
 ```
 
 ### Shared Session State
