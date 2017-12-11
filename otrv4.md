@@ -636,9 +636,9 @@ Currently, the following errors are supported:
 
 ```
   ERROR_1:
-    Message cannot be decrypted
+    Unreadable message
   ERROR_2:
-    Message not in private
+    Not in private state message
 ```
 
 ## Key Management
@@ -2363,8 +2363,8 @@ If the version is 4:
 
 * If the state is not `ENCRYPTED_MESSAGES`:
 
-  * Inform the user that an unreadable encrypted message was received.
-  * Reply with an Error Message with `ERROR_2`.
+  * Inform the user that an unreadable encrypted message was received by
+    replying with an Error Message: `ERROR_2`.
 
 * Otherwise:
 
@@ -2392,8 +2392,8 @@ If the version is 4:
       * If the message cannot be decrypted and the `IGNORE_UNREADABLE` flag is
         not set:
 
-          * Inform the user that an unreadable encrypted message was received.
-          * Reply with an Error Message with `ERROR_1`.
+          * Inform the user that an unreadable encrypted message was received
+            by replying with an Error Message: `ERROR_1`.
 
       * If the message cannot be decrypted and the `IGNORE_UNREADABLE` flag is
         set:
@@ -2443,7 +2443,7 @@ If the version is 3:
   If msgstate is `MSGSTATE_PLAINTEXT` or `MSGSTATE_FINISHED`:
 
    * Inform the user that an unreadable encrypted message was received, and
-     reply with an Error Message.
+     reply with an Error Message, as defined on OTRv3 protocol.
 
 #### Receiving an Error Message
 
