@@ -835,7 +835,7 @@ Before rotating the keys:
 To rotate the ECDH keys:
 
   * Retrieve the ECDH key from the received data message and assign it to
-    their_ecdh.
+    `their_ecdh`.
   * Calculate `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
 
 To rotate the brace key:
@@ -906,7 +906,8 @@ To expire the session:
    1. The root key and all chain keys.
    2. The ECDH keys, DH keys and brace key.
    3. `K`.
-   4. The `ssid` and any `old_mac_keys` that remain unrevealed.
+   4. The `ssid`, any `old_mac_keys` that remain unrevealed, and the
+      `extra symmetric key` if present.
 
 3. Transition the protocol state machine to `START`
 
