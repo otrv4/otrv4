@@ -21,9 +21,9 @@ existing messaging protocol, such as XMPP.
 1. [Notation and parameters](#notation-and-parameters)
    1. [Notation](#notation)
    1. [Elliptic Curve Parameters](#elliptic-curve-parameters)
-      1. [Verifying a point on curve](#verifying-a-point-on-curve)
+      1. [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    1. [3072-bit Diffie-Hellman Parameters](#3072-bit-diffie-hellman-parameters)
-      1. [Verifying an integer on the DH group](#verifying-an-integer-on-the-dh-group)
+      1. [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
 1. [Data Types](#data-types)
    1. [Encoding and Decoding](#encoding-and-decoding)
    1. [Serializing the SNIZKPK Authentication](#serializing-the-snizkpk-authentication)
@@ -279,7 +279,7 @@ Non-square element in Z_p (d)
   -39081
 ```
 
-#### Verifying a point on curve
+#### Verifying that a point is on the curve
 
 To verify that a point (`X = x, y`) is on curve Ed448-Goldilocks:
 
@@ -348,7 +348,7 @@ Hexadecimal value of dh_q:
 Whenever you see an operation on a field element from this group, the
 operation should be done modulo the prime `dh_p`.
 
-#### Verifying an integer on the DH group
+#### Verifying that an integer is in the DH group
 
 To verify that an integer (`x`) is on the group with a 3072-bit modulus:
 
@@ -1143,7 +1143,7 @@ To validate a user profile, you must:
 * Verify that the user profile has not expired
 * Verify that the `Versions` field contains the character "4"
 * Validate that the public shared prekey is on the curve Ed448. See
-  [Verifying a point on curve](#verifying-a-point-on-curve) section for details.
+  [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) section for details.
 
 ## Online Conversation Initialization
 
@@ -1200,11 +1200,10 @@ Bob will be initiating the DAKE with Alice.
       messages.
     * Validates the received ECDH ephemeral public key is on curve Ed448 and
       sets it as `their_ecdh`.
-      See [Verifying a point on curve](#verifying-a-point-on-curve) section for
-      details.
+      See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) section for details.
     * Validates that the received DH ephemeral public key is on the correct
       group and sets it as `their_dh`. See
-      [Verifying an integer on the dh group](#verifying-an-integer-on-the-dh-group)
+      [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
       section for details.
 2. Generates and sets `our_ecdh` as ephemeral ECDH keys.
 3. Generates and sets `our_dh` as ephemeral 3072-bit DH keys.
@@ -1224,11 +1223,10 @@ Bob will be initiating the DAKE with Alice.
 3. Retrieve ephemeral public keys from Alice:
     * Validates the received ECDH ephemeral public key is on curve Ed448 and
       sets it as `their_ecdh`.
-      See [Verifying a point on curve](#verifying-a-point-on-curve) section for
-      details.
+      See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) section for details.
     * Validates that the received DH ephemeral public key is on the correct
       group and sets it as `their_dh`. See
-      [Verifying an integer on the dh group](#verifying-an-integer-on-the-dh-group)
+      [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
       section for details.
 4. Sends Alice an Auth-I message
    (see [Auth-I message](#auth-i-message section)).
@@ -1288,9 +1286,9 @@ To verify an Identity message:
 
 * Validate the User Profile.
 * Verify that the point `Y` received is on curve Ed448. See
-  [Verifying a point on curve](#verifying-a-point-on-curve) section for details.
+  [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) section for details.
 * Verify that the DH public key `B` is from the correct group. See
-  [Verifying an integer on the dh group](#verifying-an-integer-on-the-dh-group)
+  [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
   section for details.
 
 An Identity message is an OTR message encoded as:
@@ -1478,11 +1476,10 @@ Verify and decrypt message if included
       messages.
     * Validates that the received ECDH ephemeral public key is on curve Ed448
       and sets it as `their_ecdh`.
-      See [Verifying a point on curve](#verifying-a-point-on-curve) section for
-      details.
+      See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) section for details.
     * Validates that the received DH ephemeral public key is on the correct
       group and sets it as `their_dh`. See
-      [Verifying an integer on the dh group](#verifying-an-integer-on-the-dh-group)
+      [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
       section for details.
 3. Generates and sets `our_ecdh` as ephemeral ECDH keys.
 4. Generates and sets `our_dh` as ephemeral 3072-bit DH keys.
@@ -1557,9 +1554,9 @@ To verify a Prekey message:
 
 * [Validate the user profile](#validating-a-user-profile)
 * Check that the ECDH public key `Y` is on curve Ed448. See
-  [Verifying a point on curve](#verifying-a-point-on-curve) section for details.
+  [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) section for details.
 * Verify that the DH public key `B` is from the correct group. See
-  [Verifying an integer on the dh group](#verifying-an-integer-on-the-dh-group)
+  [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
   section for details.
 
 A Prekey is an OTR message encoded as:
@@ -2378,9 +2375,9 @@ If the version is 4:
      * Check that the instance tag in the message is the instance tag you are
        currently using.
      * Verify that the public ECDH key is on curve Ed448. See
-       [Verifying a point on curve](#verifying-a-point-on-curve) for details.
+       [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) for details.
      * Verify that the public DH key is from the correct group. See
-       [Verifying an integer on the dh group](#verifying-an-integer-on-the-dh-group)
+       [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
        section for details.
 
     * If the message is not valid in any of the above steps:
@@ -2585,7 +2582,7 @@ Assuming that Alice begins the exchange:
 **Alice:**
 
 * Validates that `Rb` is on curve Ed448. See
-  [Verifying a point on curve](#verifying-a-point-on-curve) section for details.
+  [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) section for details.
 * Computes `Rab = Rb * a3`.
 * Checks whether `Rab == Pa - Pb`.
 
@@ -2836,7 +2833,7 @@ If smpstate is `SMPSTATE_EXPECT1`:
 
 * Verify Alice's zero-knowledge proofs for G2a and G3a:
   1. Check that both `G2a` and `G3a` are on curve Ed448. See
-     [Verifying a point on curve](#verifying-a-point-on-curve) section for
+     [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) section for
      details.
   2. Check that `c2 = HashToScalar(1 || G * d2 + G2a * c2)`.
   3. Check that `c3 = HashToScalar(2 || G * d3 + G3a * c3)`.
@@ -2856,7 +2853,7 @@ If smpstate is `SMPSTATE_EXPECT2`:
 
 * Verify Bob's zero-knowledge proofs for `G2b`, `G3b`, `Pb` and `Qb`:
   1. Check that `G2b`, `G3b`, `Pb` and `Qb` are on curve Ed448. See
-     [Verifying a point on curve](#verifying-a-point-on-curve) section for
+     [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) section for
      details.
   2. Check that `c2 = HashToScalar(3 || G * d2 + G2b * c2)`.
   3. Check that `c3 = HashToScalar(4 || G * d3 + G3b * c3)`.
@@ -2878,8 +2875,7 @@ If smpstate is `SMPSTATE_EXPECT3`:
 
 * Verify Alice's zero-knowledge proofs for `Pa`, `Qa` and `Ra`:
   1. Check that `Pa`, `Qa` and `Ra` are on curve Ed448. See
-     [Verifying a point on curve](#verifying-a-point-on-curve) section for
-     details.
+     [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) section for details.
   2. Check that `cp = HashToScalar(6 || G3 * d5 + Pa * cp || G * d5 + G2 * d6 +
      Qa * cp)`.
   3. Check that `cr = HashToScalar(7 || G * d7 + G3a * cr || (Qa - Qb) * d7 +
@@ -2905,8 +2901,7 @@ If smpstate is `SMPSTATE_EXPECT4`:
 
 * Verify Bob's zero-knowledge proof for Rb:
    1. Check that `Rb` is on curve Ed448. See
-      [Verifying a point on curve](#verifying-a-point-on-curve) section for
-      details.
+      [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) section for details.
    2. Check that `cr = HashToScalar(8 || G * d7 + G3b * cr || (Qa - Qb) * d7 + Rb * cr)`.
 * Check whether the protocol was successful:
     1. `Compute Rab = Rb * a3`.
