@@ -24,12 +24,12 @@ are set. We set an expiration date to reduce this window of compromise.
 
 Primarily, there are two attacks that we want to mitigate:
 
-1. Initiator uploads a prekey. Responder replies, but the adversary intercepts
+1. Initiator uploads a prekey. Receiver replies, but the adversary intercepts
    and drops the message. The adversary compromises Initiator's prekey secret,
    and Initiator's identity secret key. The adversary can now retroactively
    decrypt the captured initial message.
 
-2. Initiator and Responder complete an exchange and engage in a conversation.
+2. Initiator and Receiver complete an exchange and engage in a conversation.
    At some point, the adversary captures and drops some messages to (for
    example) Initiator. Later, the adversary compromises Initiator's ephemeral
    secrets, revealing the message keys corresponding to the dropped messages.
@@ -82,7 +82,7 @@ this time. For example, if the time is set to 15 minutes, messages received
 after 15 minutes are unreadable and undeniable, but an attacker must compromise
 the local keys within 15 minutes in order to read and tamper with the last
 message sent before that time passes. If the time is set to one month, this
-allows the responder to reply within one month. However, if the device is
+allows the receiver to reply within one month. However, if the device is
 compromised within one month, an attacker is able to read and tamper with the
 last message sent.
 
