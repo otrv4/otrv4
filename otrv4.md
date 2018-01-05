@@ -390,7 +390,7 @@ Ed448 point (POINT):
 Ed448 scalar (SCALAR):
   56 bytes data
 
-Ed448 secret scalar (SECRET_SCALAR):
+Ed448 secret scalar (SECRET-SCALAR):
   57 bytes data
 
 User Profile (USER-PROF):
@@ -410,7 +410,7 @@ the OTRv4 messages that should be transmitted encoded.
 
 Encoded as a little-endian array of 56 bytes, e.g.
 `h[0] + 2^8 * h[1] + ... + 2^448 * h[55]`. Take into account that the
-`SECRET_SCALAR` (used for public key generation) is 57 bytes long.
+`SECRET-SCALAR` (used for public key generation) is 57 bytes long.
 
 #### Point
 
@@ -497,7 +497,7 @@ The public key and shared prekey are generated as follows (refer to RFC 8032
 
 ```
 The symmetric key (sym_key) is 57 bytes of cryptographically secure random data.
-The secret scalar 'sk' is defined as SECRET_SCALAR.
+The secret scalar 'sk' is defined as SECRET-SCALAR.
 
 1. Hash the 57-byte symmetric key ('sym_key') using SHAKE-256(sym_key). Store
    the digest in a 114-byte buffer.  Only the lower 57 bytes (denoted 'h')
@@ -1570,7 +1570,7 @@ Prekey owner's instance tag (INT)
   The instance tag of the client that created the prekey.
 
 Prekey owner's User Profile (USER-PROF)
-  As described in the section [Creating a User Profile](#creating-a-user-profile).
+  As described in the section Creating a User Profile.
 
 Y Prekey owner's ECDH public key (POINT)
   First one-time use prekey value.
