@@ -3,9 +3,9 @@
 ### Context
 
 The non-interactive DAKE below is based on the XZDH protocol. It starts when
-the Receiver requests the Initiator's prekey from a untrusted server. The
-Initiator's long-term public key should be verified by the Receiver. The
-Receiver then generates their ephemeral keys and derives a shared secret. These
+the Responder requests the Initiator's prekey from an untrusted server. The
+Initiator's long-term public key should be verified by the Responder. The
+Responder then generates their ephemeral keys and derives a shared secret. These
 are used to start the double ratchet and send an encrypted data message with
 the final message of the non-interactive DAKE, called the non-interactive auth
 message.
@@ -24,12 +24,12 @@ are set. We set an expiration date to reduce this window of compromise.
 
 Primarily, there are two attacks that we want to mitigate:
 
-1. Initiator uploads a prekey. Receiver replies, but the adversary intercepts
+1. Initiator uploads a prekey. Responder replies, but the adversary intercepts
    and drops the message. The adversary compromises Initiator's prekey secret,
    and Initiator's identity secret key. The adversary can now retroactively
    decrypt the captured initial message.
 
-2. Initiator and Receiver complete an exchange and engage in a conversation.
+2. Initiator and Responder complete an exchange and engage in a conversation.
    At some point, the adversary captures and drops some messages to (for
    example) Initiator. Later, the adversary compromises Initiator's ephemeral
    secrets, revealing the message keys corresponding to the dropped messages.

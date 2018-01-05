@@ -203,8 +203,8 @@ produced by someone who knows the long-term public key of any of both alleged
 participants. This provides deniability for both participants in the interactive
 DAKE.
 
-In the non-interactive DAKE, the initializer (Alice, in the above overview) does
-not have participation deniability, but Bob, the receiver, does.
+In the non-interactive DAKE, the initiator (Bob, in the above overview) does
+not have participation deniability, but Alice, the responder, does.
 
 Once a conversation has been established with the DAKE, all data messages
 transmitted in it are confidential and retain their integrity. After a MAC
@@ -2617,7 +2617,7 @@ Version (BYTE)
 Initiator fingerprint (64 BYTEs)
   The fingerprint that the party initiating SMP is using in the current
   conversation.
-Receiver fingerprint (64 BYTEs)
+Responder fingerprint (64 BYTEs)
   The fingerprint that the party that did not initiate SMP is using in the
   current conversation.
 Secure Session ID or SSID (8 BYTEs)
