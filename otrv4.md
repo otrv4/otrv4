@@ -197,13 +197,11 @@ curves and the early arrival of quantum computers.
 
 In the interactive DAKE, although access to one participant's private long term
 key is required for authentication, both participants can deny having used
-their private long term keys. An external cryptographic expert will be able to
-prove that one person between the two used their long term private key for the
-authentication, but they will not be able to identify whose key was used. In
-the case where an adversary has compromised one of the long term private keys,
-a cryptographic expert cannot prove whether the DAKE was forged by the
-adversary or legitimately created by the non-compromised participant. This
-provides deniability for both participants in the interactive DAKE.
+their private long term keys. A forged transcript of the DAKE can be produced at
+any time and a cryptographic expert is able to prove that this transcript was
+produced by someone who knows the long-term public key of any of both alleged
+participants. This provides deniability for both participants in the interactive
+DAKE.
 
 In the non-interactive DAKE, the initializer (Alice, in the above overview) does
 not have participation deniability, but Bob, the receiver, does.
