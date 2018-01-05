@@ -2617,7 +2617,7 @@ Version (BYTE)
 Initiator fingerprint (64 BYTEs)
   The fingerprint that the party initiating SMP is using in the current
   conversation.
-Responder fingerprint (64 BYTEs)
+Receiver fingerprint (64 BYTEs)
   The fingerprint that the party that did not initiate SMP is using in the
   current conversation.
 Secure Session ID or SSID (8 BYTEs)
