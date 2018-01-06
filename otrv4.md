@@ -878,7 +878,7 @@ When sending or receiving data messages, you must calculate the message keys:
 ```
 derive_enc_mac_keys(chain_key):
   MKenc = KDF_1(0x01 || chain_key)
-  MKmac = KDF_2(0x02 || chain_key)
+  MKmac = KDF_2(0x02 || MK_enc)
   return MKenc, MKmac
 ```
 
