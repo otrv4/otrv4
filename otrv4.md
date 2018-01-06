@@ -814,7 +814,7 @@ To rotate the brace key:
     * Calculate `k_dh = DH(our_dh.secret, their_dh.public)`.
     * Calculate a `brace_key = KDF_1(k_dh)`.
 
-  Otherwise:
+  * Otherwise:
 
    * Derive and securely overwrite `brace_key = KDF_1(brace_key)`.
 
