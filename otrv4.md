@@ -955,7 +955,7 @@ user is allowed to repudiate their participation in OTRv4 conversations by
 publishing their user profile.  When a user profile is published, it is
 available from a public location, such as a server.
 
-Each implementation may decide how to publish the profile. For example, one
+Each implementation should decide how to publish the profile. For example, one
 client may publish profiles to a server pool (similar to a keyserver pool,
 where PGP public keys can be published). Another client may use XMPP's publish-
 subscribe extension (XEP-0060 [\[8\]](#references)) for publishing profiles. A
@@ -1018,7 +1018,7 @@ To create a user profile, assemble:
    of the non-interactive DAKE and that compromises the party's secret long term
    key. For its generation, refer to
    [Public keys, shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
-   section. This key should expire when the user profile expires.
+   section. This key must expire when the user profile expires.
 5. Profile Signature: The symmetric key, the flag `f` (set to zero, as defined
    on [RFC]8032) and the empty context `c` are used to create signatures of the
    entire profile excluding the signature itself. The size of the signature is
