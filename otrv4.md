@@ -848,7 +848,7 @@ To rotate the brace key:
 
   * Otherwise:
 
-   * Derive and securely overwrite `brace_key = KDF_1(brace_key)`.
+    * Derive and securely overwrite `brace_key = KDF_1(brace_key)`.
 
 ### Deriving new chain keys
 
