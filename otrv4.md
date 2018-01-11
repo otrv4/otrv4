@@ -846,7 +846,7 @@ To rotate the brace key:
     * Calculate a `brace_key = KDF_1(k_dh)`.
     * Securely delete `our_dh.secret`.
 
-  Otherwise:
+  * Otherwise:
 
    * Derive and securely overwrite `brace_key = KDF_1(brace_key)`.
 
@@ -1474,7 +1474,8 @@ Verify and decrypt message if included
       messages.
     * Validates that the received ECDH ephemeral public key is on curve Ed448
       and sets it as `their_ecdh`.
-      See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) section for details.
+      See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+      section for details.
     * Validates that the received DH ephemeral public key is on the correct
       group and sets it as `their_dh`. See
       [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
