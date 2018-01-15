@@ -1450,8 +1450,8 @@ Bob                            Server                               Alice
 ----------------------------------------------------------------------
 Publish a Prekey message ---->
 								....
-                                     <------------ Request Prekey messages
-                                     Prekeys messages ------------->
+                                     <----- Request Prekey messages from Bob
+                                     Prekeys messages from Bob ------------->
       <---------------------------------------- Non-Interactive-Auth message
 Verify and decrypt message if included
 ```
