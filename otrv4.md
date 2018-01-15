@@ -1164,7 +1164,7 @@ another while providing participation deniability.
 
 This protocol is derived from the DAKEZ protocol [\[1\]](#references), which
 uses a ring signature non-interactive zero-knowledge proof of knowledge
-(RING-SIG) for authentication (Auth).
+(RING-SIG) for authentication (RSig).
 
 Alice's long-term Ed448 key-pair is `(ska, PKa)` and Bob's long-term Ed448
 key-pair is `(skb, PKb)`. Both key pairs are generated as stated on the
@@ -1334,7 +1334,7 @@ A valid Auth-R message is generated as follows:
 4. Compute `t = 0x0 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(Φ)`.
    Φ is the shared session state as mention on the
    [Shared session state](#shared-session-state) section.
-5. Compute `sigma = Auth(Pka, ska, {Pkb, Pka, Y}, t)`.
+5. Compute `sigma = RSig(Pka, ska, {Pkb, Pka, Y}, t)`.
 6. Generate a 4-byte instance tag to use as the sender's instance tag.
    Additional messages in this conversation will continue to use this tag as the
    sender's instance tag. Also, this tag is used to filter future received
@@ -1352,7 +1352,7 @@ To verify an Auth-R message:
    [Shared session state](#shared-session-state) section.
 4. Verify the `sigma` with
    [Ring Signature Authentication](#ring-signature-authentication), that is
-   `sigma == Verify({Pkb, Pka, Y}, t)`.
+   `sigma == RVrf({Pkb, Pka, Y}, t)`.
 
 An Auth-R message is an OTR message encoded as:
 
@@ -1387,7 +1387,7 @@ A valid Auth-I message is generated as follows:
 1. Compute `t = 0x1 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(Φ)`.
    Φ is the shared session state as mention on the
    [Shared session state](#shared-session-state) section.
-2. Compute `sigma = Auth(Pkb, skb, {Pkb, Pka, X}, t)`.
+2. Compute `sigma = RSig(Pkb, skb, {Pkb, Pka, X}, t)`.
 3. Continue to use the sender's instance tag.
 
 To verify an Auth-I message:
@@ -1437,7 +1437,7 @@ to convey this security loss to the user.
 
 This protocol is derived from the XZDH protocol [\[1\]](#references), which
 uses a ring signature non-interactive zero-knowledge proof of knowledge
-(RING-SIG) for authentication (Auth).
+(RING-SIG) for authentication (RSig).
 
 Alice's long-term Ed448 key-pair is `(ska, PKa)` and Bob's long-term Ed448
 key-pair is `(skb, PKb)`. Both key pairs are generated as stated on the
@@ -1606,7 +1606,7 @@ A valid Non-Interactive-Auth message is generated as follows:
    This value is needed for the generation of the Mixed shared secret.
 6. Calculate the Auth MAC key `auth_mac_k = KDF_2(0x01 || tmp_k)`.
 7. Compute `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || their_shared_prekey || KDF_2(Φ)`.
-8. Compute `sigma = Auth(Pka, ska, {Pkb, Pka, Y}, t)`. When computing `sigma`,
+8. Compute `sigma = RSig(Pka, ska, {Pkb, Pka, Y}, t)`. When computing `sigma`,
    keep the first 24 bytes of the generated `c` value to be used as a `nonce` in
    the next step. Refer to
    [Ring Signature Authentication](#ring-signature-authentication) for details.
@@ -1633,7 +1633,7 @@ To verify a Non-Interactive-Auth message:
 4. Compute `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || our_shared_prekey.public || KDF_2(Φ)`.
 5. Verify the `sigma` with
    [Ring Signature Authentication](#ring-signature-authentication).
-   See [Verification: Verify({A1, A2, A3}, sigma, m)](#verification-verifya1-a2-a3-sigma-m)
+   See [Verification: RVrf({A1, A2, A3}, sigma, m)](#verification-verifya1-a2-a3-sigma-m)
    for details.
 6. If present, extract the `encrypted_data_message`.
 7. If an encrypted data message was attached, compute
@@ -3017,9 +3017,9 @@ Forge Entire Transcript
 
 The Authentication scheme consists of two functions:
 
-`sigma = Auth(A_1, a_1, {A_1, A_2, A_3}, m)`, an authentication function.
+`sigma = RSig(A_1, a_1, {A_1, A_2, A_3}, m)`, an authentication function.
 
-`Verify({A_1, A_2, A_3}, sigma, m)`, a verification function.
+`RVrf({A_1, A_2, A_3}, sigma, m)`, a verification function.
 
 #### Domain parameters
 
