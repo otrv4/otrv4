@@ -112,7 +112,7 @@ existing messaging protocol, such as XMPP.
     (DAKEZ) and "Extended Zero-knowledge Diffie-Hellman" (XZDH)
     [\[1\]](#references).
     DAKEZ corresponds to conversations when both parties are online
-    (interactive) and XZDH to conversations when one party is offline
+    (interactive) and XZDH to conversations when one of the parties is offline
     (non-interactive).
   - Key management using the Double Ratchet Algorithm [\[2\]](#references).
   - Upgraded SHA-1 and SHA-2 to SHAKE-256.
@@ -166,18 +166,18 @@ Exchanges Data Messages <---------------------------------->  Exchanges Data Mes
 
 ```
 
-In this conversation flow, Alice first retrieves a Prekey message from a prekey
-server. Prior to the start of the conversation, this Prekey message was uploaded
-by Bob's client to a server. This is done in order to allow other participants,
-like Alice, to send him encrypted messages while he is offline.
+In this conversation flow, Alice first retrieves Bob's Prekey message from a
+prekey server. Prior to the start of the conversation, this Prekey message was
+uploaded by Bob's client to a server. This is done in order to allow other
+participants, like Alice, to send him encrypted messages while he is offline.
 
 ## Assumptions
 
 Messages in a conversation can be exchanged over an insecure channel, where an
 attacker can eavesdrop or interfere with the messages.
 
-The network model provides in-order delivery of messages, however some
-messages may not be delivered.
+The network model provides in-order delivery of messages, however some messages
+may not be delivered.
 
 OTRv4 does not protect against an active attacker performing Denial of Service
 attacks.
@@ -475,8 +475,8 @@ OTR4 public authentication Ed448 key (ED448-PUBKEY):
   Pubkey type (SHORT)
     Ed448 public keys have type 0x0010
 
-    H (POINT)
-      H is the Ed448 public key generated as defined in RFC 8032.
+  H (POINT)
+    H is the Ed448 public key generated as defined in RFC 8032.
 ```
 
 OTRv4's public shared prekey is defined as follows:
@@ -487,9 +487,9 @@ OTR4 public shared prekey (ED448-SHARED-PREKEY):
   SharedPreKey type (SHORT)
     Ed448 shared prekeys have type 0x0011
 
-    D (POINT)
-      D is the Ed448 shared prekey generated the same way as the public key in
-      RFC 8032.
+  D (POINT)
+    D is the Ed448 shared prekey generated the same way as the public key in
+    RFC 8032.
 ```
 
 The public key and shared prekey are generated as follows (refer to RFC 8032
@@ -564,7 +564,7 @@ OTRv4 supports some TLV record types from OTRv3. The supported types are:
 Type 0: Padding
   The value may be an arbitrary amount of data. This data should be ignored.
   This type can be used to disguise the length of a plaintext message.
-  XSalsa20, the algorith used for encryption of the message, is a stream cipher
+  XSalsa20, the algorithm used for encryption of the message, is a stream cipher
   and so no padding is required. If you want to do message padding (to disguise
   the length of your message), use this TLV.
 
@@ -1168,7 +1168,8 @@ uses a ring signature non-interactive zero-knowledge proof of knowledge
 
 Alice's long-term Ed448 key-pair is `(ska, PKa)` and Bob's long-term Ed448
 key-pair is `(skb, PKb)`. Both key pairs are generated as stated on the
-[Public keys, shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints) section.
+[Public keys, shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
+section.
 
 #### Interactive DAKE Overview
 
@@ -1554,7 +1555,8 @@ To verify a Prekey message:
 
 * [Validate the user profile](#validating-a-user-profile)
 * Check that the ECDH public key `Y` is on curve Ed448. See
-  [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) section for details.
+  [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+  section for details.
 * Verify that the DH public key `B` is from the correct group. See
   [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
   section for details.
@@ -1638,8 +1640,7 @@ To verify a Non-Interactive-Auth message:
 6. If present, extract the `encrypted_data_message`.
 7. If an encrypted data message was attached, compute
    `Auth MAC = KDF_2(auth_mac_k || t || (message_id || nonce ||encrypted_data_message))`.
-   Otherwise, compute
-   `Auth MAC = KDF_2(auth_mac_k || t)`.
+   Otherwise, compute `Auth MAC = KDF_2(auth_mac_k || t)`.
 8. Verify the Auth Mac:
    * Extract the Auth MAC from the Non-Interactive-Auth message and verify that
      it is equal to the one calculated. If it is not, ignore the
