@@ -1015,8 +1015,8 @@ To create a user profile, assemble:
    seconds).
 4. Public Shared Prekey: An Ed448 Public Key used in multiple prekey messages.
    It adds partial protection against an attacker that modifies the first flow
-   of the non-interactive DAKE and that compromises the party's secret long term
-   key. For its generation, refer to
+   of the non-interactive DAKE and that compromises the receivers long term
+   secret key and their one-time prekey. For its generation, refer to
    [Public keys, shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
    section. This key must expire when the user profile expires.
 5. Profile Signature: The symmetric key, the flag `f` (set to zero, as defined
