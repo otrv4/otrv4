@@ -26,7 +26,7 @@ existing messaging protocol, such as XMPP.
       1. [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
 1. [Data Types](#data-types)
    1. [Encoding and Decoding](#encoding-and-decoding)
-   1. [Serializing the SNIZKPK Authentication](#serializing-the-snizkpk-authentication)
+   1. [Serializing the Ring Signture Proof of Authentication](#serializing-the-ring-signature-proof-of-authentication)
    1. [Public keys, Shared Prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
    1. [Instance Tags](#instance-tags)
    1. [TLV Record Types](#tlv-record-types)
@@ -94,7 +94,7 @@ existing messaging protocol, such as XMPP.
    1. [Considerations for networks that allow multiple devices](#considerations-for-networks-that-allow-multiple-devices)
 1. [Forging Transcripts](#forging-transcripts)
 1. [Appendices](#appendices)
-   1. [SNIZKPK Authentication](#snizkpk-authentication)
+   1. [Ring Signature Authentication](#ring-signature-authentication)
    1. [HashToScalar](#hashtoscalar)
    1. [Modify an encrypted data message](#modify-an-encrypted-data-message)
    1. [OTRv3 Specific Encoded Messages](#otrv3-specific-encoded-messages)
@@ -450,13 +450,13 @@ OTRv4 messages must be base-64 encoded. To transmit one of these messages,
 construct an ASCII string: the five bytes "?OTR:", the base-64 encoding of the
 binary form of the message and the byte ".".
 
-### Serializing the SNIZKPK Authentication
+### Serializing the Ring Signature Proof of Authentication
 
-A signature non-interactive zero-knowledge proof of knowledge (SNIZKPK) is
+The Ring Signature's non-interactive zero-knowledge proof of authentication is
 serialized as follows:
 
 ```
-SNIZKPK Authentication (SNIZKPK):
+Ring Signature Authentication (RING-SIG):
   c1 (SCALAR)
   r1 (SCALAR)
   c2 (SCALAR)
@@ -1163,8 +1163,8 @@ mutually agree upon shared keys for the two parties and authenticate one
 another while providing participation deniability.
 
 This protocol is derived from the DAKEZ protocol [\[1\]](#references), which
-uses a signature non-interactive zero-knowledge proof of knowledge (SNIZKPK)
-for authentication (Auth).
+uses a ring signature non-interactive zero-knowledge proof of knowledge
+(RING-SIG) for authentication (Auth).
 
 Alice's long-term Ed448 key-pair is `(ska, PKa)` and Bob's long-term Ed448
 key-pair is `(skb, PKb)`. Both key pairs are generated as stated on the
@@ -1350,8 +1350,9 @@ To verify an Auth-R message:
 3. Compute `t = 0x0 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(Φ)`.
    Φ is the shared session state as mention on the
    [Shared session state](#shared-session-state) section.
-4. Verify the `sigma` with [SNIZKPK Authentication](#snizkpk-authentication),
-   that is `sigma == Verify({Pkb, Pka, Y}, t)`.
+4. Verify the `sigma` with
+   [Ring Signature Authentication](#ring-signature-authentication), that is
+   `sigma == Verify({Pkb, Pka, Y}, t)`.
 
 An Auth-R message is an OTR message encoded as:
 
@@ -1371,8 +1372,8 @@ X (POINT)
 A (MPI)
   The ephemeral public DH key. Note that even though this is in uppercase,
   this is NOT a POINT.
-sigma (SNIZKPK)
-  The SNIZKPK Auth value.
+sigma (RING-SIG)
+  The RING-SIG proof of authentication value.
 ```
 
 #### Auth-I message
@@ -1396,7 +1397,7 @@ To verify an Auth-I message:
    Φ is the shared session state as mention on the
    [Shared session state](#shared-session-state) section.
 3. Verify the `sigma` as defined on
-   [SNIZKPK Authentication](#verification-verifya1-a2-a3-sigma-m).
+   [Ring Signature Authentication](#verification-verifya1-a2-a3-sigma-m).
 
 An Auth-I is an OTR message encoded as:
 
@@ -1409,8 +1410,8 @@ Sender's instance tag (INT)
   The instance tag of the person sending this message.
 Receiver's instance tag (INT)
   The instance tag of the intended recipient.
-sigma (SNIZKPK)
-  The SNIZKPK Auth value.
+sigma (RING-SIG)
+  The RING-SIG proof of authentication value.
 ```
 
 ## Offline Conversation Initialization
@@ -1422,7 +1423,7 @@ publisher. A reply, called the Non-Interactive-Auth message, is created with the
 prekey and sent. This completes the DAKE.
 
 The offline DAKE is based on the XZDH protocol [\[1\]](#references). Like the
-interactive DAKE, it also uses a SNIZKPK for authentication (Auth).
+interactive DAKE, it also uses a Ring Signature proof for authentication (Auth).
 
 ### Non-interactive Deniable Authenticated Key Exchange (DAKE)
 
@@ -1435,8 +1436,8 @@ users to complete a non-interactive DAKE. They are also expected to decide how
 to convey this security loss to the user.
 
 This protocol is derived from the XZDH protocol [\[1\]](#references), which
-uses a signature non-interactive zero-knowledge proof of knowledge (SNIZKPK)
-for authentication (Auth).
+uses a ring signature non-interactive zero-knowledge proof of knowledge
+(RING-SIG) for authentication (Auth).
 
 Alice's long-term Ed448 key-pair is `(ska, PKa)` and Bob's long-term Ed448
 key-pair is `(skb, PKb)`. Both key pairs are generated as stated on the
@@ -1607,8 +1608,8 @@ A valid Non-Interactive-Auth message is generated as follows:
 7. Compute `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || their_shared_prekey || KDF_2(Φ)`.
 8. Compute `sigma = Auth(Pka, ska, {Pkb, Pka, Y}, t)`. When computing `sigma`,
    keep the first 24 bytes of the generated `c` value to be used as a `nonce` in
-   the next step. Refer to [SNIZKPK Authentication](#snizkpk-authentication)
-   for details.
+   the next step. Refer to
+   [Ring Signature Authentication](#ring-signature-authentication) for details.
 9. A message can be optionally attached at this point. It is recommended to do
    so. Follow the section
    [When you send a Data Message](#when-you-send-a-data-message) to generate an
@@ -1630,7 +1631,8 @@ To verify a Non-Interactive-Auth message:
 2. Validate the user profile, and extract `Pka` from it.
 3. Verify that both ECDH and DH one-time use prekeys remain unused.
 4. Compute `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || our_shared_prekey.public || KDF_2(Φ)`.
-5. Verify the `sigma` with [SNIZKPK Authentication](#snizkpk-authentication).
+5. Verify the `sigma` with
+   [Ring Signature Authentication](#ring-signature-authentication).
    See [Verification: Verify({A1, A2, A3}, sigma, m)](#verification-verifya1-a2-a3-sigma-m)
    for details.
 6. If present, extract the `encrypted_data_message`.
@@ -1673,8 +1675,8 @@ A (MPI)
   The ephemeral public DH key. Note that even though this is in uppercase,
   this is NOT a POINT.
 
-Sigma (SNIZKPK)
-  The SNIZKPK Auth value.
+Sigma (RING-SIG)
+  The RING-SIG proof of authentication value.
 
 Message id (INT) (optional: if an encrypted message is attached)
   This should be set with sender's j.
@@ -1692,8 +1694,8 @@ Encrypted message (DATA) (optional)
 
 Auth MAC (MAC)
   The MAC with the appropriate MAC key (see above) of the message (t) for the
-  SNIZKPK. When an encrypted message is attached, this is also the MAC if the
-  this message.
+  Ring Signature (RING-SIG). When an encrypted message is attached, this is also
+  the MAC of that message.
 ```
 
 #### Publishing Prekey Messages
@@ -1902,11 +1904,11 @@ In both cases:
    ```
 
   * When creating a Non-Interactive-Auth message, if an encrypted message
-    will be attached to it, construct a `nonce` from the first 24 bytes of the
+    is attached to it, construct a `nonce` from the first 24 bytes of the
     `c` variable generated when creating `sigma`. See
-    [SNIZKPK Authentication](#snizkpk-authentication) section. When creating a
-    regular data message (interactive or non-interactive), generate a new random
-    24 bytes value to be the `nonce`.
+    [Ring Signature Authentication](#ring-signature-authentication) section for
+    details. In any other case, generate a new random 24 bytes value to be the
+    `nonce`.
   * Use the encryption key to encrypt the message:
 
    ```
@@ -3011,7 +3013,7 @@ Forge Entire Transcript
 
 ## Appendices
 
-### SNIZKPK Authentication
+### Ring Signature Authentication
 
 The Authentication scheme consists of two functions:
 
