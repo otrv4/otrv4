@@ -3034,7 +3034,7 @@ G = (x=22458004029592430018760433409989603624678964163256413424612546168695
 
 ```
 
-#### Authentication: Auth(A1, a1, {A1, A2, A3}, m):
+#### Authentication: RSig(A1, a1, {A1, A2, A3}, m):
 
 `A1` is the public value associated with `a1`, that is, `A1 = G*a1`.
 `m` is the message to authenticate.
@@ -3050,7 +3050,7 @@ G = (x=22458004029592430018760433409989603624678964163256413424612546168695
 7. Compute `r1 = t1 - c1 * a1 (mod q)`.
 8. Send `sigma = (c1, r1, c2, r2, c3, r3)`.
 
-#### Verification: Verify({A1, A2, A3}, sigma, m)
+#### Verification: RVrf({A1, A2, A3}, sigma, m)
 
 `A1`, `A2`, and `A3` should be checked to verify they are on curve Ed448.
 
