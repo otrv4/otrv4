@@ -129,26 +129,25 @@ An OTRv4 conversation may begin when the two participants are online (an
 interactive conversation) or when one participant is offline (non-interactive
 conversation).
 
-### Conversation started by an Interactive DAKE
+### Conversation started by an Interactive DAKE (DAKEZ)
 
 ```
-Alice                                            Bob
---------------------------------------------------------------------------------
-Requests OTR conversation           ------------->
+Alice                                                Bob
+----------------------------------------------------------------------------------------
+Requests OTR conversation            ------------->
 
-Establishes Conversation with       <------------>  Establishes Conversation with
-Deniable Authenticated Key Exchange                 Deniable Authenticated Key Exchange
+Establishes Conversation with DAKEZ  <------------>  Establishes Conversation with DAKEZ
 
-Exchanges Data Messages             <------------>  Exchanges Data Messages
+Exchanges Data Messages              <------------>  Exchanges Data Messages
 ```
 
 The conversation can begin after one participant requests a conversation. This
 includes an advertisement of which versions the participant supports. If the
 other participant supports OTRv4, an interactive DAKE can be used to establish a
 secure channel. Encrypted messages are then exchanged in this secure channel
-with forward secrecy.
+with strong forward secrecy.
 
-### Conversation started by a Non-Interactive DAKE
+### Conversation started by a Non-Interactive DAKE (XZDH)
 
 ```
 Alice                        Prekey Server                  Bob
