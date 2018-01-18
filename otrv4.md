@@ -712,7 +712,7 @@ generateECDH()
   - prune 'h': the two least significant bits of the first byte are cleared, all
     eight bits of the last byte are cleared, and the highest bit of the second
     to last byte is set.
-  - encode 'h' as SCALAR. Denote this value 's'.
+  - encode 'h' as SECRET-SCALAR. Denote this value 's'.
   - return our_ecdh.public = G * s, our_ecdh.secret = s
 
 generateDH()
