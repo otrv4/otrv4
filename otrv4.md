@@ -440,7 +440,7 @@ A curve point is decoded as follows:
       This can be done using a single modular powering for both the
       inversion of `denom` and the square root:
       ```
-           x = ((num ^ 3) * denom * (num^5 * num^3) ^ ((p-3)/4)) (mod p)
+           x = ((num ^ 3) * denom * (num^5 * denom^3) ^ ((p-3)/4)) (mod p)
       ```
    2.  If `denom * x^2 = num`, the recovered x-coordinate is `x`.  Otherwise, no
        square root exists, and the decoding fails.
