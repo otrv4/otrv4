@@ -5,10 +5,10 @@ Disclaimer
 
 This protocol specification is a draft. It's currently under constant revision.
 ```
-
-OTR version 4 (OTRv4) provides a deniable authenticated key exchange and better
-forward secrecy through the use of double ratcheting. OTR works on top of an
-existing messaging protocol, such as XMPP.
+This document describes version 4 of the Off-the-Record Messaging protocol.
+OTR version 4 (OTRv4) provides a deniable authenticated key exchange (DAKE) and
+better forward secrecy through the use of double ratcheting. OTR works on top of
+an existing messaging protocol, such as XMPP.
 
 ## Table of Contents
 
@@ -165,10 +165,11 @@ Exchanges Data Messages <---------------------------------->  Exchanges Data Mes
 
 ```
 
-In this conversation flow, Alice first retrieves Bob's Prekey message from a
-prekey server. Prior to the start of the conversation, this Prekey message was
-uploaded by Bob's client to a server. This is done in order to allow other
-participants, like Alice, to send him encrypted messages while he is offline.
+The conversation begins when one participant retrieves the other's participant
+Prekey message from a prekey server. Prior to the start of the conversation,
+this Prekey message was uploaded by the other participant's client to a server.
+This is done in order to allow other participants, like Alice, to send the other
+participant, like Bob, encrypted messages while he is offline.
 
 ## Assumptions
 
@@ -202,8 +203,8 @@ produced by someone who knows the long-term public key of any of both alleged
 participants. This provides deniability for both participants in the interactive
 DAKE.
 
-In the non-interactive DAKE, the initiator (Bob, in the above overview) does
-not have participation deniability, but Alice, the responder, does.
+In the non-interactive DAKE, the initiator (Bob, in the above overview) has
+participation deniability, but Alice, the responder, does not.
 
 Once a conversation has been established with the DAKE, all data messages
 transmitted in it are confidential and retain their integrity. After a MAC
@@ -238,6 +239,9 @@ details.
 
 A scalar modulo `q` is a field element, and should be encoded and decoded
 as a SCALAR type, which is defined in the [Data Types](#data-types) section.
+
+A point should be encoded and decoded as a POINT type, which is defined in the
+[Data Types](#data-types) section.
 
 The byte representation of a value `x` is defined as `byte(x)`
 
@@ -355,7 +359,7 @@ To verify that an integer (`x`) is on the group with a 3072-bit modulus:
 
 ## Data Types
 
-OTRv4 uses many of the data types specified in OTRv3:
+OTRv4 uses many of the data types already specified in OTRv3:
 
 ```
 Bytes (BYTE):
@@ -395,21 +399,22 @@ Ed448 secret scalar (SECRET-SCALAR):
 User Profile (USER-PROF):
   Detailed in "User Profile Data Type" section
 ```
-
-In order to encode and decode `POINT` and `SCALAR` types, refer to the
-[Encoding and Decoding](#encoding-and-decoding) section.
+In order to encode a point or a scalar into `POINT` or `SCALAR` data types, and
+to decode a `POINT` or `SCALAR` data types into a point or a scalar, refer to
+the [Encoding and Decoding](#encoding-and-decoding) section.
 
 ### Encoding and Decoding
 
-This describes the encoding and decoding schemes specified in RFC 8032
+This section describes the encoding and decoding schemes specified in RFC 8032
 [\[9\]](#references) for scalars and points. It also describes the encoding of
 the OTRv4 messages that should be transmitted encoded.
 
 #### Scalar
 
 Encoded as a little-endian array of 56 bytes, e.g.
-`h[0] + 2^8 * h[1] + ... + 2^448 * h[55]`. Take into account that the
-`SECRET-SCALAR` (used for public key generation) is 57 bytes long.
+`h[0] + 2^8 * h[1] + ... + 2^447 * h[55]`. Take into account that the
+`SECRET-SCALAR` (used for public key generation) is 57 bytes long and should be
+encoded as: `h[0] + 2^8 * h[1] + ... + 2^448 * h[56]`
 
 #### Point
 
