@@ -442,11 +442,11 @@ A curve point is decoded as follows:
       ```
            x = ((num ^ 3) * denom * (num^5 * denom^3) ^ ((p-3)/4)) (mod p)
       ```
-   2.  If `denom * x^2 = num`, the recovered x-coordinate is `x`.  Otherwise, no
+   2.  If `denom * x^2 == num`, the recovered x-coordinate is `x`.  Otherwise, no
        square root exists, and the decoding fails.
-3. Use the `x_0` bit to select the right square root.  If `x = 0`, and
-   `x_0 = 1`, decoding fails.  Otherwise, if `x_0 != x mod 2`, set
-   `x <-- p - x`.  Return the decoded point `(x,y)`.
+3. Use the `x_0` bit to select the right square root.  If `x == 0`, and `x_0 ==
+   1`, decoding fails.  Otherwise, if `x_0 != x mod 2`, set `x <-- p - x`.
+   Return the decoded point `(x,y)`.
 
 #### Encoded Messages
 
