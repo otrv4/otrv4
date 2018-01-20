@@ -472,7 +472,7 @@ Ring Signature Authentication (RING-SIG):
 OTRv4 introduces a new type of public key:
 
 ```
-OTR4 public authentication Ed448 key (ED448-PUBKEY):
+OTRv4's public authentication Ed448 key (ED448-PUBKEY):
 
   Pubkey type (SHORT)
     Ed448 public keys have type 0x0010
@@ -484,7 +484,7 @@ OTR4 public authentication Ed448 key (ED448-PUBKEY):
 OTRv4's public shared prekey is defined as follows:
 
 ```
-OTR4 public shared prekey (ED448-SHARED-PREKEY):
+OTRv4's public shared prekey (ED448-SHARED-PREKEY):
 
   SharedPreKey type (SHORT)
     Ed448 shared prekeys have type 0x0011
