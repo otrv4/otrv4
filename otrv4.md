@@ -1100,15 +1100,14 @@ is generated as follows:
 
 ```
 The inputs are the symmetric key (57 bytes, defined on 'Public keys and
-fingerprints'. Note that the symmetric key is 57 bytes), a flag 'f', which is 0,
+fingerprints' section. It is referred as 'sym_key'), a flag 'f', which is 0,
 a context 'c', which is empty, and a message 'm'.
 
-   1.  Hash the symmetric key: 'SHAKE-256(symmetric_key)'. Store the first 114
-       bytes of the digest on 'digest'. Construct the secret key 'sk' from
-       the first half of 'digest' (57 bytes), and the corresponding public
-       key 'H', as defined on 'Public keys, Shared Prekeys and Fingerprints'
-       section. Let 'nonce' denote the second half of the 'digest' (from
-       digest[57] to digest[113]).
+   1.  Hash the sym_key 'SHAKE-256(sym_key)'. Store the first 114 bytes of the
+       digest on 'digest'. Construct the secret key 'sk' from the first half of
+       'digest' (57 bytes), and the corresponding public key 'H', as defined on
+       'Public keys, Shared Prekeys and Fingerprints' section. Let 'nonce'
+       denote the second half of the 'digest' (from digest[57] to digest[113]).
 
    2.  Compute SHAKE-256("SigEd448" || f || len(c) || c || 'nonce' || m). Let
        'r' be the 114-byte digest.
@@ -1121,13 +1120,11 @@ a context 'c', which is empty, and a message 'm'.
        || m). Let 'challenge' be the encoded 114-byte digest.
 
    5.  Compute 'challenge_scalar = (r + 'challenge' * sk) mod q'.  For
-       efficiency, reduce 'challenge' modulo q. This will make 'challenge' a
-       SCALAR.
+       efficiency, reduce 'challenge' modulo q.
 
    6.  Form the signature of the concatenation of 'nonce_point' (57 bytes) and
        the little-endian encoding of 'challenge_scalar' (57 bytes, the ten most
-       significant bits are always zero). 'challenge_scalar' should be encoded
-       as a SCALAR.
+       significant bits are always zero).
 ```
 
 ### Verify a User Profile Signature
@@ -1138,13 +1135,13 @@ It is done as follows:
 ```
 1.  To verify a signature on a message 'm' using the public key 'H', with 'f'
     being 0, and 'c' being empty, split the signature into two 57-byte halves.
-    Decode the first half 'nonce_point' as POINT, and the second half
-    'challenge_scalar' as SCALAR. Decode the public key 'H' as a POINT. If any
-    of the decodings fail (including 'challenge_scalar' being out of range), the
-    signature is invalid.
-2.  Compute SHAKE-256("SigEd448" || f || len(c) || c || 'nonce_point' || H ||
+    Decode the first half as a point 'nonce_point', and the second half
+    as a scalar 'challenge_scalar'. Decode the public key 'H' as a point H'. If
+    any of the decodings fail (including 'challenge_scalar' being out of range),
+    the signature is invalid.
+2.  Compute SHAKE-256("SigEd448" || f || len(c) || c || 'nonce_point' || H' ||
     m). Let 'challenge' be the 114-byte encoded digest.
-3.  Check the group equation 'challenge_scalar' == 'nonce_point' + 'challenge' *
+3.  Check the group equation 'challenge_scalar' = 'nonce_point' + 'challenge' *
     H'.
 ```
 
