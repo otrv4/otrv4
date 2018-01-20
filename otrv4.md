@@ -1979,10 +1979,10 @@ encryption and MAC keys.
 Like OTRv3, OTRv4 defines an additional symmetric key that can be derived by
 the communicating parties for use of application-specific purposes, such as
 file transfer, voice encryption, etc. When one party wishes to use the extra
-symmetric key, they create a type `8 TLV` attached to a Data Message. The extra
+symmetric key, they create a type `7 TLV` attached to a Data Message. The extra
 symmetric key is derived by calculating `KDF_2(0xFF || K)`.
 
-Upon receipt of the Data Message containing the type 8 TLV, the recipient will
+Upon receipt of the Data Message containing the type 7 TLV, the recipient will
 compute the extra symmetric key in the same way. Note that the value of the
 extra symmetric key is not contained in the TLV itself.
 
