@@ -409,9 +409,9 @@ the OTRv4 messages that should be transmitted encoded.
 #### Scalar
 
 Encoded as a little-endian array of 56 bytes, e.g.
-`h[0] + 2^8 * h[1] + ... + 2^447 * h[55]`. Take into account that the
-scalars used for public key generation are 57 bytes long and encoded as:
-`h[0] + 2^8 * h[1] + ... + 2^448 * h[56]`
+`h[0] + 2^8 * h[1] + ... + 2^447 * h[55]`.
+Take into account that the scalars used for public key generation are 57 bytes
+long and encoded as: `h[0] + 2^8 * h[1] + ... + 2^448 * h[56]`.
 
 #### Point
 
