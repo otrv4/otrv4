@@ -486,8 +486,8 @@ OTRv4's public shared prekey is defined as follows:
 ```
 OTRv4's public shared prekey (ED448-SHARED-PREKEY):
 
-  SharedPreKey type (SHORT)
-    Ed448 shared prekeys have type 0x0011
+  Shared PreKey type (SHORT)
+    Ed448 shared prekey have type 0x0011
 
   D (POINT)
     D is the Ed448 shared prekey generated the same way as the public key in
@@ -525,11 +525,11 @@ comparison may be used. The fingerprint is generated as:
 
 ### Instance Tags
 
-Clients include instance tags in all OTR version 4 messages. Instance tags are
+Clients include instance tags in all OTRv4 messages. Instance tags are
 4-byte values that are intended to be persistent. If the same client is logged
 into the same account from multiple locations, the intention is that the client
-will have different instance tags at each location. OTR version 4 messages
-(fragmented and unfragmented) include the source and destination instance tags.
+will have different instance tags at each location. OTRv4 messages (fragmented
+and unfragmented) include the source and destination instance tags.
 If a client receives a message that lists a destination instance tag different
 from its own, the client should discard the message.
 
@@ -996,6 +996,7 @@ DSA signature (SIG):
   len byte unsigned s, big-endian
 ```
 
+<<<<<<< HEAD
 As defined on OTRv3 spec, the OTRv3 DSA public key looks like:
 
 ```
@@ -1009,7 +1010,7 @@ OTRv3 public authentication DSA key (PUBKEY):
 (p,q,g,y) are the OTRv3 DSA public key parameters
 ```
 
-`EDDSA-SIG` refers to the OTR version 4 signature:
+`EDDSA-SIG` refers to the OTRv4 signature:
 
 ```
 EDDSA signature (EDDSA-SIG):
