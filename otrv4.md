@@ -996,7 +996,6 @@ DSA signature (SIG):
   len byte unsigned s, big-endian
 ```
 
-<<<<<<< HEAD
 As defined on OTRv3 spec, the OTRv3 DSA public key looks like:
 
 ```
