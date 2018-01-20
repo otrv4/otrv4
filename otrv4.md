@@ -393,9 +393,6 @@ Ed448 point (POINT):
 Ed448 scalar (SCALAR):
   56 bytes data
 
-Ed448 secret scalar (SECRET-SCALAR):
-  57 bytes data
-
 User Profile (USER-PROF):
   Detailed in "User Profile Data Type" section
 ```
@@ -413,8 +410,8 @@ the OTRv4 messages that should be transmitted encoded.
 
 Encoded as a little-endian array of 56 bytes, e.g.
 `h[0] + 2^8 * h[1] + ... + 2^447 * h[55]`. Take into account that the
-`SECRET-SCALAR` (used for public key generation) is 57 bytes long and should be
-encoded as: `h[0] + 2^8 * h[1] + ... + 2^448 * h[56]`
+scalars used for public key generation are 57 bytes long and encoded as:
+`h[0] + 2^8 * h[1] + ... + 2^448 * h[56]`
 
 #### Point
 
@@ -442,11 +439,12 @@ A curve point is decoded as follows:
       ```
            x = ((num ^ 3) * denom * (num^5 * denom^3) ^ ((p-3)/4)) (mod p)
       ```
-   2.  If `denom * x^2 == num`, the recovered x-coordinate is `x`.  Otherwise, no
-       square root exists, and the decoding fails.
-3. Use the `x_0` bit to select the right square root.  If `x == 0`, and `x_0 ==
-   1`, decoding fails.  Otherwise, if `x_0 != x mod 2`, set `x <-- p - x`.
-   Return the decoded point `(x,y)`.
+   2.  If `denom * x^2 = num`, the recovered x-coordinate is `x`.  Otherwise, no
+       square root exists, and decoding fails.
+3. Use the `x_0` bit to select the right square root:
+   * If `x = 0`, and `x_0 = 1`, decoding fails.
+   * Otherwise, if `x_0 != x mod 2`, set `x <-- p - x`.  Return the decoded
+     point `(x,y)`.
 
 #### Encoded Messages
 
@@ -501,7 +499,6 @@ The public key and shared prekey are generated as follows (refer to RFC 8032
 
 ```
 The symmetric key (sym_key) is 57 bytes of cryptographically secure random data.
-The secret scalar 'sk' is defined as SECRET-SCALAR.
 
 1. Hash the 57-byte symmetric key ('sym_key') using SHAKE-256(sym_key). Store
    the digest in a 114-byte buffer.  Only the lower 57 bytes (denoted 'h')
@@ -717,7 +714,8 @@ generateECDH()
   - prune 'h': the two least significant bits of the first byte are cleared, all
     eight bits of the last byte are cleared, and the highest bit of the second
     to last byte is set.
-  - encode 'h' as SECRET-SCALAR. Denote this value 's'.
+  - Interpret the buffer as the little-endian integer, forming the secret scalar
+    's'.
   - return our_ecdh.public = G * s, our_ecdh.secret = s
 
 generateDH()
@@ -3379,3 +3377,4 @@ AUTHSTATE_AWAITING_SIG
 9. Josefsson, S. and Liusvaara, I. (2017). *Edwards-curve Digital Signature
    Algorithm (EdDSA)*, Internet Engineering Task Force, RFC 8032. Available at:
    https://tools.ietf.org/html/rfc8032
+f
