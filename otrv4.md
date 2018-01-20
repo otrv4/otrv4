@@ -517,7 +517,7 @@ Public keys have fingerprints, which are hex strings that serve as identifiers
 for the public key. The full OTRv4 fingerprint is calculated by taking the
 SHAKE-256 hash of the byte-level representation of the public key. To
 authenticate a long-term key pair, the [Socialist Millionaire's
-Protocol](#socialist-millionaires-protocol-smp) and manual fingerprint
+Protocol](#socialist-millionaires-protocol-smp) or a manual fingerprint
 comparison may be used. The fingerprint is generated as:
 
 * Use of the first 56 bytes from the `SHAKE-256(byte(H))` (224-bit security
@@ -526,7 +526,7 @@ comparison may be used. The fingerprint is generated as:
 ### Instance Tags
 
 Clients include instance tags in all OTR version 4 messages. Instance tags are
-32-bit values that are intended to be persistent. If the same client is logged
+4-byte values that are intended to be persistent. If the same client is logged
 into the same account from multiple locations, the intention is that the client
 will have different instance tags at each location. OTR version 4 messages
 (fragmented and unfragmented) include the source and destination instance tags.
@@ -566,8 +566,8 @@ Type 0: Padding
   The value may be an arbitrary amount of data. This data should be ignored.
   This type can be used to disguise the length of a plaintext message.
   XSalsa20, the algorithm used for encryption of the message, is a stream cipher
-  and so no padding is required. If you want to do message padding (to disguise
-  the length of your message), use this TLV.
+  and, therefore, no padding is required. If you want to do message padding (to
+  disguise the length of your message), use this TLV.
 
 Type 1: Disconnected
   Closes the connection. This TLV should have the 'IGNORE_UNREADABLE' flag set.
@@ -630,7 +630,7 @@ Any message containing the string "?OTR Error: " is an OTR Error Message. The
 following part of the message should contain human-readable details of the
 error. The message may also include a specific code at the beginning, e.g. "?OTR
 Error: ERROR_N: ". This code is used to identify which error is being
-received for optional localization of the message. OTR Error Messages are
+received for optional localization of the message. OTRv4 Error Messages are
 unencoded: they are not base-64 encoded binary.
 
 Currently, the following errors are supported:
@@ -786,8 +786,8 @@ derive_ratchet_keys(R_i-1, K):
   Cb = KDF_2(0x03 || KDF_2(R_i-1 || K))
   return R, decide_between_chain_keys(Ca, Cb)
 ```
-NOTE: If no R is supplied (as for the first ratchet), then each value should be
-derived from KDF_2(0x0n || K) where n is the appropriate value as above.
+NOTE: If there is no `R`, as for the first ratchet, then each value should be
+derived from `KDF_2(0x0n || K)` where `n` is the appropriate value as above.
 
 ### Rotating ECDH keys and brace key as sender
 
@@ -891,11 +891,10 @@ this channel.
 
 ### Session expiration
 
-An attacker may capture some messages with the plan to compromise their
-ephemeral secrets at a later time. To mitigate against this, message keys
-should be deleted regularly. OTRv4 implements this by detecting whether a new
-ECDH key has been generated within a certain amount of time. If it hasn't, then
-the session is expired.
+An attacker may capture some messages to compromise their ephemeral secrets at a
+later time. To mitigate against this, message keys should be deleted regularly.
+OTRv4 implements this by detecting whether a new ECDH key has been generated
+within a certain amount of time. If it hasn't, then the session is expired.
 
 To expire the session:
 
@@ -911,14 +910,14 @@ To expire the session:
 3. Transition the protocol state machine to `START`
 
 The session expiration time is decided individually by each party so it is
-possible for one person to use an expiration time of two hours and the other
-party to use two weeks. The client implementer should decide what the
+possible for one person to have an expiration time of two hours and the other
+party have it of two weeks. The client implementer should decide what the
 appropriate expiration time is for their particular circumstance.
 
 The session expiration encourages keys to be deleted often at the cost of
 having lost messages whose MAC keys cannot be revealed. For example, if Alice
 sets her session expiration time to be 2 hours, in order to reset Alice's
-session expiration timer Bob must create a reply and Alice must create a
+session expiration timer, Bob must create a reply and Alice must create a
 response to this reply. If this does not happen within two hours, Alice will
 expire her session and delete all keys associated with this conversation. If
 she receives a message from Bob after two hours, she cannot decrypt the message
@@ -946,7 +945,7 @@ an attacker.
 
 ## User Profile
 
-OTRv4 introduces a user profile. The user profile contains the Ed448 long term
+OTRv4 introduces user profiles. The user profile contains the Ed448 long term
 public key, a shared prekey for offline conversations, information about
 supported versions, a profile expiration date, a signature of all these, and an
 optional transition signature.
