@@ -609,7 +609,7 @@ Type 7: Extra symmetric key
 
 ### Shared Session State
 
-Both the interactive and non-interactive DAKE must authenticate their contexts
+Both the interactive and non-interactive DAKEs must authenticate their contexts
 to prevent attacks that rebind the DAKE transcript into different contexts. If
 the higher-level protocol ascribes some property to the connection, the DAKE
 exchange should verify this property. A session is created when a new OTRv4
