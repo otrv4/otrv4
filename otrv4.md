@@ -784,7 +784,7 @@ derive_ratchet_keys(R_i-1, K):
   R_i = KDF_2(0x01 || KDF_2(R_i-1 || K))
   Ca = KDF_2(0x02 || KDF_2(R_i-1 || K))
   Cb = KDF_2(0x03 || KDF_2(R_i-1 || K))
-  return R, decide_between_chain_keys(Ca, Cb)
+  return R_i, decide_between_chain_keys(Ca, Cb)
 ```
 NOTE: If there is no `R`, as for the first ratchet, then each value should be
 derived from `KDF_2(0x0n || K)` where `n` is the appropriate value as above.
