@@ -1241,7 +1241,7 @@ Bob will be initiating the DAKE with Alice.
       [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
       section for details.
 4. Sends Alice an Auth-I message
-   (see [Auth-I message](#auth-i-message section)).
+   (see [Auth-I message](#auth-i-message) section).
 5. At this point, the DAKE is complete for Bob:
     * Sets ratchet id `i` as 0.
     * Sets `j` as 0 (which means he will ratchet again).
@@ -1847,16 +1847,14 @@ Message id (INT)
   This should be set with sender's j.
 
 Public ECDH Key (POINT)
-  This is the public part of the ECDH key used to encrypt and decrypt the
-  data message. For the sender of this message, this is their
-  'our_ecdh.public' value. For the receiver of this message, it is
-  used as 'their_ecdh'.
+  This is the public part of the ECDH keypair. For the sender of this
+  message, this is their 'our_ecdh.public' value. For the receiver of
+  this message, it is used as 'their_ecdh'.
 
 Public DH Key (MPI)
-  This is the public part of the DH key used to encrypt and decrypt the
-  data message. For the sender of this message, it is 'our_dh.public'
-  value. For the receiver of this message, it is used as 'their_dh'. If
-  this value is empty, its length is zero.
+  This is the public part of the DH keypair. For the sender of this
+  message, it is 'our_dh.public' value. For the receiver of this message,
+  it is used as 'their_dh'. If this value is empty, its length is zero.
 
 Nonce (NONCE)
   The nonce used with XSalsa20 to create the encrypted message contained
