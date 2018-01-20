@@ -985,7 +985,8 @@ User Profile (USER-PROF):
 ```
 
 `SIG` is the DSA Signature. It is the same signature as used in OTRv3.
-From the OTRv3 protocol section "Public keys, signatures, and fingerprints":
+From the OTRv3 protocol section "Public keys, signatures, and fingerprints",
+the format for a signature made by a OTRv3 DSA public key is as follows:
 
 ```
 DSA signature (SIG):
@@ -993,6 +994,19 @@ DSA signature (SIG):
   implementations is 20 bytes)
   len byte unsigned r, big-endian
   len byte unsigned s, big-endian
+```
+
+As defined on OTRv3 spec, the OTRv3 DSA public key looks like:
+
+```
+OTRv3 public authentication DSA key (PUBKEY):
+  Pubkey type (SHORT)
+    DSA public keys have type 0x0000
+  p (MPI)
+  q (MPI)
+  g (MPI)
+  y (MPI)
+(p,q,g,y) are the OTRv3 DSA public key parameters
 ```
 
 `EDDSA-SIG` refers to the OTR version 4 signature:
@@ -1021,9 +1035,9 @@ To create a user profile, assemble:
    [Public keys, shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
    section. This key must expire when the user profile expires.
 5. Profile Signature: The symmetric key, the flag `f` (set to zero, as defined
-   on [RFC]8032) and the empty context `c` are used to create signatures of the
-   entire profile excluding the signature itself. The size of the signature is
-   114 bytes. For its generation, refer to
+   on [RFC]8032 [\[9\]](#references)) and the empty context `c` are used to
+   create signatures of the entire profile excluding the signature itself. The
+   size of the signature is 114 bytes. For its generation, refer to
    [Create a user profile signature](#create-a-user-profile-signature) section.
 6. Transition Signature (optional): A signature of the profile excluding the
    Profile Signature and the user's OTRv3 DSA key. The Transition Signature
@@ -1053,8 +1067,8 @@ Any other version string that is not "4", "3", "2", or "1" should be ignored.
 
 If a renewed profile is not published in a public place, the user's
 participation deniability is at risk. Participation deniability is also at risk
-if the only publicly available profile is expired. For that reason, an expired
-profile received in the DAKE is considered invalid.
+if the only publicly available profile is expired. For that reason, a received
+expired profile during the DAKE is considered invalid.
 
 Before the profile expires, the user must publish an updated profile with a
 new expiration date. The client establishes the frequency of expiration and
