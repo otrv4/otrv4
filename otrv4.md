@@ -2474,8 +2474,8 @@ If the version is 3:
 * Otherwise:
   * Ignore the message.
 
-If using version 3 and expecting that the AKE will start when receiving a OTR
-Error message (when policy `ERROR_START_AKE` is set):
+If using version 3 and 'ERROR_START_AKE' policy is set (which expects that the
+AKE will start when receiving an OTR Error message, as defined in OTRv3):
 
   * Reply with a query message
 
