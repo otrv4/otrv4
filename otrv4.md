@@ -14,8 +14,8 @@ an existing messaging protocol, such as XMPP.
 
 1. [Main Changes over Version 3](#main-changes-over-version-3)
 1. [High Level Overview](#high-level-overview)
-   1. [Conversation started by an Interactive DAKE](#conversation-started-by-an-interactive-dake)
-   1. [Conversation started by a Non-Interactive DAKE](#conversation-started-by-a-non-interactive-dake)
+   1. [Conversation started by an Interactive DAKE (DAKEZ)](#conversation-started-by-an-interactive-dake-dakez)
+   1. [Conversation started by a Non-Interactive DAKE (XZDH)](#conversation-started-by-a-non-interactive-dake-xzdh)
 1. [Assumptions](#assumptions)
 1. [Security Properties](#security-properties)
 1. [Notation and parameters](#notation-and-parameters)
