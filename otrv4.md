@@ -570,7 +570,10 @@ Type 0: Padding
   disguise the length of your message), use this TLV.
 
 Type 1: Disconnected
-  Closes the connection. This TLV should have the 'IGNORE_UNREADABLE' flag set.
+  Closes the connection. If you receive a TLV record of this type, you should
+  transition to 'FINISHED' state (see below), and inform the user that its
+  correspondent has closed its end of the private connection, and the user
+  should do the same. This TLV should have the 'IGNORE_UNREADABLE' flag set.
 
 Type 2: SMP Message 1
   The value represents the initial message of the Socialist Millionaires'
@@ -2099,8 +2102,9 @@ START
   This is the initial state before an OTR conversation starts. For the
   participant, the only way to enter this state is for the participant to
   explicitly request it via some UI operation. Messages sent in this state are
-  plaintext messages. If a TLV type 1 (Disconnected) message is sent in another
-  state, transition to this state.
+  plaintext messages. If a TLV type 1 (Disconnected) message is sent in any of
+  the other states, transition to this state. Note that this transition only
+  happens when TLV type 1 message is sent, not when it is received.
 
 WAITING_AUTH_R
 
@@ -2130,7 +2134,9 @@ FINISHED
   and her client will switch to the FINISHED state. This prevents  Alice from
   accidentally sending a message to Bob in plaintext (consider what happens
   if Alice was in the middle of typing a private message to Bob when he
-  suddenly logs out, just as Alice hits the 'enter' key).
+  suddenly logs out, just as Alice hits the 'enter' key). Note that this
+  transition only happens when TLV type 1 message is received, not when it is
+  sent.
 ```
 
 ### Protocol events
