@@ -1633,7 +1633,7 @@ A valid Non-Interactive-Auth message is generated as follows:
    encrypted message, using the nonce set in the previous step. This will be
    referred as `encrypted_data_message`.
 10. If an encrypted message is attached, compute
-    `Auth MAC = KDF_2(auth_mac_k || t || (message_id || nonce ||encrypted_data_message))`.
+    `Auth MAC = KDF_2(auth_mac_k || t || (message_id || nonce || encrypted_data_message))`.
     Otherwise, compute
     `Auth MAC = KDF_2(auth_mac_k || t)`.
 11. Generate a 4-byte instance tag to use as the sender's instance tag.
@@ -2190,9 +2190,9 @@ the AKE or DAKE according to one compatible version he supports.
 ##### Whitespace Tags
 
 If Alice wishes to communicate to Bob that she is willing to use OTR, she can
-attach a special whitespace tag to any plaintext message she sends him. Like
-[Query Messages](#query-messages), whitespace tags may occur anywhere in the
-message, and may be hidden from the user.
+attach a special whitespace tag to any plaintext message she sends him.
+Whitespace tags may occur anywhere in the message, and may be hidden from the
+user (as in the [Query Messages](#query-messages)).
 
 The tag consists of the following 16 bytes, followed by one or more sets of 8
 bytes indicating the version of OTR Alice is willing to use:
@@ -2202,7 +2202,7 @@ bytes indicating the version of OTR Alice is willing to use:
   "\x20\x09\x20\x09\x20\x09\x20\x20",
   followed by one or more of:
     "\x20\x20\x09\x09\x20\x20\x09\x09"
-  to indicate a willingness to use OTR version 3 with Bob
+  to indicate a willingness to use OTR version 3 with Bob or
     "\x20\x20\x09\x09\x20\x09\x20\x20"
   to indicate a willingness to use OTR version 4 with Bob
 ```
@@ -2229,7 +2229,7 @@ If the tag offers OTR version 4 and version 4 is allowed:
   * Send an Identity message.
   * Transition the state to `WAITING_AUTH_R`.
 
-Otherwise if the tag offers OTR version 3 and version 3 is allowed:
+Otherwise, if the tag offers OTR version 3 and version 3 is allowed:
 
   * Send a version `3 D-H Commit Message`.
   * Transition authstate to `AUTHSTATE_AWAITING_DHKEY`.
@@ -2282,9 +2282,8 @@ If the state is `WAITING_AUTH_I`:
 
   ```
   There are a number of reasons that you may receive an Identity Message in this
-  state.
-  Perhaps your correspondent simply started a new AKE or they resent their
-  Identity Message.
+  state. Perhaps your correspondent simply started a new AKE or they resent
+  their Identity Message.
   ```
 
   * Validate the Identity message. Ignore the message if validation fails.
@@ -2308,13 +2307,15 @@ If the state is `WAITING_AUTH_R`:
 
   * If the receiver's instance tag in the message is not the sender's instance
     tag you are currently using, ignore the message.
-  * Validate the Auth-R message. Ignore the message if validation fails. Stay in
-    state `WAITING_AUTH_R`.
+  * Validate the Auth-R message.
 
-    If validation succeeds:
+    * If validation fails:
+      * Ignore the message.
+      * Stay in state `WAITING_AUTH_R`.
 
-    * Reply with an Auth-I message.
-    * Transition state to `ENCRYPTED_MESSAGES`.
+    * If validation succeeds:
+      * Reply with an Auth-I message.
+      * Transition state to `ENCRYPTED_MESSAGES`.
 
 If the state is not `WAITING_AUTH_R`:
 
@@ -2332,13 +2333,15 @@ If the state is `WAITING_AUTH_I`:
 
   * If the receiver's instance tag in the message is not the sender's instance
     tag you are currently using, ignore this message.
-  * Validate the Auth-I message. Ignore the message if validation fails. Stay in
-    state `WAITING_AUTH_I`.
+  * Validate the Auth-I message.
 
-  If validation succeeds:
+    * If validation fails
+      * Ignore the message.
+      * Stay in state `WAITING_AUTH_I`.
 
-  * Transition state to `ENCRYPTED_MESSAGES`.
-  * Initialize the double ratcheting.
+    * If validation succeeds:
+      * Transition state to `ENCRYPTED_MESSAGES`.
+      * Initialize the double ratcheting.
 
 If the state is not `WAITING_AUTH_I`:
 
@@ -2493,7 +2496,7 @@ If the version is 4:
 
   * If a TLV type 1 is received in the `START` state:
 
-      * Stay in that state, else transition to the START state and
+      * Stay in that state, else transition to the `FINISHED` state and
         [reset the state variables and key variables](#resetting-state-variables-and-key-variables).
 
 If the version is 3:
