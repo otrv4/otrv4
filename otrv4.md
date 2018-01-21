@@ -2955,8 +2955,8 @@ The major utilities are:
 
 ```
 Parse
-  Parses given OTR messages to the values of each of the fields in
-  a message. This shows the values of all the fields.
+  Parses OTR messages to the values of each of the fields in it. It shows the
+  values of all the fields.
 
 Modify Data Message
   If an encrypted data message cannot be read because you don't
@@ -2991,44 +2991,45 @@ Read and Forge Data Message
   To achieve this:
   - Decrypt the data message with the corresponding message key derived from
     the given chain key.
-  - If a new message is given, replace the message with that one, encrypt and
-    mac it accordingly.
+  - If a new message is given, replace the message with that one, encrypt it
+    and create its mac accordingly.
 
-Forge AKE and Session Keys
-  Any participant of an OTR conversation may forge an AKE with another
-  participant as long as they have their profile. This function will take the
-  user profile and the secret long term key of one participant, and the user
-  profile of the other. It will return an AKE transcript between the two parties.
-  The participant's private key is required since it is used to authenticate the
-  key exchange, but the resulting transcript is created in such a way that a
-  cryptographic expert cannot identify which profile owner authenticated the
-  conversation.
+Forge DAKE and Session Keys
+  Any participant of an OTR conversation may forge a DAKE with another
+  participant as long as they have their user profile. This function will
+  take the user profile and the secret long term key of one participant, and
+  the user profile of the other. It will return a DAKE transcript between
+  the two parties. The participant's private key is required since it is used
+  to authenticate the key exchange, but the resulting transcript is created
+  in such a way that a cryptographic expert cannot identify which user
+  profile owner authenticated the conversation.
 
 Show MAC Key
-  This function takes a chain key and a message key number and shows the MAC key
-  associated with those two values. For example, if the message key number is 3,
-  the chain key is ratcheted 3 times, and the third MAC key is derived and
-  returned. 'Show MAC key' may be used with the ReMAC Message function below in
-  the case where a chain key has been compromised by an attacker and the attacker
-  wishes to forge messages.
+  This function takes a chain key and a the number of a message key, and shows
+  the MAC key associated with those two values. For example, if the message
+  key number is 3, the chain key is ratcheted 3 times, and the third MAC key is
+  derived and returned. 'Show MAC key' may be used with the ReMAC Message
+  function below in the case where a chain key has been compromised by an
+  attacker who wishes to forge messages.
 
 ReMAC Message
-  This will make a new OTR Data Message with a given MAC key and an original OTR
-  message. The user's message in the OTR message is already encrypted. A new MAC
-  tag will be generated and replaced for the message. An attacker may use this
-  function to forge messages with a compromised MAC key.
+  This will make a new OTR Data Message with a given MAC key and an original
+  OTR message. The user's message in the OTR message is already encrypted.
+  A new MAC tag will be generated and replaced for the message. An attacker
+  may use this function to forge messages with a compromised MAC key.
 
 Forge Entire Transcript
-  The Forge Entire Transcript function will allow one participant to completely
-  forge a transcript between them and another person in a way that its forgery
-  cannot be cryptographically proven. The input will be: one participant's
-  user profile, their secret key, another person's profile, and a list of plain
-  text messages corresponding to what messages were exchanged. Each message in
-  the list will have the structure: 1) sender 2) plain text message, so that the
-  function may precisely create the desired transcript. The participant's
-  private key is required since it is used to authenticate the key exchange, but
-  the resulting transcript is created in such a way that a cryptographic expert
-  cannot identify which profile owner authenticated the conversation.
+  The Forge Entire Transcript function will allow one participant to
+  completely forge a transcript between them and another person in a way
+  that its forgery cannot be cryptographically proven. The input will be:
+  one participant's user profile, their secret key, another participant's
+  user profile, and a list of plain text messages corresponding to what
+  messages were exchanged. Each message in the list will have the structure:
+  1) sender 2) plain text message, so that the function may precisely create
+  the desired transcript. The participant's private key is required since
+  it is used to authenticate the key exchange, but the resulting transcript
+  is created in such a way that a cryptographic expert cannot identify which
+  user profile owner authenticated the conversation.
 ```
 
 ## Appendices
