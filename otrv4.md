@@ -1038,7 +1038,7 @@ To create a user profile, assemble:
    [Public keys, shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
    section. This key must expire when the user profile expires.
 5. Profile Signature: The symmetric key, the flag `f` (set to zero, as defined
-   on [RFC]8032 [\[9\]](#references)) and the empty context `c` are used to
+   on RFC 8032 [\[9\]](#references)) and the empty context `c` are used to
    create signatures of the entire profile excluding the signature itself. The
    size of the signature is 114 bytes. For its generation, refer to
    [Create a user profile signature](#create-a-user-profile-signature) section.
@@ -1347,8 +1347,8 @@ A valid Auth-R message is generated as follows:
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
   * secret key `a` (80 bytes).
   * public key `A`.
-4. Compute `t = 0x0 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(Φ)`.
-   Φ is the shared session state as mention on the
+4. Compute `t = 0x0 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(phi)`.
+   `phi` is the shared session state as mention on the
    [Shared session state](#shared-session-state) section.
 5. Compute `sigma = RSig(Pka, ska, {Pkb, Pka, Y}, t)`.
 6. Generate a 4-byte instance tag to use as the sender's instance tag.
@@ -1363,8 +1363,8 @@ To verify an Auth-R message:
 
 1. Check that the receiver's instance tag matches your sender's instance tag.
 2. Validate the user profile and extract `Pka` from it.
-3. Compute `t = 0x0 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(Φ)`.
-   Φ is the shared session state as mention on the
+3. Compute `t = 0x0 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(phi)`.
+   `phi` is the shared session state as mention on the
    [Shared session state](#shared-session-state) section.
 4. Verify the `sigma` with
    [Ring Signature Authentication](#ring-signature-authentication), that is
@@ -1400,8 +1400,8 @@ authentication `sigma`.
 A valid Auth-I message is generated as follows:
 
 1. Check that the receiver's instance tag matches your sender's instance tag.
-1. Compute `t = 0x1 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(Φ)`.
-   Φ is the shared session state as mention on the
+1. Compute `t = 0x1 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(phi)`.
+   `phi` is the shared session state as mention on the
    [Shared session state](#shared-session-state) section.
 2. Compute `sigma = RSig(Pkb, skb, {Pkb, Pka, X}, t)`.
 3. Continue to use the sender's instance tag.
@@ -1409,8 +1409,8 @@ A valid Auth-I message is generated as follows:
 To verify an Auth-I message:
 
 1. Check that the receiver's instance tag matches your sender's instance tag.
-2. Compute `t = 0x1 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(Φ)`.
-   Φ is the shared session state as mention on the
+2. Compute `t = 0x1 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(phi)`.
+   `phi` is the shared session state as mention on the
    [Shared session state](#shared-session-state) section.
 3. Verify the `sigma` as defined on
    [Ring Signature Authentication](#verification-verifya1-a2-a3-sigma-m).
@@ -1622,7 +1622,7 @@ A valid Non-Interactive-Auth message is generated as follows:
    `tmp_k = KDF_2(K_ecdh || ECDH(x, their_shared_prekey) || ECDH(x, Pkb) || brace_key)`.
    This value is needed for the generation of the Mixed shared secret.
 6. Calculate the Auth MAC key `auth_mac_k = KDF_2(0x01 || tmp_k)`.
-7. Compute `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || their_shared_prekey || KDF_2(Φ)`.
+7. Compute `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || their_shared_prekey || KDF_2(phi)`.
 8. Compute `sigma = RSig(Pka, ska, {Pkb, Pka, Y}, t)`. When computing `sigma`,
    keep the first 24 bytes of the generated `c` value to be used as a `nonce` in
    the next step. Refer to
@@ -1647,7 +1647,7 @@ To verify a Non-Interactive-Auth message:
 1. Check that the receiver's instance tag matches your sender's instance tag.
 2. Validate the user profile, and extract `Pka` from it.
 3. Verify that both ECDH and DH one-time use prekeys remain unused.
-4. Compute `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || our_shared_prekey.public || KDF_2(Φ)`.
+4. Compute `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || our_shared_prekey.public || KDF_2(phi)`.
 5. Verify the `sigma` with
    [Ring Signature Authentication](#ring-signature-authentication).
    See [Verification: RVrf({A1, A2, A3}, sigma, m)](#verification-verifya1-a2-a3-sigma-m)
