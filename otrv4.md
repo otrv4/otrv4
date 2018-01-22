@@ -3387,7 +3387,7 @@ AUTHSTATE_AWAITING_SIG
    http://www.ietf.org/rfc/rfc7748.txt
 6. Kojo, M. (2003). *More Modular Exponential (MODP) Diffie-Hellman groups for
    Internet Key Exchange (IKE)*, Internet Engineering Task Force,
-   RFC 3525. Available at: https://www.ietf.org/rfc/rfc3526.txt
+   RFC 3526. Available at: https://www.ietf.org/rfc/rfc3526.txt
 7. *Off-the-Record Messaging Protocol version 3*. Available at:
    https://otr.cypherpunks.ca/Protocol-v3-4.1.1.html
 8. Meijer, R., Millard, P. and Saint-Andre, P. (2017). *XEP-0060:
