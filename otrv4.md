@@ -1181,8 +1181,8 @@ This protocol is derived from the DAKEZ protocol [\[1\]](#references), which
 uses a ring signature non-interactive zero-knowledge proof of knowledge
 (RING-SIG) for authentication (RSig).
 
-Alice's long-term Ed448 key pair is `(ska, PKa)` and Bob's long-term Ed448
-key pair is `(skb, PKb)`. Both key pairs are generated as stated on the
+Alice's long-term Ed448 key pair is `(ska, Pka)` and Bob's long-term Ed448
+key pair is `(skb, Pkb)`. Both key pairs are generated as stated on the
 [Public keys, shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
 section.
 
@@ -1455,8 +1455,8 @@ This protocol is derived from the XZDH protocol [\[1\]](#references), which
 uses a ring signature non-interactive zero-knowledge proof of knowledge
 (RING-SIG) for authentication (RSig).
 
-Alice's long-term Ed448 key pair is `(ska, PKa)` and Bob's long-term Ed448
-key pair is `(skb, PKb)`. Both key pairs are generated as stated on the
+Alice's long-term Ed448 key pair is `(ska, Pka)` and Bob's long-term Ed448
+key pair is `(skb, Pkb)`. Both key pairs are generated as stated on the
 [Public keys, shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
 section.
 
