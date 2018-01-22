@@ -1990,7 +1990,7 @@ reveals them.
 
 ## Fragmentation
 
-Some networks may have a `maximum message size` that is too small to contain
+Some networks may have a _maximum message size_ that is too small to contain
 an encoded OTR message. In that event, the sender may choose to split the
 message into a number of fragments. This section describes the format for the
 fragments.
@@ -2004,7 +2004,7 @@ fragmentation on outgoing messages is optional.
 
 ### Transmitting Fragments
 
-If you have information about the `maximum message size` you are able to send
+If you have information about the _maximum message size_ you are able to send
 (different IM networks have different limits), you can fragment an encoded
 OTR message as follows:
 
@@ -2049,7 +2049,7 @@ for this _before_ checking for any of the other `?OTR:` markers):
     * Store `piece`
     * Store `index` and `total`
 
-  * If this is the following fragment (same stored `total` and `index==index+1`):
+  * If this is the following fragment (same stored `total` and `index == index+1`):
     * Append `piece` to stored `piece`
     * Store `index` and `total`
 
@@ -2499,7 +2499,7 @@ If the version is 3:
 ## Socialist Millionaires Protocol (SMP)
 
 The Socialist Millionaires Protocol allows two parties with secret information
-(`x` and `y`, respectively) to check whether (`x==y`) without revealing any
+(`x` and `y`, respectively) to check whether (`x == y`) without revealing any
 additional information about the secrets.
 
 OTRv4 makes a few changes to SMP:
