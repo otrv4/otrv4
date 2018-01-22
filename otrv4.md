@@ -1923,13 +1923,13 @@ In both cases:
 
   * When creating a Non-Interactive-Auth message and when an encrypted
     data message has been attached to it, do not create a MAC tag. This is not
-    necessary since the MAC tag created in the non-interactive DAKE (`Auth MAC`)
-    already authentifies this first data message. In any other case, use the MAC
-    key to create a MAC tag. MAC all the sections of the data message from the
+    necessary since the MAC tag was created in the non-interactive DAKE (`Auth MAC`)
+    already authentifies this first data message. In any other case, use the
+    MKmac to create a MAC tag. MAC all the sections of the data message from the
     protocol version to the encrypted message.
 
    ```
-   Authenticator = KDF_2(MKmac || Data_message_sections)
+   Authenticator = KDF_2(MKmac || data_message_sections)
    ```
 
   * Continue to use the sender's instance tag.
