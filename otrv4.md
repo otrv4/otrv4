@@ -1646,7 +1646,7 @@ To verify a Non-Interactive-Auth message:
    for details.
 6. If present, extract the `encrypted_data_message`.
 7. If an encrypted data message was attached, compute
-   `Auth MAC = KDF_2(auth_mac_k || t || (message_id || nonce ||encrypted_data_message))`.
+   `Auth MAC = KDF_2(auth_mac_k || t || (message_id || nonce || encrypted_data_message))`.
    Otherwise, compute `Auth MAC = KDF_2(auth_mac_k || t)`.
 8. Verify the Auth Mac:
    * Extract the Auth MAC from the Non-Interactive-Auth message and verify that
@@ -1918,7 +1918,7 @@ In both cases:
   * Use the encryption key to encrypt the message:
 
    ```
-   Encrypted_message = XSalsa20_Enc(MKenc, nonce, m)
+   encrypted_message = XSalsa20_Enc(MKenc, nonce, m)
    ```
 
   * When creating a Non-Interactive-Auth message and when an encrypted
