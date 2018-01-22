@@ -907,8 +907,8 @@ To expire the session:
 
    1. The root key and all chain keys.
    2. The ECDH keys, DH keys and brace key.
-   3. The `ssid`, any `old_mac_keys` that remain unrevealed, and the
-      `extra symmetric key` if present.
+   3. The SSID, any old MAC keys that remain unrevealed, and the
+      extra symmetric key if present.
 
 3. Transition the protocol state machine to `START`
 
