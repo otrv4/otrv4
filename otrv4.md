@@ -14,8 +14,8 @@ an existing messaging protocol, such as XMPP.
 
 1. [Main Changes over Version 3](#main-changes-over-version-3)
 1. [High Level Overview](#high-level-overview)
-   1. [Conversation started by an Interactive DAKE (DAKEZ)](#conversation-started-by-an-interactive-dake-dakez)
-   1. [Conversation started by a Non-Interactive DAKE (XZDH)](#conversation-started-by-a-non-interactive-dake-xzdh)
+   1. [Conversation started by an Interactive DAKE](#conversation-started-by-an-interactive-dake)
+   1. [Conversation started by a Non-Interactive DAKE](#conversation-started-by-a-non-interactive-dake)
 1. [Assumptions](#assumptions)
 1. [Security Properties](#security-properties)
 1. [Notation and parameters](#notation-and-parameters)
@@ -129,7 +129,7 @@ An OTRv4 conversation may begin when the two participants are online (an
 interactive conversation) or when one participant is offline (non-interactive
 conversation).
 
-### Conversation started by an Interactive DAKE (DAKEZ)
+### Conversation started by an Interactive DAKE
 
 ```
 Alice                                                Bob
@@ -147,7 +147,7 @@ other participant supports OTRv4, an interactive DAKE can be used to establish a
 secure channel. Encrypted messages are then exchanged in this secure channel
 with strong forward secrecy.
 
-### Conversation started by a Non-Interactive DAKE (XZDH)
+### Conversation started by a Non-Interactive DAKE
 
 ```
 Alice                        Prekey Server                  Bob
