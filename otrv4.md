@@ -1347,8 +1347,7 @@ A valid Auth-R message is generated as follows:
   * secret key `a` (80 bytes).
   * public key `A`.
 4. Compute `t = 0x0 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(phi)`.
-   `phi` is the shared session state as mention on the
-   [Shared session state](#shared-session-state) section.
+   `phi` is the shared session state as mention on its [section](#shared-session-state).
 5. Compute `sigma = RSig(Pka, ska, {Pkb, Pka, Y}, t)`.
 6. Generate a 4-byte instance tag to use as the sender's instance tag.
    Additional messages in this conversation will continue to use this tag as the
@@ -1363,8 +1362,7 @@ To verify an Auth-R message:
 1. Check that the receiver's instance tag matches your sender's instance tag.
 2. Validate the user profile and extract `Pka` from it.
 3. Compute `t = 0x0 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(phi)`.
-   `phi` is the shared session state as mention on the
-   [Shared session state](#shared-session-state) section.
+   `phi` is the shared session state as mention on its [section](#shared-session-state).
 4. Verify the `sigma` with
    [Ring Signature Authentication](#ring-signature-authentication), that is
    `sigma == RVrf({Pkb, Pka, Y}, t)`.
@@ -1400,8 +1398,7 @@ A valid Auth-I message is generated as follows:
 
 1. Check that the receiver's instance tag matches your sender's instance tag.
 1. Compute `t = 0x1 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(phi)`.
-   `phi` is the shared session state as mention on the
-   [Shared session state](#shared-session-state) section.
+   `phi` is the shared session state as mention on its [section](#shared-session-state).
 2. Compute `sigma = RSig(Pkb, skb, {Pkb, Pka, X}, t)`.
 3. Continue to use the sender's instance tag.
 
@@ -1409,8 +1406,7 @@ To verify an Auth-I message:
 
 1. Check that the receiver's instance tag matches your sender's instance tag.
 2. Compute `t = 0x1 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(phi)`.
-   `phi` is the shared session state as mention on the
-   [Shared session state](#shared-session-state) section.
+   `phi` is the shared session state as mention on its [section](#shared-session-state).
 3. Verify the `sigma` as defined on
    [Ring Signature Authentication](#verification-verifya1-a2-a3-sigma-m).
 
