@@ -1915,7 +1915,7 @@ In both cases:
     [Ring Signature Authentication](#ring-signature-authentication) section for
     details. In any other case, generate a new random 24 bytes value to be the
     `nonce`.
-  * Use the encryption key to encrypt the message:
+  * Use the `MKenc` to encrypt the message:
 
    ```
    encrypted_message = XSalsa20_Enc(MKenc, nonce, m)
@@ -1925,8 +1925,8 @@ In both cases:
     data message has been attached to it, do not create a MAC tag. This is not
     necessary since the MAC tag was created in the non-interactive DAKE (`Auth MAC`)
     already authentifies this first data message. In any other case, use the
-    MKmac to create a MAC tag. MAC all the sections of the data message from the
-    protocol version to the encrypted message.
+    `MKmac` to create a MAC tag. MAC all the sections of the data message from
+    the protocol version to the encrypted message.
 
    ```
    Authenticator = KDF_2(MKmac || data_message_sections)
@@ -1939,16 +1939,16 @@ In both cases:
 * Check that the receiver's instance tag matches your sender's instance tag.
 
 * Use the `message_id` to compute the receiving chain key, and calculate
-encryption and MAC keys.
+encryption and MAC keys (`MKenc` and `MKmac`).
 
   ```
     compute_chain_key(chain_r, ratchet_id, message_id)
     MKenc, MKmac = derive_enc_mac_keys(chain_r[ratchet_id][message_id])
   ```
 
-* Use the MAC key (`MKmac`) to verify the MAC of the message. In the case of a
+* Use the `MKmac` to verify the MAC of the message. In the case of a
   Non-Interactive-Auth message and when an encrypted data message has been
-  attached to it, verify it with the `Auth Mac` as defined in the
+  attached to it, verify it with the `Auth MAC` as defined in the
   [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 
   If the verification fails:
@@ -1957,8 +1957,7 @@ encryption and MAC keys.
 
   Otherwise:
 
-    * Decrypt the message using the "encryption key" (`MKenc`) and securely
-      delete the key.
+    * Decrypt the message using `MKenc` and securely delete the key.
     * Securely delete receiving chain keys older than `message_id-1`.
     * Set `j = 0` to indicate that a new DH-ratchet should happen the next time
       you send a message.
