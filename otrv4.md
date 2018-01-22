@@ -1181,8 +1181,8 @@ This protocol is derived from the DAKEZ protocol [\[1\]](#references), which
 uses a ring signature non-interactive zero-knowledge proof of knowledge
 (RING-SIG) for authentication (RSig).
 
-Alice's long-term Ed448 key-pair is `(ska, PKa)` and Bob's long-term Ed448
-key-pair is `(skb, PKb)`. Both key pairs are generated as stated on the
+Alice's long-term Ed448 key pair is `(ska, PKa)` and Bob's long-term Ed448
+key pair is `(skb, PKb)`. Both key pairs are generated as stated on the
 [Public keys, shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
 section.
 
@@ -1455,8 +1455,8 @@ This protocol is derived from the XZDH protocol [\[1\]](#references), which
 uses a ring signature non-interactive zero-knowledge proof of knowledge
 (RING-SIG) for authentication (RSig).
 
-Alice's long-term Ed448 key-pair is `(ska, PKa)` and Bob's long-term Ed448
-key-pair is `(skb, PKb)`. Both key pairs are generated as stated on the
+Alice's long-term Ed448 key pair is `(ska, PKa)` and Bob's long-term Ed448
+key pair is `(skb, PKb)`. Both key pairs are generated as stated on the
 [Public keys, shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
 section.
 
@@ -1849,12 +1849,12 @@ Message id (INT)
   This should be set with sender's j.
 
 Public ECDH Key (POINT)
-  This is the public part of the ECDH keypair. For the sender of this
+  This is the public part of the ECDH key pair. For the sender of this
   message, this is their 'our_ecdh.public' value. For the receiver of
   this message, it is used as 'their_ecdh'.
 
 Public DH Key (MPI)
-  This is the public part of the DH keypair. For the sender of this
+  This is the public part of the DH key pair. For the sender of this
   message, it is 'our_dh.public' value. For the receiver of this message,
   it is used as 'their_dh'. If this value is empty, its length is zero.
 
