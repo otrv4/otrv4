@@ -2282,7 +2282,7 @@ If the state is `WAITING_AUTH_I`:
 
   ```
   There are a number of reasons that you may receive an Identity Message in this
-  state. Perhaps your correspondent simply started a new AKE or they resent
+  state. Perhaps your correspondent simply started a new DAKE or they resent
   their Identity Message.
   ```
 
