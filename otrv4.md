@@ -1609,9 +1609,9 @@ A valid Non-Interactive-Auth message is generated as follows:
 
 1. Create a user profile, as defined in
    [Creating a user profile](#creating-a-user-profile) section.
-2. Generate an ephemeral ECDH key pair:
-  * secret key `x` (57 bytes), as defined in
+2. Generate an ephemeral ECDH key pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
+  * secret key `x` (57 bytes).
   * public key `X`.
 3. Generate an ephemeral DH key pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
