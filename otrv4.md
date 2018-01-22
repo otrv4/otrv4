@@ -500,9 +500,8 @@ The public key and shared prekey are generated as follows (refer to RFC 8032
 ```
 The symmetric key (sym_key) is 57 bytes of cryptographically secure random data.
 
-1. Hash the 57-byte symmetric key ('sym_key') using SHAKE-256(sym_key). Store
-   the digest in a 114-byte buffer.  Only the lower 57 bytes (denoted 'h')
-   are used for generating the public key.
+1. Hash the sym_key using SHAKE-256. Store the digest in a 114-byte buffer.
+   Only the lower 57 bytes (denoted 'h') are used for generating the public key.
 2. Prune the buffer 'h': the two least significant bits of the first
    byte are cleared, all eight bits of the last byte are cleared, and the
    highest bit of the second to last byte is set.
