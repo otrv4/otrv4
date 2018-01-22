@@ -1433,9 +1433,6 @@ Prekey message is retrieved by the party attempting to send a message to the
 publisher. A reply, called the Non-Interactive-Auth message, is created with the
 prekey and sent. This completes the DAKE.
 
-The offline DAKE is based on the XZDH protocol [\[1\]](#references). Like the
-interactive DAKE, it also uses a Ring Signature proof for authentication (Auth).
-
 ### Non-interactive Deniable Authenticated Key Exchange (DAKE)
 
 The non-interactive DAKE is a way to mutually agree upon shared cryptographic
