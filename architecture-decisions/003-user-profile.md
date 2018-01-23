@@ -4,13 +4,14 @@
 
 Currently, OTRv3 supports previous versions by allowing the user to configure
 their version policy to allow previous versions or not: when a user wants to
-have a conversation with someone, they should send a query message telling which
-versions they support. This message is sent as plaintext at the beginning of the
-protocol and can be intercepted and changed by a MITM in a rollback attack.
+have a conversation with someone, they should send a query message telling
+which versions they support. This message is sent as plaintext at the beginning
+of the protocol and can be intercepted and changed by a MITM in a rollback
+attack.
 
 With this attack, how can OTR ensure that participants will talk using the
 highest version supported by both parties? OTRv4 seeks to solve this problem
-for versions after 4.
+for versions to come after version 4.
 
 ### Decision
 
@@ -47,10 +48,10 @@ OTRv4.
 
 Although it is possible to check for a version publication, this does not stop
 an attacker from spoofing responses about whether the profile exists or not. So
-in the case where an attacker spoofs the Query Message to contain versions lower
-than four and the response to a request for a User Profile, a version downgrade
-attack is possible. On the other hand, the user profile will protect against
-version rollback attacks in OTRv4 and higher.
+in the case where an attacker spoofs the Query Message to contain versions
+lower than four and the response to a request for a User Profile, a version
+downgrade attack is possible. On the other hand, the user profile will protect
+against version rollback attacks for OTRv4 and higher.
 
 If more than one valid user profile is available from the server, the one with
 the latest expiry will take priority.
@@ -105,9 +106,9 @@ Alice                               Malory                                Bob
 
 ### Consequences
 
-As OTRv4 upgrades do not fix any known security issue on OTRv3, it is acceptable
-for users to chat using version 3, but is preferable to use 4 if both parties
-support it.
+As OTRv4 upgrades do not fix any known security issue on OTRv3, it is
+acceptable for users to chat using version 3, but is preferable to use 4 if
+both parties support it.
 
-We will support a conversation using version 3 if we don't find any user profile
-and the client allows it.
+We will support a conversation using version 3 if we don't find any user
+profile and the client allows it.
