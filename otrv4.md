@@ -3029,9 +3029,11 @@ Forge Entire Transcript
 
 The Authentication scheme consists of two functions:
 
-`sigma = RSig(A_1, a_1, {A_1, A_2, A_3}, m)`, an authentication function.
+- An authentication function:
+  `sigma = RSig(A1, a1, {A1, A2, A3}, m)`
 
-`RVrf({A_1, A_2, A_3}, sigma, m)`, a verification function.
+- A verification function:
+  `RVrf({A1, A2, A3}, sigma, m)`
 
 #### Domain parameters
 
@@ -3047,10 +3049,9 @@ G = (x=22458004029592430018760433409989603624678964163256413424612546168695
 
 #### Authentication: RSig(A1, a1, {A1, A2, A3}, m):
 
-`A1` is the public value associated with `a1`, that is, `A1 = G*a1`.
+`A1` is the public value associated with `a1`, that is, `A1 = G * a1`.
+`A1`, `A2`, and `A3` should be checked to verify that they are on the curve Ed448.
 `m` is the message to authenticate.
-
-`A1`, `A2`, and `A3` should be checked to verify they are on curve Ed448.
 
 1. Pick random values `t1, c2, c3, r2, r3` in Z_q.
 2. Compute `T1 = G * t1`.
@@ -3063,7 +3064,7 @@ G = (x=22458004029592430018760433409989603624678964163256413424612546168695
 
 #### Verification: RVrf({A1, A2, A3}, sigma, m)
 
-`A1`, `A2`, and `A3` should be checked to verify they are on curve Ed448.
+`A1`, `A2`, and `A3` should be checked to verify that they are on curve Ed448.
 
 1. Parse sigma to retrieve components `(c1, r1, c2, r2, c3, r3)`.
 2. Compute `T1 = G * r1 + A1 * c1`
@@ -3074,7 +3075,7 @@ G = (x=22458004029592430018760433409989603624678964163256413424612546168695
 
 ### HashToScalar
 
-This function is `hashToScalar(d)`: d is an array of bytes.
+This function is `HashToScalar(d)`: d is an array of bytes.
 
 1. Compute `h = KDF_2(d)` as an unsigned value, big-endian.
 2. Return `h (mod q)`
@@ -3088,9 +3089,9 @@ message. Thus, its offset is 0. The forger wants to replace "hi" with "yo".
   offset = 0
   old_text = "hi"
   new_text = "yo"
-  text_length = string_length_of("hi")
-  encrypted_message_length = get_from_data_message()
+  text_length = string_length_of(old_text)
   old_encrypted_message = get_from_data_message()
+  encrypted_message_length = string_length_of(old_encrypted_message)
 
   for (i=0; i < text_length && offset+i < encrypted_message_length; i++) {
       old_encrypted_message[offset+i] ^= old_text[i] ^ new_text[i]
@@ -3386,4 +3387,3 @@ AUTHSTATE_AWAITING_SIG
 9. Josefsson, S. and Liusvaara, I. (2017). *Edwards-curve Digital Signature
    Algorithm (EdDSA)*, Internet Engineering Task Force, RFC 8032. Available at:
    https://tools.ietf.org/html/rfc8032
-f
