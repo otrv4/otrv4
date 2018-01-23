@@ -13,7 +13,7 @@ works as follows:
 3. Alice sends a message to Bob using her advertised key `privA` and
    acknowledged key `pubB`.
 
-There are other key exchange algorithms to consider, like The Double Ratchet
+There are other key exchange algorithms to consider, like the Double Ratchet
 Algorithm, which is designed to give us per-message forward secrecy and work
 with out-of-order messages [\[1\]](#references).
 
@@ -55,8 +55,9 @@ sent of every ratchet.
 ### Consequences
 
 This heavily changes the data exchange implementation from previous
-versions. We achieve improved forward secrecy, but key management and ratcheting
-processes become more complex because of the many types of keys involved.
+versions. We achieve improved forward secrecy, but key management and
+ratcheting processes become more complex because of the many types of keys
+involved.
 
 ### References
 
