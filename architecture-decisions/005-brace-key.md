@@ -3,7 +3,7 @@
 ### Context
 
 We acknowledge that there may be potential weaknesses in elliptic curves and
-that quantum computers may arrive earlier than we predict.
+that quantum computers may arrive earlier than predicted.
 
 We propose an additional mechanism for protecting transcripts against post-
 conversation decryption.
@@ -23,12 +23,12 @@ This proposal specifies:
 This proposal only changes how root keys are derived in the Double Ratchet algorithm.
 
 The first 3072-bit DH key agreement takes place in the DAKE. See Nik Unger's
-paper [\[1\]](#references), which specifies DAKEZ, ZDH, and XZDH as (optionally)
-quantum-resistant key exchanges.
+paper [\[1\]](#references), which specifies DAKEZ, ZDH, and XZDH as
+(optionally) quantum-resistant key exchanges.
 
 We are trying to protect against elliptic curve weaknesses, and SIDH
-[\[2\]](#references) is specific for post-quantum resistance. Instead, we'll use
-a classic DH key exchange.
+[\[2\]](#references) is specific for post-quantum resistance. Instead, we'll
+use a classic DH key exchange.
 
 We considered two options for ratcheting/rederiving the brace key:
 
@@ -48,11 +48,11 @@ In this description of the algorithm's functions, we will assume n = 3.
 
 **k_dh = A_i, a_i**
 
-A brace key is a key that is added to the KDF used to produce new root and chain
-keys. A brace key can be produced through a DH function and through a key
-derivation function, both of which produce a 3072-bit public key. This key has a
-128-bit security level according to Table 2: Comparable strengths in NIST’s
-Recommendation for Key Management, page 53 [\[3\]](#references).
+A brace key is a key that is added to the KDF used to produce new root and
+chain keys. A brace key can be produced through a DH function and through a
+key derivation function, both of which produce a 3072-bit public key. This
+key has a 128-bit security level according to Table 2: Comparable strengths
+in NIST’s Recommendation for Key Management, page 53 [\[3\]](#references).
 
 **generateDH function: generateDH()**
 
@@ -64,8 +64,8 @@ Given `a_i`, a secret key, and `B_i`, a public key, generates a shared secret va
 
 **Key Derivation Function: SHAKE-256(k_dh)**
 
-Given a 3072-bit shared secret value `k_dh`, the SHAKE-256 generates a 32-byte
-digest: `brace_key`.
+Given a 3072-bit shared secret value `k_dh`, the SHAKE-256 generates a
+32-byte digest: `brace_key`.
 
 **Key Derivation Function: SHAKE-256(brace_key)**
 
@@ -74,12 +74,12 @@ Given `brace_key`, the SHAKE-256 generates a 32-byte digest: a new `brace_key`.
 #### Considerations
 
 Transmitting the 3072-bit DH public key will increase the time it takes to
-exchange messages. To mitigate this, the key won’t be transmitted every time the
-root and chain keys are derived. Instead, this key will be computed with a DH
-function every third time and the interim keys will be derived from the
-previous `brace_key`. After generating new DH keys, the new public key will be
-sent in every message of that ratchet in order to allow transmission even if
-one of the messages is dropped.
+exchange messages. To mitigate this, the key won’t be transmitted every time
+the root and chain keys are derived. Instead, this key will be computed with
+a DH function every third time and the interim keys will be derived from the
+previous `brace_key`. After generating new DH keys, the new public key will
+be sent in every message of that ratchet in order to allow transmission even
+if one of the messages is dropped.
 
 The brace key will be mixed in at the root level with the ECDH key.
 
@@ -103,8 +103,8 @@ The interim root key derivations will use a brace key derived from a
 _When n is configured to equal 3_
 
 ```
-If we assume messages have been sent by Alice and Bob after the DAKE and we are
-now at ratchet 3:
+If we assume messages have been sent by Alice and Bob after the DAKE and we
+are now at ratchet 3:
 
 Alice                                                 Bob
 ---------------------------------------------------------------------------------------------
@@ -165,17 +165,17 @@ Alice                                                 Bob
 
 **Alice or Bob sends the first message in a ratchet (a first reply)**
 
-The ratchet identifier `ratchet_id` increases every time a greater `ratchet_id`
-is received or a new message is being sent and signals the machine to ratchet,
-i.e. `ratchet_id += 1`
+The ratchet identifier `ratchet_id` increases every time a greater
+`ratchet_id` is received or a new message is being sent and signals the
+machine to ratchet, i.e. `ratchet_id += 1`
 
 If `ratchet_id % 3 == 0 && sending the first message of a new ratchet`
 
   * Compute the new brace key from a new DH computation e.g.
     `M_i = take_first_32_bytes(SHAKE-256("OTR4" || (DH(our_DH.secret,
     their_DH.public))))`.
-  * Send the new `brace_key`'s public key (our_DH.public) to the other party for
-    further key computation.
+  * Send the new `brace_key`'s public key (our_DH.public) to the other party
+    for further key computation.
 
 Otherwise
 
@@ -185,8 +185,8 @@ Otherwise
 **Alice or Bob send a follow-up message**
 
 When a new public key has been generated and sent in the first message in a
-ratchet, all follow up messages in that ratchet will also need the public key to
-ensure that the other party receives it.
+ratchet, all follow up messages in that ratchet will also need the public key
+to ensure that the other party receives it.
 
 If `ratchet_id % 6 == 3 || ratchet_id % 6 == 0`
 
@@ -210,17 +210,17 @@ Otherwise:
 
 **Alice or Bob receive a follow up message**
 
-If the `ratchet_id` is not greater than the current state of `ratchet_id`, then
-this is not a new ratchet. In this case there is no further action to be taken
-for the brace key.
+If the `ratchet_id` is not greater than the current state of `ratchet_id`,
+then this is not a new ratchet. In this case there is no further action to be
+taken for the brace key.
 
 **Diagram: Pattern of DH computations and key derivations in a conversation**
 
 This diagram describes when public keys should be sent and when Alice and Bob
 should compute the `brace_key` from a SHAKE or a new DH computation.
 
-Both parties share knowledge of `M_0`, which is a `brace_key` established in the
-DAKE.
+Both parties share knowledge of `M_0`, which is a `brace_key` established in
+the DAKE.
 
 Given
 
@@ -247,8 +247,8 @@ M_9 = SHAKE(DH(a_2, B_1))   -----9--------------A_2------>     M_9 = SHAKE(DH(b_
 ### Performance
 
 Computation of `g^a`, `g^b` and `g^a^b` takes under a second when using the
-generator `g = 2`. Exponents `a` and `b` are 3072 bits long in an Intel Core i7
-2.2GHz.
+generator `g = 2`. Exponents `a` and `b` are 3072 bits long in an Intel Core
+i7 2.2GHz.
 
 | Operation           | Repeat times | Time per Operation |
 | ------------------- | ------------ | ------------------ |
@@ -259,24 +259,24 @@ generator `g = 2`. Exponents `a` and `b` are 3072 bits long in an Intel Core i7
 
 We’ve decide to use a 3072-bit key produced by:
 
-1. a DH function which takes as an argument the other party’s exponent through a
-   data message to produce brace key.
-2. a KDF (take_first_32_bytes(SHAKE-256)) which uses the previous brace key to
-   produce a new one.
+1. a DH function which takes as an argument the other party’s exponent
+   through a data message to produce brace key.
+2. a KDF (take_first_32_bytes(SHAKE-256)) which uses the previous brace key
+   to produce a new one.
 
 The DH function will run every n = 3 times because:
 
 1. It is a small number so a particular key can only be compromised for a
    maximum of 2 * n ratchets. This means that the maximum ratchets that will
    use the brace key or a key derived from the brace key is 6.
-2. The benefit of using an odd number is for simplicity of implementation. With
-   an odd number, both Alice and Bob can generate a new public and secret key at
-   the same time as sending the public key and compute a new brace key from a DH
-   function. However, with an even number, Alice would need to generate and send
-   a key in a different ratchet to the one where the public key would be used.
-   This happens because the public key would only be used in a brace key computed
-   from a new DH function on even numbers of ratchet_ids so only Bob would be
-   the sender at these times.
+2. The benefit of using an odd number is for simplicity of implementation.
+   With an odd number, both Alice and Bob can generate a new public and
+   secret key at the same time as sending the public key and compute a new
+   brace key from a DH function. However, with an even number, Alice would
+   need to generate and send a key in a different ratchet to the one where
+   the public key would be used. This happens because the public key would
+   only be used in a brace key computed from a new DH function on even
+   numbers of ratchet_ids so only Bob would be the sender at these times.
 
 The group used for this key is the one assigned with id 15 in the IETF paper,
 RFC 3526 [\[4\]](#references):
@@ -308,9 +308,9 @@ RFC 3526 [\[4\]](#references):
 
 ### Consequences
 
-Using a 3072-bit DH function to produce the brace key increases the size of data
-messages by 56 bytes of extra key material. The increased size may cause some
-transport protocols to fragment these messages.
+Using a 3072-bit DH function to produce the brace key increases the size of
+data messages by 56 bytes of extra key material. The increased size may cause
+some transport protocols to fragment these messages.
 
 ### References
 
