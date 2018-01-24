@@ -14,21 +14,25 @@ We believe we can protect transcripts from post-conversation decryption by
 mixing another key obtained from a Diffie-Hellman (DH) exchange into the key
 material. This additional key is called the “brace key”.
 
-This proposal specifies:
+This document specifies:
 
-1. The extra key to mix in with the ECDH shared secret when deriving a new
+1. The brace key to mix in with the ECDH shared secret when deriving a new
    root key.
 2. An algorithm for ratcheting and deriving the brace key.
 
-This proposal only changes how root keys are derived in the Double Ratchet algorithm.
+This document only changes the way root keys are derived during the Double
+Ratchet algorithm.
 
-The first 3072-bit DH key agreement takes place in the DAKE. See Nik Unger's
-paper [\[1\]](#references), which specifies DAKEZ, ZDH, and XZDH as
-(optionally) quantum-resistant key exchanges.
+The first 3072-bit DH key agreement takes place in the DAKE. This takes
+place as a traditional Diffie Hellman key exchange and not as the combined
+quantum resistant key encapsulation mechanism (KEM) as proposed in Nik
+Unger's paper [\[1\]](#references) (to be optionally used).
 
-We are trying to protect against elliptic curve weaknesses, and SIDH
-[\[2\]](#references) is specific for post-quantum resistance. Instead, we'll
-use a classic DH key exchange.
+We are not using the same quantum resistant KEM, as defined in the mentioned
+paper (that reccommends using either SIDH or New Hope), because we are aiming
+to give additional protection against transcript decryption in the case of
+ECC compromise and some protection if quantum computers arrive earlier than
+expected. Because of this, we will use a traditional DH key exchange.
 
 We considered two options for ratcheting/rederiving the brace key:
 
