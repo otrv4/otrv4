@@ -433,8 +433,8 @@ encoded as follows:
 1. Encode the y-coordinate as a little-endian array of 57 bytes. The
    final byte is always zero.
 2. Copy the least significant bit of the x-coordinate to the most
-   significant bit of the final byte. This is 1 if the x-coordinate is
-   negative or 0 if it is not.
+   significant bit of the final byte. This is `1` if the x-coordinate is
+   negative or `0` if it is not.
 
 A curve point is decoded as follows:
 
@@ -454,9 +454,11 @@ A curve point is decoded as follows:
    2.  If `denom * x^2 = num`, the recovered x-coordinate is `x`.  Otherwise, no
        square root exists, and decoding fails.
 3. Use the `x_0` bit to select the right square root:
-   * If `x = 0`, and `x_0 = 1`, decoding fails.
-   * Otherwise, if `x_0 != x mod 2`, set `x <-- p - x`.  Return the decoded
-     point `(x,y)`.
+   * If `x = 0`, and `x_0 = 1`:
+     * Decoding fails.
+   * Otherwise, if `x_0 != x mod 2`:
+     * Set `x <-- p - x`.
+     * Return the decoded point `(x,y)`.
 
 #### Encoded Messages
 
@@ -512,8 +514,9 @@ The public key and shared prekey are generated as follows (refer to RFC 8032
 ```
 The symmetric key (sym_key) is 57 bytes of cryptographically secure random data.
 
-1. Hash the sym_key using SHAKE-256. Store the digest in a 114-byte buffer.
-   Only the lower 57 bytes (denoted 'h') are used for generating the public key.
+1. Hash the sym_key using KDF(sym_key, 114). Store the digest in a 114-byte
+   buffer. Only the lower 57 bytes (denoted 'h') are used for generating the
+   public key.
 2. Prune the buffer 'h': the two least significant bits of the first
    byte are cleared, all eight bits of the last byte are cleared, and the
    highest bit of the second to last byte is set.
@@ -710,15 +713,6 @@ variable values are replaced:
   [sending a Non-Interactive-Auth message](#sending-an-encrypted-message-to-an-offline-participant)
 * When you complete a non-interactive DAKE by
   [receiving and validating a Non-Interactive-Auth message](#receiving-a-non-interactive-auth-message)
-
-### Key derivation functions
-
-The following key derivation functions are used:
-
-```
-KDF_1(x) = take_first_32_bytes(SHAKE-256("OTR4" || x))
-KDF_2(x) = take_first_64_bytes(SHAKE-256("OTR4" || x))
-```
 
 ### Generating ECDH and DH keys
 
@@ -1111,54 +1105,54 @@ If only version 4 is supported:
      `Profile Signature`.
 
 The user profile signature for version 4 is generated as defined in RFC 8032
-section 5.2.6. The flag `f` is set to `0` and the context `C` is left empty. It
-is generated as follows:
+[\[9\]](#references), section 5.2.6. The flag `f` is set to `0` and the context `C` is left empty. It is generated as follows:
 
 ```
 The inputs are the symmetric key (57 bytes, defined on 'Public keys and
 fingerprints' section. It is referred as 'sym_key'), a flag 'f', which is 0,
-a context 'c', which is empty, and a message 'm'.
+a context 'c' (a value set by the signer and verifier of maximum 255 bytes),
+which is an empty string for this protocol, and a message 'm'.
 
-   1.  Hash the sym_key 'SHAKE-256(sym_key)'. Store the first 114 bytes of the
-       digest on 'digest'. Construct the secret key 'sk' from the first half of
-       'digest' (57 bytes), and the corresponding public key 'H', as defined on
+   1.  Hash the sym_key 'KDF(sym_key, 114)'. Let 'h' denote the resulting
+       digest. Construct the secret key 'sk' from the first half of
+       'h' (57 bytes), and the corresponding public key 'H', as defined on
        'Public keys, Shared Prekeys and Fingerprints' section.
-       Let 'prefix' denote the second half of the 'digest' (from digest[57] to
-       digest[113]).
+       Let 'prefix' denote the second half of the 'h' (from h[57] to
+       h[113]).
 
-   2.  Compute SHAKE-256("SigEd448" || f || len(c) || c || prefix || m). Let
-       'r' be the 114-byte digest.
+   2.  Compute KDF("SigEd448" || f || len(c) || c || prefix || m, 114), where
+       'm' is the message to be signed. Let 'r' be the 114-byte resulting
+       digest.
 
    3.  Multiply the scalar 'r' by the Base Point (G). For efficiency, do this by
        first reducing 'r' modulo 'q', the group order.  Let 'R' be the encoding
-       of this point. It should be encoded as a POINT.
+       of this resulting point. It should be encoded as a POINT.
 
-   4.  Compute SHAKE-256("SigEd448" || f || len(c) || c || R || H || m).
-       Let 'challenge' be the encoded 114-byte digest.
+   4.  Compute KDF("SigEd448" || f || len(c) || c || R || H || m, 114).
+       Interpret the 114-byte digest as a little-endian integer 'k'.
 
-   5.  Compute 'challenge_scalar = (r + 'challenge' * sk) mod q'.  For
-       efficiency, reduce 'challenge' modulo q.
+   5.  Compute 'S = (r + k * sk) mod q'.  For efficiency, reduce 'k' again
+       modulo q first.
 
    6.  Form the signature of the concatenation of 'R' (57 bytes) and the
-       little-endian encoding of 'challenge_scalar' (57 bytes, the ten most
-       significant bits are always zero).
+       little-endian encoding of 'S' (57 bytes, the ten most significant bits
+       are always zero).
 ```
 
 ### Verify a User Profile Signature
 
-The user profile signature is verified as defined in RFC 8032 section 5.2.7.
-It is done as follows:
+The user profile signature is verified as defined in RFC 8032
+[\[9\]](#references), section 5.2.7. It works as follows:
 
 ```
-1.  To verify a signature on a message 'm' using the public key 'H', with 'f'
+1.  To verify a signature on a message 'm', using the public key 'H', with 'f'
     being 0, and 'c' being empty, split the signature into two 57-byte halves.
     Decode the first half as a point 'R', and the second half as a scalar
-    'challenge_scalar'. Decode the public key 'H' as a point H'. If any of the
-    decodings fail (including 'challenge_scalar' being out of range), the
-    signature is invalid.
-2.  Compute SHAKE-256("SigEd448" || f || len(c) || c || R || H || m). Let
-    'challenge' be the 114-byte encoded digest.
-3.  Check the group equation 'challenge_scalar' = R + 'challenge' * H'.
+    'S'. Decode the public key 'H' as a point H'. If any of the
+    decodings fail (including 'S' being out of range), the signature is invalid.
+2.  Compute KDF("SigEd448" || f || len(c) || c || R || H || m, 114). Interpret
+    the 114-byte digest as a little-endian integer 'k'.
+3.  Check the group equation 'S = R + (k * H')'.
 ```
 
 ### Validating a User Profile
