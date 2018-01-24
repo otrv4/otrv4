@@ -24,6 +24,7 @@ an existing messaging protocol, such as XMPP.
       1. [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    1. [3072-bit Diffie-Hellman Parameters](#3072-bit-diffie-hellman-parameters)
       1. [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
+   1. [Key derivation functions](#key-derivation-functions)
 1. [Data Types](#data-types)
    1. [Encoding and Decoding](#encoding-and-decoding)
    1. [Serializing the Ring Signture Proof of Authentication](#serializing-the-ring-signature-proof-of-authentication)
@@ -33,7 +34,6 @@ an existing messaging protocol, such as XMPP.
    1. [Shared session state](#shared-session-state)
    1. [OTR Error Messages](#otr-error-messages)
 1. [Key management](#key-management)
-   1. [Key derivation functions](#key-derivation-functions)
    1. [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys)
    1. [Shared secrets](#shared-secrets)
    1. [Generating shared secrets](#generating-shared-secrets)
@@ -356,6 +356,18 @@ To verify that an integer (`x`) is on the group with a 3072-bit modulus:
 1. Check that `x` is `>= g3` and `<= dh_p - g3`.
 2. Compute `x ^ q mod p`. If `result == 1`, the integer is a valid element.
    Otherwise the integer is an invalid element.
+
+### Key derivation functions
+
+The following key derivation functions are used:
+
+```
+KDF_1(x) = take_first_32_bytes(SHAKE-256("OTR4" || x))
+KDF_2(x) = take_first_64_bytes(SHAKE-256("OTR4" || x))
+```
+```
+KDF(x, y) The y first bytes of the SHAKE-256 output for input x
+```
 
 ## Data Types
 
