@@ -1935,6 +1935,8 @@ In both cases:
    Authenticator = KDF_2(MKmac || data_message_sections)
    ```
 
+  * Securely delete `MKenc` and `MKmac`.
+
   * Continue to use the sender's instance tag.
 
 #### When you receive a Data Message:
