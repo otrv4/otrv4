@@ -29,7 +29,7 @@ quantum resistant key encapsulation mechanism (KEM) as proposed in Nik
 Unger's paper [\[1\]](#references) (to be optionally used).
 
 We are not using the same quantum resistant KEM, as defined in the mentioned
-paper (that reccommends using either SIDH or New Hope), because we are aiming
+paper (that recommends using either SIDH or New Hope), because we are aiming
 to give additional protection against transcript decryption in the case of
 ECC compromise and some protection if quantum computers arrive earlier than
 expected. Because of this, we will use a traditional DH key exchange.
