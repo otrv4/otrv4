@@ -1116,7 +1116,7 @@ a context 'c', which is empty, and a message 'm'.
        'r' be the 114-byte digest.
 
    3.  Multiply the scalar 'r' by the Base Point (G). For efficiency, do this by
-       first reducing 'r' modular 'q', the group order.  Let 'R' be the encoding
+       first reducing 'r' modulo 'q', the group order.  Let 'R' be the encoding
        of this point. It should be encoded as a POINT.
 
    4.  Compute SHAKE-256("SigEd448" || f || len(c) || c || R || H || m).
@@ -1142,7 +1142,7 @@ It is done as follows:
     'challenge_scalar'. Decode the public key 'H' as a point H'. If any of the
     decodings fail (including 'challenge_scalar' being out of range), the
     signature is invalid.
-2.  Compute SHAKE-256("SigEd448" || f || len(c) || c || R || H' || m). Let
+2.  Compute SHAKE-256("SigEd448" || f || len(c) || c || R || H || m). Let
     'challenge' be the 114-byte encoded digest.
 3.  Check the group equation 'challenge_scalar' = R + 'challenge' * H'.
 ```
