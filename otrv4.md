@@ -675,7 +675,8 @@ Key variables:
   'their_ecdh': their ECDH ephemeral public key.
   'our_dh': our DH ephemeral key pair.
   'their_dh': their DH ephemeral public key.
-  'brace_key': the SHAKE-256 of the DH shared secret previously computed.
+  'brace_key': either a hash of the shared DH key: 'KDF_1(k_dh)' (every thrid
+    ratchet) or a hash of the previuos brace_key: 'KDF_1(brace_key)'
   'mac_keys_to_reveal': the MAC keys to be revealed in the first data message
     sent of the next ratchet.
 ```
@@ -733,7 +734,8 @@ k_dh:
   big-endian unsigned integer.
 
 brace_key:
-  A hash of the shared DH key: 'KDF_1(k_dh)'.
+  Either a hash of the shared DH key: 'KDF_1(k_dh)' (every thrid ratchet) or
+  a hash of the previuos brace_key: 'KDF_1(brace_key)'
 
 K_ecdh:
   The serialized ECDH shared secret computed from an ECDH exchange, serialized
@@ -820,7 +822,7 @@ To rotate the brace key:
 
   * Otherwise:
 
-   * Derive and securely overwrite `brace_key = KDF_1(brace_key)`.
+    * Derive and securely overwrite `brace_key = KDF_1(brace_key)`.
 
 ### Rotating ECDH keys and brace key as receiver
 
