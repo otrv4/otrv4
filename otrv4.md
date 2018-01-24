@@ -1871,9 +1871,11 @@ Old MAC keys to be revealed (DATA)
 
 #### When you send a Data Message:
 
-In order to send a data message, a key is required to encrypt it. This key
-will be derived from the previous chain key and, if the message's counter `j`
-has been set to `0`, keys should be rotated.
+In order to send an encoded data message, a key is required to encrypt the
+message in it. This per-message key will be derived from the previous chain key
+if a ratchet is in progress. If the message's id `j` has been set to `0`,
+ratchet keys should be rotated (the ECDH keys, the brace key, the root key
+and the chain keys).
 
 Given a new ratchet:
 
@@ -1888,14 +1890,15 @@ Given a new ratchet:
   * If needed, calculate the extra symmetric key: `KDF_2(0xFF || K)`.
   * Derive new set of keys
     `root[i], chain_s[i][0], chain_r[i][0] = derive_ratchet_keys(root[i-1], K)`.
-  * Securely delete the root key and all chain keys from the ratchet `i-1`.
+  * Securely delete the root key and all remaining chain keys from the ratchet
+    `i-1`.
   * Securely delete `K`.
   * If present, forget and reveal MAC keys. The conditions for revealing MAC
     keys are stated in the [Revealing MAC keys](#revealing-mac-keys) section.
 
 Otherwise:
 
-  * Increment current sending message ID `j = j+1`.
+  * Increment current sending message id `j = j+1`.
   * Derive the next sending chain key `derive_chain_key(chain_s, i, j)`.
   * Securely delete `chain_s[i][j-1]`.
 
