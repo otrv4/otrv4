@@ -840,7 +840,7 @@ following data messages will advertise a new ratchet id as `i + 1`.
 Before rotating the keys:
 
   * Increment the current ratchet id (`i`) by 1.
-  * Reset the next message id (`j`) to 0.
+  * Reset the receiving message id (`k`) to 0.
 
 To rotate the ECDH keys:
 
@@ -1949,13 +1949,36 @@ In both cases:
 
 #### When you receive a Data Message:
 
+In order to receive an encoded data message, a key is required to decrypt the
+message in it. This per-message key will be derived from the previous chain key
+if a ratchet is in progress.
+
 * Check that the receiver's instance tag matches your sender's instance tag.
 
-* Use the `message_id` to compute the receiving chain key, and calculate
-encryption and MAC keys (`MKenc` and `MKmac`).
+Given a new ratchet:
+
+  * Rotate the ECDH keys and brace key, see
+    [Rotating ECDH keys and brace key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
+    section.
+  * Calculate the `K = KDF_2(K_ecdh || brace_key)`.
+  * If needed, calculate the extra symmetric key: `KDF_2(0xFF || K)`.
+  * Derive new set of keys
+    `root[i], chain_s[i][0], chain_r[i][0] = derive_ratchet_keys(root[i-1], K)`.
+  * Securely delete the root key and all remaining chain keys from the ratchet
+    `i-1`.
+  * Securely delete `K`.
+
+Otherwise:
+
+  * Increment current receiving message id `k = k+1`.
+  * Use the `message_id` to compute the receiving chain key:
+    `compute_chain_key(chain_r, ratchet_id, message_id)`.
+
+In both cases:
+
+* Calculate the encryption and MAC keys (`MKenc` and `MKmac`).
 
   ```
-    compute_chain_key(chain_r, ratchet_id, message_id)
     MKenc, MKmac = derive_enc_mac_keys(chain_r[ratchet_id][message_id])
   ```
 
