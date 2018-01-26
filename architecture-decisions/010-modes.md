@@ -47,3 +47,4 @@ In addition to only supporting the version 4 of OTR (and imposing the same
 restrictions to the User Profile as the 'OTRv4 only' mode), the
 'OTRv4 interactive-only' mode will only support the interactive DAKE. The User
 Profile should not allow the Public Shared Prekey parameter.
+
