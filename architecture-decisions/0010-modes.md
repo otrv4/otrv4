@@ -29,6 +29,8 @@ two modes:
 2. OTRv3-Compatible: a mode with backwards compatibility with OTRv3.
    This mode will know, therefore, how to handle plaintext messages, including
    query messages and whitespace tags.
+3. OTRv4 interactive-only: a always encrypted mode that provides higher
+   deniability properties when compared to the previous two modes.
 
 ### Consequences
 
@@ -40,3 +42,8 @@ complexity of the specification and implementation.
 Furthermore, 'OTRv4 only' mode will only support version 4 of OTR. The User
 Profile, therefore will only allow the 1-byte version string "4". It will also
 not allow the Transition Signature parameter on the same profile.
+
+In addition to only supporting the version 4 of OTR (and imposing the same
+restrictions to the User Profile as the 'OTRv4 only' mode), the
+'OTRv4 interactive-only' mode will only support the interactive DAKE. The User
+Profile should not allow the Public Shared Prekey parameter.
