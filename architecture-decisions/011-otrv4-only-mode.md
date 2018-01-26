@@ -38,7 +38,7 @@ Alice wants to send a message to Bob.
 2. Alice verifies Bob's identity. She either:
   a. Use Bob's User Profile and verify Bob's fingerprint using a businecc card,
      a HTTPS website;
-  b. Perform a interactive AKE and use SMP.
+  b. Perform a interactive DAKE and use SMP.
 2. Alice types a message and "send it" to Bob.
   a. A DAKE is performed if the app is not already in an encrypted state.
   b. Alice is warned about any problem to establish the encrypted channel and/or
@@ -58,9 +58,9 @@ OTRv4 protocol.
 ### Temporary place for discussion before decisions are made
 
 1. Do we need query messages or whitespace tags? Do we need "disconnected TLVs"?
-2. Do we want to specify a timeout for the AKE? Encryption is mandatory so we need a reasonable expectation of success in establishing the encripted conversation.
-3. Do we want non-interactive AKEs to be upgraded to interactive (in order to provide stronger security properties)?
-  What should the Initiator do when it receives an offline message (a non-interactive AKE has completed)? Continue on the same AKE (there is already no deniability for they in regard to an online judge) or start an interactive AKE ASAP to replace the current one?
+2. Do we want to specify a timeout for the DAKE? Encryption is mandatory so we need a reasonable expectation of success in establishing the encripted conversation.
+3. Do we want non-interactive DAKE to be upgraded to interactive (in order to provide stronger security properties)?
+  What should the Initiator do when it receives an offline message (a non-interactive DAKE has completed)? Continue on the same DAKE (there is already no deniability for they in regard to an online judge) or start an interactive DAKE ASAP to replace the current one?
 4. How long should the otr4 conversations be active (encryption is required)?
   a. There could be long-lived conversations in a WhatsApp-like scenario (with optinally recommending an expiration time).
     i. This is similar to the problem of late messages in the out-of-order network. How long should we keep keys in memory/disk waiting for late messages to be delivered?
