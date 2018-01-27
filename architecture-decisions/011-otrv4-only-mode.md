@@ -15,16 +15,23 @@ When thinking about the consequences, we had the following scenarios in mind:
 Alice wants to send a message to Bob.
 
 1. Alice adds Bob as a contact
+
   a. Immediately do the DAKE (interactive or non-interactive depending on the
      contact's availability to the network) and store the conversation keys on
      the device for later use.
+
   b. No identity verification is necessary and the app uses a TOFU policy. Bob's
      User Profile can be used to present additional information about the
      alleged identity.
-2. Alice types a message and "send it" to Bob.
+
+2. Alice types a message and "send it" to Bob
+
   a. Every message will always be encrypted.
+
   b. Instance tags could be optional in this "one device per contact" model.
+
   c. Fragmentation could be optional depending on the network.
+
 3. Bob receives the message from Alice.
 
 There is no plaintext messages in this scenario, since the only way to send
@@ -35,18 +42,28 @@ messages through this app's network is using the app.
 Alice wants to send a message to Bob.
 
 1. Alice adds Bob as a contact
+
 2. Alice verifies Bob's identity. She either:
-  a. Use Bob's User Profile and verify Bob's fingerprint using a businecc card,
+
+  a. Use Bob's User Profile and verify Bob's fingerprint using a business card,
      a HTTPS website;
+
   b. Perform a interactive DAKE and use SMP.
-2. Alice types a message and "send it" to Bob.
+
+2. Alice types a message and "sends it" to Bob.
+
   a. A DAKE is performed if the app is not already in an encrypted state.
+
   b. Alice is warned about any problem to establish the encrypted channel and/or
      any problem with the identity verification for Bob.
+
   c. The conversation keys do not need to be stored on the device for later use.
+
   d. Instance tags are required because there may be multiple devices.
+
   e. Fragmentation could be optional depending on the network, but this is
      unlikely due support to multiple networks.
+
 3. Bob receives the message from Alice.
 
 If the network allows Alice to receive messages from devices not on the same
