@@ -248,14 +248,14 @@ The byte representation of a value `x` is defined as `byte(x)`
 ### Elliptic Curve Parameters
 
 OTRv4 uses the Ed448-Goldilocks [\[4\]](#references) elliptic curve
-[\[5\]](#references), which defines the following parameters:
+[\[5\]](#references). Ed448-Goldilocks is an untwisted Edwards curve, where:
 
 ```
 Equation
 	x^2 + y^2 = 1 - 39081 * x^2 * y^2
 
 Coordinates:
-	Edwards
+	Affine coordinates
 
 Base point (G)
   (x=22458004029592430018760433409989603624678964163256413424612546168695
