@@ -74,14 +74,15 @@ OTRv4 protocol.
 
 ### Temporary place for discussion before decisions are made
 
-1. Do we need query messages or whitespace tags? Do we need "disconnected TLVs"?
-2. Do we want to specify a timeout for the DAKE? Encryption is mandatory so we need a reasonable expectation of success in establishing the encripted conversation.
-3. Do we want non-interactive DAKE to be upgraded to interactive (in order to provide stronger security properties)?
-  What should the Initiator do when it receives an offline message (a non-interactive DAKE has completed)? Continue on the same DAKE (there is already no deniability for they in regard to an online judge) or start an interactive DAKE ASAP to replace the current one?
-4. How long should the otr4 conversations be active (encryption is required)?
-  a. There could be long-lived conversations in a WhatsApp-like scenario (with optinally recommending an expiration time).
-    i. This is similar to the problem of late messages in the out-of-order network. How long should we keep keys in memory/disk waiting for late messages to be delivered?
-  b. There could be short-lived conversations in a Coy-like scenario (a conversation has the lifetime of a client).
+2. Do we want to specify a timeout for the DAKE? Encryption is mandatory so we
+   need a reasonable expectation of success in establishing the encripted
+   conversation.
+3. Do we want non-interactive DAKE to be upgraded to interactive (in order to
+   provide stronger security properties)?
+   What should the Initiator do when it receives an offline message (a
+   non-interactive DAKE has completed)? Continue on the same DAKE (there is
+   already no deniability for they in regard to an online judge) or start an
+   interactive DAKE ASAP to replace the current one?
 5. Should we keep the message format (which is inspired on OTR3)?
 6. Should we encrypt the headers?
 7. Should we support fragmentation?
@@ -98,6 +99,12 @@ OTRv4 protocol.
 > Profile, therefore will only allow the 1-byte version string "4". It will also
 > not allow the Transition Signature parameter on the same profile.
 
+Although this mode requires encryption, TLV type 1 (Disconnected) are still
+necessary to provide a mechanism to session expiration.
+
+By requiring encryption, this mode may encourage long-lived sessions
+(conversations). The section "Session expiration" of OTRv4 protocol spec
+outlines how to mitigate the risks of long-lived sessions.
 
 ### Consequences
 
