@@ -252,10 +252,10 @@ OTRv4 uses the Ed448-Goldilocks [\[4\]](#references) elliptic curve
 
 ```
 Equation
-	x^2 + y^2 = 1 - 39081 * x^2 * y^2
+  x^2 + y^2 = 1 - 39081 * x^2 * y^2
 
 Coordinates:
-	Affine coordinates
+  Affine coordinates
 
 Base point (G)
   (x=22458004029592430018760433409989603624678964163256413424612546168695
