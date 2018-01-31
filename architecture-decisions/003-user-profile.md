@@ -5,13 +5,19 @@
 Currently, OTRv3 supports previous versions by allowing the user to configure
 their version policy to allow previous versions or not: when a user wants to
 have a conversation with someone, they should send a query message telling
-which versions they support. This message is sent as plaintext at the beginning
-of the protocol and can be intercepted and changed by a MITM in a rollback
-attack.
+which versions they support.
 
-With this attack, how can OTR ensure that participants will talk using the
-highest version supported by both parties? OTRv4 seeks to solve this problem
-for versions to come after version 4.
+In a version rollback attack a query message is intercepted and changed by
+a MiTM to enforce the lowest version advertised, and the protocol is unable to
+determine if participants are using the highest version they both support.
+
+OTRv4 seeks to protect future versions of OTR against rollback attacks when
+backward compatibility to OTRv4 is keept.
+
+TODO: This suggest the only reason for having User Profile is to provide
+protection from version rollback. But now, the User Profile also has information
+necessary to the non-interactive DAKE. This context needs to be updated to
+include this, OR move the version rollback to another ADR.
 
 ### Decision
 
