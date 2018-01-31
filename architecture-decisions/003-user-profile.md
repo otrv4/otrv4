@@ -47,7 +47,7 @@ the signed User Profile during the DAKE. Since this signed profile is public
 information, it does not damage participation deniability for the conversation.
 As a side affect, it is possible for the receiver of a Query Message that
 contains versions lower than four to check for a User Profile and thus detect a
-downgrade attack for older versions. Requesting a user profile from the server
+rollback attack for older versions. Requesting a user profile from the server
 is not necessary for online conversations using OTRv4. It's important to note
 that the absence of a user profile is not proof that a user doesn't support
 OTRv4.
@@ -56,7 +56,7 @@ Although it is possible to check for a version publication, this does not stop
 an attacker from spoofing responses about whether the profile exists or not. So
 in the case where an attacker spoofs the Query Message to contain versions
 lower than four and the response to a request for a User Profile, a version
-downgrade attack is possible. On the other hand, the user profile will protect
+rollback attack is possible. On the other hand, the user profile will protect
 against version rollback attacks for OTRv4 and higher.
 
 If more than one valid user profile is available from the server, the one with
