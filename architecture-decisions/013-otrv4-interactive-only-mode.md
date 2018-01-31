@@ -23,4 +23,7 @@ Same as ADR #011, and also the User Profile should not have a Public Shared
 Prekey (and it should probably be moved to the end of the User Profile data
 structure).
 
+TODO: State the security properties of this mode, or the implications to the
+security in this mode.
+
 To be defined.

@@ -1,4 +1,4 @@
-## ADR 11: "OTRv3 compatible" mode
+## ADR 12: "OTRv3 compatible" mode
 
 ### Context
 
@@ -56,5 +56,8 @@ To be defined. This is pretty much the spec as per revision
 585ba0dfcecf6abc0d30ba0ff0524bce3795110a.
 
 ### Consequences
+
+TODO: State the security properties of this mode, or the implications to the
+security in this mode.
 
 To be defined

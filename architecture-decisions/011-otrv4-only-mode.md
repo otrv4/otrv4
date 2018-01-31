@@ -108,4 +108,7 @@ outlines how to mitigate the risks of long-lived sessions.
 
 ### Consequences
 
+TODO: State the security properties of this mode, or the implications to the
+security in this mode.
+
 To be defined
