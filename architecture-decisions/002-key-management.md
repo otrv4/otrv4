@@ -13,13 +13,19 @@ works as follows:
 3. Alice sends a message to Bob using her advertised key `privA` and
    acknowledged key `pubB`.
 
+// TODO: check these statements
+
 There are other key exchange algorithms to consider, like the Double Ratchet
 Algorithm, which is designed to give us per-message forward secrecy and work
 with out-of-order messages [\[1\]](#references).
 
+// TODO: check these statements
+
 We consider using the Double Ratchet Algorithm while maintaining the same
 security properties of prior OTR versions, such as message deniability.
 Message deniability is achieved through revealing MAC keys.
+
+// TODO: this might change
 
 OTR version 2 contains a vulnerability related to message integrity when
 revealing MAC keys is done immediately by both participants in a conversation
