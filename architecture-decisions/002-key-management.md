@@ -4,9 +4,9 @@
 
 Previous versions of the OTR protocol use a mechanism called the Diffie-Hellman
 ratchet (DH Ratchet) to ratchet key material when messages are exchanged. This
-ratcheting approach attaches new DH contributions to messages and, with each
-sent message, the sender advertises a new DH value. Message keys are then
-computed from the latest acknowledged DH values.
+ratcheting approach consists of attaching new DH contributions to messages.
+With each sent message, the sender advertises a new DH value. Message keys are
+then computed from the latest acknowledged DH values.
 
 // TODO: clarify this
 
@@ -14,17 +14,17 @@ This three step DH Ratchet works as follows:
 
 1. Alice sends an encrypted message to Bob, and "advertises" her next Diffie-
    Hellman key `pubA`.
-2. Bob sends an encrypted message to Alice, and "acknowledges" her next Diffie-
-   Hellman key and advertises his next Diffie-Hellman key `pubB`.
+2. Bob sends an encrypted message to Alice, "acknowledges" her next
+   Diffie-Hellman key and advertises his next Diffie-Hellman key `pubB`.
 3. Alice sends a message to Bob using the private part of her advertised key
    `privA` and the acknowledged key from Bob `pubB`.
 
 This design introduces backward secrecy within conversations since a
 compromised key will regularly be replaced with new key material. A
 disadvantage of this DH Ratchet is that session keys might not be renewed for
-every message (i.e., forward secrecy is only partially provided). It also lacks
-out-of-order resilience; if a message arrives after a newly advertised key is
-accepted, then the necessary decryption key was already deleted.
+every message (forward secrecy is, therefore, only partially provided). It also
+lacks out-of-order resilience: if a message arrives after a newly advertised
+key is accepted, then the necessary decryption key will be already deleted.
 
 In order to improve the forward secrecy of the DH Ratchet, both ratchet
 approaches can be combined: session keys produced by DH ratchets are used to
