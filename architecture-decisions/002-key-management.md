@@ -15,7 +15,7 @@ This three step DH Ratchet works as follows:
 1. Alice sends an encrypted message to Bob, and "advertises" her next Diffie-
    Hellman key `pubA`.
 2. Bob sends an encrypted message to Alice, "acknowledges" her next
-   Diffie-Hellman key and advertises his next Diffie-Hellman key `pubB`.
+   Diffie-Hellman key `pubA` and advertises his next Diffie-Hellman key `pubB`.
 3. Alice sends a message to Bob using the private part of her advertised key
    `privA` and the acknowledged key from Bob `pubB`.
 
@@ -38,12 +38,18 @@ double ratchet makes use of a second derivation function within its KDF
 ratchets. While the KDF ratchets are advanced normally, the KDF keys are passed
 through a second distinct derivation function before being used for encryption.
 
+Nevertheless, the double ratchet does not provide asynchronicity by itself, but
+it can be combined with a prekey scheme for it. Prekeys are one-time ephemeral
+public DH contributions that have been uploaded in advance to a server.
+
 We consider using the Double Ratchet Algorithm to improve forward secrecy,
 while maintaining the same security properties of prior OTR versions, such as
 message deniability. This is achieved since messages are authenticated with
 shared MAC keys rather than being signed with long-term keys. OTR, also,
 publishes MAC and uses malleable encryption, to expand the set of possible
-message forgers.
+message forgers. OTRv4, therefore, will improve forward secrecy, support
+out-of-order resilence and asynchronicity (in the form of prekey messages
+uploaded to a server).
 
 // TODO: this might change
 
