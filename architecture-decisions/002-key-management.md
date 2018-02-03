@@ -2,28 +2,48 @@
 
 ### Context
 
-Previous versions of the OTR protocol use a mechanism called the DH ratchet to
-ratchet key material when messages are exchanged. This three step, DH ratchet
-works as follows:
+Previous versions of the OTR protocol use a mechanism called the Diffie-Hellman
+ratchet (DH Ratchet) to ratchet key material when messages are exchanged. This
+ratcheting approach attaches new DH contributions to messages and, with each
+sent message, the sender advertises a new DH value. Message keys are then
+computed from the latest acknowledged DH values.
+
+// TODO: clarify this
+
+This three step DH Ratchet works as follows:
 
 1. Alice sends an encrypted message to Bob, and "advertises" her next Diffie-
    Hellman key `pubA`.
 2. Bob sends an encrypted message to Alice, and "acknowledges" her next Diffie-
    Hellman key and advertises his next Diffie-Hellman key `pubB`.
-3. Alice sends a message to Bob using her advertised key `privA` and
-   acknowledged key `pubB`.
+3. Alice sends a message to Bob using the private part of her advertised key
+   `privA` and the acknowledged key from Bob `pubB`.
 
-// TODO: check these statements
+This design introduces backward secrecy within conversations since a
+compromised key will regularly be replaced with new key material. A
+disadvantage of this DH Ratchet is that session keys might not be renewed for
+every message (i.e., forward secrecy is only partially provided). It also lacks
+out-of-order resilience; if a message arrives after a newly advertised key is
+accepted, then the necessary decryption key was already deleted.
 
-There are other key exchange algorithms to consider, like the Double Ratchet
-Algorithm, which is designed to give us per-message forward secrecy and work
-with out-of-order messages [\[1\]](#references).
+In order to improve the forward secrecy of the DH Ratchet, both ratchet
+approaches can be combined: session keys produced by DH ratchets are used to
+seed per-participant KDF ratchets. Messages are then encrypted using
+keys produced by the KDF ratchets, frequently refreshed by the DH Ratchet on
+message responses. This resulting double ratchet (called the "Double Ratchet
+Algorithm" [\[1\]](#references)) provides forward secrecy across messages due
+to the KDF ratchets, but also backward secrecy since compromised KDF keys will
+eventually be replaced by new seeds. To achieve out-of-order resilience, the
+double ratchet makes use of a second derivation function within its KDF
+ratchets. While the KDF ratchets are advanced normally, the KDF keys are passed
+through a second distinct derivation function before being used for encryption.
 
-// TODO: check these statements
-
-We consider using the Double Ratchet Algorithm while maintaining the same
-security properties of prior OTR versions, such as message deniability.
-Message deniability is achieved through revealing MAC keys.
+We consider using the Double Ratchet Algorithm to improve forward secrecy,
+while maintaining the same security properties of prior OTR versions, such as
+message deniability. This is achieved since messages are authenticated with
+shared MAC keys rather than being signed with long-term keys. OTR, also,
+publishes MAC and uses malleable encryption, to expand the set of possible
+message forgers.
 
 // TODO: this might change
 
@@ -69,3 +89,4 @@ involved.
 
 1. https://whispersystems.org/blog/advanced-ratcheting/ "Advanced cryptographic ratcheting"
 2. http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.165.7945&rep=rep1&type=pdf "Finite-State Security Analysis of OTR Version 2"
+3. http://cacr.uwaterloo.ca/techreports/2015/cacr2015-02.pdf "SoK: Secure Messaging"
