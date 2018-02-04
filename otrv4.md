@@ -797,14 +797,12 @@ following data messages will advertise a new ratchet id as `i + 1`.
 
 Before rotating the keys:
 
-  * Increment the current ratchet id (`i`) by 1.
   * Reset the next message id (`j`) to 0.
 
 To rotate the ECDH keys:
 
   * Generate a new ECDH key pair and assign it to `our_ecdh = generateECDH()`.
   * Calculate `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
-  * Securely delete `our_ecdh.secret`.
 
 To rotate the brace key:
 
@@ -835,6 +833,7 @@ To rotate the ECDH keys:
   * Retrieve the ECDH key from the received data message and assign it to
     `their_ecdh`.
   * Calculate `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
+  * Securely delete `our_ecdh.secret`.
 
 To rotate the brace key:
 
