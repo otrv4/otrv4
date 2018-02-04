@@ -787,18 +787,6 @@ decide_between_chain_keys(Ca, Cb):
     return Cb, Ca
 ```
 
-### Deriving Double Ratchet keys
-
-```
-derive_ratchet_keys(R_i-1, K):
-  R_i = KDF_2(0x01 || KDF_2(R_i-1 || K))
-  Ca = KDF_2(0x02 || KDF_2(R_i-1 || K))
-  Cb = KDF_2(0x03 || KDF_2(R_i-1 || K))
-  return R_i, decide_between_chain_keys(Ca, Cb)
-```
-NOTE: If there is no `R`, as for the first ratchet, then each value should be
-derived from `KDF_2(0x0n || K)` where `n` is the appropriate value as above.
-
 ### Rotating ECDH keys and brace key as sender
 
 Before sending the first reply (i.e. a new message considering a previous
@@ -862,9 +850,21 @@ To rotate the brace key:
 
     * Derive and securely overwrite `brace_key = KDF_1(brace_key)`.
 
+### Deriving Double Ratchet keys
+
+```
+derive_ratchet_keys(root[i-1], K):
+  root_key[i] = KDF_2(0x01 || KDF_2(root[i-1] || K))
+  chain_key[i][j] = KDF_2(0x02 || KDF_2(root[i-1] || K))
+  return root_key[i], chain_key[i][j]
+```
+
+NOTE: If there is no `R`, as for the first ratchet, then each value should be
+derived from `KDF_2(0x0n || K)` where `n` is the appropriate value as above.
+
 ### Deriving new chain keys
 
-When sending data messages, you must derive the chain key:
+When sending data messages, you must derive the next chain key:
 
 ```
 derive_chain_key(C, i, j):
@@ -1885,8 +1885,9 @@ In order to send an encoded data message, a key is required to encrypt the
 message in it. This per-message key (`MKenc`) is the output key from the sending
 and receiving KDF chains. As defined on [\[2\]](#references), the KDF keys for
 these chains are called 'chain keys'. If the message's id `j` has been set
-to `0`, ratchet keys should be rotated (the ECDH keys, the brace key, the root
-key and the chain keys).
+to `0`, and a participant wants to send a data message after receiving another
+one, ratchet keys should be rotated (the ECDH keys, the brace key, the root
+key and the sending chain key).
 
 Given a new DH ratchet:
 
@@ -1902,25 +1903,25 @@ Given a new DH ratchet:
   * Derive new set of keys
     `root[i], chain_s[i][j] = derive_ratchet_keys(root[i-1], K)`.
   * Securely delete the previous root key (`root[i-1]`) and `K`.
-  * Increment current ratchet id `i = i+1`.
+  * Increment the ratchet id `i = i + 1`.
   * If present, forget and reveal MAC keys. The conditions for revealing MAC
     keys are stated in the [Revealing MAC keys](#revealing-mac-keys) section.
 
-In any case (in a new DH ratchet or in the same symmetric-key ratchet):
+When sending a data message in the same DH Ratchet:
 
   * Set `j` as the Data message's message id.
   * Derive the next sending chain key
-    `chain_s[i][j+1] = derive_chain_key(chain_s, i, j)`.
+    `chain_s[i-1][j+1] = KDF_2(chain_s[i-1][j])`.
   * Calculate the encryption key (`MKenc`), the MAC key (`MKmac`) and, if
     needed the extra symmetric key:
 
    ```
-   MKenc, MKmac = derive_enc_mac_keys(chain_s[i][j])
-   extra_symm_key = KDF_2(0xFF || chain_s[i][j])
+   MKenc, MKmac = derive_enc_mac_keys(chain_s[i-1][j])
+   extra_symm_key = KDF_2(0xFF || chain_s[i-1][j])
    ```
 
-  * Securely delete `chain_s[i][j]`.
-  * Increment current sending message id `j = j+1`.
+  * Securely delete `chain_s[i-1][j]`.
+  * Increment current sending message id `j = j + 1`.
   * When creating a Non-Interactive-Auth message, if an encrypted message
     is attached to it, construct a `nonce` from the first 24 bytes of the
     `c` variable generated when creating `sigma`. See
