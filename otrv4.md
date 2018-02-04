@@ -665,14 +665,14 @@ In both the interactive and non-interactive DAKEs, OTRv4 uses long-term Ed448
 keys, ephemeral Elliptic Curve Diffie-Hellman (ECDH) keys, and ephemeral
 Diffie-Hellman (DH) keys.
 
-For exchanging data messages, OTRv4 uses both the DH ratchet (with ECDH) and the
-symmetric-key ratchet from the Double Ratchet algorithm [\[2\]](#references).
-OTRv4 adds 3072-bit (384-byte) DH keys, called the brace key pair, to the
-Double Ratchet algorithm. These keys are used to protect transcripts of data
-messages in case ECC is broken. During the DAKE, both parties agree upon the
-first set of DH keys. Then, during every third DH ratchet in the Double
-Ratchet, a new key is agreed upon. Between each DH brace key ratchet, both sides
-will conduct a symmetric brace key ratchet.
+For exchanging data messages, OTRv4 uses KDF chains, the symmetric-key ratchet
+and the DH ratchet (with ECDH) from the Double Ratchet algorithm
+[\[2\]](#references). OTRv4 adds 3072-bit (384-byte) DH keys, called the brace
+key pair, to the Double Ratchet algorithm. These keys are used to protect
+transcripts of data messages in case ECC is broken. During the DAKE, both
+parties agree upon the first set of DH keys. Then, during every third DH ratchet
+in the Double Ratchet, a new key is agreed upon. Between each DH brace key
+ratchet, both sides will conduct a symmetric brace key ratchet.
 
 The following variables keep state as the ratchet moves forward:
 
@@ -1775,8 +1775,10 @@ If many prekey messages are received:
 This section describes how each participant will use the Double Ratchet
 algorithm to exchange [data messages](#data-message). The Double Ratchet is
 initialized with the shared secret established in the DAKE. Detailed validation
-and processing of each data message is described in the [receiving
-encrypted data messages](#receiving-an-encrypted-data-message) section.
+and processing of each data message is described in the
+[sending an encrypted data messages](#rsending-an-encrypted-data-message)
+and [receiving encrypted data messages](#receiving-an-encrypted-data-message)
+section.
 
 A message with an empty human-readable part (the plaintext is of zero length, or
 starts with a NULL) is a "heartbeat" message. This message is useful for key
@@ -1799,7 +1801,7 @@ Send data message 0_1            -------------------->
                                                        Derive MKenc & MKmac
                                                        Verify MAC, Decrypt message 0_1
 
-                                                       Perform a new ratchet
+                                 Perform a new ratchet
                                  <-------------------- Send data message 1_0
                                  <-------------------- Send data message 1_1
 
@@ -1880,38 +1882,35 @@ Old MAC keys to be revealed (DATA)
 #### When you send a Data Message:
 
 In order to send an encoded data message, a key is required to encrypt the
-message in it. This per-message key will be derived from the previous chain key
-if a ratchet is in progress. If the message's id `j` has been set to `0`,
-ratchet keys should be rotated (the ECDH keys, the brace key, the root key
-and the chain keys).
+message in it. This per-message key (`MKenc`) is the output key from the sending
+and receiving KDF chains. As defined on [\[2\]](#references), the KDF keys for
+these chains are called 'chain keys'. If the message's id `j` has been set
+to `0`, ratchet keys should be rotated (the ECDH keys, the brace key, the root
+key and the chain keys).
 
-Given a new ratchet:
+Given a new DH ratchet:
 
   * Rotate the ECDH keys and brace key, see
     [Rotating ECDH keys and brace key as sender](#rotating-ecdh-keys-and-brace-key-as-sender)
     section.
-    The new ECDH public key created by the sender with this process will be the
+    The new ECDH public key created by the sender in this process will be the
     'Public ECDH Key' for the message. If a new public DH key is created in
     this process, it will be the 'Public DH Key' for the message. If it is
     not created, then it will be empty.
-  * Calculate the `K = KDF_2(K_ecdh || brace_key)`.
+  * Calculate the shared secret `K = KDF_2(K_ecdh || brace_key)`.
   * If needed, calculate the extra symmetric key: `KDF_2(0xFF || K)`.
   * Derive new set of keys
-    `root[i], chain_s[i][0], chain_r[i][0] = derive_ratchet_keys(root[i-1], K)`.
-  * Securely delete the root key and all remaining chain keys from the ratchet
-    `i-1`.
-  * Securely delete `K`.
+    `root[i], chain_s[i][j] = derive_ratchet_keys(root[i-1], K)`.
+  * Securely delete the previous root key (`root[i-1]`) and `K`.
+  * Increment current ratchet id `i = i+1`.
   * If present, forget and reveal MAC keys. The conditions for revealing MAC
     keys are stated in the [Revealing MAC keys](#revealing-mac-keys) section.
 
-Otherwise:
+In any case (in a new DH ratchet or in the same symmetric-key ratchet):
 
-  * Increment current sending message id `j = j+1`.
-  * Derive the next sending chain key `derive_chain_key(chain_s, i, j)`.
-  * Securely delete `chain_s[i][j-1]`.
-
-In both cases:
-
+  * Set `j` as the Data message's message id.
+  * Derive the next sending chain key
+    `chain_s[i][j+1] = derive_chain_key(chain_s, i, j)`.
   * Calculate the encryption key (`MKenc`), the MAC key (`MKmac`) and, if
     needed the extra symmetric key:
 
@@ -1920,6 +1919,8 @@ In both cases:
    extra_symm_key = KDF_2(0xFF || chain_s[i][j])
    ```
 
+  * Securely delete `chain_s[i][j]`.
+  * Increment current sending message id `j = j+1`.
   * When creating a Non-Interactive-Auth message, if an encrypted message
     is attached to it, construct a `nonce` from the first 24 bytes of the
     `c` variable generated when creating `sigma`. See
@@ -1934,17 +1935,16 @@ In both cases:
 
   * When creating a Non-Interactive-Auth message and when an encrypted
     data message has been attached to it, do not create a MAC tag. This is not
-    necessary since the MAC tag was created in the non-interactive DAKE (`Auth MAC`)
-    already authentifies this first data message. In any other case, use the
-    `MKmac` to create a MAC tag. MAC all the sections of the data message from
-    the protocol version to the encrypted message.
+    necessary since the MAC tag was created in the non-interactive DAKE
+    (`Auth MAC`) already authentifies this first data message. In any other
+    case, use the `MKmac` to create a MAC tag. MAC all the sections of the data
+    message from the protocol version to the encrypted message.
 
    ```
    Authenticator = KDF_2(MKmac || data_message_sections)
    ```
 
   * Securely delete `MKenc` and `MKmac`.
-
   * Continue to use the sender's instance tag.
 
 #### When you receive a Data Message:
