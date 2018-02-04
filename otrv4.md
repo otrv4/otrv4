@@ -1902,6 +1902,8 @@ Given a new DH ratchet:
   * Increment the ratchet id `i = i + 1`.
   * If present, forget and reveal MAC keys. The conditions for revealing MAC
     keys are stated in the [Revealing MAC keys](#revealing-mac-keys) section.
+  * Derive the next sending chain key, `MKenc` and `MKmac`, and encrypt the
+    message as described below.
 
 When sending a data message in the same DH Ratchet:
 
@@ -1954,7 +1956,7 @@ key).
 
 * Check that the receiver's instance tag matches your sender's instance tag.
 
-Given a new ratchet:
+Given a new ratchet (the receiving `j` is equal to 0):
 
   * Rotate the ECDH keys and brace key, see
     [Rotating ECDH keys and brace key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
@@ -1965,6 +1967,8 @@ Given a new ratchet:
     `root[i], chain_r[i][0] = derive_ratchet_keys(root[i-1], K)`.
   * Securely delete the root key and `K`.
   * Increment the ratchet id `i = i + 1`.
+  * Derive the next receiving chain key, `MKenc` and `MKmac`, and decrypt the
+    message as described below.
 
 When receiving a data message in the same DH Ratchet:
 
@@ -1982,17 +1986,24 @@ When receiving a data message in the same DH Ratchet:
     attached to it, verify it with the `Auth MAC` as defined in the
     [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 
-  If the verification fails:
+  * If the verification fails:
 
     * Reject the message
 
-  Otherwise:
+  * Otherwise:
 
     * Increment the next receiving message id `k = k + 1`.
-    * Decrypt the message using `MKenc` and securely delete the key.
+    * Set `nonce` as the "nonce" from the received data message.
+    * Decrypt the message using `MKenc` and `nonce`:
+
+      ```
+      decrypted_message = XSalsa20_Dec(MKenc, nonce, m)
+      ```
+
+    * Securely delete `MKenc`.
     * Set `their_ecdh` as the "Public ECDH key" from the message.
     * Set `their_dh` as the "Public DH Key" from the message, if it is not NULL.
-    * Add the MKmac key to list `mac_keys_to_reveal`.
+    * Add `MKmac` to the list `mac_keys_to_reveal`.
 
 ### Extra symmetric key
 
