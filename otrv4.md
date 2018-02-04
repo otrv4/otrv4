@@ -725,6 +725,7 @@ generateECDH()
     to last byte is set.
   - Interpret the buffer as the little-endian integer, forming the secret scalar
     's'.
+  - Securely delete 'r' and 'h'.
   - return our_ecdh.public = G * s, our_ecdh.secret = s
 
 generateDH()
@@ -866,17 +867,6 @@ When sending data messages, you must derive the next chain key:
 derive_chain_key(C, i, j):
   C[i][j] = KDF_2(C[i][j-1])
   return C[i][j]
-```
-
-### Computing chain keys
-
-When receiving data messages, you must compute the chain key:
-
-```
-compute_chain_key(C, i, k):
-  if C[i][k] does not exist:
-    C[i][k] = KDF_2(compute_chain_key(C, i, k-1))
-  return C[i][k]
 ```
 
 ### Calculating encryption and MAC keys
