@@ -72,19 +72,15 @@ Therefore, to reveal MAC keys in the Double Ratchet, we have two options:
 ### Decision
 
 For OTRv4, we decided to use the Double Ratchet Algorithm for key management.
-Even though our network model assumes in-order message delivery, we can
-benefit from the per-message forward secrecy that the Double Ratchet
-algorithm provides.
-
-Although the Double Ratchet allows us to receive out-of-order messages, we do
-not support this: messages that are received later than expected will be
-ignored. Other reasons for this decision are described in
-[the ADR for the Non-Interactive DAKE](https://github.com/otrv4/otrv4/blob/master/architecture-decisions/009-non-interactive-dake.md).
+This allows OTRv4 to support out-of-order resilence and to improve forward
+secrecy (in the form of per-message forward secrecy).
 
 We decided that only the receiver will reveal MAC keys on the first message
 sent of every ratchet.
 
 ### Consequences
+
+TODO: check this
 
 This heavily changes the data exchange implementation from previous
 versions. We achieve improved forward secrecy, but key management and
