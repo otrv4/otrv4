@@ -2446,7 +2446,6 @@ If the version is 4:
 
           * Display the human-readable part (if non empty) to the user.
             SMP TLVs should be addressed according to the SMP state machine.
-          * Rotate root, chain and brace keys as appropriate.
           * If the received message contains a TLV type 1 (Disconnected):
 
              * Forget all encryption keys for this correspondent and transition
