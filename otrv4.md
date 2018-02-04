@@ -792,8 +792,7 @@ decide_between_chain_keys(Ca, Cb):
 Before sending the first reply (i.e. a new message considering a previous
 message has been received) the sender will rotate their ECDH keys and brace key.
 This is for the computation of `K` (see
-[Deriving Double Ratchet Keys](#deriving-double-ratchet-keys)). The
-following data messages will advertise a new ratchet id as `i + 1`.
+[Deriving Double Ratchet Keys](#deriving-double-ratchet-keys)).
 
 Before rotating the keys:
 
@@ -820,12 +819,10 @@ To rotate the brace key:
 
 Every ratchet, the receiver will rotate their ECDH keys and brace key.
 This is for the computation of `K` (see
-[Deriving Double Ratchet Keys](#deriving-double-ratchet-keys)). The
-following data messages will advertise a new ratchet id as `i + 1`.
+[Deriving Double Ratchet Keys](#deriving-double-ratchet-keys)).
 
 Before rotating the keys:
 
-  * Increment the current ratchet id (`i`) by 1.
   * Reset the receiving message id (`k`) to 0.
 
 To rotate the ECDH keys:
@@ -1920,7 +1917,7 @@ When sending a data message in the same DH Ratchet:
    ```
 
   * Securely delete `chain_s[i-1][j]`.
-  * Increment current sending message id `j = j + 1`.
+  * Increment the next sending message id `j = j + 1`.
   * When creating a Non-Interactive-Auth message, if an encrypted message
     is attached to it, construct a `nonce` from the first 24 bytes of the
     `c` variable generated when creating `sigma`. See
@@ -1949,9 +1946,11 @@ When sending a data message in the same DH Ratchet:
 
 #### When you receive a Data Message:
 
-In order to receive an encoded data message, a key is required to decrypt the
-message in it. This per-message key will be derived from the previous chain key
-if a ratchet is in progress.
+The counterpart of the sending an encoded data message. As that one, it also
+needs a per-message key derived from the previous chain key to decrypt the
+message in it. If the receiving `j` is equal to 0, ratchet keys should be
+rotated (the ECDH keys, the brace key, the root key and the receiving chain
+key).
 
 * Check that the receiver's instance tag matches your sender's instance tag.
 
@@ -1960,32 +1959,28 @@ Given a new ratchet:
   * Rotate the ECDH keys and brace key, see
     [Rotating ECDH keys and brace key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
     section.
-  * Calculate the `K = KDF_2(K_ecdh || brace_key)`.
+  * Calculate `K = KDF_2(K_ecdh || brace_key)`.
   * If needed, calculate the extra symmetric key: `KDF_2(0xFF || K)`.
   * Derive new set of keys
-    `root[i], chain_s[i][0], chain_r[i][0] = derive_ratchet_keys(root[i-1], K)`.
-  * Securely delete the root key and all remaining chain keys from the ratchet
-    `i-1`.
-  * Securely delete `K`.
+    `root[i], chain_r[i][0] = derive_ratchet_keys(root[i-1], K)`.
+  * Securely delete the root key and `K`.
+  * Increment the ratchet id `i = i + 1`.
 
-Otherwise:
+When receiving a data message in the same DH Ratchet:
 
-  * Increment current receiving message id `k = k+1`.
-  * Use the `message_id` to compute the receiving chain key:
-    `compute_chain_key(chain_r, ratchet_id, message_id)`.
+  * Derive the next receiving chain key
+    `chain_r[i-1][k+1] = KDF_2(chain_r[i-1][k])`.
+  * Calculate the encryption and MAC keys (`MKenc` and `MKmac`).
 
-In both cases:
+    ```
+      MKenc, MKmac = derive_enc_mac_keys(chain_r[i-1][k])
+    ```
 
-* Calculate the encryption and MAC keys (`MKenc` and `MKmac`).
-
-  ```
-    MKenc, MKmac = derive_enc_mac_keys(chain_r[ratchet_id][message_id])
-  ```
-
-* Use the `MKmac` to verify the MAC of the message. In the case of a
-  Non-Interactive-Auth message and when an encrypted data message has been
-  attached to it, verify it with the `Auth MAC` as defined in the
-  [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
+  * Securely delete `chain_r[i-1][k]`.
+  * Use the `MKmac` to verify the MAC of the message. In the case of a
+    Non-Interactive-Auth message and when an encrypted data message has been
+    attached to it, verify it with the `Auth MAC` as defined in the
+    [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 
   If the verification fails:
 
@@ -1993,10 +1988,8 @@ In both cases:
 
   Otherwise:
 
+    * Increment the next receiving message id `k = k + 1`.
     * Decrypt the message using `MKenc` and securely delete the key.
-    * Securely delete receiving chain keys older than `message_id-1`.
-    * Set `j = 0` to indicate that a new DH-ratchet should happen the next time
-      you send a message.
     * Set `their_ecdh` as the "Public ECDH key" from the message.
     * Set `their_dh` as the "Public DH Key" from the message, if it is not NULL.
     * Add the MKmac key to list `mac_keys_to_reveal`.
