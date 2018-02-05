@@ -683,21 +683,23 @@ State variables:
   k: the current receiving message id.
 
 Key variables:
-  'root[i]': the root key for the ratchet i.
-  'chain_s[i][j]': the sending chain key for the message j in the ratchet i.
-  'chain_r[i][k]': the receiving chain key for the message k in the ratchet i.
+  'root_key[i]': the root key for the ratchet i.
+  'chain_key_s[i][j]': the sending chain key for the sending message j in
+    ratchet i.
+  'chain_key_r[i][k]': the receiving chain key for the receiving message k in
+    ratchet i.
   'our_ecdh': our current ECDH ephemeral key pair.
   'their_ecdh': their ECDH ephemeral public key.
   'our_dh': our DH ephemeral key pair.
   'their_dh': their DH ephemeral public key.
   'brace_key': either a hash of the shared DH key: 'KDF_1(k_dh)' (every thrid
-    ratchet) or a hash of the previuos brace_key: 'KDF_1(brace_key)'
+    DH ratchet) or a hash of the previuos brace_key: 'KDF_1(brace_key)'
   'mac_keys_to_reveal': the MAC keys to be revealed in the first data message
     sent of the next ratchet.
 ```
 
-When these events occur, the state variables are incremented and the key
-variable values are replaced:
+When these events occur, the state variables are incremented and, depending on
+the event, some key variable values are replaced:
 
 * When you start a new [interactive DAKE](#interactive-dake-overview) by sending
   or receiving an [Identity message](#identity-message)
@@ -705,14 +707,17 @@ variable values are replaced:
   sending an [Auth-I Message](#auth-i-message)
 * When you complete the [interactive DAKE](#interactive-dake-overview) by
   receiving and validating an [Auth-I Message](#auth-i-message)
+* When you start a new [non-interactive DAKE](#non-interactive-dake-overview) by
+  publishing or retrieving a [Prekey message](##prekey-message)
+* When you complete a [non-interactive DAKE](#non-interactive-dake-overview) by
+  sending a [non-interactive-Auth message](#non-interactive-auth-message)
+* When you complete a [non-interactive DAKE](#non-interactive-dake-overview) by
+  receiving and validating a
+  [non-interactive-Auth message](#non-interactive-auth-message)
 * When you [send a Data Message](#when-you-send-a-data-message) or
   [receive a Data Message](#when-you-receive-a-data-message)
 * When you [send a TLV type 1 (Disconnected)](#sending-a-tlv-type-1-disconnected-message)
 * When you [receive a TLV type 1 (Disconnected)](#receiving-a-tlv-type-1-disconnected-message)
-* When you complete a non-interactive DAKE by
-  [sending a Non-Interactive-Auth message](#sending-an-encrypted-message-to-an-offline-participant)
-* When you complete a non-interactive DAKE by
-  [receiving and validating a Non-Interactive-Auth message](#receiving-a-non-interactive-auth-message)
 
 ### Generating ECDH and DH keys
 
@@ -741,7 +746,7 @@ k_dh:
   big-endian unsigned integer.
 
 brace_key:
-  Either a hash of the shared DH key: 'KDF_1(k_dh)' (every thrid ratchet) or
+  Either a hash of the shared DH key: 'KDF_1(k_dh)' (every thrid DH ratchet) or
   a hash of the previuos brace_key: 'KDF_1(brace_key)'
 
 K_ecdh:
@@ -850,24 +855,14 @@ To rotate the brace key:
 ### Deriving Double Ratchet keys
 
 ```
-derive_ratchet_keys(root[i-1], K):
-  root_key[i] = KDF_2(0x01 || KDF_2(root[i-1] || K))
-  chain_key[i][j] = KDF_2(0x02 || KDF_2(root[i-1] || K))
+derive_ratchet_keys(root_key[i-1], K):
+  root_key[i] = KDF_2(0x01 || KDF_2(root_key[i-1] || K))
+  chain_key[i][j] = KDF_2(0x02 || KDF_2(root_key[i-1] || K))
   return root_key[i], chain_key[i][j]
 ```
 
 NOTE: If there is no `R`, as for the first ratchet, then each value should be
 derived from `KDF_2(0x0n || K)` where `n` is the appropriate value as above.
-
-### Deriving new chain keys
-
-When sending data messages, you must derive the next chain key:
-
-```
-derive_chain_key(C, i, j):
-  C[i][j] = KDF_2(C[i][j-1])
-  return C[i][j]
-```
 
 ### Calculating encryption and MAC keys
 
