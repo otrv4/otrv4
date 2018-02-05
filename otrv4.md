@@ -2038,7 +2038,7 @@ OTR message as follows:
   * Break it up into sufficiently small pieces. Let this number of pieces be
   `total`, and the pieces be `piece[1],piece[2],...,piece[total]`.
   * Transmit `total` OTRv4 fragmented messages with the following (printf-like)
-    structure:
+    structure (as `index` runs from 1 to `total` inclusive:
 
   ```
   "?OTR|%x|%x,%hu,%hu,%s," , sender_instance, receiver_instance, index, total,
@@ -2060,45 +2060,67 @@ for this _before_ checking for any of the other `?OTR:` markers):
 
   * Parse it (as the previous printf structure) extracting the instance tags,
     `index`, `total`, and `piece[index]`.
-  * Discard the message and optionally pass a warning to the user, if:
+
+  * Discard the message and optionally pass a warning to the user if:
     * the recipient's own instance tag does not match the listed receiver
       instance tag
     * the listed receiver's instance tag is not zero
-  * Discard the illegal fragment, if:
+
+  * Let `(I, T)` be your currently stored fragment number, and `F` be your
+    currently stored fragment (if you have no currently stored fragment,
+    then `I = T = 0` and `F = ""`).
+
+  * Discard the (illegal) fragment if:
     * `index` is 0
     * `total` is 0
-    * `index` is bigger than total
+    * `index` is bigger than `total`
 
   * If this is the first fragment:
     * Forget any stored fragment you may have
-    * Store `piece`
-    * Store `index` and `total`
+    * Store `piece` as `F`
+    * Store `index` and `total` as `(I, T)`
 
-  * If this is the following fragment (same stored `total` and `index == index+1`):
-    * Append `piece` to stored `piece`
-    * Store `index` and `total`
+  * If this is the following fragment (`total == T` and `index == I + 1`):
+    * Append `piece` to stored `F`
+    * Store `index` and `total` as `(I, T)`
 
   * Otherwise:
     * Forget any stored fragment you may have
-    * Forget stored `piece`
-    * Forget stored `index` and `total`
+    * Store `"` as `F`
+    * Store `(0, 0)` as `(I, T)`
 
-After this, if stored `total` is bigger than 0 and stored `index` is equal to
-stored `total`, treat `piece` as the received message.
+After this, if `T` is bigger than 0 and `I` is equal to `T`, treat `F` as the
+received message.
 
-If you receive a non-OTR message or an unfragmented message, forget any
-stored value you may have (`piece`, `total` and, `index`).
+If you receive a non-OTR message or an unfragmented message:
+
+* Forget any stored value you may have
+* Store `""` as `F` and store `(0,0)` as `(I, T)`
 
 For example, here is a Data Message we would like to transmit over a network
 with an unreasonably small `maximum message size`:
 
-    ?OTR:AAQD--here-is-my-very-long-message
+    ?OTR:AAMDJ+MVmSfjFZcAAAAAAQAAAAIAAADA1g5IjD1ZGLDVQEyCgCyn9hb
+    rL3KAbGDdzE2ZkMyTKl7XfkSxh8YJnudstiB74i4BzT0W2haClg6dMary/jo
+    9sMudwmUdlnKpIGEKXWdvJKT+hQ26h9nzMgEditLB8vjPEWAJ6gBXvZrY6ZQ
+    rx3gb4v0UaSMOMiR5sB7Eaulb2Yc6RmRnnlxgUUC2alosg4WIeFN951PLjSc
+    ajVba6dqlDi+q1H5tPvI5SWMN7PCBWIJ41+WvF+5IAZzQZYgNaVLbAAAAAAA
+    AAAEAAAAHwNiIi5Ms+4PsY/L2ipkTtquknfx6HodLvk3RAAAAAA==.
 
 We could fragment this message into three pieces:
 
-    ?OTR|5a73a599|27e31597,00001,00003,?OTR:AAQD--here,
-    ?OTR|5a73a599|27e31597,00002,00003,is-my-very-long,
-    ?OTR|5a73a599|27e31597,00003,00003,-message,
+    ?OTR|5a73a599|27e31597,00001,00003,?OTR:AAMDJ+MVmSfjFZcAAAAA
+    AQAAAAIAAADA1g5IjD1ZGLDVQEyCgCyn9hbrL3KAbGDdzE2ZkMyTKl7XfkSx
+    h8YJnudstiB74i4BzT0W2haClg6dMary/jo9sMudwmUdlnKpIGEKXWdvJKT+
+    hQ26h9nzMgEditLB8v,
+
+    ?OTR|5a73a599|27e31597,00002,00003,jPEWAJ6gBXvZrY6ZQrx3gb4v0
+    UaSMOMiR5sB7Eaulb2Yc6RmRnnlxgUUC2alosg4WIeFN951PLjScajVba6dq
+    lDi+q1H5tPvI5SWMN7PCBWIJ41+WvF+5IAZzQZYgNaVLbAAAAAAAAAAEAAAA
+    HwNiIi5Ms+4PsY/L2i,
+
+    ?OTR|5a73a599|27e31597,00003,00003,pkTtquknfx6HodLvk3RAAAAAA
+    ==.,
 
 ## The protocol state machine
 
