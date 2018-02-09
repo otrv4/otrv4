@@ -1189,27 +1189,41 @@ Bob will be initiating the DAKE with Alice.
 
 **Bob:**
 
-1. Generates and sets `our_ecdh` as ephemeral ECDH keys.
-2. Generates and sets `our_dh` as ephemeral 3072-bit DH keys.
-3. Sends Alice an Identity message.
+1. Generates an Identity message, as defined in
+   [Identity message](#identity-message) section.
+1. Sets `Y` and `y` as `our_ecdh`: the ephemeral ECDH keys.
+2. Sets `B` as  and `b` as `our_dh`: the ephemeral 3072-bit DH keys.
+3. Sends Alice the Identity message.
 
 **Alice:**
 
 1. Receives an Identity message from Bob:
-    * Validates Bob's User Profile.
-    * Picks a compatible version of OTR listed in Bob's profile.
+  * Validates Bob's User Profile.
+  * Picks a compatible version of OTR listed in Bob's profile.
       If the versions are incompatible, Alice does not send any further
       messages.
-    * Validates the received ECDH ephemeral public key is on curve Ed448 and
-      sets it as `their_ecdh`.
+  * Validates that the received ECDH ephemeral public key `Y` is on curve
+      Ed448 and sets it as `their_ecdh`.
       See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) section for details.
-    * Validates that the received DH ephemeral public key is on the correct
+  * Validates that the received DH ephemeral public key `B` is on the correct
       group and sets it as `their_dh`. See
       [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
       section for details.
-2. Generates and sets `our_ecdh` as ephemeral ECDH keys.
-3. Generates and sets `our_dh` as ephemeral 3072-bit DH keys.
-4. Sends Bob an Auth-R message (see [Auth-R message](#auth-r-message) section).
+2. Generates an Auth-R message, as defined in
+   [Auth-R message](#auth-r-message) section.
+2. Sets `X` and `x` as `our_ecdh`: the ephemeral ECDH keys.
+3. Sets `A` and `a` as `our_dh`: ephemeral 3072-bit DH keys.
+4. Calculates the mixed shared secret `K` and the SSID:
+  * Calculates ECDH shared secret
+    `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
+     Securely deletes `our_ecdh.secret`.
+  * Calculates DH shared secret `k_dh = DH(our_dh.secret, their_dh.public)`.
+    Securely deletes `our_dh.secret`.
+  * Calculates the Brace Key `brace_key = KDF_1(k_dh)`.
+  * Calculates Mixed shared secret `K = KDF_2(K_ecdh || brace_key)`.
+  * Calculates the SSID from shared secret: the first 8 bytes of
+      `KDF_2(0x00 || K)`.
+5. Sends Bob the Auth-R message (see [Auth-R message](#auth-r-message) section).
 
 **Bob:**
 
@@ -1220,46 +1234,55 @@ Bob will be initiating the DAKE with Alice.
       does not send any further messages.
     * Verify the authentication `sigma` (see [Auth-R message](#auth-r-message)
       section).
-    * Verify that `(Y, B)` in the message is the Identity message that Bob
-      previously sent and has not been used.
+    * Verify that `(Y, B)` in the message are the ones already sent in the
+      Identity message and remain unused.
 3. Retrieve ephemeral public keys from Alice:
-    * Validates the received ECDH ephemeral public key is on curve Ed448 and
+    * Validates the received ECDH ephemeral public key `X` is on curve Ed448 and
       sets it as `their_ecdh`.
       See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) section for details.
-    * Validates that the received DH ephemeral public key is on the correct
+    * Validates that the received DH ephemeral public key `A` is on the correct
       group and sets it as `their_dh`. See
       [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
       section for details.
-4. Sends Alice an Auth-I message
+4. Creates an Auth-I message
    (see [Auth-I message](#auth-i-message) section).
-5. At this point, the DAKE is complete for Bob:
-    * Sets ratchet id `i` as 0.
-    * Sets `j` as 0 (which means he will ratchet again).
-    * Calculates ECDH shared secret `K_ecdh`.
-    * Calculates DH shared secret `k_dh` and `brace_key`.
-    * Calculates Mixed shared secret `K = KDF_2(K_ecdh || brace_key)`.
-    * Calculates the SSID from shared secret: the first 8 bytes of
+5. Calculates the mixed shared secret `K` and the SSID:
+  * Calculates ECDH shared secret
+    `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
+     Securely deletes `our_ecdh.secret`.
+  * Calculates DH shared secret `k_dh = DH(our_dh.secret, their_dh.public)`.
+    Securely deletes `our_dh.secret`.
+  * Calculates the Brace Key `brace_key = KDF_1(k_dh)`.
+  * Calculates Mixed shared secret `K = KDF_2(K_ecdh || brace_key)`.
+  * Calculates the SSID from shared secret: the first 8 bytes of
       `KDF_2(0x00 || K)`.
-    * Calculates the first set of keys with
-      `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
-    * [Decides which chain key he will use](#deciding-between-chain-keys).
+  * Sets ratchet id `i` as 0.
+  * Sets `j` as 0 and `k` as 0.
+5. At this point, Bob can attach an encrypted message to the Auth-I message:
+   * TODO: define this case
+6. Send the Auth-I message.
+5. At this point, the interactive DAKE is complete for Bob:
+   * In the case that he wants to inmmediatly send a data message:
+     * Follows what is defined on the
+       [When you send a data message](#when-you-send-a-data-message) section.
 
 **Alice:**
 
 1. Receives an Auth-I message from Bob:
-    * Verify the authentication `sigma` (see [Auth-I message](#auth-i-message)
-      section).
+ * Verify the authentication `sigma` (see [Auth-I message](#auth-i-message)
+   section).
+ * Sets ratchet id `i` as 0.
+ * Sets `j` and `k` as 0.
+ * If an encrypted message was attached to the Auth-I message:
+   * TODO: define this case
 2. At this point, the interactive DAKE is complete for Alice:
-    * Sets ratchet id `i` as 0.
-    * Sets `j` as 1.
-    * Calculates ECDH shared secret `K_ecdh`.
-    * Calculates DH shared secret `k_dh` and `brace_key`.
-    * Calculates Mixed shared secret `K = KDF_2(K_ecdh || brace_key)`.
-    * Calculates the SSID from shared secret: the first 8 bytes of
-      `KDF_2(0x00 || K)`.
-    * Calculates the first set of keys with
-      `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
-    * [Decides which chain key she will use](#deciding-between-chain-keys).
+ * In the case that she wants to inmmediatly send a data message:
+   * Enters a new ratchet and follows what is defined on the
+     [When you send a data message](#when-you-send-a-data-message) section.
+ * In the case that she inmmediatly receives a data message:
+   * Follows what is defined on the
+     [When you receive a data message](#when-you-receive-a-data-message)
+     section.
 
 #### Identity message
 
