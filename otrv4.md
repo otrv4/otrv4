@@ -1198,6 +1198,7 @@ Bob will be initiating the DAKE with Alice.
 **Alice:**
 
 1. Receives an Identity message from Bob:
+
   * Validates Bob's User Profile.
   * Picks a compatible version of OTR listed in Bob's profile.
     If the versions are incompatible, Alice does not send any further messages.
@@ -1209,6 +1210,7 @@ Bob will be initiating the DAKE with Alice.
     group and sets it as `their_dh`. See
     [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
     section for details.
+
 2. Generates an Auth-R message, as defined in
    [Auth-R message](#auth-r-message) section.
 3. Sets `X` and `x` as `our_ecdh`: the ephemeral ECDH keys.
