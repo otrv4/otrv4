@@ -1191,29 +1191,29 @@ Bob will be initiating the DAKE with Alice.
 
 1. Generates an Identity message, as defined in
    [Identity message](#identity-message) section.
-1. Sets `Y` and `y` as `our_ecdh`: the ephemeral ECDH keys.
-2. Sets `B` as  and `b` as `our_dh`: the ephemeral 3072-bit DH keys.
-3. Sends Alice the Identity message.
+2. Sets `Y` and `y` as `our_ecdh`: the ephemeral ECDH keys.
+3. Sets `B` as  and `b` as `our_dh`: the ephemeral 3072-bit DH keys.
+4. Sends Alice the Identity message.
 
 **Alice:**
 
 1. Receives an Identity message from Bob:
   * Validates Bob's User Profile.
   * Picks a compatible version of OTR listed in Bob's profile.
-      If the versions are incompatible, Alice does not send any further
-      messages.
+    If the versions are incompatible, Alice does not send any further messages.
   * Validates that the received ECDH ephemeral public key `Y` is on curve
-      Ed448 and sets it as `their_ecdh`.
-      See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) section for details.
+    Ed448 and sets it as `their_ecdh`.
+    See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+    section for details.
   * Validates that the received DH ephemeral public key `B` is on the correct
-      group and sets it as `their_dh`. See
-      [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
-      section for details.
+    group and sets it as `their_dh`. See
+    [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
+    section for details.
 2. Generates an Auth-R message, as defined in
    [Auth-R message](#auth-r-message) section.
-2. Sets `X` and `x` as `our_ecdh`: the ephemeral ECDH keys.
-3. Sets `A` and `a` as `our_dh`: ephemeral 3072-bit DH keys.
-4. Calculates the mixed shared secret `K` and the SSID:
+3. Sets `X` and `x` as `our_ecdh`: the ephemeral ECDH keys.
+4. Sets `A` and `a` as `our_dh`: ephemeral 3072-bit DH keys.
+5. Calculates the mixed shared secret `K` and the SSID:
   * Calculates ECDH shared secret
     `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
      Securely deletes `our_ecdh.secret`.
@@ -1223,30 +1223,31 @@ Bob will be initiating the DAKE with Alice.
   * Calculates Mixed shared secret `K = KDF_2(K_ecdh || brace_key)`.
   * Calculates the SSID from shared secret: the first 8 bytes of
       `KDF_2(0x00 || K)`.
-5. Sends Bob the Auth-R message (see [Auth-R message](#auth-r-message) section).
+6. Sends Bob the Auth-R message (see [Auth-R message](#auth-r-message) section).
 
 **Bob:**
 
 1. Receives Auth-R message from Alice:
-    * Validates Alice's User Profile.
-    * Picks a compatible version of OTR listed on Alice's profile, and follows
-      the specification for this version. If the versions are incompatible, Bob
-      does not send any further messages.
-    * Verify the authentication `sigma` (see [Auth-R message](#auth-r-message)
-      section).
-    * Verify that `(Y, B)` in the message are the ones already sent in the
-      Identity message and remain unused.
-3. Retrieve ephemeral public keys from Alice:
-    * Validates the received ECDH ephemeral public key `X` is on curve Ed448 and
-      sets it as `their_ecdh`.
-      See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) section for details.
-    * Validates that the received DH ephemeral public key `A` is on the correct
-      group and sets it as `their_dh`. See
-      [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
-      section for details.
-4. Creates an Auth-I message
+  * Validates Alice's User Profile.
+  * Picks a compatible version of OTR listed on Alice's profile, and follows
+    the specification for this version. If the versions are incompatible, Bob
+    does not send any further messages.
+  * Verify the authentication `sigma` (see [Auth-R message](#auth-r-message)
+    section).
+  * Verify that `(Y, B)` in the message are the ones already sent in the
+    Identity message and remain unused.
+2. Retrieve ephemeral public keys from Alice:
+  * Validates the received ECDH ephemeral public key `X` is on curve Ed448 and
+    sets it as `their_ecdh`.
+    See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+    section for details.
+  * Validates that the received DH ephemeral public key `A` is on the correct
+    group and sets it as `their_dh`. See
+    [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
+    section for details.
+3. Creates an Auth-I message
    (see [Auth-I message](#auth-i-message) section).
-5. Calculates the mixed shared secret `K` and the SSID:
+4. Calculates the mixed shared secret `K` and the SSID:
   * Calculates ECDH shared secret
     `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
      Securely deletes `our_ecdh.secret`.
@@ -1258,13 +1259,13 @@ Bob will be initiating the DAKE with Alice.
       `KDF_2(0x00 || K)`.
   * Sets ratchet id `i` as 0.
   * Sets `j` as 0 and `k` as 0.
-5. At this point, Bob can attach an encrypted message to the Auth-I message:
-   * TODO: define this case
-6. Send the Auth-I message.
-5. At this point, the interactive DAKE is complete for Bob:
-   * In the case that he wants to inmmediatly send a data message:
-     * Follows what is defined on the
-       [When you send a data message](#when-you-send-a-data-message) section.
+5. At this point, he can attach an encrypted message to the Auth-I message:
+  * TODO: define this case
+6. Sends the Auth-I message.
+7. At this point, the interactive DAKE is complete for Bob:
+  * In the case that he wants to inmmediatly send a data message:
+    * Follows what is defined on the
+      [When you send a data message](#when-you-send-a-data-message) section.
 
 **Alice:**
 
@@ -1276,13 +1277,13 @@ Bob will be initiating the DAKE with Alice.
  * If an encrypted message was attached to the Auth-I message:
    * TODO: define this case
 2. At this point, the interactive DAKE is complete for Alice:
- * In the case that she wants to inmmediatly send a data message:
-   * Enters a new ratchet and follows what is defined on the
-     [When you send a data message](#when-you-send-a-data-message) section.
- * In the case that she inmmediatly receives a data message:
-   * Follows what is defined on the
-     [When you receive a data message](#when-you-receive-a-data-message)
-     section.
+  * In the case that she wants to inmmediatly send a data message:
+    * Enters a new ratchet and follows what is defined on the
+      [When you send a data message](#when-you-send-a-data-message) section.
+  * In the case that she inmmediatly receives a data message:
+    * Follows what is defined on the
+      [When you receive a data message](#when-you-receive-a-data-message)
+      section.
 
 #### Identity message
 
@@ -1479,72 +1480,101 @@ Verify and decrypt message if included
 
 **Bob:**
 
-1. Generates and sets `our_ecdh` as ephemeral ECDH keys.
-2. Generates and sets `our_dh` as ephemeral 3072-bit DH keys.
-3. Generates a Prekey message, as described in the section
-   [Prekey message](#prekey-message).
-4. Publishes the Prekey message to the untrusted server.
+1. Generates an Prekey message, as defined in
+   [Identity message](#identity-message) section.
+2. Sets `Y` and `y` as `our_ecdh`: the ephemeral ECDH keys.
+3. Sets `B` as  and `b` as `our_dh`: the ephemeral 3072-bit DH keys.
+4. Publishes the Prekey message to an untrusted server.
 
 **Alice:**
 
 1. Requests prekey messages from the untrusted server.
 2. For each Prekey message received from the server:
-    * Validates Bob's User Profile.
-    * Picks a compatible version of OTR listed in Bob's profile.
-      If the versions are incompatible, Alice does not send any further
-      messages.
-    * Validates that the received ECDH ephemeral public key is on curve Ed448
-      and sets it as `their_ecdh`.
-      See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
-      section for details.
-    * Validates that the received DH ephemeral public key is on the correct
-      group and sets it as `their_dh`. See
-      [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
-      section for details.
-3. Generates and sets `our_ecdh` as ephemeral ECDH keys.
-4. Generates and sets `our_dh` as ephemeral 3072-bit DH keys.
-5. Extracts the Public Shared Prekey from Bob's user profile and sets it as
+  * Validates Bob's User Profile.
+  * Picks a compatible version of OTR listed in Bob's profile.
+    If the versions are incompatible, Alice does not send any further
+    messages.
+  * Validates that the received ECDH ephemeral public key is on curve Ed448
+    and sets it as `their_ecdh`.
+    See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+    section for details.
+  * Validates that the received DH ephemeral public key is on the correct
+    group and sets it as `their_dh`. See
+    [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
+    section for details.
+3. Extracts the Public Shared Prekey from Bob's user profile and sets it as
    `their_shared_prekey`.
-6. At this point, the non-interactive DAKE is complete for Alice:
-	* Sets ratchet id `i` as 0.
-	* Sets `j` as 0
-	* Calculates ECDH shared secret
-	  `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
-	* Calculates DH shared secret `k_dh = DH(our_dh.secret, their_dh)`
-	  and `brace_key`.
-	* Computes `tmp_k` as defined in
-	  [Non-Interactive-Auth Message](#non-interactive-auth-message).
-   * Calculates the Mixed shared secret `K = KDF_2(0x02 || tmp_k)`. Securely
-     delete `tmp_k`.
-   * Calculates the SSID from shared secret: it is the first 8 bytes of
-     `KDF_2(0x00 || K)`.
-   * Calculates the first set of keys with
-     `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
-   * [Decides which chain key she will used](#deciding-between-chain-keys).
-7. Sends Bob a Non-Interactive-Auth message. See
+4. Generates a Non-Interactive-Auth message. See
    [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
+5. Sets `X` and `x` as `our_ecdh`: the ephemeral ECDH keys.
+6. Sets `A` and `a` as `our_dh`: ephemeral 3072-bit DH keys.
+7. Calculates the Mixed shared secret and the SSID:
+  * Gets `tmp_k` from the
+    [Non-Interactive-Auth Message](#non-interactive-auth-message).
+  * Calculates the Mixed shared secret `K = KDF_2(0x02 || tmp_k)`. Securely
+    delete `tmp_k`.
+  * Calculates the SSID from shared secret: it is the first 8 bytes of
+    `KDF_2(0x00 || K)`.
+  * Sets ratchet id `i` as 0.
+  * Sets `j` as 0
+8. At this point, Alice can attach an encrypted message to the
+  Non-Interactive-Auth message:
+  * TODO: define this case
+9. Sends Bob a Non-Interactive-Auth message. See
+   [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
+10. At this point, the non-interactive DAKE is complete for Alice:
+  * In the case that she wants to inmmediatly send a data message:
+    * Follows what is defined on the
+      [When you send a data message](#when-you-send-a-data-message) section.
 
 **Bob:**
 
-1. Receive a Non-Interactive-Auth message from Alice.
-2. Calculates ECDH shared secret `K_ecdh`.
-3. Calculates DH shared secret `k_dh` and `brace_key`.
-4. Calculates `tmp_k = KDF_2(K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(ska, X) || brace_key)`.
-   For the definition of `X`, see the [Non-Interactive-Auth Message](#non-interactive-auth-message)
-   section.
-5. Computes the Auth MAC key `auth_mac_k = KDF_2(0x01 || tmp_k)`.
-6. Computes the Mixed shared secret `K = KDF_2(0x02 || tmp_k)`. Securely
-   delete `tmp_k`.
-7. 	Verifies the Non-Interactive-Auth message. See
+1. Receives Non-Interactive-Auth message from Alice:
+  * Validates Alice's User Profile and and extract `Pka` from it.
+  * Picks a compatible version of OTR listed on Alice's profile, and follows
+    the specification for this version. If the versions are incompatible, Bob
+    does not send any further messages.
+  * Sets his Public Shared Prekey from his User Profile as
+    `our_shared_prekey.public `.
+  * Verifies that `(Y, B)` in the message are the ones already sent in the
+    published Prekey message and remain unused.
+  * Verifies the Non-Interactive-Auth message. See
     [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
-8. At this point, the non-interactive DAKE is complete for Bob:
-   * Sets ratchet id `i` as 0.
-   * Sets `j` as 1.
-   * Calculates the SSID from shared secret: it is the first 8 bytes of
-	  `KDF_2(0x00 || K)`.
-	* Calculates the first set of keys with
-	  `root[0], chain_s[0][0], chain_r[0][0] = derive_ratchet_keys(K)`.
-	* [Decides which chain key he will use](#deciding-between-chain-keys).
+2. Retrieve ephemeral public keys from Alice:
+  * Validates the received ECDH ephemeral public key `X` is on curve Ed448 and
+    sets it as `their_ecdh`.
+    See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) section for details.
+  * Validates that the received DH ephemeral public key `A` is on the correct
+    group and sets it as `their_dh`. See
+    [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
+    section for details.
+3. Calculates the keys needed to generate the mixed shared secret `K` and the
+  SSID:
+  * Calculates ECDH shared secret
+    `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`. Securely deletes
+    `our_ecdh.secret`.
+  * Calculates DH shared secret `k_dh = DH(our_dh.secret, their_dh.public)`.
+    Securely deletes `our_dh.secret`.
+  * Calculates the Brace Key `brace_key = KDF_1(k_dh)`.
+4. Calculates `tmp_k = KDF_2(K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(ska, their_ecdh) || brace_key)`.
+5. Computes the Auth MAC key `auth_mac_k = KDF_2(0x01 || tmp_k)`.
+6. Computes the Mixed shared secret and the SSID:
+  * `K = KDF_2(0x02 || tmp_k)`.
+  * Securely deletes `tmp_k`.
+  * Calculates the SSID from shared secret: it is the first 8 bytes of
+	 `KDF_2(0x00 || K)`.
+  * Sets ratchet id `i` as 0.
+  * Sets `j` as 0 and `k` as 0.
+  * If an encrypted message was attached to the Non-Interactive-Auth message:
+    * TODO: define this case
+7. At this point, the non-interactive DAKE is complete for Bob:
+  * In the case that he wants to inmmediatly send a data message:
+    * Enters a new ratchet and follows what is defined on the
+     [When you send a data message](#when-you-send-a-data-message) section.
+  * In the case that he inmmediatly receives a data message:
+    * Follows what is defined on the
+      [When you receive a data message](#when-you-receive-a-data-message)
+      section.
 
 #### Prekey message
 
@@ -1622,36 +1652,35 @@ A valid Non-Interactive-Auth message is generated as follows:
   * secret key `a` (80 bytes).
   * public key `A`.
 4. Verify the Prekey message.
-5. Compute
-   `tmp_k = KDF_2(K_ecdh || ECDH(x, their_shared_prekey) || ECDH(x, Pkb) || brace_key)`.
-   This value is needed for the generation of the Mixed shared secret.
-6. Calculate the Auth MAC key `auth_mac_k = KDF_2(0x01 || tmp_k)`.
-7. Compute `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || their_shared_prekey || KDF_2(phi)`.
-8. Compute `sigma = RSig(Pka, ska, {Pkb, Pka, Y}, t)`. When computing `sigma`,
-   keep the first 24 bytes of the generated `c` value to be used as a `nonce` in
-   the next step. Refer to
-   [Ring Signature Authentication](#ring-signature-authentication) for details.
-9. A message can be optionally attached at this point. It is recommended to do
-   so. Follow the section
-   [When you send a Data Message](#when-you-send-a-data-message) to generate an
-   encrypted message, using the nonce set in the previous step. This will be
-   referred as `encrypted_data_message`.
-10. If an encrypted message is attached, compute
-    `Auth MAC = KDF_2(auth_mac_k || t || (message_id || nonce || encrypted_data_message))`.
-    Otherwise, compute
-    `Auth MAC = KDF_2(auth_mac_k || t)`.
-11. Generate a 4-byte instance tag to use as the sender's instance tag.
-    Additional messages in this conversation will continue to use this tag as
-    the sender's instance tag. Also, this tag is used to filter future received
-    messages. Messages intended for this instance of the client will have this
-    number as the receiver's instance tag.
+5. Compute `K_ecdh = ECDH(x, their_ecdh)`.
+6. Compute `k_dh = DH(a, their_dh)` and `brace_key = KDF_1(k_dh)`.
+7. Compute
+  `tmp_k = KDF_2(K_ecdh || ECDH(x, their_shared_prekey) || ECDH(x, Pkb) || brace_key)`.
+  This value is needed for the generation of the Mixed shared secret.
+8. Calculate the Auth MAC key `auth_mac_k = KDF_2(0x01 || tmp_k)`.
+9. Compute `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || their_shared_prekey || KDF_2(phi)`.
+10. Compute `sigma = RSig(Pka, ska, {Pkb, Pka, Y}, t)`. When computing `sigma`,
+  keep the first 24 bytes of the generated `c` value to be used as a `nonce` in
+  the next step. Refer to
+  [Ring Signature Authentication](#ring-signature-authentication) for details.
+11. A message can be optionally attached at this point. It is recommended to do
+  so. Follow the section
+  [When you send a Data Message](#when-you-send-a-data-message) to generate an
+  encrypted message, using the nonce set in the previous step. This will be
+  referred as `encrypted_data_message`.
+12. If an encrypted message is attached, compute
+  `Auth MAC = KDF_2(auth_mac_k || t || (message_id || nonce || encrypted_data_message))`.
+  Otherwise, compute `Auth MAC = KDF_2(auth_mac_k || t)`.
+13. Generate a 4-byte instance tag to use as the sender's instance tag.
+  Additional messages in this conversation will continue to use this tag as
+  the sender's instance tag. Also, this tag is used to filter future received
+  messages. Messages intended for this instance of the client will have this
+  number as the receiver's instance tag.
 
 To verify a Non-Interactive-Auth message:
 
 1. Check that the receiver's instance tag matches your sender's instance tag.
-2. Validate the user profile, and extract `Pka` from it.
-3. Verify that both ECDH and DH one-time use prekeys remain unused.
-4. Compute `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || our_shared_prekey.public || KDF_2(phi)`.
+2. Compute `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || our_shared_prekey.public || KDF_2(phi)`.
 5. Verify the `sigma` with
    [Ring Signature Authentication](#ring-signature-authentication).
    See [Verification: RVrf({A1, A2, A3}, sigma, m)](#verification-verifya1-a2-a3-sigma-m)
