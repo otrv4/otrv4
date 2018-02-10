@@ -1803,6 +1803,112 @@ If many prekey messages are received:
       * If there are multiple prekey messages per instance tag, decide
         whether to send multiple messages to the same instance tag.
 
+### Encrypted messages in DAKE's messages
+
+One message of each DAKE allows participants to attach an encrypted message to
+them:
+
+- The Auth-I message in the case of DAKEZ for the interactive DAKE.
+- The Non-Interactive-Auth message in the case of XZDH for the non-interactive
+  DAKE.
+
+#### Attaching an encrypted message to Auth-I message in DAKEZ
+
+// TODO: at this point, can it be derived the extra symm key?
+
+After the calculation of the mixed shared secret `K` has been completed, a
+participant (Bob in the above overview) can attach an encrypted message to the
+already generated Auth-I message, but prior to sending it. For this, the
+participant:
+
+* Rotates the ECDH keys and brace key, see
+  [Rotating ECDH keys and brace key as sender](#rotating-ecdh-keys-and-brace-key-as-sender)
+  section. The new ECDH public key created by the sender in this process will be
+  the `Public ECDH Key` for the message. The new public DH key will be the
+  `Public DH Key` for the message.
+* Sets the derived ECDH keys as `our_ecdh`, and the derived DH keys as `our_dh`.
+* Derives a set of keys:
+  `root[i], chain_s[i][j] = derive_ratchet_keys(K, KDF_2(K_ecdh || brace_key)`.
+* Securely deletes `K`.
+* Increments the ratchet id `i = i + 1`.
+* Sets `j` as the attached message id.
+* Derives the next sending chain key
+  `chain_s[i-1][j+1] = KDF_2(chain_s[i-1][j])`.
+* Calculates the encryption key (`MKenc`), the MAC key (`MKmac`):
+  `MKenc, MKmac = derive_enc_mac_keys(chain_s[i-1][j])`
+* Securely deletes `chain_s[i-1][j]`.
+* Increments the next sending message id `j = j + 1`.
+* Constructs a nonce from the first 24 bytes of the `c` variable generated when
+  creating `sigma`. See
+  [Ring Signature Authentication](authentication-rsiga1-a1-a1-a2-a3-m) section
+  for details.
+* Uses the `MKenc` to encrypt the message:
+  `encrypted_message = XSalsa20_Enc(MKenc, nonce, m)`.
+* Uses the `MKmac` to create a MAC tag. MACs all the sections of the attached
+  message (from the flags to the encrypted message):
+  `Authenticator = KDF_2(MKmac || attached_message_sections)`
+* Securely deletes `MKenc` and `MKmac`.
+
+The format of this attached message in the Auth-I message will be:
+
+// TODO: does this needs a message type?
+
+// TODO: maybe this should not include the flags..
+
+```
+Flags (BYTE)
+  The bitwise-OR of the flags for this message. Usually you should
+  set this to 0x00. The only currently defined flag is:
+
+  IGNORE_UNREADABLE (0x01)
+
+    If you receive a Data Message with this flag set, and you are
+    unable to decrypt the message or verify the MAC (because, for
+    example, you don't have the right keys), just ignore the message
+    instead of producing an error or a notification to the user.
+
+Attached Message id (INT)
+  Set with sender's j.
+
+Public ECDH Key (POINT)
+  This is the public part of the ECDH key pair. For the sender of this
+  message, this is their 'our_ecdh.public' value. For the receiver of
+  this message, it is used as 'their_ecdh'.
+
+Public DH Key (MPI)
+  This is the public part of the DH key pair. For the sender of this
+  message, it is 'our_dh.public' value. For the receiver of this message,
+  it is used as 'their_dh'.
+
+Nonce (NONCE)
+  The nonce used with XSalsa20 to create the encrypted message.
+
+Encrypted message (DATA)
+  Using the appropriate encryption key, perform an XSalsa20 encryption
+  of the message. The nonce used for this operation is also included in
+  the header of the attached message packet.
+
+Authenticator (MAC)
+  The MAC with the appropriate MAC key of everything: from the flags
+  to the end of the encrypted message.
+
+Old MAC keys to be revealed (DATA)
+  See 'Revealing MAC Keys section'.
+```
+
+After the encryption and mac of the attached encrypted message, the
+participant attaches it to the Auth-I message, which will look like this:
+
+```
+  (Protocol version || message type || sender's instance tag || receiver's
+  instance tag || RSig(Pkb, skb, {Pkb, Pka, X}, (0x1 ||
+  KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B ||
+  A || KDF_2(phi)) || (flags || attached message id || nonce ||
+  public ecdh key || public dh key || nonce ||encrypted message ||
+  authenticator || old mac keys)
+```
+
+
 ## Data Exchange
 
 This section describes how each participant will use the Double Ratchet
