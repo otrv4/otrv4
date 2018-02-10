@@ -1198,32 +1198,31 @@ Bob will be initiating the DAKE with Alice.
 **Alice:**
 
 1. Receives an Identity message from Bob:
-
-  * Validates Bob's User Profile.
-  * Picks a compatible version of OTR listed in Bob's profile.
-    If the versions are incompatible, Alice does not send any further messages.
-  * Validates that the received ECDH ephemeral public key `Y` is on curve
-    Ed448 and sets it as `their_ecdh`.
-    See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
-    section for details.
-  * Validates that the received DH ephemeral public key `B` is on the correct
-    group and sets it as `their_dh`. See
-    [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
-    section for details.
-
+    * Validates Bob's User Profile.
+    * Picks a compatible version of OTR listed in Bob's profile.
+      If the versions are incompatible, Alice does not send any further
+      messages.
+    * Validates that the received ECDH ephemeral public key `Y` is on curve
+      Ed448 and sets it as `their_ecdh`.
+      See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+      section for details.
+    * Validates that the received DH ephemeral public key `B` is on the correct
+      group and sets it as `their_dh`. See
+      [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
+      section for details.
 2. Generates an Auth-R message, as defined in
    [Auth-R message](#auth-r-message) section.
 3. Sets `X` and `x` as `our_ecdh`: the ephemeral ECDH keys.
 4. Sets `A` and `a` as `our_dh`: ephemeral 3072-bit DH keys.
 5. Calculates the mixed shared secret `K` and the SSID:
-  * Calculates ECDH shared secret
-    `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
-     Securely deletes `our_ecdh.secret`.
-  * Calculates DH shared secret `k_dh = DH(our_dh.secret, their_dh.public)`.
-    Securely deletes `our_dh.secret`.
-  * Calculates the Brace Key `brace_key = KDF_1(k_dh)`.
-  * Calculates Mixed shared secret `K = KDF_2(K_ecdh || brace_key)`.
-  * Calculates the SSID from shared secret: the first 8 bytes of
+    * Calculates ECDH shared secret
+      `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
+       Securely deletes `our_ecdh.secret`.
+    * Calculates DH shared secret `k_dh = DH(our_dh.secret, their_dh.public)`.
+      Securely deletes `our_dh.secret`.
+    * Calculates the Brace Key `brace_key = KDF_1(k_dh)`.
+    * Calculates Mixed shared secret `K = KDF_2(K_ecdh || brace_key)`.
+    * Calculates the SSID from shared secret: the first 8 bytes of
       `KDF_2(0x00 || K)`.
 6. Sends Bob the Auth-R message (see [Auth-R message](#auth-r-message) section).
 
