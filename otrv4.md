@@ -2169,23 +2169,14 @@ When sending a data message in the same DH Ratchet:
 
   * Securely delete `chain_s[i-1][j]`.
   * Increment the next sending message id `j = j + 1`.
-  * When creating a Non-Interactive-Auth message, if an encrypted message
-    is attached to it, construct a `nonce` from the first 24 bytes of the
-    `c` variable generated when creating `sigma`. See
-    [Ring Signature Authentication](#ring-signature-authentication) section for
-    details. In any other case, generate a new random 24 bytes value to be the
-    `nonce`.
+  * Generate a new random 24 bytes value to be the `nonce`.
   * Use the `MKenc` to encrypt the message:
 
    ```
    encrypted_message = XSalsa20_Enc(MKenc, nonce, m)
    ```
 
-  * When creating a Non-Interactive-Auth message and when an encrypted
-    data message has been attached to it, do not create a MAC tag. This is not
-    necessary since the MAC tag was created in the non-interactive DAKE
-    (`Auth MAC`) already authentifies this first data message. In any other
-    case, use the `MKmac` to create a MAC tag. MAC all the sections of the data
+  * Use the `MKmac` to create a MAC tag. MAC all the sections of the data
     message from the protocol version to the encrypted message.
 
    ```
