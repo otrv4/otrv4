@@ -1259,13 +1259,18 @@ Bob will be initiating the DAKE with Alice.
       `KDF_2(0x00 || K)`.
     * Sets ratchet id `i` as 0.
     * Sets `j` as 0 and `k` as 0.
+    * Calculates `chain_r[0][0] = KDF_2(0x00 || K)`.
 5. At this point, he can attach an encrypted message to the Auth-I message:
-    * TODO: define this case
+    * Follows what is defined on the
+      [Attaching an encrypted message to Auth-I message](attaching-an-encrypted-message-to-auth-i-message-in-dakez)
+      section.
 6. Sends the Auth-I message.
 7. At this point, the interactive DAKE is complete for Bob:
     * In the case that he wants to inmmediatly send a data message:
         * Follows what is defined on the
-          [When you send a data message](#when-you-send-a-data-message) section.
+          [When you send a data message](#when-you-send-a-data-message) section,
+          depending on whether he is in the same DH ratchet (when he attached
+          an encrypted message to the Auth-I message) or not.
 
 **Alice:**
 
@@ -1273,13 +1278,18 @@ Bob will be initiating the DAKE with Alice.
    * Verify the authentication `sigma` (see [Auth-I message](#auth-i-message)
      section).
    * Sets ratchet id `i` as 0.
-   * Sets `j` and `k` as 0.
+   * Sets `j` as 0 and `k` as 0.
+   * Calculates `chain_s[0][0] = KDF_2(0x00 || K)`.
    * If an encrypted message was attached to the Auth-I message:
      * TODO: define this case
 2. At this point, the interactive DAKE is complete for Alice:
-   * In the case that she wants to inmmediatly send a data message:
-     * Enters a new ratchet and follows what is defined on the
+   * In the case that she wants to inmmediatly send a data message if no
+     message was attached to the Auth-I message or no data message was
+     received:
+     * Increments the ratchet id `i = i + 1`. // TODO: check this
+     * Follows what is defined on the
        [When you send a data message](#when-you-send-a-data-message) section.
+       Note that she will not DH ratchet again.
    * In the case that she inmmediatly receives a data message:
      * Follows what is defined on the
        [When you receive a data message](#when-you-receive-a-data-message)
@@ -1516,7 +1526,8 @@ Verify and decrypt message if included
     * Calculates the SSID from shared secret: it is the first 8 bytes of
       `KDF_2(0x00 || K)`.
     * Sets ratchet id `i` as 0.
-    * Sets `j` as 0
+    * Sets `j` as 0 and `k` as 0.
+    * Calculates `chain_r[0][0] = KDF_2(0x00 || K)`.
 8. At this point, Alice can attach an encrypted message to the
   Non-Interactive-Auth message:
     * TODO: define this case
@@ -1565,12 +1576,15 @@ Verify and decrypt message if included
 	 `KDF_2(0x00 || K)`.
     * Sets ratchet id `i` as 0.
     * Sets `j` as 0 and `k` as 0.
+    * Calculates `chain_s[0][0] = KDF_2(0x00 || K)`.
     * If an encrypted message was attached to the Non-Interactive-Auth message:
         * TODO: define this case
 7. At this point, the non-interactive DAKE is complete for Bob:
     * In the case that he wants to inmmediatly send a data message:
-        * Enters a new ratchet and follows what is defined on the
+      * Increments the ratchet id `i = i + 1`. // TODO: check this
+      * Follows what is defined on the
         [When you send a data message](#when-you-send-a-data-message) section.
+        Note that he will not DH ratchet again.
     * In the case that he inmmediatly receives a data message:
         * Follows what is defined on the
         [When you receive a data message](#when-you-receive-a-data-message)
