@@ -1942,7 +1942,7 @@ participant attaches it to the Auth-I message, which will look like this:
 * Increments the ratchet id `i = i + 1`.
 * Derives the next receiving chain key
   `chain_r[i-1][j+1] = KDF_2(chain_r[i-1][j])`.
-* Calculates the encryption key (`MKenc`):
+* Calculates the encryption key (`MKenc`) and the MAC key (`MKmac`):
   `MKenc, MKmac = derive_enc_mac_keys(chain_r[i-1][j])`
 * Securely deletes `chain_r[i-1][j]`.
 * Uses `MKmac` to verify the received `Authenticator (MAC)` of the attached
@@ -2048,6 +2048,35 @@ like this:
   (flags || attached message id || nonce || public ecdh key || public dh key ||
    nonce ||encrypted message || old mac keys))
 ```
+
+#### Decrypting the message
+
+* Rotates the ECDH keys and brace key, see
+  [Rotating ECDH keys and brace key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
+  section.
+* Derives a set of keys:
+  `root[i], chain_r[i][j] = derive_ratchet_keys(K, KDF_2(K_ecdh || brace_key)`.
+* Securely deletes `K`.
+* Increments the ratchet id `i = i + 1`.
+* Derives the next receiving chain key
+  `chain_r[i-1][j+1] = KDF_2(chain_r[i-1][j])`.
+* Calculates the encryption key (`MKenc`):
+  `MKenc = KDF_1(0x01 || chain_r)`
+* Securely deletes `chain_r[i-1][j]`.
+* Uses `MKmac` to verify the received `Authenticator (MAC)` of the attached
+  encrypted message:
+  `Auth MAC = KDF_2(auth_mac_k || t || (flags || attached message id || nonce ||
+   public ecdh key || public dh key || nonce ||encrypted message ||
+   old mac keys))`
+  If verification fails, reject the message.
+* Increments the next receiving message id `k = k + 1`.
+* Set `nonce` as the "nonce" from the received data message.
+* Uses the `MKenc` and `nonce` to decrypt the message:
+  `decrypted_message = XSalsa20_Dec(MKenc, nonce, m)`.
+  TODO: maybe repeated
+* Sets `their_ecdh` as the "Public ECDH key" from the message.
+* Sets `their_dh` as the "Public DH Key" from the message.
+* Add `MKmac` to the list `mac_keys_to_reveal`.
 
 ## Data Exchange
 
