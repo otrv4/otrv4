@@ -1289,7 +1289,8 @@ Bob will be initiating the DAKE with Alice.
      * Increments the ratchet id `i = i + 1`. // TODO: check this
      * Follows what is defined on the
        [When you send a data message](#when-you-send-a-data-message) section.
-       Note that she will not DH ratchet again.
+       Note that she will not DH ratchet again, as she will use the already
+       derived `chain_s`.
    * In the case that she inmmediatly receives a data message:
      * Follows what is defined on the
        [When you receive a data message](#when-you-receive-a-data-message)
@@ -1527,16 +1528,21 @@ Verify and decrypt message if included
       `KDF_2(0x00 || K)`.
     * Sets ratchet id `i` as 0.
     * Sets `j` as 0 and `k` as 0.
-    * Calculates `chain_r[0][0] = KDF_2(0x00 || K)`.
-8. At this point, Alice can attach an encrypted message to the
-  Non-Interactive-Auth message:
-    * TODO: define this case
+    * Calculates `chain_r[0][0] = KDF_2(0x00 || K)`. // TODO: define here for
+      what.
+8. At this point, she can attach an encrypted message to the
+   Non-Interactive-Auth message:
+    * Follows what is defined on the
+      [Attaching an encrypted message to Non-Interactive-Auth message](#attaching-an-encrypted-message-to-non-interactive-auth-message-in-xzdh)
+       section.
 9. Sends Bob a Non-Interactive-Auth message. See
    [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 10. At this point, the non-interactive DAKE is complete for Alice:
     * In the case that she wants to inmmediatly send a data message:
         * Follows what is defined on the
-        [When you send a data message](#when-you-send-a-data-message) section.
+        [When you send a data message](#when-you-send-a-data-message) section
+        depending on whether she is in the same DH ratchet (when she attached an
+        encrypted message to the Non-Interactive-Auth message) or not.
 
 **Bob:**
 
@@ -1573,18 +1579,19 @@ Verify and decrypt message if included
     * `K = KDF_2(0x02 || tmp_k)`.
     * Securely deletes `tmp_k`.
     * Calculates the SSID from shared secret: it is the first 8 bytes of
-	 `KDF_2(0x00 || K)`.
+	   `KDF_2(0x00 || K)`.
     * Sets ratchet id `i` as 0.
     * Sets `j` as 0 and `k` as 0.
     * Calculates `chain_s[0][0] = KDF_2(0x00 || K)`.
     * If an encrypted message was attached to the Non-Interactive-Auth message:
-        * TODO: define this case
+        * TODO: define this
 7. At this point, the non-interactive DAKE is complete for Bob:
     * In the case that he wants to inmmediatly send a data message:
       * Increments the ratchet id `i = i + 1`. // TODO: check this
       * Follows what is defined on the
         [When you send a data message](#when-you-send-a-data-message) section.
-        Note that he will not DH ratchet again.
+        Note that he will not DH ratchet again, as he will use the already
+        derived `chain_s`.
     * In the case that he inmmediatly receives a data message:
         * Follows what is defined on the
         [When you receive a data message](#when-you-receive-a-data-message)
@@ -2129,10 +2136,10 @@ Old MAC keys to be revealed (DATA)
 In order to send an encoded data message, a key is required to encrypt the
 message in it. This per-message key (`MKenc`) is the output key from the sending
 and receiving KDF chains. As defined on [\[2\]](#references), the KDF keys for
-these chains are called 'chain keys'. If the message's id `j` has been set
-to `0`, and a participant wants to send a data message after receiving another
-one, ratchet keys should be rotated (the ECDH keys, the brace key, the root
-key and the sending chain key).
+these chains are called 'chain keys'. If the receiving message's id `j` has been
+set to `0`, and a participant wants to send a data message after receiving
+another one, ratchet keys should be rotated (the ECDH keys, the brace key, the
+root key and the sending chain key).
 
 Given a new DH ratchet:
 
@@ -2205,7 +2212,7 @@ Given a new ratchet (the receiving `j` is equal to 0):
   * If needed, calculate the extra symmetric key: `KDF_2(0xFF || K)`.
   * Derive new set of keys
     `root[i], chain_r[i][0] = derive_ratchet_keys(root[i-1], K)`.
-  * Securely delete the root key and `K`.
+  * Securely delete the previous root key (`root[i-1]`) and `K`.
   * Increment the ratchet id `i = i + 1`.
   * Derive the next receiving chain key, `MKenc` and `MKmac`, and decrypt the
     message as described below.
