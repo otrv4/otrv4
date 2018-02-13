@@ -833,8 +833,8 @@ Before rotating the keys:
 
 To rotate the ECDH keys:
 
-  * Retrieve the ECDH key from the received data message and assign it to
-    `their_ecdh`.
+  * Retrieve the ECDH key ("Public ECDH key) from the received data message or
+    from the received attached encrypted message, and assign it to `their_ecdh`.
   * Calculate `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
   * Securely delete `our_ecdh.secret`.
 
@@ -842,8 +842,8 @@ To rotate the brace key:
 
   * If `i % 3 == 0`:
 
-    * Retrieve the DH key from the received data message and assign it to
-      `their_dh`.
+    * Retrieve the DH key ("Public DH key) from the received data message from
+      the received attached encrypted message, and assign it to `their_dh`.
     * Calculate `k_dh = DH(our_dh.secret, their_dh.public)`.
     * Calculate a `brace_key = KDF_1(k_dh)`.
     * Securely delete `our_dh.secret`.
@@ -1262,7 +1262,7 @@ Bob will be initiating the DAKE with Alice.
     * Calculates `chain_r[0][0] = KDF_2(0x00 || K)`.
 5. At this point, he can attach an encrypted message to the Auth-I message:
     * Follows what is defined on the
-      [Attaching an encrypted message to Auth-I message](attaching-an-encrypted-message-to-auth-i-message-in-dakez)
+      [Attaching an encrypted message to Auth-I message](#attaching-an-encrypted-message-to-auth-i-message-in-dakez)
       section.
 6. Sends the Auth-I message.
 7. At this point, the interactive DAKE is complete for Bob:
@@ -1281,7 +1281,8 @@ Bob will be initiating the DAKE with Alice.
    * Sets `j` as 0 and `k` as 0.
    * Calculates `chain_s[0][0] = KDF_2(0x00 || K)`.
    * If an encrypted message was attached to the Auth-I message:
-     * TODO: define this case
+     * Follows what is defined on [Decrypting an attached encrypted message](#decrypting-the-message)
+      section.
 2. At this point, the interactive DAKE is complete for Alice:
    * In the case that she wants to inmmediatly send a data message if no
      message was attached to the Auth-I message or no data message was
@@ -1827,10 +1828,10 @@ If many prekey messages are received:
 ### Encrypted messages in DAKE's messages
 
 One message of each DAKE allows participants to attach an encrypted message to
-them:
+them. This message will be referred as "attached encrypted message":
 
-- The Auth-I message in the case of DAKEZ for the interactive DAKE.
-- The Non-Interactive-Auth message in the case of XZDH for the non-interactive
+- The Auth-I message in the case of DAKEZ of the interactive DAKE.
+- The Non-Interactive-Auth message in the case of XZDH of the non-interactive
   DAKE.
 
 #### Attaching an encrypted message to Auth-I message in DAKEZ
@@ -1876,21 +1877,8 @@ The format of this attached message in the Auth-I message will be:
 
 // TODO: does this needs a message type?
 
-// TODO: maybe this should not include the flags..
-
 ```
-Flags (BYTE)
-  The bitwise-OR of the flags for this message. Usually you should
-  set this to 0x00. The only currently defined flag is:
-
-  IGNORE_UNREADABLE (0x01)
-
-    If you receive a Data Message with this flag set, and you are
-    unable to decrypt the message or verify the MAC (because, for
-    example, you don't have the right keys), just ignore the message
-    instead of producing an error or a notification to the user.
-
-Attached Message id (INT)
+Attached Encrypted Message Id (INT)
   Set with sender's j.
 
 Public ECDH Key (POINT)
@@ -1906,7 +1894,7 @@ Public DH Key (MPI)
 Nonce (NONCE)
   The nonce used with XSalsa20 to create the encrypted message.
 
-Encrypted message (DATA)
+Encrypted Message (DATA)
   Using the appropriate encryption key, perform an XSalsa20 encryption
   of the message. The nonce used for this operation is also included in
   the header of the attached message packet.
@@ -1914,9 +1902,6 @@ Encrypted message (DATA)
 Authenticator (MAC)
   The MAC with the appropriate MAC key of everything: from the flags
   to the end of the encrypted message.
-
-Old MAC keys to be revealed (DATA)
-  See 'Revealing MAC Keys section'.
 ```
 
 After the encryption and mac of the attached encrypted message, the
@@ -1926,34 +1911,37 @@ participant attaches it to the Auth-I message, which will look like this:
   (Protocol version || message type || sender's instance tag || receiver's
   instance tag || RSig(Pkb, skb, {Pkb, Pka, X}, (0x1 ||
   KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B ||
-  A || KDF_2(phi)) || (flags || attached message id || nonce ||
+  A || KDF_2(phi)) || (attached encrypted message id || nonce ||
   public ecdh key || public dh key || nonce ||encrypted message ||
-  authenticator || old mac keys)
+  authenticator)
 ```
 
 #### Decrypting the message
+
+After verifying `sigma` on the Auth-I message, a participant (Alice in the above
+overview) can decrypted an attached encrypted message if it was attached. This
+has to be done prior to receiving any other data message, or sending one. For
+this, the participant:
 
 * Rotates the ECDH keys and brace key, see
   [Rotating ECDH keys and brace key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
   section.
 * Derives a set of keys:
-  `root[i], chain_r[i][j] = derive_ratchet_keys(K, KDF_2(K_ecdh || brace_key)`.
+  `root[i], chain_r[i][k] = derive_ratchet_keys(K, KDF_2(K_ecdh || brace_key)`.
 * Securely deletes `K`.
 * Increments the ratchet id `i = i + 1`.
 * Derives the next receiving chain key
-  `chain_r[i-1][j+1] = KDF_2(chain_r[i-1][j])`.
+  `chain_r[i-1][k+1] = KDF_2(chain_r[i-1][k])`.
 * Calculates the encryption key (`MKenc`) and the MAC key (`MKmac`):
-  `MKenc, MKmac = derive_enc_mac_keys(chain_r[i-1][j])`
-* Securely deletes `chain_r[i-1][j]`.
+  `MKenc, MKmac = derive_enc_mac_keys(chain_r[i-1][k])`
+* Securely deletes `chain_r[i-1][k]`.
+* Increments the next receiving message id `k = k + 1`.
 * Uses `MKmac` to verify the received `Authenticator (MAC)` of the attached
   encrypted message. If verification fails, reject the message.
 * Increments the next receiving message id `k = k + 1`.
 * Set `nonce` as the "nonce" from the received data message.
 * Uses the `MKenc` and `nonce` to decrypt the message:
   `decrypted_message = XSalsa20_Dec(MKenc, nonce, m)`.
-  TODO: maybe repeated
-* Sets `their_ecdh` as the "Public ECDH key" from the message.
-* Sets `their_dh` as the "Public DH Key" from the message.
 * Add `MKmac` to the list `mac_keys_to_reveal`.
 
 #### Attaching an encrypted message to Non-Interactive-Auth message in XZDH
