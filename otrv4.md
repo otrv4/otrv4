@@ -2238,7 +2238,8 @@ key).
 
 * Try to decrypt the message with a skipped message key:
 
-  * If `Public ECDH Key`, `Public DH Key` and sender `j` is in `skipped_MKenc`:
+  * If `Public ECDH Key`, `Public DH Key` and the received `j` is in
+    `skipped_MKenc`:
       * `MKenc = skipped_MKenc[Public ECDH Key, Public DH Key, j]`.
       * Securely delete `skipped_MKenc[Public ECDH Key, Public DH Key, j]`.
       * Calculate `MKmac = KDF_2(0x02 || MK_enc)`.
@@ -2252,23 +2253,52 @@ key).
 
       * Securely delete `MKenc`.
 
-Given a new ratchet (the receiving `j` is equal to 0):
+// TODO: define if we are going to ratchet with `j`.
 
+* Given a new ratchet (the received `j` is equal to 0, `Public ECDH Key` is
+different from `their_ecdh` and `Public DH Key` is different from `their_dh`):
+
+  * Store any message keys from the previous DH Ratchet that correspond to
+    messages that have not yet arrived:
+      * If `k` + `MAX_SKIP` < received `pn`:
+         * The message is undecryptable. // TODO: raise an error?
+      * If `chain_key_r` is not NULL:
+         * while `k` < received `pn`:
+             * Derive
+               `chain_key_r[i-1][k+1], MKenc = KDF_2(chain_key_r[i-1][k])`.
+             * Store `MKenc = skipped_MKenc[Public ECDH Key, Public DH Key, j]`.
+             * Increment `k = k + 1`.
+             * Delete `chain_key_r[i-1][k]`.
   * Rotate the ECDH keys and brace key, see
     [Rotating ECDH keys and brace key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
     section.
+  * Set the received `pn` as `j`.
   * Calculate `K = KDF_2(K_ecdh || brace_key)`.
   * If needed, calculate the extra symmetric key: `KDF_2(0xFF || K)`.
   * Derive new set of keys
-    `root_key[i], chain_key_r[i][0] = derive_ratchet_keys(receiving,
+    `root_key[i], chain_key_r[i][k] = derive_ratchet_keys(receiving,
      root_key[i-1], K)`.
   * Securely delete the previous root key (`root_key[i-1]`) and `K`.
   * Increment the ratchet id `i = i + 1`.
   * Derive the next receiving chain key, `MKenc` and `MKmac`, and decrypt the
     message as described below.
 
-When receiving a data message in the same DH Ratchet:
+  // TODO: should `j` and `k` become 0?
+  // TODO: here the sending can be derived
 
+* When receiving a data message in the same DH Ratchet:
+
+  * Store any message keys from the current DH Ratchet that correspond to
+    messages that have not yet arrived:
+    * If `k` + `MAX_SKIP` < received `j`:
+         * The message is undecryptable. // TODO: raise an error?
+      * If `chain_key_r` is not NULL:
+         * while `k` < received `j`:
+             * Derive
+               `chain_key_r[i-1][k+1], MKenc = KDF_2(chain_key_r[i-1][k])`.
+             * Store `MKenc = skipped_MKenc[Public ECDH Key, Public DH Key, j]`.
+             * Increment `k = k + 1`.
+             * Delete `chain_key_r[i-1][k]`.
   * Derive the next receiving chain key
     `chain_key_r[i-1][k+1] = KDF_2(chain_key_r[i-1][k])`.
   * Calculate the encryption and MAC keys (`MKenc` and `MKmac`).
