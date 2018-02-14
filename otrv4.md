@@ -664,7 +664,7 @@ In both the interactive and non-interactive DAKEs, OTRv4 uses long-term Ed448
 keys, ephemeral Elliptic Curve Diffie-Hellman (ECDH) keys, and ephemeral
 Diffie-Hellman (DH) keys.
 
-For exchanging data messages, OTRv4 uses KDF chains, the symmetric-key ratchet
+For exchanging data messages, OTRv4 uses KDF chains: the symmetric-key ratchet
 and the DH ratchet (with ECDH) from the Double Ratchet algorithm
 [\[2\]](#references). OTRv4 adds 3072-bit (384-byte) DH keys, called the brace
 key pair, to the Double Ratchet algorithm. These keys are used to protect
@@ -677,12 +677,13 @@ The following variables keep state as the ratchet moves forward:
 
 ```
 State variables:
-  i: the current ratchet id.
-  j: the current sending message id.
-  k: the current receiving message id.
+  i: the ratchet id.
+  j: the sending message id.
+  k: the receiving message id.
+  pn: number of messages in the previous chain.
 
 Key variables:
-  'root_key[i]': the root key for the ratchet i.
+  'root_key[i]': the root key for ratchet i.
   'chain_key_s[i][j]': the sending chain key for the sending message j in
     ratchet i.
   'chain_key_r[i][k]': the receiving chain key for the receiving message k in
@@ -695,15 +696,18 @@ Key variables:
     DH ratchet) or a hash of the previuos brace_key: 'KDF_1(brace_key)'
   'mac_keys_to_reveal': the MAC keys to be revealed in the first data message
     sent of the next ratchet.
+  'skipped_MKenc': Dictionary of skipped-over message keys, indexed by
+   their_ecdh, their_dh and message number. Raises an exception if too many
+   elements are stored.
 ```
 
-When these events occur, the state variables are incremented and, depending on
-the event, some key variable values are replaced:
+Depending on the event, the state variables are incremented and some key
+variable values are replaced:
 
 * When you start a new [interactive DAKE](#interactive-dake-overview) by sending
-  or receiving an [Identity message](#identity-message)
+  or receiving an [Identity message](#identity-message).
 * When you complete the [interactive DAKE](#interactive-dake-overview) by
-  sending an [Auth-I Message](#auth-i-message)
+  sending an [Auth-I Message](#auth-i-message).
 * When you complete the [interactive DAKE](#interactive-dake-overview) by
   receiving and validating an [Auth-I Message](#auth-i-message)
 * When you start a new [non-interactive DAKE](#non-interactive-dake-overview) by
