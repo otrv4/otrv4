@@ -699,6 +699,11 @@ Key variables:
   'skipped_MKenc': Dictionary of skipped-over message keys, indexed by
    their_ecdh, their_dh and message number. Raises an exception if too many
    elements are stored.
+   'MAX_SKIP' a constant that specifies the maximum number of message keys
+    that can be skipped. It should be set by the implementer. Take into
+    account that it should be set high enough to tolerate routine lost or
+    delayed messages, but low enough that a malicious sender can't trigger
+    excessive recipient computation.
 ```
 
 Depending on the event, the state variables are incremented and some key
