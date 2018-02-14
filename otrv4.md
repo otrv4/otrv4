@@ -1306,12 +1306,13 @@ A valid Identity message is generated as follows:
 
 To verify an Identity message:
 
-* Validate the User Profile.
-* Verify that the point `Y` received is on curve Ed448. See
-  [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) section for details.
-* Verify that the DH public key `B` is from the correct group. See
-  [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
-  section for details.
+1. Validate the User Profile.
+2. Verify that the point `Y` received is on curve Ed448. See
+   [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+   section for details.
+3. Verify that the DH public key `B` is from the correct group. See
+   [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
+   section for details.
 
 An Identity message is an OTR message encoded as:
 
@@ -1418,10 +1419,10 @@ authentication `sigma`.
 A valid Auth-I message is generated as follows:
 
 1. Check that the receiver's instance tag matches your sender's instance tag.
-1. Compute `t = 0x1 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(phi)`.
+2. Compute `t = 0x1 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(phi)`.
    `phi` is the shared session state as mention on its [section](#shared-session-state).
-2. Compute `sigma = RSig(Pkb, skb, {Pkb, Pka, X}, t)`.
-3. Continue to use the sender's instance tag.
+3. Compute `sigma = RSig(Pkb, skb, {Pkb, Pka, X}, t)`.
+4. Continue to use the sender's instance tag.
 
 To verify an Auth-I message:
 
@@ -1549,9 +1550,9 @@ Verify and decrypt message if included
     encrypted_data_message))`. Securely delete the `auth_mac_k`.
    Otherwise, compute `Auth MAC = KDF_2(auth_mac_k || t)`. Include this value on
    the Non-Interactive-Auth message. Securely delete the `auth_mac_k`.
-9. Sends Bob a Non-Interactive-Auth message. See
+10. Sends Bob a Non-Interactive-Auth message. See
    [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
-10. At this point, the non-interactive DAKE is complete for Alice:
+11. At this point, the non-interactive DAKE is complete for Alice:
     * In the case that she wants to inmmediatly send a data message:
         * Follows what is defined on the
           [When you send a data message](#when-you-send-a-data-message) section
@@ -1642,13 +1643,13 @@ A valid Prekey message is generated as follows:
 
 To verify a Prekey message:
 
-* [Validate the user profile](#validating-a-user-profile)
-* Check that the ECDH public key `Y` is on curve Ed448. See
-  [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
-  section for details.
-* Verify that the DH public key `B` is from the correct group. See
-  [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
-  section for details.
+1. [Validate the user profile](#validating-a-user-profile)
+2. Check that the ECDH public key `Y` is on curve Ed448. See
+   [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+   section for details.
+3. Verify that the DH public key `B` is from the correct group. See
+   [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
+   section for details.
 
 A Prekey is an OTR message encoded as:
 
@@ -1703,7 +1704,7 @@ A valid Non-Interactive-Auth message is generated as follows:
     keep the first 24 bytes of the generated `c` value to be used as a `nonce`
     in the next step. Refer to
     [Ring Signature Authentication](#ring-signature-authentication) for details.
-13. Generate a 4-byte instance tag to use as the sender's instance tag.
+11. Generate a 4-byte instance tag to use as the sender's instance tag.
     Additional messages in this conversation will continue to use this tag as
     the sender's instance tag. Also, this tag is used to filter future received
     messages. Messages intended for this instance of the client will have this
