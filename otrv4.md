@@ -714,18 +714,18 @@ variable values are replaced:
 * When you complete the [interactive DAKE](#interactive-dake-overview) by
   sending an [Auth-I Message](#auth-i-message).
 * When you complete the [interactive DAKE](#interactive-dake-overview) by
-  receiving and validating an [Auth-I Message](#auth-i-message)
+  receiving and validating an [Auth-I Message](#auth-i-message).
 * When you start a new [non-interactive DAKE](#non-interactive-dake-overview) by
-  publishing or retrieving a [Prekey message](##prekey-message)
+  publishing or retrieving a [Prekey message](##prekey-message).
 * When you complete a [non-interactive DAKE](#non-interactive-dake-overview) by
-  sending a [non-interactive-Auth message](#non-interactive-auth-message)
+  sending a [non-interactive-Auth message](#non-interactive-auth-message).
 * When you complete a [non-interactive DAKE](#non-interactive-dake-overview) by
   receiving and validating a
-  [non-interactive-Auth message](#non-interactive-auth-message)
+  [non-interactive-Auth message](#non-interactive-auth-message).
 * When you [send a Data Message](#when-you-send-a-data-message) or
-  [receive a Data Message](#when-you-receive-a-data-message)
-* When you [send a TLV type 1 (Disconnected)](#sending-a-tlv-type-1-disconnected-message)
-* When you [receive a TLV type 1 (Disconnected)](#receiving-a-tlv-type-1-disconnected-message)
+  [receive a Data Message](#when-you-receive-a-data-message).
+* When you [send a TLV type 1 (Disconnected)](#sending-a-tlv-type-1-disconnected-message).
+* When you [receive a TLV type 1 (Disconnected)](#receiving-a-tlv-type-1-disconnected-message).
 
 ### Generating ECDH and DH keys
 
@@ -1881,9 +1881,6 @@ Public DH Key (MPI)
   message, it is 'our_dh.public' value. For the receiver of this message,
   it is used as 'their_dh'.
 
-Nonce (NONCE)
-  The nonce used with XSalsa20 to create the encrypted message.
-
 Encrypted Message (DATA)
   Using the appropriate encryption key, perform an XSalsa20 encryption
   of the message. The nonce used for this operation is also included in
@@ -1902,7 +1899,7 @@ participant attaches it to the Auth-I message, which will look like this:
   instance tag || RSig(Pkb, skb, {Pkb, Pka, X}, (0x1 ||
   KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B ||
   A || KDF_2(phi)) || (attached encrypted message id || public ecdh key ||
-  public dh key || nonce ||encrypted message || authenticator)
+  public dh key || encrypted message || authenticator)
 ```
 
 #### Decrypting the message
@@ -1929,7 +1926,10 @@ this, the participant:
 * Uses `MKmac` to verify the received `Authenticator (MAC)` of the attached
   encrypted message. If verification fails, reject the message.
 * Increments the next receiving message id `k = k + 1`.
-* Set `nonce` as the "nonce" from the received data message.
+* Constructs the nonce from the first 24 bytes of the `c` variable generated
+  when creating `sigma`. See
+  [Ring Signature Verification](#verification-rvrfa1-a2-a3-sigma-m) section
+  for details.
 * Uses the `MKenc` and `nonce` to decrypt the message:
   `decrypted_message = XSalsa20_Dec(MKenc, nonce, m)`.
 * Add `MKmac` to the list `mac_keys_to_reveal`.
@@ -1987,9 +1987,6 @@ Public DH Key (MPI)
   message, it is 'our_dh.public' value. For the receiver of this message,
   it is used as 'their_dh'.
 
-Nonce (NONCE)
-  The nonce used with XSalsa20 to create the encrypted message.
-
 Encrypted message (DATA)
   Using the appropriate encryption key, perform an XSalsa20 encryption
   of the message. The nonce used for this operation is also included in
@@ -2003,7 +2000,7 @@ like this:
 ```
   (Protocol version || message type || sender's instance tag || receiver's
    instance tag || Sender's User Profile || X || A || Sigma || Auth MAC ||
-  (attached message id || public ecdh key || public dh key || nonce ||
+  (attached message id || public ecdh key || public dh key ||
    encrypted message))
 ```
 
@@ -2034,7 +2031,10 @@ sending one. For this, the participant:
    public ecdh key || public dh key || nonce ||encrypted message))`
   If verification fails, reject the message.
 * Increments the next receiving message id `k = k + 1`.
-* Set `nonce` as the "nonce" from the received data message.
+* Constructs the nonce from the first 24 bytes of the `c` variable generated
+  when creating `sigma`. See
+  [Ring Signature Verification](#verification-rvrfa1-a2-a3-sigma-m) section
+  for details.
 * Uses the `MKenc` and `nonce` to decrypt the message:
   `decrypted_message = XSalsa20_Dec(MKenc, nonce, m)`.
 * Adds `auth_mac_k` to the list `mac_keys_to_reveal`.
