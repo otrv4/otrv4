@@ -1217,7 +1217,7 @@ Bob will be initiating the DAKE with Alice.
 5. Calculates the mixed shared secret `K` and the SSID:
     * Calculates ECDH shared secret
       `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
-       Securely deletes `our_ecdh.secret`.
+      Securely deletes `our_ecdh.secret`.
     * Calculates DH shared secret `k_dh = DH(our_dh.secret, their_dh.public)`.
       Securely deletes `our_dh.secret`.
     * Calculates the Brace Key `brace_key = KDF_1(k_dh)`.
@@ -1259,7 +1259,10 @@ Bob will be initiating the DAKE with Alice.
       `KDF_2(0x00 || K)`.
     * Sets ratchet id `i` as 0.
     * Sets `j` as 0 and `k` as 0.
-    * Calculates `chain_r[0][0] = KDF_2(0x00 || K)`.
+    * Calculates `chain_r[0][0] = KDF_2(0x00 || K)`. Bob will use this key
+      in the case that Alice immediately sends a data message when she finishes
+      the DAKE and prior to her receving any of Bob's data messages. This key
+      will not be used in the case that Bob attaches an encrypted message.
 5. At this point, he can attach an encrypted message to the Auth-I message:
     * Follows what is defined on the
       [Attaching an encrypted message to Auth-I message](#attaching-an-encrypted-message-to-auth-i-message-in-dakez)
@@ -1270,7 +1273,7 @@ Bob will be initiating the DAKE with Alice.
         * Follows what is defined on the
           [When you send a data message](#when-you-send-a-data-message) section,
           depending on whether he is in the same DH ratchet (when he attached
-          an encrypted message to the Auth-I message) or not.
+          an attached encrypted message to the Auth-I message) or not.
 
 **Alice:**
 
@@ -1282,12 +1285,11 @@ Bob will be initiating the DAKE with Alice.
    * Calculates `chain_s[0][0] = KDF_2(0x00 || K)`.
    * If an encrypted message was attached to the Auth-I message:
      * Follows what is defined on [Decrypting an attached encrypted message](#decrypting-the-message)
-      section.
+       section.
 2. At this point, the interactive DAKE is complete for Alice:
    * In the case that she wants to inmmediatly send a data message if no
      message was attached to the Auth-I message or no data message was
      received:
-     * Increments the ratchet id `i = i + 1`. // TODO: check this
      * Follows what is defined on the
        [When you send a data message](#when-you-send-a-data-message) section.
        Note that she will not DH ratchet again, as she will use the already
@@ -1295,7 +1297,9 @@ Bob will be initiating the DAKE with Alice.
    * In the case that she inmmediatly receives a data message:
      * Follows what is defined on the
        [When you receive a data message](#when-you-receive-a-data-message)
-       section.
+       section, depending on whether she is in the same DH ratchet (when she
+       received and decrypted an attached encrypted message to the Auth-I
+       message) or not.
 
 #### Identity message
 
@@ -1529,8 +1533,10 @@ Verify and decrypt message if included
       `KDF_2(0x00 || K)`.
     * Sets ratchet id `i` as 0.
     * Sets `j` as 0 and `k` as 0.
-    * Calculates `chain_r[0][0] = KDF_2(0x00 || K)`. // TODO: define here for
-      what.
+    * Calculates `chain_r[0][0] = KDF_2(0x00 || K)`. Alice will use this key
+      in the case that Bob immediately sends a data message when he finishes
+      the DAKE and prior to him receving any of Alice's data messages. This key
+      will not be used in the case that Alice attaches an encrypted message.
 8. At this point, she can attach an encrypted message to the
    Non-Interactive-Auth message:
     * Follows what is defined on the
@@ -1567,7 +1573,7 @@ Verify and decrypt message if included
       [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
       section for details.
 3. Calculates the keys needed to generate the mixed shared secret `K` and the
-  SSID:
+   SSID:
     * Calculates ECDH shared secret
       `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`. Securely deletes
       `our_ecdh.secret`.
@@ -2209,7 +2215,10 @@ When sending a data message in the same DH Ratchet:
 
   * Set `j` as the Data message's message id.
   * Derive the next sending chain key
-    `chain_s[i-1][j+1] = KDF_2(chain_s[i-1][j])`.
+    `chain_s[i-1][j+1] = KDF_2(chain_s[i-1][j])` when a data message is sent.
+    In the case where a data message is sent from Alice when she inmediatly
+    finishes the interactive DAKE, derive the next sending chain key:
+    `chain_s[i][j+1] = KDF_2(chain_s[i][j])`
   * Calculate the encryption key (`MKenc`), the MAC key (`MKmac`) and, if
     needed the extra symmetric key:
 
@@ -2218,7 +2227,17 @@ When sending a data message in the same DH Ratchet:
    extra_symm_key = KDF_2(0xFF || chain_s[i-1][j])
    ```
 
-  * Securely delete `chain_s[i-1][j]`.
+   In the case where a data message is sent from Alice when she inmediatly
+   finishes the interactive DAKE, derive the next sending chain key:
+
+   ```
+   MKenc, MKmac = derive_enc_mac_keys(chain_s[i][j])
+   extra_symm_key = KDF_2(0xFF || chain_s[i][j])
+   ```
+
+  * Securely delete `chain_s[i-1][j]`. In the case where a data message is sent
+    from Alice when she inmediatly finishes the interactive DAKE, securely
+    delete: `chain_s[i][j]`
   * Increment the next sending message id `j = j + 1`.
   * Generate a new random 24 bytes value to be the `nonce`.
   * Use the `MKenc` to encrypt the message:
