@@ -37,7 +37,6 @@ an existing messaging protocol, such as XMPP.
    1. [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys)
    1. [Shared secrets](#shared-secrets)
    1. [Generating shared secrets](#generating-shared-secrets)
-   1. [Deciding between chain keys](#deciding-between-chain-keys)
    1. [Deriving Double Ratchet keys](#deriving-double-ratchet-keys)
    1. [Rotating ECDH keys and brace key as sender](#rotating-ecdh-keys-and-brace-key-as-sender)
    1. [Rotating ECDH keys and brace key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
@@ -766,31 +765,6 @@ ECDH(ai, Bi)
 
 DH(ai, Bi)
   return k_dh = ai ^ Bi
-```
-
-### Deciding between chain keys
-
-Once the DAKE completes, Alice and Bob derive two chain keys from the mixed
-shared secret. Both sides will compare their public keys to choose which chain
-key will be used for encrypting and decrypting data messages:
-
-- Alice (and, similarly, Bob) determines if she is the "low" end or the "high"
-  end of this ratchet. If Alice's ephemeral ECDH public key is numerically
-  greater than Bob's public key, then she is the "high" end. Otherwise, she is
-  the "low" end.
-
-- Alice selects the chain keys for sending and receiving:
-  - If she is the "high" end, use `Ca` as the sending chain key (`chain_s`)
-  and `Cb` as the receiving chain key (`chain_r`).
-  - If she is the "low" end, use `Cb` as the sending chain key (`chain_s`)
-  and `Ca` as the receiving chain key (`chain_r`).
-
-```
-decide_between_chain_keys(Ca, Cb):
-  if compare(our_ecdh.public, their_ecdh) > 0
-    return Ca, Cb
-  else
-    return Cb, Ca
 ```
 
 ### Rotating ECDH keys and brace key as sender
@@ -1574,9 +1548,9 @@ Verify and decrypt message if included
 10. At this point, the non-interactive DAKE is complete for Alice:
     * In the case that she wants to inmmediatly send a data message:
         * Follows what is defined on the
-        [When you send a data message](#when-you-send-a-data-message) section
-        depending on whether she is in the same DH ratchet (when she attached an
-        encrypted message to the Non-Interactive-Auth message) or not.
+          [When you send a data message](#when-you-send-a-data-message) section
+          depending on whether she is in the same DH ratchet (when she attached
+          an encrypted message to the Non-Interactive-Auth message) or not.
 
 **Bob:**
 
@@ -1633,8 +1607,8 @@ Verify and decrypt message if included
         derived `chain_s`.
     * In the case that he inmmediatly receives a data message:
         * Follows what is defined on the
-        [When you receive a data message](#when-you-receive-a-data-message)
-        section.
+          [When you receive a data message](#when-you-receive-a-data-message)
+          section.
 
 #### Prekey message
 
@@ -1720,14 +1694,14 @@ A valid Non-Interactive-Auth message is generated as follows:
 8. Calculate the Auth MAC key `auth_mac_k = KDF_2(0x01 || tmp_k)`.
 9. Compute `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || their_shared_prekey || KDF_2(phi)`.
 10. Compute `sigma = RSig(Pka, ska, {Pkb, Pka, Y}, t)`. When computing `sigma`,
-  keep the first 24 bytes of the generated `c` value to be used as a `nonce` in
-  the next step. Refer to
-  [Ring Signature Authentication](#ring-signature-authentication) for details.
+    keep the first 24 bytes of the generated `c` value to be used as a `nonce`
+    in the next step. Refer to
+    [Ring Signature Authentication](#ring-signature-authentication) for details.
 13. Generate a 4-byte instance tag to use as the sender's instance tag.
-  Additional messages in this conversation will continue to use this tag as
-  the sender's instance tag. Also, this tag is used to filter future received
-  messages. Messages intended for this instance of the client will have this
-  number as the receiver's instance tag.
+    Additional messages in this conversation will continue to use this tag as
+    the sender's instance tag. Also, this tag is used to filter future received
+    messages. Messages intended for this instance of the client will have this
+    number as the receiver's instance tag.
 
 To verify a Non-Interactive-Auth message:
 
