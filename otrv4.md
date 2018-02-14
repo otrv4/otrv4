@@ -2681,8 +2681,8 @@ If the state is `ENCRYPTED_MESSAGES`:
 
 #### Sending an Auth-R message
 
-  * Generate an Auth-R Message.
-  * Transition the state to `WAITING_AUTH_I`.
+  * Generate and send an Auth-R Message.
+  * Transition to state `WAITING_AUTH_I`.
 
 #### Receiving an Auth-R message
 
@@ -2697,8 +2697,8 @@ If the state is `WAITING_AUTH_R`:
       * Stay in state `WAITING_AUTH_R`.
 
     * If validation succeeds:
-      * Reply with an Auth-I message.
-      * Transition state to `ENCRYPTED_MESSAGES`.
+      * Reply with an Auth-I message, as defined on
+        [Sending an Auth-I message](##sending-an-auth-i-message).
 
 If the state is not `WAITING_AUTH_R`:
 
@@ -2706,9 +2706,10 @@ If the state is not `WAITING_AUTH_R`:
 
 #### Sending an Auth-I message
 
-  * Send an Auth-I Message.
-  * Transition the state to `ENCRYPTED_MESSAGES`.
-  * Initialize the double ratcheting.
+  * Generate and send an Auth-I Message.
+  * Initialize the double ratcheting, as defined on the
+    [Interactive DAKE Overview](#interactive-dake-overview).
+  * Transition to state `ENCRYPTED_MESSAGES`.
 
 #### Receiving an Auth-I message
 
@@ -2723,8 +2724,9 @@ If the state is `WAITING_AUTH_I`:
       * Stay in state `WAITING_AUTH_I`.
 
     * If validation succeeds:
-      * Transition state to `ENCRYPTED_MESSAGES`.
-      * Initialize the double ratcheting.
+      * Transition to state `ENCRYPTED_MESSAGES`.
+      * Initialize the double ratcheting, as defined on the
+        [Interactive DAKE Overview](#interactive-dake-overview).
 
 If the state is not `WAITING_AUTH_I`:
 
@@ -2732,8 +2734,10 @@ If the state is not `WAITING_AUTH_I`:
 
 #### Sending an encrypted message to an offline participant
 
-  * Send a Non-Interactive-Auth message.
-  * Transition to `ENCRYPTED_MESSAGES` state.
+  * Generate and send a Non-Interactive-Auth message.
+  * Initialize the double ratcheting, as defined on the
+    [Non-Interactive DAKE Overview](#non-interactive-dake-overview).
+  * Transition to state `ENCRYPTED_MESSAGES`.
 
 #### Receiving a Non-Interactive-Auth message
 
@@ -2745,17 +2749,26 @@ Else:
 
   * If the receiver's instance tag in the message is not the sender's instance
     tag you are currently using, ignore this message.
-  * Receive and validate the Non-Interactive-Auth message.
-  * Transition to `ENCRYPTED_MESSAGES` state.
+  * Validate the Non-Interactive-Auth message.
+  * Initialize the double ratcheting, as defined on the
+    [Non-Interactive DAKE Overview](#non-interactive-dake-overview).
+  * Transition to state `ENCRYPTED_MESSAGES`.
 
 #### Sending an encrypted data message
 
-The `ENCRYPTED_MESSAGES` state is the only state where a participant is allowed
-to send encrypted data messages.
+The `ENCRYPTED_MESSAGES` state is the state where a participant is allowed to
+send encrypted data messages. There are only two other states in which a
+participant can send an encrypted message (that do not have the same format
+as a data message):
 
-If the state is `START`, `WAITING_AUTH_R`, or `WAITING_AUTH_I`, queue the
-message for encrypting and sending when the participant transitions to the
-`ENCRYPTED_MESSAGES` state.
+* On `WAITING-AUTH-R` state: when a participant attaches an encrypted message
+  to the Auth-I message.
+* On `START`: when a participant attaches an encrypted message to the
+  Non-Interactive Auth message.
+
+In any other case and if the state is `START`, `WAITING_AUTH_R`, or
+`WAITING_AUTH_I`, queue the message for encrypting and sending it when the
+participant transitions to the `ENCRYPTED_MESSAGES` state.
 
 If the state is `FINISHED`, the participant must start another OTR conversation
 to send encrypted messages.
@@ -2768,6 +2781,15 @@ If the version is 4:
 
   * Inform the user that an unreadable encrypted message was received by
     replying with an Error Message: `ERROR_2`.
+
+  * There are only two other states in which a participant can receive an
+    encrypted message (that do not have the same format as a data message):
+
+      * On `WAITING-AUTH-I` state: when the other participant sends you an
+        Auth-I message that has an attached encrypted message with it.
+      * On `START`: when the other participant sends you an
+        Non-Interactive-Auth message that has an attached encrypted message with
+        it.
 
 * Otherwise:
 
@@ -2789,8 +2811,8 @@ If the version is 4:
 
     * Otherwise:
 
-      * Use the ratchet id and the message id to compute the corresponding
-        decryption key. Try to decrypt the message.
+      * Derive the corresponding decryption key depending if you are on a new
+        DH ratchet, if you have stored keys or not. Try to decrypt the message.
 
       * If the message cannot be decrypted and the `IGNORE_UNREADABLE` flag is
         not set:
