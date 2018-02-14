@@ -1338,18 +1338,24 @@ An Identity message is an OTR message encoded as:
 ```
 Protocol version (SHORT)
   The version number of this protocol is 0x0004.
+
 Message type (BYTE)
   The message has type 0x08.
+
 Sender's instance tag (INT)
   The instance tag of the person sending this message.
+
 Receiver's instance tag (INT)
   The instance tag of the intended recipient. For an Identity message, this
   will often be 0 since the other party may not have set its instance
   tag yet.
+
 Sender's User Profile (USER-PROF)
   As described in the section 'Creating a User Profile'.
+
 Y (POINT)
   The ephemeral public ECDH key.
+
 B (MPI)
   The ephemeral public DH key. Note that even though this is in uppercase,
   this is NOT a POINT.
@@ -1401,19 +1407,25 @@ An Auth-R message is an OTR message encoded as:
 ```
 Protocol version (SHORT)
   The version number of this protocol is 0x0004.
+
 Message type (BYTE)
   The message has type 0x91.
+
 Sender's instance tag (INT)
   The instance tag of the person sending this message.
 Receiver's instance tag (INT)
   The instance tag of the intended recipient.
+
 Sender's User Profile (USER-PROF)
   As described in the section 'Creating a User Profile'.
+
 X (POINT)
   The ephemeral public ECDH key.
+
 A (MPI)
   The ephemeral public DH key. Note that even though this is in uppercase,
   this is NOT a POINT.
+
 sigma (RING-SIG)
   The RING-SIG proof of authentication value.
 ```
@@ -1444,14 +1456,24 @@ An Auth-I is an OTR message encoded as:
 ```
 Protocol version (SHORT)
   The version number of this protocol is 0x0004.
+
 Message type (BYTE)
   The message has type 0x88.
+
 Sender's instance tag (INT)
   The instance tag of the person sending this message.
+
 Receiver's instance tag (INT)
   The instance tag of the intended recipient.
+
 sigma (RING-SIG)
   The RING-SIG proof of authentication value.
+
+Attached DAKEZ Encrypted Message (DAKEZ-ENCRYPTED-MSG)
+  (optional: if an encrypted message is attached)
+  The DAKEZ-ENCRYPTED-MSG that consists of an attached message id,
+  a public ecdh key (used for encrypting the message), a public dh key
+  (used for encrypting the message) a nonce and the encrypted message.
 ```
 
 ## Offline Conversation Initialization
@@ -1541,7 +1563,12 @@ Verify and decrypt message if included
    Non-Interactive-Auth message:
     * Follows what is defined on the
       [Attaching an encrypted message to Non-Interactive-Auth message](#attaching-an-encrypted-message-to-non-interactive-auth-message-in-xzdh)
-       section.
+      section.
+9. If an encrypted message is attached, compute
+   `Auth MAC = KDF_2(auth_mac_k || t || (message_id || nonce ||
+    encrypted_data_message))`. Securely delete the `auth_mac_k`.
+   Otherwise, compute `Auth MAC = KDF_2(auth_mac_k || t)`. Include this value on
+   the Non-Interactive-Auth message. Securely delete the `auth_mac_k`.
 9. Sends Bob a Non-Interactive-Auth message. See
    [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 10. At this point, the non-interactive DAKE is complete for Alice:
@@ -1591,10 +1618,15 @@ Verify and decrypt message if included
     * Sets `j` as 0 and `k` as 0.
     * Calculates `chain_s[0][0] = KDF_2(0x00 || K)`.
     * If an encrypted message was attached to the Non-Interactive-Auth message:
-        * TODO: define this
+        * Follows what is defined on [Decrypting an attached encrypted message](#decrypting-the-message-1)
+          section.
+    * Otherwise:
+        * Computes `Auth MAC = KDF_2(auth_mac_k || t)`.
+    * Extracts the Auth MAC from the Non-Interactive-Auth message and verifies
+      that it is equal to the one just calculated. If it is not, ignore the
+      Non-Interactive-Auth message.
 7. At this point, the non-interactive DAKE is complete for Bob:
     * In the case that he wants to inmmediatly send a data message:
-      * Increments the ratchet id `i = i + 1`. // TODO: check this
       * Follows what is defined on the
         [When you send a data message](#when-you-send-a-data-message) section.
         Note that he will not DH ratchet again, as he will use the already
@@ -1691,14 +1723,6 @@ A valid Non-Interactive-Auth message is generated as follows:
   keep the first 24 bytes of the generated `c` value to be used as a `nonce` in
   the next step. Refer to
   [Ring Signature Authentication](#ring-signature-authentication) for details.
-11. A message can be optionally attached at this point. It is recommended to do
-  so. Follow the section
-  [When you send a Data Message](#when-you-send-a-data-message) to generate an
-  encrypted message, using the nonce set in the previous step. This will be
-  referred as `encrypted_data_message`.
-12. If an encrypted message is attached, compute
-  `Auth MAC = KDF_2(auth_mac_k || t || (message_id || nonce || encrypted_data_message))`.
-  Otherwise, compute `Auth MAC = KDF_2(auth_mac_k || t)`.
 13. Generate a 4-byte instance tag to use as the sender's instance tag.
   Additional messages in this conversation will continue to use this tag as
   the sender's instance tag. Also, this tag is used to filter future received
@@ -1709,23 +1733,10 @@ To verify a Non-Interactive-Auth message:
 
 1. Check that the receiver's instance tag matches your sender's instance tag.
 2. Compute `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || our_shared_prekey.public || KDF_2(phi)`.
-5. Verify the `sigma` with
+3. Verify the `sigma` with
    [Ring Signature Authentication](#ring-signature-authentication).
    See [Verification: RVrf({A1, A2, A3}, sigma, m)](#verification-verifya1-a2-a3-sigma-m)
    for details.
-6. If present, extract the `encrypted_data_message`.
-7. If an encrypted data message was attached, compute
-   `Auth MAC = KDF_2(auth_mac_k || t || (message_id || nonce || encrypted_data_message))`.
-   Otherwise, compute `Auth MAC = KDF_2(auth_mac_k || t)`.
-8. Verify the Auth Mac:
-   * Extract the Auth MAC from the Non-Interactive-Auth message and verify that
-     it is equal to the one calculated. If it is not, ignore the
-     Non-Interactive-Auth message.
-9. If an `encrypted_data_message` was present, decrypt it by following
-   [When you receive a Data Message](#when-you-receive-a-data-message) section.
-   Keep in mind that the `MKmac` should be discarded as it is not necessary for
-   the first message delivered through a Non-Interactive-Auth message.
-   Nevertheless, add the `Auth MAC` key to the list `mac_keys_to_reveal`.
 
 A Non-Interactive-Auth is an OTR message encoded as:
 
@@ -1755,19 +1766,11 @@ A (MPI)
 Sigma (RING-SIG)
   The RING-SIG proof of authentication value.
 
-Message id (INT) (optional: if an encrypted message is attached)
-  This should be set with sender's j.
-
-Nonce (NONCE) (optional: if an encrypted message is attached)
-  The nonce used with XSalsa20 to create the encrypted message contained
-  in this packet.
-
-Encrypted message (DATA) (optional)
-  Using the appropriate encryption key (see 'When you send a Data Message'
-  section) derived from the sender's and recipient's public keys (with the
-  keyids given in this message), perform an XSalsa20 encryption of the message.
-  The nonce used for this operation is also included in the header of the data
-  message packet.
+Attached XZDH Encrypted Message (XZDH-ENCRYPTED-MSG)
+  (optional: if an encrypted message is attached)
+  The XZDH-ENCRYPTED-MSG that consists of an attached message id,
+  a public ecdh key (used for encrypting the message), a public dh key
+  (used for encrypting the message) a nonce and the encrypted message.
 
 Auth MAC (MAC)
   The MAC with the appropriate MAC key (see above) of the message (t) for the
@@ -1884,6 +1887,8 @@ The format of this attached message in the Auth-I message will be:
 // TODO: does this needs a message type?
 
 ```
+Attached DAKEZ Encrypted Message (DAKEZ-ENCRYPTED-MSG)
+
 Attached Encrypted Message Id (INT)
   Set with sender's j.
 
@@ -1917,15 +1922,14 @@ participant attaches it to the Auth-I message, which will look like this:
   (Protocol version || message type || sender's instance tag || receiver's
   instance tag || RSig(Pkb, skb, {Pkb, Pka, X}, (0x1 ||
   KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B ||
-  A || KDF_2(phi)) || (attached encrypted message id || nonce ||
-  public ecdh key || public dh key || nonce ||encrypted message ||
-  authenticator)
+  A || KDF_2(phi)) || (attached encrypted message id || public ecdh key ||
+  public dh key || nonce ||encrypted message || authenticator)
 ```
 
 #### Decrypting the message
 
 After verifying `sigma` on the Auth-I message, a participant (Alice in the above
-overview) can decrypted an attached encrypted message if it was attached. This
+overview) can decrypt an attached encrypted message if it was attached. This
 has to be done prior to receiving any other data message, or sending one. For
 this, the participant:
 
@@ -1982,32 +1986,16 @@ this, the participant:
   for details.
 * Uses the `MKenc` to encrypt the message:
   `encrypted_message = XSalsa20_Enc(MKenc, nonce, m)`.
-* Uses the `auth_mac_k` derived while creating the Non-Interactive-Auth message
-  to MAC the `t` (from the Non-Interactive-Auth message) and the attached
-  encrypted message:
-  `Auth MAC = KDF_2(auth_mac_k || t || (flags || attached message id ||
-   public ECDH Key || public DH key || nonce || encrypted message || ))`
-* Securely deletes `MKenc` and `auth_mac_k`.
+* Securely deletes `MKenc`.
 
 The format of this attached message in the Non-Interactive-Auth message will be:
 
 // TODO: does this needs a message type?
 
-// TODO: maybe this should not include the flags...
-
 ```
-Flags (BYTE)
-  The bitwise-OR of the flags for this message. Usually you should
-  set this to 0x00. The only currently defined flag is:
+Attached XZDH Encrypted Message (XZDH-ENCRYPTED-MSG)
 
-  IGNORE_UNREADABLE (0x01)
-
-    If you receive a Data Message with this flag set, and you are
-    unable to decrypt the message or verify the MAC (because, for
-    example, you don't have the right keys), just ignore the message
-    instead of producing an error or a notification to the user.
-
-Attached Message id (INT)
+Attached Encrypted Message Id (INT)
   Set with sender's j.
 
 Public ECDH Key (POINT)
@@ -2027,9 +2015,6 @@ Encrypted message (DATA)
   Using the appropriate encryption key, perform an XSalsa20 encryption
   of the message. The nonce used for this operation is also included in
   the header of the attached message packet.
-
-Old MAC keys to be revealed (DATA)
-  See 'Revealing MAC Keys section'.
 ```
 
 After the encryption and mac of the attached encrypted message, the
@@ -2039,38 +2024,40 @@ like this:
 ```
   (Protocol version || message type || sender's instance tag || receiver's
    instance tag || Sender's User Profile || X || A || Sigma || Auth MAC ||
-  (flags || attached message id || nonce || public ecdh key || public dh key ||
-   nonce ||encrypted message || old mac keys))
+  (attached message id || public ecdh key || public dh key || nonce ||
+   encrypted message))
 ```
 
 #### Decrypting the message
+
+After verifying `sigma` on the Non-Interactive-Auth message, a participant
+(Bob in the above overview) can decrypt an attached encrypted message if it was
+attached. This has to be done prior to receiving any other data message, or
+sending one. For this, the participant:
 
 * Rotates the ECDH keys and brace key, see
   [Rotating ECDH keys and brace key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
   section.
 * Derives a set of keys:
-  `root[i], chain_r[i][j] = derive_ratchet_keys(K, KDF_2(K_ecdh || brace_key)`.
+  `root[i], chain_r[i][k] = derive_ratchet_keys(K, KDF_2(K_ecdh || brace_key)`.
 * Securely deletes `K`.
 * Increments the ratchet id `i = i + 1`.
 * Derives the next receiving chain key
-  `chain_r[i-1][j+1] = KDF_2(chain_r[i-1][j])`.
+  `chain_r[i-1][k+1] = KDF_2(chain_r[i-1][k])`.
 * Calculates the encryption key (`MKenc`):
   `MKenc = KDF_1(0x01 || chain_r)`
-* Securely deletes `chain_r[i-1][j]`.
-* Uses `MKmac` to verify the received `Authenticator (MAC)` of the attached
-  encrypted message:
-  `Auth MAC = KDF_2(auth_mac_k || t || (flags || attached message id || nonce ||
-   public ecdh key || public dh key || nonce ||encrypted message ||
-   old mac keys))`
+* Securely deletes `chain_r[i-1][k]`.
+* Uses `auth_mac_k` to verify the received `Authenticator (MAC)` of the attached
+  encrypted message (the `t` here is the one computed during the verification
+  of the Non-Interactive Auth message):
+  `Auth MAC = KDF_2(auth_mac_k || t || (attached encrypted message id ||
+   public ecdh key || public dh key || nonce ||encrypted message))`
   If verification fails, reject the message.
 * Increments the next receiving message id `k = k + 1`.
 * Set `nonce` as the "nonce" from the received data message.
 * Uses the `MKenc` and `nonce` to decrypt the message:
   `decrypted_message = XSalsa20_Dec(MKenc, nonce, m)`.
-  TODO: maybe repeated
-* Sets `their_ecdh` as the "Public ECDH key" from the message.
-* Sets `their_dh` as the "Public DH Key" from the message.
-* Add `MKmac` to the list `mac_keys_to_reveal`.
+* Adds `auth_mac_k` to the list `mac_keys_to_reveal`.
 
 ## Data Exchange
 
