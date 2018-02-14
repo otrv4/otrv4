@@ -1233,7 +1233,7 @@ Bob will be initiating the DAKE with Alice.
     * Calculates the SSID from shared secret: the first 8 bytes of
       `KDF_2(0x00 || K)`.
     * Sets ratchet id `i` as 0.
-    * Sets `j` as 0 and `k` as 0.
+    * Sets `j` as 0, `k` as 0 and `pn` as 0.
     * Calculates `chain_key_r[0][0] = KDF_2(0x00 || K)`. Bob will use this key
       in the case that Alice immediately sends a data message when she finishes
       the DAKE and prior to her receving any of Bob's data messages. This key
@@ -1256,7 +1256,7 @@ Bob will be initiating the DAKE with Alice.
    * Verify the authentication `sigma` (see [Auth-I message](#auth-i-message)
      section).
    * Sets ratchet id `i` as 0.
-   * Sets `j` as 0 and `k` as 0.
+   * Sets `j` as 0, `k` as 0 and `pn` as 0.
    * Calculates `chain_key_s[0][0] = KDF_2(0x00 || K)`.
    * If an encrypted message was attached to the Auth-I message:
      * Follows what is defined on [Decrypting an attached encrypted message](#decrypting-the-message)
@@ -1529,7 +1529,7 @@ Verify and decrypt message if included
     * Calculates the SSID from shared secret: it is the first 8 bytes of
       `KDF_2(0x00 || K)`.
     * Sets ratchet id `i` as 0.
-    * Sets `j` as 0 and `k` as 0.
+    * Sets `j` as 0, `k` as 0 and `pn` as 0.
     * Calculates `chain_key_r[0][0] = KDF_2(0x00 || K)`. Alice will use this key
       in the case that Bob immediately sends a data message when he finishes
       the DAKE and prior to him receving any of Alice's data messages. This key
@@ -1590,7 +1590,7 @@ Verify and decrypt message if included
     * Calculates the SSID from shared secret: it is the first 8 bytes of
 	   `KDF_2(0x00 || K)`.
     * Sets ratchet id `i` as 0.
-    * Sets `j` as 0 and `k` as 0.
+    * Sets `j` as 0, `k` as 0 and `pn` as 0.
     * Calculates `chain_key_s[0][0] = KDF_2(0x00 || K)`.
     * If an encrypted message was attached to the Non-Interactive-Auth message:
         * Follows what is defined on [Decrypting an attached encrypted message](#decrypting-the-message-1)
@@ -1860,8 +1860,6 @@ participant:
 
 The format of this attached message in the Auth-I message will be:
 
-// TODO: does this needs a message type?
-
 ```
 Attached DAKEZ Encrypted Message (DAKEZ-ENCRYPTED-MSG)
 
@@ -1967,8 +1965,6 @@ this, the participant:
 * Securely deletes `MKenc`.
 
 The format of this attached message in the Non-Interactive-Auth message will be:
-
-// TODO: does this needs a message type?
 
 ```
 Attached XZDH Encrypted Message (XZDH-ENCRYPTED-MSG)
@@ -2114,6 +2110,9 @@ Flags (BYTE)
     unable to decrypt the message or verify the MAC (because, for
     example, you don't have the right keys), just ignore the message
     instead of producing an error or a notification to the user.
+
+Previous chain message number (INT)
+  This should be set with sender's pn.
 
 Message id (INT)
   This should be set with sender's j.
