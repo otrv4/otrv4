@@ -2349,12 +2349,13 @@ extra symmetric key is not contained in the TLV itself.
 ### Revealing MAC Keys
 
 Old MAC keys are keys from already received messages and that will no longer be
-used to verify the authenticity of the message. We reveal them in order to
-provide [forgeability of messages](#forging-transcripts).
+used to verify the authenticity of that message. We reveal them in order to
+provide [forgeability of messages](#forging-transcripts): once MAC keys are
+revealed, anyone can modify an OTR message and still have it appear valid.
 
-A MAC key is added to `mac_keys_to_reveal` after a participant has verified
+A MAC key is added to `mac_keys_to_reveal` list after a participant has verified
 the message associated with that MAC key. Old MAC keys are formatted as a list
-of concatenated 64-byte values. The first data message sent every ratchet
+of 64-byte concatenated values. The first data message sent every ratchet
 reveals them.
 
 ## Fragmentation
