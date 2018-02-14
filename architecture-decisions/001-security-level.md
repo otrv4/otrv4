@@ -29,9 +29,9 @@ curve cryptography. In the case that elliptic curves are broken, data message
 transcripts of OTRv4 will have classic Diffie-Hellman ~128-bit security.
 
 To achieve ~224-bit elliptic curve security, we chose curve Ed448
-("Goldilocks") for the generation of ECDH. In relation to secrets generated
-with ECDH, we use SHAKE-256 as the hash function since it gives give 256-bit
-security if the output is 64 bytes and 128 if the output is 32 bytes. Although
+("Goldilocks") for ECDH. We use SHAKE-256 as the hash function during the
+generation of secret keys, since it gives give 256-bit security if the
+output is 64 bytes and 128 if the output is 32 bytes. Although
 Ed448 does not have as much published cryptanalysis as Curve25519, it can be
 safely used as Curve25519 [\[1\]](#references).
 
@@ -59,8 +59,8 @@ KDF_2(x) = take_first_64_bytes(SHAKE-256("OTR4" || x))
 
 When a keyed cryptographic hash function is expected, we set
 `x = key || secret`. To provide cryptographic domain separation when multiple
-values need to be derived from the same secret, we set `x = counter || secret`,
-where the counter changes for each situation.
+values are need to be derived from the same secret, we set
+`x = counter || secret`, where the counter changes for each situation.
 
 In OTRv4, long-lived key authentication can happen by using SMP or comparing
 fingerprints. We take the first 56 bytes of the SHAKE-256 hash function for
@@ -70,7 +70,7 @@ authentication.
 
 ### Consequences
 
-Choosing Ed448 requires implementations of it, and chaging SMP crypto
+Choosing Ed448 requires implementations of it, and chaging SMP cryptographic
 primitives.
 
 The size of fingerprints is increased to 56 bytes.
