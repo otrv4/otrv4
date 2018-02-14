@@ -2236,6 +2236,22 @@ key).
 
 * Check that the receiver's instance tag matches your sender's instance tag.
 
+* Try to decrypt the message with a skipped message key:
+
+  * If `Public ECDH Key`, `Public DH Key` and sender `j` is in `skipped_MKenc`:
+      * `MKenc = skipped_MKenc[Public ECDH Key, Public DH Key, j]`.
+      * Securely delete `skipped_MKenc[Public ECDH Key, Public DH Key, j]`.
+      * Calculate `MKmac = KDF_2(0x02 || MK_enc)`.
+      * Use the `MKmac` to verify the MAC of the message.
+      * Set `nonce` as the "nonce" from the received data message.
+      * Decrypt the message using `MKenc` and `nonce`:
+
+      ```
+      decrypted_message = XSalsa20_Dec(MKenc, nonce, m)
+      ```
+
+      * Securely delete `MKenc`.
+
 Given a new ratchet (the receiving `j` is equal to 0):
 
   * Rotate the ECDH keys and brace key, see
@@ -2262,10 +2278,7 @@ When receiving a data message in the same DH Ratchet:
     ```
 
   * Securely delete `chain_key_r[i-1][k]`.
-  * Use the `MKmac` to verify the MAC of the message. In the case of a
-    Non-Interactive-Auth message and when an encrypted data message has been
-    attached to it, verify it with the `Auth MAC` as defined in the
-    [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
+  * Use the `MKmac` to verify the MAC of the message.
 
   * If the verification fails:
 
