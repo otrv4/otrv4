@@ -1249,7 +1249,7 @@ Bob will be initiating the DAKE with Alice.
       section.
 6. Sends the Auth-I message.
 7. At this point, the interactive DAKE is complete for Bob:
-    * In the case that he wants to inmmediatly send a data message:
+    * In the case that he wants to immediately send a data message:
         * Follows what is defined on the
           [When you send a data message](#when-you-send-a-data-message) section,
           depending on whether he is in the same DH ratchet (when he attached
@@ -1267,14 +1267,14 @@ Bob will be initiating the DAKE with Alice.
      * Follows what is defined on [Decrypting an attached encrypted message](#decrypting-the-message)
        section.
 2. At this point, the interactive DAKE is complete for Alice:
-   * In the case that she wants to inmmediatly send a data message if no
+   * In the case that she wants to immediately send a data message if no
      message was attached to the Auth-I message or no data message was
      received:
      * Follows what is defined on the
        [When you send a data message](#when-you-send-a-data-message) section.
        Note that she will not DH ratchet again, as she will use the already
        derived `chain_key_s`.
-   * In the case that she inmmediatly receives a data message:
+   * In the case that she immediately receives a data message:
      * Follows what is defined on the
        [When you receive a data message](#when-you-receive-a-data-message)
        section, depending on whether she is in the same DH ratchet (when she
@@ -1362,7 +1362,8 @@ A valid Auth-R message is generated as follows:
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
   * secret key `a` (80 bytes).
   * public key `A`.
-4. Compute `t = 0x0 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(phi)`.
+4. Compute
+   `t = 0x0 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(phi)`.
    `phi` is the shared session state as mention on its [section](#shared-session-state).
 5. Compute `sigma = RSig(Pka, ska, {Pkb, Pka, Y}, t)`.
 6. Generate a 4-byte instance tag to use as the sender's instance tag.
@@ -1419,7 +1420,8 @@ authentication `sigma`.
 A valid Auth-I message is generated as follows:
 
 1. Check that the receiver's instance tag matches your sender's instance tag.
-2. Compute `t = 0x1 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(phi)`.
+2. Compute
+   `t = 0x1 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(phi)`.
    `phi` is the shared session state as mention on its [section](#shared-session-state).
 3. Compute `sigma = RSig(Pkb, skb, {Pkb, Pka, X}, t)`.
 4. Continue to use the sender's instance tag.
@@ -1427,7 +1429,8 @@ A valid Auth-I message is generated as follows:
 To verify an Auth-I message:
 
 1. Check that the receiver's instance tag matches your sender's instance tag.
-2. Compute `t = 0x1 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(phi)`.
+2. Compute
+   `t = 0x1 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(phi)`.
    `phi` is the shared session state as mention on its [section](#shared-session-state).
 3. Verify the `sigma` as defined on
    [Ring Signature Authentication](#verification-verifya1-a2-a3-sigma-m).
@@ -1553,7 +1556,7 @@ Verify and decrypt message if included
 10. Sends Bob a Non-Interactive-Auth message. See
    [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 11. At this point, the non-interactive DAKE is complete for Alice:
-    * In the case that she wants to inmmediatly send a data message:
+    * In the case that she wants to immediately send a data message:
         * Follows what is defined on the
           [When you send a data message](#when-you-send-a-data-message) section
           depending on whether she is in the same DH ratchet (when she attached
@@ -1562,7 +1565,7 @@ Verify and decrypt message if included
 **Bob:**
 
 1. Receives Non-Interactive-Auth message from Alice:
-    * Validates Alice's User Profile and and extract `Pka` from it.
+    * Validates Alice's User Profile and extracts `Pka` from it.
     * Picks a compatible version of OTR listed on Alice's profile, and follows
       the specification for this version. If the versions are incompatible, Bob
       does not send any further messages.
@@ -1575,7 +1578,8 @@ Verify and decrypt message if included
 2. Retrieve ephemeral public keys from Alice:
     * Validates the received ECDH ephemeral public key `X` is on curve Ed448 and
       sets it as `their_ecdh`.
-      See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) section for details.
+      See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+      section for details.
     * Validates that the received DH ephemeral public key `A` is on the correct
       group and sets it as `their_dh`. See
       [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
@@ -1607,12 +1611,12 @@ Verify and decrypt message if included
       that it is equal to the one just calculated. If it is not, ignore the
       Non-Interactive-Auth message.
 7. At this point, the non-interactive DAKE is complete for Bob:
-    * In the case that he wants to inmmediatly send a data message:
+    * In the case that he wants to immediately send a data message:
       * Follows what is defined on the
         [When you send a data message](#when-you-send-a-data-message) section.
         Note that he will not DH ratchet again, as he will use the already
         derived `chain_key_s`.
-    * In the case that he inmmediatly receives a data message:
+    * In the case that he immediately receives a data message:
         * Follows what is defined on the
           [When you receive a data message](#when-you-receive-a-data-message)
           section.
@@ -1699,7 +1703,8 @@ A valid Non-Interactive-Auth message is generated as follows:
   `tmp_k = KDF_2(K_ecdh || ECDH(x, their_shared_prekey) || ECDH(x, Pkb) || brace_key)`.
   This value is needed for the generation of the Mixed shared secret.
 8. Calculate the Auth MAC key `auth_mac_k = KDF_2(0x01 || tmp_k)`.
-9. Compute `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || their_shared_prekey || KDF_2(phi)`.
+9. Compute
+   `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || their_shared_prekey || KDF_2(phi)`.
 10. Compute `sigma = RSig(Pka, ska, {Pkb, Pka, Y}, t)`. When computing `sigma`,
     keep the first 24 bytes of the generated `c` value to be used as a `nonce`
     in the next step. Refer to
@@ -1713,7 +1718,8 @@ A valid Non-Interactive-Auth message is generated as follows:
 To verify a Non-Interactive-Auth message:
 
 1. Check that the receiver's instance tag matches your sender's instance tag.
-2. Compute `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || our_shared_prekey.public || KDF_2(phi)`.
+2. Compute
+   `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || our_shared_prekey.public || KDF_2(phi)`.
 3. Verify the `sigma` with
    [Ring Signature Authentication](#ring-signature-authentication).
    See [Verification: RVrf({A1, A2, A3}, sigma, m)](#verification-verifya1-a2-a3-sigma-m)
@@ -2201,8 +2207,8 @@ When sending a data message in the same DH Ratchet:
    extra_symm_key = KDF_2(0xFF || chain_key_s[i-1][j])
    ```
 
-   In the case where a data message is sent from Alice when she inmediatly
-   finishes the interactive DAKE or when Bob inmediatly finishes the
+   In the case where a data message is sent from Alice when she immediately
+   finishes the interactive DAKE or when Bob immediately finishes the
    non-interactive DAKE, derive the next sending chain key:
 
    ```
@@ -3259,8 +3265,8 @@ If smpstate is `SMPSTATE_EXPECT1`:
 
 * Verify Alice's zero-knowledge proofs for G2a and G3a:
   1. Check that both `G2a` and `G3a` are on curve Ed448. See
-     [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) section for
-     details.
+     [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+     section for details.
   2. Check that `c2 = HashToScalar(1 || G * d2 + G2a * c2)`.
   3. Check that `c3 = HashToScalar(2 || G * d3 + G3a * c3)`.
 * Create a SMP message 2 and send it to Alice.
@@ -3279,8 +3285,8 @@ If smpstate is `SMPSTATE_EXPECT2`:
 
 * Verify Bob's zero-knowledge proofs for `G2b`, `G3b`, `Pb` and `Qb`:
   1. Check that `G2b`, `G3b`, `Pb` and `Qb` are on curve Ed448. See
-     [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) section for
-     details.
+     [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+     section for details.
   2. Check that `c2 = HashToScalar(3 || G * d2 + G2b * c2)`.
   3. Check that `c3 = HashToScalar(4 || G * d3 + G3b * c3)`.
   4. Check that `cp = HashToScalar(5 || G3 * d5 + Pb * cp || G * d5 + G2 * d6 +
@@ -3301,7 +3307,8 @@ If smpstate is `SMPSTATE_EXPECT3`:
 
 * Verify Alice's zero-knowledge proofs for `Pa`, `Qa` and `Ra`:
   1. Check that `Pa`, `Qa` and `Ra` are on curve Ed448. See
-     [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) section for details.
+     [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+     section for details.
   2. Check that `cp = HashToScalar(6 || G3 * d5 + Pa * cp || G * d5 + G2 * d6 +
      Qa * cp)`.
   3. Check that `cr = HashToScalar(7 || G * d7 + G3a * cr || (Qa - Qb) * d7 +
@@ -3327,7 +3334,8 @@ If smpstate is `SMPSTATE_EXPECT4`:
 
 * Verify Bob's zero-knowledge proof for Rb:
    1. Check that `Rb` is on curve Ed448. See
-      [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) section for details.
+      [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+      section for details.
    2. Check that `cr = HashToScalar(8 || G * d7 + G3b * cr || (Qa - Qb) * d7 + Rb * cr)`.
 * Check whether the protocol was successful:
     1. `Compute Rab = Rb * a3`.
