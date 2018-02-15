@@ -72,22 +72,6 @@ and not by the OTRv4 protocol. If the app allows Alice to send plaintext
 messages, they should be directly delivered to Bob by the app and not by the
 OTRv4 protocol.
 
-### Temporary place for discussion before decisions are made
-
-2. Do we want to specify a timeout for the DAKE? Encryption is mandatory so we
-   need a reasonable expectation of success in establishing the encripted
-   conversation.
-3. Do we want non-interactive DAKE to be upgraded to interactive (in order to
-   provide stronger security properties)?
-   What should the Initiator do when it receives an offline message (a
-   non-interactive DAKE has completed)? Continue on the same DAKE (there is
-   already no deniability for they in regard to an online judge) or start an
-   interactive DAKE ASAP to replace the current one?
-5. Should we keep the message format (which is inspired on OTR3)?
-6. Should we encrypt the headers?
-7. Should we support fragmentation?
-8. Should we support instance tags?
-
 ### Decision
 
 (From ADR #010)
@@ -106,9 +90,52 @@ By requiring encryption, this mode may encourage long-lived sessions
 (conversations). The section "Session expiration" of OTRv4 protocol spec
 outlines how to mitigate the risks of long-lived sessions.
 
+Even though there is no need to prefix OTR messages with "?OTR:", since the
+protocol only handles OTR messages, this mode does not remove this encodiing
+for convenience.
+
 ### Consequences
 
-TODO: State the security properties of this mode, or the implications to the
-security in this mode.
+As a consequence of requiring encryption, this protocol may be stuck
+if, for example, a DAKE message is lost. This mode does not define any
+strategy, like a timeout, for dealing with such cases.
 
-To be defined
+There may be loss of deniability if a interactive DAKE is followed by a
+non-interactive. This mode does not address this neither recommend any
+way to warn the user when it happen.
+
+The spec for this mode would be the same spec as per (current revision) except:
+
+- "High Level Overview": remove "Requests OTR conversation" from diagram and
+  change diagram's description.
+- "Encoded Messages": there may not have a need to use a particular encoding to
+  distinguish between plaintext messages and OTR messages, since every message
+  in this mode is a OTRv4 message. That is, remove the "?OTR:" prefix.
+- "User Profile Data Type": if there is no query message, and every
+  conversation is strictly OTR4, does the field "Versions" have any use now?
+- "Creating a User Profile": according to the current spec, "Versions" MUST be
+  "4" only. The field "Public Shared Prekey" could be optional in the mode
+  "interactive-only".
+- "Establishing Versions". This is not true anymore: "A compliant OTRv4
+  implementation is required to support version 3 of OTR, but not versions
+  1 and 2.". This mode, for example, is not required.
+- "Create a User Profile Signature": Ignore first paragraph.
+- "Online Conversation Initialization": The introduction is wrong: there is
+  no query message or whitespace tag anymore. Everything in this section
+  that mentions them (diagrams, for example) is also wrong.
+- "Protocol states": the START protocol does not allow messages to be sent,
+  since plaintext messages are not part of this mode. Also, the description of
+  state FINISHED becomes weird because sending plaintext should be prevented
+  by the protocol regardless of the state.
+
+Ignore completely the sections:
+
+- "User requests to start an OTR conversation"
+- "Receiving plaintext without the whitespace tag", and
+  "Receiving plaintext with the whitespace tag": should probably be replaced by
+  "Receiving plaintext: reject".
+- "Receiving a Query Message"
+
+TODO: State the security properties of this mode, or the implications to the
+security in this mode?
+
