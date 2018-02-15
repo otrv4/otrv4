@@ -4,70 +4,88 @@
 
 Previous versions of the OTR protocol use a mechanism called the Diffie-Hellman
 ratchet (DH Ratchet) to ratchet key material when messages are exchanged. This
-ratcheting approach consists of attaching new DH contributions to messages.
-With each sent message, the sender advertises a new DH value. Message keys are
-then computed from the latest acknowledged DH values.
-
-// TODO: clarify this
+ratcheting approach consists of attaching new DH contributions to sent
+messages: with each sent message, the sender advertises a new DH value. Message
+keys are then computed from the latest acknowledged DH values.
 
 This three step DH Ratchet works as follows:
 
-1. Alice sends an encrypted message to Bob, and "advertises" her next Diffie-
-   Hellman key `pubA`.
-2. Bob sends an encrypted message to Alice, "acknowledges" her next
-   Diffie-Hellman key `pubA` and advertises his next Diffie-Hellman key `pubB`.
-3. Alice sends a message to Bob using the private part of her advertised key
-   `privA` and the acknowledged key from Bob `pubB`.
+1. Alice wants to send an encrypted message to Bob:
+   * She picks the most recent of her own D-H encryption keys (`pubA`) that Bob
+     has acknowledged receiving (by using it in a Data Message or in the AKE).
+   * If the above key is Alice's most recent key, she generates a new D-H key
+     (`next_dh`).
+   * She picks the most recent of Bob's D-H encryption keys (`pubB`) that she
+     has received from him (either in a Data Message or in the AKE).
+   * She uses Diffie-Hellman to compute a shared secret from the two keys
+     (`pubA` and `pubB`), and a message key. She encrypts a message with it.
+   * She sends the encrypted message to Bob and "advertises" her next
+     Diffie-Hellman key `next_dh`.
+2. Bob receives the encrypted message from Alice:
+   * He uses Diffie-Hellman to compute a shared secret from the two keys
+     (`pubA` and `pubB`), and a message key. He decrypts the message with it.
+   * If he wants to send an encrypted message:
+     * He "acknowledges" Alice's next Diffie-Hellman key `next_dh` as `pubA`.
+     * He generates a new D-H key (`next_dh`).
+     * He picks the most recent of Alice's D-H encryption keys (`pubA`) that
+       he has received from her.
+     * He uses Diffie-Hellman to compute a shared secret from the two keys
+       (`pubA` and `pubB`), and a message key. He encrypts a message with it.
+     * He sends the encrypted message to Alice and "advertises" his next
+       Diffie-Hellman key `next_dh`.
+ 3. Alice receives the encrypted message from Bob and proceeds to decrypt it
+    as previously stated.
 
 This design introduces backward secrecy within conversations since a
-compromised key will regularly be replaced with new key material. A
+compromised key will be regularly replaced with new key material. A
 disadvantage of this DH Ratchet is that session keys might not be renewed for
 every message (forward secrecy is, therefore, only partially provided). It also
 lacks out-of-order resilience: if a message arrives after a newly advertised
-key is accepted, then the necessary decryption key will be already deleted.
+key is accepted, then the necessary decryption key will be already deleted and
+the message will not be able to be decrypted.
 
 In order to improve the forward secrecy of the DH Ratchet, both ratchet
 approaches can be combined: session keys produced by DH ratchets are used to
-seed per-participant KDF ratchets. Messages are then encrypted using
-keys produced by the KDF ratchets, frequently refreshed by the DH Ratchet on
-message responses. This resulting double ratchet (called the "Double Ratchet
+seed per-participant KDF symmetric ratchets. Messages are then encrypted using
+keys produced by the KDF symmetric ratchets, frequently refreshed by the DH
+Ratchet when a participant wants to send a message after one has already been
+received. This resulting double ratchet (called the "Double Ratchet
 Algorithm" [\[1\]](#references)) provides forward secrecy across messages due
-to the KDF ratchets, but also backward secrecy since compromised KDF keys will
-eventually be replaced by new seeds. To achieve out-of-order resilience, the
-double ratchet makes use of a second derivation function within its KDF
-ratchets. While the KDF ratchets are advanced normally, the KDF keys are passed
-through a second distinct derivation function before being used for encryption.
+to the KDF symmetric ratchets, but also backward secrecy since compromised KDF
+keys will eventually be replaced by new seeds. To achieve out-of-order
+resilience, the double ratchet makes use of a second derivation function within
+its KDF symmetric ratchets. While the KDF symmetric ratchets are advanced
+normally, the KDF keys are passed through a second derivation function before
+being used for encryption.
 
-Nevertheless, the double ratchet does not provide asynchronicity by itself, but
-it can be combined with a prekey scheme for it. Prekeys are one-time ephemeral
-public DH contributions that have been uploaded in advance to a server.
+The double ratchet, nevertheless, does not provide asynchronicity by itself,
+but it can be combined with a prekey scheme for it. Prekeys are one-time
+ephemeral public DH contributions that have been uploaded in advance to an
+untrusted server.
 
 We consider using the Double Ratchet Algorithm to improve forward secrecy,
 while maintaining the same security properties of prior OTR versions, such as
-message deniability. This is achieved since messages are authenticated with
-shared MAC keys rather than being signed with long-term keys. OTR, also,
+message deniability. This is achieved because messages are authenticated with
+shared MAC keys rather with signatures generated by long-term keys. OTR, also,
 publishes MAC and uses malleable encryption, to expand the set of possible
 message forgers. OTRv4, therefore, will improve forward secrecy, support
 out-of-order resilence and asynchronicity (in the form of prekey messages
 uploaded to a server).
 
-// TODO: this might change
-
 OTR version 2 contains a vulnerability related to message integrity when
-revealing MAC keys is done immediately by both participants in a conversation
-[\[2\]](#references). Two potential solutions are possible:
+the revelation of MAC keys is done immediately by both participants in a
+conversation [\[2\]](#references). Two potential solutions are possible:
 
 1. Only the receiver can reveal MAC keys, which gives weaker deniability as
-   it puts full trust in receiver
+   it puts full trust in receiver.
 2. Both the sender and receiver can reveal MAC keys, but the sender must reveal
-   only after two ratchet generations
+   only after two ratchet generations.
 
 OTRv3 made the decision to only allow the receiver to reveal MAC keys.
 
-Therefore, to reveal MAC keys in the Double Ratchet, we have two options:
+Therefore, to reveal MAC keys in the Double Ratchet, we can:
 
-1. Reveal one MAC key per message
-2. Reveal MAC keys per ratchet
+1. Reveal MAC keys per ratchet.
 
 ### Decision
 
@@ -80,12 +98,10 @@ sent of every ratchet.
 
 ### Consequences
 
-TODO: check this
+This heavily changes how data was exchanged on previous versions.
 
-This heavily changes the data exchange implementation from previous
-versions. We achieve improved forward secrecy, but key management and
-ratcheting processes become more complex because of the many types of keys
-involved.
+We achieve improved forward secrecy, but key management and ratcheting
+processes become complex because of the many types of keys involved.
 
 ### References
 
