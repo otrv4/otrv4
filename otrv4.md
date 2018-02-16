@@ -1194,7 +1194,7 @@ Bob will be initiating the DAKE with Alice.
    [Auth-R message](#auth-r-message) section.
 3. Sets `X` and `x` as `our_ecdh`: the ephemeral ECDH keys.
 4. Sets `A` and `a` as `our_dh`: ephemeral 3072-bit DH keys.
-5. Calculates the mixed shared secret `K` and the SSID:
+5. Calculates the Mixed shared secret (`K`) and the SSID:
     * Calculates ECDH shared secret
       `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
       Securely deletes `our_ecdh.secret`.
@@ -1227,7 +1227,7 @@ Bob will be initiating the DAKE with Alice.
       [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
       section for details.
 3. Creates an Auth-I message (see [Auth-I message](#auth-i-message) section).
-4. Calculates the mixed shared secret `K` and the SSID:
+4. Calculates the Mixed shared secret (`K`) and the SSID:
     * Calculates ECDH shared secret
       `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
       Securely deletes `our_ecdh.secret`.
@@ -1530,7 +1530,7 @@ Verify and decrypt message if included
    [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 5. Sets `X` and `x` as `our_ecdh`: the ephemeral ECDH keys.
 6. Sets `A` and `a` as `our_dh`: ephemeral 3072-bit DH keys.
-7. Calculates the Mixed shared secret and the SSID:
+7. Calculates the Mixed shared secret (`K`) and the SSID:
     * Gets `tmp_k` from the
       [Non-Interactive-Auth Message](#non-interactive-auth-message).
     * Calculates the Mixed shared secret `K = KDF_2(0x02 || tmp_k)`. Securely
@@ -1584,7 +1584,7 @@ Verify and decrypt message if included
       group and sets it as `their_dh`. See
       [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
       section for details.
-3. Calculates the keys needed to generate the mixed shared secret `K` and the
+3. Calculates the keys needed to generate the Mixed shared secret (`K`) and the
    SSID:
     * Calculates ECDH shared secret
       `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`. Securely deletes
