@@ -2341,6 +2341,30 @@ different from `their_ecdh` and `Public DH Key` is different from `their_dh`):
     * Set `their_dh` as the "Public DH Key" from the message, if it is not NULL.
     * Add `MKmac` to the list `mac_keys_to_reveal`.
 
+### Deletion of stored message keys
+
+Storing message keys from messages that haven't arrived yet introduces some
+risks, as defined on the
+[The Double Ratchet Algorithm specification](https://signal.org/docs/specifications/doubleratchet/):
+
+1. A malicious sender could induce receivers to store large numbers of
+   message keys, possibly causing a denial-of-service due to consuming storage
+   space.
+
+2. An adversary can capture and drop some messages from sender, even
+   though they didn't reach the recipient. The attacker can later compromise the
+   intended recipient at a later time to reveal the stored message keys that
+   correspond to the dropped messages. The adversary can then retroactively
+   decrypt the captured messages.
+
+To mitigate the first risk parties should set reasonable per-conversation limits
+on the number of possible stored message keys (e.g. 1000).
+
+To mitigate the second risk parties should delete stored message keys after an
+appropriate interval. This deletion could be triggered by a timer, or by
+counting a number of events (messages received, DH ratchet steps, etc.). This
+should be decided by the implementor.
+
 ### Extra symmetric key
 
 Like OTRv3, OTRv4 defines an additional symmetric key that can be derived by
