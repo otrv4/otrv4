@@ -1215,8 +1215,6 @@ Bob will be initiating the DAKE with Alice.
       does not send any further messages.
     * Verify the authentication `sigma` (see [Auth-R message](#auth-r-message)
       section).
-    * Verify that `(Y, B)` in the message are the ones already sent in the
-      Identity message and remain unused.
 2. Retrieve ephemeral public keys from Alice:
     * Validates the received ECDH ephemeral public key `X` is on curve Ed448 and
       sets it as `their_ecdh`.
@@ -1571,8 +1569,6 @@ Verify and decrypt message if included
       does not send any further messages.
     * Sets his Public Shared Prekey from his User Profile as
       `our_shared_prekey.public `.
-    * Verifies that `(Y, B)` in the message are the ones already sent in the
-      published Prekey message and remain unused.
     * Verifies the Non-Interactive-Auth message. See
       [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 2. Retrieve ephemeral public keys from Alice:
