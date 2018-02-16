@@ -1197,9 +1197,7 @@ Bob will be initiating the DAKE with Alice.
 5. Calculates the Mixed shared secret (`K`) and the SSID:
     * Calculates ECDH shared secret
       `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
-      Securely deletes `our_ecdh.secret`.
     * Calculates DH shared secret `k_dh = DH(our_dh.secret, their_dh.public)`.
-      Securely deletes `our_dh.secret`.
     * Calculates the Brace Key `brace_key = KDF_1(k_dh)`.
     * Calculates Mixed shared secret `K = KDF_2(K_ecdh || brace_key)`.
     * Calculates the SSID from shared secret: the first 8 bytes of
