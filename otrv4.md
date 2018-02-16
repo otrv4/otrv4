@@ -2178,7 +2178,6 @@ Given a new DH Ratchet:
     this process, it will be the 'Public DH Key' for the message. If it is
     not created, then it will be empty.
   * Calculate the shared secret `K = KDF_2(K_ecdh || brace_key)`.
-  * If needed, calculate the extra symmetric key: `KDF_2(0xFF || K)`.
   * Derive new set of keys
     `root_key[i], chain_key_s[i][j] = derive_ratchet_keys(sending,
      root_key[i-1], K)`.
@@ -2204,7 +2203,7 @@ When sending a data message in the same DH Ratchet:
 
    ```
    MKenc, MKmac = derive_enc_mac_keys(chain_key_s[i-1][j])
-   extra_symm_key = KDF_2(0xFF || chain_key_s[i-1][j])
+   extra_symm_key = KDF_1(0xFF || chain_key_s[i-1][j])
    ```
 
    In the case where a data message is sent from Alice when she immediately
@@ -2286,7 +2285,6 @@ different from `their_ecdh` and `Public DH Key` is different from `their_dh`):
     section.
   * Set the received `pn` as `j`.
   * Calculate `K = KDF_2(K_ecdh || brace_key)`.
-  * If needed, calculate the extra symmetric key: `KDF_2(0xFF || K)`.
   * Derive new set of keys
     `root_key[i], chain_key_r[i][k] = derive_ratchet_keys(receiving,
      root_key[i-1], K)`.
@@ -2317,6 +2315,7 @@ different from `their_ecdh` and `Public DH Key` is different from `their_dh`):
 
     ```
       MKenc, MKmac = derive_enc_mac_keys(chain_key_r[i-1][k])
+      extra_symm_key = KDF_1(0xFF || chain_key_r[i-1][k])
     ```
 
   * Securely delete `chain_key_r[i-1][k]`.
@@ -2376,7 +2375,9 @@ Like OTRv3, OTRv4 defines an additional symmetric key that can be derived by
 the communicating parties for use of application-specific purposes, such as
 file transfer, voice encryption, etc. When one party wishes to use the extra
 symmetric key, they create a type `7 TLV` attached to a Data Message. The extra
-symmetric key is derived by calculating `KDF_2(0xFF || K)`.
+symmetric key itself is then derived using the same `chain_key` used to compute
+the encryption key used to protect the Data Message. It is, thefore, derived
+by calculating `KDF_1(0xFF || chain_key)`.
 
 Upon receipt of the Data Message containing the type 7 TLV, the recipient will
 compute the extra symmetric key in the same way. Note that the value of the
