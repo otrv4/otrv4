@@ -37,6 +37,7 @@ an existing messaging protocol, such as XMPP.
    1. [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys)
    1. [Shared secrets](#shared-secrets)
    1. [Generating shared secrets](#generating-shared-secrets)
+   1. [Deciding between chain keys](#deciding-between-chain-keys)
    1. [Deriving Double Ratchet keys](#deriving-double-ratchet-keys)
    1. [Rotating ECDH keys and brace key as sender](#rotating-ecdh-keys-and-brace-key-as-sender)
    1. [Rotating ECDH keys and brace key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
@@ -774,6 +775,32 @@ ECDH(ai, Bi)
 
 DH(ai, Bi)
   return k_dh = ai ^ Bi
+```
+
+### Deciding between chain keys
+
+Once the DAKE completes, Alice and Bob derive two chain keys from the mixed
+shared secret. Both sides will compare their public keys to choose which chain
+key will be used for encrypting and decrypting data messages:
+- Alice (and, similarly, Bob) determines if she is the "low" end or the "high"
+  end of this ratchet. If Alice's ephemeral ECDH public key is numerically
+  greater than Bob's public key, then she is the "high" end. Otherwise, she is
+  the "low" end.
+
+- Alice selects the chain keys for sending and receiving:
+
+  - If she is the "high" end, use `Ca` as the sending chain key (`chain_key_s`)
+    and `Cb` as the receiving chain key (`chain_key_r`).
+
+  - If she is the "low" end, use `Cb` as the sending chain key (`chain_key_s`)
+    and `Ca` as the receiving chain key (`chain_key_r`).
+
+```
+decide_between_chain_keys(Ca, Cb):
+  if compare(our_ecdh.public, their_ecdh) > 0
+    return Ca, Cb
+  else
+    return Cb, Ca
 ```
 
 ### Rotating ECDH keys and brace key as sender
