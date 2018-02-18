@@ -5,6 +5,7 @@ Disclaimer
 
 This protocol specification is a draft. It's currently under constant revision.
 ```
+
 This document describes version 4 of the Off-the-Record Messaging protocol.
 OTR version 4 (OTRv4) provides a deniable authenticated key exchange (DAKE) and
 better forward secrecy through the use of double ratcheting. OTR works on top of
