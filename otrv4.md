@@ -1215,7 +1215,7 @@ Bob will be initiating the DAKE with Alice.
 2. Generates an Auth-R message, as defined in
    [Auth-R message](#auth-r-message) section.
 3. Sets `X` and `x` as `our_ecdh`: the ephemeral ECDH keys.
-4. Sets `A` and `a` as `our_dh`: ephemeral 3072-bit DH keys.
+4. Sets `A` and `a` as `our_dh`: the ephemeral 3072-bit DH keys.
 5. Calculates the Mixed shared secret (`K`) and the SSID:
     * Calculates ECDH shared secret
       `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
@@ -1282,7 +1282,7 @@ Bob will be initiating the DAKE with Alice.
       he will use for receiving messages, as defined on
       [Deciding between chain keys](#deciding-between-chain-keys) section:
       `decide_between_chain_keys(chain_key_a[i][j], chain_key_b[i][j]`.
-     // TODO: delete K?
+    * Securely deletes `their_ecdh` and `their_dh`.
 7. At this point, he can attach an encrypted message to the Auth-I message:
     * Follows what is defined on the
       [Attaching an encrypted message to Auth-I message](#attaching-an-encrypted-message-to-auth-i-message-in-dakez)
@@ -1322,7 +1322,7 @@ Bob will be initiating the DAKE with Alice.
       he will use for receiving messages, as defined on
       [Deciding between chain keys](#deciding-between-chain-keys) section:
       `decide_between_chain_keys(chain_key_a[i][j], chain_key_b[i][j]`.
-     // TODO: delete K?
+    * Securely deletes `their_ecdh` and `their_dh`.
    * If an encrypted message was attached to the Auth-I message:
      * Follows what is defined on [Decrypting an attached encrypted message](#decrypting-the-message)
        section.
@@ -1337,13 +1337,16 @@ Bob will be initiating the DAKE with Alice.
        will advertize the new derived `our_ecdh.public` and `our_dh.public`.
    * In the case that she immediately receives a data message:
      * Follows what is defined on the
-       [When you receive a data message](#when-you-receive-a-data-message)
+       [Inmediately receiving a data message](#inmediately-receiving-a-data-message)
        section. Note that she will use the derived and decided `chain_key_r`.
+       After receiving a data message and when she wants to send a new data
+       message, she will follow the
+       [When you send a data message](#when-you-send-a-data-message) section.
 
 #### Identity message
 
-This is the first message of the DAKE. Bob sends it to Alice to commit to a
-choice of DH and ECDH key.
+This is the first message of the DAKE. Bob sends it to Alice (as stated in the
+above overview) to commit to a choice of ECDH and DH key.
 
 A valid Identity message is generated as follows:
 
@@ -1404,9 +1407,9 @@ B (MPI)
 #### Auth-R message
 
 This is the second message of the DAKEZ. Alice sends it to Bob to commit to a
-choice of her ECDH ephemeral key and her DH ephemeral key, and acknowledgment
-of Bob's ECDH ephemeral key and DH ephemeral key. This acknowledgment includes
-a validation that Bob's ECDH key is on the curve Ed448 and his DH key is in the
+choice of her ECDH ephemeral key and her DH ephemeral key, and to acknowledge
+Bob's ECDH ephemeral key and DH ephemeral key. This acknowledgment includes
+a validation that Bob's ECDH key is on curve Ed448 and his DH key is in the
 correct group.
 
 A valid Auth-R message is generated as follows:
@@ -1454,6 +1457,7 @@ Message type (BYTE)
 
 Sender's instance tag (INT)
   The instance tag of the person sending this message.
+
 Receiver's instance tag (INT)
   The instance tag of the intended recipient.
 
@@ -2094,22 +2098,25 @@ sending one. For this, the participant:
 
 ### Inmediately sending a data message
 
-After the calculation of the mixed shared secret `K` has been completed, a
-participant can attach inmmediately send a data message (prior to receiving
-a data message from the other party).
+// TODO: not stricly true
+
+After deriving the mixed shared secret `K`, a participant can inmmediately
+send a data message (prior to receiving a data message from the other party).
+Note that in this case, the party will have `their_ecdh` and `their_dh` set to
+NULL.
 
 If the participant has not attached an encrypted data message to the Auth-I
 message:
 
-  * Increments the ratchet id `i = i + 1`.
+  * Increment the ratchet id `i = i + 1`.
 
 Otherwise:
 
-* Sets `j` as the Data message's message id.
-* Derives the next sending chain key by using the `chain_key_s` already derived
-  and decided:
+* Set `j` as the Data message's message id.
+* Derive the next sending chain key by using the `chain_key_s`, which has been
+  already derived and decided:
   `chain_key_s[i-1][j+1] = KDF_2(chain_key_s[i-1][j])`.
-* Calculates the encryption key (`MKenc`), the MAC key (`MKmac`) and, if needed
+* Calculate the encryption key (`MKenc`), the MAC key (`MKmac`) and, if needed
   the extra symmetric key:
 
   ```
@@ -2117,18 +2124,53 @@ Otherwise:
   extra_symm_key = KDF_1(0xFF || chain_key_s[i-1][j])
   ```
 
-* Securely deletes `chain_key_s[i-1][j]`.
-* Increments the next sending message id `j = j + 1`.
-* Generates a new random 24 bytes value to be the `nonce`.
-* Sets `our_ecdh.public` as the `Public ECDH Key` and `our_dh.public` as
-  `Public DH Key`.
-* Uses the `MKenc` to encrypt the message:
+* Securely delete `chain_key_s[i-1][j]`.
+* Increment the next sending message id `j = j + 1`.
+* Generate a new random 24 bytes value to be the `nonce`.
+* Set `our_ecdh.public` as the `Public ECDH Key` and `our_dh.public` as
+  `Public DH Key` of the data message.
+* Use the `MKenc` to encrypt the message:
   `encrypted_message = XSalsa20_Enc(MKenc, nonce, m)`.
-* Uses the `MKmac` to create a MAC tag. MACs all the sections of the data
+* Use the `MKmac` to create a MAC tag. MAC all the sections of the data
   message from the protocol version to the encrypted message:
   `Authenticator = KDF_2(MKmac || data_message_sections)`
-* Securely deletes `MKenc` and `MKmac`.
-* Continues to use the sender's instance tag.
+* Securely delete `MKenc` and `MKmac`.
+* Continue to use the sender's instance tag.
+
+### Inmediately receiving a data message
+
+After verifying the Auth-I message and deriving the mixed shared secret `K`, a
+participant can inmmediately receive a data message (prior to receiving a data
+message from the other party). Note that in this case, the party will have
+`their_ecdh` and `their_dh` set to NULL.
+
+* Increment the ratchet id `i = i + 1`.
+* Derive the next receiving chain key, which has been already derived and
+  decided
+  `chain_key_r[i-1][k+1] = KDF_2(chain_key_r[i-1][k])`.
+* Calculate the encryption key (`MKenc`), the MAC key (`MKmac`) and, if needed
+  the extra symmetric key:
+
+  ```
+  MKenc, MKmac = derive_enc_mac_keys(chain_key_r[i-1][j])`
+  extra_symm_key = KDF_1(0xFF || chain_key_r[i-1][j])
+  ```
+
+* Securely delete `chain_key_r[i-1][j]`.
+* Use the `MKmac` to verify the MAC of the message.
+* Increment the next receiving message id `k = k + 1`.
+* Set nonce as the "nonce" from the received data message.
+* Use the `MKenc` and `nonce` to decrypt the message:
+  `decrypted_message = XSalsa20_Dec(MKenc, nonce, m)`.
+* Securely delete `MKenc`.
+* Set `their_ecdh` as the "Public ECDH key" from the message. Note that this
+  key will be used when the participant wants to send a data message (when
+  the participant will perform a DH ratchet).
+* Set `their_dh` as the "Public DH Key" from the message. Note that this
+  key will be used when the participant wants to send a data message (when
+  the participant will perform a DH ratchet).
+* Add `MKmac` to the list mac_keys_to_reveal.
+* Adds `auth_mac_k` to the list `mac_keys_to_reveal`.
 
 ## Data Exchange
 
