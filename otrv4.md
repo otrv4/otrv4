@@ -1566,7 +1566,7 @@ Verify and decrypt message if included
 **Bob:**
 
 1. Generates an Prekey message, as defined in
-   [Identity message](#identity-message) section.
+   [Prekey message](#prekey-message) section.
 2. Sets `Y` and `y` as `our_ecdh`: the ephemeral ECDH keys.
 3. Sets `B` as  and `b` as `our_dh`: the ephemeral 3072-bit DH keys.
 4. Publishes the Prekey message to an untrusted server.
