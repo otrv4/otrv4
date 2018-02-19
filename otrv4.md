@@ -1487,7 +1487,8 @@ sigma (RING-SIG)
 #### Auth-I message
 
 This is the final message of the DAKE. Bob sends it to Alice to verify the
-authentication `sigma`.
+authentication `sigma`. This message might also contain an attached encrypted
+message, which is highly recommended
 
 A valid Auth-I message is generated as follows:
 
@@ -1722,9 +1723,10 @@ Verify and decrypt message if included
 
 #### Prekey message
 
-This message is created and published to a prekey server to allow offline
-conversations. Each Prekey message contains the owner's user profile and two
-one-time use public prekey values.
+This message is created and published to an unstrusted prekey server to allow
+offline conversations. Each Prekey message contains the owner's user profile
+(which constains a signed shared prekey) and two one-time use ephemeral public
+prekey values.
 
 A valid Prekey message is generated as follows:
 
@@ -1780,8 +1782,11 @@ B Prekey owner's DH public key (MPI)
 
 #### Non-Interactive-Auth Message
 
-This message terminates the non-interactive DAKE and might also contain an
-encrypted data message. This is highly recommended.
+This message finishes the non-interactive. It contains a key-only unforgeable
+message authentication code function. Bob sends it to Alice to commit to a
+choice of his ECDH ephemeral key and his DH ephemeral key, and to acknowledge
+Alice's ECDH ephemeral key and DH ephemeral key. This message might also contain
+an attached encrypted message, which is highly recommended.
 
 A valid Non-Interactive-Auth message is generated as follows:
 
