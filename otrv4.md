@@ -1154,7 +1154,8 @@ To validate a user profile, you must:
 1. [Verify that the user profile signature is valid](#verify-a-user-profile-signature)
 2. Verify that the user profile has not expired
 3. Verify that the `Versions` field contains the character "4"
-4. Validate that the public shared prekey is on the curve Ed448. See
+4. If `Transitional Signature` is present, verify validity
+5. Validate that the public shared prekey is on the curve Ed448. See
   [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) section for details.
 
 ## Online Conversation Initialization
