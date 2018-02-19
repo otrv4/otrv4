@@ -1649,6 +1649,7 @@ Verify and decrypt message if included
       Securely, deletes the `auth_mac_k`.
 
     * Otherwise, she computes:
+
       ```
       Auth MAC = KDF_2(auth_mac_k || t)`
       ```
@@ -1666,7 +1667,7 @@ Verify and decrypt message if included
 
 **Bob:**
 
-1. Receives a Non-Interactive-Auth message from Alice:
+1. Receives the Non-Interactive-Auth message from Alice:
     * Validates Alice's User Profile and extracts `Pka` from it.
     * Picks a compatible version of OTR listed on Alice's profile, and follows
       the specification for this version. If the versions are incompatible, Bob
@@ -1676,27 +1677,20 @@ Verify and decrypt message if included
     * Verifies the Non-Interactive-Auth message. See
       [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 2. Retrieve ephemeral public keys from Alice:
-    * Validates the received ECDH ephemeral public key `X` is on curve Ed448 and
-      sets it as `their_ecdh`.
-      See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
-      section for details.
-    * Validates that the received DH ephemeral public key `A` is on the correct
-      group and sets it as `their_dh`. See
-      [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
-      section for details.
-3. Calculates the keys needed to generate the Mixed shared secret (`K`) and the
-   SSID:
-    * Calculates ECDH shared secret
+    * Sets the received ECDH ephemeral public key `X` as `their_ecdh`.
+    * Sets the received DH ephemeral public key `A` as `their_dh`.
+3. Calculates the keys needed to generate the Mixed shared secret (`K`):
+    * Calculates the ECDH shared secret
       `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`. Securely deletes
       `our_ecdh.secret`.
-    * Calculates DH shared secret `k_dh = DH(our_dh.secret, their_dh)`.
+    * Calculates the DH shared secret `k_dh = DH(our_dh.secret, their_dh)`.
       Securely deletes `our_dh.secret`.
     * Calculates the Brace Key `brace_key = KDF_1(k_dh)`.
-4. Calculates `tmp_k = KDF_2(K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(ska, their_ecdh) || brace_key)`.
+4. Calculates
+   `tmp_k = KDF_2(K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(skb, their_ecdh) || brace_key)`.
 5. Computes the Auth MAC key `auth_mac_k = KDF_2(0x01 || tmp_k)`.
 6. Computes the Mixed shared secret and the SSID:
-    * `K = KDF_2(0x02 || tmp_k)`.
-    * Securely deletes `tmp_k`.
+    * `K = KDF_2(0x02 || tmp_k)`. Securely deletes `tmp_k`.
     * Calculates the SSID from shared secret: it is the first 8 bytes of
 	   `KDF_2(0x00 || K)`.
     * Sets ratchet id `i` as 0.
@@ -1822,9 +1816,16 @@ A valid Non-Interactive-Auth message is generated as follows:
 To verify a Non-Interactive-Auth message:
 
 1. Check that the receiver's instance tag matches your sender's instance tag.
-2. Compute
+2. Validate the received ECDH ephemeral public key `X` is on curve Ed448.
+   See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+   section for details.
+3. Validate that the received DH ephemeral public key `A` is on the correct
+   group. See
+   [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
+   section for details.
+4. Compute
    `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || our_shared_prekey.public || KDF_2(phi)`.
-3. Verify the `sigma` with
+5. Verify the `sigma` with
    [Ring Signature Authentication](#ring-signature-authentication).
    See [Verification: RVrf({A1, A2, A3}, sigma, m)](#verification-verifya1-a2-a3-sigma-m)
    for details.
