@@ -1629,19 +1629,27 @@ Verify and decrypt message if included
     * Follows what is defined on the
       [Attaching an encrypted message to Non-Interactive-Auth message](#attaching-an-encrypted-message-to-non-interactive-auth-message-in-xzdh)
       section.
-9. If an encrypted message is attached, compute
-   `Auth MAC = KDF_2(auth_mac_k || t || (message_id || nonce ||
-    encrypted_data_message))`. Securely delete the `auth_mac_k`.
-   Otherwise, compute `Auth MAC = KDF_2(auth_mac_k || t)`. Include this value on
-   the Non-Interactive-Auth message. Securely delete the `auth_mac_k`.
+9. Calculates the `Auth MAC`:
+
+    * If an encrypted message is attached, she computes:
+
+      ```
+      Auth MAC = KDF_2(auth_mac_k || t || (message_id || nonce ||
+                       encrypted_data_message)).
+      ```
+
+      Securely, deletes the `auth_mac_k`.
+
+    * Otherwise, compute `Auth MAC = KDF_2(auth_mac_k || t)`. Include this value
+      on the Non-Interactive-Auth message. Securely delete the `auth_mac_k`.
 10. Sends Bob a Non-Interactive-Auth message. See
    [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 11. At this point, the non-interactive DAKE is complete for Alice:
     * In the case that she wants to immediately send a data message:
         * Follows what is defined on the
-          [When you send a data message](#when-you-send-a-data-message) section
-          depending on whether she is in the same DH ratchet (when she attached
-          an encrypted message to the Non-Interactive-Auth message) or not.
+          [Inmediately sending a data message](#inmediately-sending-a-data-message)
+          section. Note that she will not perform a new DH ratchet, but she will
+           advertize the new derived `our_ecdh.public` and `our_dh.public`.
 
 **Bob:**
 
