@@ -1601,12 +1601,29 @@ Verify and decrypt message if included
       delete `tmp_k`.
     * Calculates the SSID from shared secret: it is the first 8 bytes of
       `KDF_2(0x00 || K)`.
+7. Initializes the double-ratchet:
     * Sets ratchet id `i` as 0.
     * Sets `j` as 0, `k` as 0 and `pn` as 0.
-    * Calculates `chain_key_r[0][0] = KDF_2(0x00 || K)`. Alice will use this key
-      in the case that Bob immediately sends a data message when he finishes
-      the DAKE and prior to him receving any of Alice's data messages. This key
-      will not be used in the case that Alice attaches an encrypted message.
+    * Generates a new ephemeral ECDH key pair, as defined in
+      [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
+      replaces `our_ecdh`.
+    * Generates a new ephemeral DH key pair, as defined in
+      [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
+      replaces `our_dh`.
+    * Derives a set of keys:
+
+      ```
+      root_key[i], chain_key_a[i][j], chain_key_b[i][j] =
+         root_key[i] = KDF_2(0x01 || K)
+         chain_key_a[i][j] = KDF_2(0x02 || K)
+         chain_key_b[i][j] = KDF_2(0x03 || K)
+      ```
+
+    * Decides which chain key she will use for sending messages and which key
+      she will use for receiving messages, as defined in
+      [Deciding between chain keys](#deciding-between-chain-keys) section:
+      `decide_between_chain_keys(chain_key_a[i][j], chain_key_b[i][j]`.
+    * Securely deletes `their_ecdh` and `their_dh`.
 8. At this point, she can attach an encrypted message to the
    Non-Interactive-Auth message:
     * Follows what is defined on the
@@ -1894,22 +1911,29 @@ them. This message will be referred as "attached encrypted message":
 
 #### Attaching an encrypted message to Auth-I message in DAKEZ
 
-#### Encrypting the message
+##### Encrypting the message
 
 // TODO: at this point, can it be derived the extra symm key?
 
-After the calculation of the mixed shared secret `K` has been completed, a
-participant (Bob in the above overview) can attach an encrypted message to the
-already generated Auth-I message, but prior to sending it. For this, the
-participant:
+After deriving the mixed shared secret `K`, a participant (Bob in the above
+overview) can attach an encrypted message to the already generated Auth-I
+message, but prior to sending it. For this, the participant:
 
 * Increments the ratchet id `i = i + 1`.
 * Sets `j` as the attached message id.
 * Derives the next sending chain key by using the `chain_key_s` already derived
   and decided:
-  `chain_key_s[i-1][j+1] = KDF_2(chain_key_s[i-1][j])`.
+
+  ```
+  chain_key_s[i-1][j+1] = KDF_2(chain_key_s[i-1][j])
+  ```
+
 * Calculates the encryption key (`MKenc`), the MAC key (`MKmac`):
-  `MKenc, MKmac = derive_enc_mac_keys(chain_key_s[i-1][j])`
+*
+  ```
+  MKenc, MKmac = derive_enc_mac_keys(chain_key_s[i-1][j])
+  ```
+
 * Securely deletes `chain_key_s[i-1][j]`.
 * Increments the next sending message id `j = j + 1`.
 * Constructs a nonce from the first 24 bytes of the `c` variable generated when
@@ -1964,7 +1988,7 @@ participant attaches it to the Auth-I message, which will look like this:
   public dh key || encrypted message || authenticator)
 ```
 
-#### Decrypting the message
+##### Decrypting the message
 
 After verifying `sigma` on the Auth-I message, a participant (Alice in the above
 overview) can decrypt an attached encrypted message if it was attached. This
@@ -1974,9 +1998,17 @@ this, the participant:
 * Increments the ratchet id `i = i + 1`.
 * Derives the next receiving chain key by using the `chain_key_r` already
   derived and decided:
-  `chain_key_r[i-1][k+1] = KDF_2(chain_key_r[i-1][k])`.
+
+  ```
+  chain_key_r[i-1][k+1] = KDF_2(chain_key_r[i-1][k])
+  ```
+
 * Calculates the encryption key (`MKenc`) and the MAC key (`MKmac`):
-  `MKenc, MKmac = derive_enc_mac_keys(chain_key_r[i-1][k])`
+
+  ```
+  MKenc, MKmac = derive_enc_mac_keys(chain_key_r[i-1][k])
+  ```
+
 * Securely deletes `chain_key_r[i-1][k]`.
 * Increments the next receiving message id `k = k + 1`.
 * Uses `MKmac` to verify the received `Authenticator (MAC)` of the attached
@@ -1994,29 +2026,29 @@ this, the participant:
 
 #### Attaching an encrypted message to Non-Interactive-Auth message in XZDH
 
+##### Encrypting the message
+
 // TODO: at this point, can it be derived the extra symm key?
 
-After the calculation of the mixed shared secret `K` has been completed, a
-participant (Alice in the above overview) can attach an encrypted message to the
-already generated Non-Interactive-Auth message, but prior to sending it. For
-this, the participant:
+After deriving the mixed shared secret `K`, a participant (Alice in the above
+overview) can attach an encrypted message to the already generated
+Non-Interactive-Auth message, but prior to sending it. For this, the
+participant:
 
-* Rotates the ECDH keys and brace key, see
-  [Rotating ECDH keys and brace key as sender](#rotating-ecdh-keys-and-brace-key-as-sender)
-  section. The new ECDH public key created by the sender in this process will be
-  the `Public ECDH Key` for the message. The new public DH key will be the
-  `Public DH Key` for the message.
-* Sets the derived ECDH keys as `our_ecdh`, and the derived DH keys as `our_dh`.
-* Derives a set of keys:
-  `root_key[i], chain_key_s[i][j] = derive_ratchet_keys(sending, K,
-   KDF_2(K_ecdh || brace_key)`.
-* Securely deletes `K`.
 * Increments the ratchet id `i = i + 1`.
 * Sets `j` as the attached message id.
-* Derives the next sending chain key
-  `chain_key_s[i-1][j+1] = KDF_2(chain_key_s[i-1][j])`.
+* Derives the next sending chain key by using the `chain_key_s` already derived
+  and decided:
+
+  ```
+  chain_key_s[i-1][j+1] = KDF_2(chain_key_s[i-1][j])
+  ```
+
 * Calculates the encryption key (`MKenc`):
-  `MKenc = KDF_1(0x01 || chain_key_s)`
+  ```
+  MKenc = KDF_1(0x01 || chain_key_s)
+  ```
+
 * Securely deletes `chain_key_s[i-1][j]`.
 * Increments the next sending message id `j = j + 1`.
 * Constructs a nonce from the first 24 bytes of the `c` variable generated when
@@ -2062,7 +2094,7 @@ like this:
    encrypted message))
 ```
 
-#### Decrypting the message
+##### Decrypting the message
 
 After verifying `sigma` on the Non-Interactive-Auth message, a participant
 (Bob in the above overview) can decrypt an attached encrypted message if it was
