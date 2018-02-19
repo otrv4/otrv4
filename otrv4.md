@@ -903,7 +903,10 @@ To expire the session:
 
    1. The root key and all chain keys.
    2. The ECDH keys, DH keys and brace key.
-   3. The SSID, any old MAC keys that remain unrevealed, and the
+   3. The Secure Session ID (SSID) whose creation is described
+      [here](#interactive-deniable-authenticated-key-exchange-dake)
+      and [here](#non-interactive-auth-message), 
+      any old MAC keys that remain unrevealed, and the
       extra symmetric key if present.
 
 3. Transition the protocol state machine to `START`
@@ -979,8 +982,8 @@ User Profile (USER-PROF):
   Profile Expiration (PROF-EXP)
   Public Shared Prekey (ED448-SHARED-PREKEY)
     The shared prekey used between different prekey messages.
-  Profile Signature (EDDSA-SIG)
   (optional) Transitional Signature (SIG)
+  Profile Signature (EDDSA-SIG)
 ```
 
 `SIG` is the DSA Signature. It is the same signature as used in OTRv3.
@@ -1148,10 +1151,10 @@ The user profile signature is verified as defined in RFC 8032
 
 To validate a user profile, you must:
 
-* [Verify that the user profile signature is valid](#verify-a-user-profile-signature)
-* Verify that the user profile has not expired
-* Verify that the `Versions` field contains the character "4"
-* Validate that the public shared prekey is on the curve Ed448. See
+1. [Verify that the user profile signature is valid](#verify-a-user-profile-signature)
+2. Verify that the user profile has not expired
+3. Verify that the `Versions` field contains the character "4"
+4. Validate that the public shared prekey is on the curve Ed448. See
   [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) section for details.
 
 ## Online Conversation Initialization
