@@ -1151,10 +1151,10 @@ The user profile signature is verified as defined in RFC 8032
 
 To validate a user profile, you must:
 
-1. [Verify that the user profile signature is valid](#verify-a-user-profile-signature)
-2. Verify that the user profile has not expired
-3. Verify that the `Versions` field contains the character "4"
-4. If `Transitional Signature` is present, verify validity
+1. Verify that the user profile has not expired
+2. Verify that the `Versions` field contains the character "4"
+3. If `Transitional Signature` is present, verify validity
+4. [Verify that the user profile signature is valid](#verify-a-user-profile-signature)
 5. Validate that the public shared prekey is on the curve Ed448. See
   [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) section for details.
 
