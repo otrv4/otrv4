@@ -1286,7 +1286,11 @@ Bob will be initiating the DAKE with Alice.
     * Decides which chain key he will use for sending messages and which key
       he will use for receiving messages, as defined on
       [Deciding between chain keys](#deciding-between-chain-keys) section:
-      `decide_between_chain_keys(chain_key_a[i][j], chain_key_b[i][j]`.
+
+      ```
+      decide_between_chain_keys(chain_key_a[i][j], chain_key_b[i][j]
+      ```
+
     * Securely deletes `their_ecdh` and `their_dh`.
 7. At this point, he can attach an encrypted message to the Auth-I message:
     * Follows what is defined on the
@@ -1324,9 +1328,13 @@ Bob will be initiating the DAKE with Alice.
       ```
 
     * Decides which chain key he will use for sending messages and which key
-      he will use for receiving messages, as defined on
+      she will use for receiving messages, as defined on
       [Deciding between chain keys](#deciding-between-chain-keys) section:
-      `decide_between_chain_keys(chain_key_a[i][j], chain_key_b[i][j]`.
+
+      ```
+      decide_between_chain_keys(chain_key_a[i][j], chain_key_b[i][j]
+      ```
+
     * Securely deletes `their_ecdh` and `their_dh`.
    * If an encrypted message was attached to the Auth-I message:
      * Follows what is defined on [Decrypting an attached encrypted message](#decrypting-the-message)
@@ -1483,7 +1491,8 @@ sigma (RING-SIG)
 #### Auth-I message
 
 This is the final message of the DAKE. Bob sends it to Alice to verify the
-authentication `sigma`.
+authentication `sigma`. This message might also contain an attached encrypted
+message, which is highly recommended
 
 A valid Auth-I message is generated as follows:
 
@@ -1580,20 +1589,15 @@ Verify and decrypt message if included
 
 1. Requests prekey messages from the untrusted server.
 2. For each Prekey message received from the server:
-    * Validates Bob's User Profile.
+    * Verifies the Prekey message as defined on the
+      [Prekey message](#prekey-message) section.
     * Picks a compatible version of OTR listed in Bob's profile.
       If the versions are incompatible, Alice does not send any further
       messages.
-    * Validates that the received ECDH ephemeral public key is on curve Ed448
-      and sets it as `their_ecdh`.
-      See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
-      section for details.
-    * Validates that the received DH ephemeral public key is on the correct
-      group and sets it as `their_dh`. See
-      [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
-      section for details.
-3. Extracts the Public Shared Prekey from Bob's user profile and sets it as
-   `their_shared_prekey`.
+    * Sets the received ECDH ephemeral public key as `their_ecdh`.
+    * Sets the received DH ephemeral public key as `their_dh`.
+3. Extracts the Public Shared Prekey and `Pkb` from Bob's user profile. Sets
+   the first as `their_shared_prekey`.
 4. Generates a Non-Interactive-Auth message. See
    [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 5. Sets `X` and `x` as `our_ecdh`: the ephemeral ECDH keys.
@@ -1602,7 +1606,7 @@ Verify and decrypt message if included
     * Gets `tmp_k` from the
       [Non-Interactive-Auth Message](#non-interactive-auth-message).
     * Calculates the Mixed shared secret `K = KDF_2(0x02 || tmp_k)`. Securely
-      delete `tmp_k`.
+      deletes `tmp_k`.
     * Calculates the SSID from shared secret: it is the first 8 bytes of
       `KDF_2(0x00 || K)`.
 7. Initializes the double-ratchet:
@@ -1626,7 +1630,11 @@ Verify and decrypt message if included
     * Decides which chain key she will use for sending messages and which key
       she will use for receiving messages, as defined in
       [Deciding between chain keys](#deciding-between-chain-keys) section:
-      `decide_between_chain_keys(chain_key_a[i][j], chain_key_b[i][j]`.
+
+      ```
+      decide_between_chain_keys(chain_key_a[i][j], chain_key_b[i][j]
+      ```
+
     * Securely deletes `their_ecdh` and `their_dh`.
 8. At this point, she can attach an encrypted message to the
    Non-Interactive-Auth message:
@@ -1644,8 +1652,14 @@ Verify and decrypt message if included
 
       Securely, deletes the `auth_mac_k`.
 
-    * Otherwise, compute `Auth MAC = KDF_2(auth_mac_k || t)`. Include this value
-      on the Non-Interactive-Auth message. Securely delete the `auth_mac_k`.
+    * Otherwise, she computes:
+
+      ```
+      Auth MAC = KDF_2(auth_mac_k || t)`
+      ```
+
+      She includes this value on the Non-Interactive-Auth message and securely
+      deletes the `auth_mac_k`.
 10. Sends Bob a Non-Interactive-Auth message. See
    [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 11. At this point, the non-interactive DAKE is complete for Alice:
@@ -1653,11 +1667,11 @@ Verify and decrypt message if included
         * Follows what is defined on the
           [Inmediately sending a data message](#inmediately-sending-a-data-message)
           section. Note that she will not perform a new DH ratchet, but she will
-           advertize the new derived `our_ecdh.public` and `our_dh.public`.
+          advertize the new derived `our_ecdh.public` and `our_dh.public`.
 
 **Bob:**
 
-1. Receives Non-Interactive-Auth message from Alice:
+1. Receives the Non-Interactive-Auth message from Alice:
     * Validates Alice's User Profile and extracts `Pka` from it.
     * Picks a compatible version of OTR listed on Alice's profile, and follows
       the specification for this version. If the versions are incompatible, Bob
@@ -1667,56 +1681,80 @@ Verify and decrypt message if included
     * Verifies the Non-Interactive-Auth message. See
       [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 2. Retrieve ephemeral public keys from Alice:
-    * Validates the received ECDH ephemeral public key `X` is on curve Ed448 and
-      sets it as `their_ecdh`.
-      See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
-      section for details.
-    * Validates that the received DH ephemeral public key `A` is on the correct
-      group and sets it as `their_dh`. See
-      [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
-      section for details.
-3. Calculates the keys needed to generate the Mixed shared secret (`K`) and the
-   SSID:
-    * Calculates ECDH shared secret
+    * Sets the received ECDH ephemeral public key `X` as `their_ecdh`.
+    * Sets the received DH ephemeral public key `A` as `their_dh`.
+3. Calculates the keys needed to generate the Mixed shared secret (`K`):
+    * Calculates the ECDH shared secret
       `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`. Securely deletes
       `our_ecdh.secret`.
-    * Calculates DH shared secret `k_dh = DH(our_dh.secret, their_dh)`.
+    * Calculates the DH shared secret `k_dh = DH(our_dh.secret, their_dh)`.
       Securely deletes `our_dh.secret`.
     * Calculates the Brace Key `brace_key = KDF_1(k_dh)`.
-4. Calculates `tmp_k = KDF_2(K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(ska, their_ecdh) || brace_key)`.
+4. Calculates
+   `tmp_k = KDF_2(K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(skb, their_ecdh) || brace_key)`.
 5. Computes the Auth MAC key `auth_mac_k = KDF_2(0x01 || tmp_k)`.
 6. Computes the Mixed shared secret and the SSID:
-    * `K = KDF_2(0x02 || tmp_k)`.
-    * Securely deletes `tmp_k`.
+    * `K = KDF_2(0x02 || tmp_k)`. Securely deletes `tmp_k`.
     * Calculates the SSID from shared secret: it is the first 8 bytes of
 	   `KDF_2(0x00 || K)`.
-    * Sets ratchet id `i` as 0.
-    * Sets `j` as 0, `k` as 0 and `pn` as 0.
-    * Calculates `chain_key_s[0][0] = KDF_2(0x00 || K)`.
-    * If an encrypted message was attached to the Non-Interactive-Auth message:
-        * Follows what is defined on [Decrypting an attached encrypted message](#decrypting-the-message-1)
-          section.
-    * Otherwise:
+7. Initializes the double ratchet:
+   * Sets ratchet id `i` as 0.
+   * Sets `j` as 0, `k` as 0 and `pn` as 0.
+   * Generates a new ephemeral ECDH key pair, as defined in
+      [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
+      replaces `our_ecdh`.
+    * Generates a new ephemeral DH key pair, as defined in
+      [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
+      replaces `our_dh`.
+    * Derives a set of keys:
+
+      ```
+      root_key[i], chain_key_a[i][j], chain_key_b[i][j] =
+         root_key[i] = KDF_2(0x01 || K)
+         chain_key_a[i][j] = KDF_2(0x02 || K)
+         chain_key_b[i][j] = KDF_2(0x03 || K)
+      ```
+
+    * Decides which chain key he will use for sending messages and which key
+      he will use for receiving messages, as defined on
+      [Deciding between chain keys](#deciding-between-chain-keys) section:
+
+      ```
+      decide_between_chain_keys(chain_key_a[i][j], chain_key_b[i][j]
+      ```
+
+    * Securely deletes `their_ecdh` and `their_dh`.
+   * If an encrypted message was attached to the Non-Interactive-Auth message:
+     * Follows what is defined on [Decrypting an attached encrypted message](#decrypting-the-message-1)
+       section. // TODO: this is done afterwards
+     * Otherwise:
         * Computes `Auth MAC = KDF_2(auth_mac_k || t)`.
-    * Extracts the Auth MAC from the Non-Interactive-Auth message and verifies
+    * Extracts the `Auth MAC` from the Non-Interactive-Auth message and verifies
       that it is equal to the one just calculated. If it is not, ignore the
       Non-Interactive-Auth message.
 7. At this point, the non-interactive DAKE is complete for Bob:
-    * In the case that he wants to immediately send a data message:
+    * In the case that he wants to immediately send a data message if no
+     message was attached to the Non-Interactive-Auth message or no data message
+     was received:
       * Follows what is defined on the
-        [When you send a data message](#when-you-send-a-data-message) section.
-        Note that he will not DH ratchet again, as he will use the already
-        derived `chain_key_s`.
+        [Inmediately sending a data message](#inmediately-sending-a-data-message)
+        section.
+        Note that he will not perform a new DH ratchet, but he
+        will advertize the new derived `our_ecdh.public` and `our_dh.public`.
     * In the case that he immediately receives a data message:
         * Follows what is defined on the
-          [When you receive a data message](#when-you-receive-a-data-message)
-          section.
+          [Inmediately receiving a data message](#inmediately-receiving-a-data-message)
+          section. Note that he will use the derived and decided `chain_key_r`.
+          After receiving a data message and when he wants to send a new data
+          message, he will follow the
+          [When you send a data message](#when-you-send-a-data-message) section.
 
 #### Prekey message
 
-This message is created and published to a prekey server to allow offline
-conversations. Each Prekey message contains the owner's user profile and two
-one-time use public prekey values.
+This message is created and published to an unstrusted prekey server to allow
+offline conversations. Each Prekey message contains the owner's user profile
+(which constains a signed shared prekey) and two one-time use ephemeral public
+prekey values.
 
 A valid Prekey message is generated as follows:
 
@@ -1738,7 +1776,7 @@ A valid Prekey message is generated as follows:
 
 To verify a Prekey message:
 
-1. [Validate the user profile](#validating-a-user-profile)
+1. [Validate the user profile](#validating-a-user-profile).
 2. Check that the ECDH public key `Y` is on curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
@@ -1772,8 +1810,11 @@ B Prekey owner's DH public key (MPI)
 
 #### Non-Interactive-Auth Message
 
-This message terminates the non-interactive DAKE and might also contain an
-encrypted data message. This is highly recommended.
+This message finishes the non-interactive. It contains a key-only unforgeable
+message authentication code function. Bob sends it to Alice to commit to a
+choice of his ECDH ephemeral key and his DH ephemeral key, and to acknowledge
+Alice's ECDH ephemeral key and DH ephemeral key. This message might also contain
+an attached encrypted message, which is highly recommended.
 
 A valid Non-Interactive-Auth message is generated as follows:
 
@@ -1809,9 +1850,16 @@ A valid Non-Interactive-Auth message is generated as follows:
 To verify a Non-Interactive-Auth message:
 
 1. Check that the receiver's instance tag matches your sender's instance tag.
-2. Compute
+2. Validate the received ECDH ephemeral public key `X` is on curve Ed448.
+   See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+   section for details.
+3. Validate that the received DH ephemeral public key `A` is on the correct
+   group. See
+   [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
+   section for details.
+4. Compute
    `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || our_shared_prekey.public || KDF_2(phi)`.
-3. Verify the `sigma` with
+5. Verify the `sigma` with
    [Ring Signature Authentication](#ring-signature-authentication).
    See [Verification: RVrf({A1, A2, A3}, sigma, m)](#verification-verifya1-a2-a3-sigma-m)
    for details.
