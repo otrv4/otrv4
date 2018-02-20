@@ -2368,6 +2368,7 @@ Encrypted message (DATA)
 Authenticator (MAC)
   The MAC with the appropriate MAC key (see below) of everything:
   from the protocol version to the end of the encrypted message.
+  Note: The old MAC keys are not included in the authenticator.
 
 Old MAC keys to be revealed (DATA)
   See 'Revealing MAC Keys section'.
