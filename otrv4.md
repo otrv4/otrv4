@@ -950,7 +950,7 @@ an attacker.
 OTRv4 introduces user profiles. The user profile contains the Ed448 long term
 public key, a shared prekey for offline conversations, information about
 supported versions, a profile expiration date, a signature of all these, and an
-optional transition signature.
+optional transitional signature.
 
 Each participant maintains two instances of the same user profile. One instance
 is for authentication in both DAKEs. The other instance is for publication. A
@@ -1041,8 +1041,8 @@ To create a user profile, assemble:
    create signatures of the entire profile excluding the signature itself. The
    size of the signature is 114 bytes. For its generation, refer to
    [Create a user profile signature](#create-a-user-profile-signature) section.
-6. Transition Signature (optional): A signature of the profile excluding the
-   Profile Signature and the user's OTRv3 DSA key. The Transition Signature
+6. Transitional Signature (optional): A signature of the profile excluding the
+   Profile Signature and the user's OTRv3 DSA key. The Transitional Signature
    enables parties that trust user's version 3 DSA key to trust the user's
    profile in version 4. This is only used if the user supports versions 3
    and 4. For more information, refer to
@@ -1085,8 +1085,8 @@ term key:
    * Concatenate `Ed448 public key || Versions || Profile Expiration || Public
      Shared Prekey`. Denote this value `m`.
    * Sign `m` with the user's OTRv3 DSA key. Denote this value
-     `Transition Signature`.
-   * Sign `m || Transition Signature`  with the symmetric key, as stated below.
+     `Transitional Signature`.
+   * Sign `m || Transitional Signature`  with the symmetric key, as stated below.
      Denote this value `Profile Signature`.
 
 If only version 4 is supported:

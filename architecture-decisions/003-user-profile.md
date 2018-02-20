@@ -38,7 +38,7 @@ We introduce a user profile to OTRv4 that includes:
    DAKE](https://github.com/otrv4/otrv4/blob/master/architecture-decisions/009-non-interactive-dake.md)
    protocol.
 5. Profile signature of the above 4 parts
-6. Transition Signature (optional): A signature of the profile excluding
+6. Transitional Signature (optional): A signature of the profile excluding
    Profile Signatures and itself signed by the user's OTRv3 DSA key.
 
 The user profile must be published publicly and updated before it expires. The

@@ -81,7 +81,7 @@ OTRv4 protocol.
 
 > Furthermore, 'OTRv4 only' mode will only support version 4 of OTR. The User
 > Profile, therefore will only allow the 1-byte version string "4". It will also
-> not allow the Transition Signature parameter on the same profile.
+> not allow the Transitional Signature parameter on the same profile.
 
 Although this mode requires encryption, TLV type 1 (Disconnected) are still
 necessary to provide a mechanism to session expiration.
