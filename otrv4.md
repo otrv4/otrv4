@@ -2372,6 +2372,7 @@ Encrypted message (DATA)
 Authenticator (MAC)
   The MAC with the appropriate MAC key (see below) of everything:
   from the protocol version to the end of the encrypted message.
+  Note: The old MAC keys are not included in the authenticator.
 
 Old MAC keys to be revealed (DATA)
   See 'Revealing MAC Keys section'.
@@ -2681,11 +2682,11 @@ for this _before_ checking for any of the other `?OTR:` markers):
     * Store `piece` as `F`
     * Store `index` and `total` as `(I, T)`
 
-  * If this is the following fragment (`total == T` and `index == I + 1`):
+  * Else if this is the following fragment (`total == T` and `index == I + 1`):
     * Append `piece` to stored `F`
     * Store `index` and `total` as `(I, T)`
 
-  * Otherwise:
+  * Else:
     * Forget any stored fragment you may have
     * Store `"` as `F`
     * Store `(0, 0)` as `(I, T)`
