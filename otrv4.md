@@ -644,12 +644,12 @@ roles), the expected attributes (expressed in fixed length) should be included.
 
 ### OTR Error Messages
 
-An OTR Error message is the message that contains at the start position the string 
-"?OTR Error: ". The following part of the message should contain human-readable 
-details of the error. The message may also include a specific code at the beginning, 
-e.g. "?OTR Error: ERROR_N: ". This code is used to identify which error is being
-received for optional localization of the message. OTRv4 Error Messages are
-unencoded: they are not base-64 encoded binary.
+Any message containing "?OTR Error: " at the starting position is an OTR Error Message. 
+The following part of the message should contain human-readable details of the error. 
+The message may also include a specific code at the beginning, e.g. "?OTR Error: 
+ERROR_N: ". This code is used to identify which error is being received for optional 
+localization of the message. OTRv4 Error Messages are unencoded: they are not base-64 
+encoded binary.
 
 Currently, the following errors are supported:
 
@@ -663,8 +663,7 @@ Note: The string "?OTR Error:" must be in at the start position of the message b
 at least of these reasons:
  - The possibility for playing games with the state machine by "embedding" this string
     inside some other message.
- - The potential of social engineering depending on how this affects the UI of the
-    chat client used.
+ - The potential of social engineering depending on the UI of the chat client used.
 
 ## Key Management
 
