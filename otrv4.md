@@ -1273,10 +1273,17 @@ Bob will be initiating the DAKE with Alice.
     * Sets `j` as 0, `k` as 0 and `pn` as 0.
     * Generates a new ephemeral ECDH key pair, as defined in
       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
-      replaces `our_ecdh`.
+      replaces `our_ecdh`. The public part of this key is sent (but not used as
+      an input to the current DH ratchet) as an advertisement, so Alice uses
+      this for a new ratchet once it is received. Bob will use the private part
+      of this key for the new ratchet.
     * Generates a new ephemeral DH key pair, as defined in
       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
-      replaces `our_dh`.
+      replaces `our_dh`. This new key is sent (but not used as an input to the
+      current DH ratchet) as an advertisement, so Alice uses this for a new
+      ratchet once it is received. Bob will use the private part of this key
+      for the new ratchet.
+
     * Derives a set of keys:
 
       ```
@@ -1317,10 +1324,16 @@ Bob will be initiating the DAKE with Alice.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
    * Generates a new ephemeral ECDH key pair, as defined in
       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
-      replaces `our_ecdh`.
+      replaces `our_ecdh`. The public part of this key is sent (but not used as
+      an input to the current DH ratchet) as an advertisement, so Bob uses
+      this for a new ratchet once it is received. Alice will use the private
+      part of this key for the new ratchet.
     * Generates a new ephemeral DH key pair, as defined in
       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
-      replaces `our_dh`.
+      replaces `our_dh`. The public part of this key is sent (but not used as
+      an input to the current DH ratchet) as an advertisement, so Bob uses
+      this for a new ratchet once it is received. Alice will use the private
+      part of this key for the new ratchet.
     * Derives a set of keys:
 
       ```
@@ -1342,16 +1355,17 @@ Bob will be initiating the DAKE with Alice.
    * If an encrypted message was attached to the Auth-I message:
      * Follows what is defined on [Decrypting an attached encrypted message](#decrypting-the-message)
        section.
-2. At this point, the interactive DAKE is complete for Alice:
+3. At this point, the interactive DAKE is complete for Alice:
    * In the case that she wants to immediately send a data message if no
-     message was attached to the Auth-I message or no data message was
+     message was attached to the Auth-I message or no data message was still
      received:
      * Follows what is defined on the
        [Inmediately sending a data message](#inmediately-sending-a-data-message)
        section.
        Note that she will not perform a new DH ratchet, but she
        will advertize the new derived `our_ecdh.public` and `our_dh.public`.
-   * In the case that she immediately receives a data message:
+   * In the case that she immediately receives a data message (even if she has
+     inmediately send a data message):
      * Follows what is defined on the
        [Inmediately receiving a data message](#inmediately-receiving-a-data-message)
        section. Note that she will use the derived and decided `chain_key_r`.
@@ -1617,10 +1631,16 @@ Verify and decrypt message if included
     * Sets `j` as 0, `k` as 0 and `pn` as 0.
     * Generates a new ephemeral ECDH key pair, as defined in
       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
-      replaces `our_ecdh`.
+      replaces `our_ecdh`. The public part of this key is sent (but not used as
+      an input to the current DH ratchet) as an advertisement, so Bob uses
+      this for a new ratchet once it is received. Alice will use the private
+      part of this key for the new ratchet.
     * Generates a new ephemeral DH key pair, as defined in
       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
-      replaces `our_dh`.
+      replaces `our_dh`. The public part of this key is sent (but not used as
+      an input to the current DH ratchet) as an advertisement, so Bob uses
+      this for a new ratchet once it is received. Alice will use the private
+      part of this key for the new ratchet.
     * Derives a set of keys:
 
       ```
@@ -1705,10 +1725,16 @@ Verify and decrypt message if included
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
    * Generates a new ephemeral ECDH key pair, as defined in
       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
-      replaces `our_ecdh`.
+      replaces `our_ecdh`. The public part of this key is sent (but not used as
+      an input to the current DH ratchet) as an advertisement, so Alice uses
+      this for a new ratchet once it is received. Bob will use the private
+      part of this key for the new ratchet.
     * Generates a new ephemeral DH key pair, as defined in
       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
-      replaces `our_dh`.
+      replaces `our_dh`. The public part of this key is sent (but not used as
+      an input to the current DH ratchet) as an advertisement, so Alice uses
+      this for a new ratchet once it is received. Bob will use the private
+      part of this key for the new ratchet.
     * Derives a set of keys:
 
       ```
