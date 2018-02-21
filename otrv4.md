@@ -905,7 +905,7 @@ To expire the session:
    2. The ECDH keys, DH keys and brace key.
    3. The Secure Session ID (SSID) whose creation is described
       [here](#interactive-deniable-authenticated-key-exchange-dake)
-      and [here](#non-interactive-auth-message), 
+      and [here](#non-interactive-auth-message),
       any old MAC keys that remain unrevealed, and the
       extra symmetric key if present.
 
@@ -1097,7 +1097,8 @@ If only version 4 is supported:
      `Profile Signature`.
 
 The user profile signature for version 4 is generated as defined in RFC 8032
-[\[9\]](#references), section 5.2.6. The flag `f` is set to `0` and the context `C` is left empty. It is generated as follows:
+[\[9\]](#references), section 5.2.6. The flag `f` is set to `0` and the context
+`C` is left empty. It is generated as follows:
 
 ```
 The inputs are the symmetric key (57 bytes, defined on 'Public keys and
@@ -1151,12 +1152,14 @@ The user profile signature is verified as defined in RFC 8032
 
 To validate a user profile, you must:
 
-1. Verify that the user profile has not expired
-2. Verify that the `Versions` field contains the character "4"
-3. If `Transitional Signature` is present, verify validity
-4. [Verify that the user profile signature is valid](#verify-a-user-profile-signature)
-5. Validate that the public shared prekey is on the curve Ed448. See
-  [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) section for details.
+1. Verify that the user profile has not expired.
+2. Verify that the `Versions` field contains the character "4".
+3. Validate that the public shared prekey and the Ed448 public key are on the
+   curve Ed448-Goldilocks. See
+   [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+   section for details.
+3. If the `Transitional Signature` is present, verify its validity.
+4. [Verify that the user profile signature is valid](#verify-a-user-profile-signature).
 
 ## Online Conversation Initialization
 
