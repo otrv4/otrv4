@@ -952,11 +952,11 @@ public key, a shared prekey for offline conversations, information about
 supported versions, a profile expiration date, a signature of all these, and an
 optional transitional signature.
 
-Each participant maintains two instances of the same user profile. One instance
-is for authentication in both DAKEs. The other instance is for publication. A
-user is allowed to repudiate their participation in OTRv4 conversations by
-publishing their user profile.  When a user profile is published, it is
-available from a public location, such as a server.
+The user profile is used for authentication in both DAKEs (interactive and
+non-interactive). Also, it should be published in a public place for deniability
+properties. This procedure allows two parties to send and verify each other's
+signed User Profile during the DAKE without damaging participation deniability
+for the conversation, since the signed profile is public information.
 
 Each implementation should decide how to publish the profile. For example, one
 client may publish profiles to a server pool (similar to a keyserver pool,
@@ -969,6 +969,9 @@ When the user profile expires, it should be updated. Client implementation
 should determine the frequency of user's profile expiration and renewal. The
 recommended expiration time is one week. Note, though, that the long term public
 key has its own expiration time.
+
+It is also important to note that the absence of a user profile is not a proof
+that a user does not support OTRv4.
 
 ### User Profile Data Type
 
