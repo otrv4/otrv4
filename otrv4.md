@@ -2317,7 +2317,8 @@ Verify MAC, Decrypt message 1_1
 ### Data Message
 
 This message is used to transmit a private message to the correspondent.
-It is also used to [reveal old MAC keys](#revealing-mac-keys).
+It is also used to [reveal old MAC keys](#revealing-mac-keys). This data message
+is encoded as defined on [Encoded Messages](#encoded-messages) section.
 
 #### Data Message format
 
