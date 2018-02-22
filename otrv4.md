@@ -1106,13 +1106,13 @@ If only version 4 is supported:
 
 The user profile signature for version 4 is generated as defined in RFC 8032
 [\[9\]](#references), section 5.2.6. The flag `f` is set to `0` and the context
-`C` is left empty. It is generated as follows:
+`C` is an empty constant string. It is generated as follows:
 
 ```
 The inputs are the symmetric key (57 bytes, defined on 'Public keys and
-fingerprints' section. It is referred as 'sym_key'), a flag 'f', which is 0,
-a context 'c' (a value set by the signer and verifier of maximum 255 bytes),
-which is an empty string for this protocol, and a message 'm'.
+fingerprints' section. It is referred as 'sym_key'), a flag 'f', which is a byte
+with value 0, a context 'C' (a value set by the signer and verifier of maximum
+255 bytes), which is an empty string for this protocol, and a message 'm'.
 
    1.  Hash the sym_key 'KDF(sym_key, 114)'. Let 'h' denote the resulting
        digest. Construct the secret key 'sk' from the first half of
@@ -1121,7 +1121,7 @@ which is an empty string for this protocol, and a message 'm'.
        Let 'prefix' denote the second half of the 'h' (from h[57] to
        h[113]).
 
-   2.  Compute KDF("SigEd448" || f || len(c) || c || prefix || m, 114), where
+   2.  Compute KDF("SigEd448" || f || len(C) || C || prefix || m, 114), where
        'm' is the message to be signed. Let 'r' be the 114-byte resulting
        digest.
 
@@ -1129,7 +1129,7 @@ which is an empty string for this protocol, and a message 'm'.
        first reducing 'r' modulo 'q', the group order.  Let 'R' be the encoding
        of this resulting point. It should be encoded as a POINT.
 
-   4.  Compute KDF("SigEd448" || f || len(c) || c || R || H || m, 114).
+   4.  Compute KDF("SigEd448" || f || len(C) || C || R || H || m, 114).
        Interpret the 114-byte digest as a little-endian integer 'k'.
 
    5.  Compute 'S = (r + k * sk) mod q'.  For efficiency, reduce 'k' again
