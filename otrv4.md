@@ -1281,16 +1281,12 @@ Bob will be initiating the DAKE with Alice.
     * Sets `j` as 0, `k` as 0 and `pn` as 0.
     * Generates a new ephemeral ECDH key pair, as defined in
       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
-      replaces `our_ecdh`. The public part of this key is sent (but not used as
-      an input to the current DH ratchet) as an advertisement, so Alice uses
-      this for a new ratchet once it is received. Bob will use the private part
-      of this key for the new ratchet.
+      replaces `our_ecdh`. The public part of this key is sent but it will not
+      be used as an input to any ratchet.
     * Generates a new ephemeral DH key pair, as defined in
       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
-      replaces `our_dh`. This new key is sent (but not used as an input to the
-      current DH ratchet) as an advertisement, so Alice uses this for a new
-      ratchet once it is received. Bob will use the private part of this key
-      for the new ratchet.
+      replaces `our_dh`. The public part of this key is sent but it will not
+      be used as an input to any ratchet.
 
     * Derives a set of keys:
 
@@ -1335,13 +1331,13 @@ Bob will be initiating the DAKE with Alice.
       replaces `our_ecdh`. The public part of this key is sent (but not used as
       an input to the current DH ratchet) as an advertisement, so Bob uses
       this for a new ratchet once it is received. Alice will use the private
-      part of this key for the new ratchet.
+      part of this key for a new ratchet.
     * Generates a new ephemeral DH key pair, as defined in
       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
       replaces `our_dh`. The public part of this key is sent (but not used as
       an input to the current DH ratchet) as an advertisement, so Bob uses
       this for a new ratchet once it is received. Alice will use the private
-      part of this key for the new ratchet.
+      part of this key for a new ratchet.
     * Derives a set of keys:
 
       ```
@@ -1351,7 +1347,7 @@ Bob will be initiating the DAKE with Alice.
          chain_key_b[i][j] = KDF_2(0x03 || K)
       ```
 
-    * Decides which chain key he will use for sending messages and which key
+    * Decides which chain key she will use for sending messages and which key
       she will use for receiving messages, as defined on
       [Deciding between chain keys](#deciding-between-chain-keys) section:
 
@@ -1364,22 +1360,32 @@ Bob will be initiating the DAKE with Alice.
      * Follows what is defined on [Decrypting an attached encrypted message](#decrypting-the-message)
        section.
 3. At this point, the interactive DAKE is complete for Alice:
-   * In the case that she wants to immediately send a data message if no
-     message was attached to the Auth-I message or no data message was still
-     received:
+   * In the case that she wants to immediately send a data message or send
+     a data message after receiving one (including receiving one attached to
+     the Auth-I message):
      * Follows what is defined on the
        [Inmediately sending a data message](#inmediately-sending-a-data-message)
        section.
        Note that she will not perform a new DH ratchet, but she
        will advertize the new derived `our_ecdh.public` and `our_dh.public`.
    * In the case that she immediately receives a data message (even if she has
-     inmediately send a data message):
+     inmediately send one):
      * Follows what is defined on the
        [Inmediately receiving a data message](#inmediately-receiving-a-data-message)
        section. Note that she will use the derived and decided `chain_key_r`.
-       After receiving a data message and when she wants to send a new data
-       message, she will follow the
+
+**Bob:**
+
+1. At this point, the interactive DAKE is complete for Bob, but he has to
+   correctly setup the double ratchet mechanism:
+   * In the case that he immediately receives a data message:
+     * Follows what is defined on the
+       [Inmediately receiving a data message](#inmediately-receiving-a-data-message)
+       section. Note that he will use the derived and decided `chain_key_r`.
+     * After receiving a data message and when he wants to send a new data
+       message, he will follow the
        [When you send a data message](#when-you-send-a-data-message) section.
+       Note that he will perform a new DH ratchet.
 
 #### Identity message
 
@@ -2228,12 +2234,10 @@ sending one. For this, the participant:
 
 ### Inmediately sending a data message
 
-// TODO: not stricly true
-
-After deriving the mixed shared secret `K`, a participant can inmmediately
-send a data message (prior to receiving a data message from the other party).
-Note that in this case, the party will have `their_ecdh` and `their_dh` set to
-NULL.
+After deriving the mixed shared secret `K` and initializing the double ratchet
+algorithm, a participant can inmmediately send a data message (prior to
+receiving one from the other party). Note that in this case, the party will have
+`their_ecdh` and `their_dh` set to NULL.
 
 If the participant has not attached an encrypted data message to the Auth-I
 message:
