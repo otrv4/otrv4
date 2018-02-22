@@ -2928,6 +2928,15 @@ If the Query message offers OTR version 3 and version 3 is allowed:
   * Send a version `3 D-H Commit Message`.
   * Transition authstate to `AUTHSTATE_AWAITING_DHKEY`.
 
+#### Starting a conversation interactively
+
+Rather than requesting an encrypted conversation, Alice can directly
+start an OTR conversation with Bob if she is certain that both support
+and are willing to do so. In such case, Alice should:
+
+  * Send an Identity message.
+  * Transition the state to `WAITING_AUTH_R`.
+
 #### Receiving an Identity message
 
 If the state is `START`:
