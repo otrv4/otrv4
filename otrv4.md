@@ -1583,24 +1583,25 @@ Attached DAKEZ Encrypted Message (DAKEZ-ENCRYPTED-MSG)
 ## Offline Conversation Initialization
 
 To begin an offline conversation, a Prekey message is published to an untrusted
-server and this action is seen as the start of a non-interactive DAKE. The
-Prekey message is retrieved by the party attempting to send a message to the
-publisher. A reply, called the Non-Interactive-Auth message, is created with the
-prekey and sent. This completes the DAKE.
+server. This action is considered	 to be the start of the non-interactive DAKE.
+A Prekey message is retrieved by the party attempting to send a message to the
+Prekey's publisher. This participan, then, replies with a Non-Interactive-Auth
+message (created with the prekey). This action is considered to complete the
+non-interactive DAKE.
 
 ### Non-interactive Deniable Authenticated Key Exchange (DAKE)
 
-The non-interactive DAKE is a way to mutually agree upon shared cryptographic
-keys while providing some participation deniability. Unlike the interactive
-DAKE, the non-interactive DAKE does not provide online deniability for the
-party that completes the DAKE by sending a Non-Interactive-Auth message. Client
-implementations are expected to understand this deniability risk when allowing
-users to complete a non-interactive DAKE. They are also expected to decide how
-to convey this security loss to the user.
+The non-interactive DAKE is a method by which two parties mutually agree upon
+shared cryptographic keys while providing partial participation deniability.
+Unlike the interactive DAKE, the non-interactive DAKE does not provide online
+deniability for the party that completes the DAKE by sending a
+Non-Interactive-Auth message. Client implementations are expected to understand
+this deniability risk when allowing users to complete a non-interactive DAKE.
+They are also expected to decide how to convey this security loss to the user.
 
 This protocol is derived from the XZDH protocol [\[1\]](#references), which
 uses a ring signature non-interactive zero-knowledge proof of knowledge
-(RING-SIG) for authentication (RSig).
+(RING-SIG) for authentication (`RSig`).
 
 Alice's long-term Ed448 key pair is `(ska, Pka)` and Bob's long-term Ed448
 key pair is `(skb, Pkb)`. Both key pairs are generated as stated on the
