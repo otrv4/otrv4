@@ -1318,7 +1318,10 @@ Bob will be initiating the DAKE with Alice.
           [Inmediately sending a data message](#inmediately-sending-a-data-message)
           section. Note that he will not perform a new DH ratchet, but he
           will advertize the new derived `our_ecdh.public` and `our_dh.public`
-          in every data message sent.
+          in every data message sent. If she did not attached an encrypted
+          message to the Auth-I message, she will start by using the derived and
+          decided `chain_key_s[i][j]`. Otherwise, she will use the current
+          `chain_key_s[i][j]`.
 
 **Alice:**
 
@@ -1686,7 +1689,7 @@ Verify and decrypt message if included
 8. At this point, she can attach an encrypted message to the
    Non-Interactive-Auth message:
     * Follows what is defined on the
-      [Attaching an encrypted message to Non-Interactive-Auth message](#attaching-an-encrypted-message-to-non-interactive-auth-message-in-xzdh)
+      [Attaching an encrypted message to the Non-Interactive-Auth message](#attaching-an-encrypted-message-to-non-interactive-auth-message-in-xzdh)
       section.
 9. Calculates the `Auth MAC`:
 
@@ -1697,24 +1700,26 @@ Verify and decrypt message if included
                        encrypted_data_message)).
       ```
 
-      Securely, deletes the `auth_mac_k`.
-
     * Otherwise, she computes:
 
       ```
-      Auth MAC = KDF_2(auth_mac_k || t)`
+      Auth MAC = KDF_2(auth_mac_k || t)
       ```
 
-      She includes this value on the Non-Interactive-Auth message and securely
+    * Includes this value on the Non-Interactive-Auth message and securely
       deletes the `auth_mac_k`.
 10. Sends Bob a Non-Interactive-Auth message. See
-   [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
+    [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 11. At this point, the non-interactive DAKE is complete for Alice:
     * In the case that she wants to immediately send a data message:
         * Follows what is defined on the
           [Inmediately sending a data message](#inmediately-sending-a-data-message)
           section. Note that she will not perform a new DH ratchet, but she will
           advertize the new derived `our_ecdh.public` and `our_dh.public`.
+          If she did not attached an encrypted message to the
+          Non-Interactive-Auth message, she will start by using the derived and
+          decided `chain_key_s[i][j]`. Otherwise, she will use the current
+          `chain_key_s[i][j]`.
 
 **Bob:**
 
