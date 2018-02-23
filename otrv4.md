@@ -1756,59 +1756,76 @@ Verify and decrypt message if included
    * Sets ratchet id `i` as 0.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
    * Generates a new ephemeral ECDH key pair, as defined in
-      [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
-      replaces `our_ecdh`. The public part of this key is sent (but not used as
-      an input to the current DH ratchet) as an advertisement, so Alice uses
-      this for a new ratchet once it is received. Bob will use the private
-      part of this key for the new ratchet.
-    * Generates a new ephemeral DH key pair, as defined in
-      [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
-      replaces `our_dh`. The public part of this key is sent (but not used as
-      an input to the current DH ratchet) as an advertisement, so Alice uses
-      this for a new ratchet once it is received. Bob will use the private
-      part of this key for the new ratchet.
-    * Derives a set of keys:
+     [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
+     replaces `our_ecdh`. The public part of this key is sent (but not used as
+     an input to the current DH ratchet) as an advertisement, so Alice uses
+     this for a new ratchet once it is received. Bob will use the private
+     part of this key for the new ratchet.
+   * Generates a new ephemeral DH key pair, as defined in
+     [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
+     replaces `our_dh`. The public part of this key is sent (but not used as
+     an input to the current DH ratchet) as an advertisement, so Alice uses
+     this for a new ratchet once it is received. Bob will use the private
+     part of this key for the new ratchet.
+   * Derives a set of keys:
 
-      ```
-      root_key[i], chain_key_a[i][j], chain_key_b[i][j] =
-         root_key[i] = KDF_2(0x01 || K)
-         chain_key_a[i][j] = KDF_2(0x02 || K)
-         chain_key_b[i][j] = KDF_2(0x03 || K)
-      ```
+     ```
+     root_key[i], chain_key_a[i][j], chain_key_b[i][j] =
+        root_key[i] = KDF_2(0x01 || K)
+        chain_key_a[i][j] = KDF_2(0x02 || K)
+        chain_key_b[i][j] = KDF_2(0x03 || K)
+     ```
 
-    * Decides which chain key he will use for sending messages and which key
-      he will use for receiving messages, as defined on
-      [Deciding between chain keys](#deciding-between-chain-keys) section:
+   * Decides which chain key he will use for sending messages and which key
+     he will use for receiving messages, as defined on
+     [Deciding between chain keys](#deciding-between-chain-keys) section:
 
-      ```
-      decide_between_chain_keys(chain_key_a[i][j], chain_key_b[i][j]
-      ```
+     ```
+     chain_key_s[i][j], chain_key_r[i][k] =
+     decide_between_chain_keys(chain_key_a[i][j], chain_key_b[i][j])
+     ```
 
-    * Securely deletes `their_ecdh` and `their_dh`.
+   * Securely deletes `their_ecdh` and `their_dh`.
    * If an encrypted message was attached to the Non-Interactive-Auth message:
      * Follows what is defined on [Decrypting an attached encrypted message](#decrypting-the-message-1)
-       section. // TODO: this is done afterwards
+       section.
      * Otherwise:
-        * Computes `Auth MAC = KDF_2(auth_mac_k || t)`.
+        * Computes `Auth MAC = KDF_2(auth_mac_k || t)`. The `t` value here is
+          the one computed during the verification of the Non-Interactive Auth
+          message.
     * Extracts the `Auth MAC` from the Non-Interactive-Auth message and verifies
       that it is equal to the one just calculated. If it is not, ignore the
       Non-Interactive-Auth message.
-7. At this point, the non-interactive DAKE is complete for Bob:
+8. At this point, the non-interactive DAKE is complete for Bob:
     * In the case that he wants to immediately send a data message if no
-     message was attached to the Non-Interactive-Auth message or no data message
-     was received:
+      message was attached to the Non-Interactive-Auth message or no data
+      message was received:
       * Follows what is defined on the
         [Inmediately sending a data message](#inmediately-sending-a-data-message)
-        section.
-        Note that he will not perform a new DH ratchet, but he
-        will advertize the new derived `our_ecdh.public` and `our_dh.public`.
+        section. Note that he will not perform a new DH ratchet (even after
+        receiving a data message), but he will advertize the new derived
+        `our_ecdh.public` and `our_dh.public`. He will start by using the
+        derived and decided `chain_key_s[i][j]`.
     * In the case that he immediately receives a data message:
         * Follows what is defined on the
           [Inmediately receiving a data message](#inmediately-receiving-a-data-message)
-          section. Note that he will use the derived and decided `chain_key_r`.
-          After receiving a data message and when he wants to send a new data
-          message, he will follow the
-          [When you send a data message](#when-you-send-a-data-message) section.
+          section. Note that he will use the derived and decided
+          `chain_key_r[i][k]`.
+
+**Alice:**
+
+1. At this point, the non-interactive DAKE is complete for Alice, but she has to
+   correctly setup the double ratchet mechanism:
+   * In the case that she immediately receives a data message that advertizes
+     the new public keys from Bob:
+     * Follows what is defined on the
+       [Inmediately receiving a data message](#inmediately-receiving-a-data-message)
+       section. Note that he will start by using the derived and decided
+       `chain_key_r[i][k]`.
+     * After receiving a data message and when she wants to send a new data
+       message, she will follow the
+       [When you send a data message](#when-you-send-a-data-message) section.
+       Note that she will perform a new DH ratchet.
 
 #### Prekey message
 
@@ -2221,25 +2238,25 @@ After verifying `sigma` on the Non-Interactive-Auth message, a participant
 attached. This has to be done prior to receiving any other data message, or
 sending one. For this, the participant:
 
-* Rotates the ECDH keys and brace key, see
-  [Rotating ECDH keys and brace key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
-  section.
-* Derives a set of keys:
-  `root_key[i], chain_key_r[i][k] = derive_ratchet_keys(receiving, K,
-   KDF_2(K_ecdh || brace_key)`.
-* Securely deletes `K`.
 * Increments the ratchet id `i = i + 1`.
-* Derives the next receiving chain key
-  `chain_key_r[i-1][k+1] = KDF_2(chain_key_r[i-1][k])`.
+* Derives the next receiving chain key by using the `chain_key_r[i-1][k]`
+  already derived and decided:
+
+  ```
+  chain_key_r[i-1][k+1] = KDF_2(chain_key_r[i-1][k])
+  ```
+
 * Calculates the encryption key (`MKenc`):
-  `MKenc = KDF_1(0x01 || chain_key_r)`
+  `MKenc = KDF_1(0x01 || chain_key_r[i-1][k])`
 * Securely deletes `chain_key_r[i-1][k]`.
-* Uses `auth_mac_k` to verify the received `Authenticator (MAC)` of the attached
-  encrypted message (the `t` here is the one computed during the verification
-  of the Non-Interactive Auth message):
+* Uses `auth_mac_k` to generate the `Auth MAC` of the attached
+  encrypted message (the `t` value here is the one computed during the
+  verification of the Non-Interactive Auth message):
   `Auth MAC = KDF_2(auth_mac_k || t || (attached encrypted message id ||
-   public ecdh key || public dh key || nonce ||encrypted message))`
-  If verification fails, reject the message.
+   public ecdh key || public dh key || nonce ||encrypted message))`.
+* Extracts the `Auth MAC` from the Non-Interactive-Auth message and verifies
+  that it is equal to the one just calculated. If it is not, ignores
+  the Non-Interactive-Auth message and rejects the attached encrypted message.
 * Increments the next receiving message id `k = k + 1`.
 * Constructs the nonce from the first 24 bytes of the `c` variable generated
   when creating `sigma`. See
