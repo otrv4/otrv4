@@ -644,11 +644,11 @@ roles), the expected attributes (expressed in fixed length) should be included.
 
 ### OTR Error Messages
 
-Any message containing "?OTR Error: " at the starting position is an OTR Error Message. 
-The following part of the message should contain human-readable details of the error. 
-The message may also include a specific code at the beginning, e.g. "?OTR Error: 
-ERROR_N: ". This code is used to identify which error is being received for optional 
-localization of the message. OTRv4 Error Messages are unencoded: they are not base-64 
+Any message containing "?OTR Error: " at the starting position is an OTR Error Message.
+The following part of the message should contain human-readable details of the error.
+The message may also include a specific code at the beginning, e.g. "?OTR Error:
+ERROR_N: ". This code is used to identify which error is being received for optional
+localization of the message. OTRv4 Error Messages are unencoded: they are not base-64
 encoded binary.
 
 Currently, the following errors are supported:
@@ -1282,11 +1282,11 @@ Bob will be initiating the DAKE with Alice.
     * Generates a new ephemeral ECDH key pair, as defined in
       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
       replaces `our_ecdh`. The public part of this key is sent but it will not
-      be used as an input to any ratchet.
+      be used as an input for any of Alice's ratchet.
     * Generates a new ephemeral DH key pair, as defined in
       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
       replaces `our_dh`. The public part of this key is sent but it will not
-      be used as an input to any ratchet.
+      be used as an input for any of Alice's ratchet.
 
     * Derives a set of keys:
 
@@ -1302,7 +1302,7 @@ Bob will be initiating the DAKE with Alice.
       [Deciding between chain keys](#deciding-between-chain-keys) section:
 
       ```
-      decide_between_chain_keys(chain_key_a[i][j], chain_key_b[i][j]
+      chain_key_s, chain_key_r = decide_between_chain_keys(chain_key_a[i][j], chain_key_b[i][j]
       ```
 
     * Securely deletes `their_ecdh` and `their_dh`.
@@ -1312,11 +1312,12 @@ Bob will be initiating the DAKE with Alice.
       section.
 8. Sends the Auth-I message.
 9. At this point, the interactive DAKE is complete for Bob:
-    * In the case that he wants to immediately send a data message:
+    * In the case that he wants to immediately send a data messages:
         * Follows what is defined on the
           [Inmediately sending a data message](#inmediately-sending-a-data-message)
           section. Note that he will not perform a new DH ratchet, but he
-          will advertize the new derived `our_ecdh.public` and `our_dh.public`.
+          will advertize the new derived `our_ecdh.public` and `our_dh.public`
+          in every data message sent.
 
 **Alice:**
 
@@ -1332,47 +1333,51 @@ Bob will be initiating the DAKE with Alice.
       an input to the current DH ratchet) as an advertisement, so Bob uses
       this for a new ratchet once it is received. Alice will use the private
       part of this key for a new ratchet.
-    * Generates a new ephemeral DH key pair, as defined in
-      [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
-      replaces `our_dh`. The public part of this key is sent (but not used as
-      an input to the current DH ratchet) as an advertisement, so Bob uses
-      this for a new ratchet once it is received. Alice will use the private
-      part of this key for a new ratchet.
-    * Derives a set of keys:
+   * Generates a new ephemeral DH key pair, as defined in
+     [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
+     replaces `our_dh`. The public part of this key is sent (but not used as
+     an input to the current DH ratchet) as an advertisement, so Bob uses
+     this for a new ratchet once it is received. Alice will use the private
+     part of this key for a new ratchet.
+   * Derives a set of keys:
 
-      ```
-      root_key[i], chain_key_a[i][j], chain_key_b[i][j] =
-         root_key[i] = KDF_2(0x01 || K)
-         chain_key_a[i][j] = KDF_2(0x02 || K)
-         chain_key_b[i][j] = KDF_2(0x03 || K)
-      ```
+     ```
+     root_key[i], chain_key_a[i][j], chain_key_b[i][j] =
+        root_key[i] = KDF_2(0x01 || K)
+        chain_key_a[i][j] = KDF_2(0x02 || K)
+        chain_key_b[i][j] = KDF_2(0x03 || K)
+     ```
 
-    * Decides which chain key she will use for sending messages and which key
-      she will use for receiving messages, as defined on
-      [Deciding between chain keys](#deciding-between-chain-keys) section:
+   * Decides which chain key she will use for sending messages and which key
+     she will use for receiving messages, as defined in the
+     [Deciding between chain keys](#deciding-between-chain-keys) section:
 
-      ```
-      decide_between_chain_keys(chain_key_a[i][j], chain_key_b[i][j]
-      ```
+     ```
+     chain_key_s, chain_key_r = decide_between_chain_keys(chain_key_a[i][j], chain_key_b[i][j]
+     ```
 
-    * Securely deletes `their_ecdh` and `their_dh`.
+   * Securely deletes `their_ecdh` and `their_dh`.
    * If an encrypted message was attached to the Auth-I message:
-     * Follows what is defined on [Decrypting an attached encrypted message](#decrypting-the-message)
-       section.
+     * Follows what is defined in the [Decrypting an attached encrypted message](#decrypting-the-message)
+       section. Note that she will start by using the derived and decided
+       `chain_key_s`.
 3. At this point, the interactive DAKE is complete for Alice:
    * In the case that she wants to immediately send a data message or send
-     a data message after receiving one (including receiving one attached to
+     a data message after receiving one (like receiving one attached to
      the Auth-I message):
      * Follows what is defined on the
        [Inmediately sending a data message](#inmediately-sending-a-data-message)
        section.
-       Note that she will not perform a new DH ratchet, but she
-       will advertize the new derived `our_ecdh.public` and `our_dh.public`.
+       Note that she will not perform a new DH ratchet (even after receiving a
+       data message), but she will advertize the new derived
+       `our_ecdh.public` and `our_dh.public`. She will start by using the
+       derived and decided `chain_key_s`.
    * In the case that she immediately receives a data message (even if she has
      inmediately send one):
      * Follows what is defined on the
        [Inmediately receiving a data message](#inmediately-receiving-a-data-message)
-       section. Note that she will use the derived and decided `chain_key_r`.
+       section. Note that she will start by using the derived and decided
+       `chain_key_r`.
 
 **Bob:**
 
@@ -1381,7 +1386,8 @@ Bob will be initiating the DAKE with Alice.
    * In the case that he immediately receives a data message:
      * Follows what is defined on the
        [Inmediately receiving a data message](#inmediately-receiving-a-data-message)
-       section. Note that he will use the derived and decided `chain_key_r`.
+       section. Note that he will start by using the derived and decided
+       `chain_key_r`.
      * After receiving a data message and when he wants to send a new data
        message, he will follow the
        [When you send a data message](#when-you-send-a-data-message) section.
@@ -2080,7 +2086,7 @@ Authenticator (MAC)
   to the end of the encrypted message.
 ```
 
-After the encryption and mac of the attached encrypted message, the
+After the encryption and MAC of the attached encrypted message, the
 participant attaches it to the Auth-I message, which will look like this:
 
 ```
@@ -2094,9 +2100,8 @@ participant attaches it to the Auth-I message, which will look like this:
 ##### Decrypting the message
 
 After verifying `sigma` on the Auth-I message, a participant (Alice in the above
-overview) can decrypt an attached encrypted message if it was attached. This
-has to be done prior to receiving any other data message, or sending one. For
-this, the participant:
+overview) can decrypt an attached encrypted message if present. For this, the
+participant:
 
 * Increments the ratchet id `i = i + 1`.
 * Derives the next receiving chain key by using the `chain_key_r` already
@@ -2235,21 +2240,28 @@ sending one. For this, the participant:
 ### Inmediately sending a data message
 
 After deriving the mixed shared secret `K` and initializing the double ratchet
-algorithm, a participant can inmmediately send a data message (prior to
-receiving one from the other party). Note that in this case, the party will have
-`their_ecdh` and `their_dh` set to NULL.
+algorithm or after attaching an encrypted message to the Auth-I message or the
+Non-Interactive Auth message, a participant can inmmediately send a data message
+(prior to receiving one from the other party). Note that in this case, the party
+will have `their_ecdh` and `their_dh` set to NULL.
+
+// TODO: check this
 
 If the participant has not attached an encrypted data message to the Auth-I
-message:
+message or this is the first data message sent:
 
   * Increment the ratchet id `i = i + 1`.
 
 Otherwise:
 
 * Set `j` as the Data message's message id.
-* Derive the next sending chain key by using the `chain_key_s`, which has been
-  already derived and decided:
-  `chain_key_s[i-1][j+1] = KDF_2(chain_key_s[i-1][j])`.
+* Derive the next sending chain key by using the `chain_key_s`, which has
+  already been derived:
+
+  ```
+  chain_key_s[i-1][j+1] = KDF_2(chain_key_s[i-1][j])
+  ```
+
 * Calculate the encryption key (`MKenc`), the MAC key (`MKmac`) and, if needed
   the extra symmetric key:
 
@@ -2275,10 +2287,15 @@ Otherwise:
 
 After verifying the Auth-I message and deriving the mixed shared secret `K`, a
 participant can inmmediately receive a data message (prior to receiving a data
-message from the other party). Note that in this case, the party will have
-`their_ecdh` and `their_dh` set to NULL.
+message from the other party or not). Note that in this case, the party will
+have `their_ecdh` and `their_dh` set to NULL.
+
+If this is the first data message received:
 
 * Increment the ratchet id `i = i + 1`.
+
+In any case:
+
 * Derive the next receiving chain key, which has been already derived and
   decided
   `chain_key_r[i-1][k+1] = KDF_2(chain_key_r[i-1][k])`.
