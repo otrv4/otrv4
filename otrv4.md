@@ -1661,13 +1661,13 @@ Verify and decrypt message if included
       replaces `our_ecdh`. The public part of this key is sent (but not used as
       an input to the current DH ratchet) as an advertisement, so Bob uses
       this for a new ratchet once it is received. Alice will use the private
-      part of this key for the new ratchet.
+      part of this key for a new ratchet.
     * Generates a new ephemeral DH key pair, as defined in
       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
       replaces `our_dh`. The public part of this key is sent (but not used as
       an input to the current DH ratchet) as an advertisement, so Bob uses
       this for a new ratchet once it is received. Alice will use the private
-      part of this key for the new ratchet.
+      part of this key for a new ratchet.
     * Derives a set of keys:
 
       ```
@@ -1730,19 +1730,21 @@ Verify and decrypt message if included
       the specification for this version. If the versions are incompatible, Bob
       does not send any further messages.
     * Sets his Public Shared Prekey from his User Profile as
-      `our_shared_prekey.public `.
+      `our_shared_prekey.public`.
     * Verifies the Non-Interactive-Auth message. See
       [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
-2. Retrieve ephemeral public keys from Alice:
+2. Retrieves the ephemeral public keys from Alice:
     * Sets the received ECDH ephemeral public key `X` as `their_ecdh`.
     * Sets the received DH ephemeral public key `A` as `their_dh`.
-3. Calculates the keys needed to generate the Mixed shared secret (`K`):
+3. Calculates the keys needed for the generation of the Mixed shared secret
+   (`K`):
     * Calculates the ECDH shared secret
       `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`. Securely deletes
       `our_ecdh.secret`.
     * Calculates the DH shared secret `k_dh = DH(our_dh.secret, their_dh)`.
       Securely deletes `our_dh.secret`.
-    * Calculates the Brace Key `brace_key = KDF_1(k_dh)`.
+    * Calculates the Brace Key `brace_key = KDF_1(k_dh)`. Securely deletes
+      `k_dh`.
 4. Calculates
    `tmp_k = KDF_2(K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(skb, their_ecdh) || brace_key)`.
 5. Computes the Auth MAC key `auth_mac_k = KDF_2(0x01 || tmp_k)`.
@@ -2201,7 +2203,7 @@ Encrypted message (DATA)
   the header of the attached message packet.
 ```
 
-After the encryption and mac of the attached encrypted message, the
+After the encryption and MAC of the attached encrypted message, the
 participant attaches it to the Non-Interactive-Auth message, which will look
 like this:
 
