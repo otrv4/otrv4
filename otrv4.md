@@ -1302,7 +1302,8 @@ Bob will be initiating the DAKE with Alice.
       [Deciding between chain keys](#deciding-between-chain-keys) section:
 
       ```
-      chain_key_s, chain_key_r = decide_between_chain_keys(chain_key_a[i][j], chain_key_b[i][j]
+      chain_key_s, chain_key_r =
+      decide_between_chain_keys(chain_key_a[i][j], chain_key_b[i][j])
       ```
 
     * Securely deletes `their_ecdh` and `their_dh`.
@@ -1353,14 +1354,15 @@ Bob will be initiating the DAKE with Alice.
      [Deciding between chain keys](#deciding-between-chain-keys) section:
 
      ```
-     chain_key_s, chain_key_r = decide_between_chain_keys(chain_key_a[i][j], chain_key_b[i][j]
+     chain_key_s, chain_key_r =
+     decide_between_chain_keys(chain_key_a[i][j], chain_key_b[i][j])
      ```
 
    * Securely deletes `their_ecdh` and `their_dh`.
    * If an encrypted message was attached to the Auth-I message:
      * Follows what is defined in the [Decrypting an attached encrypted message](#decrypting-the-message)
        section. Note that she will start by using the derived and decided
-       `chain_key_s`.
+       `chain_key_s[i][j]`.
 3. At this point, the interactive DAKE is complete for Alice:
    * In the case that she wants to immediately send a data message or send
      a data message after receiving one (like receiving one attached to
@@ -1377,17 +1379,18 @@ Bob will be initiating the DAKE with Alice.
      * Follows what is defined on the
        [Inmediately receiving a data message](#inmediately-receiving-a-data-message)
        section. Note that she will start by using the derived and decided
-       `chain_key_r`.
+       `chain_key_r[i][k]`.
 
 **Bob:**
 
 1. At this point, the interactive DAKE is complete for Bob, but he has to
    correctly setup the double ratchet mechanism:
-   * In the case that he immediately receives a data message:
+   * In the case that he immediately receives a data message that advertizes
+     the new public keys from Alice:
      * Follows what is defined on the
        [Inmediately receiving a data message](#inmediately-receiving-a-data-message)
        section. Note that he will start by using the derived and decided
-       `chain_key_r`.
+       `chain_key_r[i][k]`.
      * After receiving a data message and when he wants to send a new data
        message, he will follow the
        [When you send a data message](#when-you-send-a-data-message) section.
@@ -1675,7 +1678,8 @@ Verify and decrypt message if included
       [Deciding between chain keys](#deciding-between-chain-keys) section:
 
       ```
-      decide_between_chain_keys(chain_key_a[i][j], chain_key_b[i][j]
+      chain_key_s[i][j], chain_key_r[i][k] =
+      decide_between_chain_keys(chain_key_a[i][j], chain_key_b[i][j])
       ```
 
     * Securely deletes `their_ecdh` and `their_dh`.
@@ -2030,8 +2034,8 @@ message, but prior to sending it. For this, the participant:
 
 * Increments the ratchet id `i = i + 1`.
 * Sets `j` as the attached message id.
-* Derives the next sending chain key by using the `chain_key_s` already derived
-  and decided:
+* Derives the next sending chain key by using the `chain_key_s[i][j]` already
+  derived and decided:
 
   ```
   chain_key_s[i-1][j+1] = KDF_2(chain_key_s[i-1][j])
@@ -2104,7 +2108,7 @@ overview) can decrypt an attached encrypted message if present. For this, the
 participant:
 
 * Increments the ratchet id `i = i + 1`.
-* Derives the next receiving chain key by using the `chain_key_r` already
+* Derives the next receiving chain key by using the `chain_key_r[i][k]` already
   derived and decided:
 
   ```
@@ -2145,8 +2149,8 @@ participant:
 
 * Increments the ratchet id `i = i + 1`.
 * Sets `j` as the attached message id.
-* Derives the next sending chain key by using the `chain_key_s` already derived
-  and decided:
+* Derives the next sending chain key by using the `chain_key_s[i-1][j]` already
+  derived and decided:
 
   ```
   chain_key_s[i-1][j+1] = KDF_2(chain_key_s[i-1][j])
@@ -2154,7 +2158,7 @@ participant:
 
 * Calculates the encryption key (`MKenc`):
   ```
-  MKenc = KDF_1(0x01 || chain_key_s)
+  MKenc = KDF_1(0x01 || chain_key_s[i-1][j])
   ```
 
 * Securely deletes `chain_key_s[i-1][j]`.
