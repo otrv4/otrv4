@@ -2568,11 +2568,12 @@ Decrypting a data message consists of:
 
 * Check that the receiver's instance tag matches your sender's instance tag.
 
-* Try to decrypt the message with a skipped message key:
+* Try to decrypt the message with a stored skipped message key:
 
   * If `Public ECDH Key`, `Public DH Key` and the received `j` is in
     `skipped_MKenc`:
-      * `MKenc = skipped_MKenc[Public ECDH Key, Public DH Key, j]`.
+      * Get the mssage key:
+        `MKenc = skipped_MKenc[Public ECDH Key, Public DH Key, j]`.
       * Securely delete `skipped_MKenc[Public ECDH Key, Public DH Key, j]`.
       * Calculate `MKmac = KDF_2(0x02 || MK_enc)`.
       * Use the `MKmac` to verify the MAC of the message.
@@ -2583,7 +2584,8 @@ Decrypting a data message consists of:
       decrypted_message = XSalsa20_Dec(MKenc, nonce, m)
       ```
 
-      * Securely delete `MKenc`.
+      * Securely delete `MKenc` and `nonce`.
+      * Add `MKmac` to the list `mac_keys_to_reveal`.
 
 // TODO: define if we are going to ratchet with `j`.
 
@@ -2593,14 +2595,16 @@ different from `their_ecdh` and `Public DH Key` is different from `their_dh`):
   * Store any message keys from the previous DH Ratchet that correspond to
     messages that have not yet arrived:
       * If `k` + `MAX_SKIP` < received `pn`:
-         * The message is undecryptable. // TODO: raise an error?
+         * Inform the user that an unreadable encrypted message was received
+           by replying with an Error Message: ERROR_2.
       * If `chain_key_r` is not NULL:
          * while `k` < received `pn`:
              * Derive
                `chain_key_r[i-1][k+1], MKenc = KDF_2(chain_key_r[i-1][k])`.
-             * Store `MKenc = skipped_MKenc[Public ECDH Key, Public DH Key, j]`.
+             * Store `MKenc = skipped_MKenc[Public ECDH Key, Public DH Key, k]`.
              * Increment `k = k + 1`.
              * Delete `chain_key_r[i-1][k]`.
+
   * Rotate the ECDH keys and brace key, see
     [Rotating ECDH keys and brace key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
     section.
@@ -2614,23 +2618,22 @@ different from `their_ecdh` and `Public DH Key` is different from `their_dh`):
   * Derive the next receiving chain key, `MKenc` and `MKmac`, and decrypt the
     message as described below.
 
-  // TODO: should `j` and `k` become 0?
   // TODO: here the sending can be derived
 
 * When receiving a data message in the same DH Ratchet:
-
   * Store any message keys from the current DH Ratchet that correspond to
     messages that have not yet arrived:
     * If `k` + `MAX_SKIP` < received `j`:
-         * The message is undecryptable. // TODO: raise an error?
+         * Inform the user that an unreadable encrypted message was received
+           by replying with an Error Message: ERROR_2.
       * If `chain_key_r` is not NULL:
          * while `k` < received `j`:
              * Derive
                `chain_key_r[i-1][k+1], MKenc = KDF_2(chain_key_r[i-1][k])`.
-             * Store `MKenc = skipped_MKenc[Public ECDH Key, Public DH Key, j]`.
+             * Store `MKenc = skipped_MKenc[Public ECDH Key, Public DH Key, k]`.
              * Increment `k = k + 1`.
              * Delete `chain_key_r[i-1][k]`.
-  * Derive the next receiving chain key
+  * Derive the next receiving chain key:
     `chain_key_r[i-1][k+1] = KDF_2(chain_key_r[i-1][k])`.
   * Calculate the encryption and MAC keys (`MKenc` and `MKmac`).
 
@@ -2640,26 +2643,22 @@ different from `their_ecdh` and `Public DH Key` is different from `their_dh`):
     ```
 
   * Securely delete `chain_key_r[i-1][k]`.
-  * Use the `MKmac` to verify the MAC of the message.
-
-  * If the verification fails:
-
-    * Reject the message
-
+  * Use the `MKmac` to verify the MAC of the message. If the verification fails:
+      * Reject the message
   * Otherwise:
-
-    * Increment the next receiving message id `k = k + 1`.
-    * Set `nonce` as the "nonce" from the received data message.
-    * Decrypt the message using `MKenc` and `nonce`:
+      * Increment the next receiving message id `k = k + 1`.
+      * Set `nonce` as the "nonce" from the received data message.
+      * Decrypt the message using `MKenc` and `nonce`:
 
       ```
       decrypted_message = XSalsa20_Dec(MKenc, nonce, m)
       ```
 
-    * Securely delete `MKenc`.
-    * Set `their_ecdh` as the "Public ECDH key" from the message.
-    * Set `their_dh` as the "Public DH Key" from the message, if it is not NULL.
-    * Add `MKmac` to the list `mac_keys_to_reveal`.
+      * Securely delete `MKenc` and `nonce`.
+      * Set `their_ecdh` as the "Public ECDH key" from the message.
+      * Set `their_dh` as the "Public DH Key" from the message, if it is not
+        NULL.
+      * Add `MKmac` to the list `mac_keys_to_reveal`.
 
 ### Deletion of stored message keys
 
@@ -2668,8 +2667,8 @@ risks, as defined on the
 [The Double Ratchet Algorithm specification](https://signal.org/docs/specifications/doubleratchet/):
 
 1. A malicious sender could induce receivers to store large numbers of
-   message keys, possibly causing a denial-of-service due to consuming storage
-   space.
+   skipped message keys, possibly causing a denial-of-service due to consuming
+   storage space.
 
 2. An adversary can capture and drop some messages from sender, even
    though they didn't reach the recipient. The attacker can later compromise the
@@ -2684,7 +2683,7 @@ on the number of possible stored message keys (e.g. 1000).
 
 To mitigate the second risk parties should delete stored message keys after an
 appropriate interval. This deletion could be triggered by a timer, or by
-counting a number of events (messages received, DH ratchet steps, etc.). This
+counting the number of events (messages received, DH ratchet steps, etc.). This
 should be decided by the implementor. This partially defends against the second
 risk as it only protects "lost" messages, not messages sent using a new
 DH ratchet key that has not yet been received by the compromised party.
