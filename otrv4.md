@@ -2549,9 +2549,22 @@ When sending a data message in the same DH Ratchet:
 
 The counterpart of the sending an encoded data message. As that one, it also
 needs a per-message key derived from the previous chain key to decrypt the
-message in it. If the receiving `j` is equal to 0, ratchet keys should be
-rotated (the ECDH keys, the brace key, the root key and the receiving chain
-key).
+message in it. If the receiving `j` is equal to 0, and the receiving `Public
+ECDH Key` has not yet been seen, ratchet keys should be rotated (the ECDH keys,
+the brace key, the root key and the receiving chain key).
+
+Decrypting a data message consists of:
+
+1. If the encrypted message corresponds to a skipped and stored message key,
+   the message is decrypted with that key and the message key is deleted from
+   storage.
+
+2. If a new ratchet key has been received, any skipped message keys are stored
+   from the receiving ratchet and a new DH ratchet is performed.
+
+3. Any skipped message keys from the current receiving ratchet are stored,
+   and a symmetric-key ratchet is performed to derive the current message key
+   and next receiving chain key. The message is then decrypted.
 
 * Check that the receiver's instance tag matches your sender's instance tag.
 
