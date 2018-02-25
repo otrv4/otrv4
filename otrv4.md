@@ -788,12 +788,15 @@ DH(ai, Bi)
 Once the DAKE completes, Alice and Bob derive two chain keys from the mixed
 shared secret. Both sides will compare their public keys to choose which chain
 key will be used for encrypting and decrypting data messages:
-- Alice (and, similarly, Bob) determines if she is the "low" end or the "high"
-  end of this ratchet. If Alice's ephemeral ECDH public key is numerically
-  greater than Bob's public key, then she is the "high" end. Otherwise, she is
-  the "low" end.
 
-- Alice selects the chain keys for sending and receiving:
+- Alice (and, similarly, Bob) determines if she is the "low" end or the "high"
+  end of this ratchet. If Alice's encoded ephemeral ECDH public key (as a 57
+  byte array as defined in the
+  [Point encoding](https://github.com/otrv4/otrv4/blob/master/otrv4.md#point)
+  section) is numerically greater than Bob's public key, then she is the "high"
+  end. Otherwise, she is the "low" end.
+
+- Alice (and, similarly, Bob) selects the chain keys for sending and receiving:
 
   - If she is the "high" end, use `Ca` as the sending chain key (`chain_key_s`)
     and `Cb` as the receiving chain key (`chain_key_r`).
@@ -801,9 +804,23 @@ key will be used for encrypting and decrypting data messages:
   - If she is the "low" end, use `Cb` as the sending chain key (`chain_key_s`)
     and `Ca` as the receiving chain key (`chain_key_r`).
 
+This comparison function will take the same semantics as the `strcmp` function
+from C, mainly:
+
+It will start comparing the first character of each byte array (`Ca`, `Cb`). If
+they are equal to each other, it will continue with the following pairs until
+the characters differ or until a terminating null-character is reached. It will
+return:
+
+* a `<0` if the first character that does not match has a lower value in `Ca`
+  than in `Cb`.
+* a `0` if contents of both parameters are equal.
+* a `>0` if the first character that does not match has a greater value in `Ca`
+  than in `Cb`.
+
 ```
 decide_between_chain_keys(Ca, Cb):
-  if compare(our_ecdh.public, their_ecdh) > 0
+  if strcmp(our_ecdh.public, their_ecdh) > 0
     return Ca, Cb
   else
     return Cb, Ca
