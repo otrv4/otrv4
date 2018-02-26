@@ -2077,13 +2077,13 @@ them. This message will be referred as "attached encrypted message":
   DAKE.
 
 Note that if a data message arrives prior to the Auth-I or the
-Non-Interactive-Auth message, this data message will be ignored.
+Non-Interactive-Auth message, this data message will be ignored. An attached
+encrypted message to the Auth-I message and to the Non-Interactive-Auth message
+cannot contain any TLV types.
 
 #### Attaching an encrypted message to Auth-I message in DAKEZ
 
 ##### Encrypting the message
-
-// TODO: at this point, can it be derived the extra symm key?
 
 After deriving the mixed shared secret `K`, a participant (Bob in the above
 overview) can attach an encrypted message to the already generated Auth-I
@@ -2196,8 +2196,6 @@ participant:
 #### Attaching an encrypted message to Non-Interactive-Auth message in XZDH
 
 ##### Encrypting the message
-
-// TODO: at this point, can it be derived the extra symm key?
 
 After deriving the mixed shared secret `K`, a participant (Alice in the above
 overview) can attach an encrypted message to the already generated
