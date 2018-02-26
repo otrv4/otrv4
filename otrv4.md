@@ -2382,8 +2382,9 @@ In any case:
 
 This section describes how each participant will use the Double Ratchet
 algorithm to exchange [data messages](#data-message). The Double Ratchet is
-initialized with the shared secret established in the DAKE. Detailed validation
-and processing of each data message is described in the
+initialized with the shared secret established in the DAKE and the public keys
+immediately exchanged. Detailed validation and processing of each data message
+is described in the
 [sending an encrypted data messages](#rsending-an-encrypted-data-message)
 and [receiving encrypted data messages](#receiving-an-encrypted-data-message)
 section.
@@ -2584,13 +2585,13 @@ Decrypting a data message consists of:
 1. If the encrypted message corresponds to a skipped and stored message key,
    the message is decrypted with that key and the message key is deleted from
    storage.
-
 2. If a new ratchet key has been received, any skipped message keys are stored
    from the receiving ratchet and a new DH ratchet is performed.
-
 3. Any skipped message keys from the current receiving ratchet are stored,
    and a symmetric-key ratchet is performed to derive the current message key
    and next receiving chain key. The message is then decrypted.
+
+This is done by:
 
 * Check that the receiver's instance tag matches your sender's instance tag.
 
@@ -2598,10 +2599,11 @@ Decrypting a data message consists of:
 
   * If `Public ECDH Key`, `Public DH Key`, and the received `j` and `i` are in
     the `skipped_MKenc` dictionary:
-      * Get the mssage key:
-        `MKenc = skipped_MKenc[Public ECDH Key, Public DH Key, i, j]`.
-      * Securely delete `skipped_MKenc[Public ECDH Key, Public DH Key, i, j]`.
-      * Calculate `MKmac = KDF_2(0x02 || MK_enc)`.
+      * Get the mssage key and the extra symmetric key, if needed:
+        `MKenc, extra_symm_key = skipped_MKenc[Public ECDH Key, Public DH Key, i, j]`.
+      * Securely delete
+        `skipped_MKenc[Public ECDH Key, Public DH Key, i, j]`.
+      * Calculate `MKmac = KDF_2(0x02 || MKenc)`.
       * Use the `MKmac` to verify the MAC of the message.
       * Set `nonce` as the "nonce" from the received data message.
       * Decrypt the message using `MKenc` and `nonce`:
@@ -2626,8 +2628,12 @@ different from `their_ecdh` and the `Public DH Key` is different from
          * while `k` < received `pn`:
              * Derive
                `chain_key_r[i-1][k+1], MKenc = KDF_2(chain_key_r[i-1][k])`.
+             * Derive (this is done any time a message key is stored as
+               there is no way of knowing if the message that will be received
+               in the future will ask for its computation):
+               `extra_symm_key = KDF_1(0xFF || chain_key_r[i-1][j])`.
              * Store
-               `MKenc = skipped_MKenc[Public ECDH Key, Public DH Key, i, k]`.
+               `MKenc, extra_sym_key = skipped_MKenc[Public ECDH Key, Public DH Key, i, k]`.
              * Increment `k = k + 1`.
              * Delete `chain_key_r[i-1][k]`.
   * Rotate the ECDH keys and brace key, see
@@ -2643,8 +2649,6 @@ different from `their_ecdh` and the `Public DH Key` is different from
   * Derive the next receiving chain key, `MKenc` and `MKmac`, and decrypt the
     message as described below.
 
-  // TODO: here the sending can be derived
-
 * When receiving a data message in the same DH Ratchet:
   * Store any message keys from the current DH Ratchet that correspond to
     messages that have not yet arrived:
@@ -2655,8 +2659,12 @@ different from `their_ecdh` and the `Public DH Key` is different from
          * while `k` < received `j`:
              * Derive
                `chain_key_r[i-1][k+1], MKenc = KDF_2(chain_key_r[i-1][k])`.
+             * Derive (this is done any time a message key is stored as
+               there is no way of knowing if the message that will be received
+               in the future will ask for its computation):
+               `extra_symm_key = KDF_1(0xFF || chain_key_r[i-1][j])`.
              * Store
-               `MKenc = skipped_MKenc[Public ECDH Key, Public DH Key, i, k]`.
+               `MKenc, extra_sym_key = skipped_MKenc[Public ECDH Key, Public DH Key, i, k]`.
              * Increment `k = k + 1`.
              * Delete `chain_key_r[i-1][k]`.
   * Derive the next receiving chain key:
