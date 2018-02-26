@@ -714,12 +714,12 @@ Key variables:
     DH ratchet) or a hash of the previuos brace_key: 'KDF_1(brace_key)'
   'mac_keys_to_reveal': the MAC keys to be revealed in the first data message
     sent of the next ratchet.
-  'skipped_MKenc': Dictionary of skipped-over message keys, indexed by
-   their_ecdh, their_dh and message number. Raises an exception if too many
-   elements are stored.
-   'MAX_SKIP' a constant that specifies the maximum number of message keys
-    that can be skipped. It should be set by the implementer. Take into
-    account that it should be set high enough to tolerate routine lost or
+  'skipped_MKenc': Dictionary of stored skipped-over message keys, indexed by
+    their_ecdh, their_dh, the racthet id (i) and the message number (j).
+    Errors if too many elements are stored.
+  'MAX_SKIP' a constant that specifies the maximum number of message keys
+    that can be skipped in a ratchet. It should be set by the implementer. Take
+    into account that it should be set high enough to tolerate routine lost or
     delayed messages, but low enough that a malicious sender can't trigger
     excessive recipient computation.
 ```
@@ -2598,11 +2598,11 @@ Decrypting a data message consists of:
 
 * Try to decrypt the message with a stored skipped message key:
 
-  * If `Public ECDH Key`, `Public DH Key` and the received `j` is in
-    `skipped_MKenc`:
+  * If `Public ECDH Key`, `Public DH Key`, and the received `j` and `i` are in
+    the `skipped_MKenc` dictionary:
       * Get the mssage key:
-        `MKenc = skipped_MKenc[Public ECDH Key, Public DH Key, j]`.
-      * Securely delete `skipped_MKenc[Public ECDH Key, Public DH Key, j]`.
+        `MKenc = skipped_MKenc[Public ECDH Key, Public DH Key, i, j]`.
+      * Securely delete `skipped_MKenc[Public ECDH Key, Public DH Key, i, j]`.
       * Calculate `MKmac = KDF_2(0x02 || MK_enc)`.
       * Use the `MKmac` to verify the MAC of the message.
       * Set `nonce` as the "nonce" from the received data message.
@@ -2615,24 +2615,23 @@ Decrypting a data message consists of:
       * Securely delete `MKenc` and `nonce`.
       * Add `MKmac` to the list `mac_keys_to_reveal`.
 
-// TODO: define if we are going to ratchet with `j`.
-
-* Given a new ratchet (the received `j` is equal to 0, `Public ECDH Key` is
-different from `their_ecdh` and `Public DH Key` is different from `their_dh`):
+* Given a new ratchet (the received `j` is equal to 0, the `Public ECDH Key` is
+different from `their_ecdh` and the `Public DH Key` is different from
+`their_dh`):
 
   * Store any message keys from the previous DH Ratchet that correspond to
     messages that have not yet arrived:
       * If `k` + `MAX_SKIP` < received `pn`:
          * Inform the user that an unreadable encrypted message was received
-           by replying with an Error Message: ERROR_2.
+           by replying with an Error Message: ERROR_2. // TODO: check this.
       * If `chain_key_r` is not NULL:
          * while `k` < received `pn`:
              * Derive
                `chain_key_r[i-1][k+1], MKenc = KDF_2(chain_key_r[i-1][k])`.
-             * Store `MKenc = skipped_MKenc[Public ECDH Key, Public DH Key, k]`.
+             * Store
+               `MKenc = skipped_MKenc[Public ECDH Key, Public DH Key, i, k]`.
              * Increment `k = k + 1`.
              * Delete `chain_key_r[i-1][k]`.
-
   * Rotate the ECDH keys and brace key, see
     [Rotating ECDH keys and brace key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
     section.
@@ -2658,7 +2657,8 @@ different from `their_ecdh` and `Public DH Key` is different from `their_dh`):
          * while `k` < received `j`:
              * Derive
                `chain_key_r[i-1][k+1], MKenc = KDF_2(chain_key_r[i-1][k])`.
-             * Store `MKenc = skipped_MKenc[Public ECDH Key, Public DH Key, k]`.
+             * Store
+               `MKenc = skipped_MKenc[Public ECDH Key, Public DH Key, i, k]`.
              * Increment `k = k + 1`.
              * Delete `chain_key_r[i-1][k]`.
   * Derive the next receiving chain key:
