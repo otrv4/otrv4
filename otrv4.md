@@ -912,14 +912,13 @@ When sending or receiving data messages, you must calculate the message keys:
 ```
 derive_enc_mac_keys(chain_key):
   MKenc = KDF_1(0x01 || chain_key)
-  MKmac = KDF_2(0x02 || MK_enc)
+  MKmac = KDF_2(0x02 || MKenc)
   return MKenc, MKmac
 ```
 
 ### Resetting state variables and key variables
 
-The state variables are set to `0` and the key variables are set to `NIL` for
-this channel.
+The state variables are set to `0` and the key variables are set to `NIL`.
 
 ### Session expiration
 
@@ -941,6 +940,8 @@ To expire the session:
       and [here](#non-interactive-auth-message),
       any old MAC keys that remain unrevealed, and the
       extra symmetric key if present.
+   4. Reset the state and key variables, as defined in
+      [its section](#resetting-state-variables-and-key-variables).
 
 3. Transition the protocol state machine to `START`
 
