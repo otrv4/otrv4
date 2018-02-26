@@ -188,8 +188,8 @@ participant, like Bob, encrypted messages while he is offline.
 Messages in a conversation can be exchanged over an insecure channel, where an
 attacker can eavesdrop or interfere with the messages.
 
-The network model provides in-order delivery of messages, however some messages
-may not be delivered.
+The network model provides in-order and out-of-order delivery of messages.
+Some messages may not be delivered.
 
 OTRv4 does not protect against an active attacker performing Denial of Service
 attacks.
