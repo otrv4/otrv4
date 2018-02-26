@@ -1347,9 +1347,9 @@ Bob will be initiating the DAKE with Alice.
           [Inmediately sending a data message](#inmediately-sending-a-data-message)
           section. Note that he will not perform a new DH ratchet, but he
           will advertize the new derived `our_ecdh.public` and `our_dh.public`
-          in every data message sent. If she did not attached an encrypted
-          message to the Auth-I message, she will start by using the derived and
-          decided `chain_key_s[i][j]`. Otherwise, she will use the current
+          in every data message sent. If he did not attached an encrypted
+          message to the Auth-I message, he will start by using the derived and
+          decided `chain_key_s[i][j]`. Otherwise, he will use the current
           `chain_key_s[i][j]`.
 
 **Alice:**
@@ -2076,6 +2076,9 @@ them. This message will be referred as "attached encrypted message":
 - The Non-Interactive-Auth message in the case of XZDH of the non-interactive
   DAKE.
 
+Note that if a data message arrives prior to the Auth-I or the
+Non-Interactive-Auth message, this data message will be ignored.
+
 #### Attaching an encrypted message to Auth-I message in DAKEZ
 
 ##### Encrypting the message
@@ -2303,10 +2306,9 @@ Non-Interactive Auth message, a participant can inmmediately send a data message
 (prior to receiving one from the other party). Note that in this case, the party
 will have `their_ecdh` and `their_dh` set to NULL.
 
-// TODO: check this
-
 If the participant has not attached an encrypted data message to the Auth-I
-message or this is the first data message sent:
+message or to the Non-Interactive-Auth message, or this is the first data
+message sent after the derivation of the Mixed shared secret:
 
   * Increment the ratchet id `i = i + 1`.
 
@@ -2343,10 +2345,10 @@ Otherwise:
 
 ### Inmediately receiving a data message
 
-After verifying the Auth-I message and deriving the mixed shared secret `K`, a
-participant can inmmediately receive a data message (prior to receiving a data
-message from the other party or not). Note that in this case, the party will
-have `their_ecdh` and `their_dh` set to NULL.
+After verifying the Auth-I message or the Non-Interactive-Auth message, and
+deriving the mixed shared secret `K`, a participant can inmmediately receive a
+data message. Note that in this case, the party will have `their_ecdh` and
+`their_dh` set to NULL.
 
 If this is the first data message received:
 
@@ -2366,20 +2368,15 @@ In any case:
   ```
 
 * Securely delete `chain_key_r[i-1][j]`.
-* Use the `MKmac` to verify the MAC of the message.
-* Increment the next receiving message id `k = k + 1`.
-* Set nonce as the "nonce" from the received data message.
-* Use the `MKenc` and `nonce` to decrypt the message:
-  `decrypted_message = XSalsa20_Dec(MKenc, nonce, m)`.
-* Securely delete `MKenc`.
+* Follow the decryption and MAC verification of the data message as defined
+  in the [When you receive a Data Message](#when-you-receive-a-data-message)
+  section. Note that a new ratchet will not be performed.
 * Set `their_ecdh` as the "Public ECDH key" from the message. Note that this
   key will be used when the participant wants to send a data message (when
   the participant will perform a DH ratchet).
 * Set `their_dh` as the "Public DH Key" from the message. Note that this
   key will be used when the participant wants to send a data message (when
   the participant will perform a DH ratchet).
-* Add `MKmac` to the list mac_keys_to_reveal.
-* Adds `auth_mac_k` to the list `mac_keys_to_reveal`.
 
 ## Data Exchange
 
