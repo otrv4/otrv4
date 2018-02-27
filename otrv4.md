@@ -162,16 +162,16 @@ with strong forward secrecy.
 ### Conversation started by a Non-Interactive DAKE
 
 ```
-Alice                        Prekey Server                  Bob
+Alice                      Untrusuted Prekey Server         Bob
 --------------------------------------------------------------------------------
                                     (<--------------------- Pre-conversation: Creates
                                                             and sends a Prekey Message)
 Retrieves Bob's  ----------------->
 Prekey Message
 
-Establishes Non-interactive ------------------------------->
-Conversation with Bob and
-sends the first Data Message
+Establishes Conversation  ------------------------------->
+with XZDH and sends the
+first Data Message
 
 Exchanges Data Messages <---------------------------------->  Exchanges Data Messages
 
@@ -2775,8 +2775,7 @@ OTR message as follows:
     structure (as `index` runs from 1 to `total` inclusive:
 
   ```
-  "?OTR|%x|%x,%hu,%hu,%s," , sender_instance, receiver_instance, index, total,
-  piece[index]
+  "?OTR|%x|%x,%hu,%hu,%s," , sender_instance, receiver_instance, index, total, piece[index]
   ```
 
 The message should begin with `?OTR|` and end with `,`.
