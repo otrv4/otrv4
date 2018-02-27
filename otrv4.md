@@ -1369,11 +1369,13 @@ A valid Identity message is generated as follows:
 
 To verify an Identity message:
 
-1. Validate the User Profile.
-2. Verify that the point `Y` received is on curve Ed448. See
+1. Verify if the message type is identity (0x08).
+2. Verify protocol version on message.
+3. Validate the User Profile.
+4. Verify that the point `Y` received is on curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
-3. Verify that the DH public key `B` is from the correct group. See
+5. Verify that the DH public key `B` is from the correct group. See
    [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
    section for details.
 
