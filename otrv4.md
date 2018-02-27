@@ -413,14 +413,15 @@ Message Authentication Code (MAC):
   64 bytes MAC data
 
 Ed448 point (POINT):
-  57 bytes data
+  57 bytes data // TODO: data is big endian but this should be little endian
 
 Ed448 scalar (SCALAR):
-  56 bytes data
+  56 bytes data // TODO: data is big endian but this should be little endian
 
 User Profile (USER-PROF):
   Detailed in "User Profile Data Type" section
 ```
+
 In order to encode a point or a scalar into `POINT` or `SCALAR` data types, and
 to decode a `POINT` or `SCALAR` data types into a point or a scalar, refer to
 the [Encoding and Decoding](#encoding-and-decoding) section.
