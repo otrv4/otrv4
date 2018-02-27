@@ -177,11 +177,11 @@ Exchanges Data Messages <---------------------------------->  Exchanges Data Mes
 
 ```
 
-The conversation begins when one participant retrieves the other's participant
-Prekey message from a prekey server. Prior to the start of the conversation,
-this Prekey message was uploaded by the other participant's client to a server.
-This is done in order to allow other participants, like Alice, to send the other
-participant, like Bob, encrypted messages while he is offline.
+The conversation can begin when one participant retrieves the other's
+participant Prekey message from a prekey server. Prior to the start of the
+conversation, this Prekey message would have had to be uploaded by the other
+participant's client to a server. This have to be done so other participants,
+like Alice, can send messages while to them while they are offline.
 
 ## Assumptions
 
@@ -377,6 +377,7 @@ The following key derivation functions are used:
 KDF_1(x) = take_first_32_bytes(SHAKE-256("OTR4" || x))
 KDF_2(x) = take_first_64_bytes(SHAKE-256("OTR4" || x))
 ```
+
 ```
 KDF(x, y) The y first bytes of the SHAKE-256 output for input x
 ```
@@ -460,9 +461,11 @@ A curve point is decoded as follows:
       of `(num/denom)`, compute the candidate root `x = (num/denom)^((p+1)/4)`.
       This can be done using a single modular powering for both the
       inversion of `denom` and the square root:
+
       ```
            x = ((num ^ 3) * denom * (num^5 * denom^3) ^ ((p-3)/4)) (mod p)
       ```
+
    2.  If `denom * x^2 = num`, the recovered x-coordinate is `x`.  Otherwise, no
        square root exists, and decoding fails.
 3. Use the `x_0` bit to select the right square root:
@@ -655,12 +658,12 @@ roles), the expected attributes (expressed in fixed length) should be included.
 
 ### OTR Error Messages
 
-Any message containing "?OTR Error: " at the starting position is an OTR Error Message.
-The following part of the message should contain human-readable details of the error.
-The message may also include a specific code at the beginning, e.g. "?OTR Error:
-ERROR_N: ". This code is used to identify which error is being received for optional
-localization of the message. OTRv4 Error Messages are unencoded: they are not base-64
-encoded binary.
+Any message containing "?OTR Error: " at the starting position is an OTR Error
+Message. The following part of the message should contain human-readable details
+of the error. The message may also include a specific code at the beginning,
+e.g. "?OTR Error: ERROR_N: ". This code is used to identify which error is being
+received for optional localization of the message. OTRv4 Error Messages are
+unencoded: they are not base-64 encoded binary.
 
 Currently, the following errors are supported:
 
@@ -670,11 +673,13 @@ Currently, the following errors are supported:
   ERROR_2:
     Not in private state message
 ```
-Note: The string "?OTR Error:" must be in at the start position of the message because
-at least of these reasons:
- - The possibility for playing games with the state machine by "embedding" this string
-    inside some other message.
- - The potential of social engineering depending on the UI of the chat client used.
+Note: The string "?OTR Error:" must be in at the start position of the message
+because of these reasons:
+
+ - The possibility for playing games with the state machine by "embedding" this
+   string inside some other message.
+ - The potential of social engineering depending on the UI of the used chat
+   client.
 
 ## Key Management
 
@@ -715,7 +720,7 @@ Key variables:
   'mac_keys_to_reveal': the MAC keys to be revealed in the first data message
     sent of the next ratchet.
   'skipped_MKenc': Dictionary of stored skipped-over message keys, indexed by
-    their_ecdh, their_dh, the racthet id (i) and the message number (j).
+    their_ecdh, their_dh, the ratchet id (i) and the message number (j).
     Errors if too many elements are stored.
   'MAX_SKIP' a constant that specifies the maximum number of message keys
     that can be skipped in a ratchet. It should be set by the implementer. Take
