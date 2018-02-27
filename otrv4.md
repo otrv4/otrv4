@@ -1227,10 +1227,12 @@ Bob will be initiating the DAKE with Alice.
 **Alice:**
 
 1. Receives an Identity message from Bob:
-    * Verifies the Identity message as defined in the
-      [Identity message](#identity-message) section.
-    * Picks a compatible version of OTR listed in Bob's profile. If the versions
-      are incompatible, Alice does not send any further messages.
+    * Verifies the Identity message as defined on the
+      [Identity message](#identity-message) section. If the Bob's publickey cannot be
+      verified Alice does not send any further messages.
+    * Picks the newest compatible version of OTR listed in Bob's profile.
+      If there aren't any compatible versions, Alice does not send any further
+      messages.
     * Sets `Y` as `their_ecdh`.
     * Sets `B` as `their_dh`.
 2. Generates an Auth-R message, as defined in
