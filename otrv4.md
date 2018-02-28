@@ -800,8 +800,9 @@ DH(ai, Bi)
 ### Rotating ECDH keys and brace key as sender
 
 Before sending the first reply (i.e. a new message considering a previous
-message has been received) the sender will rotate their ECDH keys and brace key.
-This is for the computation of the Mixed shared secret `K` (see
+message has been received) or sending the first data message, the sender will
+rotate their ECDH keys and brace key. This is for the computation of the Mixed
+shared secret `K` (see
 [Deriving Double Ratchet Keys](#deriving-double-ratchet-keys)).
 
 Before rotating the keys:
@@ -940,8 +941,8 @@ hours, Alice's session will expire.
 The session expiration timer begins at different times for the sender and the
 receiver of the first data message in a conversation. The sender begins their
 timer as they send the first data message or as they attach an encrypted
-message to either the Auth-I message or the Non-Interactive-Auth message. The
-receiver begins their timer when they receive this first data message.
+message to the Non-Interactive-Auth message. The receiver begins their timer
+when they receive this first data message.
 
 Since the session expiration uses a timer, it can be compromised by clock
 errors. Some errors may cause the session to be deleted too early and result in
@@ -1253,7 +1254,7 @@ Bob will be initiating the DAKE with Alice.
 
 **Bob:**
 
-1. Receives Auth-R message from Alice:
+1. Receives the Auth-R message from Alice:
    * Picks a compatible version of OTR listed on Alice's profile, and follows
      the specification for this version. If the versions are incompatible, Bob
      does not send any further messages.
@@ -1327,7 +1328,8 @@ Bob will be initiating the DAKE with Alice.
    * In the case that she wants to immediately send a data message:
      * Follows what is defined in the
        [When you send a Data Message](#when-you-send-a-data-message)
-       section. Note that she will perform a new DH ratchet.
+       section. Note that she will perform a new DH ratchet by using the
+       already derived `our_ecdh` and `our_dh`.
 
 **Bob:**
 
@@ -1337,8 +1339,9 @@ Bob will be initiating the DAKE with Alice.
      new public keys from Alice:
      * Follows what is defined in the
        [When you receive a Data Message](#when-you-receive-a-data-message)
-       section. Note that he will perform a new DH ratchet. When he wants to
-       send a data message, he will follow the
+       section. Note that he will perform a new DH ratchet for the first
+       received data message. When he wants to send a data message, he will
+       follow the
        [When you send a Data Message](#when-you-send-a-data-message) section,
        and perform a new DH Ratchet.
 
@@ -1559,7 +1562,7 @@ Verify and decrypt message if included
 
 **Bob:**
 
-1. Generates an Prekey message, as defined in
+1. Generates a Prekey message, as defined in
    [Prekey message](#prekey-message) section.
 2. Sets `Y` and `y` as `our_ecdh`: the ephemeral ECDH keys.
 3. Sets `B` as  and `b` as `our_dh`: the ephemeral 3072-bit DH keys.
@@ -1641,7 +1644,8 @@ Verify and decrypt message if included
        * Follows what is defined in the
          [When you send a Data Message](#when-you-send-a-data-message)
          section. Note that she will perform a new DH ratchet if no encrypted
-         message was attached to the Non-Interactive-Auth message.
+         message was attached to the Non-Interactive-Auth message, by using the
+         already derived `our_ecdh` and `our_dh`.
 
 **Bob:**
 
@@ -1788,8 +1792,8 @@ A valid Non-Interactive-Auth message is generated as follows:
 5. Compute `K_ecdh = ECDH(x, their_ecdh)`.
 6. Compute `k_dh = DH(a, their_dh)` and `brace_key = KDF_1(k_dh)`.
 7. Compute
-  `tmp_k = KDF_2(K_ecdh || ECDH(x, their_shared_prekey) || ECDH(x, Pkb) || brace_key)`.
-  This value is needed for the generation of the Mixed shared secret.
+   `tmp_k = KDF_2(K_ecdh || ECDH(x, their_shared_prekey) || ECDH(x, Pkb) || brace_key)`.
+   This value is needed for the generation of the Mixed shared secret.
 8. Calculate the Auth MAC key `auth_mac_k = KDF_2(0x01 || tmp_k)`.
 9. Compute
    `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || their_shared_prekey || KDF_2(phi)`.
@@ -1935,12 +1939,12 @@ overview) can attach an encrypted message to the already generated
 Non-Interactive-Auth message, but prior to sending it. For this, the
 participant:
 
-* Rotates the ECDH keys and brace key, see
+* Rotates the ECDH keys and brace key by using the already derived `our_ecdh`
+  and `our_dh`.see
   [Rotating ECDH keys and brace key as sender](#rotating-ecdh-keys-and-brace-key-as-sender) section.
-  The new ECDH public key created by the sender in this process will be the
-  'Public ECDH Key' for the message. If a new public DH key is created in this
-  process, it will be the 'Public DH Key' for the message. If it is not created,
-  then it will be empty.
+  The already derived ECDH public key created by the sender in this process will
+  be the 'Public ECDH Key' for the message. The already derived DH public key
+  will be the 'Public DH Key' for the message.
 * Calculates the shared secret `K = KDF_2(K_ecdh || brace_key)`.
 * Derive new set of keys:
   `root_key[i], chain_key_s[i][j] = derive_ratchet_keys(sending, root_key[i-1], K)`.
@@ -2274,8 +2278,8 @@ This is done by:
 
 * Try to decrypt the message with a stored skipped message key:
 
-  * If `Public ECDH Key`, `Public DH Key`, and the received `j` and `i` are in
-    the `skipped_MKenc` dictionary:
+  * If `Public ECDH Key`, `Public DH Key` (if present), and the received `j`
+    and `i` are in the `skipped_MKenc` dictionary:
       * Get the message key and the extra symmetric key (if needed):
         `MKenc, extra_symm_key = skipped_MKenc[Public ECDH Key, Public DH Key, i, j]`.
       * Securely delete
