@@ -1155,7 +1155,12 @@ If only version 4 is supported:
 
 The user profile signature for version 4 is generated as defined in RFC 8032
 [\[9\]](#references), section 5.2.6. The flag `f` is set to `0` and the context
-`c` is an empty constant string. It is generated as follows:
+`c` is an empty constant string.
+
+Note that although the RFC states that parameters are defined as octets,
+they are defined as bytes in OTRv4.
+
+It is generated as follows:
 
 ```
 The inputs are the symmetric key (57 bytes, defined on 'Public keys and
