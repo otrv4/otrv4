@@ -906,6 +906,8 @@ To rotate the brace key:
 
 ### Deriving Double Ratchet keys
 
+To derive the next root key and the current chain key:
+
 ```
 derive_ratchet_keys(purpose, root_key[i-1], K):
   root_key[i] = KDF_2(0x01 || KDF_2(root_key[i-1] || K))
@@ -930,28 +932,34 @@ The state variables are set to `0` and the key variables are set to `NIL`.
 
 ### Session expiration
 
-An attacker may capture some messages to compromise their ephemeral secrets at a
-later time. To mitigate against this, message keys should be deleted regularly.
-OTRv4 implements this by detecting whether a new ECDH key has been generated
-within a certain amount of time. If it hasn't, then the session is expired.
+OTRv4 can vulnerable to a situation when an attacker capture some messages to
+compromise their ephemeral secrets at a later time. To mitigate against this,
+message keys should be deleted regularly. OTRv4 implements this by detecting
+whether a new ECDH key has been generated within a certain amount of time. If it
+hasn't, the session is expired.
 
-To expire the session:
+To expire a session:
 
-1. Send a TLV type 1 (Disconnected) Message
-2. Securely delete all keys and data associated with the conversation.
+1. Send a TLV type 1 (Disconnected) Message.
+2. Calculate the MAC keys corresponding to the stored message keys in the
+   `skipped_MKenc` dictionary and put them on the `old_mac_keys` list (so they
+   are revealed the next time a message is sent in a new ratchet).
+3. Securely delete all keys and data associated with the conversation.
    This includes:
 
    1. The root key and all chain keys.
-   2. The ECDH keys, DH keys and brace key.
-   3. The Secure Session ID (SSID) whose creation is described
+   2. All message keys and extra symmetric keys stored in the `skipped_MKenc`
+      dictionary.
+   3. The ECDH keys, DH keys and brace keys.
+   4. The Secure Session ID (SSID) whose creation is described
       [here](#interactive-deniable-authenticated-key-exchange-dake)
       and [here](#non-interactive-auth-message),
       any old MAC keys that remain unrevealed, and the
       extra symmetric key if present.
-   4. Reset the state and key variables, as defined in
+   5. Reset the state and key variables, as defined in
       [its section](#resetting-state-variables-and-key-variables).
 
-3. Transition the protocol state machine to `START`
+4. Transition the protocol state machine to `START`
 
 The session expiration time is decided individually by each party so it is
 possible for one person to have an expiration time of two hours and the other
@@ -964,8 +972,10 @@ sets her session expiration time to be 2 hours, in order to reset Alice's
 session expiration timer, Bob must create a reply and Alice must create a
 response to this reply. If this does not happen within two hours, Alice will
 expire her session and delete all keys associated with this conversation. If
-she receives a message from Bob after two hours, she cannot decrypt the message
-and thus she cannot reveal the MAC key associated with it.
+she receives a message from Bob after two hours, she will not be able to decrypt
+the message and thus she will not reveal the MAC key associated with it. Note,
+nevertheless, that the MAC keys corresponding to stored message keys (from
+messages that have not yet arrived) will be derived and revealed.
 
 It is also possible for the heartbeat messages to keep a session from expiring.
 Sticking with the above example of Alice's 2 hour session expiration time, Bob
@@ -977,8 +987,9 @@ hours, Alice's session will expire.
 
 The session expiration timer begins at different times for the sender and the
 receiver of the first data message in a conversation. The sender begins their
-timer when they calculate their first ECDH message. The receiver begins their
-timer when they receive the first data message.
+timer as they send the first data message or as they attach an encrypted
+message to either the Auth-I message or the Non-Interactive-Auth message. The
+receiver begins their timer when they receive this first data message.
 
 Since the session expiration uses a timer, it can be compromised by clock
 errors. Some errors may cause the session to be deleted too early and result in
