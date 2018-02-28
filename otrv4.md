@@ -1392,8 +1392,9 @@ Sender's instance tag (INT)
   The instance tag of the person sending this message.
 
 Receiver's instance tag (INT)
-  The instance tag of the intended recipient. For an Identity message, this
-  will often be 0 since the other party may not have set its instance
+  The instance tag of the intended recipient. As the instance tag is used
+  to differentiate the clients that are in use for an user for Identity messages,
+  this will often be 0 since the other party may not have set its instance
   tag yet.
 
 Sender's User Profile (USER-PROF)
