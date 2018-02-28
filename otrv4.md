@@ -799,49 +799,6 @@ DH(ai, Bi)
   return k_dh = ai ^ Bi
 ```
 
-### Deciding between chain keys
-
-Once the DAKE completes, Alice and Bob derive two chain keys from the mixed
-shared secret. Both sides will compare their public keys to choose which chain
-key will be used for encrypting and decrypting data messages:
-
-- Alice (and, similarly, Bob) determines if she is the "low" end or the "high"
-  end of this ratchet. If Alice's encoded ephemeral ECDH public key (as a 57
-  byte array as defined in the
-  [Point encoding](https://github.com/otrv4/otrv4/blob/master/otrv4.md#point)
-  section) is numerically greater than Bob's public key, then she is the "high"
-  end. Otherwise, she is the "low" end.
-
-- Alice (and, similarly, Bob) selects the chain keys for sending and receiving:
-
-  - If she is the "high" end, use `Ca` as the sending chain key (`chain_key_s`)
-    and `Cb` as the receiving chain key (`chain_key_r`).
-
-  - If she is the "low" end, use `Cb` as the sending chain key (`chain_key_s`)
-    and `Ca` as the receiving chain key (`chain_key_r`).
-
-This comparison function will take the same semantics as the `strcmp` function
-from C, mainly:
-
-It will start comparing the first character of each byte array (`Ca`, `Cb`). If
-they are equal to each other, it will continue with the following pairs until
-the characters differ or until a terminating null-character is reached. It will
-return:
-
-* a `<0` if the first character that does not match has a lower value in `Ca`
-  than in `Cb`.
-* a `0` if contents of both parameters are equal.
-* a `>0` if the first character that does not match has a greater value in `Ca`
-  than in `Cb`.
-
-```
-decide_between_chain_keys(Ca, Cb):
-  if strcmp(our_ecdh.public, their_ecdh) > 0
-    return Ca, Cb
-  else
-    return Cb, Ca
-```
-
 ### Rotating ECDH keys and brace key as sender
 
 Before sending the first reply (i.e. a new message considering a previous
@@ -1291,7 +1248,7 @@ Bob will be initiating the DAKE with Alice.
     * Calculates the Brace Key `brace_key = KDF_1(k_dh)`.
       Securely deletes `k_dh`.
     * Calculates the Mixed shared secret `K = KDF_2(K_ecdh || brace_key)`.
-      Securely deletes `k_ecdh` and `brace_key`.
+      Securely deletes `K_ecdh` and `brace_key`.
     * Calculates the SSID from shared secret: the first 8 bytes of
       `KDF_2(0x00 || K)`.
 6. Sends Bob the Auth-R message (see [Auth-R message](#auth-r-message) section).
@@ -1311,7 +1268,7 @@ Bob will be initiating the DAKE with Alice.
       group and sets it as `their_dh`. See
       [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
       section for details.
-3. Verifies the Auth-R message as defined on the
+3. Verifies the Auth-R message as defined in the
    [Auth-R message](#auth-r-message) section.
 4. Creates an Auth-I message (see [Auth-I message](#auth-i-message) section).
 5. Calculates the Mixed shared secret (`K`) and the SSID:
@@ -1372,18 +1329,20 @@ Bob will be initiating the DAKE with Alice.
    * In the case that she wants to immediately send a data message:
      * Follows what is defined in the
        [When you send a Data Message](#when-you-send-a-data-message)
-       section.
-       Note that she will perform a new DH ratchet.
+       section. Note that she will perform a new DH ratchet.
 
 **Bob:**
 
 1. At this point, the interactive DAKE is complete for Bob, but he has to
    correctly setup the double ratchet mechanism:
-   * In the case that he immediately receives a data message that advertizes
-     the new public keys from Alice:
+   * In the case that he immediately receives a data message that advertizes the
+     new public keys from Alice:
      * Follows what is defined in the
        [When you receive a Data Message](#when-you-receive-a-data-message)
-       section. Note that he will perform a new DH ratchet.
+       section. Note that he will perform a new DH ratchet. When he wants to
+       send a data message, he will follow the
+       [When you send a Data Message](#when-you-send-a-data-message) section,
+       and perform a new DH Ratchet.
 
 #### Identity message
 
@@ -1557,12 +1516,6 @@ Receiver's instance tag (INT)
 
 sigma (RING-SIG)
   The RING-SIG proof of authentication value.
-
-Attached DAKEZ Encrypted Message (DAKEZ-ENCRYPTED-MSG)
-  (optional: if an encrypted message is attached)
-  The DAKEZ-ENCRYPTED-MSG that consists of an attached message id,
-  a public ecdh key (used for encrypting the message), a public dh key
-  (used for encrypting the message) a nonce and the encrypted message.
 ```
 
 ## Offline Conversation Initialization
