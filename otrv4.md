@@ -2421,7 +2421,18 @@ rotations and revealing MAC keys. It should not be displayed to the user.
 Alice                                                                           Bob
 -----------------------------------------------------------------------------------
 Initialize root key, chain keys                        Initialize root key, chain keys
+and the other party ECDH and DH keys                   and the other party ECDH and DH keys
+
+Derive MKenc & MKmac
+Generate MAC,
+Encrypt message 0_0
+
 Send data message 0_0            -------------------->
+
+Derive MKenc & MKmac
+Generate MAC,
+Encrypt message 0_1
+
 Send data message 0_1            -------------------->
 
                                                        Receive data message 0_0
@@ -2430,12 +2441,21 @@ Send data message 0_1            -------------------->
                                                        Verify MAC, Decrypt message 0_0
 
                                                        Receive data message 0_1
-                                                       Compute receiving chain key 1_1
+                                                       Compute receiving chain key 0_1
                                                        Derive MKenc & MKmac
                                                        Verify MAC, Decrypt message 0_1
 
-                                 Perform a new ratchet
+                                 Perform a new DH Ratchet
+                                                       Derive MKenc & MKmac
+                                                       Generate MAC,
+                                                       Encrypt message 1_0
+
                                  <-------------------- Send data message 1_0
+
+                                                       Derive MKenc & MKmac
+                                                       Generate MAC,
+                                                       Encrypt message 1_1
+
                                  <-------------------- Send data message 1_1
 
 Receive data message 1_0
@@ -2511,7 +2531,7 @@ Encrypted message (DATA)
 Authenticator (MAC)
   The MAC with the appropriate MAC key (see below) of everything:
   from the protocol version to the end of the encrypted message.
-  Note: The old MAC keys are not included in the authenticator.
+  Note: The old MAC keys are not included in this field.
 
 Old MAC keys to be revealed (DATA)
   See 'Revealing MAC Keys section'.
@@ -2522,10 +2542,10 @@ Old MAC keys to be revealed (DATA)
 In order to send an encoded data message, a key is required to encrypt the
 message in it. This per-message key (`MKenc`) is the output key from the sending
 and receiving KDF chains. As defined on [\[2\]](#references), the KDF keys for
-these chains are called 'chain keys'. If the sending message's id `j` has been
-set to `0`, and a participant wants to send a data message after receiving
-another one, ratchet keys should be rotated (the ECDH keys, the brace key, the
-root key and the sending chain key).
+these chains are called 'chain keys'. When a participant wants to send a data
+message after receiving another one, ratchet keys should be rotated (the ECDH
+keys, the brace key, the root key and the sending chain key) and the `j`
+parameter should be set to 0.
 
 Given a new DH Ratchet:
 
@@ -2537,7 +2557,7 @@ Given a new DH Ratchet:
     this process, it will be the 'Public DH Key' for the message. If it is
     not created, then it will be empty.
   * Calculate the shared secret `K = KDF_2(K_ecdh || brace_key)`.
-  * Derive new set of keys
+  * Derive new set of keys:
     `root_key[i], chain_key_s[i][j] = derive_ratchet_keys(sending,
      root_key[i-1], K)`.
   * Securely delete the previous root key (`root_key[i-1]`) and `K`.
@@ -2565,19 +2585,7 @@ When sending a data message in the same DH Ratchet:
    extra_symm_key = KDF_1(0xFF || chain_key_s[i-1][j])
    ```
 
-   In the case where a data message is sent from Alice when she immediately
-   finishes the interactive DAKE or when Bob immediately finishes the
-   non-interactive DAKE, derive the next sending chain key:
-
-   ```
-   MKenc, MKmac = derive_enc_mac_keys(chain_key_s[i][j])
-   extra_symm_key = KDF_2(0xFF || chain_key_s[i][j])
-   ```
-
-  * Securely delete `chain_key_s[i-1][j]`. In the case where a data message is
-    sent from Alice when she inmediatly finishes the interactive DAKE or
-    when Bob inmediatly finishes the non-interactive DAKE, securely
-    delete: `chain_key_s[i][j]`
+  * Securely delete `chain_key_s[i-1][j]`.
   * Increment the next sending message id `j = j + 1`.
   * Generate a new random 24 bytes value to be the `nonce`.
   * Use the `MKenc` to encrypt the message:
@@ -2607,28 +2615,30 @@ the brace key, the root key and the receiving chain key).
 Decrypting a data message consists of:
 
 1. If the encrypted message corresponds to a skipped and stored message key,
-   the message is decrypted with that key and the message key is deleted from
+   the message is verified and decrypted with that key which is deleted from the
    storage.
-2. If a new ratchet key has been received, any skipped message keys are stored
-   from the receiving ratchet and a new DH ratchet is performed.
-3. Any skipped message keys from the current receiving ratchet are stored,
-   and a symmetric-key ratchet is performed to derive the current message key
-   and next receiving chain key. The message is then decrypted.
+2. If a new ratchet key has been received, any skipped message keys from the
+   previous receiving ratchetare stored and a new DH ratchet is performed.
+3. If a new message from the current receiving ratchet is received, any skipped
+   message keys from it are stored, and a symmetric-key ratchet is performed to
+   derive the current message key and the next receiving chain key. The message
+   is then verified and decrypted.
 
 This is done by:
 
 * Check that the receiver's instance tag matches your sender's instance tag.
+  * If they do not match, discard the message.
 
 * Try to decrypt the message with a stored skipped message key:
 
   * If `Public ECDH Key`, `Public DH Key`, and the received `j` and `i` are in
     the `skipped_MKenc` dictionary:
-      * Get the mssage key and the extra symmetric key, if needed:
+      * Get the message key and the extra symmetric key (if needed):
         `MKenc, extra_symm_key = skipped_MKenc[Public ECDH Key, Public DH Key, i, j]`.
       * Securely delete
         `skipped_MKenc[Public ECDH Key, Public DH Key, i, j]`.
       * Calculate `MKmac = KDF_2(0x02 || MKenc)`.
-      * Use the `MKmac` to verify the MAC of the message.
+      * Use the `MKmac` to verify the MAC of the data message.
       * Set `nonce` as the "nonce" from the received data message.
       * Decrypt the message using `MKenc` and `nonce`:
 
@@ -2640,8 +2650,8 @@ This is done by:
       * Add `MKmac` to the list `mac_keys_to_reveal`.
 
 * Given a new ratchet (the received `j` is equal to 0, the `Public ECDH Key` is
-different from `their_ecdh` and the `Public DH Key` is different from
-`their_dh`):
+  different from `their_ecdh` and the `Public DH Key` is different from
+  `their_dh` -if present-):
 
   * Store any message keys from the previous DH Ratchet that correspond to
     messages that have not yet arrived:
@@ -2651,15 +2661,16 @@ different from `their_ecdh` and the `Public DH Key` is different from
       * If `chain_key_r` is not NULL:
          * while `k` < received `pn`:
              * Derive
-               `chain_key_r[i-1][k+1], MKenc = KDF_2(chain_key_r[i-1][k])`.
+               `chain_key_r[i][k+1], MKenc = KDF_2(chain_key_r[i][k])`.
              * Derive (this is done any time a message key is stored as
                there is no way of knowing if the message that will be received
-               in the future will ask for its computation):
-               `extra_symm_key = KDF_1(0xFF || chain_key_r[i-1][j])`.
+               in the future will ask for the computation of the extra
+               symmetric key):
+               `extra_symm_key = KDF_1(0xFF || chain_key_r[i][j])`.
              * Store
                `MKenc, extra_sym_key = skipped_MKenc[Public ECDH Key, Public DH Key, i, k]`.
              * Increment `k = k + 1`.
-             * Delete `chain_key_r[i-1][k]`.
+             * Delete `chain_key_r[i][k]`.
   * Rotate the ECDH keys and brace key, see
     [Rotating ECDH keys and brace key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
     section.
@@ -2721,25 +2732,24 @@ different from `their_ecdh` and the `Public DH Key` is different from
 ### Deletion of stored message keys
 
 Storing message keys from messages that haven't arrived yet introduces some
-risks, as defined on the
+risks, as defined in the
 [The Double Ratchet Algorithm specification](https://signal.org/docs/specifications/doubleratchet/):
 
 1. A malicious sender could induce receivers to store large numbers of
    skipped message keys, possibly causing a denial-of-service due to consuming
    storage space.
-
 2. An adversary can capture and drop some messages from sender, even
    though they didn't reach the recipient. The attacker can later compromise the
    intended recipient at a later time to reveal the stored message keys that
    correspond to the dropped messages. The adversary can then retroactively
    decrypt the captured messages.
 
-To mitigate the first risk parties should set reasonable per-conversation limits
-on the number of possible stored message keys (e.g. 1000).
+To mitigate the first risk, parties should set reasonable per-conversation
+limits on the number of possible stored message keys (e.g. 1000).
 
 // TODO: check this
 
-To mitigate the second risk parties should delete stored message keys after an
+To mitigate the second risk, parties should delete stored message keys after an
 appropriate interval. This deletion could be triggered by a timer, or by
 counting the number of events (messages received, DH ratchet steps, etc.). This
 should be decided by the implementor. This partially defends against the second
