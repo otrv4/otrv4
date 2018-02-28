@@ -849,7 +849,7 @@ decide_between_chain_keys(Ca, Cb):
 
 Before sending the first reply (i.e. a new message considering a previous
 message has been received) the sender will rotate their ECDH keys and brace key.
-This is for the computation of `K` (see
+This is for the computation of the Mixed shared secret `K` (see
 [Deriving Double Ratchet Keys](#deriving-double-ratchet-keys)).
 
 Before rotating the keys:
@@ -876,7 +876,7 @@ To rotate the brace key:
 ### Rotating ECDH keys and brace key as receiver
 
 Every ratchet, the receiver will rotate their ECDH keys and brace key.
-This is for the computation of `K` (see
+This is for the computation of the Mixed shared secret `K` (see
 [Deriving Double Ratchet Keys](#deriving-double-ratchet-keys)).
 
 Before rotating the keys:
@@ -885,8 +885,8 @@ Before rotating the keys:
 
 To rotate the ECDH keys:
 
-  * Retrieve the ECDH key ("Public ECDH key) from the received data message or
-    from the received attached encrypted message, and assign it to `their_ecdh`.
+  * Retrieve the ECDH key ("Public ECDH key") from the received data message and
+    assign it to `their_ecdh`.
   * Calculate `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
   * Securely delete `our_ecdh.secret`.
 
@@ -894,8 +894,8 @@ To rotate the brace key:
 
   * If `i % 3 == 0`:
 
-    * Retrieve the DH key ("Public DH key) from the received data message from
-      the received attached encrypted message, and assign it to `their_dh`.
+    * Retrieve the DH key ("Public DH key") from the received data message and
+      assign it to `their_dh`.
     * Calculate `k_dh = DH(our_dh.secret, their_dh)`.
     * Calculate a `brace_key = KDF_1(k_dh)`.
     * Securely delete `our_dh.secret`.
@@ -994,11 +994,12 @@ public key, a shared prekey for offline conversations, information about
 supported versions, a profile expiration date, a signature of all these, and an
 optional transitional signature.
 
-The user profile is used for authentication in both DAKEs (interactive and
-non-interactive). Also, it should be published in a public place for deniability
-properties. This procedure allows two parties to send and verify each other's
-signed User Profile during the DAKE without damaging participation deniability
-for the conversation, since the signed profile is public information.
+There are two instances of the user profile that should be generated. One is
+used for authentication in both DAKEs (interactive and non-interactive). The
+other should be published in a public place to achieve deniability properties.
+This procedure allows two parties to send and verify each other's signed User
+Profile during the DAKE without damaging participation deniability for the
+conversation, since the signed profile is public information.
 
 Each implementation should decide how to publish the profile. For example, one
 client may publish profiles to a server pool (similar to a keyserver pool,
@@ -1007,7 +1008,7 @@ subscribe extension (XEP-0060 [\[8\]](#references)) for publishing profiles. A
 protocol for publication must be defined, but the definition is out of scope
 for this specification.
 
-When the user profile expires, it should be updated. Client implementation
+When the user profile expires, it should be updated. Client implementations
 should determine the frequency of user's profile expiration and renewal. The
 recommended expiration time is one week. Note, though, that the long term public
 key has its own expiration time.
@@ -1029,6 +1030,14 @@ User Profile (USER-PROF):
     The shared prekey used between different prekey messages.
   (optional) Transitional Signature (SIG)
   Profile Signature (EDDSA-SIG)
+```
+
+`EDDSA-SIG` refers to the OTRv4 EDDSA signature:
+
+```
+EDDSA signature (EDDSA-SIG):
+  (len is the expected length of the signature, which is 114 bytes)
+  len byte unsigned value, big-endian
 ```
 
 `SIG` is the DSA Signature. It is the same signature as used in OTRv3.
@@ -1054,14 +1063,6 @@ OTRv3 public authentication DSA key (PUBKEY):
   g (MPI)
   y (MPI)
 (p,q,g,y) are the OTRv3 DSA public key parameters
-```
-
-`EDDSA-SIG` refers to the OTRv4 signature:
-
-```
-EDDSA signature (EDDSA-SIG):
-  (len is the expected length of the signature, which is 114 bytes)
-  len byte unsigned value, big-endian
 ```
 
 ### Creating a User Profile
@@ -1131,8 +1132,8 @@ term key:
      Shared Prekey`. Denote this value `m`.
    * Sign `m` with the user's OTRv3 DSA key. Denote this value
      `Transitional Signature`.
-   * Sign `m || Transitional Signature`  with the symmetric key, as stated below.
-     Denote this value `Profile Signature`.
+   * Sign `m || Transitional Signature`  with the symmetric key, as stated
+     below. Denote this value `Profile Signature`.
 
 If only version 4 is supported:
 
@@ -1143,12 +1144,12 @@ If only version 4 is supported:
 
 The user profile signature for version 4 is generated as defined in RFC 8032
 [\[9\]](#references), section 5.2.6. The flag `f` is set to `0` and the context
-`C` is an empty constant string. It is generated as follows:
+`c` is an empty constant string. It is generated as follows:
 
 ```
 The inputs are the symmetric key (57 bytes, defined on 'Public keys and
 fingerprints' section. It is referred as 'sym_key'), a flag 'f', which is a byte
-with value 0, a context 'C' (a value set by the signer and verifier of maximum
+with value 0, a context 'c' (a value set by the signer and verifier of maximum
 255 bytes), which is an empty string for this protocol, and a message 'm'.
 
    1.  Hash the sym_key 'KDF(sym_key, 114)'. Let 'h' denote the resulting
@@ -1158,7 +1159,7 @@ with value 0, a context 'C' (a value set by the signer and verifier of maximum
        Let 'prefix' denote the second half of the 'h' (from h[57] to
        h[113]).
 
-   2.  Compute KDF("SigEd448" || f || len(C) || C || prefix || m, 114), where
+   2.  Compute KDF("SigEd448" || f || len(c) || c || prefix || m, 114), where
        'm' is the message to be signed. Let 'r' be the 114-byte resulting
        digest.
 
@@ -1166,7 +1167,7 @@ with value 0, a context 'C' (a value set by the signer and verifier of maximum
        first reducing 'r' modulo 'q', the group order.  Let 'R' be the encoding
        of this resulting point. It should be encoded as a POINT.
 
-   4.  Compute KDF("SigEd448" || f || len(C) || C || R || H || m, 114).
+   4.  Compute KDF("SigEd448" || f || len(c) || c || R || H || m, 114).
        Interpret the 114-byte digest as a little-endian integer 'k'.
 
    5.  Compute 'S = (r + k * sk) mod q'.  For efficiency, reduce 'k' again
@@ -1186,11 +1187,11 @@ The user profile signature is verified as defined in RFC 8032
 1.  To verify a signature on a message 'm', using the public key 'H', with 'f'
     being 0, and 'c' being empty, split the signature into two 57-byte halves.
     Decode the first half as a point 'R', and the second half as a scalar
-    'S'. Decode the public key 'H' as a point H'. If any of the
+    'S'. Decode the public key 'H' as a point 'H_1'. If any of the
     decodings fail (including 'S' being out of range), the signature is invalid.
 2.  Compute KDF("SigEd448" || f || len(c) || c || R || H || m, 114). Interpret
     the 114-byte digest as a little-endian integer 'k'.
-3.  Check the group equation 'S = R + (k * H')'.
+3.  Check the group equation 'S = R + (k * H_1)'.
 ```
 
 ### Validating a User Profile
@@ -1230,7 +1231,7 @@ uses a ring signature non-interactive zero-knowledge proof of knowledge
 (RING-SIG) for authentication (RSig).
 
 Alice's long-term Ed448 key pair is `(ska, Pka)` and Bob's long-term Ed448
-key pair is `(skb, Pkb)`. Both key pairs are generated as stated on the
+key pair is `(skb, Pkb)`. Both key pairs are generated as stated in the
 [Public keys, shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
 section.
 
@@ -1258,11 +1259,10 @@ Bob will be initiating the DAKE with Alice.
 **Alice:**
 
 1. Receives an Identity message from Bob:
-    * Verifies the Identity message as defined on the
+    * Verifies the Identity message as defined in the
       [Identity message](#identity-message) section.
-    * Picks a compatible version of OTR listed in Bob's profile.
-      If the versions are incompatible, Alice does not send any further
-      messages.
+    * Picks a compatible version of OTR listed in Bob's profile. If the versions
+      are incompatible, Alice does not send any further messages.
     * Sets `Y` as `their_ecdh`.
     * Sets `B` as `their_dh`.
 2. Generates an Auth-R message, as defined in
@@ -1335,7 +1335,7 @@ Bob will be initiating the DAKE with Alice.
       ```
 
     * Decides which chain key he will use for sending messages and which key
-      he will use for receiving messages, as defined on
+      he will use for receiving messages, as defined in
       [Deciding between chain keys](#deciding-between-chain-keys) section:
 
       ```
@@ -1348,7 +1348,8 @@ Bob will be initiating the DAKE with Alice.
     * Follows what is defined on the
       [Attaching an encrypted message to Auth-I message](#attaching-an-encrypted-message-to-auth-i-message-in-dakez)
       section.
-8. Sends the Auth-I message.
+8. Sends the Auth-I message (with the attached encrypted message if it is the
+   case).
 9. At this point, the interactive DAKE is complete for Bob:
     * In the case that he wants to immediately send a data messages:
         * Follows what is defined on the
@@ -1369,11 +1370,11 @@ Bob will be initiating the DAKE with Alice.
    * Sets ratchet id `i` as 0.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
    * Generates a new ephemeral ECDH key pair, as defined in
-      [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
-      replaces `our_ecdh`. The public part of this key is sent (but not used as
-      an input to the current DH ratchet) as an advertisement, so Bob uses
-      this for a new ratchet once it is received. Alice will use the private
-      part of this key for a new ratchet.
+     [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
+     replaces `our_ecdh`. The public part of this key is sent (but not used as
+     an input to the current DH ratchet) as an advertisement, so Bob uses
+     this for a new ratchet once it is received. Alice will use the private
+     part of this key for a new ratchet.
    * Generates a new ephemeral DH key pair, as defined in
      [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
      replaces `our_dh`. The public part of this key is sent (but not used as
@@ -1402,7 +1403,7 @@ Bob will be initiating the DAKE with Alice.
    * If an encrypted message was attached to the Auth-I message:
      * Follows what is defined in the [Decrypting an attached encrypted message](#decrypting-the-message)
        section. Note that she will start by using the derived and decided
-       `chain_key_s[i][j]`.
+       `chain_key_r[i][j]`.
 3. At this point, the interactive DAKE is complete for Alice:
    * In the case that she wants to immediately send a data message or send
      a data message after receiving one (like receiving one attached to
@@ -2123,7 +2124,7 @@ message, but prior to sending it. For this, the participant:
 * Uses the `MKenc` to encrypt the message:
   `encrypted_message = XSalsa20_Enc(MKenc, nonce, m)`.
 * Uses the `MKmac` to create a MAC tag. MACs all the sections of the attached
-  message (from the flags to the encrypted message):
+  message (from the `Attached Encrypted Message Id` to the `Encrypted Message`):
   `Authenticator = KDF_2(MKmac || attached_message_sections)`
 * Securely deletes `MKenc` and `MKmac`.
 
@@ -2189,7 +2190,7 @@ participant:
 * Securely deletes `chain_key_r[i-1][k]`.
 * Increments the next receiving message id `k = k + 1`.
 * Uses `MKmac` to verify the received `Authenticator (MAC)` of the attached
-  encrypted message. If verification fails, reject the message.
+  encrypted message. If verification fails, rejects the message.
 * Increments the next receiving message id `k = k + 1`.
 * Constructs the nonce from the first 24 bytes of the `c` variable generated
   when creating `sigma`. See
@@ -2306,11 +2307,11 @@ sending one. For this, the participant:
 
 ### Inmediately sending a data message
 
-After deriving the mixed shared secret `K` and initializing the double ratchet
-algorithm or after attaching an encrypted message to the Auth-I message or the
-Non-Interactive Auth message, a participant can inmmediately send a data message
-(prior to receiving one from the other party). Note that in this case, the party
-will have `their_ecdh` and `their_dh` set to NULL.
+After deriving the Mixed shared secret `K` and initializing the double ratchet
+algorithm or after attaching an encrypted message to the Auth-I message or to
+the Non-Interactive Auth message, a participant can inmmediately send a data
+message. If this is the first data message sent and the party has not yet
+received one, the party will have `their_ecdh` and `their_dh` set to `NIL`.
 
 If the participant has not attached an encrypted data message to the Auth-I
 message or to the Non-Interactive-Auth message, or this is the first data
@@ -2332,7 +2333,7 @@ Otherwise:
   the extra symmetric key:
 
   ```
-  MKenc, MKmac = derive_enc_mac_keys(chain_key_s[i-1][j])`
+  MKenc, MKmac = derive_enc_mac_keys(chain_key_s[i-1][j])
   extra_symm_key = KDF_1(0xFF || chain_key_s[i-1][j])
   ```
 
