@@ -1439,14 +1439,17 @@ Bob will be initiating the DAKE with Alice.
    correctly setup the double ratchet mechanism:
    * In the case that he immediately receives a data message that advertizes
      the new public keys from Alice:
-     * Follows what is defined on the
+     * Follows what is defined in the
        [Inmediately receiving a data message](#inmediately-receiving-a-data-message)
        section. Note that he will start by using the derived and decided
        `chain_key_r[i][k]`.
      * After receiving a data message and when he wants to send a new data
        message, he will follow the
-       [When you send a data message](#when-you-send-a-data-message) section.
-       Note that he will perform a new DH ratchet.
+       [When you send a data message](#when-you-send-a-data-message) section,
+       using his already derived `root_key[i]`.
+       Note that he will perform a new DH ratchet. Upon receiving this data
+       message, Alice will perform a new DH ratchet as well, using her already
+       derived `root_key[i]`
 
 #### Identity message
 
@@ -1514,7 +1517,7 @@ B (MPI)
 This is the second message of the DAKEZ. Alice sends it to Bob to commit to a
 choice of her ECDH ephemeral key and her DH ephemeral key, and to acknowledge
 Bob's ECDH ephemeral key and DH ephemeral key. This acknowledgment includes
-a validation that Bob's ECDH key is on curve Ed448 and his DH key is in the
+a validation that Bob's ECDH key is on curve Ed448 and that his DH key is in the
 correct group.
 
 A valid Auth-R message is generated as follows:
@@ -1634,7 +1637,7 @@ Attached DAKEZ Encrypted Message (DAKEZ-ENCRYPTED-MSG)
 To begin an offline conversation, a Prekey message is published to an untrusted
 server. This action is considered	 to be the start of the non-interactive DAKE.
 A Prekey message is retrieved by the party attempting to send a message to the
-Prekey's publisher. This participan, then, replies with a Non-Interactive-Auth
+Prekey's publisher. This participant, then, replies with a Non-Interactive-Auth
 message (created with the prekey). This action is considered to complete the
 non-interactive DAKE.
 
@@ -1650,7 +1653,7 @@ They are also expected to decide how to convey this security loss to the user.
 
 This protocol is derived from the XZDH protocol [\[1\]](#references), which
 uses a ring signature non-interactive zero-knowledge proof of knowledge
-(RING-SIG) for authentication (`RSig`).
+(`RING-SIG`) for authentication (`RSig`).
 
 Alice's long-term Ed448 key pair is `(ska, Pka)` and Bob's long-term Ed448
 key pair is `(skb, Pkb)`. Both key pairs are generated as stated on the
@@ -1687,8 +1690,8 @@ Verify and decrypt message if included
     * Picks a compatible version of OTR listed in Bob's profile.
       If the versions are incompatible, Alice does not send any further
       messages.
-    * Sets the received ECDH ephemeral public key as `their_ecdh`.
-    * Sets the received DH ephemeral public key as `their_dh`.
+    * Sets the received ECDH ephemeral public key `Y` as `their_ecdh`.
+    * Sets the received DH ephemeral public key `B` as `their_dh`.
 3. Extracts the Public Shared Prekey and `Pkb` from Bob's user profile. Sets
    the first as `their_shared_prekey`.
 4. Generates a Non-Interactive-Auth message. See
@@ -1738,7 +1741,7 @@ Verify and decrypt message if included
     * Securely deletes `their_ecdh` and `their_dh`.
 8. At this point, she can attach an encrypted message to the
    Non-Interactive-Auth message:
-    * Follows what is defined on the
+    * Follows what is defined in the
       [Attaching an encrypted message to the Non-Interactive-Auth message](#attaching-an-encrypted-message-to-non-interactive-auth-message-in-xzdh)
       section.
 9. Calculates the `Auth MAC`:
@@ -1746,8 +1749,7 @@ Verify and decrypt message if included
     * If an encrypted message is attached, she computes:
 
       ```
-      Auth MAC = KDF_2(auth_mac_k || t || (message_id || nonce ||
-                       encrypted_data_message)).
+      Auth MAC = KDF_2(auth_mac_k || t || (message_id || nonce ||attached_encrypted_data_message)).
       ```
 
     * Otherwise, she computes:
@@ -1849,14 +1851,14 @@ Verify and decrypt message if included
     * In the case that he wants to immediately send a data message if no
       message was attached to the Non-Interactive-Auth message or no data
       message was received:
-      * Follows what is defined on the
+      * Follows what is defined in the
         [Inmediately sending a data message](#inmediately-sending-a-data-message)
         section. Note that he will not perform a new DH ratchet (even after
         receiving a data message), but he will advertize the new derived
         `our_ecdh.public` and `our_dh.public`. He will start by using the
         derived and decided `chain_key_s[i][j]`.
     * In the case that he immediately receives a data message:
-        * Follows what is defined on the
+        * Follows what is defined in the
           [Inmediately receiving a data message](#inmediately-receiving-a-data-message)
           section. Note that he will use the derived and decided
           `chain_key_r[i][k]`.
@@ -1867,14 +1869,17 @@ Verify and decrypt message if included
    correctly setup the double ratchet mechanism:
    * In the case that she immediately receives a data message that advertizes
      the new public keys from Bob:
-     * Follows what is defined on the
+     * Follows what is defined in the
        [Inmediately receiving a data message](#inmediately-receiving-a-data-message)
        section. Note that he will start by using the derived and decided
        `chain_key_r[i][k]`.
      * After receiving a data message and when she wants to send a new data
        message, she will follow the
        [When you send a data message](#when-you-send-a-data-message) section.
-       Note that she will perform a new DH ratchet.
+       Note that she will perform a new DH ratchet, using her already derived
+       `root_key[i]`. Upon receiving this data message, Bob will perform a new
+       DH ratchet as well, using his already derived `root_key[i]`
+
 
 #### Prekey message
 
@@ -2232,6 +2237,7 @@ participant:
   ```
 
 * Calculates the encryption key (`MKenc`):
+
   ```
   MKenc = KDF_1(0x01 || chain_key_s[i-1][j])
   ```
@@ -2301,9 +2307,9 @@ sending one. For this, the participant:
 * Securely deletes `chain_key_r[i-1][k]`.
 * Uses `auth_mac_k` to generate the `Auth MAC` of the attached
   encrypted message (the `t` value here is the one computed during the
-  verification of the Non-Interactive Auth message):
+  verification of the Non-Interactive-Auth message):
   `Auth MAC = KDF_2(auth_mac_k || t || (attached encrypted message id ||
-   public ecdh key || public dh key || nonce ||encrypted message))`.
+   public ecdh key || public dh key || nonce || encrypted message))`.
 * Extracts the `Auth MAC` from the Non-Interactive-Auth message and verifies
   that it is equal to the one just calculated. If it is not, ignores
   the Non-Interactive-Auth message and rejects the attached encrypted message.
@@ -2321,8 +2327,8 @@ sending one. For this, the participant:
 After deriving the Mixed shared secret `K` and initializing the double ratchet
 algorithm or after attaching an encrypted message to the Auth-I message or to
 the Non-Interactive Auth message, a participant can inmmediately send a data
-message. If this is the first data message sent and the party has not yet
-received one, the party will have `their_ecdh` and `their_dh` set to `NIL`.
+message. In the case that the party has not yet received a data message, the
+party will have `their_ecdh` and `their_dh` set to `NIL`.
 
 If the participant has not attached an encrypted data message to the Auth-I
 message or to the Non-Interactive-Auth message, or this is the first data
@@ -2365,8 +2371,8 @@ Otherwise:
 
 After verifying the Auth-I message or the Non-Interactive-Auth message, and
 deriving the mixed shared secret `K`, a participant can inmmediately receive a
-data message. Note that in this case, the party will have `their_ecdh` and
-`their_dh` set to NULL.
+data message. In the case that this is the first data message received, Note the
+party will have `their_ecdh` and `their_dh` set to `NIL`.
 
 If this is the first data message received:
 
