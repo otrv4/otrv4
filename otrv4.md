@@ -71,9 +71,6 @@ an existing messaging protocol, such as XMPP.
       1. [Publishing Prekey Messages](#publishing-prekey-messages)
       1. [Receiving Prekey Messages](#receiving-prekey-messages)
    1. [Encrypted messages in DAKE's messages](#encrypted-messages-in-dakes-messages)
-      1. [Attaching an encrypted message to Auth-I message in DAKEZ](#attaching-an-encrypted-message-to-auth-i-message-in-dakez)
-         1. [Encrypting the message](#encrypting-the-message)
-         1. [Decrypting the message](#decrypting-the-message)
       1. [Attaching an encrypted message to Non-Interactive-Auth message in XZDH](#attaching-an-encrypted-message-to-non-interactive-auth-message-in-xzdh)
          1. [Encrypting the message](#encrypting-the-message-1)
          1. [Decrypting the message](#decrypting-the-message-1)
@@ -1332,111 +1329,51 @@ Bob will be initiating the DAKE with Alice.
 6. Initializes the double-ratchet:
     * Sets ratchet id `i` as 0.
     * Sets `j` as 0, `k` as 0 and `pn` as 0.
-    * Generates a new ephemeral ECDH key pair, as defined in
-      [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
-      replaces `our_ecdh`. The public part of this key is sent but it will not
-      be used as an input for any of Alice's ratchet.
-    * Generates a new ephemeral DH key pair, as defined in
-      [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
-      replaces `our_dh`. The public part of this key is sent but it will not
-      be used as an input for any of Alice's ratchet.
-
-    * Derives a set of keys:
-
-      ```
-      root_key[i], chain_key_a[i][j], chain_key_b[i][j] =
-         root_key[i] = KDF_2(0x01 || K)
-         chain_key_a[i][j] = KDF_2(0x02 || K)
-         chain_key_b[i][j] = KDF_2(0x03 || K)
-      ```
-
-    * Decides which chain key he will use for sending messages and which key
-      he will use for receiving messages, as defined in
-      [Deciding between chain keys](#deciding-between-chain-keys) section:
-
-      ```
-      chain_key_s, chain_key_r =
-      decide_between_chain_keys(chain_key_a[i][j], chain_key_b[i][j])
-      ```
-
+    * Generates an ephemeral ECDH key pair, as defined in
+      [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
+      of using a random value `r`, it will use : `r = KDF(57, 0x01 || K)`.
+      Securely replaces `our_ecdh` with the outputs.
+    * Generates an ephemeral DH key pair, as defined in
+      [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
+      of using a random value `r`, it will use : `r = KDF(80, 0x02 || K)`.
+      Securely replaces `our_dh` with the outputs.
     * Securely deletes `their_ecdh` and `their_dh`.
-7. At this point, he can attach an encrypted message to the Auth-I message:
-    * Follows what is defined on the
-      [Attaching an encrypted message to Auth-I message](#attaching-an-encrypted-message-to-auth-i-message-in-dakez)
-      section.
-8. Sends the Auth-I message (with the attached encrypted message if it is the
-   case).
-9. At this point, the interactive DAKE is complete for Bob:
-    * In the case that he wants to immediately send a data messages:
-        * Follows what is defined on the
-          [Inmediately sending a data message](#inmediately-sending-a-data-message)
-          section. Note that he will not perform a new DH ratchet, but he
-          will advertize the new derived `our_ecdh.public` and `our_dh.public`
-          in every data message sent. If he did not attached an encrypted
-          message to the Auth-I message, he will start by using the derived and
-          decided `chain_key_s[i][j]`. Otherwise, he will use the current
-          `chain_key_s[i][j]`.
+7. At this point, the interactive DAKE is complete for Bob, but the
+   double ratchet still needs to be correctly set up.
 
 **Alice:**
 
 1. Receives the Auth-I message from Bob:
-   * Verifies the Auth-I message as defined on the
+   * Verifies the Auth-I message as defined in the
      [Auth-I message](#auth-i-message) section.
 2. Initializes the double ratchet:
    * Sets ratchet id `i` as 0.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
-   * Generates a new ephemeral ECDH key pair, as defined in
+   * Generates Bob ECDH and DH public keys:
+      * Generates an ephemeral ECDH key pair, as defined in
+        [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
+        of using a random value `r`, it will use : `r = KDF(57, 0x01 || K)`.
+        Securely replaces `their_ecdh` with the outputted
+        `our_ecdh.public (G * s)` and securely deletes the outputted
+        `our_ecdh.secret (s)`.
+      * Generates an ephemeral DH key pair, as defined in
+        [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
+        of using a random value `r`, it will use : `r = KDF(80, 0x02 || K)`.
+        Securely replaces `their_dh` with the outputted
+        `our_dh.public (g3 ^ r)` and securely deletes the outputted
+        `our_dh.secret (r)`.
+   * Generates a new ephemeral ECDH key pair, as defined in the
+     [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys) section.
+     Securely replaces `our_ecdh`.
+   * Generates a new ephemeral DH key pair, as defined in the
      [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
-     replaces `our_ecdh`. The public part of this key is sent (but not used as
-     an input to the current DH ratchet) as an advertisement, so Bob uses
-     this for a new ratchet once it is received. Alice will use the private
-     part of this key for a new ratchet.
-   * Generates a new ephemeral DH key pair, as defined in
-     [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
-     replaces `our_dh`. The public part of this key is sent (but not used as
-     an input to the current DH ratchet) as an advertisement, so Bob uses
-     this for a new ratchet once it is received. Alice will use the private
-     part of this key for a new ratchet.
-   * Derives a set of keys:
-
-     ```
-     root_key[i], chain_key_a[i][j], chain_key_b[i][j] =
-        root_key[i] = KDF_2(0x01 || K)
-        chain_key_a[i][j] = KDF_2(0x02 || K)
-        chain_key_b[i][j] = KDF_2(0x03 || K)
-     ```
-
-   * Decides which chain key she will use for sending messages and which key
-     she will use for receiving messages, as defined in the
-     [Deciding between chain keys](#deciding-between-chain-keys) section:
-
-     ```
-     chain_key_s, chain_key_r =
-     decide_between_chain_keys(chain_key_a[i][j], chain_key_b[i][j])
-     ```
-
-   * Securely deletes `their_ecdh` and `their_dh`.
-   * If an encrypted message was attached to the Auth-I message:
-     * Follows what is defined in the [Decrypting an attached encrypted message](#decrypting-the-message)
-       section. Note that she will start by using the derived and decided
-       `chain_key_r[i][j]`.
+     replaces `our_dh`.
 3. At this point, the interactive DAKE is complete for Alice:
-   * In the case that she wants to immediately send a data message or send
-     a data message after receiving one (like receiving one attached to
-     the Auth-I message):
-     * Follows what is defined on the
-       [Inmediately sending a data message](#inmediately-sending-a-data-message)
+   * In the case that she wants to immediately send a data message:
+     * Follows what is defined in the
+       [When you send a Data Message](#when-you-send-a-data-message)
        section.
-       Note that she will not perform a new DH ratchet (even after receiving a
-       data message), but she will advertize the new derived
-       `our_ecdh.public` and `our_dh.public`. She will start by using the
-       derived and decided `chain_key_s`.
-   * In the case that she immediately receives a data message (even if she has
-     inmediately send one):
-     * Follows what is defined on the
-       [Inmediately receiving a data message](#inmediately-receiving-a-data-message)
-       section. Note that she will start by using the derived and decided
-       `chain_key_r[i][k]`.
+       Note that she will perform a new DH ratchet.
 
 **Bob:**
 
@@ -1445,16 +1382,8 @@ Bob will be initiating the DAKE with Alice.
    * In the case that he immediately receives a data message that advertizes
      the new public keys from Alice:
      * Follows what is defined in the
-       [Inmediately receiving a data message](#inmediately-receiving-a-data-message)
-       section. Note that he will start by using the derived and decided
-       `chain_key_r[i][k]`.
-     * After receiving a data message and when he wants to send a new data
-       message, he will follow the
-       [When you send a data message](#when-you-send-a-data-message) section,
-       using his already derived `root_key[i]`.
-       Note that he will perform a new DH ratchet. Upon receiving this data
-       message, Alice will perform a new DH ratchet as well, using her already
-       derived `root_key[i]`
+       [When you receive a Data Message](#when-you-receive-a-data-message)
+       section. Note that he will perform a new DH ratchet.
 
 #### Identity message
 
@@ -1591,8 +1520,7 @@ sigma (RING-SIG)
 #### Auth-I message
 
 This is the final message of the DAKE. Bob sends it to Alice to verify the
-authentication `sigma`. This message might also contain an attached encrypted
-message, which is highly recommended
+authentication `sigma`.
 
 A valid Auth-I message is generated as follows:
 
@@ -2099,129 +2027,13 @@ If many prekey messages are received:
 
 ### Encrypted messages in DAKE's messages
 
-One message of each DAKE allows participants to attach an encrypted message to
-them. This message will be referred as "attached encrypted message":
-
-- The Auth-I message in the case of DAKEZ of the interactive DAKE.
-- The Non-Interactive-Auth message in the case of XZDH of the non-interactive
-  DAKE.
+One message of XZDH allows participants to attach an encrypted message to it.
+This message will be referred as "attached encrypted message":
 
 Note that if a data message arrives prior to the Auth-I or the
 Non-Interactive-Auth message, this data message will be ignored. An attached
-encrypted message to the Auth-I message and to the Non-Interactive-Auth message
-cannot contain any TLV types.
-
-#### Attaching an encrypted message to Auth-I message in DAKEZ
-
-##### Encrypting the message
-
-After deriving the mixed shared secret `K`, a participant (Bob in the above
-overview) can attach an encrypted message to the already generated Auth-I
-message, but prior to sending it. For this, the participant:
-
-* Increments the ratchet id `i = i + 1`.
-* Sets `j` as the attached message id.
-* Derives the next sending chain key by using the `chain_key_s[i][j]` already
-  derived and decided:
-
-  ```
-  chain_key_s[i-1][j+1] = KDF_2(chain_key_s[i-1][j])
-  ```
-
-* Calculates the encryption key (`MKenc`), the MAC key (`MKmac`):
-*
-  ```
-  MKenc, MKmac = derive_enc_mac_keys(chain_key_s[i-1][j])
-  ```
-
-* Securely deletes `chain_key_s[i-1][j]`.
-* Increments the next sending message id `j = j + 1`.
-* Constructs a nonce from the first 24 bytes of the `c` variable generated when
-  creating `sigma`. See
-  [Ring Signature Authentication](authentication-rsiga1-a1-a1-a2-a3-m) section
-  for details.
-* Sets `our_ecdh.public` as the `Public ECDH Key` and `our_dh.public` as
-  `Public DH Key`.
-* Uses the `MKenc` to encrypt the message:
-  `encrypted_message = XSalsa20_Enc(MKenc, nonce, m)`.
-* Uses the `MKmac` to create a MAC tag. MACs all the sections of the attached
-  message (from the `Attached Encrypted Message Id` to the `Encrypted Message`):
-  `Authenticator = KDF_2(MKmac || attached_message_sections)`
-* Securely deletes `MKenc` and `MKmac`.
-
-The format of this attached message in the Auth-I message will be:
-
-```
-Attached DAKEZ Encrypted Message (DAKEZ-ENCRYPTED-MSG)
-
-Attached Encrypted Message Id (INT)
-  Set with sender's j.
-
-Public ECDH Key (POINT)
-  This is the public part of the ECDH key pair. For the sender of this
-  message, this is their 'our_ecdh.public' value. For the receiver of
-  this message, it is used as 'their_ecdh'.
-
-Public DH Key (MPI)
-  This is the public part of the DH key pair. For the sender of this
-  message, it is 'our_dh.public' value. For the receiver of this message,
-  it is used as 'their_dh'.
-
-Encrypted Message (DATA)
-  Using the appropriate encryption key, perform an XSalsa20 encryption
-  of the message. The nonce used for this operation is also included in
-  the header of the attached message packet.
-
-Authenticator (MAC)
-  The MAC with the appropriate MAC key of everything: from the flags
-  to the end of the encrypted message.
-```
-
-After the encryption and MAC of the attached encrypted message, the
-participant attaches it to the Auth-I message, which will look like this:
-
-```
-  (Protocol version || message type || sender's instance tag || receiver's
-  instance tag || RSig(Pkb, skb, {Pkb, Pka, X}, (0x1 ||
-  KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B ||
-  A || KDF_2(phi)) || (attached encrypted message id || public ecdh key ||
-  public dh key || encrypted message || authenticator)
-```
-
-##### Decrypting the message
-
-After verifying `sigma` on the Auth-I message, a participant (Alice in the above
-overview) can decrypt an attached encrypted message if present. For this, the
-participant:
-
-* Increments the ratchet id `i = i + 1`.
-* Derives the next receiving chain key by using the `chain_key_r[i][k]` already
-  derived and decided:
-
-  ```
-  chain_key_r[i-1][k+1] = KDF_2(chain_key_r[i-1][k])
-  ```
-
-* Calculates the encryption key (`MKenc`) and the MAC key (`MKmac`):
-
-  ```
-  MKenc, MKmac = derive_enc_mac_keys(chain_key_r[i-1][k])
-  ```
-
-* Securely deletes `chain_key_r[i-1][k]`.
-* Increments the next receiving message id `k = k + 1`.
-* Uses `MKmac` to verify the received `Authenticator (MAC)` of the attached
-  encrypted message. If verification fails, rejects the message.
-* Increments the next receiving message id `k = k + 1`.
-* Constructs the nonce from the first 24 bytes of the `c` variable generated
-  when creating `sigma`. See
-  [Ring Signature Verification](#verification-rvrfa1-a2-a3-sigma-m) section
-  for details.
-* Uses the `MKenc` and `nonce` to decrypt the message:
-  `decrypted_message = XSalsa20_Dec(MKenc, nonce, m)`.
-* Add `MKmac` to the list `mac_keys_to_reveal`.
-* Sets the arriving `Public ECDH Key` as `their_ecdh` and the arriving
-  `Public DH Key` as `their_dh`.
+encrypted message to the Non-Interactive-Auth message cannot contain any TLV
+types.
 
 #### Attaching an encrypted message to Non-Interactive-Auth message in XZDH
 
