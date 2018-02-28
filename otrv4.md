@@ -778,8 +778,9 @@ k_dh:
   big-endian unsigned integer.
 
 brace_key:
-  Either a hash of the shared DH key: 'KDF_1(k_dh)' (every thrid DH ratchet) or
-  a hash of the previuos brace_key: 'KDF_1(brace_key)'
+  Either a hash of the shared DH key: 'KDF_1(k_dh)' (every third DH ratchet) or
+  a hash of the previuos brace_key: 'KDF_1(brace_key)'. // TODO: does this
+  need to define a serialization?
 
 K_ecdh:
   The serialized ECDH shared secret computed from an ECDH exchange, serialized
@@ -787,7 +788,8 @@ K_ecdh:
 
 K:
   The mixed shared secret is the final shared secret derived from both the
-  DH and ECDH shared secrets: KDF_2(K_ecdh || brace_key)
+  DH and ECDH shared secrets: KDF_2(K_ecdh || brace_key). // TODO: does this
+  need to define a serialization?
 ```
 
 ### Generating shared secrets
