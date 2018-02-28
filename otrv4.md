@@ -2394,15 +2394,14 @@ risks, as defined in the
 To mitigate the first risk, parties should set reasonable per-conversation
 limits on the number of possible stored message keys (e.g. 1000).
 
-// TODO: check this
-
 To mitigate the second risk, parties should delete stored message keys after an
 appropriate interval. This deletion could be triggered by a timer, or by
 counting the number of events (messages received, DH ratchet steps, etc.). This
 should be decided by the implementor. This partially defends against the second
 risk as it only protects "lost" messages, not messages sent using a new
 DH ratchet key that has not yet been received by the compromised party.
-To fully defend againt the second risk, the session should be regularly expired.
+To also defend against the second risk, the session should be regularly expired,
+as defined in [Session expiration](#session-expiration) section.
 
 ### Extra symmetric key
 
