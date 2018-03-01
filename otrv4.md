@@ -1693,7 +1693,7 @@ Verify and decrypt message if included
        section.
      * Otherwise:
         * Computes `Auth MAC = KDF_2(auth_mac_k || t)`. The `t` value here is
-          the one computed during the verification of the Non-Interactive Auth
+          the one computed during the verification of the Non-Interactive-Auth
           message.
     * Extracts the `Auth MAC` from the Non-Interactive-Auth message and verifies
       that it is equal to the one just calculated. If it is not, ignore the
@@ -2878,7 +2878,7 @@ participant can send an encrypted message (that do not have the same format
 as a data message):
 
 * On `START`: when a participant attaches an encrypted message to the
-  Non-Interactive Auth message.
+  Non-Interactive-Auth message.
 
 In any other case and if the state is `START`, `WAITING_AUTH_R`, or
 `WAITING_AUTH_I`, queue the message for encrypting and sending it when the
