@@ -93,15 +93,27 @@ For OTRv4, we decided to use the Double Ratchet Algorithm for key management.
 This allows OTRv4 to support out-of-order resilence and to improve forward
 secrecy (in the form of per-message forward secrecy).
 
+As OTRv4 supports, therefore, an out-of-order network model, message keys should
+be stored for a reasonable amount of time. This is done in order to allow
+decryption of skipped messages. Implementers should, nevertheless, be careful
+around the storage of message keys as attackers can try to cause
+denial-of-service (by storing large amounts of message keys), or to try to
+capture and retroactively decrypt messages.
+
 We decided that only the receiver will reveal MAC keys on the first message
-sent of every ratchet.
+sent of every ratchet (even the MAC keys from stored messages keys). When the
+session is expired or when stored message keys are deleted, their corresponding
+MAC keys are placed in the `old_mac_keys` list so they can be later revealed.
 
 ### Consequences
 
 This heavily changes how data was exchanged on previous versions.
 
-We achieve improved forward secrecy, but key management and ratcheting
-processes become complex because of the many types of keys involved.
+We achieve improved forward secrecy, but key management and ratcheting processes
+become somewhat complex because of the many types of keys involved.
+
+As a consequence of allowing an out-of-order network model, fragmentation
+differs from previous versions.
 
 ### References
 
