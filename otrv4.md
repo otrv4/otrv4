@@ -2430,15 +2430,15 @@ compute the extra symmetric key in the same way. Note that the value of the
 extra symmetric key is not contained in the TLV itself.
 
 If more keys are wished to be derived from this already calculated extra
-symmetric key, this can be done: take the index from the TLV list received in
-the data message and the context received in `7 TLV`, and use them as inputs
+symmetric key, this can be done by taking the index from the TLV list received
+in the data message and the context received in `7 TLV`, and use them as inputs
 to a KDF:
 
 ```
   symkey1 = KDF_2(index || context || extra_sym_key)
 ```
 
-So, if for example, this TLVs arrive with the data message:
+So, if for example, these TLVs arrive with the data message:
 
 ```
   TLV 1
@@ -2449,7 +2449,7 @@ So, if for example, this TLVs arrive with the data message:
   TLV 7   context: 0x0001
 ```
 
-Three keys can be calculated in this way:
+Three keys can be calculated:
 
 ```
   symkey1 = KDF_1(0x00 || 0x0042 || extra_sym_key)
