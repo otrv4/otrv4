@@ -2473,9 +2473,10 @@ an encoded OTR message. In that event, the sender may choose to split the
 message into a number of fragments. This section describes the format for the
 fragments.
 
-OTRv4 and OTRv3 perform fragmentation in the same way, with the same format.
-Thus, message parsing should happen after the message has been defragmented.
-This also keeps OTRv4 from being compatible with OTRv2.
+OTRv4 and OTRv3 perform fragmentation in different ways. As OTRv4 supports an
+out-of-order network model, fragmentation is different. Nevertheless, for
+both OTR versions, message parsing should happen after the message has been
+defragmented.
 
 All OTRv4 clients must be able to assemble received fragments, but performing
 fragmentation on outgoing messages is optional.
@@ -2488,20 +2489,32 @@ OTR message as follows:
 
   * Start with the OTR message as you would normally transmit it. For example,
     a Data Message would start with `?OTR:AAQD` and end with `.`.
+  * Assign an identifier, which will be used specifically for this fragmented
+    data message. This is done in order to not confuse these fragments with
+    other data message's fragments. The identifier is a randomly generated
+    8-byte value.
   * Break it up into sufficiently small pieces. Let this number of pieces be
-  `total`, and the pieces be `piece[1],piece[2],...,piece[total]`.
+    `total`, and the pieces be `piece[1],piece[2],...,piece[total]`.
   * Transmit `total` OTRv4 fragmented messages with the following (printf-like)
     structure (as `index` runs from 1 to `total` inclusive:
 
   ```
-  "?OTR|%x|%x,%hu,%hu,%s," , sender_instance, receiver_instance, index, total, piece[index]
+  "?OTR|%x|%x|%x,%hu,%hu,%s,", identifier, sender_instance, receiver_instance, index, total, piece[index]
+  ```
+
+  OTRv3 messages get fragmented in a similar format, but without the indentifier
+  field:
+
+  ```
+  "?OTR|%x|%x,%hu,%hu,%s,", sender_instance, receiver_instance, index, total, piece[index]
   ```
 
 The message should begin with `?OTR|` and end with `,`.
 
 Note that `index` and `total` are unsigned short int (2 bytes), and each has
 a maximum value of 65535. Each `piece[index]` must be non-empty.
-The instance tags, `index` and `total` values may have leading zeros.
+The identifier, instance tags, `index` and `total` values may have leading
+zeros.
 
 Note that fragments are not messages that can be fragmented: you can't fragment a fragment.
 
@@ -2510,44 +2523,57 @@ Note that fragments are not messages that can be fragmented: you can't fragment 
 If you receive a message containing `?OTR|` (note that you'll need to check
 for this _before_ checking for any of the other `?OTR:` markers):
 
-  * Parse it (as the previous printf structure) extracting the instance tags,
-    `index`, `total`, and `piece[index]`.
+  * Parse it (as the previous printf structure) extracting the identifier,
+    the instance tags, `index`, `total`, and `piece[index]`.
 
   * Discard the message and optionally pass a warning to the user if:
-    * the recipient's own instance tag does not match the listed receiver
-      instance tag
-    * the listed receiver's instance tag is not zero
-
-  * Let `(I, T)` be your currently stored fragment number, and `F` be your
-    currently stored fragment (if you have no currently stored fragment,
-    then `I = T = 0` and `F = ""`).
+    * The recipient's own instance tag does not match the listed receiver
+      instance tag.
+    * The listed receiver's instance tag is not zero.
 
   * Discard the (illegal) fragment if:
     * `index` is 0
     * `total` is 0
     * `index` is bigger than `total`
 
-  * If this is the first fragment:
-    * Forget any stored fragment you may have
-    * Store `piece` as `F`
-    * Store `index` and `total` as `(I, T)`
+  * For the first fragment that arrives (there is not a current buffer with the
+    same identifier):
+    * Create a buffer which will be keep track of the portions of the fragmented
+      data message that have arrived (by filling up it with fragments).
+    * Optionally, initialize a timer for the reassembly of the fragments as it
+      is possible that some fragment of the data message might never show up.
+      This timer ensures that a client will not be "forever" waiting for a
+      fragment.
+    * Let `B` be the buffer, `I` be the currently stored identifier, `T` the
+      currently stored `total` and `C` a counter that keeps track of the
+      received number of fragments for this buffer. If you have no currently
+      stored fragments there are no buffers.
+    * Set the length of the buffer as `total`: `len(B) = total`.
+    * Store `piece` at the `index` given position: `insert(piece, index)`.
+    * Let `total` be `T` and `identifier` be `I` for the buffer.
+    * Increment the buffer counter: `C = C + 1`.
 
-  * Else if this is the following fragment (`total == T` and `index == I + 1`):
-    * Append `piece` to stored `F`
-    * Store `index` and `total` as `(I, T)`
+  * If `identifier == I`:
+    * If `total == T`, and `C < T`:
+      * Check that the given position of the buffer is empty: `B[index] == NIL`.
+        If it is not, reject the fragment.
+      * Store the `piece` at the given position in the buffer:
+        `insert(piece, index)`.
+      * Increment the buffer counter: `C = C + 1`.
+     * Otherwise:
+      * Forget any stored fragments of this buffer you may have.
+      * Reset `C`, `N` and `I` to 0, and destroy this buffer.
 
-  * Else:
-    * Forget any stored fragment you may have
-    * Store `"` as `F`
-    * Store `(0, 0)` as `(I, T)`
+  * Otherwise:
+    * Consider this fragment as part of another buffer: either create a new
+      buffer or insert the fragment into one that has already been created.
 
-After this, if `T` is bigger than 0 and `I` is equal to `T`, treat `F` as the
-received message.
+After this, if the current buffer's `C == T` and `T == 0`, treat the buffer as
+the received data message.
 
 If you receive a non-OTR message or an unfragmented message:
 
-* Forget any stored value you may have
-* Store `""` as `F` and store `(0,0)` as `(I, T)`
+* Keep track of the buffers you may have.
 
 For example, here is a Data Message we would like to transmit over a network
 with an unreasonably small `maximum message size`:
