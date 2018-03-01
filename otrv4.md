@@ -782,7 +782,7 @@ K_ecdh:
   as a POINT.
 
 K:
-  The mixed shared secret is the final shared secret derived from both the
+  The Mixed shared secret is the final shared secret derived from both the
   DH and ECDH shared secrets: KDF_2(K_ecdh || brace_key). // TODO: does this
   need to define a serialization?
 ```
@@ -1934,7 +1934,7 @@ types.
 
 ##### Encrypting the message
 
-After deriving the mixed shared secret `K`, a participant (Alice in the above
+After deriving the Mixed shared secret `K`, a participant (Alice in the above
 overview) can attach an encrypted message to the already generated
 Non-Interactive-Auth message, but prior to sending it. For this, the
 participant:
