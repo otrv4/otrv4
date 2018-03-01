@@ -2656,7 +2656,7 @@ FINISHED
   of the OTR conversation. For example, if Alice and Bob are having an OTR
   conversation, and Bob instructs his OTR client to end its private session
   with Alice (for example, by logging out), Alice will be notified of this,
-  and her client will switch to the FINISHED state. This prevents  Alice from
+  and her client will switch to the FINISHED state. This prevents Alice from
   accidentally sending a message to Bob in plaintext (consider what happens
   if Alice was in the middle of typing a private message to Bob when he
   suddenly logs out, just as Alice hits the 'enter' key). Note that this
@@ -2667,7 +2667,36 @@ FINISHED
 ### Protocol events
 
 The following sections outline the actions that the protocol should implement.
-Note that the protocol is initialized with the allowed versions (3 and/or 4).
+This assumes that the client initialized with the allowed versions (3 and/or 4).
+
+There are twelve events an OTRv4 client must handle (For version 3 messages,
+please refer to previous OTR protocol document):
+
+* Received messages:
+  * Plaintext without the whitespace tag
+  * Plaintext with the whitespace tag
+  * Query Messages
+  * Error Message
+  * Identity Message
+  * Auth-R Message
+  * Auth-I Message
+  * Prekey Message
+  * Non-Interactive-Auth Message
+  * Data Message
+
+* User actions:
+  * User requests to start an OTR conversation
+  * Starting a conversation interactively
+  * User requests to end an OTR conversation
+  * Sending an encrypted data message
+
+// TODO: prekey messages should have Receiver's instance tag?
+
+For version 4 messages, someone receiving a message with a recipient instance
+tag specified that does not equal their own, should discard the message and
+optionally warn the user. The exception here is the Identity Message where the
+receiver's instance tag may be 0, indicating that no particular instance is
+specified.
 
 #### User requests to start an OTR conversation
 
@@ -2677,13 +2706,13 @@ tags](#whitespace-tags) are constructed according to the sections below.
 
 ##### Query Messages
 
-If Alice wishes to communicate to Bob that she would like to use OTR, she
-sends a message containing the string "?OTRv" followed by an indication of
-what versions of OTR she is willing to use with Bob. The versions she is
-willing to use, whether she can set this on a global level or on a user by
-user basis, this is up to the implementer. However, the requirement of
-enabling users to choose whether they want to allow or disallow versions is
-required. The version string is constructed as follows:
+If Alice wishes to communicate to Bob that she would like to use OTR, she sends
+a message containing the string "?OTRv" followed by an indication of what
+versions of OTR she is willing to use with Bob. The versions she is willing to
+use, whether she can set this on a global level or on a user by user basis, is
+up to the implementer. However, the requirement of enabling users to choose
+whether they want to allow or disallow versions is required. The version string
+is constructed as follows:
 
 If she is willing to use OTR version 3, she appends a byte identifier for the
 versions in question, followed by "?". The byte identifier for OTR version 3
@@ -2749,6 +2778,10 @@ If the state is `ENCRYPTED_MESSAGES` or `FINISHED`:
 
 Remove the whitespace tag and display the message to the user.
 
+If the state is `ENCRYPTED_MESSAGES` or `FINISHED`:
+
+  * The user should be warned that the message received was unencrypted.
+
 If the tag offers OTR version 4 and version 4 is allowed:
 
   * Send an Identity message.
@@ -2777,8 +2810,8 @@ Rather than requesting an encrypted conversation, Alice can directly start an
 OTR conversation with Bob if she is certain that both support and are willing to
 do so. In such case, Alice should:
 
-  * Send an Identity message.
-  * Transition the state to `WAITING_AUTH_R`.
+* Send an Identity message.
+* Transition the state to `WAITING_AUTH_R`.
 
 #### Receiving an Identity message
 
@@ -2801,14 +2834,16 @@ If the state is `WAITING_AUTH_R`:
 
   * Validate the Identity message. Ignore the message if validation fails.
   * If validation succeeds:
-    * Compare the `B` you sent in your Identity message with the value from the
-      message you received.
+    * Compare the hashed `B` you sent in your Identity message with the DH value
+      from the message you received, considered as 32-byte unsigned big-endian
+      values.
     * If yours is the higher hash value:
-      * Ignore the received Identity message, but resend your Identity message.
-        This will make the other side have the lower hash value and, therefore,
+      * Ignore the incoming Identity message, but resend your Identity message.
+        This means that the other side have the lower hash value and, therefore,
         keep going as stated below.
     * Otherwise:
       * Forget your old `B` value that you sent earlier.
+      * Pretend you are on `START` state.
       * Send an Auth-R message.
       * Transition state to `WAITING_AUTH_I`.
 
@@ -2817,7 +2852,11 @@ If the state is `WAITING_AUTH_I`:
   ```
   There are a number of reasons that you may receive an Identity Message in this
   state. Perhaps your correspondent simply started a new DAKE or they resent
-  their Identity Message.
+  their Identity Message. On some networks, like AIM, if your correspondent is
+  logged in multiple times, each of his clients will send an Identity Message
+  in response to a Query Message. Resending the same Auth-R Message in
+  response to each of those messages will prevent compounded confusion, since
+  each of their clients will see each of the Auth-R Messages you send.
   ```
 
   * Validate the Identity message. Ignore the message if validation fails.
@@ -2828,12 +2867,18 @@ If the state is `WAITING_AUTH_I`:
 
 If the state is `ENCRYPTED_MESSAGES`:
 
+   * If this Auth-R message is the same the one you received earlier (when you
+     send an Auth-I message):
+     * Retransmit your Auth-I Message.
+
+If the state is `ENCRYPTED_MESSAGES`:
+
   * Ignore the message.
 
 #### Sending an Auth-R message
 
-  * Generate and send an Auth-R Message.
-  * Transition to state `WAITING_AUTH_I`.
+* Generate and send an Auth-R Message.
+* Transition to state `WAITING_AUTH_I`.
 
 #### Receiving an Auth-R message
 
@@ -2851,25 +2896,29 @@ If the state is `WAITING_AUTH_R`:
       * Reply with an Auth-I message, as defined in
         [Sending an Auth-I message](##sending-an-auth-i-message).
 
+If the state is `ENCRYPTED_MESSAGES`:
+
+   * If this Auth-R message is the same the one you received earlier (when you
+     send an Auth-I message):
+     * Retransmit your Auth-I Message.
+
 If the state is not `WAITING_AUTH_R`:
 
   * Ignore this message.
 
 #### Sending an Auth-I message
 
-  * Generate and send an Auth-I Message.
-  * Initialize the double ratcheting, as defined in the
-    [Interactive DAKE Overview](#interactive-dake-overview) section.
-  * Transition to state `ENCRYPTED_MESSAGES`.
+* Generate and send an Auth-I Message.
+* Initialize the double ratcheting, as defined in the
+  [Interactive DAKE Overview](#interactive-dake-overview) section.
+* Transition to state `ENCRYPTED_MESSAGES`.
 
 #### Receiving an Auth-I message
 
-If the state is `WAITING_AUTH_I`:
-
+* If the state is `WAITING_AUTH_I`:
   * If the receiver's instance tag in the message is not the sender's instance
     tag you are currently using, ignore this message.
   * Validate the Auth-I message.
-
     * If validation fails
       * Ignore the message.
       * Stay in state `WAITING_AUTH_I`.
@@ -2879,38 +2928,40 @@ If the state is `WAITING_AUTH_I`:
       * Initialize the double ratcheting, as defined in the
         [Interactive DAKE Overview](#interactive-dake-overview) section.
 
-If the state is not `WAITING_AUTH_I`:
-
+* If the state is not `WAITING_AUTH_I`:
   * Ignore this message.
 
 #### Sending an encrypted message to an offline participant
 
-  * Generate and send a Non-Interactive-Auth message.
-  * Initialize the double ratcheting, as defined in the
-    [Non-Interactive DAKE Overview](#non-interactive-dake-overview).
-  * Transition to state `ENCRYPTED_MESSAGES`.
+* Generate and send a Non-Interactive-Auth message.
+* Initialize the double ratcheting, as defined in the
+  [Non-Interactive DAKE Overview](#non-interactive-dake-overview).
+* Transition to state `ENCRYPTED_MESSAGES`.
+* If there is a recent stored message, encrypt it and send it as a Data
+  Message.
 
 #### Receiving a Non-Interactive-Auth message
 
-If the state is `FINISHED`:
-
+* If the state is `FINISHED`:
   * Ignore the message.
 
-Else:
-
+* Else:
   * If the receiver's instance tag in the message is not the sender's instance
-    tag you are currently using, ignore this message.
-  * Validate the Non-Interactive-Auth message.
-  * Initialize the double ratcheting, as defined in the
-    [Non-Interactive DAKE Overview](#non-interactive-dake-overview).
-  * Transition to state `ENCRYPTED_MESSAGES`.
+    tag you are currently using:
+    * Ignore this message.
+
+  * Otherwise:
+    * Validate the Non-Interactive-Auth message.
+    * Initialize the double ratcheting, as defined in the
+      [Non-Interactive DAKE Overview](#non-interactive-dake-overview).
+    * Transition to state `ENCRYPTED_MESSAGES`.
 
 #### Sending an encrypted data message
 
 The `ENCRYPTED_MESSAGES` state is the state where a participant is allowed to
 send encrypted data messages. There are only one other state in which a
-participant can send an encrypted message (that do not have the same format
-as a data message):
+participant can send an attached encrypted message (that do not have the same
+format as a data message):
 
 * On `START`: when a participant attaches an encrypted message to the
   Non-Interactive-Auth message.
@@ -2920,26 +2971,28 @@ In any other case and if the state is `START`, `WAITING_AUTH_R`, or
 participant transitions to the `ENCRYPTED_MESSAGES` state.
 
 If the state is `FINISHED`, the participant must start another OTR conversation
-to send encrypted messages.
+to send encrypted messages:
 
-#### Receiving an encrypted data message
+  * Inform the user that the message cannot be sent at this time.
+  * Store the plaintext message for possible retransmission.
+
+If the state is `ENCRYPTED`, encrypt the message, and send it as a Data Message.
+Store plaintext message for possible retransmission.
+
+#### Receiving a data message
 
 If the version is 4:
 
 * If the state is not `ENCRYPTED_MESSAGES`:
-
   * Inform the user that an unreadable encrypted message was received by
     replying with an Error Message: `ERROR_2`.
-
   * There are only one other states in which a participant can receive an
     encrypted message (that do not have the same format as a data message):
-
       * On `START`: when the other participant sends you an
         Non-Interactive-Auth message that has an attached encrypted message with
         it.
 
 * Otherwise:
-
   * Validate the data message:
      * Verify the MAC tag.
      * Check if the message version is allowed.
@@ -2953,31 +3006,27 @@ If the version is 4:
        section for details.
 
     * If the message is not valid in any of the above steps:
-      * Discard it and optionally pass along a warning to the user.
+      * Inform the user that an unreadable encrypted message was received by
+        replying with an Error Message: `ERROR_2`.
 
     * Otherwise:
-
       * Derive the corresponding decryption key depending if you are on a new
         DH ratchet, if you have stored keys or not. Try to decrypt the message.
-
-      * If the message cannot be decrypted and the `IGNORE_UNREADABLE` flag is
+      * If the message cannot be decrypted (e.g., this is a duplicated message
+        which key has already been used) and the `IGNORE_UNREADABLE` flag is
         not set:
-
           * Inform the user that an unreadable encrypted message was received
             by replying with an Error Message: `ERROR_1`.
 
       * If the message cannot be decrypted and the `IGNORE_UNREADABLE` flag is
         set:
-
           * Ignore it instead of producing an error or a notification to the
             user.
 
       * If the message can be decrypted:
-
           * Display the human-readable part (if non empty) to the user.
             SMP TLVs should be addressed according to the SMP state machine.
           * If the received message contains a TLV type 1 (Disconnected):
-
              * Forget all encryption keys for this correspondent and transition
                the state to `FINISHED`.
 
@@ -2988,15 +3037,12 @@ If the version is 4:
 If the version is 3:
 
 * If msgstate is `MSGSTATE_ENCRYPTED`:
-
     * Verify the information (MAC, keyids, ctr value, etc) in the message.
     * If the instance tag in the message is not the instance tag you are
       currently using:
-
       * Discard the message and optionally warn the user.
 
     * If the verification succeeds:
-
       * Decrypt the message and display the human-readable part (if non-empty)
         to the user.
       * Update the D-H encryption keys, if necessary.
@@ -3007,11 +3053,11 @@ If the version is 3:
       * If the received message contains a TLV type 1, forget all encryption
         keys for this correspondent, and transition msgstate to
         `MSGSTATE_FINISHED`.
+
     * Otherwise, inform the user that an unreadable encrypted message was
       received, and reply with an Error Message, as defined in OTRv3 protocol.
 
-  If msgstate is `MSGSTATE_PLAINTEXT` or `MSGSTATE_FINISHED`:
-
+* If msgstate is `MSGSTATE_PLAINTEXT` or `MSGSTATE_FINISHED`:
    * Inform the user that an unreadable encrypted message was received, and
      reply with an Error Message, as defined in OTRv3 protocol.
 
@@ -3039,18 +3085,14 @@ AKE will start when receiving an OTR Error message, as defined in OTRv3):
 
 * If the instance tag in the message is not the instance tag you are currently
   using:
-
   * Discard the message and optionally warn the user.
 
-If the version is 4:
-
+* If the version is 4:
   * If a TLV type 1 is received in the `START` state:
-
       * Stay in that state, else transition to the `FINISHED` state and
         [reset the state variables and key variables](#resetting-state-variables-and-key-variables).
 
-If the version is 3:
-
+* If the version is 3:
   * Transition to `MSGSTATE_FINISHED`.
   * Inform the user that their correspondent has closed their end of the private
     connection.
