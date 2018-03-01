@@ -1335,7 +1335,7 @@ Bob will be initiating the DAKE with Alice.
 
 1. At this point, the interactive DAKE is complete for Bob, but he has to
    correctly setup the double ratchet mechanism:
-   * In the case that he immediately receives a data message that advertizes the
+   * In the case that he immediately receives a data message that advertises the
      new public keys from Alice:
      * Follows what is defined in the
        [When you receive a Data Message](#when-you-receive-a-data-message)
@@ -1522,7 +1522,7 @@ sigma (RING-SIG)
 ## Offline Conversation Initialization
 
 To begin an offline conversation, a Prekey message is published to an untrusted
-server. This action is considered	 to be the start of the non-interactive DAKE.
+server. This action is considered to be the start of the non-interactive DAKE.
 A Prekey message is retrieved by the party attempting to send a message to the
 Prekey's publisher. This participant, then, replies with a Non-Interactive-Auth
 message (created with the prekey). This action is considered to complete the
@@ -1699,7 +1699,7 @@ Verify and decrypt message if included
       that it is equal to the one just calculated. If it is not, ignore the
       Non-Interactive-Auth message.
 8. At this point, the non-interactive DAKE is complete for Bob:
-   * In the case that he immediately receives a data message that advertizes the
+   * In the case that he immediately receives a data message that advertises the
      new public keys from Alice:
      * Follows what is defined in the
        [When you receive a Data Message](#when-you-receive-a-data-message)
@@ -1713,7 +1713,7 @@ Verify and decrypt message if included
 
 This message is created and published to an unstrusted prekey server to allow
 offline conversations. Each Prekey message contains the owner's user profile
-(which constains a signed shared prekey) and two one-time use ephemeral public
+(which contains a signed shared prekey) and two one-time use ephemeral public
 prekey values.
 
 A valid Prekey message is generated as follows:
@@ -2021,7 +2021,8 @@ attached. This has to be done prior to receiving any other data message, or
 sending one. For this, the participant:
 
 * Rotates the ECDH keys and brace key, see
-  [Rotating ECDH keys and brace key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver) section.
+  [Rotating ECDH keys and brace key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
+  section.
 * Calculates `K = KDF_2(K_ecdh || brace_key)`.
 * Derive new set of keys `root_key[i], chain_key_r[i][k] = derive_ratchet_keys(receiving, root_key[i-1], K)`.
 * Securely delete the previous root key (`root_key[i-1]`) and `K`.
@@ -2270,7 +2271,7 @@ Decrypting a data message consists of:
    the message is verified and decrypted with that key which is deleted from the
    storage.
 2. If a new ratchet key has been received, any skipped message keys from the
-   previous receiving ratchetare stored and a new DH ratchet is performed.
+   previous receiving ratchet are stored and a new DH ratchet is performed.
 3. If a new message from the current receiving ratchet is received, any skipped
    message keys from it are stored, and a symmetric-key ratchet is performed to
    derive the current message key and the next receiving chain key. The message
@@ -2405,7 +2406,7 @@ limits on the number of possible stored message keys (e.g. 1000).
 To mitigate the second risk, parties should delete stored message keys after an
 appropriate interval. This deletion could be triggered by a timer, or by
 counting the number of events (messages received, DH ratchet steps, etc.). This
-should be decided by the implementor. This partially defends against the second
+should be decided by the implementer. This partially defends against the second
 risk as it only protects "lost" messages, not messages sent using a new
 DH ratchet key that has not yet been received by the compromised party.
 To also defend against the second risk, the session should be regularly expired,
@@ -2418,7 +2419,7 @@ the communicating parties for use of application-specific purposes, such as
 file transfer, voice encryption, etc. When one party wishes to use the extra
 symmetric key, they create a type `7 TLV` attached to a Data Message. The extra
 symmetric key itself is then derived using the same `chain_key` used to compute
-the encryption key used to protect the Data Message. It is, thefore, derived
+the encryption key used to protect the Data Message. It is, therefore, derived
 by calculating `KDF_1(0xFF || chain_key)`.
 
 Upon receipt of the Data Message containing the type 7 TLV, the recipient will
@@ -2910,7 +2911,8 @@ If the version is 4:
      * Check that the instance tag in the message is the instance tag you are
        currently using.
      * Verify that the public ECDH key is on curve Ed448. See
-       [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) for details.
+       [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+       section for details.
      * Verify that the public DH key is from the correct group. See
        [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
        section for details.
@@ -3134,7 +3136,7 @@ conversation in which SMP takes place. This includes the Secure Session ID
 (SSID) whose creation is described
 [here](#interactive-deniable-authenticated-key-exchange-dake)
 and [here](#non-interactive-auth-message). If the user requests to see this
-Secure Session ID, it should be displayed as two 32-bit bigendian unsigned
+Secure Session ID, it should be displayed as two 32-bit big-endian unsigned
 values, for example, in C language, "%08x" format. If the party transmitted the
 Auth-R message during the DAKE, then display the first 32 bits in bold, and the
 second 32 bits in non-bold. If the user transmitted the Auth-I message instead,
