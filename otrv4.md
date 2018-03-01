@@ -2311,7 +2311,7 @@ This is done by:
   * Store any message keys from the previous DH Ratchet that correspond to
     messages that have not yet arrived:
       * If `k` + `MAX_SKIP` < received `pn`:
-         * Raise and exception that informs the user that too many message keys
+         * Raise an exception that informs the user that too many message keys
            are stored.
       * If `chain_key_r` is not NULL:
          * while `k` < received `pn`:
@@ -2343,7 +2343,7 @@ This is done by:
   * Store any message keys from the current DH Ratchet that correspond to
     messages that have not yet arrived:
     * If `k` + `MAX_SKIP` < received `j`:
-         * Raise and exception that informs the user that too many message keys
+         * Raise an exception that informs the user that too many message keys
            are stored.
       * If `chain_key_r` is not NULL:
          * while `k` < received `j`:
@@ -2369,7 +2369,7 @@ This is done by:
 
   * Securely delete `chain_key_r[i-1][k]`.
   * Use the `MKmac` to verify the MAC of the message. If the verification fails:
-      * Reject the message
+      * Reject the message.
   * Otherwise:
       * Increment the next receiving message id `k = k + 1`.
       * Set `nonce` as the "nonce" from the received data message.
@@ -2378,6 +2378,9 @@ This is done by:
       ```
       decrypted_message = XSalsa20_Dec(MKenc, nonce, m)
       ```
+
+      * If the message cannot be decrypted:
+        * Reject the message.
 
       * Securely delete `MKenc` and `nonce`.
       * Set `their_ecdh` as the "Public ECDH key" from the message.
