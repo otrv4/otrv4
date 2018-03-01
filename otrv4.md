@@ -1016,7 +1016,7 @@ DSA signature (SIG):
   len byte unsigned s, big-endian
 ```
 
-As defined on OTRv3 spec, the OTRv3 DSA public key looks like:
+As defined in OTRv3 spec, the OTRv3 DSA public key looks like:
 
 ```
 OTRv3 public authentication DSA key (PUBKEY):
@@ -1110,20 +1110,20 @@ The user profile signature for version 4 is generated as defined in RFC 8032
 [\[9\]](#references), section 5.2.6. The flag `f` is set to `0` and the context
 `c` is an empty constant string.
 
-Note that although the RFC states that parameters are defined as octets,
+Note that although the RFC 8032 states defines parameters as octet strings,
 they are defined as bytes in OTRv4.
 
 It is generated as follows:
 
 ```
-The inputs are the symmetric key (57 bytes, defined on 'Public keys and
+The inputs are the symmetric key (57 bytes, defined in the 'Public keys and
 fingerprints' section. It is referred as 'sym_key'), a flag 'f', which is a byte
 with value 0, a context 'c' (a value set by the signer and verifier of maximum
 255 bytes), which is an empty string for this protocol, and a message 'm'.
 
    1.  Hash the sym_key 'KDF(sym_key, 114)'. Let 'h' denote the resulting
        digest. Construct the secret key 'sk' from the first half of
-       'h' (57 bytes), and the corresponding public key 'H', as defined on
+       'h' (57 bytes), and the corresponding public key 'H', as defined in the
        'Public keys, Shared Prekeys and Fingerprints' section.
        Let 'prefix' denote the second half of the 'h' (from h[57] to
        h[113]).
@@ -1497,7 +1497,7 @@ To verify an Auth-I message:
 2. Compute
    `t = 0x1 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(phi)`.
    `phi` is the shared session state as mention on its [section](#shared-session-state).
-3. Verify the `sigma` as defined on
+3. Verify the `sigma` as defined in
    [Ring Signature Authentication](#verification-verifya1-a2-a3-sigma-m).
 
 An Auth-I is an OTR message encoded as:
@@ -1543,7 +1543,7 @@ uses a ring signature non-interactive zero-knowledge proof of knowledge
 (`RING-SIG`) for authentication (`RSig`).
 
 Alice's long-term Ed448 key pair is `(ska, Pka)` and Bob's long-term Ed448
-key pair is `(skb, Pkb)`. Both key pairs are generated as stated on the
+key pair is `(skb, Pkb)`. Both key pairs are generated as stated in the
 [Public keys, shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
 section.
 
@@ -1572,7 +1572,7 @@ Verify and decrypt message if included
 
 1. Requests prekey messages from the untrusted server.
 2. For each Prekey message received from the server:
-    * Verifies the Prekey message as defined on the
+    * Verifies the Prekey message as defined in the
       [Prekey message](#prekey-message) section.
     * Picks a compatible version of OTR listed in Bob's profile.
       If the versions are incompatible, Alice does not send any further
@@ -1689,7 +1689,7 @@ Verify and decrypt message if included
      of using a random value `r`, it will use : `r = KDF(80, 0x02 || K)`.
      Securely replaces `our_dh` with the outputs.
    * If an encrypted message was attached to the Non-Interactive-Auth message:
-     * Follows what is defined on [Decrypting an attached encrypted message](#decrypting-the-message-1)
+     * Follows what is defined in [Decrypting an attached encrypted message](#decrypting-the-message-1)
        section.
      * Otherwise:
         * Computes `Auth MAC = KDF_2(auth_mac_k || t)`. The `t` value here is
@@ -2124,7 +2124,7 @@ Verify MAC, Decrypt message 1_1
 
 This message is used to transmit a private message to the correspondent.
 It is also used to [reveal old MAC keys](#revealing-mac-keys). This data message
-is encoded as defined on [Encoded Messages](#encoded-messages) section.
+is encoded as defined in the [Encoded Messages](#encoded-messages) section.
 
 #### Data Message format
 
@@ -2195,7 +2195,7 @@ Old MAC keys to be revealed (DATA)
 
 In order to send an encoded data message, a key is required to encrypt the
 message in it. This per-message key (`MKenc`) is the output key from the sending
-and receiving KDF chains. As defined on [\[2\]](#references), the KDF keys for
+and receiving KDF chains. As defined in [\[2\]](#references), the KDF keys for
 these chains are called 'chain keys'. When a participant wants to send a data
 message after receiving another one, ratchet keys should be rotated (the ECDH
 keys, the brace key, the root key and the sending chain key) and the `j`
@@ -2812,7 +2812,7 @@ If the state is `WAITING_AUTH_R`:
       * Stay in state `WAITING_AUTH_R`.
 
     * If validation succeeds:
-      * Reply with an Auth-I message, as defined on
+      * Reply with an Auth-I message, as defined in
         [Sending an Auth-I message](##sending-an-auth-i-message).
 
 If the state is not `WAITING_AUTH_R`:
@@ -2822,8 +2822,8 @@ If the state is not `WAITING_AUTH_R`:
 #### Sending an Auth-I message
 
   * Generate and send an Auth-I Message.
-  * Initialize the double ratcheting, as defined on the
-    [Interactive DAKE Overview](#interactive-dake-overview).
+  * Initialize the double ratcheting, as defined in the
+    [Interactive DAKE Overview](#interactive-dake-overview) section.
   * Transition to state `ENCRYPTED_MESSAGES`.
 
 #### Receiving an Auth-I message
@@ -2840,8 +2840,8 @@ If the state is `WAITING_AUTH_I`:
 
     * If validation succeeds:
       * Transition to state `ENCRYPTED_MESSAGES`.
-      * Initialize the double ratcheting, as defined on the
-        [Interactive DAKE Overview](#interactive-dake-overview).
+      * Initialize the double ratcheting, as defined in the
+        [Interactive DAKE Overview](#interactive-dake-overview) section.
 
 If the state is not `WAITING_AUTH_I`:
 
@@ -2971,12 +2971,12 @@ If the version is 3:
         keys for this correspondent, and transition msgstate to
         `MSGSTATE_FINISHED`.
     * Otherwise, inform the user that an unreadable encrypted message was
-      received, and reply with an Error Message, as defined on OTRv3 protocol.
+      received, and reply with an Error Message, as defined in OTRv3 protocol.
 
   If msgstate is `MSGSTATE_PLAINTEXT` or `MSGSTATE_FINISHED`:
 
    * Inform the user that an unreadable encrypted message was received, and
-     reply with an Error Message, as defined on OTRv3 protocol.
+     reply with an Error Message, as defined in OTRv3 protocol.
 
 #### Receiving an Error Message
 
