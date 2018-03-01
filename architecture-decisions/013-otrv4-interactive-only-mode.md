@@ -8,8 +8,8 @@ version 4.
 This document outlines the implications of having a "OTRv4 only" mode to the
 spec as per revision 585ba0dfcecf6abc0d30ba0ff0524bce3795110a.
 
-When thinking about the consequences, we had in mind the same scenarios as ADR #011
-but restricting the DAKE to the interactive version.
+When thinking about the consequences, we had in mind the same scenarios as
+ADR#011 but restricting the DAKE to the interactive version.
 
 ### Decision
 

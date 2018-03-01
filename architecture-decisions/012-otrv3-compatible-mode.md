@@ -5,8 +5,8 @@
 ADR #010 defines the need for specifying alternative modes for the OTR protocol
 version 4.
 
-This document outlines the implications of having a "OTRv3 compatible" mode to the
-spec as per revision 585ba0dfcecf6abc0d30ba0ff0524bce3795110a.
+This document outlines the implications of having a "OTRv3 compatible" mode to
+the spec as per revision 585ba0dfcecf6abc0d30ba0ff0524bce3795110a.
 
 When thinking about the consequences, we had the following scenarios in mind:
 
@@ -14,28 +14,20 @@ When thinking about the consequences, we had the following scenarios in mind:
 
 Alice wants to send a message to Bob.
 
-1. Alice adds Bob as a contact
-
+1. Alice adds Bob as a contact.
 2. Alice verifies Bob's identity. She either:
-
-  a. Use Bob's User Profile and verify Bob's fingerprint using a business card,
-     a HTTPS website;
-
-  b. Perform a interactive DAKE and use SMP.
+  * Uses Bob's User Profile and verifies Bob's fingerprint using a business
+    card, a HTTPS website, etc.
+  * Performs an interactive DAKE and uses SMP.
 
 2. Alice types a message and "sends it" to Bob.
-
-  a. A DAKE is performed if the app is not already in an encrypted state.
-
-  b. Alice is warned about any problem to establish the encrypted channel and/or
-     any problem with the identity verification for Bob.
-
-  c. The conversation keys do not need to be stored on the device for later use.
-
-  d. Instance tags are required because there may be multiple devices.
-
-  e. Fragmentation could be optional depending on the network, but this is
-     unlikely due support to multiple networks.
+  * A DAKE is performed if the app is not already in an encrypted state.
+  * Alice is warned about any problem to establish the encrypted channel and/or
+    any problem with the identity verification for Bob.
+  * The conversation keys do not need to be stored on the device for later use.
+  * Instance tags are required because there may be multiple devices.
+  * Fragmentation could be optional depending on the network, but this is
+    unlikely due support to multiple networks.
 
 3. Bob receives the message from Alice.
 
@@ -46,7 +38,7 @@ messages, they should be directly delivered to Bob by the app and not by the
 OTRv4 protocol.
 
 TODO: OTR3 supports plaintext messages. Should this mode support it too? I think
-so.
+so. yes.
 
 ### Decision
 

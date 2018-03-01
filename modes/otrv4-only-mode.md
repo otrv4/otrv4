@@ -1,7 +1,7 @@
 # OTR version 4: version 4 only mode ("standalone" mode?)
 
 This document describes the version 4 of the Off-the-Record Messaging protocol,
-in a operation mode that aims to provide a always encrypted mode with higher
+in an operation mode that aims to provide an always encrypted mode with higher
 security properties than OTR version 3.
 
 ## Mode description
@@ -21,7 +21,7 @@ The spec for this mode would be the same spec as per (current revision) except:
 
 - "High Level Overview": there's no "Requests OTR conversation" step.
 - "Creating a User Profile": "Versions" MUST be "4" only.
-- "Establishing Versions". ignore the paragraph "A compliant OTRv4
+- "Establishing Versions": ignore the paragraph "A compliant OTRv4
   implementation is required to support version 3 of OTR, but not versions
   1 and 2.".
 - "Online Conversation Initialization": Ignore everything about query messages
