@@ -2310,8 +2310,8 @@ This is done by:
   * Store any message keys from the previous DH Ratchet that correspond to
     messages that have not yet arrived:
       * If `k` + `MAX_SKIP` < received `pn`:
-         * Inform the user that an unreadable encrypted message was received
-           by replying with an Error Message: ERROR_2. // TODO: check this.
+         * Raise and exception that informs the user that too many message keys
+           are stored.
       * If `chain_key_r` is not NULL:
          * while `k` < received `pn`:
              * Derive
