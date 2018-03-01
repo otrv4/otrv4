@@ -942,7 +942,7 @@ The session expiration timer begins at different times for the sender and the
 receiver of the first data message in a conversation. The sender begins their
 timer as they send the first data message or as they attach an encrypted
 message to the Non-Interactive-Auth message. The receiver begins their timer
-when they receive this first data message.
+when they receive this first data message or the attached encrypted message.
 
 Since the session expiration uses a timer, it can be compromised by clock
 errors. Some errors may cause the session to be deleted too early and result in

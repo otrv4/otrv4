@@ -40,14 +40,14 @@ with a relatively short expiration time. As a result, an attacker would need to
 compromise the secret part of the signed prekey before this expiration time
 along with the identity secret key in order to gain access to the message.
 
-The second attack is mitigated in two ways. First, since it cannot be known
-whether a message was dropped by an attacker, keys for dropped messages are
-never kept. Thus, if Alice receives message 3 from Bob, but she has not
-received message 1 and 2, Alice will derive the keys to validate and decrypt
-message 3. If the message is valid, all chain keys used for derivation are
-deleted. In this case, chain keys for message 1 and message 2 are deleted. This
-is acceptable since OTRv4 assumes in-order delivery of messages. As a result,
-messages received out of order will be ignored.
+The second attack is mitigated in two ways. Keys for dropped messages or
+skipped messages are kept for a period of time. If Alice, for example, receives
+only message 3 from Bob, but she has not received message 1 and 2, Alice will
+derive the keys to validate and decrypt message 3. If the message is valid, all
+chain keys used for derivation are deleted but the message keys are kept.
+In this case, chain keys for message 1 and message 2 are deleted. These stored
+message keys remain stored until an appropriate interval (defined by
+implementers) triggers its deletion.
 
 Second, to fully defend against attack 2, sessions are expired if no new ECDH
 keys are generated within a certain amount of time. This encourages keys to be
@@ -247,7 +247,8 @@ the implementer.
 
 Here is the guide:
 
-To validate a prekey message, use the following checks. If any of them fail, ignore the message:
+To validate a prekey message, use the following checks. If any of them fail,
+ignore the message:
 
     Check if the user profile is not expired
     Check if the OTR version of the prekey message matches one of the versions
@@ -290,8 +291,8 @@ Currently we have decided on one state machine that can receive multiple DAKEs.
 The machine has the following states:
 
 * Start
-* Waiting for R Auth
-* Waiting for I Auth
+* Waiting for Auth-R
+* Waiting for Auth-I
 * Encrypted Message
 * Finished
 
