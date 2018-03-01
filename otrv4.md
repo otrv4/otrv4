@@ -2473,12 +2473,20 @@ an encoded OTR message. In that event, the sender may choose to split the
 message into a number of fragments. This section describes the format for the
 fragments.
 
+OTRv4 fragmentation and reassembly procedure needs to be able to break
+data messages into an almost arbitrary number of pieces that can be later
+reassembled.  The receiver of the fragments uses the identifier field to ensure
+that fragments of different data messages are not mixed.  The fragment index
+field tells the receiver the position of a fragment in the original data
+message. These fields provide sufficient information to reassemble data
+messages.
+
 OTRv4 and OTRv3 perform fragmentation in different ways. As OTRv4 supports an
 out-of-order network model, fragmentation is different. Nevertheless, for
 both OTR versions, message parsing should happen after the message has been
 defragmented.
 
-All OTRv4 clients must be able to assemble received fragments, but performing
+All OTRv4 clients must be able to reassemble received fragments, but performing
 fragmentation on outgoing messages is optional.
 
 ### Transmitting Fragments
@@ -2491,8 +2499,9 @@ OTR message as follows:
     a Data Message would start with `?OTR:AAQD` and end with `.`.
   * Assign an identifier, which will be used specifically for this fragmented
     data message. This is done in order to not confuse these fragments with
-    other data message's fragments. The identifier is a randomly generated
-    8-byte value.
+    other data message's fragments. The identifier is a unique randomly
+    generated 8-byte value that must be unique for the time the data message
+    is fragmentented.
   * Break it up into sufficiently small pieces. Let this number of pieces be
     `total`, and the pieces be `piece[1],piece[2],...,piece[total]`.
   * Transmit `total` OTRv4 fragmented messages with the following (printf-like)
@@ -2538,16 +2547,16 @@ for this _before_ checking for any of the other `?OTR:` markers):
 
   * For the first fragment that arrives (there is not a current buffer with the
     same identifier):
-    * Create a buffer which will be keep track of the portions of the fragmented
+    * Create a buffer which will keep track of the portions of the fragmented
       data message that have arrived (by filling up it with fragments).
     * Optionally, initialize a timer for the reassembly of the fragments as it
-      is possible that some fragment of the data message might never show up.
+      is possible that some fragments of the data message might never show up.
       This timer ensures that a client will not be "forever" waiting for a
-      fragment.
+      fragment. If the timer runs out, all stored buffers should be destroyed.
     * Let `B` be the buffer, `I` be the currently stored identifier, `T` the
       currently stored `total` and `C` a counter that keeps track of the
       received number of fragments for this buffer. If you have no currently
-      stored fragments there are no buffers.
+      stored fragments, there are no buffers.
     * Set the length of the buffer as `total`: `len(B) = total`.
     * Store `piece` at the `index` given position: `insert(piece, index)`.
     * Let `total` be `T` and `identifier` be `I` for the buffer.
@@ -2560,7 +2569,7 @@ for this _before_ checking for any of the other `?OTR:` markers):
       * Store the `piece` at the given position in the buffer:
         `insert(piece, index)`.
       * Increment the buffer counter: `C = C + 1`.
-     * Otherwise:
+    * Otherwise:
       * Forget any stored fragments of this buffer you may have.
       * Reset `C`, `N` and `I` to 0, and destroy this buffer.
 
@@ -2568,12 +2577,12 @@ for this _before_ checking for any of the other `?OTR:` markers):
     * Consider this fragment as part of another buffer: either create a new
       buffer or insert the fragment into one that has already been created.
 
-After this, if the current buffer's `C == T` and `T == 0`, treat the buffer as
-the received data message.
+After this, if the current buffer's `C == T`, treat the buffer as the received
+data message.
 
 If you receive a non-OTR message or an unfragmented message:
 
-* Keep track of the buffers you may have.
+* Keep track of the buffers you may already have. Do not destroy them.
 
 For example, here is a Data Message we would like to transmit over a network
 with an unreasonably small `maximum message size`:
