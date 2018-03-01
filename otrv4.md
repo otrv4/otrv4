@@ -1942,13 +1942,14 @@ participant:
 * Rotates the ECDH keys and brace key by using the already derived `our_ecdh`
   and `our_dh`.see
   [Rotating ECDH keys and brace key as sender](#rotating-ecdh-keys-and-brace-key-as-sender) section.
-  The already derived ECDH public key created by the sender in this process will
-  be the 'Public ECDH Key' for the message. The already derived DH public key
-  will be the 'Public DH Key' for the message.
+  The already derived ECDH public key will be the 'Public ECDH Key' for the
+  message. The already derived DH public key will be the 'Public DH Key' for the
+  message.
 * Calculates the shared secret `K = KDF_2(K_ecdh || brace_key)`.
 * Derive new set of keys:
   `root_key[i], chain_key_s[i][j] = derive_ratchet_keys(sending, root_key[i-1], K)`.
   Securely deletes the previous root key (`root_key[i-1]`) and `K`.
+* Sets `i` as the attached message ratchet id.
 * Increments the ratchet id `i = i + 1`.
 * Sets `j` as the attached message id.
 * Derives the next sending chain key by using the `chain_key_s[i-1][j]` already
@@ -1979,6 +1980,9 @@ The format of this attached message in the Non-Interactive-Auth message will be:
 ```
 Attached XZDH Encrypted Message (XZDH-ENCRYPTED-MSG)
 
+Attached Encrypted Ratchet Id (INT)
+  Set with sender's i.
+
 Attached Encrypted Message Id (INT)
   Set with sender's j.
 
@@ -2005,8 +2009,8 @@ like this:
 ```
   (Protocol version || message type || sender's instance tag || receiver's
    instance tag || Sender's User Profile || X || A || Sigma || Auth MAC ||
-  (attached message id || public ecdh key || public dh key ||
-   encrypted message))
+  (attached message ratchet id || attached message id || public ecdh key ||
+   public dh key || encrypted message))
 ```
 
 ##### Decrypting the message
@@ -2151,6 +2155,9 @@ Flags (BYTE)
 Previous chain message number (INT)
   This should be set with sender's pn.
 
+Ratchet id (INT)
+  This should be set with sender's i.
+
 Message id (INT)
   This should be set with sender's j.
 
@@ -2208,6 +2215,7 @@ Given a new DH Ratchet:
     `root_key[i], chain_key_s[i][j] = derive_ratchet_keys(sending,
      root_key[i-1], K)`.
   * Securely delete the previous root key (`root_key[i-1]`) and `K`.
+  * Set `i` as the Data message's ratchet id.
   * Increment the ratchet id `i = i + 1`.
   * If present, forget and reveal MAC keys. The conditions for revealing MAC
     keys are stated in the [Revealing MAC keys](#revealing-mac-keys) section.
@@ -2217,13 +2225,10 @@ Given a new DH Ratchet:
 When sending a data message in the same DH Ratchet:
 
   * Set `j` as the Data message's message id.
+  * Set `i - 1` as the Data message's ratchet id.
   * Derive the next sending chain key
     `chain_key_s[i-1][j+1] = KDF_2(chain_key_s[i-1][j])` when a data message
     is sent.
-    In the case where a data message is sent from Alice when she inmediatly
-    finishes the interactive DAKE or when Bob inmediatly finishes the
-    non-interactive DAKE, derive the next sending chain key:
-    `chain_key_s[i][j+1] = KDF_2(chain_key_s[i][j])`
   * Calculate the encryption key (`MKenc`), the MAC key (`MKmac`) and, if
     needed the extra symmetric key:
 
@@ -2278,23 +2283,25 @@ This is done by:
 
 * Try to decrypt the message with a stored skipped message key:
 
-  * If `Public ECDH Key`, `Public DH Key` (if present), and the received `j`
-    and `i` are in the `skipped_MKenc` dictionary:
-      * Get the message key and the extra symmetric key (if needed):
-        `MKenc, extra_symm_key = skipped_MKenc[Public ECDH Key, Public DH Key, i, j]`.
-      * Securely delete
-        `skipped_MKenc[Public ECDH Key, Public DH Key, i, j]`.
-      * Calculate `MKmac = KDF_2(0x02 || MKenc)`.
-      * Use the `MKmac` to verify the MAC of the data message.
-      * Set `nonce` as the "nonce" from the received data message.
-      * Decrypt the message using `MKenc` and `nonce`:
+  * If the received `j` and `i` are in the `skipped_MKenc` dictionary:
+    * Compared the received `Public ECDH Key` and, if present, the
+      received `Public DH Key`.
+      * If they are equal:
+          * Get the message key and the extra symmetric key (if needed):
+            `MKenc, extra_symm_key = skipped_MKenc[Public ECDH Key, Public DH Key, i, j]`.
+          * Securely delete
+            `skipped_MKenc[Public ECDH Key, Public DH Key, i, j]`.
+          * Calculate `MKmac = KDF_2(0x02 || MKenc)`.
+          * Use the `MKmac` to verify the MAC of the data message.
+          * Set `nonce` as the "nonce" from the received data message.
+          * Decrypt the message using `MKenc` and `nonce`:
 
-      ```
-      decrypted_message = XSalsa20_Dec(MKenc, nonce, m)
-      ```
+            ```
+            decrypted_message = XSalsa20_Dec(MKenc, nonce, m)
+            ```
 
-      * Securely delete `MKenc` and `nonce`.
-      * Add `MKmac` to the list `mac_keys_to_reveal`.
+          * Securely delete `MKenc` and `nonce`.
+          * Add `MKmac` to the list `mac_keys_to_reveal`.
 
 * Given a new ratchet (the received `j` is equal to 0, the `Public ECDH Key` is
   different from `their_ecdh` and the `Public DH Key` is different from
@@ -2335,15 +2342,16 @@ This is done by:
   * Store any message keys from the current DH Ratchet that correspond to
     messages that have not yet arrived:
     * If `k` + `MAX_SKIP` < received `j`:
-         * Inform the user that an unreadable encrypted message was received
-           by replying with an Error Message: ERROR_2.
+         * Raise and exception that informs the user that too many message keys
+           are stored.
       * If `chain_key_r` is not NULL:
          * while `k` < received `j`:
              * Derive
                `chain_key_r[i-1][k+1], MKenc = KDF_2(chain_key_r[i-1][k])`.
              * Derive (this is done any time a message key is stored as
                there is no way of knowing if the message that will be received
-               in the future will ask for its computation):
+               in the future will ask for the computation of the extra
+               symmetric key):
                `extra_symm_key = KDF_1(0xFF || chain_key_r[i-1][j])`.
              * Store
                `MKenc, extra_sym_key = skipped_MKenc[Public ECDH Key, Public DH Key, i, k]`.
