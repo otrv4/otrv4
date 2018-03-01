@@ -2737,9 +2737,9 @@ If the Query message offers OTR version 3 and version 3 is allowed:
 
 #### Starting a conversation interactively
 
-Rather than requesting an encrypted conversation, Alice can directly
-start an OTR conversation with Bob if she is certain that both support
-and are willing to do so. In such case, Alice should:
+Rather than requesting an encrypted conversation, Alice can directly start an
+OTR conversation with Bob if she is certain that both support and are willing to
+do so. In such case, Alice should:
 
   * Send an Identity message.
   * Transition the state to `WAITING_AUTH_R`.
@@ -2850,7 +2850,7 @@ If the state is not `WAITING_AUTH_I`:
 #### Sending an encrypted message to an offline participant
 
   * Generate and send a Non-Interactive-Auth message.
-  * Initialize the double ratcheting, as defined on the
+  * Initialize the double ratcheting, as defined in the
     [Non-Interactive DAKE Overview](#non-interactive-dake-overview).
   * Transition to state `ENCRYPTED_MESSAGES`.
 
@@ -2865,19 +2865,17 @@ Else:
   * If the receiver's instance tag in the message is not the sender's instance
     tag you are currently using, ignore this message.
   * Validate the Non-Interactive-Auth message.
-  * Initialize the double ratcheting, as defined on the
+  * Initialize the double ratcheting, as defined in the
     [Non-Interactive DAKE Overview](#non-interactive-dake-overview).
   * Transition to state `ENCRYPTED_MESSAGES`.
 
 #### Sending an encrypted data message
 
 The `ENCRYPTED_MESSAGES` state is the state where a participant is allowed to
-send encrypted data messages. There are only two other states in which a
+send encrypted data messages. There are only one other state in which a
 participant can send an encrypted message (that do not have the same format
 as a data message):
 
-* On `WAITING-AUTH-R` state: when a participant attaches an encrypted message
-  to the Auth-I message.
 * On `START`: when a participant attaches an encrypted message to the
   Non-Interactive Auth message.
 
@@ -2897,11 +2895,9 @@ If the version is 4:
   * Inform the user that an unreadable encrypted message was received by
     replying with an Error Message: `ERROR_2`.
 
-  * There are only two other states in which a participant can receive an
+  * There are only one other states in which a participant can receive an
     encrypted message (that do not have the same format as a data message):
 
-      * On `WAITING-AUTH-I` state: when the other participant sends you an
-        Auth-I message that has an attached encrypted message with it.
       * On `START`: when the other participant sends you an
         Non-Interactive-Auth message that has an attached encrypted message with
         it.
@@ -2909,9 +2905,7 @@ If the version is 4:
 * Otherwise:
 
   * Validate the data message:
-     * Verify the MAC tag. In the case of a Non-Interactive-Auth message,
-       verify it with the Auth Mac as defined in the [Non-Interactive-Auth
-       Message](#non-interactive-auth-message) section.
+     * Verify the MAC tag.
      * Check if the message version is allowed.
      * Check that the instance tag in the message is the instance tag you are
        currently using.
