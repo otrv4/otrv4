@@ -2413,19 +2413,19 @@ should be decided by the implementer. This partially defends against the second
 risk as it only protects "lost" messages, not messages sent using a new
 DH ratchet key that has not yet been received by the compromised party.
 To also defend against the second risk, the session should be regularly expired,
-as defined in [Session expiration](#session-expiration) section.
+as defined in the [Session expiration](#session-expiration) section.
 
 ### Extra symmetric key
 
 Like OTRv3, OTRv4 defines an additional symmetric key that can be derived by
 the communicating parties for use of application-specific purposes, such as
 file transfer, voice encryption, etc. When one party wishes to use the extra
-symmetric key, they create a type `7 TLV` attached to a Data Message. The extra
-symmetric key itself is then derived using the same `chain_key` used to compute
-the encryption key used to protect the Data Message. It is, therefore, derived
-by calculating `KDF_1(0xFF || chain_key)`.
+symmetric key, they create a type `7 TLV`, which they attach to a Data Message.
+The extra symmetric key itself is then derived using the same `chain_key` used
+to compute the message encryption key used to protect the Data Message. It is,
+therefore, derived by calculating `KDF_1(0xFF || chain_key)`.
 
-Upon receipt of the Data Message containing the type 7 TLV, the recipient will
+Upon receipt of the Data Message containing the type `7 TLV`, the recipient will
 compute the extra symmetric key in the same way. Note that the value of the
 extra symmetric key is not contained in the TLV itself.
 
@@ -2449,7 +2449,8 @@ So, if for example, these TLVs arrive with the data message:
   TLV 7   context: 0x0001
 ```
 
-Three keys can be calculated:
+Three keys can, therefore, be calculated from the already derived extra
+symmetric key:
 
 ```
   symkey1 = KDF_1(0x00 || 0x0042 || extra_sym_key)
