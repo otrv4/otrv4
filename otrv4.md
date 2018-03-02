@@ -2189,7 +2189,8 @@ Authenticator (MAC)
   Note: The old MAC keys are not included in this field.
 
 Old MAC keys to be revealed (DATA)
-  See 'Revealing MAC Keys section'.
+  See 'Revealing MAC Keys section'. This corresponds to the 'mac_keys_to_reveal'
+  variable.
 ```
 
 #### When you send a Data Message:
@@ -2463,12 +2464,15 @@ symmetric key:
 Old MAC keys are keys from already received messages and that will no longer be
 used to verify the authenticity of that message. We reveal them in order to
 provide [forgeability of messages](#forging-transcripts): once MAC keys are
-revealed, anyone can modify an OTR message and still have it appear valid.
+revealed, anyone can modify an OTR message and still have it appear as valid.
 
 A MAC key is added to `mac_keys_to_reveal` list after a participant has verified
-the message associated with that MAC key. Old MAC keys are formatted as a list
-of 64-byte concatenated values. The first data message sent every ratchet
-reveals them.
+the message associated with that MAC key. They are also added if the session is
+expired or when the storage of message keys gets deleted, and the MAC keys for
+messages that have not arrived are derived.
+
+Old MAC keys are formatted as a list of 64-byte concatenated values. The first
+data message sent every ratchet reveals them.
 
 ## Fragmentation
 
