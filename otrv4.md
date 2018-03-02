@@ -1435,8 +1435,8 @@ A valid Auth-R message is generated as follows:
 6. Generate a 4-byte instance tag to use as the sender's instance tag.
    Additional messages in this conversation will continue to use this tag as the
    sender's instance tag. Also, this tag is used to filter future received
-   messages. Messages intended for this instance of the client will have this
-   number as the receiver's instance tag.
+   messages. Messages intended for this instance of the client will have the same
+   number but will be used as the receiver's instance tag.
 7. Use the sender's instance tag from the Identity Message as the receiver's
    instance tag.
 
