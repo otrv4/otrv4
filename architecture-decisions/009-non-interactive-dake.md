@@ -45,9 +45,10 @@ skipped messages are kept for a period of time. If Alice, for example, receives
 only message 3 from Bob, but she has not received message 1 and 2, Alice will
 derive the keys to validate and decrypt message 3. If the message is valid, all
 chain keys used for derivation are deleted but the message keys are kept.
-In this case, chain keys for message 1 and message 2 are deleted. These stored
+In this case, chain keys for message 1 and message 2 are deleted. The stored
 message keys remain stored until an appropriate interval (defined by
-implementers) triggers its deletion.
+implementers) triggers its deletion, which partially defends against the second
+attack.
 
 Second, to fully defend against attack 2, sessions are expired if no new ECDH
 keys are generated within a certain amount of time. This encourages keys to be
