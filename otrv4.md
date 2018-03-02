@@ -1228,10 +1228,12 @@ Bob will be initiating the DAKE with Alice.
 **Alice:**
 
 1. Receives an Identity message from Bob:
-    * Verifies the Identity message as defined in the
-      [Identity message](#identity-message) section.
-    * Picks a compatible version of OTR listed in Bob's profile. If the versions
-      are incompatible, Alice does not send any further messages.
+    * Verifies the Identity message as defined on the
+      [Identity message](#identity-message) section. If the Bob's public keys (Y or B)
+      are not valid, Alice rejects the message and does not send anything further.
+    * Picks the newest compatible version of OTR listed in Bob's profile.
+      If there aren't any compatible versions, Alice does not send any further
+      messages.
     * Sets `Y` as `their_ecdh`.
     * Sets `B` as `their_dh`.
 2. Generates an Auth-R message, as defined in
@@ -1370,11 +1372,13 @@ A valid Identity message is generated as follows:
 
 To verify an Identity message:
 
-1. Validate the User Profile.
-2. Verify that the point `Y` received is on curve Ed448. See
+1. Verify if the message type is 0x08.
+2. Verify protocol version on message.
+3. Validate the User Profile.
+4. Verify that the point `Y` received is on curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
-3. Verify that the DH public key `B` is from the correct group. See
+5. Verify that the DH public key `B` is from the correct group. See
    [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
    section for details.
 
@@ -1391,8 +1395,9 @@ Sender's instance tag (INT)
   The instance tag of the person sending this message.
 
 Receiver's instance tag (INT)
-  The instance tag of the intended recipient. For an Identity message, this
-  will often be 0 since the other party may not have set its instance
+  The instance tag of the intended recipient. As the instance tag is used
+  to differentiate the clients that are in use for an user for Identity messages,
+  this will often be 0 since the other party may not have set its instance
   tag yet.
 
 Sender's User Profile (USER-PROF)
@@ -1433,8 +1438,8 @@ A valid Auth-R message is generated as follows:
 6. Generate a 4-byte instance tag to use as the sender's instance tag.
    Additional messages in this conversation will continue to use this tag as the
    sender's instance tag. Also, this tag is used to filter future received
-   messages. Messages intended for this instance of the client will have this
-   number as the receiver's instance tag.
+   messages. Messages intended for this instance of the client will have the same
+   number but will be used as the receiver's instance tag.
 7. Use the sender's instance tag from the Identity Message as the receiver's
    instance tag.
 
