@@ -1358,12 +1358,12 @@ A valid Identity message is generated as follows:
    [Creating a user profile](#creating-a-user-profile) section.
 2. Generate an ephemeral ECDH key pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
-  * secret key `y` (57 bytes).
-  * public key `Y`.
+   * secret key `y` (57 bytes).
+   * public key `Y`.
 3. Generate an ephemeral DH key pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
-  * secret key `b` (80 bytes).
-  * public key `B`.
+   * secret key `b` (80 bytes).
+   * public key `B`.
 4. Generate a 4-byte instance tag to use as the sender's instance tag.
    Additional messages in this conversation will continue to use this tag as the
    sender's instance tag. Also, this tag is used to filter future received
@@ -1425,12 +1425,12 @@ A valid Auth-R message is generated as follows:
    [Creating a user profile](#creating-a-user-profile) section.
 2. Generate an ephemeral ECDH key pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
-  * secret key `x` (57 bytes).
-  * public key `X`.
+   * secret key `x` (57 bytes).
+   * public key `X`.
 3. Generate an ephemeral DH key pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
-  * secret key `a` (80 bytes).
-  * public key `A`.
+   * secret key `a` (80 bytes).
+   * public key `A`.
 4. Compute
    `t = 0x0 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(phi)`.
    `phi` is the shared session state as mention on its [section](#shared-session-state).
@@ -1787,12 +1787,12 @@ A valid Non-Interactive-Auth message is generated as follows:
    [Creating a user profile](#creating-a-user-profile) section.
 2. Generate an ephemeral ECDH key pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
-  * secret key `x` (57 bytes).
-  * public key `X`.
+   * secret key `x` (57 bytes).
+   * public key `X`.
 3. Generate an ephemeral DH key pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
-  * secret key `a` (80 bytes).
-  * public key `A`.
+   * secret key `a` (80 bytes).
+   * public key `A`.
 4. Verify the Prekey message.
 5. Compute `K_ecdh = ECDH(x, their_ecdh)`.
 6. Compute `k_dh = DH(a, their_dh)` and `brace_key = KDF_1(k_dh)`.
@@ -1928,7 +1928,7 @@ If many prekey messages are received:
 ### Encrypted messages in DAKE's messages
 
 One message of XZDH allows participants to attach an encrypted message to it.
-This message will be referred as "attached encrypted message":
+This message will be referred as "attached encrypted message".
 
 Note that if a data message arrives prior to the Auth-I or the
 Non-Interactive-Auth message, this data message will be ignored. An attached
@@ -2459,6 +2459,7 @@ Three keys can, therefore, be calculated from the already derived extra
 symmetric key:
 
 ```
+  extra_sym_key = KDF_1(0xFF || chain_key)
   symkey1 = KDF_1(0x00 || 0x0042 || extra_sym_key)
   symkey2 = KDF_1(0x01 || 0x104A || extra_sym_key)
   symkey3 = KDF_1(0x02 || 0x0001 || extra_sym_key)
@@ -2514,7 +2515,7 @@ OTR message as follows:
     data message. This is done in order to not confuse these fragments with
     other data message's fragments. The identifier is a unique randomly
     generated 8-byte value that must be unique for the time the data message
-    is fragmentented.
+    is fragmented.
   * Break it up into sufficiently small pieces. Let this number of pieces be
     `total`, and the pieces be `piece[1],piece[2],...,piece[total]`.
   * Transmit `total` OTRv4 fragmented messages with the following (printf-like)
