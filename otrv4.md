@@ -432,7 +432,8 @@ the OTRv4 messages that should be transmitted encoded.
 Encoded as a little-endian array of 56 bytes, e.g.
 `h[0] + 2^8 * h[1] + ... + 2^447 * h[55]`.
 Take into account that the scalars used for public key generation are 57 bytes
-long and encoded as: `h[0] + 2^8 * h[1] + ... + 2^448 * h[56]`.
+long and encoded as: `h[0] + 2^8 * h[1] + ... + 2^448 * h[56]`. This latter
+scalar is not sent over the wire.
 
 #### Point
 
@@ -447,10 +448,11 @@ encoded as follows:
 
 A curve point is decoded as follows:
 
-1. Interpret bit 455 as the least significant bit of the x-coordinate. Denote
+1. Interpret the 57-byte array as an integer in little-endian representation.
+2. Interpret bit 455 as the least significant bit of the x-coordinate. Denote
    this value `x_0`.  The y-coordinate is recovered simply by clearing this bit.
    If the resulting value is `>= p`, decoding fails.
-2. To recover the x-coordinate, the curve equation implies
+3. To recover the x-coordinate, the curve equation implies
    `x^2 = (y^2 - 1) / (d * y^2 - 1) (mod p)`.  The denominator is always
    non-zero mod p.
    1. Let `num = y^2 - 1` and `denom = d * y^2 - 1`.  To compute the square root
@@ -464,7 +466,7 @@ A curve point is decoded as follows:
 
    2.  If `denom * x^2 = num`, the recovered x-coordinate is `x`.  Otherwise, no
        square root exists, and decoding fails.
-3. Use the `x_0` bit to select the right square root:
+4. Use the `x_0` bit to select the right square root:
    * If `x = 0`, and `x_0 = 1`:
      * Decoding fails.
    * Otherwise, if `x_0 != x mod 2`:
@@ -499,7 +501,8 @@ OTRv4 introduces a new type of public key:
 ```
 OTRv4's public authentication Ed448 key (ED448-PUBKEY):
 
-  Pubkey type (SHORT)
+  Pubkey type
+    2 byte unsigned value, little-endian
     Ed448 public keys have type 0x0010
 
   H (POINT)
@@ -511,7 +514,8 @@ OTRv4's public shared prekey is defined as follows:
 ```
 OTRv4's public shared prekey (ED448-SHARED-PREKEY):
 
-  Shared Prekey type (SHORT)
+  Shared Prekey type
+    2 byte unsigned value, little-endian
     Ed448 shared prekey have type 0x0011
 
   D (POINT)
@@ -534,7 +538,8 @@ The symmetric key (sym_key) is 57 bytes of cryptographically secure random data.
 3. Interpret the buffer as the little-endian integer, forming the
    secret scalar 'sk'.  Perform a known-base-point scalar multiplication
    'sk * Base point (G)'. If the result is for the 'ED448-PUBKEY', store it in
-   'H'.  If the result is for the 'ED448-SHARED-PREKEY', store it in 'D'.
+   'H', encoded as POINT.  If the result is for the 'ED448-SHARED-PREKEY', store
+   it in 'D', encoded as POINT.
 4. Securely delete 'sk' and 'sym_key'.
 ```
 
@@ -1001,7 +1006,7 @@ User Profile (USER-PROF):
 ```
 EDDSA signature (EDDSA-SIG):
   (len is the expected length of the signature, which is 114 bytes)
-  len byte unsigned value, big-endian
+  len byte unsigned value, little-endian
 ```
 
 `SIG` is the DSA Signature. It is the same signature as used in OTRv3.
@@ -1160,7 +1165,8 @@ The user profile signature is verified as defined in RFC 8032
     decodings fail (including 'S' being out of range), the signature is invalid.
 2.  Compute KDF("SigEd448" || f || len(c) || c || R || H || m, 114). Interpret
     the 114-byte digest as a little-endian integer 'k'.
-3.  Check the group equation 'S = R + (k * H_1)'.
+3.  Check the group equation '4 * (S * G) = (4 * R) + (4 * (k * H_1))'. It's is
+    sufficient to check '(S * G) = R + (k * H_1)'.
 ```
 
 ### Validating a User Profile
