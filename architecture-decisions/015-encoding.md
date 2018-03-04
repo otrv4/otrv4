@@ -2,7 +2,7 @@
 
 ### Context
 
-The OTRv4 operations use several different elliptic curve specific data types.
+The OTRv4 protocol use several different elliptic curve specific data types.
 Four data types are employed: two types associated with elliptic curve
 arithmetic — field elements, and elliptic curve points — as well as byte arrays
 which are used to communicate and store information, and bit strings which are
@@ -29,7 +29,7 @@ If the field is `F_p`, convert the integer into a byte array. If the field is
 `F_2m`, view the coefficients of the polynomial as a bit string with the highest
 degree term on the left and convert the bit string to a byte array.
 
-This encoding of points can be defined as:
+The encoding of points can be defined as:
 
 For sets `S` and `T`, and encoding from `S` to `T` is an efficient
 function `enc : S → T` with efficient left-inverse `dec : T → SU{⊥}`, which
@@ -38,11 +38,12 @@ encoding from an elliptic curve `E` over the field `F` to a binary set
 `{0, 1}^n` for some fixed `n`. We assume that the implementer has already chosen
 an encoding from `F` to binary.
 
-This process translates a point into a format that can be stored (for example,
-in a file or memory buffer) or transmitted (for example, across a network) and
-reconstructed later (possibly in a different computer environment).  When the
-resulting series of bits is reread according to the encoding format, it can be
-used to create a semantically identical clone of the original point.
+This process translates a point or field element into a format that can be
+stored (for example, in a file or memory buffer) or transmitted (for example,
+across a network) and reconstructed later (possibly in a different computer
+environment).  When the resulting series of bits is reread according to the
+encoding format, it can be used to create a semantically identical clone of the
+original point.
 
 This is usually done depending of point compression. Informally, if point
 compression is being used, the idea is that the compressed y-coordinate is
@@ -54,17 +55,20 @@ x-coordinate followed by the y-coordinate.
 
 Usually, every specification defines a way of doing encodings. As OTRv4
 uses EdDSA for signature generation and verification, as well as for generation
-of private and public keys, EdDSA encoding for ed448 is used.
+of private and public keys (by following RFC8032), EdDSA encoding for ed448 is
+used.
 
 ### Decision
 
 OTRv4 uses little and big-endian format. For operations related to elliptic
 curve arithmetic, little-endian is used. For everything else, big-endian is
-used. This is done because OTRv4 uses EdDSA. As the specification of EdDSA uses
-little-endian, OTRv4 keeps that for elliptic curve arithmetic encoding.
+used (as to be compatible with OTRv3, and to be consistent with data networking
+protocols). This is done because OTRv4 uses EdDSA. As the specification of EdDSA
+uses little-endian, OTRv4 follows that for elliptic curve arithmetic encoding
+(transmission and storage).
 
 The byte array to bit string and viceversa encoding (with little-endian) is,
-therefore, defined as:
+therefore, defined as (as defined in RFC8032):
 
 Bit strings are converted to byte arrays by taking bits from left to right,
 packing those from the least significant bit of each byte to the most
@@ -84,14 +88,14 @@ is converted into two bytes `x0` and `x1` (in this order) as:
 ```
 
 Little-endian encoding into bits places bits from left to right and from least
-significant to most significant.  If combined with bit-string-to-byte-array
+significant to most significant. If combined with bit-string-to-byte-array
 conversion defined above, this results in little-endian encoding into bytes (if
-length is not a multiple of 8, the most significant bits of the last byte
+the length is not a multiple of 8, the most significant bits of the last byte
 remain unused).
 
 Big-endian encoding into bits places bits from right to left and from most
-significant to least significant.  If combined with bit-string-to-byte-array
-conversion defined above, this results in big-endian encoding into bytes (if
+significant to least significant. If combined with bit-string-to-byte-array
+conversion defined above, this results in big-endian encoding into bytes (if the
 length is not a multiple of 8, the least significant bits of the last byte
 remain unused).
 
@@ -120,8 +124,7 @@ a square then the parsing fails.
 
 This follows the understanding that valid `y` coordinates must satisfy a
 quadratic equation for any given `x` coordinate, such that any `y` data may be
-represented by its corresponding `x` coordinate and a single additional byte or
-bit.
+represented by its corresponding `x` coordinate and a single additional bit.
 
 The encoding of integers and field elements correspond to the SCALAR data type;
 the encoding of points correspond to the POINT data type.
@@ -132,28 +135,33 @@ OTRv4 will use little and big-endian format. It will use little-endian for data
 types used for elliptic curve arithmetic (points and field elements), and
 big-endian for everything else. This is decided as so in order to be consistent
 with RFC8032, meaning that implementers of OTRv4 can reuse EdDSA libraries
-without having to change the format or the encoding.
+without having to change the format or the encoding of them.
 
 In order, to be consistent with RFC8032 as well, POINT will be a 57-bytes byte
 array (this number is defined according to `b`, which is an integer with
 `2^(b-1) > p`). EdDSA public keys have exactly `b` bits, and EdDSA signatures
 have exactly `2 * b` bits. A SCALAR will be 56-bytes byte array ((`b-1)-bit`
-encoding of elements of the finite field `GF(p)`) as defined in RFC8032.
+encoding of elements of the finite field `GF(p)`). The private keys and any
+secret information will be 57-byte. They will be subject to the clamping
+mechanism:
 
-Private keys, therefore, will also follow the clamping mechanism prior to be
-used:
+1. The two least significant bits of the first octet are cleared.
+2. All eight bits the last octet are cleared, and the highest bit of the second
+to last octet is set.
 
-```
-  scalar[0] &= 252;
-  scalar[55] |= 128;
-```
-
-This make the private key a multiple of the cofactor.
-
-After a point has been encoded it should be multiplied by the cofactor, as well.
+Prior to do a key exchange or to encode a curve point, it should be multiplied
+by the cofactor (the ratio between the order of a group and that of the
+subgroup), which for ed448 is 4.
 
 ### References
 
-https://patents.google.com/patent/US6252960
-https://eprint.iacr.org/2015/677.pdf
-http://www.secg.org/sec1-v2.pdf
+1. Google, Seroussi, G. (2001). *Compression and decompression of elliptic curve
+   data points*. US6252960B1. Available at:
+   https://patents.google.com/patent/US6252960
+2. Bernstein, D., Josefsson, S., Lange, T., Schwabe, P., Yan, B. (2015). *EdDSA
+   for more curves*. Available at: https://eprint.iacr.org/2015/677.pdf
+3. Brown, D. (2009). *SEC 1: Elliptic Curve Cryptography*, Certicom Research.
+   Available at: http://www.secg.org/sec1-v2.pdf
+4. Josefsson, S. and Liusvaara, I. (2017). *Edwards-curve Digital Signature
+   Algorithm (EdDSA)*, Internet Engineering Task Force, RFC 8032. Available at:
+   https://tools.ietf.org/html/rfc8032
