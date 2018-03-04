@@ -1,5 +1,7 @@
 ## ADR 15: Point Encoding
 
+// TODO: include clamping and cofactor
+
 ### Context
 
 The OTRv4 operations use several different elliptic curve specific data types.
