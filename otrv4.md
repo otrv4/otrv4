@@ -511,7 +511,7 @@ OTRv4's public shared prekey is defined as follows:
 ```
 OTRv4's public shared prekey (ED448-SHARED-PREKEY):
 
-  Shared PreKey type (SHORT)
+  Shared Prekey type (SHORT)
     Ed448 shared prekey have type 0x0011
 
   D (POINT)
