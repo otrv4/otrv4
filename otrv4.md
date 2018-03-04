@@ -408,10 +408,10 @@ Message Authentication Code (MAC):
   64 bytes MAC data
 
 Ed448 point (POINT):
-  57 bytes data // TODO: data is big endian but this should be little endian
+  57 bytes data as defined in Encoding and Decoding section, little-endian
 
 Ed448 scalar (SCALAR):
-  56 bytes data // TODO: data is big endian but this should be little endian
+  56 bytes data as defined in Encoding and Decoding section, little-endian
 
 User Profile (USER-PROF):
   Detailed in "User Profile Data Type" section
