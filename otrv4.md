@@ -1293,9 +1293,10 @@ Bob will be initiating the DAKE with Alice.
 **Alice:**
 
 1. Receives an Identity message from Bob:
-    * Verifies the Identity message as defined on the
-      [Identity message](#identity-message) section. If the Bob's public keys (Y or B)
-      are not valid, Alice rejects the message and does not send anything further.
+    * Verifies the Identity message as defined in the
+      [Identity message](#identity-message) section. If the verification fails
+      (for example, if Bob's public keys -`Y` or `B`- are not valid), rejects
+      the message and does not send anything further.
     * Picks the newest compatible version of OTR listed in Bob's profile.
       If there aren't any compatible versions, Alice does not send any further
       messages.
@@ -1376,27 +1377,20 @@ Bob will be initiating the DAKE with Alice.
       * Generates an ephemeral ECDH key pair, as defined in
         [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
         of using a random value `r`, it will use : `r = KDF(57, 0x01 || K)`.
-        Securely replaces `their_ecdh` with the outputted
-        `our_ecdh.public (G * s)` and securely deletes the outputted
+        Securely replaces `their_ecdh` with the output
+        `our_ecdh.public (G * s)` and securely deletes the output
         `our_ecdh.secret (s)`.
       * Generates an ephemeral DH key pair, as defined in
         [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
         of using a random value `r`, it will use : `r = KDF(80, 0x02 || K)`.
-        Securely replaces `their_dh` with the outputted
-        `our_dh.public (g3 ^ r)` and securely deletes the outputted
+        Securely replaces `their_dh` with the output
+        `our_dh.public (g3 ^ r)` and securely deletes the output
         `our_dh.secret (r)`.
-   * Generates a new ephemeral ECDH key pair, as defined in the
-     [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys) section.
-     Securely replaces `our_ecdh`.
-   * Generates a new ephemeral DH key pair, as defined in the
-     [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
-     replaces `our_dh`.
 3. At this point, the interactive DAKE is complete for Alice:
    * In the case that she wants to immediately send a data message:
      * Follows what is defined in the
        [When you send a Data Message](#when-you-send-a-data-message)
-       section. Note that she will perform a new DH ratchet by using the
-       already derived `our_ecdh` and `our_dh`.
+       section. Note that she will perform a new DH ratchet.
 
 **Bob:**
 
@@ -1437,9 +1431,10 @@ A valid Identity message is generated as follows:
 
 To verify an Identity message:
 
-1. Verify if the message type is 0x08.
-2. Verify protocol version on message.
-3. Validate the User Profile.
+1. Verify if the message type is `0x08`.
+2. Verify that protocol's version of the message is `0x0004`.
+3. Validate the User Profile, as defined in
+   [Validating a User Profile](#validating-a-user-profile) section.
 4. Verify that the point `Y` received is on curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
@@ -1502,18 +1497,22 @@ A valid Auth-R message is generated as follows:
 6. Generate a 4-byte instance tag to use as the sender's instance tag.
    Additional messages in this conversation will continue to use this tag as the
    sender's instance tag. Also, this tag is used to filter future received
-   messages. Messages intended for this instance of the client will have the same
-   number but will be used as the receiver's instance tag.
+   messages. For the other party, this will be the receiver's instance tag.
 7. Use the sender's instance tag from the Identity Message as the receiver's
    instance tag.
 
 To verify an Auth-R message:
 
-1. Check that the receiver's instance tag matches your sender's instance tag.
-2. Validate the user profile and extract `Pka` from it.
-3. Compute `t = 0x0 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(phi)`.
-   `phi` is the shared session state as mention on its [section](#shared-session-state).
-4. Verify the `sigma` with
+1. Verify if the message type is `0x91`.
+2. Verify that protocol's version of the message is `0x0004`.
+3. Check that the receiver's instance tag matches your sender's instance tag.
+4. Validate the user profile as defined in
+   [Validating a User Profile](#validating-a-user-profile) section.
+   Extract `Pka` from it.
+5. Compute `t = 0x0 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(phi)`.
+   `phi` is the shared session state as mention in its
+   [section](#shared-session-state).
+6. Verify the `sigma` with
    [Ring Signature Authentication](#ring-signature-authentication), that is
    `sigma == RVrf({Pkb, Pka, Y}, t)`.
 
@@ -1553,20 +1552,21 @@ authentication `sigma`.
 
 A valid Auth-I message is generated as follows:
 
-1. Check that the receiver's instance tag matches your sender's instance tag.
-2. Compute
+1. Compute
    `t = 0x1 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(phi)`.
    `phi` is the shared session state as mention on its [section](#shared-session-state).
-3. Compute `sigma = RSig(Pkb, skb, {Pkb, Pka, X}, t)`.
-4. Continue to use the sender's instance tag.
+2. Compute `sigma = RSig(Pkb, skb, {Pkb, Pka, X}, t)`.
+3. Continue to use the sender's instance tag.
 
 To verify an Auth-I message:
 
-1. Check that the receiver's instance tag matches your sender's instance tag.
-2. Compute
+1. Verify if the message type is `0x88`.
+2. Verify that protocol's version of the message is `0x0004`.
+3. Check that the receiver's instance tag matches your sender's instance tag.
+4. Compute
    `t = 0x1 || KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || KDF_2(phi)`.
    `phi` is the shared session state as mention on its [section](#shared-session-state).
-3. Verify the `sigma` as defined in
+5. Verify the `sigma` as defined in
    [Ring Signature Authentication](#verification-verifya1-a2-a3-sigma-m).
 
 An Auth-I is an OTR message encoded as:
