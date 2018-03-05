@@ -1,4 +1,4 @@
-## ADR 15: Point Encoding
+## ADR 15: Encoding
 
 ### Context
 
