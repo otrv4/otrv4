@@ -714,7 +714,7 @@ State variables:
   i: the ratchet id.
   j: the sending message id.
   k: the receiving message id.
-  pn: number of messages in the previous chain.
+  pn: the number of messages in the previous DH ratchet.
 
 Key variables:
   'root_key[i]': the root key for ratchet i.
@@ -732,8 +732,8 @@ Key variables:
     sent of the next ratchet.
   'skipped_MKenc': Dictionary of stored skipped-over message keys, indexed by
     their_ecdh, their_dh, the ratchet id (i) and the message number (j).
-    Errors if too many elements are stored.
-  'MAX_SKIP' a constant that specifies the maximum number of message keys
+    Raises and exception if too many elements are stored.
+  'max_skip' a constant that specifies the maximum number of message keys
     that can be skipped in a ratchet. It should be set by the implementer. Take
     into account that it should be set high enough to tolerate routine lost or
     delayed messages, but low enough that a malicious sender can't trigger
@@ -2332,7 +2332,7 @@ This is done by:
 
   * Store any message keys from the previous DH Ratchet that correspond to
     messages that have not yet arrived:
-      * If `k` + `MAX_SKIP` < received `pn`:
+      * If `k` + `max_skip` < received `pn`:
          * Raise an exception that informs the user that too many message keys
            are stored.
       * If `chain_key_r` is not NULL:
@@ -2364,7 +2364,7 @@ This is done by:
 * When receiving a data message in the same DH Ratchet:
   * Store any message keys from the current DH Ratchet that correspond to
     messages that have not yet arrived:
-    * If `k` + `MAX_SKIP` < received `j`:
+    * If `k` + `max_skip` < received `j`:
          * Raise an exception that informs the user that too many message keys
            are stored.
       * If `chain_key_r` is not NULL:
