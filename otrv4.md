@@ -1668,23 +1668,15 @@ Verify and decrypt message if included
       * Generates an ephemeral ECDH key pair, as defined in
         [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
         of using a random value `r`, it will use : `r = KDF(57, 0x01 || K)`.
-        Securely replaces `their_ecdh` with the outputted
-        `our_ecdh.public (G * s)` and securely deletes the outputted
+        Securely replaces `their_ecdh` with the output
+        `our_ecdh.public (G * s)` and securely deletes the output
         `our_ecdh.secret (s)`.
       * Generates an ephemeral DH key pair, as defined in
         [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
         of using a random value `r`, it will use : `r = KDF(80, 0x02 || K)`.
-        Securely replaces `their_dh` with the outputted
-        `our_dh.public (g3 ^ r)` and securely deletes the outputted
+        Securely replaces `their_dh` with the output
+        `our_dh.public (g3 ^ r)` and securely deletes the output
         `our_dh.secret (r)`.
-    * Generates an ephemeral ECDH key pair, as defined in
-      [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
-      of using a random value `r`, it will use : `r = KDF(57, 0x01 || K)`.
-      Securely replaces `our_ecdh` with the outputs.
-    * Generates an ephemeral DH key pair, as defined in
-      [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
-      of using a random value `r`, it will use : `r = KDF(80, 0x02 || K)`.
-      Securely replaces `our_dh` with the outputs.
 8. At this point, she can attach an encrypted message to the
    Non-Interactive-Auth message:
     * Follows what is defined in the
@@ -1713,8 +1705,7 @@ Verify and decrypt message if included
        * Follows what is defined in the
          [When you send a Data Message](#when-you-send-a-data-message)
          section. Note that she will perform a new DH ratchet if no encrypted
-         message was attached to the Non-Interactive-Auth message, by using the
-         already derived `our_ecdh` and `our_dh`.
+         message was attached to the Non-Interactive-Auth message.
 
 **Bob:**
 
@@ -1805,11 +1796,13 @@ A valid Prekey message is generated as follows:
 
 To verify a Prekey message:
 
-1. [Validate the user profile](#validating-a-user-profile).
-2. Check that the ECDH public key `Y` is on curve Ed448. See
+1. Verify if the message type is `0x0F`.
+2. Verify that protocol's version of the message is `0x0004`.
+3. [Validate the user profile](#validating-a-user-profile).
+4. Check that the ECDH public key `Y` is on curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
-3. Verify that the DH public key `B` is from the correct group. See
+5. Verify that the DH public key `B` is from the correct group. See
    [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
    section for details.
 
@@ -1878,17 +1871,19 @@ A valid Non-Interactive-Auth message is generated as follows:
 
 To verify a Non-Interactive-Auth message:
 
-1. Check that the receiver's instance tag matches your sender's instance tag.
-2. Validate the received ECDH ephemeral public key `X` is on curve Ed448.
+1. Verify if the message type is `0x8D`.
+2. Verify that protocol's version of the message is `0x0004`.
+3. Check that the receiver's instance tag matches your sender's instance tag.
+4. Validate the received ECDH ephemeral public key `X` is on curve Ed448.
    See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
-3. Validate that the received DH ephemeral public key `A` is on the correct
+5. Validate that the received DH ephemeral public key `A` is on the correct
    group. See
    [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
    section for details.
-4. Compute
+6. Compute
    `t = KDF_2(Bobs_User_Profile) || KDF_2(Alices_User_Profile) || Y || X || B || A || our_shared_prekey.public || KDF_2(phi)`.
-5. Verify the `sigma` with
+7. Verify the `sigma` with
    [Ring Signature Authentication](#ring-signature-authentication).
    See [Verification: RVrf({A1, A2, A3}, sigma, m)](#verification-verifya1-a2-a3-sigma-m)
    for details.
@@ -1923,9 +1918,10 @@ Sigma (RING-SIG)
 
 Attached XZDH Encrypted Message (XZDH-ENCRYPTED-MSG)
   (optional: if an encrypted message is attached)
-  The XZDH-ENCRYPTED-MSG that consists of an attached message id,
-  a public ecdh key (used for encrypting the message), a public dh key
-  (used for encrypting the message), a nonce and the encrypted message.
+  The XZDH-ENCRYPTED-MSG that consists of an attached encrypted ratchet
+  id, an attached message id, a public ecdh key (used for encrypting the
+  message), a public dh key (used for encrypting the message), a nonce
+  and the encrypted message.
 
 Auth MAC (MAC)
   The MAC with the appropriate MAC key (see above) of the message (t) for the
@@ -1961,26 +1957,26 @@ prekey messages.
 Use the following checks to validate a Prekey message. If any checks fail,
 ignore the message:
 
-  * Check that the user profile is not expired
-  * Check that the OTR version of the prekey message matches one of the versions
-    signed in the user profile contained in the prekey message
-  * Check if the user profile version is supported by the receiver
+  1. Check that the user profile is not expired.
+  2. Check that the OTR version of the prekey message matches one of the
+    versions signed in the user profile contained in the prekey message.
+  3. Check if the user profile version is supported by the receiver.
 
 If one Prekey message is received:
 
-  * Validate the Prekey message.
-  * If the Prekey message is valid, decide whether to send a non-interactive
-    auth message depending on whether the long term key in the use profile is
-    trusted or not.
+  1. Validate the Prekey message.
+  2. If the Prekey message is valid, decide whether to send a
+     Non-Interactive-Auth message depending on whether the long term key in the
+     use profile is trusted or not.
 
 If many prekey messages are received:
 
-  * Remove all invalid prekey messages.
-  * Remove all duplicate prekey messages in the list.
-  * If one Prekey message remains:
+  1. Discard all invalid prekey messages.
+  2. Discard all duplicate prekey messages in the list.
+  3. If one Prekey message remains:
       * Decide whether to send a message using this Prekey message if the long
         term key within the use profile is trusted or not.
-  * If multiple valid prekey messages remain:
+  4. If multiple valid prekey messages remain:
       * If there are keys that are untrusted and trusted in the list of
         messages, decide whether to only use messages that contain trusted long
         term keys.
@@ -2008,12 +2004,10 @@ overview) can attach an encrypted message to the already generated
 Non-Interactive-Auth message, but prior to sending it. For this, the
 participant:
 
-* Rotates the ECDH keys and brace key by using the already derived `our_ecdh`
-  and `our_dh`.see
+* Rotates the ECDH keys and brace key, see
   [Rotating ECDH keys and brace key as sender](#rotating-ecdh-keys-and-brace-key-as-sender) section.
-  The already derived ECDH public key will be the 'Public ECDH Key' for the
-  message. The already derived DH public key will be the 'Public DH Key' for the
-  message.
+  The derived ECDH public key will be the 'Public ECDH Key' for the message.
+  The derived DH public key will be the 'Public DH Key' for the message.
 * Calculates the shared secret `K = KDF_2(K_ecdh || brace_key)`.
 * Derive new set of keys:
   `root_key[i], chain_key_s[i][j] = derive_ratchet_keys(sending, root_key[i-1], K)`.
