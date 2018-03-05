@@ -124,6 +124,7 @@ an existing messaging protocol, such as XMPP.
   - Key management using the Double Ratchet Algorithm [\[2\]](#references).
   - Upgraded SHA-1 and SHA-2 to SHAKE-256.
   - Switched from AES to XSalsa20 [\[3\]](#references).
+- Support of out-of-order network model.
 - Explicit instructions for producing forged transcripts using the same
   functions used to conduct honest conversations.
 
@@ -176,7 +177,7 @@ The conversation can begin when one participant retrieves the other's
 participant Prekey message from a prekey server. Prior to the start of the
 conversation, this Prekey message would have had to be uploaded by the other
 participant's client to a server. This have to be done so other participants,
-like Alice, can send messages while to them while they are offline.
+like Alice, can send messages to them while they are offline.
 
 ## Assumptions
 
@@ -216,9 +217,11 @@ participation deniability, but Alice, the responder, does not.
 Once a conversation has been established with the DAKE, all data messages
 transmitted in it are confidential and retain their integrity. After a MAC
 key is used by a party to validate a received message, it is added to a list.
-Those MAC keys are revealed in the first message sent of the next ratchet. This
-allows forgeability of the data messages and consequent deniability of their
-contents.
+It is also added when the stored message key that corresponds to messages that
+have not yet arrived is deleted (because the session has expired ot because
+the storage of the message keys has been deleted). Those MAC keys are revealed
+in the first message sent of the next ratchet. This allows forgeability of the
+data messages and consequent deniability of their contents.
 
 If key material used to encrypt a particular data message is compromised,
 previous messages are protected. Additionally, future messages are protected by
@@ -250,7 +253,14 @@ as a SCALAR type, which is defined in the [Data Types](#data-types) section.
 A point should be encoded and decoded as a POINT type, which is defined in the
 [Data Types](#data-types) section.
 
-The byte representation of a value `x` is defined as `byte(x)`
+The byte representation of a value `x` is defined as `byte(x)`.
+
+The endianness is little and big-endian. Data types that are specific to
+elliptic curve arithmentic (POINT, SCALAR, ED448-PUBKEY, ED448-SHARED-PREKEY and
+EDDSA-SIG) are encoded as little-endian. The rest of data types are encoded
+as big-endian. Little-endian encoding into bits places bits from left to right
+and from least significant to most significant. Big-endian encoding into bits
+places bits from right to left and from most significant to least significant.
 
 ### Elliptic Curve Parameters
 
