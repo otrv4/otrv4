@@ -124,7 +124,7 @@ an existing messaging protocol, such as XMPP.
   - Key management using the Double Ratchet Algorithm [\[2\]](#references).
   - Upgraded SHA-1 and SHA-2 to SHAKE-256.
   - Switched from AES to XSalsa20 [\[3\]](#references).
-- Support of out-of-order network model.
+- Support of an out-of-order network model.
 - Explicit instructions for producing forged transcripts using the same
   functions used to conduct honest conversations.
 
@@ -208,24 +208,52 @@ key is required for authentication, both participants can deny having used
 their private long term keys. A forged transcript of the DAKE can be produced at
 any time and a cryptographic expert is able to prove that this transcript was
 produced by someone who knows the long-term public key of any of both alleged
-participants. This provides deniability for both participants in the interactive
-DAKE.
+participants. This provides offline deniability for both participants in the
+interactive DAKE. Furthermore, participants in the interactive DAKE, cannot
+provide proof of participation to third parties without making themselves
+vulnerable to Key Compromise Impersonation (KCI) attacks, even if they perform
+arbitrary protocols with these third parties. This latter property is known as
+online or participation deniability.
+
+Both DAKEs (interactive and non-interactive) provide offline deniability as
+anyone can forge DAKE transcript between two parties using their long-term
+public keys. Consequently, no transcript provides evidence of a past key
+exchange, because it could have been forged by anyone.
 
 In the non-interactive DAKE, the initiator (Bob, in the above overview) has
-participation deniability, but Alice, the responder, does not.
+participation deniability, but Alice, the responder, does not. A party that
+knows Alice's long-term secret and Bob's ephemeral secret cannot derive a
+shared key (as it will need to know either Bob's long-term secret or Alice's
+ephemeral key). This allows a participant to generate irrefutable cryptographic
+proof of a conversation with the aid of an interactive third party.
 
 Once a conversation has been established with the DAKE, all data messages
 transmitted in it are confidential and retain their integrity. After a MAC
 key is used by a party to validate a received message, it is added to a list.
 It is also added when the stored message key that corresponds to messages that
-have not yet arrived is deleted (because the session has expired ot because
+have not yet arrived is deleted (because the session has expired or because
 the storage of the message keys has been deleted). Those MAC keys are revealed
 in the first message sent of the next ratchet. This allows forgeability of the
 data messages and consequent deniability of their contents.
 
-If key material used to encrypt a particular data message is compromised,
-previous messages are protected. Additionally, future messages are protected by
-the Diffie-Hellman and Elliptic Curve Diffie-Hellman ratchets.
+Furthermore, OTRv4 provides forward secrecy. A classical adversary that
+compromises the long-term secret keys of both parties cannot retroactively
+compromise past session keys. The interactive DAKE offers strong forward secrecy
+(it protects the session key when at least one party completes the exchange).
+The non-interactive DAKE offers a forward secrey that is between strong and
+weak, as it protects completed sessions and incomplete sessions that stalllong enough to be invalidated by a participant. The key exchange mechanism used
+in OTRv4 is the Double Ratchet algorithm which provides forward and backward
+secrecy as parties negotiate secrets several times using an ephemeral key
+exchange.
+
+A protocol provides forward secrecy if the compromise of a long-term key does
+not allow ciphertexts encrypted with previous session keys to be decrypted. If
+the compromise of a long-term key does not allow subsequent ciphertexts to be
+decrypted by passive attackers, then the protocol is said to have backward
+secrecy. OTRv4 by using the Double Ratchet Algorithm provides both. If key
+material used to encrypt a particular data message is compromised, previous
+messages are protected. Additionally, future messages are protected by the
+Diffie-Hellman and Elliptic Curve Diffie-Hellman ratchets.
 
 ## Notation and parameters
 
