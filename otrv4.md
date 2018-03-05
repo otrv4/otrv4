@@ -806,8 +806,23 @@ K:
 
 ```
 ECDH(ai, Bi)
-  return k_ecdh = ai * Bi
+  Bi * cofactor
+  K_ecdh = ai * Bi
+  if K_ecdh == 0 (check that it is an all-zero value)
+     return error
+  else
+     return K_ecdh
+```
 
+Check, without leaking extra information about the value of `K_ecdh`, whether
+`K_ecdh` is the all-zero value and abort if so, as this process involves
+contributory behavior. Specially, contributory behaviour means that both
+parties' private keys contribute to the resulting shared key.  Since ed448
+have a cofactor of 4, an input point of small order will eliminate any
+contribution from the other party's private key.  This situation can be detected
+by checking for the all-zero output.
+
+```
 DH(ai, Bi)
   return k_dh = ai ^ Bi
 ```
@@ -3710,7 +3725,7 @@ G = (x=22458004029592430018760433409989603624678964163256413424612546168695
 
 This function is `HashToScalar(d)`: d is an array of bytes.
 
-1. Compute `h = KDF_2(d)` as an unsigned value, big-endian.
+1. Compute `h = KDF_2(d)` as an unsigned value, little-endian.
 2. Return `h (mod q)`
 
 ### Modify an encrypted data message
