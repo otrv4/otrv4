@@ -277,19 +277,20 @@ values. See the section on [Data Types](#data-types) for encoding and decoding
 details.
 
 A scalar modulo `q` is a field element, and should be encoded and decoded
-as a SCALAR type, which is defined in the [Data Types](#data-types) section.
+as a `SCALAR` type, which is defined in the [Data Types](#data-types) section.
 
-A point should be encoded and decoded as a POINT type, which is defined in the
+A point should be encoded and decoded as a `POINT` type, which is defined in the
 [Data Types](#data-types) section.
 
 The byte representation of a value `x` is defined as `byte(x)`.
 
 The endianness is little and big-endian. Data types that are specific to
-elliptic curve arithmentic (POINT, SCALAR, ED448-PUBKEY, ED448-SHARED-PREKEY and
-EDDSA-SIG) are encoded as little-endian. The rest of data types are encoded
-as big-endian. Little-endian encoding into bits places bits from left to right
-and from least significant to most significant. Big-endian encoding into bits
-places bits from right to left and from most significant to least significant.
+elliptic curve arithmentic (`POINT`, `SCALAR`, `ED448-PUBKEY`,
+`ED448-SHARED-PREKEY` and `EDDSA-SIG`) are encoded as little-endian. The rest of
+data types are encoded as big-endian. Little-endian encoding into bits places
+bits from left to right and from least significant to most significant.
+Big-endian encoding into bits places bits from right to left and from most
+significant to least significant.
 
 ### Elliptic Curve Parameters
 
@@ -447,10 +448,10 @@ Message Authentication Code (MAC):
   64 bytes MAC data
 
 Ed448 point (POINT):
-  57 bytes data as defined in Encoding and Decoding section, little-endian
+  57 bytes as defined in Encoding and Decoding section, little-endian
 
 Ed448 scalar (SCALAR):
-  56 bytes data as defined in Encoding and Decoding section, little-endian
+  56 bytes as defined in Encoding and Decoding section, little-endian
 
 User Profile (USER-PROF):
   Detailed in "User Profile Data Type" section
@@ -823,7 +824,7 @@ brace_key:
 
 K_ecdh:
   The serialized ECDH shared secret computed from an ECDH exchange, serialized
-  as a POINT.
+  as a 'POINT'.
 
 K:
   The Mixed shared secret is the final shared secret derived from both the
@@ -834,9 +835,9 @@ K:
 ### Generating shared secrets
 
 ```
-ECDH(ai, Bi)
-  Bi * cofactor
-  K_ecdh = ai * Bi
+ECDH(a, B)
+  B * cofactor
+  K_ecdh = a * B
   if K_ecdh == 0 (check that it is an all-zero value)
      return error
   else
@@ -852,8 +853,8 @@ contribution from the other party's private key.  This situation can be detected
 by checking for the all-zero output.
 
 ```
-DH(ai, Bi)
-  return k_dh = ai ^ Bi
+DH(a, B)
+  return k_dh = a ^ B
 ```
 
 ### Rotating ECDH keys and brace key as sender
@@ -1064,7 +1065,7 @@ EDDSA signature (EDDSA-SIG):
 ```
 
 `SIG` is the DSA Signature. It is the same signature as used in OTRv3.
-From the OTRv3 protocol section "Public keys, signatures, and fingerprints",
+From the OTRv3 protocol, section "Public keys, signatures, and fingerprints",
 the format for a signature made by a OTRv3 DSA public key is as follows:
 
 ```
@@ -1118,7 +1119,7 @@ To create a user profile, assemble:
    [Create a user profile signature](#create-a-user-profile-signature) section.
 
 After the profile is created, it must be published in a public place, like an
-untrusted server.
+untrusted server, as defined above.
 
 ### Establishing Versions
 
@@ -1257,7 +1258,7 @@ another while providing participation deniability.
 
 This protocol is derived from the DAKEZ protocol [\[1\]](#references), which
 uses a ring signature non-interactive zero-knowledge proof of knowledge
-(RING-SIG) for authentication (RSig).
+(`RING-SIG`) for authentication (`RSig`).
 
 Alice's long-term Ed448 key pair is `(ska, Pka)` and Bob's long-term Ed448
 key pair is `(skb, Pkb)`. Both key pairs are generated as stated in the
@@ -1349,11 +1350,11 @@ Bob will be initiating the DAKE with Alice.
     * Sets `j` as 0, `k` as 0 and `pn` as 0.
     * Generates an ephemeral ECDH key pair, as defined in
       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
-      of using a random value `r`, it will use : `r = KDF(57, 0x01 || K)`.
+      of using a random value `r`, it will use : `r = KDF(0x01 || K, 57)`.
       Securely replaces `our_ecdh` with the outputs.
     * Generates an ephemeral DH key pair, as defined in
       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
-      of using a random value `r`, it will use : `r = KDF(80, 0x02 || K)`.
+      of using a random value `r`, it will use : `r = KDF(0x02 || K, 80)`.
       Securely replaces `our_dh` with the outputs.
     * Securely deletes `their_ecdh` and `their_dh`.
 7. At this point, the interactive DAKE is complete for Bob, but the
