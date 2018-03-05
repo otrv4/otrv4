@@ -464,8 +464,9 @@ the [Encoding and Decoding](#encoding-and-decoding) section.
 ### Encoding and Decoding
 
 This section describes the encoding and decoding schemes specified in RFC 8032
-[\[9\]](#references) for scalars and points. It also describes the encoding of
-the OTRv4 messages that should be transmitted encoded.
+[\[9\]](#references) for scalars and points. Note that, although the RFC 8032
+defines parameters as octet strings, they are defined as bytes here. It also
+describes the encoding of the OTRv4 messages that should be transmitted encoded.
 
 #### Scalar
 
@@ -564,7 +565,8 @@ OTRv4's public shared prekey (ED448-SHARED-PREKEY):
 ```
 
 The public key and shared prekey are generated as follows (refer to RFC 8032
-[\[9\]](#references), for more information on key generation):
+[\[9\]](#references), for more information on key generation). Note that,
+although the RFC 8032 defines parameters as octet strings, they are defined as bytes here:
 
 ```
 The symmetric key (sym_key) is 57 bytes of cryptographically secure random data.
@@ -968,7 +970,7 @@ To expire a session:
       [here](#interactive-deniable-authenticated-key-exchange-dake)
       and [here](#non-interactive-auth-message),
       any old MAC keys that remain unrevealed, and the
-      extra symmetric key if present.
+      extra symmetric key if present. // TODO: check
    5. Reset the state and key variables, as defined in
       [its section](#resetting-state-variables-and-key-variables).
 
@@ -1045,6 +1047,8 @@ that a user does not support OTRv4.
 ```
 Profile Expiration (PROF-EXP):
   8 byte signed value, big-endian
+
+// TODO: this will be a mix between little and big endian
 
 User Profile (USER-PROF):
   Ed448 public key (ED448-PUBKEY)
@@ -1170,8 +1174,8 @@ The user profile signature for version 4 is generated as defined in RFC 8032
 [\[9\]](#references), section 5.2.6. The flag `f` is set to `0` and the context
 `c` is an empty constant string.
 
-Note that although the RFC 8032 states defines parameters as octet strings,
-they are defined as bytes in OTRv4.
+Note that, although the RFC 8032 defines parameters as octet strings, they are
+defined as bytes here.
 
 It is generated as follows:
 
@@ -1226,7 +1230,7 @@ The user profile signature is verified as defined in RFC 8032
 
 ### Validating a User Profile
 
-To validate a user profile, you must:
+To validate a user profile, you must (in this order):
 
 1. Verify that the user profile has not expired.
 2. Verify that the `Versions` field contains the character "4".
@@ -1457,9 +1461,8 @@ Sender's instance tag (INT)
 
 Receiver's instance tag (INT)
   The instance tag of the intended recipient. As the instance tag is used
-  to differentiate the clients that are in use for an user for Identity messages,
-  this will often be 0 since the other party may not have set its instance
-  tag yet.
+  to differentiate the clients that an user uses, this will often be 0 since
+  the other party may not have set its instance tag yet.
 
 Sender's User Profile (USER-PROF)
   As described in the section 'Creating a User Profile'.
@@ -1588,7 +1591,7 @@ sigma (RING-SIG)
 ## Offline Conversation Initialization
 
 To begin an offline conversation, a Prekey message is published to an untrusted
-server. This action is considered to be the start of the non-interactive DAKE.
+server. This action is considered as the start of the non-interactive DAKE.
 A Prekey message is retrieved by the party attempting to send a message to the
 Prekey's publisher. This participant, then, replies with a Non-Interactive-Auth
 message (created with the prekey). This action is considered to complete the
