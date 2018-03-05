@@ -2241,9 +2241,9 @@ Nonce (NONCE)
 
 Encrypted message (DATA)
   Using the appropriate encryption key (see below) derived from the
-  sender's and recipient's DH public keys (with the keyids given in this
-  message), perform an XSalsa20 encryption of the message. The nonce used for
-  this operation is also included in the header of the data message
+  sender's and recipient's ECDH and DH public keys (with the keyids given in
+  this message), perform an XSalsa20 encryption of the message. The nonce used
+  for this operation is also included in the header of the data message
   packet.
 
 Authenticator (MAC)
@@ -2274,7 +2274,8 @@ Given a new DH Ratchet:
     The new ECDH public key created by the sender in this process will be the
     'Public ECDH Key' for the message. If a new public DH key is created in
     this process, it will be the 'Public DH Key' for the message. If it is
-    not created, then it will be empty.
+    not created (meaning it is only a KDF of the previoud one), then it will be
+    empty.
   * Calculate the shared secret `K = KDF_2(K_ecdh || brace_key)`.
   * Derive new set of keys:
     `root_key[i], chain_key_s[i][j] = derive_ratchet_keys(sending,
@@ -2349,8 +2350,8 @@ This is done by:
 * Try to decrypt the message with a stored skipped message key:
 
   * If the received `j` and `i` are in the `skipped_MKenc` dictionary:
-    * Compared the received `Public ECDH Key` and, if present, the
-      received `Public DH Key`.
+    * Compare the received `Public ECDH Key` and, if present, the
+      received `Public DH Key` with the stored ones.
       * If they are equal:
           * Get the message key and the extra symmetric key (if needed):
             `MKenc, extra_symm_key = skipped_MKenc[Public ECDH Key, Public DH Key, i, j]`.
@@ -2377,7 +2378,7 @@ This is done by:
       * If `k` + `max_skip` < received `pn`:
          * Raise an exception that informs the user that too many message keys
            are stored.
-      * If `chain_key_r` is not NULL:
+      * If `chain_key_r` is not `NIL`:
          * while `k` < received `pn`:
              * Derive
                `chain_key_r[i][k+1], MKenc = KDF_2(chain_key_r[i][k])`.
@@ -2409,7 +2410,7 @@ This is done by:
     * If `k` + `max_skip` < received `j`:
          * Raise an exception that informs the user that too many message keys
            are stored.
-      * If `chain_key_r` is not NULL:
+      * If `chain_key_r` is not `NIL`:
          * while `k` < received `j`:
              * Derive
                `chain_key_r[i-1][k+1], MKenc = KDF_2(chain_key_r[i-1][k])`.
@@ -2451,6 +2452,9 @@ This is done by:
       * Set `their_dh` as the "Public DH Key" from the message, if it is not
         NULL.
       * Add `MKmac` to the list `mac_keys_to_reveal`.
+
+* If a message arrives that corresponds to a message key already deleted:
+  * Reject the message.
 
 ### Deletion of stored message keys
 
@@ -2548,7 +2552,7 @@ fragments.
 OTRv4 fragmentation and reassembly procedure needs to be able to break
 data messages into an almost arbitrary number of pieces that can be later
 reassembled.  The receiver of the fragments uses the identifier field to ensure
-that fragments of different data messages are not mixed.  The fragment index
+that fragments of different data messages are not mixed. The fragment index
 field tells the receiver the position of a fragment in the original data
 message. These fields provide sufficient information to reassemble data
 messages.
@@ -2560,6 +2564,9 @@ defragmented.
 
 All OTRv4 clients must be able to reassemble received fragments, but performing
 fragmentation on outgoing messages is optional.
+
+For fragmentation in OTRv3, refer to the "Fragmentation" section on OTRv3
+specification.
 
 ### Transmitting Fragments
 
@@ -2594,7 +2601,7 @@ The message should begin with `?OTR|` and end with `,`.
 
 Note that `index` and `total` are unsigned short int (2 bytes), and each has
 a maximum value of 65535. Each `piece[index]` must be non-empty.
-The identifier, instance tags, `index` and `total` values may have leading
+The `identifier`, instance tags, `index` and `total` values may have leading
 zeros.
 
 Note that fragments are not messages that can be fragmented: you can't fragment a fragment.
@@ -2604,7 +2611,7 @@ Note that fragments are not messages that can be fragmented: you can't fragment 
 If you receive a message containing `?OTR|` (note that you'll need to check
 for this _before_ checking for any of the other `?OTR:` markers):
 
-  * Parse it (as the previous printf structure) extracting the identifier,
+  * Parse it (as the previous printf structure) extracting the `identifier`,
     the instance tags, `index`, `total`, and `piece[index]`.
 
   * Discard the message and optionally pass a warning to the user if:
@@ -2618,17 +2625,18 @@ for this _before_ checking for any of the other `?OTR:` markers):
     * `index` is bigger than `total`
 
   * For the first fragment that arrives (there is not a current buffer with the
-    same identifier):
+    same `identifier`):
     * Create a buffer which will keep track of the portions of the fragmented
       data message that have arrived (by filling up it with fragments).
     * Optionally, initialize a timer for the reassembly of the fragments as it
       is possible that some fragments of the data message might never show up.
       This timer ensures that a client will not be "forever" waiting for a
-      fragment. If the timer runs out, all stored buffers should be destroyed.
+      fragment. If the timer runs out, all stored fragments in this buffer
+      should be discarded.
     * Let `B` be the buffer, `I` be the currently stored identifier, `T` the
       currently stored `total` and `C` a counter that keeps track of the
       received number of fragments for this buffer. If you have no currently
-      stored fragments, there are no buffers.
+      stored fragments, there are no buffers, and `I`, `T` and `C` equal 0.
     * Set the length of the buffer as `total`: `len(B) = total`.
     * Store `piece` at the `index` given position: `insert(piece, index)`.
     * Let `total` be `T` and `identifier` be `I` for the buffer.
@@ -2643,7 +2651,7 @@ for this _before_ checking for any of the other `?OTR:` markers):
       * Increment the buffer counter: `C = C + 1`.
     * Otherwise:
       * Forget any stored fragments of this buffer you may have.
-      * Reset `C`, `N` and `I` to 0, and destroy this buffer.
+      * Reset `C`, `N` and `I` to 0, and discard this buffer.
 
   * Otherwise:
     * Consider this fragment as part of another buffer: either create a new
@@ -2654,7 +2662,7 @@ data message.
 
 If you receive a non-OTR message or an unfragmented message:
 
-* Keep track of the buffers you may already have. Do not destroy them.
+* Keep track of the buffers you may already have. Do not discard them.
 
 For example, here is a Data Message we would like to transmit over a network
 with an unreasonably small `maximum message size`:
