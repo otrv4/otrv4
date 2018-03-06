@@ -50,17 +50,25 @@ XSalsa20 reduced to 8 rounds to break the cipher.
 XSalsa20 will be used with the following parameters: 20 rounds, 192-bits
 nonces, and 256-bit keys.
 
-The following KDFs are defined:
+The following key derivation functions are used:
 
 ```
-KDF_1(x) = take_first_32_bytes(SHAKE-256("OTR4" || x))
-KDF_2(x) = take_first_64_bytes(SHAKE-256("OTR4" || x))
+KDF_1(usageID || m, output_size) = SHAKE-256("OTRv4" || usageID || m, size)
 ```
 
-When a keyed cryptographic hash function is expected, we set
-`x = key || secret`. To provide cryptographic domain separation when multiple
-values are need to be derived from the same secret, we set
-`x = counter || secret`, where the counter changes for each situation.
+The `size` first bytes of the SHAKE-256 output for input
+`"OTRv4" || usageID || m`
+
+```
+KDF_2(values, size) = SHAKE-256(values, size)
+```
+
+The `size` first bytes of the SHAKE-256 output for input `values`. This KDF is
+used when referred to RFC 8032.
+
+To provide cryptographic domain separation, we set
+`x = OTRv4_domain || usageID || secret`, where the usageID changes for each
+situation.
 
 In OTRv4, long-lived key authentication can happen by using SMP or comparing
 fingerprints. We take the first 56 bytes of the SHAKE-256 hash function for
