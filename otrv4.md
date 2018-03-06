@@ -3773,7 +3773,8 @@ G = (x=22458004029592430018760433409989603624678964163256413424612546168695
 
 This function can be generalized so it is not possible to determine which secret
 key was used to produce this ring signature, even if all secret keys are
-revealed. The prover knows a secret `ai` and, therefore:
+revealed. For this, constant-time conditional copies should be used. The prover
+knows a secret `ai` and, therefore:
 
 * Picks random values `ti`.
 * Computes `Ti = G * ti`.
