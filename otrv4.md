@@ -3759,10 +3759,9 @@ G = (x=22458004029592430018760433409989603624678964163256413424612546168695
 #### Authentication: RSig(A1, a1, {A1, A2, A3}, m):
 
 `A1` is the public value associated with `a1`, that is, `A1 = G * a1`.
-`A1`, `A2`, and `A3` should be checked to verify that they are on the curve Ed448.
-`m` is the message to authenticate.
+`A1`, `A2`, and `A3` should be checked to verify that they are on the curve Ed448. `m` is the message to authenticate.
 
-1. Pick random values `t1, c2, c3, r2, r3` in Z_q.
+1. Pick random values `t1, c2, c3, r2, r3` in `q`.
 2. Compute `T1 = G * t1`.
 3. Compute `T2 = G * r2 + A2 * c2`.
 4. Compute `T3 = G * r3 + A3 * c3`.
@@ -3771,6 +3770,45 @@ G = (x=22458004029592430018760433409989603624678964163256413424612546168695
 6. Compute `c1 = c - c2 - c3 (mod q)`.
 7. Compute `r1 = t1 - c1 * a1 (mod q)`.
 8. Send `sigma = (c1, r1, c2, r2, c3, r3)`.
+
+This function can be generalized so it is not possible to determine which secret
+key was used to produce this ring signature, even if all secret keys are
+revealed. The prover knows a secret `ai` and, therefore:
+
+* Picks random values `ti`.
+* Computes `Ti = G * ti`.
+* Computes `Tj` = `G * rj + Aj * cj` for `j != i`.
+* Continues computing `ci` and `ri`.
+
+If the prover knows `a2`, for example, the `RSig` function looks like this:
+`RSig(A2, a2, {A1, A2, A3}, m)`
+
+1. Pick random values `t2, c1, c3, r1, r3` in `q`.
+2. Compute `T2 = G * t2`.
+3. Compute `T1 = G * r1 + A1 * c1`.
+4. Compute `T3 = G * r3 + A3 * c3`.
+5. Compute `c = HashToScalar(0x29 || G || q || A1 || A2 || A3 || T1 || T2 ||
+   T3 || m)`.
+6. Compute `c2 = c - c1 - c3 (mod q)`.
+7. Compute `r2 = t2 - c2 * a2 (mod q)`.
+8. Send `sigma = (c1, r1, c2, r2, c3, r3)`.
+
+If the prover knows `a3`, for example, the `RSig` function looks like this:
+`RSig(A3, a3, {A1, A2, A3}, m)`
+
+1. Pick random values `t3, c2, c1, r2, r1` in `q`.
+2. Compute `T3 = G * t3`.
+3. Compute `T2 = G * r2 + A2 * c2`.
+4. Compute `T1 = G * r1 + A1 * c1`.
+5. Compute `c = HashToScalar(0x29 || G || q || A1 || A2 || A3 || T1 || T2 ||
+   T3 || m)`.
+6. Compute `c3 = c - c2 - c1 (mod q)`.
+7. Compute `r3 = t3 - c3 * a3 (mod q)`.
+8. Send `sigma = (c1, r1, c2, r2, c3, r3)`.
+
+The order of elements passed to `H` and sent to the verifier must not depend
+on the secret known by the prover (otherwise, the key used to produce the proof
+can be inferred in practice).
 
 #### Verification: RVrf({A1, A2, A3}, sigma, m)
 
@@ -3782,7 +3820,8 @@ G = (x=22458004029592430018760433409989603624678964163256413424612546168695
 4. Compute `T3 = G * r3 + A3 * c3`
 5. Compute `c = HashToScalar(0x29 || G || q || A1 || A2 || A3 || T1 || T2 ||
    T3 || m)`.
-6. Check if `c ≟ c1 + c2 + c3 (mod q)`.
+6. Check if `c ≟ c1 + c2 + c3 (mod q)`. If it is true, verification succeeds.
+   If not, it fails.
 
 ### HashToScalar
 
