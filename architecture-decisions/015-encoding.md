@@ -55,7 +55,7 @@ x-coordinate followed by the y-coordinate.
 
 Usually, every specification defines a way of doing encodings. As OTRv4
 uses EdDSA for signature generation and verification, as well as for generation
-of private and public keys (by following RFC8032), EdDSA encoding for ed448 is
+of private and public keys (by following RFC 8032), EdDSA encoding for ed448 is
 used.
 
 ### Decision
@@ -68,7 +68,7 @@ uses little-endian, OTRv4 follows that for elliptic curve arithmetic encoding
 (transmission and storage).
 
 The byte array to bit string and viceversa encoding (with little-endian) is,
-therefore, defined as (as defined in RFC8032):
+therefore, defined as (as defined in RFC 8032):
 
 Bit strings are converted to byte arrays by taking bits from left to right,
 packing those from the least significant bit of each byte to the most
@@ -134,11 +134,11 @@ type;the encoding of points correspond to the `POINT` data type.
 OTRv4 will use little and big-endian format. It will use little-endian for data
 types used for elliptic curve arithmetic (points and field elements), and
 big-endian for everything else. This is decided as so in order to be consistent
-with RFC8032, meaning that implementers of OTRv4 can reuse EdDSA libraries
+with RFC 8032, meaning that implementers of OTRv4 can reuse EdDSA libraries
 without having to change the format or the encoding of them.
 
-In order, to be consistent with RFC8032 as well, `POINT` will be a 57-bytes byte
-array (this number is defined according to `b`, which is an integer with
+In order, to be consistent with RFC 8032 as well, `POINT` will be a 57-bytes
+byte array (this number is defined according to `b`, which is an integer with
 `2^(b-1) > p`). EdDSA public keys have exactly `b` bits, and EdDSA signatures
 have exactly `2 * b` bits. A `SCALAR` will be 56-bytes byte array ((`b-1)-bit`
 encoding of elements of the finite field `GF(p)`). The private keys and any
