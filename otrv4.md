@@ -1709,10 +1709,7 @@ Verify and decrypt message if included
     * If an encrypted message is attached, she computes:
 
       ```
-      Auth MAC = KDF_1(0x17 || auth_mac_k || t || (KDF_1(0x18 || attached
-      encrypted ratchet id || attached encrypted message id ||
-      public ecdh key || public dh key || nonce || encrypted message, 64)),
-      64)`.
+      Auth MAC = KDF_1(0x17 || auth_mac_k || t || (KDF_1(0x18 || attached encrypted ratchet id || attached encrypted message id || public ecdh key || public dh key || nonce || encrypted message, 64)), 64)`.
       ```
 
     * Otherwise, she computes:
@@ -2348,8 +2345,7 @@ When sending a data message in the same DH Ratchet:
     message from the protocol version to the encrypted message.
 
    ```
-     Authenticator = KDF_1(0x28 || MKmac || KDF_1(0x27 ||
-     data_message_sections, 64), 64)
+     Authenticator = KDF_1(0x28 || MKmac || KDF_1(0x27 || data_message_sections, 64), 64)
    ```
 
   * Securely delete `MKenc` and `MKmac`.
