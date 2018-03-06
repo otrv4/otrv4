@@ -2747,9 +2747,10 @@ FINISHED
 ### Protocol events
 
 The following sections outline the actions that the protocol should implement.
-This assumes that the client initialized with the allowed versions (3 and/or 4).
+This assumes that the client is initialized with the allowed versions
+(3 and/or 4).
 
-There are twelve events an OTRv4 client must handle (For version 3 messages,
+There are fourteen events an OTRv4 client must handle (for version 3 messages,
 please refer to previous OTR protocol document):
 
 * Received messages:
@@ -2770,13 +2771,11 @@ please refer to previous OTR protocol document):
   * User requests to end an OTR conversation
   * Sending an encrypted data message
 
-// TODO: prekey messages should have Receiver's instance tag?
-
 For version 4 messages, someone receiving a message with a recipient instance
 tag specified that does not equal their own, should discard the message and
 optionally warn the user. The exception here is the Identity Message where the
 receiver's instance tag may be 0, indicating that no particular instance is
-specified.
+specified, and the Prekey Message that does not include this field.
 
 #### User requests to start an OTR conversation
 
@@ -2794,13 +2793,13 @@ up to the implementer. However, the requirement of enabling users to choose
 whether they want to allow or disallow versions is required. The version string
 is constructed as follows:
 
-If she is willing to use OTR version 3, she appends a byte identifier for the
-versions in question, followed by "?". The byte identifier for OTR version 3
-is "3", and "4" for 4. Thus, if she is willing to use OTR versions 3 and
-4, the following identifier would be "34". The order of the identifiers
-between the "v" and the "?" does not matter, but none should be listed more
-than once. The OTRv4 specification only supports versions 3 and higher. Thus,
-query messages for older versions have been omitted.
+If she is willing to use OTR, she appends a byte identifier for the versions in
+question, followed by "?". The byte identifier for OTR version 3 is "3", and "4"
+for 4. Thus, if she is willing to use OTR versions 3 and 4, the identifier would
+be "34". The order of the identifiers between the "v" and the "?" does not
+matter, but none should be listed more than once. The OTRv4 specification only
+supports versions 3 and higher. Thus, query messages for older versions have
+been omitted.
 
 Example query messages:
 
@@ -2819,7 +2818,7 @@ These strings may be hidden from the user (for example, in an attribute of an
 HTML tag), and may be accompanied by an explanatory message ("Alice has
 requested an Off-the-Record private conversation."). If Bob is willing to use
 OTR with Alice (with a protocol version that Alice has offered), he should start
-the AKE or DAKE according to one compatible version he supports.
+the AKE or DAKE according to the compatible version he supports.
 
 ##### Whitespace Tags
 
@@ -2828,8 +2827,8 @@ attach a special whitespace tag to any plaintext message she sends him.
 Whitespace tags may occur anywhere in the message, and may be hidden from the
 user (as in the [Query Messages](#query-messages)).
 
-The tag consists of the following 16 bytes, followed by one or more sets of 8
-bytes indicating the version of OTR Alice is willing to use:
+The tag consists of the following 16 bytes, followed by one or more sets of
+8 bytes indicating the version of OTR Alice is willing to use:
 
 ```
   Always send "\x20\x09\x20\x20\x09\x09\x09\x09"
@@ -2867,7 +2866,7 @@ If the tag offers OTR version 4 and version 4 is allowed:
   * Send an Identity message.
   * Transition the state to `WAITING_AUTH_R`.
 
-Otherwise, if the tag offers OTR version 3 and version 3 is allowed:
+If the tag offers OTR version 3 and version 3 is allowed:
 
   * Send a version `3 D-H Commit Message`.
   * Transition authstate to `AUTHSTATE_AWAITING_DHKEY`.
@@ -2950,10 +2949,8 @@ If the state is `ENCRYPTED_MESSAGES`:
    * If this Auth-R message is the same the one you received earlier (when you
      send an Auth-I message):
      * Retransmit your Auth-I Message.
-
-If the state is `ENCRYPTED_MESSAGES`:
-
-  * Ignore the message.
+   * Otherwise:
+     * Ignore the message.
 
 #### Sending an Auth-R message
 
@@ -2967,11 +2964,9 @@ If the state is `WAITING_AUTH_R`:
   * If the receiver's instance tag in the message is not the sender's instance
     tag you are currently using, ignore the message.
   * Validate the Auth-R message.
-
     * If validation fails:
       * Ignore the message.
       * Stay in state `WAITING_AUTH_R`.
-
     * If validation succeeds:
       * Reply with an Auth-I message, as defined in
         [Sending an Auth-I message](##sending-an-auth-i-message).
@@ -3330,7 +3325,7 @@ but no man-in-the-middle is capable of reading their communication either.
 There are many places where the first 64 bytes of a SHAKE-256 hash are taken of
 an integer followed by other values. This is defined as `HashToScalar(i || v)`
 where `i` is an integer used to distinguish the calls to the hash function and
-`v` is some values. Hashing is done in this way to prevent Alice from replaying
+`v` are some values. Hashing is done in this way to prevent Alice from replaying
 Bob's zero knowledge proofs or vice versa.
 
 ### SMP message 1
