@@ -3758,8 +3758,18 @@ G = (x=22458004029592430018760433409989603624678964163256413424612546168695
 
 #### Authentication: RSig(A1, a1, {A1, A2, A3}, m):
 
-`A1` is the public value associated with `a1`, that is, `A1 = G * a1`.
-`A1`, `A2`, and `A3` should be checked to verify that they are on the curve Ed448. `m` is the message to authenticate.
+`RSig` produces a SoK (signature of knowledge), named `sigma`, bound to the
+message `m`, that demonstrates knowledge of a private key corresponding to one
+of three public keys.
+
+In the case the DAKEs used for interactive and non-interactive, `A1` is the
+public value associated with `a1`, that is, `A1 = G * a1` and `m` is the message
+to authenticate.
+
+To compute `RSig`, without loss of generality:
+
+`A1`, `A2`, and `A3` should be checked to verify that they are on the curve
+Ed448.
 
 1. Pick random values `t1, c2, c3, r2, r3` in `q`.
 2. Compute `T1 = G * t1`.
@@ -3812,6 +3822,8 @@ on the secret known by the prover (otherwise, the key used to produce the proof
 can be inferred in practice).
 
 #### Verification: RVrf({A1, A2, A3}, sigma, m)
+
+`RVrf` is the verification function for the SoK `sigma`, created by `RSig`.
 
 `A1`, `A2`, and `A3` should be checked to verify that they are on curve Ed448.
 
