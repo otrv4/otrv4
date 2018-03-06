@@ -126,8 +126,8 @@ This follows the understanding that valid `y` coordinates must satisfy a
 quadratic equation for any given `x` coordinate, such that any `y` data may be
 represented by its corresponding `x` coordinate and a single additional bit.
 
-The encoding of integers and field elements correspond to the SCALAR data type;
-the encoding of points correspond to the POINT data type.
+The encoding of integers and field elements correspond to the `SCALAR` data
+type;the encoding of points correspond to the `POINT` data type.
 
 ### Consequences
 
@@ -137,10 +137,10 @@ big-endian for everything else. This is decided as so in order to be consistent
 with RFC8032, meaning that implementers of OTRv4 can reuse EdDSA libraries
 without having to change the format or the encoding of them.
 
-In order, to be consistent with RFC8032 as well, POINT will be a 57-bytes byte
+In order, to be consistent with RFC8032 as well, `POINT` will be a 57-bytes byte
 array (this number is defined according to `b`, which is an integer with
 `2^(b-1) > p`). EdDSA public keys have exactly `b` bits, and EdDSA signatures
-have exactly `2 * b` bits. A SCALAR will be 56-bytes byte array ((`b-1)-bit`
+have exactly `2 * b` bits. A `SCALAR` will be 56-bytes byte array ((`b-1)-bit`
 encoding of elements of the finite field `GF(p)`). The private keys and any
 secret information will be 57-byte. They will be subject to the clamping
 mechanism:
