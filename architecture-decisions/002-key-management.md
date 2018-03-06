@@ -113,7 +113,9 @@ extra symmetric key can either be used or discarded.
 We decided that only the receiver will reveal MAC keys on the first message
 sent of every ratchet (even the MAC keys from stored messages keys). When the
 session is expired or when stored message keys are deleted, their corresponding
-MAC keys are placed in the `old_mac_keys` list so they can be later revealed.
+MAC keys are placed in the `old_mac_keys` list so they can be later revealed
+in either the next sent data message or in the immediate TLV type 1 sent when
+a session is expired.
 
 ### Consequences
 

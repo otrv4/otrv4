@@ -233,8 +233,9 @@ key is used by a party to validate a received message, it is added to a list.
 It is also added when the stored message key that corresponds to messages that
 have not yet arrived is deleted (because the session has expired or because
 the storage of the message keys has been deleted). Those MAC keys are revealed
-in the first message sent of the next ratchet. This allows forgeability of the
-data messages and consequent deniability of their contents.
+in the first message sent of the next ratchet or in the TLV type 1 that is sent
+when a session is expired. This allows forgeability of the data messages and
+consequent deniability of their contents.
 
 Furthermore, OTRv4 provides forward secrecy. A classical adversary that
 compromises the long-term secret keys of both parties cannot retroactively
@@ -646,6 +647,7 @@ Type 1: Disconnected
   transition to 'FINISHED' state (see below), and inform the user that its
   correspondent has closed its end of the private connection, and the user
   should do the same. This TLV should have the 'IGNORE_UNREADABLE' flag set.
+  Old mac keys can be attached to this TLV when the session is expired.
 
 Type 2: SMP Message 1
   The value represents the initial message of the Socialist Millionaires'
@@ -851,7 +853,7 @@ Check, without leaking extra information about the value of `K_ecdh`, whether
 contributory behavior. Specially, contributory behaviour means that both
 parties' private keys contribute to the resulting shared key.  Since ed448
 have a cofactor of 4, an input point of small order will eliminate any
-contribution from the other party's private key.  This situation can be detected
+contribution from the other party's private key. This situation can be detected
 by checking for the all-zero output.
 
 ```
@@ -955,10 +957,11 @@ hasn't, the session is expired.
 
 To expire a session:
 
-1. Send a TLV type 1 (Disconnected) Message.
-2. Calculate the MAC keys corresponding to the stored message keys in the
+1. Calculate the MAC keys corresponding to the stored message keys in the
    `skipped_MKenc` dictionary and put them on the `old_mac_keys` list (so they
    are revealed the next time a message is sent in a new ratchet).
+2. Send a TLV type 1 (Disconnected) Message, with the `old_mac_keys` list
+   attached to it.
 3. Securely delete all keys and data associated with the conversation.
    This includes:
 
@@ -970,7 +973,7 @@ To expire a session:
       [here](#interactive-deniable-authenticated-key-exchange-dake)
       and [here](#non-interactive-auth-message),
       any old MAC keys that remain unrevealed, and the
-      extra symmetric key if present. // TODO: check
+      extra symmetric key if present.
    5. Reset the state and key variables, as defined in
       [its section](#resetting-state-variables-and-key-variables).
 
@@ -990,7 +993,8 @@ expire her session and delete all keys associated with this conversation. If
 she receives a message from Bob after two hours, she will not be able to decrypt
 the message and thus she will not reveal the MAC key associated with it. Note,
 nevertheless, that the MAC keys corresponding to stored message keys (from
-messages that have not yet arrived) will be derived and revealed.
+messages that have not yet arrived) will be derived and revealed in the TLV
+type 1 that is sent.
 
 It is also possible for the heartbeat messages to keep a session from expiring.
 Sticking with the above example of Alice's 2 hour session expiration time, Bob
