@@ -85,5 +85,6 @@ The size of fingerprints is increased to 56 bytes.
 
 ### References
 
-1. https://tools.ietf.org/html/rfc7748 "A. Langley, M. Hamburg,
-and S. Turner: Elliptic Curves for Security.” Internet Engineering Task Force; RFC 7748 (Informational); IETF, Jan-2016"
+1. Hamburg, M., Langley, A. and Turner, S. (2016). *Elliptic Curves for
+   Security*, Internet Engineering Task Force, RFC 7748. Available at:
+   http://www.ietf.org/rfc/rfc7748.txt

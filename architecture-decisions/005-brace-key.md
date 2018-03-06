@@ -318,7 +318,13 @@ some transport protocols to fragment these messages.
 
 ### References
 
-1. http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf "N. Unger, I. Goldberg: Improved Techniques for Implementing Strongly Deniable Authenticated Key Exchanges"
-2. https://eprint.iacr.org/2011/506.pdf "L. de Feo, D. Jao, J. Plût: Towards Quantum-Resistant Cryptosystems from Supersingular Elliptic Curve Isogenies"
-3. http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-57pt1r4.pdf "E. Barker: NIST Special Publication 800-57 Part 1 Revision 4; Recommendation for Key Management; Part 1 General"
-4. https://www.ietf.org/rfc/rfc3526.txt "M. Kojo: More Modular Exponential (MODP) Diffie-Hellman groups for Internet Key Exchange (IKE)"
+1. Goldberg, I. and Unger, N. (2016). *Improved Strongly Deniable Authenticated
+   Key Exchanges for Secure Messaging*, Waterloo, Canada: University of
+   Waterloo. Available at:
+   http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf
+2. Barker, E. (2016). *Recommendation for Key Management*, NIST Special
+   Publication 800-57. Available at:
+   http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-57pt1r4.pdf
+3. Kojo, M. (2003). *More Modular Exponential (MODP) Diffie-Hellman groups for
+   Internet Key Exchange (IKE)*, Internet Engineering Task Force,
+   RFC 3526. Available at: https://www.ietf.org/rfc/rfc3526.txt

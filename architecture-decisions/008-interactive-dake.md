@@ -36,6 +36,8 @@ Choosing DAKEZ for the interactive DAKE maximizes the deniability properties of
 interactive conversations.
 
 ### References
-1. http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf "N. Unger, I.
-   Goldberg: Improved Techniques for Implementing Strongly Deniable
-   Authenticated Key Exchanges"
+
+1. Goldberg, I. and Unger, N. (2016). *Improved Strongly Deniable Authenticated
+   Key Exchanges for Secure Messaging*, Waterloo, Canada: University of
+   Waterloo. Available at:
+   http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf

@@ -129,6 +129,12 @@ be stored. This also changes how fragmentation of data messages work.
 
 ### References
 
-1. https://whispersystems.org/blog/advanced-ratcheting/ "Advanced cryptographic ratcheting"
-2. http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.165.7945&rep=rep1&type=pdf "Finite-State Security Analysis of OTR Version 2"
-3. http://cacr.uwaterloo.ca/techreports/2015/cacr2015-02.pdf "SoK: Secure Messaging"
+
+1. Marlinspike, M. (2013). *Advanced cryptographic ratcheting*, Signal blog.
+   Available at: http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf
+2. Bonneau, J., Morrison, A. (2006) *Finite-State Security Analysis of OTR
+   Version 2*. Available at:
+   http://www.jbonneau.com/doc/BM06-OTR_v2_analysis.pdf
+3. Unger, N., Dechand, S., Bonneau, J., Fahl, S., Perl, H., Goldberg, I., Smith,
+   M. (2015). *SoK: Secure Messaging*, CACR, Available at:
+   http://cacr.uwaterloo.ca/techreports/2015/cacr2015-02.pdf
