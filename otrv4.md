@@ -590,7 +590,8 @@ The symmetric key (sym_key) is 57 bytes of cryptographically secure random data.
    it in 'D', encoded as POINT.
 4. Securely store 'sk' locally, as 'sk_h' for 'ED448-PUBKEY' and 'sk_d' for
    'ED448-SHARED-PREKEY'. This keys will be stored for as long as the
-   'ED448-PUBKEY' and the 'ED448-SHARED-PREKEY' respectevely live.
+   'ED448-PUBKEY' and the 'ED448-SHARED-PREKEY' respectevely live. After their
+   public key counterpart expires, they should be securely deleted.
 5. Securely delete 'sym_key' and 'h'.
 ```
 
