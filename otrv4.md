@@ -543,7 +543,8 @@ Ring Signature Authentication (RING-SIG):
 
 ### Public keys, Shared Prekeys and Fingerprints
 
-OTRv4 introduces a new type of public key:
+OTR users have long-lived public keys that they use for authentication
+(but not encryption). OTRv4 introduces a new type of public key:
 
 ```
 OTRv4's public authentication Ed448 key (ED448-PUBKEY):
