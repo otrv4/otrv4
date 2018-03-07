@@ -3147,7 +3147,11 @@ Store plaintext message for possible retransmission.
 A recevied data message will look like this:
 
 ```
-  ["?OTR" || protocol version || message type || sender's instance_tag || receiver's instance tag || flags || previous chain message number || ratchet id || message id || public ECDH key || public DH key || nonce || enc(plaintext message || TLV) || authenticator || Old MAC keys to be revealed ]
+  ["?OTR" || protocol version || message type || sender's instance_tag ||
+   receiver's instance tag || flags || previous chain message number ||
+   ratchet id || message id || public ECDH key || public DH key || nonce ||
+   enc(plaintext message || TLV) || authenticator ||
+   Old MAC keys to be revealed ]
 ```
 
 If the version is 4:
