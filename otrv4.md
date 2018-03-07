@@ -2194,6 +2194,9 @@ section.
 A message with an empty human-readable part (the plaintext is of zero length, or
 starts with a NULL) is a "heartbeat" message. This message is useful for key
 rotations and revealing MAC keys. It should not be displayed to the user.
+If you have not sent a message to a correspondent in some (configurable) time,
+send a "heartbeat" message, consisting of a Data Message encoding an empty
+ plaintext. The heartbeat message should have the `IGNORE_UNREADABLE` flag set.
 
 ```
 Alice                                                                           Bob
@@ -3199,8 +3202,7 @@ If the version is 4:
       * If the message can be decrypted:
           * Display the human-readable part (if non empty) to the user.
             SMP TLVs should be addressed according to the SMP state machine.
-
-      * If the received message contains a TLV type 1 (Disconnected):
+        * If the received message contains a TLV type 1 (Disconnected):
           * Forget all encryption keys for this correspondent and transition
             the state to `FINISHED`.
 
