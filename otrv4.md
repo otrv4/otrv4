@@ -694,17 +694,42 @@ Type 7: Extra symmetric key
 Both the interactive and non-interactive DAKEs must authenticate their contexts
 to prevent attacks that rebind the DAKE transcript into different contexts. If
 the higher-level protocol ascribes some property to the connection, the DAKE
-exchange should verify this property. A session is created when a new OTRv4
-conversation begins. Given a shared session state information `phi` (e.g., a
-session identifier) associated with the higher-level context (e.g., XMPP), the
-DAKE authenticates that both parties share the same value for `phi` (Φ).
+exchange should verify this property, so both sides of a conversation can
+cryptographically verify some beliefs they have about the session.
 
-Therefore, the shared session state (Φ) is any session-specific protocol state
-available to both parties in the higher-level protocol. For example, in XMPP, it
-will be the node and domain parts of the Jabber identifier, e.g.
-`alice@jabber.net`. In an application that assigns some attribute to users
-before a conversation (e.g., a networked game in which players take on specific
-roles), the expected attributes (expressed in fixed length) should be included.
+A session is created when a new OTRv4 conversation begins. Given a shared
+session state information `phi` (e.g., a session identifier) associated with the
+higher-level context (e.g., XMPP), the DAKE authenticates that both parties
+share the same value for `phi` (Φ).
+
+The shared session state (Φ) verifies shared state from the higher-level
+protocol as well as from OTR itself. Therefore, an implementer (who has complete
+knowledge of the application network stack) should define a known shared session
+state from the higher-level protocol as `phi`, as well as include the values
+imposed by this specification.
+
+```
+  session identifier mandated by the OTRv4 spec = sender and receiver's
+    instance tags, and the querry message or the whitespace tag
+  Phi' = session identifier defines by the implementer
+  Phi = session identifier mandated by the OTRv4 spec || Phi'
+```
+
+In XMPP, for example, `Phi'` can be the node and domain parts of the jabber
+identifier, e.g. `alice@jabber.net`. In an application that assigns some
+attribute to users before a conversation (e.g., a networked game in which
+players take on specific roles), the expected attributes (expressed in fixed
+length) should be included in `Phi'`.
+
+For example, a shared session state which higher-level protocol is XMPP, will
+look like this:
+
+```
+  phi = sender's instance tag || receiver's instance tag || querry message ||
+        node and domain from jabber identifier
+  phi = 0x00000100 || 0x00000101 || "?OTRv4?" || "alice@jabber.net"
+
+```
 
 ### OTR Error Messages
 
