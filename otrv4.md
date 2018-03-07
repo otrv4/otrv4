@@ -653,11 +653,14 @@ Type 0: Padding
   disguise the length of your message), use this TLV.
 
 Type 1: Disconnected
-  Closes the connection. If you receive a TLV record of this type, you should
-  transition to 'FINISHED' state (see below), and inform the user that its
+  If the user requests to close the private connection, you may send a message
+  (possibly with empty human-readable part) containing a record with this TLV
+  type just before you discard the session keys, and transition to
+  'START' (see below). If you receive a TLV record of this type, you should
+  transition to 'FINISHED' (see below), and inform the user that its
   correspondent has closed its end of the private connection, and the user
-  should do the same. This TLV should have the 'IGNORE_UNREADABLE' flag set.
-  Old mac keys can be attached to this TLV when the session is expired.
+  should do the same. Old mac keys can be attached to this TLV when the session
+  is expired. This TLV should have the 'IGNORE_UNREADABLE' flag set.
 
 Type 2: SMP Message 1
   The value represents the initial message of the Socialist Millionaires'
@@ -3202,9 +3205,9 @@ If the version is 4:
       * If the message can be decrypted:
           * Display the human-readable part (if non empty) to the user.
             SMP TLVs should be addressed according to the SMP state machine.
-        * If the received message contains a TLV type 1 (Disconnected):
-          * Forget all encryption keys for this correspondent and transition
-            the state to `FINISHED`.
+          * If the received message contains a TLV type 1 (Disconnected):
+            * Forget all encryption keys for this correspondent and transition
+              the state to `FINISHED`.
 
       * If you have not sent a message to this correspondent in some
         (configurable) time, send a "heartbeat" message. The heartbeat message
@@ -3256,22 +3259,6 @@ AKE will start when receiving an OTR Error message, as defined in OTRv3):
 * Send a data message with an encoding of the message with an empty
   human-readable part, and the TLV type 1.
 * Transition to the `START` state.
-
-#### Receiving a TLV type 1 (Disconnected) Message
-
-* If the instance tag in the message is not the instance tag you are currently
-  using:
-  * Discard the message and optionally warn the user.
-
-* If the version is 4:
-  * If a TLV type 1 is received in the `START` state:
-      * Stay in that state, else transition to the `FINISHED` state and
-        [reset the state variables and key variables](#resetting-state-variables-and-key-variables).
-
-* If the version is 3:
-  * Transition to `MSGSTATE_FINISHED`.
-  * Inform the user that their correspondent has closed their end of the private
-    connection.
 
 ## Socialist Millionaires Protocol (SMP)
 
