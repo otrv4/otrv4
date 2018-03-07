@@ -70,6 +70,7 @@ an existing messaging protocol, such as XMPP.
       1. [Non-Interactive-Auth Message](#non-interactive-auth-message)
       1. [Publishing Prekey Messages](#publishing-prekey-messages)
       1. [Receiving Prekey Messages](#receiving-prekey-messages)
+      1. [Validating Prekey Messages](#validating-prekey-messages)
    1. [Encrypted messages in DAKE's messages](#encrypted-messages-in-dakes-messages)
       1. [Attaching an encrypted message to Non-Interactive-Auth message in XZDH](#attaching-an-encrypted-message-to-non-interactive-auth-message-in-xzdh)
          1. [Encrypting the message](#encrypting-the-message)
@@ -1711,8 +1712,7 @@ Verify and decrypt message if included
 
 1. Requests prekey messages from the untrusted server.
 2. For each Prekey message received from the server:
-    * Verifies the Prekey message as defined in the
-      [Prekey message](#prekey-message) section.
+    * [Validates the prekey message.](#validating-prekey-messages)
     * Picks a compatible version of OTR listed in Bob's profile.
       If the versions are incompatible, Alice does not send any further
       messages.
@@ -1921,7 +1921,7 @@ A valid Non-Interactive-Auth message is generated as follows:
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
    * secret key `a` (80 bytes).
    * public key `A`.
-4. Verify the Prekey message.
+4. [Validate the Prekey message.](#validating-prekey-messages)
 5. Compute `K_ecdh = ECDH(x, their_ecdh)`.
 6. Compute `k_dh = DH(a, their_dh)` and `brace_key = KDF_1(0x02 || k_dh, 32)`.
 7. Compute
@@ -2030,17 +2030,9 @@ prekey messages, the non-interactive DAKE must wait until one can be obtained.
 The following guide is meant to help implementers identify and remove invalid
 prekey messages.
 
-Use the following checks to validate a Prekey message. If any checks fail,
-ignore the message:
-
-  1. Check that the user profile is not expired.
-  2. Check that the OTR version of the prekey message matches one of the
-    versions signed in the user profile contained in the prekey message.
-  3. Check if the user profile version is supported by the receiver.
-
 If one Prekey message is received:
 
-  1. Validate the Prekey message.
+  1. [Validate the Prekey message.](#validating-prekey-messages)
   2. If the Prekey message is valid, decide whether to send a
      Non-Interactive-Auth message depending on whether the long term key in the
      use profile is trusted or not.
@@ -2060,6 +2052,16 @@ If many prekey messages are received:
         decide which instance tags to send messages to.
       * If there are multiple prekey messages per instance tag, decide
         whether to send multiple messages to the same instance tag.
+
+#### Validating prekey messages
+Use the following checks to validate a Prekey message. If any checks fail, ignore the message:
+
+  1. Check that the user profile is not expired.
+  2. Check that the OTR version of the prekey message matches one of the
+    versions signed in the user profile contained in the prekey message.
+  3. Check if the user profile version is supported by the receiver.
+
+Reminder that the these steps can be done before receiving a non-interactive auth message
 
 ### Encrypted messages in DAKE's messages
 
