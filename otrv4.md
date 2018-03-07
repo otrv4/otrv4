@@ -2922,8 +2922,9 @@ If the state is `ENCRYPTED_MESSAGES` or `FINISHED`:
 
 Remove the whitespace tag and display the message to the user.
 
-If the client has some policy dictating that 'OTR is required', and the tag
-offers OTR version 4 and version 4 is allowed:
+If the client has some policy dictating that 'OTR is always required' or that
+'encryption is always required' (like `REQUIRE_ENCRYPTION` in OTRv3), and the
+tag offers OTR version 4 and version 4 is allowed:
 
   * Queue the message for encrypting and sending it when the participant
     transitions to the `ENCRYPTED_MESSAGES` state.
