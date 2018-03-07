@@ -2853,10 +2853,16 @@ tags](#whitespace-tags) are constructed according to the sections below.
 If Alice wishes to communicate to Bob that she would like to use OTR, she sends
 a message containing the string "?OTRv" followed by an indication of what
 versions of OTR she is willing to use with Bob. The versions she is willing to
-use, whether she can set this on a global level or on a user by user basis, is
-up to the implementer. However, the requirement of enabling users to choose
-whether they want to allow or disallow versions is required. The version string
-is constructed as follows:
+use, whether she can set this on a global level or per-correspondent basis, is
+up to the implementer. However, enabling users to choose whether they want to
+allow or disallow a version is required, as OTR clients can set different
+policies for different correspondents. For example, Alice could set up her
+client so that it speaks only OTR version 4, except with Charlie, who she knows
+has only an old client; so that it will opportunistically start an OTR
+conversation whenever it detects the correspondent supports it; or so that it
+refuses to send non-encrypted messages to Bob, ever.
+
+The version string is constructed as follows:
 
 If she is willing to use OTR, she appends a byte identifier for the versions in
 question, followed by "?". The byte identifier for OTR version 3 is "3", and "4"
