@@ -421,7 +421,7 @@ KDF_2(values, size) = SHAKE-256(values, size)
 ```
 
 The `size` first bytes of the SHAKE-256 output for input `values` are returned.
-This KDF is used when referred to RFC 8032.
+This `KDF_2` is used when referred to RFC 8032.
 
 ## Data Types
 
@@ -577,7 +577,7 @@ although the RFC 8032 defines parameters as octet strings, they are defined as b
 ```
 The symmetric key (sym_key) is 57 bytes of cryptographically secure random data.
 
-1. Hash the sym_key using KDF_2(sym_key, 114). Store the digest in a 114-byte
+1. Hash the 'sym_key' using KDF_2(sym_key, 114). Store the digest in a 114-byte
    buffer. Only the lower 57 bytes (denoted 'h') are used for generating the
    public key.
 2. Prune the buffer 'h': the two least significant bits of the first
@@ -588,7 +588,10 @@ The symmetric key (sym_key) is 57 bytes of cryptographically secure random data.
    'sk * Base point (G)'. If the result is for the 'ED448-PUBKEY', store it in
    'H', encoded as POINT.  If the result is for the 'ED448-SHARED-PREKEY', store
    it in 'D', encoded as POINT.
-4. Securely delete 'sk' and 'sym_key'.
+4. Securely store 'sk' locally, as 'sk_h' for 'ED448-PUBKEY' and 'sk_d' for
+   'ED448-SHARED-PREKEY'. This keys will be stored for as long as the
+   'ED448-PUBKEY' and the 'ED448-SHARED-PREKEY' respectevely live.
+5. Securely delete 'sym_key' and 'h'.
 ```
 
 Public keys have fingerprints, which are hex strings that serve as identifiers
@@ -947,7 +950,7 @@ To rotate the brace key:
       assign it to `their_dh`.
     * Calculate `k_dh = DH(our_dh.secret, their_dh)`.
     * Calculate a `brace_key = KDF_1(0x02 || k_dh, 32)`.
-    * Securely delete `our_dh.secret`.
+    * Securely delete `our_dh.secret` and `k_dh`.
 
   * Otherwise:
 
@@ -1221,7 +1224,7 @@ fingerprints' section. It is referred as 'sym_key'), a flag 'f', which is a byte
 with value 0, a context 'c' (a value set by the signer and verifier of maximum
 255 bytes), which is an empty string for this protocol, and a message 'm'.
 
-   1.  Hash the sym_key 'KDF_2(sym_key, 114)'. Let 'h' denote the resulting
+   1.  Hash the 'sym_key': 'KDF_2(sym_key, 114)'. Let 'h' denote the resulting
        digest. Construct the secret key 'sk' from the first half of
        'h' (57 bytes), and the corresponding public key 'H', as defined in the
        'Public keys, Shared Prekeys and Fingerprints' section.
@@ -1230,7 +1233,7 @@ with value 0, a context 'c' (a value set by the signer and verifier of maximum
 
    2.  Compute KDF_2("SigEd448" || f || len(c) || c || prefix || m, 114), where
        'm' is the message to be signed. Let 'r' be the 114-byte resulting
-       digest.
+       digest and interpret it as a little-endian integer.
 
    3.  Multiply the scalar 'r' by the Base Point (G). For efficiency, do this by
        first reducing 'r' modulo 'q', the group order.  Let 'R' be the encoding
@@ -1245,6 +1248,8 @@ with value 0, a context 'c' (a value set by the signer and verifier of maximum
    6.  Form the signature of the concatenation of 'R' (57 bytes) and the
        little-endian encoding of 'S' (57 bytes, the ten most significant bits
        are always zero).
+
+   7. Securely delete 'sym_key', 'sk', 'h', 'r' and 'k'.
 ```
 
 ### Verify a User Profile Signature
@@ -1264,6 +1269,7 @@ The user profile signature is verified as defined in RFC 8032
 
 3.  Check the group equation '4 * (S * G) = (4 * R) + (4 * (k * H_1))'. It's is
     sufficient to check '(S * G) = R + (k * H_1)'.
+
 ```
 
 ### Validating a User Profile
@@ -1441,8 +1447,8 @@ Bob will be initiating the DAKE with Alice.
      * Follows what is defined in the
        [When you receive a Data Message](#when-you-receive-a-data-message)
        section. Note that he will perform a new DH ratchet for the first
-       received data message. When he wants to send a data message, he will
-       follow the
+       received data message. When he wants to send a data message after
+       receiving one, he will follow the
        [When you send a Data Message](#when-you-send-a-data-message) section,
        and perform a new DH Ratchet.
 
@@ -1734,13 +1740,13 @@ Verify and decrypt message if included
     * If an encrypted message is attached, she computes:
 
       ```
-      Auth MAC = KDF_1(0x17 || auth_mac_k || t || (KDF_1(0x18 || attached encrypted ratchet id || attached encrypted message id || public ecdh key || public dh key || nonce || encrypted message, 64)), 64)`.
+      Auth MAC = KDF_1(0x18 || auth_mac_k || t || (KDF_1(0x17 || attached encrypted ratchet id || attached encrypted message id || public ecdh key || public dh key || nonce || encrypted message, 64)), 64)`.
       ```
 
     * Otherwise, she computes:
 
       ```
-      Auth MAC = KDF_1(0x17 || auth_mac_k || t, 64)
+      Auth MAC = KDF_1(0x18 || auth_mac_k || t, 64)
       ```
 
     * Includes this value on the Non-Interactive-Auth message and securely
@@ -1800,7 +1806,7 @@ Verify and decrypt message if included
      * Follows what is defined in [Decrypting an attached encrypted message](#decrypting-the-message-1)
        section.
      * Otherwise:
-        * Computes `Auth MAC = KDF_1(0x17 || auth_mac_k || t, 64)`.
+        * Computes `Auth MAC = KDF_1(0x18 || auth_mac_k || t, 64)`.
           The `t` value here is the one computed during the verification of the
           Non-Interactive-Auth message.
     * Extracts the `Auth MAC` from the Non-Interactive-Auth message and verifies
@@ -1813,7 +1819,7 @@ Verify and decrypt message if included
        [When you receive a Data Message](#when-you-receive-a-data-message)
        section. Note that he will perform a new DH ratchet if no encrypted
        message was attached to the Non-Interactive-Auth message. When he wants
-       to send a data message, he will follow the
+       to send a data message after receiving one, he will follow the
        [When you send a Data Message](#when-you-send-a-data-message) section,
        and perform a new DH Ratchet.
 
@@ -2156,7 +2162,7 @@ sending one. For this, the participant:
 * Uses `auth_mac_k` to generate the `Auth MAC` of the attached
   encrypted message (the `t` value here is the one computed during the
   verification of the Non-Interactive-Auth message):
-  `Auth MAC = KDF_1(0x17 || auth_mac_k || t || (KDF_1(0x18 || attached encrypted
+  `Auth MAC = KDF_1(0x18 || auth_mac_k || t || (KDF_1(0x17 || attached encrypted
    ratchet id || attached encrypted message id || public ecdh key || public dh
    key || nonce || encrypted message, 64)), 64)`.
 * Extracts the `Auth MAC` from the Non-Interactive-Auth message and verifies
@@ -2169,6 +2175,7 @@ sending one. For this, the participant:
   for details.
 * Uses the `MKenc` and `nonce` to decrypt the message:
   `decrypted_message = XSalsa20_Dec(MKenc, nonce, m)`.
+* Securely deletes `MKenc`.
 * Adds `auth_mac_k` to the list `mac_keys_to_reveal`.
 
 ## Data Exchange
@@ -2353,8 +2360,8 @@ When sending a data message in the same DH Ratchet:
     needed the extra symmetric key:
 
    ```
-   MKenc, MKmac = derive_enc_mac_keys(chain_key_s[i-1][j])
-   extra_symm_key = KDF_1(0x26 || 0xFF || chain_key_s[i-1][j], 32)
+     MKenc, MKmac = derive_enc_mac_keys(chain_key_s[i-1][j])
+     extra_symm_key = KDF_1(0x26 || 0xFF || chain_key_s[i-1][j], 32)
    ```
 
   * Securely delete `chain_key_s[i-1][j]`.
@@ -2363,7 +2370,7 @@ When sending a data message in the same DH Ratchet:
   * Use the `MKenc` to encrypt the message:
 
    ```
-   encrypted_message = XSalsa20_Enc(MKenc, nonce, m)
+     encrypted_message = XSalsa20_Enc(MKenc, nonce, m)
    ```
 
   * Use the `MKmac` to create a MAC tag. MAC all the sections of the data
@@ -2581,6 +2588,8 @@ symmetric key:
   symkey2 = KDF_1(0x01 || 0x104A || extra_sym_key, 32)
   symkey3 = KDF_1(0x02 || 0x0001 || extra_sym_key, 32)
 ```
+
+Every derived key and the `extra_symm_key` should be deleted after being used.
 
 ### Revealing MAC Keys
 
