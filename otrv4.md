@@ -2253,6 +2253,13 @@ This message is used to transmit a private message to the correspondent.
 It is also used to [reveal old MAC keys](#revealing-mac-keys). This data message
 is encoded as defined in the [Encoded Messages](#encoded-messages) section.
 
+The plaintext message (either before encryption or after decryption) consists
+of a human-readable message (encoded in UTF-8, optionally with HTML markup),
+optionally followed by:
+
+* a single NUL (a BYTE with value 0x00), and
+* zero or more TLV (type/length/value) records (with no padding between them)
+
 #### Data Message format
 
 ```
@@ -3087,7 +3094,7 @@ If the state is not `WAITING_AUTH_R`:
 * If the state is not `WAITING_AUTH_I`:
   * Ignore this message.
 
-#### Sending an encrypted message to an offline participant
+#### Sending a data message to an offline participant
 
 * Generate and send a Non-Interactive-Auth message.
 * Initialize the double ratcheting, as defined in the
@@ -3112,7 +3119,7 @@ If the state is not `WAITING_AUTH_R`:
       [Non-Interactive DAKE Overview](#non-interactive-dake-overview).
     * Transition to state `ENCRYPTED_MESSAGES`.
 
-#### Sending an encrypted data message
+#### Sending a data message
 
 The `ENCRYPTED_MESSAGES` state is the state where a participant is allowed to
 send encrypted data messages. There are only one other state in which a
@@ -3136,6 +3143,12 @@ If the state is `ENCRYPTED`, encrypt the message, and send it as a Data Message.
 Store plaintext message for possible retransmission.
 
 #### Receiving a data message
+
+A recevied data message will look like this:
+
+```
+  ["?OTR" || protocol version || message type || sender's instance_tag || receiver's instance tag || flags || previous chain message number || ratchet id || message id || public ECDH key || public DH key || nonce || enc(plaintext message || TLV) || authenticator || Old MAC keys to be revealed ]
+```
 
 If the version is 4:
 
@@ -3182,13 +3195,14 @@ If the version is 4:
       * If the message can be decrypted:
           * Display the human-readable part (if non empty) to the user.
             SMP TLVs should be addressed according to the SMP state machine.
-          * If the received message contains a TLV type 1 (Disconnected):
-             * Forget all encryption keys for this correspondent and transition
-               the state to `FINISHED`.
 
-          * If you have not sent a message to this correspondent in some
-            (configurable) time, send a "heartbeat" message. The heartbeat
-            message should have the `IGNORE_UNREADABLE` flag set.
+      * If the received message contains a TLV type 1 (Disconnected):
+          * Forget all encryption keys for this correspondent and transition
+            the state to `FINISHED`.
+
+      * If you have not sent a message to this correspondent in some
+        (configurable) time, send a "heartbeat" message. The heartbeat message
+        should have the `IGNORE_UNREADABLE` flag set.
 
 If the version is 3:
 
