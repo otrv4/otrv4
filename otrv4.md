@@ -2805,8 +2805,8 @@ ENCRYPTED_MESSAGES
   This state is entered after the DAKE is finished. The interactive DAKE is
   finished after the Auth-I message is sent, received and validated. The
   non-interactive DAKE is finished when the Non-Interactive-Auth message is
-  sent, and when it is received and validated. Messages sent in this state are
-  encrypted.
+  sent, and when it is received and validated. Outgoing messages sent in this
+  state are encrypted.
 
 FINISHED
 
@@ -2820,7 +2820,7 @@ FINISHED
   if Alice was in the middle of typing a private message to Bob when he
   suddenly logs out, just as Alice hits the 'enter' key). Note that this
   transition only happens when TLV type 1 message is received, not when it is
-  sent.
+  sent. This state indicates that outgoing messages are not delivered at all.
 ```
 
 ### Protocol events
@@ -2938,6 +2938,11 @@ If the state is `ENCRYPTED_MESSAGES` or `FINISHED`:
 
   * The user should be warned that the message received was unencrypted.
 
+For OTRv3, if msgstate is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
+
+  * Display the message to the user. The user should be warned that the message
+    received was unencrypted.
+
 #### Receiving plaintext with the whitespace tag
 
 Remove the whitespace tag and display the message to the user.
@@ -2954,6 +2959,11 @@ tag offers OTR version 4 and version 4 is allowed:
 If the state is `ENCRYPTED_MESSAGES` or `FINISHED`:
 
   * The user should be warned that the message received was unencrypted.
+
+For OTRv3, if msgstate is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
+
+  * Display the message to the user. The user should be warned that the message
+    received was unencrypted.
 
 If the tag offers OTR version 4 and version 4 is allowed:
 
@@ -3111,7 +3121,7 @@ If the state is not `WAITING_AUTH_R`:
 
 #### Receiving a Non-Interactive-Auth message
 
-* If the state is `FINISHED`:
+* If the state is `FINISHED` or `MSGSTATE_FINISHED`:
   * Ignore the message.
 
 * Else:
