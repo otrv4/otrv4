@@ -739,7 +739,7 @@ and receiver's jabber identifier, e.g. `alice@jabber.net` (often referred as the
 "bare JID"). In an application that assigns some attribute to users before a
 conversation (e.g., a networked game in which players take on specific roles),
 the expected attributes (expressed in fixed length) should be included in
-`Phi'`.
+`Phi'`. A static password shared by both sides can also be included.
 
 For example, a shared session state which higher-level protocol is XMPP, will
 look like this:
