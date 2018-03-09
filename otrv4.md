@@ -1712,7 +1712,7 @@ Verify and decrypt message if included
 
 1. Requests prekey messages from the untrusted server.
 2. For each Prekey message received from the server:
-    * [Validates the prekey message.](#validating-prekey-messages)
+    * [Validates the prekey message].(#validating-prekey-messages)
     * Picks a compatible version of OTR listed in Bob's profile.
       If the versions are incompatible, Alice does not send any further
       messages.
