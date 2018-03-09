@@ -31,7 +31,7 @@ an existing messaging protocol, such as XMPP.
       1. [Scalar](#scalar)
       1. [Point](#point)
       1. [Encoded Messages](#encoded-messages)
-   1. [Serializing the Ring Signture Proof of Authentication](#serializing-the-ring-signature-proof-of-authentication)
+   1. [Serializing the Ring Signature Proof of Authentication](#serializing-the-ring-signature-proof-of-authentication)
    1. [Public keys, Shared Prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
    1. [Instance Tags](#instance-tags)
    1. [TLV Record Types](#tlv-record-types)
@@ -106,6 +106,11 @@ an existing messaging protocol, such as XMPP.
    1. [Modify an encrypted data message](#modify-an-encrypted-data-message)
    1. [OTRv3 Specific Encoded Messages](#otrv3-specific-encoded-messages)
    1. [OTRv3 Protocol State Machine](#otrv3-protocol-state-machine)
+   1. [Elliptic curve operations](elliptic-curve-operations)
+      1. [Point addition](point-addition)
+   1. [Constant-time Operations](constant-time-operations)
+      1. [Constant-time equality](constant-time-equality)
+      1. [Constant-time selection](constant-time-selection)
 1. [References](#references)
 
 ## Main Changes over Version 3
@@ -4240,9 +4245,9 @@ Compute:
 
 ### Constant-time operations
 
-#### Constant-time equallity
+#### Constant-time equality
 
-A constant-time equallity function should return `1` if `x == y` and `0`
+A constant-time equality function should return `1` if `x == y` and `0`
 otherwise.
 
 ```
