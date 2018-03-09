@@ -1,4 +1,4 @@
-## ADR 015: Prekey server
+## ADR 016: Prekey server
 
 ### Context
 
