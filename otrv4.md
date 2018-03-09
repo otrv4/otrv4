@@ -261,7 +261,7 @@ These security properties only hold for when a conversation with OTRv4 is
 started. They do not hold for the previous versions of the OTR protocol, meaning
 that if a user that supports version 4 starts a conversation with someone that
 only supports version 3, a conversation with OTRv3 will start, and its security
-properties will not be the ones stated on this paragraph.
+properties will not be the ones stated on these paragraphs.
 
 ## Notation and parameters
 
@@ -729,20 +729,21 @@ imposed by this specification.
   Phi = session identifier mandated by the OTRv4 spec || Phi'
 ```
 
-In XMPP, for example, `Phi'` can be the node and domain parts of the jabber
-identifier, e.g. `alice@jabber.net`. In an application that assigns some
-attribute to users before a conversation (e.g., a networked game in which
-players take on specific roles), the expected attributes (expressed in fixed
-length) should be included in `Phi'`.
+In XMPP, for example, `Phi'` can be the node and domain parts of the sender
+and receiver's jabber identifier, e.g. `alice@jabber.net` (often referred as the
+"bare JID"). In an application that assigns some attribute to users before a
+conversation (e.g., a networked game in which players take on specific roles),
+the expected attributes (expressed in fixed length) should be included in
+`Phi'`.
 
 For example, a shared session state which higher-level protocol is XMPP, will
 look like this:
 
 ```
   phi = sender's instance tag || receiver's instance tag || querry message ||
-        node and domain from jabber identifier
-  phi = 0x00000100 || 0x00000101 || "?OTRv4?" || "alice@jabber.net"
-
+        sender's bare JID || receiver's bare JID
+  phi = 0x00000100 || 0x00000101 || "?OTRv4?" || "alice@jabber.net" ||
+        "bob@jabber.net"
 ```
 
 ### OTR Error Messages
