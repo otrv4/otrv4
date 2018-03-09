@@ -241,7 +241,7 @@ Furthermore, OTRv4 provides forward secrecy. A classical adversary that
 compromises the long-term secret keys of both parties cannot retroactively
 compromise past session keys. The interactive DAKE offers strong forward secrecy
 (it protects the session key when at least one party completes the exchange).
-The non-interactive DAKE offers a forward secrey that is between strong and
+The non-interactive DAKE offers a forward secrecy that is between strong and
 weak, as it protects completed sessions and incomplete sessions that stall long
 enough to be invalidated by a participant. The key exchange mechanism used
 in OTRv4 is the Double Ratchet algorithm which provides forward and backward
@@ -256,6 +256,12 @@ secrecy. OTRv4, by using the Double Ratchet Algorithm, provides both. If key
 material used to encrypt a particular data message is compromised, previous
 messages are protected. Additionally, future messages are protected by the
 Diffie-Hellman and Elliptic Curve Diffie-Hellman ratchets.
+
+These security properties only hold for when a conversation with OTRv4 is
+started. They do not hold for the previous versions of the OTR protocol, meaning
+that if a user that supports version 4 starts a conversation with someone that
+only supports version 3, a conversation with OTRv3 will start, and its security
+properties will not be the ones stated on this paragraph.
 
 ## Notation and parameters
 
