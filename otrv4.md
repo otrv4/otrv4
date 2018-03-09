@@ -1713,7 +1713,7 @@ Verify and decrypt message if included
 
 1. Requests prekey messages from the untrusted server.
 2. For each Prekey message received from the server:
-    * [Validates the prekey message].(#validating-prekey-messages)
+    * [Validates each Prekey message](#validating-prekey-messages).
     * Picks a compatible version of OTR listed in Bob's profile.
       If the versions are incompatible, Alice does not send any further
       messages.
@@ -1922,23 +1922,22 @@ A valid Non-Interactive-Auth message is generated as follows:
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
    * secret key `a` (80 bytes).
    * public key `A`.
-4. [Validate the Prekey message.](#validating-prekey-messages)
-5. Compute `K_ecdh = ECDH(x, their_ecdh)`.
-6. Compute `k_dh = DH(a, their_dh)` and `brace_key = KDF_1(0x02 || k_dh, 32)`.
-7. Compute
+4. Compute `K_ecdh = ECDH(x, their_ecdh)`.
+5. Compute `k_dh = DH(a, their_dh)` and `brace_key = KDF_1(0x02 || k_dh, 32)`.
+6. Compute
    `tmp_k = KDF_1(0x12 || K_ecdh || ECDH(x, their_shared_prekey) ||
     ECDH(x, Pkb) || brace_key, 64)`.
    This value is needed for the generation of the Mixed shared secret.
-8. Calculate the Auth MAC key `auth_mac_k = KDF_1(0x13 || tmp_k, 64)`.
-9. Compute
+7. Calculate the Auth MAC key `auth_mac_k = KDF_1(0x13 || tmp_k, 64)`.
+8. Compute
    `t = KDF_1(0x14 || Bobs_User_Profile, 64) ||
     KDF_1(0x15 || Alices_User_Profile, 64) || Y || X || B || A ||
     their_shared_prekey || KDF_1(0x16 || phi, 64)`.
-10. Compute `sigma = RSig(Pka, ska, {Pkb, Pka, Y}, t)`. When computing `sigma`,
-    keep the first 24 bytes of the generated `c` value to be used as a `nonce`
-    in the next step. Refer to
-    [Ring Signature Authentication](#ring-signature-authentication) for details.
-11. Generate a 4-byte instance tag to use as the sender's instance tag.
+9. Compute `sigma = RSig(Pka, ska, {Pkb, Pka, Y}, t)`. When computing `sigma`,
+   keep the first 24 bytes of the generated `c` value to be used as a `nonce`
+   in the next step. Refer to
+   [Ring Signature Authentication](#ring-signature-authentication) for details.
+10. Generate a 4-byte instance tag to use as the sender's instance tag.
     Additional messages in this conversation will continue to use this tag as
     the sender's instance tag. Also, this tag is used to filter future received
     messages. Messages intended for this instance of the client will have this
@@ -2021,6 +2020,19 @@ messages.
 Details on how to interact with a prekey server to publish messages are outside
 the scope of this protocol.
 
+#### Validating Prekey Messages
+
+Use the following checks to validate a Prekey message. If any of the checks
+fail, ignore the message:
+
+  1. Check that the user profile is not expired.
+  2. Check that the OTR version of the prekey message matches one of the
+    versions signed in the user profile contained in the prekey message.
+  3. Check if the user profile version is supported by the receiver.
+
+Note that these steps can be done in anticipation of sending a
+Non-Interactive-Auth message.
+
 #### Receiving Prekey Messages
 
 Details on how prekey messages may be received from a prekey server are outside
@@ -2033,19 +2045,20 @@ prekey messages.
 
 If one Prekey message is received:
 
-  1. [Validate the Prekey message.](#validating-prekey-messages)
+  1. [Validate the Prekey message](#validating-prekey-messages).
   2. If the Prekey message is valid, decide whether to send a
      Non-Interactive-Auth message depending on whether the long term key in the
      use profile is trusted or not.
 
 If many prekey messages are received:
 
-  1. Discard all invalid prekey messages.
-  2. Discard all duplicate prekey messages in the list.
-  3. If one Prekey message remains:
+  1. [Validate the Prekey messages](#validating-prekey-messages).
+  2. Discard all invalid prekey messages.
+  3. Discard all duplicate prekey messages in the list.
+  4. If one Prekey message remains:
       * Decide whether to send a message using this Prekey message if the long
         term key within the use profile is trusted or not.
-  4. If multiple valid prekey messages remain:
+  5. If multiple valid prekey messages remain:
       * If there are keys that are untrusted and trusted in the list of
         messages, decide whether to only use messages that contain trusted long
         term keys.
@@ -2053,16 +2066,6 @@ If many prekey messages are received:
         decide which instance tags to send messages to.
       * If there are multiple prekey messages per instance tag, decide
         whether to send multiple messages to the same instance tag.
-
-#### Validating prekey messages
-Use the following checks to validate a Prekey message. If any checks fail, ignore the message:
-
-  1. Check that the user profile is not expired.
-  2. Check that the OTR version of the prekey message matches one of the
-    versions signed in the user profile contained in the prekey message.
-  3. Check if the user profile version is supported by the receiver.
-
-Reminder that the these steps can be done before receiving a non-interactive auth message
 
 ### Encrypted messages in DAKE's messages
 
