@@ -4189,6 +4189,68 @@ AUTHSTATE_AWAITING_SIG
 
 ```
 
+### Elliptic curve operations
+
+#### Point addition
+
+For point addition, the following method is recommended, as defined in RFC 8032.
+A point `(x,y)` is represented in projective coordinates `(X, Y, Z)`, with
+`x = X/Z`, `y = Y/Z` with `Z != 0`.
+
+The neutral point is `(0,1)`, or equivalently in projective coordinates
+`(0, Z, Z)` for any non-zero `Z`.
+
+The following formulas for adding two points, `(x3,y3) = (x1,y1) + (x2,y2)`
+(or `X_1 : Y_1 : Z_1) + X_2 : Y_2 : Z_2 = X_3 : Y_3 : Z_3`) on untwisted Edwards
+curve (i.e., `a = 1`) with non-square `d`, as defined in [\[10\]](#references).
+They are complete (they work for any pair of valid input points):
+
+Compute:
+
+```
+                 A = Z1 * Z2
+                 B = A^2
+                 C = X1 * X2
+                 D = Y1 * Y2
+                 E = d * C * D
+                 F = B - E
+                 G = B + E
+                 H = (X1 + Y1) * (X2 + Y2)
+                 X3 = A * F * (H - C - D)
+                 Y3 = A * G * (D - C)
+                 Z3 = F * G
+```
+
+### Constant-time operations
+
+#### Constant-time equallity
+
+A constant-time equallity function should return `1` if `x == y` and `0`
+otherwise.
+
+```
+constant_time_equals(x, y):
+  if len(x) != len(y)
+    return 0
+
+  result = 0
+
+  for i= 0; i < len(x); i++
+    result |= x ^ y
+
+  return result
+```
+
+#### Constant-time selection
+
+A constant-time selection function should return `x` if `v` is `1` and `y` if
+`v` is `0`. The behavior is undefined if `v` takes any other value.
+
+```
+constant_time_select(v, x, y):
+  return ^(v - 1)&x | (v - 1)&y
+```
+
 ## References
 
 1. Goldberg, I. and Unger, N. (2016). *Improved Strongly Deniable Authenticated
@@ -4216,3 +4278,6 @@ AUTHSTATE_AWAITING_SIG
 9. Josefsson, S. and Liusvaara, I. (2017). *Edwards-curve Digital Signature
    Algorithm (EdDSA)*, Internet Engineering Task Force, RFC 8032. Available at:
    https://tools.ietf.org/html/rfc8032
+10. Bernstein, D. and T. Lange. (2007). *Projective coordinates for Edwards
+    curves*, The 'add-2007-bl' addition formulas. Available at:
+    http://www.hyperelliptic.org/EFD/g1p/auto-edwards-projective.html#addition-add-2007-bl
