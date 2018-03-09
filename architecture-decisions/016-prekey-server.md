@@ -157,6 +157,15 @@ conversations established with the INITIATOR (one for each received pre-key
 message) or always use one prekey per message in this case (which drains
 prekeys from every group.
 
+Another problem with the step is that once an attacker impersonates the
+identity to the server (someone steals your XMPP password), they can simply
+publish a new user profile (with a new long-term key, with new prekey
+messages) and guarantee they will receive encrypted copies of every "first"
+message the RESPONDER sends. Does it mean non-interactive is more fragile
+in regard to this attack than OTRv3? Can we add recommendations to the spec
+to make sure client implementations are extra careful with how they handle
+fingerprints in the non-interactive case?
+
 #### Things to consider
 
 - All the previous scenarios but in the context of having prekey messages
