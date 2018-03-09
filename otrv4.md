@@ -1299,7 +1299,8 @@ To validate a user profile, you must (in this order):
    curve Ed448-Goldilocks. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
-3. If the `Transitional Signature` is present, verify its validity.
+3. If the `Transitional Signature` is present, verify its validity using the
+   OTRv3 DSA key.
 4. [Verify that the user profile signature is valid](#verify-a-user-profile-signature).
 
 ## Online Conversation Initialization
