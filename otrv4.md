@@ -3734,30 +3734,37 @@ have more recently received a message from).
 
 OTRv4 expects each implementation of this specification to expose an interface
 for producing forged transcripts. These forging operations must use the same
-functions used for honest conversations. This section will outline which
-operations must be exposed and include guidance to forge messages.
+functions used for honest conversations. This section will outline the
+operations that must be exposed and include guidance to forge messages.
 
-The major utilities are:
+In OTRv4, anyone can forge messages after a conversation to make them look like
+they came from you. However, during a conversation, your correspondent is
+assured the messages they sees are authentic and unmodified. Easily forgeable
+transcripts achieve the 'offline' deniability property: if someone claims a
+participant said something over OTR, they'll have no way to proof so, as
+anyone could have modify a transcript.
+
+The major utilities for forging are:
 
 ```
 Parse
-  Parses OTR messages to the values of each of the fields in it. It shows the
-  values of all the fields.
+  Parses OTR messages to the values of each of the fields in them and shows
+  these fields.
 
 Modify Data Message
   If an encrypted data message cannot be read because you don't
-  know the message key (or a key used to derive this message key) but it can
-  be guessed that the string `x` appears at a given place in the message,
-  this method will replace the old text with some new desired text with
-  the same length. The result is a valid OTR message containing the new text.
-  For example, if the string "hi" is accurately guessed to be at the beginning
-  of an encrypted message, it can be replaced with the string "yo". In that way,
-  a valid data message can be created with the new text.
+  know the message key (or one of the chain keys used to derive this message
+  key) but it can be guessed that the string 'x' appears at a given place in
+  the message, a participant can replace that string with some new desired
+  text with the same length. The result is a valid OTR message that contains
+  the new text. For example, if the string "hi" is accurately guessed to be
+  at the beginning of an encrypted message, it can be replaced with the string
+  "yo". Therefore, a valid data message can be created with new text.
 
   To achieve this:
   - XOR the old text and the new text. Store this value.
-  - XOR the stored value again with the original encrypted message starting at
-    a given offset.
+  - XOR the stored value again with the original encrypted message starting
+    at a given offset.
   - Recalculate the MAC tag with the revealed MAC key associated with this
     message. The new tag is attached to the data message, replacing the old
     value.
@@ -3791,18 +3798,18 @@ Forge DAKE and Session Keys
   profile owner authenticated the conversation.
 
 Show MAC Key
-  This function takes a chain key and a the number of a message key, and shows
+  This function takes a chain key and the number of a message key, and shows
   the MAC key associated with those two values. For example, if the message
-  key number is 3, the chain key is ratcheted 3 times, and the third MAC key is
-  derived and returned. 'Show MAC key' may be used with the ReMAC Message
+  key number is 3, the chain key is ratcheted 3 times, and the third MAC key
+  is derived and returned. 'Show MAC key' may be used with the ReMAC Message
   function below in the case where a chain key has been compromised by an
   attacker who wishes to forge messages.
 
 ReMAC Message
   This will make a new OTR Data Message with a given MAC key and an original
-  OTR message. The user's message in the OTR message is already encrypted.
-  A new MAC tag will be generated and replaced for the message. An attacker
-  may use this function to forge messages with a compromised MAC key.
+  OTR data message. The user's message in the OTR data message is already
+  encrypted. A new MAC tag will be generated and replaced for the message. An
+  attacker may use this function to forge messages with a compromised MAC key.
 
 Forge Entire Transcript
   The Forge Entire Transcript function will allow one participant to
