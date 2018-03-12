@@ -24,7 +24,7 @@ can and may be also implemented in other modes.
 To attain all of the purposes of OTRv4, the specification can work in
 three modes:
 
-1. OTRv4-standalone mode: a always encrypted mode. This mode will not know how
+1. OTRv4-standalone mode: an always encrypted mode. This mode will not know how
    to handle any kind of plaintext message, including query messages and
    whitespace tags.
 2. OTRv3-compatible-mode: a mode with backwards compatibility with OTRv3.

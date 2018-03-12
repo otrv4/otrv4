@@ -28,7 +28,7 @@ Alice wants to send a message to Bob.
     Alice's account from multiple locations
   * Fragmentation will be optional as it depends on the network. It is
     unlikely due support of multiple networks.
-4. Bob receives encrypted messages from Alice.
+4. Bob receives the encrypted messages from Alice.
 
 ### Decision
 

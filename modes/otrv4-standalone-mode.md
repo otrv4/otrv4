@@ -24,7 +24,7 @@ The specification for this mode, as compared with the full version, will
 differ in these sections:
 
 - "High Level Overview": there is not a "Requests OTR conversation" step.
-- "Creating a User Profile": the "Versions" field must only allow the 2-byte
+- "Creating a User Profile": the "Versions" field must only allow the 1-byte
   version string "4".
 - "Creating a User Profile": the "Transitional Signature" field is not allowed
   for this mode: there is no DSA signature generation or verification. When
