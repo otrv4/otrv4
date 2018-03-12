@@ -3,14 +3,25 @@
 ### Context
 
 In order to send an offline message, the Responder needs to obtain
-cryptographic keys from the Initiator. These cryptographic keys are
-distributed through prekey messages, who are cryptographically bound
-to a prekey and made public in a untrusted pre-key server.
+cryptographic keys from the Initiator so they can engage in a
+non-interactive DAKE. These cryptographic keys are distributed as
+prekey messages, who is made public in a untrusted pre-key server.
 
 A participant is identified by some identity in the underlying network
 (be it alice@xmpp.org for the XMPP network, or +99 1234-5678 for the
 SMS network). We assume this is everything each participant is required
 to know about who they want to send a message to.
+
+To publish prekey messages, a participant deniably authenticates itself to
+the server through a interactive DAKE, and sends prekeys to be stored and
+published by the server. The server will associate the prekeys received to
+the identity used by the sender to identify itself to the server (TODO: does
+the user is required to authenticate its identity to the server? It should not
+matter, if the server is not trusted - I guess).
+
+To obtain prekey messages, a participant asks the server for prekey messages
+from a particular identity, and the server delivers one prekey message for
+every not-expired profile it knows about from that particular identity.
 
 This document describes the pre-key server as a component in the OTRv4 protocol.
 
@@ -22,6 +33,7 @@ offer the following services to its users:
 - prekey message retrieval
 - prekey message publication
 
+TODO: Should this be a requirement?
 It is assumed that the server is able to receive messages from a
 authenticated identity. By performing a DAKE with the server, a
 authenticated identity binds itself to its long-term public-key,
@@ -116,16 +128,18 @@ Users are allowed to import/export their long-term key but are not expected
 to manage (or even know about) profiles. In this case, if Alice wants to
 preserve the same long-term key (and fingerprint) among multiple clients
 she will always have multiple profiles for the same long-term key that can be
-concurrently active (not-expired). This is due the fact that profiles are
+simultaneously active (not-expired). This is due the fact that profiles are
 per-device and should not allowed to be exported/imported by clients.
 
-Clients needs to be aware of how to handle this, and may need to inform the user
-before sending the offline message to multiple devices.
+Clients should group all received prekey messages, and choose from each
+group only the one with the latest expiry time. This must be done to avoid
+sending multiple offline messages to the same device. If there's still multiple
+prekey messages after filtering out duplicate instance tags, the client needs to
+decide which client the offline message should be sent to, or even send to all
+of them. Clients may need to inform the user before sending the offline message
+to multiple devices, or ask the user about which from the many possible actions
+should be taken.
 
-Clients could use the instance tag on the received prekey messages to determine
-if the received prekey messages are from the same device. This could happen
-if the INITIATOR's client decided to publish a new profile (and prekey messages)
-in preparation to the expiry of the currently published profile.
 
 #### SCENARIO 4
 
@@ -147,12 +161,21 @@ in preparation to the expiry of the currently published profile.
       pre-key-msg3
       pre-key-msg4
 
+Users are expected to have multiple long-term keys and profiles associated to
+the same identity. For example, they may use multiple clients and/or devices
+that do not share the same long-term key.
+
+From the clients' perspective, this is the same scenario as the previous one,
+and clients are required to behave similarly in regard to grouping received
+perkey messages by instance tag, filtering out duplicates, and chosing which
+devices to send the offline messages to.
+
 #### Problems with receiving multiple prekey messages for a particular identity
 
 In Scenarios 3 and 4, the RESPONDER needs to decide to either keep multiple
 conversations established with the INITIATOR (one for each received pre-key
-message) or always use one prekey per message in this case (which drains
-prekeys from every group.
+message) or always discard the conversation after the offline message is
+sent (which drains prekeys from every group.
 
 Another problem with the step is that once an attacker impersonates the
 identity to the server (someone steals your XMPP password), they can simply
@@ -162,19 +185,6 @@ message the RESPONDER sends. Does it mean non-interactive is more fragile
 in regard to this attack than OTRv3? Can we add recommendations to the spec
 to make sure client implementations are extra careful with how they handle
 fingerprints in the non-interactive case?
-
-#### Things to consider
-
-- All the previous scenarios but in the context of having prekey messages
-  with different instance tags in each group of candidates to delivery.
-
-   * What if there are prekey messages with the same instance tag on different groups?
-   * What if there are prekey messages with different instance tags on the same group?
-
-  In scenarios 3 and 4, if the pre-key messages received by the RESPONDER have
-  the same instance tag, they may need to decide which of the prekeys to use.
-  Otherwise multiple OTR conversations will be established with the same
-  INITIATOR. It may be problematic to both.
 
 
 ### Decision
