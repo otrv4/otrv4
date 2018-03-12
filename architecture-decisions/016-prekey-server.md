@@ -7,6 +7,11 @@ cryptographic keys from the Initiator. These cryptographic keys are
 distributed through prekey messages, who are cryptographically bound
 to a prekey and made public in a untrusted pre-key server.
 
+A participant is identified by some identity in the underlying network
+(be it alice@xmpp.org for the XMPP network, or +99 1234-5678 for the
+SMS network). We assume this is everything each participant is required
+to know about who they want to send a message to.
+
 This document describes the pre-key server as a component in the OTRv4 protocol.
 
 Having in mind a client-server architecture, a prekey server instance MUST
