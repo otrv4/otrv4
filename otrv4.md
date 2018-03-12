@@ -611,7 +611,8 @@ OTRv4's public shared prekey (ED448-SHARED-PREKEY):
 
 The public key and shared prekey are generated as follows (refer to RFC 8032
 [\[9\]](#references), for more information on key generation). Note that,
-although the RFC 8032 defines parameters as octet strings, they are defined as bytes here:
+although the RFC 8032 defines parameters as octet strings, they are defined as
+bytes here:
 
 ```
 The symmetric key (sym_key) is 57 bytes of cryptographically secure random data.
@@ -888,8 +889,8 @@ generateECDH()
   - return our_ecdh.public = G * s, our_ecdh.secret = s
 
 generateDH()
-  pick a random value r (80 bytes)
-  return our_dh.public = g3 ^ r, our_dh.secret = r
+  - pick a random value r (80 bytes)
+  - return our_dh.public = g3 ^ r, our_dh.secret = r
 ```
 
 ### Shared secrets
@@ -1585,7 +1586,8 @@ A valid Auth-R message is generated as follows:
    `t = 0x0 || KDF_1(0x06 || Bobs_User_Profile, 64) ||
     KDF_1(0x07 || Alices_User_Profile, 64) || Y || X || B || A ||
     KDF_1(0x08 || phi, 64)`.
-   `phi` is the shared session state as mention in its [section](#shared-session-state).
+   `phi` is the shared session state as mention in its
+   [section](#shared-session-state).
 5. Compute `sigma = RSig(Pka, ska, {Pkb, Pka, Y}, t)`.
 6. Generate a 4-byte instance tag to use as the sender's instance tag.
    Additional messages in this conversation will continue to use this tag as the
@@ -1650,7 +1652,8 @@ A valid Auth-I message is generated as follows:
    `t = 0x1 || KDF_1(0x09 || Bobs_User_Profile, 64) ||
     KDF_1(0x10 || Alices_User_Profile, 64) || Y || X || B || A ||
     KDF_1(0x11 || phi, 64)`.
-   `phi` is the shared session state as mention on its [section](#shared-session-state).
+   `phi` is the shared session state as mention on its
+   [section](#shared-session-state).
 2. Compute `sigma = RSig(Pkb, skb, {Pkb, Pka, X}, t)`.
 3. Continue to use the sender's instance tag.
 
@@ -1663,7 +1666,8 @@ To verify an Auth-I message:
    `t = 0x1 || KDF_1(0x09 || Bobs_User_Profile, 64) ||
     KDF_1(0x10 || Alices_User_Profile, 64) || Y || X || B || A ||
     KDF_1(0x11 || phi, 64)`.
-   `phi` is the shared session state as mention on its [section](#shared-session-state).
+   `phi` is the shared session state as mention on its
+   [section](#shared-session-state).
 5. Verify the `sigma` as defined in
    [Ring Signature Authentication](#verification-verifya1-a2-a3-sigma-m).
 
@@ -1784,7 +1788,9 @@ Verify and decrypt message if included
     * If an encrypted message is attached, she computes:
 
       ```
-      Auth MAC = KDF_1(0x18 || auth_mac_k || t || (KDF_1(0x17 || attached encrypted ratchet id || attached encrypted message id || public ecdh key || public dh key || nonce || encrypted message, 64)), 64)`.
+      Auth MAC = KDF_1(0x18 || auth_mac_k || t || (KDF_1(0x17 ||
+      attached encrypted ratchet id || attached encrypted message id ||
+      public ecdh key || public dh key || nonce || encrypted message, 64)), 64)`.
       ```
 
     * Otherwise, she computes:
@@ -1879,11 +1885,13 @@ A valid Prekey message is generated as follows:
 1. Create a user profile, as defined in
    [Creating a user profile](#creating-a-user-profile) section.
 2. Create the first one-time use prekey by generating the ephemeral ECDH key
-   pair, as defined in [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
+   pair, as defined in
+   [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
    * secret key `y` (57 bytes).
    * public key `Y`.
 3. Create the second one-time use prekey by generating the ephemeral DH key
-   pair, as defined in [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
+   pair, as defined in
+   [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
    * secret key `b` (80 bytes).
    * public key `B`.
 4. Generate a 4-byte instance tag to use as the sender's instance tag.
@@ -2118,7 +2126,8 @@ participant:
   The derived DH public key will be the 'Public DH Key' for the message.
 * Calculates the shared secret `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`.
 * Derive new set of keys:
-  `root_key[i], chain_key_s[i][j] = derive_ratchet_keys(sending, root_key[i-1], K)`.
+  `root_key[i], chain_key_s[i][j] = derive_ratchet_keys(sending,
+  root_key[i-1], K)`.
   Securely deletes the previous root key (`root_key[i-1]`) and `K`.
 * Sets `i` as the attached message ratchet id.
 * Increments the ratchet id `i = i + 1`.
@@ -2195,7 +2204,8 @@ sending one. For this, the participant:
   [Rotating ECDH keys and brace key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
   section.
 * Calculates `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`.
-* Derive new set of keys `root_key[i], chain_key_r[i][k] = derive_ratchet_keys(receiving, root_key[i-1], K)`.
+* Derive new set of keys `root_key[i], chain_key_r[i][k] =
+derive_ratchet_keys(receiving, root_key[i-1], K)`.
 * Securely delete the previous root key (`root_key[i-1]`) and `K`.
 * Increments the ratchet id `i = i + 1`.
 * Derives the next receiving chain key by using the `chain_key_r[i-1][k]`
@@ -2474,7 +2484,8 @@ This is done by:
       received `Public DH Key` with the stored ones.
       * If they are equal:
           * Get the message key and the extra symmetric key (if needed):
-            `MKenc, extra_symm_key = skipped_MKenc[Public ECDH Key, Public DH Key, i, j]`.
+            `MKenc, extra_symm_key = skipped_MKenc[Public ECDH Key,
+            Public DH Key, i, j]`.
           * Securely delete
             `skipped_MKenc[Public ECDH Key, Public DH Key, i, j]`.
           * Calculate `MKmac = KDF_1(0x25 || MKenc, 64)`.
@@ -2509,7 +2520,8 @@ This is done by:
                symmetric key):
                `extra_symm_key = KDF_1(0x26 || 0xFF || chain_key_r[i][j], 32)`.
              * Store
-               `MKenc, extra_sym_key = skipped_MKenc[Public ECDH Key, Public DH Key, i, k]`.
+               `MKenc, extra_sym_key = skipped_MKenc[Public ECDH Key,
+               Public DH Key, i, k]`.
              * Increment `k = k + 1`.
              * Delete `chain_key_r[i][k]`.
   * Rotate the ECDH keys and brace key, see
@@ -2542,7 +2554,8 @@ This is done by:
                symmetric key):
                `extra_symm_key = KDF_1(0x26 || 0xFF || chain_key_r[i-1][j], 32)`.
              * Store
-               `MKenc, extra_sym_key = skipped_MKenc[Public ECDH Key, Public DH Key, i, k]`.
+               `MKenc, extra_sym_key = skipped_MKenc[Public ECDH Key,
+               Public DH Key, i, k]`.
              * Increment `k = k + 1`.
              * Delete `chain_key_r[i-1][k]`.
   * Calculate the encryption and MAC keys (`MKenc` and `MKmac`).
@@ -2710,7 +2723,8 @@ OTR message as follows:
     structure (as `index` runs from 1 to `total` inclusive:
 
   ```
-  "?OTR|%x|%x|%x,%hu,%hu,%s,", identifier, sender_instance, receiver_instance, index, total, piece[index]
+  "?OTR|%x|%x|%x,%hu,%hu,%s,", identifier, sender_instance, receiver_instance,
+  index, total, piece[index]
   ```
 
   OTRv3 messages get fragmented in a similar format, but without the indentifier
@@ -2727,7 +2741,8 @@ a maximum value of 65535. Each `piece[index]` must be non-empty.
 The `identifier`, instance tags, `index` and `total` values may have leading
 zeros.
 
-Note that fragments are not messages that can be fragmented: you can't fragment a fragment.
+Note that fragments are not messages that can be fragmented: you can't fragment
+a fragment.
 
 ### Receiving Fragments
 
@@ -3412,13 +3427,14 @@ Assuming that Alice begins the exchange:
 **Alice:**
 
 * Validates that `Rb` is on curve Ed448. See
-  [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve) section for details.
+  [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+  section for details.
 * Computes `Rab = Rb * a3`.
 * Checks whether `Rab == Pa - Pb`.
 
 If everything is done correctly, then `Rab` should hold the value of
-`(Pa - Pb) * ((G2 * a3 * b3) * (x - y))`.  This test will only succeed if the secret
-information provided by each participant are equal (essentially `x == y`).
+`(Pa - Pb) * ((G2 * a3 * b3) * (x - y))`.  This test will only succeed if the
+secret information provided by each participant are equal (essentially `x == y`).
 Further, since `G2 * a3 * b3` is a random number not known to any party, if `x`
 is not equal to `y`, no other information is revealed.
 
@@ -3495,8 +3511,8 @@ The SMP message 1 has the following data and format:
 ```
 Question (DATA)
   A user-specified question, which is associated with the user-specified secret
-  information. If there is no question input from the user, the length of this is
-  0 and the data is NULL.
+  information. If there is no question input from the user, the length of this
+  is 0 and the data is NULL.
 
 G2a (POINT)
   Alice's half of the ECDH exchange to determine G2.
@@ -4153,7 +4169,8 @@ If authstate is `AUTHSTATE_AWAITING_REVEALSIG`:
 
     * Ignore the message.
 
-If authstate is `AUTHSTATE_NONE`, `AUTHSTATE_AWAITING_DHKEY` or `AUTHSTATE_AWAITING_SIG`:
+If authstate is `AUTHSTATE_NONE`, `AUTHSTATE_AWAITING_DHKEY` or
+`AUTHSTATE_AWAITING_SIG`:
 
   * Ignore the message.
 
