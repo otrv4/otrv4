@@ -1,13 +1,13 @@
 # OTR version 4: interactive-only
 
 This document describes the version 4 of the Off-the-Record Messaging protocol,
-in a operation mode that aims to provide a always encrypted mode that provides
-the highest security properties.
+in a operation mode that aims to provide a always encrypted mode with only
+interactive conversations. This aims to provide the highest security properties.
 
 ## Mode description
 
-An implementation of the OTRv4 protocol in interactive-only mode must be compliant
-with the "version 4 only", with exceptions described below.
+An implementation of the OTRv4 protocol in an interactive-only mode must be
+compliant with the "standalone mode", with exceptions described below.
 
 Ignore the sections:
 
@@ -18,6 +18,7 @@ Ignore the sections:
 
 ## Considerations
 
-TODO: We may want to mention implications of this mode (is there any
-improvement or diminishement in regard to security properties? any potential
-pitfall for implementors?).
+This mode achieves different security properties as the ones described in the
+[security properties](../otrv4.md#security-properties) section, as it does
+not achieve the security properties given by a non-interactive DAKE. Therefore,
+it provides offline and online (participation) deniability for both participants.
