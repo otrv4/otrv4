@@ -1,4 +1,4 @@
-# OTR version 4: compatible mode
+# OTR version 4: OTRv3 Compatible Mode
 
 This document describes the version 4 of the Off-the-Record Messaging protocol,
 in a operation that aims to provide a transition path from the previous version

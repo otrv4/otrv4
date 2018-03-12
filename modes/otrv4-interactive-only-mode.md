@@ -1,4 +1,4 @@
-# OTR version 4: interactive-only
+# OTR version 4: Interactive-Only Mode
 
 This document describes the version 4 of the Off-the-Record Messaging protocol,
 in a operation mode that aims to provide a always encrypted mode with only

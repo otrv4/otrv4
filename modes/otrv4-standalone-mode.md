@@ -1,4 +1,4 @@
-# OTR version 4: standalone mode
+# OTR version 4: Standalone Mode
 
 This document describes the version 4 of the Off-the-Record Messaging protocol,
 in an operation mode that aims to provide an always encrypted mode with higher
