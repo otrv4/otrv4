@@ -41,6 +41,14 @@ We introduce a user profile to OTRv4 that includes:
 6. Transitional Signature (optional): A signature of the profile excluding
    Profile Signatures and itself signed by the user's OTRv3 DSA key.
 
+Note all the previously mentioned information is not about the user, but about
+their device (more specifically, the versions and shared prekey). Also, users
+are not expected to have to manage user profiles (theirs or from others)
+in a client. As a consequence, clients are discouraged to allow importing or
+exporting of user profiles. Also, if a user has multiple clients concurrently
+in use, it is expected they has multiple user profiles simultaneously published
+and not-expired.
+
 The user profile must be published publicly and updated before it expires. The
 main reason for doing this is that the publication allows two parties to send
 the signed User Profile during the DAKE. Since this signed profile is public
