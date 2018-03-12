@@ -16,6 +16,15 @@ Ignore the sections:
 - "Sending an encrypted message to an offline participant".
 - "Receiving a Non-Interactive-Auth message".
 
+The specification for this mode, as compared with the "OTRv4-standalone"
+version, will differ in these sections:
+
+- "Public keys, Shared Prekeys and Fingerprints": an OTRv4's public shared
+  prekey will never be created.
+- "Creating a User Profile": the "Public Shared Prekey" field is not allowed
+  for this mode: there is no Public Shared Prekey generation or verification.
+  When validating the user profile, this field must not be verified.
+
 ## Considerations
 
 This mode achieves different security properties as the ones described in the

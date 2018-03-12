@@ -1322,7 +1322,7 @@ To validate a user profile, you must (in this order):
 
 1. Verify that the user profile has not expired.
 2. Verify that the `Versions` field contains the character "4".
-3. Validate that the public shared prekey and the Ed448 public key are on the
+3. Validate that the Public Shared Prekey and the Ed448 Public Key are on the
    curve Ed448-Goldilocks. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
