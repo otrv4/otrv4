@@ -2,13 +2,14 @@
 
 ### Context
 
-ADR #010 defines the need for specifying alternative modes for the OTR protocol
+ADR#010 defines the need for specifying alternative modes for the OTR protocol
 version 4.
 
-This document outlines the implications of having a "OTRv3 compatible" mode to
-the spec as per revision 585ba0dfcecf6abc0d30ba0ff0524bce3795110a.
+One of this modes is the 'OTRv3-compatible' mode: a mode with backwards
+compatibility with OTRv3. It knows how to handle plaintext messages, including
+query messages and whitespace tags.
 
-When thinking about the consequences, we had the following scenarios in mind:
+This mode might work on this kind of application and scenario:
 
 #### Pidgin (a OTRv3-compatible plugin)
 
@@ -18,38 +19,40 @@ Alice wants to send a message to Bob.
 2. Alice verifies Bob's identity. She either:
   * Uses Bob's User Profile and verifies Bob's fingerprint using a business
     card, a HTTPS website, etc.
-  * Performs an interactive DAKE and uses SMP.
-
-2. Alice types a message and "sends it" to Bob.
-  * A DAKE is performed if the app is not already in an encrypted state.
-  * Alice is warned about any problem to establish the encrypted channel and/or
-    any problem with the identity verification for Bob.
-  * The conversation keys do not need to be stored on the device for later use.
-  * Instance tags are required because there may be multiple devices.
-  * Fragmentation could be optional depending on the network, but this is
-    unlikely due support to multiple networks.
-
-3. Bob receives the message from Alice.
-
-If the network allows Alice to receive messages from devices not on the same
-mode, plaintext messages may arrive. Such messages should be handled by the app,
-and not by the OTRv4 protocol. If the app allows Alice to send plaintext
-messages, they should be directly delivered to Bob by the app and not by the
-OTRv4 protocol.
-
-TODO: OTR3 supports plaintext messages. Should this mode support it too? I think
-so. yes.
+  * Performs an interactive DAKE with Bob and uses SMP.
+3. Alice types messages, encrypts them and "sends them" to Bob.
+  * A DAKE is performed if the application is not already in an encrypted state.
+  * She is warned about any problem while establishing an encrypted channel
+    and/or any problem with the identity verification of Bob.
+  * Instance tags are required because the same client might be logged into
+    Alice's account from multiple locations
+  * Fragmentation will be optional as it depends on the network. It is
+    unlikely due support of multiple networks.
+4. Bob receives encrypted messages from Alice.
 
 ### Decision
 
-(From ADR #010)
-
-To be defined. This is pretty much the spec as per revision
-585ba0dfcecf6abc0d30ba0ff0524bce3795110a.
+An implementation of the OTRv4 protocol in a OTRv3 compatible mode must be
+compliant with the full protocol specification:
+[OTRv4 protocol](../otrv4.md#table-of-contents). That
+is, it must comply with every section on it.
 
 ### Consequences
 
-TODO: State the security properties of this mode, or the implications to the
-security in this mode.
+Plaintext messages are allowed in conversations with OTRv3-compatible mode.
+The use of policies, similar to OTRv3, can be used to safely handle the
+transition from an "encrypted" to a "plaintext" state.
 
-To be defined
+Notice that in this mode, the security properties stated in the
+[security properties](../otrv4.md#security-properties) section only hold for
+when a conversation with OTRv4 is started. They do not hold for the previous
+versions of the OTR protocol, meaning that if a user that supports version 3 and
+4 starts a conversation with someone that only supports version 3, a
+conversation with OTRv3 will start, and its security properties will not be the
+ones stated in those paragraphs. The security properties will be those defined
+by OTRv3.
+
+The network model will also change when starting a conversation with OTRv3. If a
+user that supports version 3 and 4 starts a conversation with someone that
+only supports version 3, a conversation with OTRv3 will start, and its network
+model will only provide in-order delivery of messages.

@@ -6,7 +6,7 @@ of the protocol, namely OTRv3, to the current version.
 
 ## Mode description
 
-An implementation of the OTRv4 protocol in a OTRv3 compatible mode must be
+An implementation of the OTRv4 protocol in an OTRv3-compatible mode must be
 compliant with the full protocol specification:
 [OTRv4 protocol](../otrv4.md#table-of-contents). That
 is, it must comply with every section on it.
@@ -14,7 +14,7 @@ is, it must comply with every section on it.
 ## Considerations
 
 Unlike the other two modes, plaintext messages are allowed in conversations with
-OTRv4 compatible mode. The use of policies, similar to OTRv3, can be used to
+OTRv3-compatible mode. The use of policies, similar to OTRv3, can be used to
 safely handle the transition from an "encrypted" to a "plaintext" state.
 
 Notice that in this mode, the security properties stated in the
