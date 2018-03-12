@@ -30,4 +30,5 @@ version, will differ in these sections:
 This mode achieves different security properties as the ones described in the
 [security properties](../otrv4.md#security-properties) section, as it does
 not achieve the security properties given by a non-interactive DAKE. Therefore,
-it provides offline and online (participation) deniability for both participants.
+it provides offline and online (participation) deniability for both
+participants.

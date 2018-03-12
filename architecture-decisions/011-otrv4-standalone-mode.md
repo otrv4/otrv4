@@ -72,7 +72,7 @@ not allow the Transitional Signature parameter on the same profile.
 By always requiring encryption, this mode may encourage long-lived sessions.
 The section "Session expiration" of OTRv4 protocol specification outlines how to
 mitigate the risks of long-lived sessions. For this reason, TLVs type 1
-(Disconnected) are necessary.
+(Disconnected) are necessary in this mode.
 
 Even though there is no need to prefix OTR messages with "?OTR:", since the
 protocol only handles OTR messages, this mode does not modify this encoding
