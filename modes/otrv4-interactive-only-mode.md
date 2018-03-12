@@ -21,7 +21,7 @@ version, will differ in these sections:
 
 - "Public keys, Shared Prekeys and Fingerprints": an OTRv4's public shared
   prekey will never be created.
-- "Creating a User Profile": the "Public Shared Prekey" field is not allowed
+- "Creating a User Profile": the `Public Shared Prekey` field is not allowed
   for this mode: there is no Public Shared Prekey generation or verification.
   When validating the user profile, this field must not be verified.
 

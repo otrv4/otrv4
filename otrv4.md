@@ -166,7 +166,7 @@ with strong forward secrecy.
 ### Conversation started by a Non-Interactive DAKE
 
 ```
-Alice                      Untrusuted Prekey Server         Bob
+Alice                      Untrusted Prekey Server         Bob
 --------------------------------------------------------------------------------
                                     (<--------------------- Pre-conversation: Creates
                                                             and sends a Prekey Message)
@@ -224,7 +224,7 @@ arbitrary protocols with these third parties. This latter property is known as
 online or participation deniability.
 
 Both DAKEs (interactive and non-interactive) provide offline deniability as
-anyone can forge DAKE transcript between two parties using their long-term
+anyone can forge a DAKE transcript between two parties using their long-term
 public keys. Consequently, no transcript provides evidence of a past key
 exchange, because it could have been forged by anyone.
 
@@ -273,9 +273,10 @@ security properties will not be the ones stated in these paragraphs.
 
 ## OTRv4 modes
 
-In order for OTRv4 to be an alternative to current messaging applications and to
-be compatible with the OTRv3 specification, the OTRv4 protocol must define
-different modes in which it can be implemented: a OTRv3-compatible mode, a OTRv4
+In order for OTRv4 to be an alternative to current messaging applications, to
+be compatible with the OTRv3 specification and to be useful for instant
+messaging protocols (e.g. XMPP), the OTRv4 protocol must define different modes
+in which the protocol can be implemented: a OTRv3-compatible mode, a OTRv4
 standalone mode, and a OTRv4 interactive-only-mode. These are the three
 modes enforced by this protocol specification, but, it must be taken into
 account, that OTRv4 can and may be also implemented in other modes.
@@ -287,13 +288,15 @@ The modes are:
    query messages and whitespace tags.
 2. OTRv4-standalone mode: an always encrypted mode. This mode will not know how
    to handle any kind of plaintext messages, including query messages and
-   whitespace tags.
+   whitespace tags. It supports both interactive and non-interactive
+   conversations.
 3. OTRv4-interactive-only: an always encrypted mode that provides higher
    deniability properties when compared to the previous two modes, as it
    achieves offline and online deniability for both participants in a
-   conversation. It only allows interactive conversations.
+   conversation. It only supports interactive conversations.
 
-For details on how these modes will work, review the [modes](https://github.com/otrv4/otrv4/tree/master/modes) folder.
+For details on how these modes work, review the
+[modes](https://github.com/otrv4/otrv4/tree/master/modes) folder.
 
 ## Notation and parameters
 
@@ -459,7 +462,7 @@ KDF_2(values, size) = SHAKE-256(values, size)
 ```
 
 The `size` first bytes of the SHAKE-256 output for input `values` are returned.
-This `KDF_2` is used when referred to RFC 8032.
+This `KDF_2` is used when referring to RFC 8032.
 
 ## Data Types
 
@@ -629,7 +632,7 @@ The symmetric key (sym_key) is 57 bytes of cryptographically secure random data.
    'H', encoded as POINT.  If the result is for the 'ED448-SHARED-PREKEY', store
    it in 'D', encoded as POINT.
 4. Securely store 'sk' locally, as 'sk_h' for 'ED448-PUBKEY' and 'sk_d' for
-   'ED448-SHARED-PREKEY'. This keys will be stored for as long as the
+   'ED448-SHARED-PREKEY'. These keys will be stored for as long as the
    'ED448-PUBKEY' and the 'ED448-SHARED-PREKEY' respectevely live. After their
    public key counterpart expires, they should be securely deleted.
 5. Securely delete 'sym_key' and 'h'.
@@ -758,7 +761,7 @@ imposed by this specification.
 ```
   session identifier mandated by the OTRv4 spec = sender and receiver's
     instance tags, and the querry message or the whitespace tag
-  Phi' = session identifier defines by the implementer
+  Phi' = session identifier defined by the implementer
   Phi = session identifier mandated by the OTRv4 spec || Phi'
 ```
 
@@ -785,8 +788,7 @@ Any message containing "?OTR Error: " at the starting position is an OTR Error
 Message. The following part of the message should contain human-readable details
 of the error. The message may also include a specific code at the beginning,
 e.g. "?OTR Error: ERROR_N: ". This code is used to identify which error is being
-received for optional localization of the message. OTRv4 Error Messages are
-unencoded: they are not base-64 encoded binary.
+received for optional localization of the message.
 
 Currently, the following errors are supported:
 
@@ -796,8 +798,8 @@ Currently, the following errors are supported:
   ERROR_2:
     Not in private state message
 ```
-Note: The string "?OTR Error:" must be in at the start position of the message
-because of these reasons:
+Note that the string "?OTR Error:" must be in at the start position of the
+message because of these reasons:
 
  - The possibility for playing games with the state machine by "embedding" this
    string inside some other message.
@@ -930,11 +932,11 @@ ECDH(a, B)
 
 Check, without leaking extra information about the value of `K_ecdh`, whether
 `K_ecdh` is the all-zero value and abort if so, as this process involves
-contributory behavior. Specially, contributory behaviour means that both
-parties' private keys contribute to the resulting shared key.  Since ed448
-have a cofactor of 4, an input point of small order will eliminate any
-contribution from the other party's private key. This situation can be detected
-by checking for the all-zero output.
+contributory behavior. Contributory behaviour means that both parties' private
+keys contribute to the resulting shared key.  Since ed448 have a cofactor of 4,
+an input point of small order will eliminate any contribution from the other
+party's private key. This situation can be detected by checking for the all-zero
+output.
 
 ```
 DH(a, B)
@@ -1039,8 +1041,8 @@ To expire a session:
 
 1. Calculate the MAC keys corresponding to the stored message keys in the
    `skipped_MKenc` dictionary and put them on the `old_mac_keys` list (so they
-   are revealed the next time a message is sent in a new ratchet).
-2. Send a TLV type 1 (Disconnected) Message, with the `old_mac_keys` list
+   are revealed in TLV type 1 (Disconnected) message).
+2. Send a TLV type 1 (Disconnected) message, with the `old_mac_keys` list
    attached to it.
 3. Securely delete all keys and data associated with the conversation.
    This includes:
@@ -2202,8 +2204,12 @@ sending one. For this, the participant:
   [Rotating ECDH keys and brace key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
   section.
 * Calculates `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`.
+<<<<<<< Updated upstream
 * Derive new set of keys `root_key[i], chain_key_r[i][k] = 
 derive_ratchet_keys(receiving, root_key[i-1], K)`.
+=======
+* Derive new set of keys `root_key[i], chain_key_r[i][k] = derive_ratchet_keys(receiving, root_key[i-1], K)`.
+>>>>>>> Stashed changes
 * Securely delete the previous root key (`root_key[i-1]`) and `K`.
 * Increments the ratchet id `i = i + 1`.
 * Derives the next receiving chain key by using the `chain_key_r[i-1][k]`
