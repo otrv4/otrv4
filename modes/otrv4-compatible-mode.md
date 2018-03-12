@@ -17,7 +17,7 @@ Unlike the other two modes, plaintext messages are allowed in conversations with
 OTRv4 compatible mode. The use of policies, similar to OTRv3, can be used to
 safely handle the transition from an "encrypted" to a "plaintext" state.
 
-Notice that in this mode, the security properities stated in the
+Notice that in this mode, the security properties stated in the
 [security properties](../otrv4.md#security-properties) section only hold for
 when a conversation with OTRv4 is started. They do not hold for the previous
 versions of the OTR protocol, meaning that if a user that supports version 3 and

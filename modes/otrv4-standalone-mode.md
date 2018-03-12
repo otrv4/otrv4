@@ -34,7 +34,7 @@ differ in these sections:
   1 and 2". This mode only allows version 4 of the protocol.
 - "Online Conversation Initialization": ignore everything that refers to query
   messages and whitespace tags.
-- "Fragmentation": only a OTRv4 fragmenation is allowed. Ignore this paragraph:
+- "Fragmentation": only a OTRv4 fragmentation is allowed. Ignore this paragraph:
   "For fragmentation in OTRv3, refer to the "Fragmentation" section on OTRv3
   specification".
 - "Protocol states": the `START` and `FINISHED` states of the protocol state
