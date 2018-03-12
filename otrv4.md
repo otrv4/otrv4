@@ -265,9 +265,9 @@ Diffie-Hellman and Elliptic Curve Diffie-Hellman ratchets.
 
 These security properties only hold for when a conversation with OTRv4 is
 started. They do not hold for the previous versions of the OTR protocol, meaning
-that if a user that supports version 4 starts a conversation with someone that
-only supports version 3, a conversation with OTRv3 will start, and its security
-properties will not be the ones stated on these paragraphs.
+that if a user that supports version 3 and 4 starts a conversation with someone
+that only supports version 3, a conversation with OTRv3 will start, and its
+security properties will not be the ones stated in these paragraphs.
 
 ## Notation and parameters
 
