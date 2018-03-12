@@ -112,28 +112,20 @@ The server MUST deliver additional prekey messages when multiple
       pre-key-msg4
       pre-key-msg5
 
+Users are allowed to import/export their long-term key but are not expected
+to manage (or even know about) profiles. In this case, if Alice wants to
+preserve the same long-term key (and fingerprint) among multiple clients
+she will always have multiple profiles for the same long-term key that can be
+concurrently active (not-expired). This is due the fact that profiles are
+per-device and should not allowed to be exported/imported by clients.
 
-We assume clients are allowed to export/import long-term keypairs but they can
-decide whether or not to share the same long-term key between multiple profiles.
-That is, Alice could generate profile1 and long-term1 on one device, import
-long-term1 to another device and generate profile2 there. Alice then uses
-both devices.
+Clients needs to be aware of how to handle this, and may need to inform the user
+before sending the offline message to multiple devices.
 
-Why would a user be OK with sharing the same long-term keypair between multiple
-clients, but not be OK with sharing the same prekey (and user profile)? Is there
-any benefit in allowing this scenario?
-
-We can imagine this being used by a person who wants to keep the same long-term
-key (and the same fingerprint) on multiple devices but also wants to have one
-profile per device to (?).
-
-Alternatively, the server could send only one prekey message from the "active"
-user profile, that is, the one who will be the last to expire. If this is the
-case, we need to document that "there may be only one active user profile".
-
-If needed, we could even support both cases and use the instance tags on the
-prekey messages to distinguish between them.
-
+Clients could use the instance tag on the received prekey messages to determine
+if the received prekey messages are from the same device. This could happen
+if the INITIATOR's client decided to publish a new profile (and prekey messages)
+in preparation to the expiry of the currently published profile.
 
 #### SCENARIO 4
 
