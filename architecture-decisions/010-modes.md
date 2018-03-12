@@ -2,7 +2,7 @@
 
 ### Context
 
-Otrv4 is a protocol that aims to:
+OTRv4 is a protocol that aims to:
 
 1. Be an alternative to current messaging applications that work in synchronous
    and asynchronous messaging environments.
@@ -14,7 +14,7 @@ Otrv4 is a protocol that aims to:
    (e.g. XMPP).
 
 In order to be an alternative to current messaging applications and to be
-compatible with OTRv3, OTRv4 protocol must define two modes that can be
+compatible with OTRv3, OTRv4 protocol must define three modes in which it can be
 implemented: a only OTRv4 mode and a OTRv3-compatible mode. These are the two
 modes enforced by the protocol, but, it must be taken into account, that OTRv4
 can and may be also implemented in other modes.
@@ -22,7 +22,7 @@ can and may be also implemented in other modes.
 ### Decision
 
 To attain all of the purposes of OTRv4, the specification can work in
-two modes:
+three modes:
 
 1. OTRv4 only: a always encrypted mode. This mode will not know how to handle
    any kind of plain text, including query messages and whitespace tags.

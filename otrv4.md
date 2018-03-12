@@ -19,6 +19,7 @@ an existing messaging protocol, such as XMPP.
    1. [Conversation started by a Non-Interactive DAKE](#conversation-started-by-a-non-interactive-dake)
 1. [Assumptions](#assumptions)
 1. [Security Properties](#security-properties)
+1. [OTRv4 modes](#otrv4-modes)
 1. [Notation and parameters](#notation-and-parameters)
    1. [Notation](#notation)
    1. [Elliptic Curve Parameters](#elliptic-curve-parameters)
@@ -131,6 +132,7 @@ an existing messaging protocol, such as XMPP.
   - Upgraded SHA-1 and SHA-2 to SHAKE-256.
   - Switched from AES to XSalsa20 [\[3\]](#references).
 - Support of an out-of-order network model.
+- Support of different modes in which this specification can be implemented.
 - Explicit instructions for producing forged transcripts using the same
   functions used to conduct honest conversations.
 
@@ -268,6 +270,30 @@ started. They do not hold for the previous versions of the OTR protocol, meaning
 that if a user that supports version 3 and 4 starts a conversation with someone
 that only supports version 3, a conversation with OTRv3 will start, and its
 security properties will not be the ones stated in these paragraphs.
+
+## OTRv4 modes
+
+In order for OTRv4 to be an alternative to current messaging applications and to
+be compatible with the OTRv3 specification, the OTRv4 protocol must define
+different modes in which it can be implemented: a OTRv3-compatible mode, a OTRv4
+standalone mode, and a OTRv4 interactive-only-mode. These are the three
+modes enforced by this protocol specification, but, it must be taken into
+account, that OTRv4 can and may be also implemented in other modes.
+
+The modes are:
+
+1. OTRv3-compatible mode: a mode with backwards compatibility with OTRv3.
+   This mode will know how to handle plaintext messages, including
+   query messages and whitespace tags.
+2. OTRv4-standalone mode: an always encrypted mode. This mode will not know how
+   to handle any kind of plaintext messages, including query messages and
+   whitespace tags.
+3. OTRv4-interactive-only: an always encrypted mode that provides higher
+   deniability properties when compared to the previous two modes, as it
+   achieves offline and online deniability for both participants in a
+   conversation. It only allows interactive conversations.
+
+For details on how these modes will work, review the [modes](https://github.com/otrv4/otrv4/tree/master/modes) folder.
 
 ## Notation and parameters
 
