@@ -15,7 +15,7 @@ OTRv4 is a protocol that aims to:
 
 In order to be an alternative to current messaging applications and to be
 compatible with OTRv3, OTRv4 protocol must define three modes in which it can be
-implemented: a only OTRv4 mode and a OTRv3-compatible mode. These are the two
+implemented: a only OTRv4 mode and a OTRv3-compatible mode. These are the three
 modes enforced by the protocol, but, it must be taken into account, that OTRv4
 can and may be also implemented in other modes.
 
@@ -24,13 +24,15 @@ can and may be also implemented in other modes.
 To attain all of the purposes of OTRv4, the specification can work in
 three modes:
 
-1. OTRv4 only: a always encrypted mode. This mode will not know how to handle
-   any kind of plain text, including query messages and whitespace tags.
-2. OTRv3-Compatible: a mode with backwards compatibility with OTRv3.
+1. OTRv4-standalone mode: a always encrypted mode. This mode will not know how
+   to handle any kind of plaintext message, including query messages and
+   whitespace tags.
+2. OTRv3-compatible-mode: a mode with backwards compatibility with OTRv3.
    This mode will know, therefore, how to handle plaintext messages, including
    query messages and whitespace tags.
-3. OTRv4 interactive-only: a always encrypted mode that provides higher
-   deniability properties when compared to the previous two modes.
+3. OTRv4-interactive-only-mode: a always encrypted mode that provides higher
+   deniability properties when compared to the previous two modes. It only
+   supports interactive conversations.
 
 ### Consequences
 
@@ -39,12 +41,12 @@ initialized. It will also need to take this mode into account everytime it
 makes a decision on how to transition from every state. This increases the
 complexity of the specification and implementation.
 
-Furthermore, 'OTRv4 only' mode will only support version 4 of OTR. The User
+Furthermore, 'OTRv4-standalone' mode will only support version 4 of OTR. The User
 Profile, therefore will only allow the 1-byte version string "4". It will also
 not allow the Transitional Signature parameter on the same profile.
 
 In addition to only supporting the version 4 of OTR (and imposing the same
-restrictions to the User Profile as the 'OTRv4 only' mode), the
+restrictions to the User Profile as the 'OTRv4-standalone' mode), the
 'OTRv4 interactive-only' mode will only support the interactive DAKE. The User
-Profile should not allow the Public Shared Prekey parameter.
+Profile should not allow the Public Shared Prekey as a parameter.
 
