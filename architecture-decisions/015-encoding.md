@@ -118,7 +118,7 @@ and only if `x` is negative.
 
 A parser recovers `(x, y)` from a 455-bit string, while also verifying the
 element `(x, y)`, as follows: parse the first 455 bits as `y`; compute
-`xx = (y^2 - 1)/(d(y^2) - a); compute `x = +- sqrt(xx)`, where the `+-` is
+`xx = (y^2 - 1)/(d(y^2) - a)`; compute `x = +- sqrt(xx)`, where the `+-` is
 chosen so that the sign of `x` matches the 456 bit of the string. If `xx` is not
 a square then the parsing fails.
 
