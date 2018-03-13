@@ -299,6 +299,14 @@ The modes are:
 For details on how these modes work, review the
 [modes](https://github.com/otrv4/otrv4/tree/master/modes) folder.
 
+Take into account, that some clients might implement different modes when
+talking with each other. In those cases:
+
+* If a client implements OTRv4-standalone mode or OTRv4-interactive-only mode
+  and a request for an OTRv3 conversartion arrives, reject this request.
+* If a client implements OTRv4-interactive-only mode and a request for an
+  offline conversartion arrives, reject this request.
+
 ## Notation and parameters
 
 This section contains information needed to understand the parameters,
