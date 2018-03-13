@@ -10,7 +10,7 @@ of the protocol, namely OTRv3, to the current version.
 
 The OTRv3-Compatible mode is a mode with backwards compatibility with OTRv3.
 It knows how to handle plaintext messages, including query messages and
-whitespace tags.
+whitespace tags. It is considered the 'default' mode.
 
 ## Mode description
 
