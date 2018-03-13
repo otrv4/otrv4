@@ -289,11 +289,12 @@ The modes are:
 2. OTRv4-standalone mode: an always encrypted mode. This mode will not know how
    to handle any kind of plaintext messages, including query messages and
    whitespace tags. It supports both interactive and non-interactive
-   conversations.
+   conversations. It is not backwards compatible with OTRv3.
 3. OTRv4-interactive-only: an always encrypted mode that provides higher
    deniability properties when compared to the previous two modes, as it
    achieves offline and online deniability for both participants in a
-   conversation. It only supports interactive conversations.
+   conversation. It only supports interactive conversations. It is not backwards
+   compatible with OTRv3.
 
 For details on how these modes work, review the
 [modes](https://github.com/otrv4/otrv4/tree/master/modes) folder.
