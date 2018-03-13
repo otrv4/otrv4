@@ -9,15 +9,15 @@ in an operation mode that aims to provide an always encrypted mode with higher
 security properties than OTRv3. This mode will be referred as the "standalone
 mode".
 
-The 'OTRv4-standalone' mode is an always encrypted mode. It does not know how to
+The 'OTRv4-Standalone' mode is an always encrypted mode. It does not know how to
 handle any kind of plaintext messages, including query messages and whitespace
 tags. It supports both interactive and non-interactive conversations. It is
 not backwards compatible with OTRv3.
 
 ## Mode description
 
-An implementation of the OTRv4 protocol in standalone mode must be compliant
-with the overall protocol specification
+An implementation of the OTRv4 protocol in a OTRv4-Standalone mode must be
+compliant with the overall protocol specification
 [OTRv4 protocol](../otrv4.md#table-of-contents), with the following exceptions
 and the following changes.
 
@@ -61,7 +61,9 @@ differ in these sections:
   messages are not allowed in this mode.
 
 Online OTRv4 conversations in this mode are initialized by sending an Identity
-Message.
+Message, as defined in the
+[Starting a conversation interactively](../otrv4.md#starting-a-conversation-interactively)
+section.
 
 ### Interactive DAKE Overview in OTRv4-Standalone Mode
 
@@ -204,7 +206,7 @@ Alice will be initiating the DAKE with Bob.
 
 This mode might work on this kind of applications and scenarios:
 
-#### Scenario A: an OTRv4-standalone WhatsApp-like application
+#### Scenario A: an OTRv4-Standalone WhatsApp-like application
 
 Alice wants to send a message to Bob.
 
@@ -224,7 +226,7 @@ Alice wants to send a message to Bob.
 There is no plaintext messages in this scenario, since the only way to send
 messages through this application's network is using the application.
 
-#### Scenario B: an OTRv4-standalone Pidgin-like application
+#### Scenario B: an OTRv4-Standalone Pidgin-like application
 
 Alice wants to send a message to Bob.
 
@@ -251,7 +253,7 @@ Bob by the application and not by the OTRv4 protocol in this mode.
 
 ## Considerations
 
-Plaintext messages are not allowed in conversations in OTRv4-standalone mode.
+Plaintext messages are not allowed in conversations in OTRv4-Standalone mode.
 This means that query messages and whitespace tags are not allowed in this
 mode.
 
@@ -271,8 +273,7 @@ since the protocol only handles OTR messages, this mode does not modify this
 encoding for convenience.
 
 This mode is compliant with the security properties described in the
-[security properties](../otrv4.md#security-properties) section.
-
-Take into account that there may be a loss of deniability if an interactive DAKE
-is followed by a non-interactive one. Implementers are recommended to warn the
+[security properties](../otrv4.md#security-properties) section. But, take into
+account that there may be a loss of deniability if an interactive DAKE is
+followed by a non-interactive one. Implementers are recommended to warn the
 users about it when it happens.

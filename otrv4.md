@@ -3048,8 +3048,8 @@ If the Query message offers OTR version 3 and version 3 is allowed:
 #### Starting a conversation interactively
 
 Rather than requesting an encrypted conversation, Alice can directly start an
-OTR conversation with Bob if she is certain that both support and are willing to
-do so. In such case, Alice should:
+OTR conversation with Bob if she is certain that they both support and are
+willing to do so. In such case, Alice should:
 
 * Send an Identity message.
 * Transition the state to `WAITING_AUTH_R`.
@@ -3781,7 +3781,7 @@ operations that must be exposed and include guidance to forge messages.
 In OTRv4, anyone can forge messages after a conversation to make them look like
 they came from you. However, during a conversation, your correspondent is
 assured the messages they sees are authentic and unmodified. Easily forgeable
-transcripts achieve the 'offline' deniability property: if someone claims a
+transcripts achieve the offline deniability property: if someone claims a
 participant said something over OTR, they'll have no way to proof so, as
 anyone could have modify a transcript.
 
