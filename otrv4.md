@@ -3933,9 +3933,9 @@ prover knows a secret `ai` and, therefore:
 2. Depending the result of the above operations, compute:
 
 ```
-  serT1 = constant_time_select(eq1, encode(G * t1), encode(G * r1 + A1 * c1))
-  serT2 = constant_time_select(eq2, encode(G * t2), encode(G * r2 + A2 * c2))
-  serT3 = constant_time_select(eq3, encode(G * t3), encode(G * r3 + A3 * c3))
+  T1 = constant_time_select(eq1, encode(G * t1), encode(G * r1 + A1 * c1))
+  T2 = constant_time_select(eq2, encode(G * t2), encode(G * r2 + A2 * c2))
+  T3 = constant_time_select(eq3, encode(G * t3), encode(G * r3 + A3 * c3))
 ```
 
 3. Compute `c = HashToScalar(0x29 || G || q || A1 || A2 || A3 || T1 || T2 ||
