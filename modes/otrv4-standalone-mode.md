@@ -209,16 +209,16 @@ This mode might work on this kind of applications and scenarios:
 Alice wants to send a message to Bob.
 
 1. Alice adds Bob as a contact:
-  * A DAKE (interactive or non-interactive depending on the contact's
-    availability) is immediately done. The conversation keys are stored on
-    the device for later use.
-  * No identity verification is necessary and the app uses a Trust on first use
-    (TOFU) policy. Bob's User Profile can be used to verify the information
-    about the alleged identity.
+   * A DAKE (interactive or non-interactive depending on the contact's
+     availability) is immediately done. The conversation keys are stored on
+     the device for later use.
+   * No identity verification is necessary and the app uses a Trust on first use
+     (TOFU) policy. Bob's User Profile can be used to verify the information
+     about the alleged identity.
 2. Alice types messages, encrypts them and "sends them" to Bob.
-  * Every message will always be encrypted.
-  * Instance tags could be optional in this "one device per contact" model.
-  * Fragmentation will be optional as it depends on the network.
+   * Every message will always be encrypted.
+   * Instance tags could be optional in this "one device per contact" model.
+   * Fragmentation will be optional as it depends on the network.
 3. Bob receives the encrypted messages from Alice.
 
 There is no plaintext messages in this scenario, since the only way to send
@@ -230,16 +230,16 @@ Alice wants to send a message to Bob.
 
 1. Alice adds Bob as a contact
 2. Alice verifies Bob's identity. She either:
-  * Uses Bob's User Profile and verifies Bob's fingerprint using a business
-    card, a HTTPS website, etc.
-  * Performs a interactive DAKE and uses SMP.
+   * Uses Bob's User Profile and verifies Bob's fingerprint using a business
+     card, a HTTPS website, etc.
+   * Performs a interactive DAKE and uses SMP.
 2. Alice types a messages and "sends them" to Bob.
-  * A DAKE is performed if the application is not already in an encrypted state.
-  * Alice is warned about any problem to establish an encrypted channel and/or
-    any problem with the identity verification for Bob.
-  * The conversation keys do not need to be stored on the device for later use.
-  * Instance tags are required because there may be multiple devices.
-  * Fragmentation could be optional depending on the network, but this is
+   * A DAKE is performed if the application is not already in an encrypted state.
+   * Alice is warned about any problem to establish an encrypted channel and/or
+     any problem with the identity verification for Bob.
+   * The conversation keys do not need to be stored on the device for later use.
+   * Instance tags are required because there may be multiple devices.
+   * Fragmentation could be optional depending on the network, but this is
     unlikely due support to multiple networks.
 3. Bob receives the message from Alice.
 
