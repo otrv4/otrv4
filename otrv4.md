@@ -1502,8 +1502,8 @@ Bob will be initiating the DAKE with Alice.
 
 #### Identity message
 
-This is the first message of the DAKE. Bob sends it to Alice (as stated in the
-above overview) to commit to a choice of ECDH and DH key.
+This is the first message of the DAKE. It is sent to commit to a choice of ECDH
+and DH key.
 
 A valid Identity message is generated as follows:
 
@@ -1566,11 +1566,11 @@ B (MPI)
 
 #### Auth-R message
 
-This is the second message of the DAKEZ. Alice sends it to Bob to commit to a
-choice of her ECDH ephemeral key and her DH ephemeral key, and to acknowledge
-Bob's ECDH ephemeral key and DH ephemeral key. This acknowledgment includes
-a validation that Bob's ECDH key is on curve Ed448 and that his DH key is in the
-correct group.
+This is the second message of the DAKEZ. It is sent to commit to a choice of a
+ECDH ephemeral key and a DH ephemeral key, and to acknowledge the other
+participant's ECDH ephemeral key and DH ephemeral key. This acknowledgment
+includes a validation that other participant's ECDH key is on curve Ed448 and
+that its DH key is in the correct group.
 
 A valid Auth-R message is generated as follows:
 
@@ -1645,8 +1645,8 @@ sigma (RING-SIG)
 
 #### Auth-I message
 
-This is the final message of the DAKE. Bob sends it to Alice to verify the
-authentication `sigma`.
+This is the final message of the DAKE. It is sent to verify the authentication
+`sigma`.
 
 A valid Auth-I message is generated as follows:
 

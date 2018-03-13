@@ -25,9 +25,12 @@ Ignore these sections:
 
 - "User requests to start an OTR conversation", including "Query Messages" and
   "Whitespace Tags".
+- "Requesting conversation with older OTR versions".
 - "Receiving plaintext without the whitespace tag".
 - "Receiving plaintext with the whitespace tag".
 - "Receiving a Query Message".
+- "OTRv3 Specific Encoded Messages".
+- "OTRv3 Protocol State Machine".
 
 The specification for this mode, as compared with the overall version, will
 differ in these sections:
@@ -46,19 +49,156 @@ differ in these sections:
   implementation is required to support version 3 of OTR, but not versions
   1 and 2". This mode only allows version 4 of the protocol.
 - "Online Conversation Initialization": ignore everything that refers to query
-  messages and whitespace tags.
+  messages and whitespace tags. Always check that the compatible version in the
+  participant's user profile includes "4".
+- "Offline Conversation Initialization": always check that the compatible
+  version in the participant's user profile includes "4".
 - "Fragmentation": only OTRv4 fragmentation is allowed. Ignore this paragraph:
   "For fragmentation in OTRv3, refer to the "Fragmentation" section on OTRv3
   specification".
 - "Protocol states": the `START` and `FINISHED` states of the protocol state
-  machine should not allow any message to be sent, since plaintext messages are
-  not allowed in this mode.
+  machine should not allow any plaintext message to be sent, since plaintext
+  messages are not allowed in this mode.
 
-// TODO: how will the DAKE work.. send an identity message?
+Online OTRv4 conversations in this mode are initialized by sending an Identity
+Message.
 
-// TODO: the double ratchet will change.
+### Interactive DAKE Overview in OTRv4-Standalone Mode
 
-// TODO: probably state how the state machine will change
+```
+Alice                                           Bob
+---------------------------------------------------
+       Identity message -------->
+       <------------------------------------ Auth-R
+       Auth-I --------------------------------->
+```
+
+Alice will be initiating the DAKE with Bob.
+
+**Alice:**
+
+1. Generates an Identity message, as defined in
+   [Identity message](#identity-message) section.
+2. Sets `Y` and `y` as `our_ecdh`: the ephemeral ECDH keys.
+3. Sets `B` as  and `b` as `our_dh`: the ephemeral 3072-bit DH keys.
+4. Sends Bob the Identity message.
+
+**Bob:**
+
+1. Receives an Identity message from Alice:
+    * Verifies the Identity message as defined in the
+      [Identity message](#identity-message) section. If the verification fails
+      (for example, if Alice's public keys -`Y` or `B`- are not valid), rejects
+      the message and does not send anything further.
+    * Checks that the version in Alice's user profile includes "4". If it is not,
+      Bob does not send any further messages.
+    * Sets `Y` as `their_ecdh`.
+    * Sets `B` as `their_dh`.
+2. Generates an Auth-R message, as defined in
+   [Auth-R message](#auth-r-message) section.
+3. Sets `X` and `x` as `our_ecdh`: the ephemeral ECDH keys.
+4. Sets `A` and `a` as `our_dh`: the ephemeral 3072-bit DH keys.
+5. Calculates the Mixed shared secret (`K`) and the SSID:
+    * Calculates ECDH shared secret
+      `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
+      Securely deletes `our_ecdh.secret`.
+    * Calculates DH shared secret `k_dh = DH(our_dh.secret, their_dh)`.
+      Securely deletes `our_dh.secret`.
+    * Calculates the brace key `brace_key = KDF_1(0x02 || k_dh, 32)`.
+      Securely deletes `k_dh`.
+    * Calculates the Mixed shared secret
+      `K = KDF_1(0x04 ||K_ecdh || brace_key, 64)`.
+      Securely deletes `K_ecdh` and `brace_key`.
+    * Calculates the SSID from shared secret: the first 8 bytes of
+      `KDF_1(0x05 || K, 64)`.
+6. Sends Alice the Auth-R message (see [Auth-R message](#auth-r-message) section).
+
+**Alice:**
+
+1. Receives the Auth-R message from Bob:
+   * Picks a compatible version of OTR listed on Bob's profile (only "4" for
+     this mode). If the versions are incompatible, Alice does not send any
+     further messages.
+2. Retrieves the ephemeral public keys from Bob:
+    * Validates that the received ECDH ephemeral public key `X` is on curve
+      Ed448 and sets it as `their_ecdh`.
+      See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+      section for details.
+    * Validates that the received DH ephemeral public key `A` is on the correct
+      group and sets it as `their_dh`. See
+      [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
+      section for details.
+3. Verifies the Auth-R message as defined in the
+   [Auth-R message](#auth-r-message) section.
+4. Creates an Auth-I message (see [Auth-I message](#auth-i-message) section).
+5. Calculates the Mixed shared secret (`K`) and the SSID:
+    * Calculates ECDH shared secret
+      `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
+      Securely deletes `our_ecdh.secret`.
+    * Calculates DH shared secret `k_dh = DH(our_dh.secret, their_dh)`.
+      Securely deletes `our_dh.secret`.
+    * Calculates the brace key `brace_key = KDF_1(0x02 || k_dh, 32)`.
+      Securely deletes `k_dh`.
+    * Calculates the Mixed shared secret
+      `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`.
+      Securely deletes `k_ecdh` and `brace_key`.
+    * Calculates the SSID from shared secret: the first 8 bytes of
+      `KDF_1(0x05 || K, 64)`.
+6. Initializes the double-ratchet:
+    * Sets ratchet id `i` as 0.
+    * Sets `j` as 0, `k` as 0 and `pn` as 0.
+    * Generates an ephemeral ECDH key pair, as defined in
+      [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
+      of using a random value `r`, it will use : `r = KDF_1(0x19 || K, 57)`.
+      Securely replaces `our_ecdh` with the outputs.
+    * Generates an ephemeral DH key pair, as defined in
+      [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
+      of using a random value `r`, it will use : `r = KDF_1(0x20 || K, 80)`.
+      Securely replaces `our_dh` with the outputs.
+    * Securely deletes `their_ecdh` and `their_dh`.
+7. At this point, the interactive DAKE is complete for Alice, but the
+   double ratchet still needs to be correctly set up.
+
+**Bob:**
+
+1. Receives the Auth-I message from Alice:
+   * Verifies the Auth-I message as defined in the
+     [Auth-I message](#auth-i-message) section.
+2. Initializes the double ratchet:
+   * Sets ratchet id `i` as 0.
+   * Sets `j` as 0, `k` as 0 and `pn` as 0.
+   * Generates Alice's ECDH and DH public keys:
+      * Generates an ephemeral ECDH key pair, as defined in
+        [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
+        of using a random value `r`, it will use : `r = KDF_1(0x19 || K, 57)`.
+        Securely replaces `their_ecdh` with the output
+        `our_ecdh.public (G * s)` and securely deletes the output
+        `our_ecdh.secret (s)`.
+      * Generates an ephemeral DH key pair, as defined in
+        [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
+        of using a random value `r`, it will use : `r = KDF_1(0x20 || K, 80)`.
+        Securely replaces `their_dh` with the output
+        `our_dh.public (g3 ^ r)` and securely deletes the output
+        `our_dh.secret (r)`.
+3. At this point, the interactive DAKE is complete for Bob:
+   * In the case that he wants to immediately send a data message:
+     * Follows what is defined in the
+       [When you send a Data Message](#when-you-send-a-data-message)
+       section. Note that he will perform a new DH ratchet.
+
+**Alice:**
+
+1. At this point, the interactive DAKE is complete for Alice, but she has to
+   correctly setup the double ratchet mechanism:
+   * In the case that he immediately receives a data message that advertises the
+     new public keys from Bob:
+     * Follows what is defined in the
+       [When you receive a Data Message](#when-you-receive-a-data-message)
+       section. Note that she will perform a new DH ratchet for the first
+       received data message. When she wants to send a data message after
+       receiving one, she will follow the
+       [When you send a Data Message](#when-you-send-a-data-message) section,
+       and perform a new DH Ratchet.
 
 ## Considerations
 
@@ -67,9 +207,10 @@ This means that querry messages and whitespace tags are not allowed in this
 mode.
 
 By always requiring encryption, this mode may encourage long-lived sessions.
-The section "Session expiration" of the OTRv4 protocol specification outlines
-how to mitigate the risks of long-lived sessions. For this reason, TLVs type 1
-(Disconnected) are necessary in this mode.
+The section [session expiration](../otrv4.md#session-expiration) of the OTRv4
+protocol specification outlines how to mitigate the risks of long-lived
+sessions. For this reason, TLVs type 1 (Disconnected) are necessary in this
+mode.
 
 Even though there is no need to prefix OTR messages with the five bytes "?OTR:",
 since the protocol only handles OTR messages, this mode does not modify this
