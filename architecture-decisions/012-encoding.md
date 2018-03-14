@@ -2,27 +2,31 @@
 
 ### Context
 
-The OTRv4 protocol use several different elliptic curve specific data types.
-Four data types are employed: two types associated with elliptic curve
-arithmetic — field elements, and elliptic curve points — as well as byte arrays
-which are used to communicate and store information, and bit strings which are
-used by some of the primitives.
+The OTRv4 protocol use several different data types. Specifically, four data
+types are employed: two types associated with elliptic curve arithmetic —
+field elements, and elliptic curve points — as well as byte arrays which are
+used to communicate and store information, and bit strings which are used by
+some of the primitives.
 
 Frequently it is necessary to convert one of the data types into another, for
-example to represent an elliptic curve point as a byte array.
+example to represent an elliptic curve point as a byte array. This can be done
+in these ways:
 
-The encodings for types not associated with elliptic curves are defined as:
+a. The encodings for types not associated with elliptic curves are defined as:
 
+```
 The encoding of a bit string to byte array can be defined as: pad the bit string
 with 0’s on the left to make its length a multiple of 8, then chop the result
 up into bytes.
 
 The encoding of a byte array to a bit string can be defined as: simply view the
 byte array as a bit string instead.
+```
 
-For elliptic curve operations, an encoding of points and field elements is
+b. For elliptic curve operations, an encoding of points and field elements is
 needed.
 
+```
 The encoding of field elements can be defined as:
 
 If the field is `F_p`, convert the integer into a byte array. If the field is
@@ -37,6 +41,7 @@ fails by returning `⊥` on every element of `T\enc[S]`. We are interested in an
 encoding from an elliptic curve `E` over the field `F` to a binary set
 `{0, 1}^n` for some fixed `n`. We assume that the implementer has already chosen
 an encoding from `F` to binary.
+```
 
 This process translates a point or field element into a format that can be
 stored (for example, in a file or memory buffer) or transmitted (for example,
@@ -45,13 +50,13 @@ environment).  When the resulting series of bits is reread according to the
 encoding format, it can be used to create a semantically identical clone of the
 original point.
 
-This is usually done depending of point compression. Informally, if point
-compression is being used, the idea is that the compressed y-coordinate is
-placed in the leftmost byte of the byte array along with an indication that
-point compression is on, and the x-coordinate is placed in the remainder of the
-byte array; otherwise if point compression is off, the leftmost byte indicates
-that point compression is off, and the remainder of the byte array contains the
-x-coordinate followed by the y-coordinate.
+For elliptic curve points, this is usually done depending of point compression.
+Informally, if point compression is being used, the idea is that the compressed
+y-coordinate is placed in the leftmost byte of the byte array along with an
+indication that point compression is on, and the x-coordinate is placed in the
+remainder of the byte array; otherwise if point compression is off, the leftmost
+byte indicates that point compression is off, and the remainder of the byte
+array contains the x-coordinate followed by the y-coordinate.
 
 Usually, every specification defines a way of doing encodings. As OTRv4
 uses EdDSA for signature generation and verification, as well as for generation
@@ -65,7 +70,7 @@ curve arithmetic, little-endian is used. For everything else, big-endian is
 used (as to be compatible with OTRv3, and to be consistent with data networking
 protocols). This is done because OTRv4 uses EdDSA. As the specification of EdDSA
 uses little-endian, OTRv4 follows that for elliptic curve arithmetic encoding
-(transmission and storage).
+(for transmission and for storage).
 
 The byte array to bit string and viceversa encoding (with little-endian) is,
 therefore, defined as (as defined in RFC 8032):
@@ -127,7 +132,7 @@ quadratic equation for any given `x` coordinate, such that any `y` data may be
 represented by its corresponding `x` coordinate and a single additional bit.
 
 The encoding of integers and field elements correspond to the `SCALAR` data
-type;the encoding of points correspond to the `POINT` data type.
+type; the encoding of points correspond to the `POINT` data type.
 
 ### Consequences
 
@@ -142,12 +147,12 @@ byte array (this number is defined according to `b`, which is an integer with
 `2^(b-1) > p`). EdDSA public keys have exactly `b` bits, and EdDSA signatures
 have exactly `2 * b` bits. A `SCALAR` will be 56-bytes byte array ((`b-1)-bit`
 encoding of elements of the finite field `GF(p)`). The private keys and any
-secret information will be 57-byte. They will be subject to the clamping
+secret information will be 57-byte. They both will be subject to the clamping
 mechanism:
 
 1. The two least significant bits of the first octet are cleared.
 2. All eight bits the last octet are cleared, and the highest bit of the second
-to last octet is set.
+   to last octet is set.
 
 Prior to do a key exchange or to encode a curve point, it should be multiplied
 by the cofactor (the ratio between the order of a group and that of the
