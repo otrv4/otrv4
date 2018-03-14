@@ -2943,6 +2943,8 @@ has only an old client; so that it will opportunistically start an OTR
 conversation whenever it detects the correspondent supports it; or so that it
 refuses to send non-encrypted messages to Bob, ever.
 
+Query Messages are not allowed to be sent in `ENCRYPTED_MESSAGES` state.
+
 The version string is constructed as follows:
 
 If she is willing to use OTR, she appends a byte identifier for the versions in
