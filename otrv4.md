@@ -235,6 +235,10 @@ shared key (as it will need to know either Bob's long-term secret or Alice's
 ephemeral key). This allows a participant to generate irrefutable cryptographic
 proof of a conversation with the aid of an interactive third party.
 
+Although both DAKEs (interactive and non-interactive) provide offline
+deniability, take into account that there may be a loss of deniability if an
+interactive DAKE is followed by a non-interactive one.
+
 Once a conversation has been established with the DAKE, all data messages
 transmitted in it are confidential and retain their integrity. After a MAC
 key is used by a party to validate a received message, it is added to a list.
