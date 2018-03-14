@@ -280,10 +280,10 @@ security properties will not be the ones stated in these paragraphs.
 In order for OTRv4 to be an alternative to current messaging applications, to
 be compatible with the OTRv3 specification and to be useful for instant
 messaging protocols (e.g. XMPP), the OTRv4 protocol must define different modes
-in which the protocol can be implemented: a OTRv3-compatible mode, a OTRv4
-standalone mode, and a OTRv4 interactive-only-mode. These are the three
-modes enforced by this protocol specification, but, it must be taken into
-account, that OTRv4 can and may be also implemented in other modes.
+in which it can be implemented: a OTRv3-compatible mode, a OTRv4 standalone
+mode, and a OTRv4 interactive-only-mode. These are the three modes enforced by
+this protocol specification, but, it must be taken into account, that OTRv4 can
+and may be also implemented in other modes.
 
 The modes are:
 
@@ -918,8 +918,7 @@ k_dh:
 brace_key:
   Either a hash of the shared DH key: 'KDF_1(0x02 || k_dh, 32)' (every third
   DH ratchet) or a hash of the previuos brace_key:
-  'KDF_1(0x03 || brace_key, 32)'. // TODO: does this need to define a
-  serialization?
+  'KDF_1(0x03 || brace_key, 32)'.
 
 K_ecdh:
   The serialized ECDH shared secret computed from an ECDH exchange, serialized
@@ -928,7 +927,6 @@ K_ecdh:
 K:
   The Mixed shared secret is the final shared secret derived from both the
   DH and ECDH shared secrets: KDF_1(0x04 || K_ecdh || brace_key, 64).
-  // TODO: does this need to define a serialization?
 ```
 
 ### Generating shared secrets
@@ -1146,8 +1144,6 @@ that a user does not support OTRv4.
 ```
 Profile Expiration (PROF-EXP):
   8 byte signed value, big-endian
-
-// TODO: this will be a mix between little and big endian
 
 User Profile (USER-PROF):
   Ed448 public key (ED448-PUBKEY)
@@ -2330,7 +2326,7 @@ The plaintext message (either before encryption or after decryption) consists
 of a human-readable message (encoded in UTF-8, optionally with HTML markup),
 optionally followed by:
 
-* a single NUL (a BYTE with value 0x00), and
+* a single NUL (a BYTE with value 0x00)
 * zero or more TLV (type/length/value) records (with no padding between them)
 
 #### Data Message format
@@ -2392,7 +2388,7 @@ Encrypted message (DATA)
 Authenticator (MAC)
   The MAC with the appropriate MAC key (see below) of everything:
   from the protocol version to the end of the encrypted message.
-  Note: The old MAC keys are not included in this field.
+  Note that old MAC keys are not included in this field.
 
 Old MAC keys to be revealed (DATA)
   See 'Revealing MAC Keys section'. This corresponds to the 'mac_keys_to_reveal'
@@ -3234,11 +3230,7 @@ Store plaintext message for possible retransmission.
 A recevied data message will look like this:
 
 ```
-  ["?OTR" || protocol version || message type || sender's instance_tag ||
-   receiver's instance tag || flags || previous chain message number ||
-   ratchet id || message id || public ECDH key || public DH key || nonce ||
-   enc(plaintext message || TLV) || authenticator ||
-   Old MAC keys to be revealed ]
+  ["?OTR" || protocol version || message type || sender's instance_tag ||receiver's instance tag || flags || previous chain message number || ratchet id || message id || public ECDH key || public DH key || nonce || enc(plaintext message || TLV) || authenticator || old MAC keys to be revealed ]
 ```
 
 If the version is 4:
@@ -4290,7 +4282,7 @@ A point `(x,y)` is represented in projective coordinates `(X, Y, Z)`, with
 The neutral point is `(0,1)`, or equivalently in projective coordinates
 `(0, Z, Z)` for any non-zero `Z`.
 
-The following formulas for adding two points, `(x3,y3) = (x1,y1) + (x2,y2)`
+The following formula is for adding two points, `(x3,y3) = (x1,y1) + (x2,y2)`
 (or `X_1 : Y_1 : Z_1) + X_2 : Y_2 : Z_2 = X_3 : Y_3 : Z_3`) on untwisted Edwards
 curve (i.e., `a = 1`) with non-square `d`, as defined in [\[10\]](#references).
 They are complete (they work for any pair of valid input points):
