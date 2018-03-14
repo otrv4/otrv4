@@ -2977,7 +2977,9 @@ the AKE or DAKE according to the compatible version he supports.
 If Alice wishes to communicate to Bob that she is willing to use OTR, she can
 attach a special whitespace tag to any plaintext message she sends him.
 Whitespace tags may occur anywhere in the message, and may be hidden from the
-user (as in the [Query Messages](#query-messages)).
+user (as in the [Query Messages](#query-messages)). There should be only one
+whitespace tag per message. In the case that multiple whitespace tags arrive,
+only the first one should be considered.
 
 The tag consists of the following 16 bytes, followed by one or more sets of
 8 bytes indicating the version of OTR Alice is willing to use:
