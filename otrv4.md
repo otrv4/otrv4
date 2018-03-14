@@ -3016,15 +3016,6 @@ For OTRv3, if msgstate is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
 
 Remove the whitespace tag and display the message to the user.
 
-If the client has some policy dictating that 'OTR is always required' or that
-'encryption is always required' (like `REQUIRE_ENCRYPTION` in OTRv3), and the
-tag offers OTR version 4 and version 4 is allowed:
-
-  * Queue the message for encrypting and sending it when the participant
-    transitions to the `ENCRYPTED_MESSAGES` state.
-  * Send an Identity message.
-  * Transition the state to `WAITING_AUTH_R`.
-
 If the state is `ENCRYPTED_MESSAGES` or `FINISHED`:
 
   * The user should be warned that the message received was unencrypted.
@@ -3034,15 +3025,24 @@ For OTRv3, if msgstate is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
   * Display the message to the user. The user should be warned that the message
     received was unencrypted.
 
-If the tag offers OTR version 4 and version 4 is allowed:
+If the client has some policy dictating that 'OTR is always required' or that
+'encryption is always required' (like `REQUIRE_ENCRYPTION` in OTRv3), and the
+tag offers OTR version 4 and version 4 is allowed:
 
+  * Queue the message for encrypting and sending it when the participant
+    transitions to the `ENCRYPTED_MESSAGES` state.
   * Send an Identity message.
   * Transition the state to `WAITING_AUTH_R`.
 
-If the tag offers OTR version 3 and version 3 is allowed:
+In any event:
 
-  * Send a version `3 D-H Commit Message`.
-  * Transition authstate to `AUTHSTATE_AWAITING_DHKEY`.
+  * If the tag offers OTR version 4 and version 4 is allowed:
+    * Send an Identity message.
+    * Transition the state to `WAITING_AUTH_R`.
+
+  * If the tag offers OTR version 3 and version 3 is allowed:
+    * Send a version `3 D-H Commit Message`.
+    * Transition authstate to `AUTHSTATE_AWAITING_DHKEY`.
 
 #### Receiving a Query Message
 
