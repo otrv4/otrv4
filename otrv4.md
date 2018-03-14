@@ -3773,10 +3773,10 @@ When using a transport network that allows multiple devices to be
 simultaneously logged in with the same peer identifier, make sure to identify
 the other participant by its device-specific identifier and not only the peer
 identifier (for example, using XMPP full JID instead of bare JID). Doing so
-allows establishing an OTR channel at the same time with multiple devices from
-the other participant at the cost of managing exposure of this to the message
-client (for example, XMPP clients can decide to reply only to the device you
-have more recently received a message from).
+allows establishing multiple OTR channels at the same time with multiple devices
+from the other participant. This can cost that the client manages this exposure
+(for example, XMPP clients can decide to reply only to the device you have more
+recently received a message from).
 
 ## Forging Transcripts
 
