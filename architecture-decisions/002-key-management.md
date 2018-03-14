@@ -90,6 +90,8 @@ Therefore, to reveal MAC keys in the Double Ratchet:
 
 1. The receiver of data messages can reveal MAC keys on the first message sent
    per ratchet.
+2. The participant expiring the session can reveal MAC keys on the sent TLV
+   type 1.
 
 ### Decision
 

@@ -8,8 +8,8 @@ there is an inverse relation between security level and speed. For this reason,
 the cryptographic primitives should be chosen to have roughly the same security
 level as the target security level.
 
-Designing a new version of OTR is an opportunity to improve its security by
-using cryptographic primitives with a higher security level. Also, it is an
+Designing a new version of OTR is an opportunity to improve its security level
+by using cryptographic primitives with a higher security level. It is also an
 opportunity to use elliptic curve cryptography for faster computations with
 the same security level.
 
@@ -30,10 +30,10 @@ transcripts of OTRv4 will have classic Diffie-Hellman ~128-bit security.
 
 To achieve ~224-bit elliptic curve security, we chose curve Ed448
 ("Goldilocks") for ECDH. We use SHAKE-256 as the hash function during the
-generation of secret keys, since it gives give 256-bit security if the
-output is 64 bytes and 128 if the output is 32 bytes. Although
-Ed448 does not have as much published cryptanalysis as Curve25519, it can be
-safely used as Curve25519 [\[1\]](#references).
+generation of secret keys, since it gives a 256-bit security if the output is
+64 bytes and 128 if the output is 32 bytes. Although Ed448 does not have as much
+published cryptanalysis as Curve25519, it can be safely used as
+Curve25519 [\[1\]](#references).
 
 To achieve classic Diffie-Hellman ~128-bit security, we use a brace key, which
 is described in
@@ -63,8 +63,8 @@ The `size` first bytes of the SHAKE-256 output for input
 KDF_2(values, size) = SHAKE-256(values, size)
 ```
 
-The `size` first bytes of the SHAKE-256 output for input `values`. This KDF is
-used when referred to RFC 8032.
+The `size` first bytes of the SHAKE-256 output for input `values`. This KDF will
+be  used when referring to RFC 8032.
 
 To provide cryptographic domain separation, we set
 `x = OTRv4_domain || usageID || secret`, where the usageID changes for each
@@ -78,8 +78,8 @@ authentication.
 
 ### Consequences
 
-Choosing Ed448 requires implementations of it, and chaging SMP cryptographic
-primitives.
+Choosing Ed448 curve requires existing implementations of it, and chaging SMP
+cryptographic primitives.
 
 The size of fingerprints is increased to 56 bytes.
 
