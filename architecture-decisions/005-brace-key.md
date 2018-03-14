@@ -1,7 +1,5 @@
 ## ADR 5: Brace keys
 
-// TODO: use the correct variable names
-
 ### Context
 
 We acknowledge that there may be potential weaknesses in elliptic curves and
@@ -28,7 +26,10 @@ Ratchet algorithm.
 The first 3072-bit DH key agreement takes place in the DAKE. This takes
 place as a traditional Diffie Hellman key exchange and not as the combined
 quantum resistant key encapsulation mechanism (KEM) as proposed in Nik
-Unger's paper [\[1\]](#references) (to be optionally used).
+Unger's paper [\[1\]](#references) (which is described to be optionally used).
+Notice that the first derived DH key during the DAKE is used for generation
+of the Mixed shared secret. For the initialization of the Double Ratchet
+Logarithm, a DH key must be advertised.
 
 We are not using the same quantum resistant KEM, as defined in the mentioned
 paper (that recommends using either SIDH or New Hope), because we are aiming
@@ -36,10 +37,10 @@ to give additional protection against transcript decryption in the case of
 ECC compromise and some protection if quantum computers arrive earlier than
 expected. Because of this, we will use a traditional DH key exchange.
 
-We considered two options for ratcheting/rederiving the brace key:
+We considered two options for ratcheting/deriving the brace key:
 
 1. Obtain a brace key from a DH function which requires the other party to
-   contribute to the computation each time a new root key is derived.
+   contribute to the computation each time a new Mixed shared secret is derived.
 2. Obtain a brace key with DH functions which require the other party to
    contribute to the computation every n times. Between these derivations,
    the brace keys are obtained using a key derivation function (KDF) that is
@@ -75,8 +76,8 @@ value: `k_dh`.
 
 **Key Derivation Function: SHAKE-256(k_dh)**
 
-Given a 3072-bit shared secret value `k_dh`, the SHAKE-256 generates a
-32-byte digest: `brace_key`.
+Given a 3072-bit shared secret value `k_dh`, the SHAKE-256 generates a 32-byte
+digest: `brace_key`.
 
 **Key Derivation Function: SHAKE-256(brace_key)**
 
@@ -101,8 +102,6 @@ Alice's DH keypair = `(a_i, A_i)`
 
 Bob's DH keypair = `(b_i, B_i)`
 
-`brace_key` = in this document, it will be referred to as `M_i` for ease.
-
 Every Mixed shared secret derivation requires both an ECDH key and a brace key.
 For the purposes of this explanation, we will only discuss the brace key.
 
@@ -120,121 +119,120 @@ are now at ratchet 3:
 
 Alice                                                 Bob
 ---------------------------------------------------------------------------------------------
-* Increases ratchet_id by one
-* Generates a new public DH key A_1 and
-  a secret key a_1
+* Generates a new public DH key 'A_1' and
+  a secret key 'a_1'
 * Derives a new DH shared secret using Bob's
-  public key received in the previous ratchet (B_0)
-    k_dh = DH(B_0, a_1)
-* Derives the new brace key from the k_dh
-    M_3 = KDF_1(0x02 || k_dh, 32)
+  public key received in a previous ratchet ('B_0')
+    'k_dh = DH(B_0, a_1)'
+* Derives the new brace key from 'k_dh'
+    brace_key_3 = KDF_1(0x02 || k_dh, 32)
 * Mixes the brace key with the ECDH shared
-  secret to create the Mixed shared secret K_3
-    K_3 =
-    KDF_1(0x04 || K_ecdh || M_3, 64)
+  secret to create the Mixed shared secret 'K_3'
+    'K_3 =
+    KDF_1(0x04 || K_ecdh || brace_key_3, 64)'
 * Generates the root key and
-  the sending chain key from root key 2 (R_2)
-  and the Mixed shared secret (K_3)
-    R_3 = KDF_1(0x21 || R_2 || K_3, 64)
-    Cs_3_0 = KDF_1(0x22 || R_2 || K_3, 64)
+  the sending chain key from root key 2 ('root_key_2')
+  and the Mixed shared secret ('K_3')
+    'root_key_3 = KDF_1(0x21 || root_key_2 || K_3, 64)'
+    'chain_key_s_3_0 = KDF_1(0x22 || root_key_2 || K_3, 64)'
 * Encrypts data message with a message key
-  derived from Cs_3_0
-* Sends data_message_3_0 with A_1 ----------------->
-                                                     * Generates new public DH key B_1 and secret
-                                                       key b_1
+  derived from 'chain_key_s_3_0'
+* Increases ratchet_id by one
+* Sends data_message_3_0 with 'A_1' ----------------->
+                                                     * Generates a new public DH key 'B_1' and secret
+                                                       key 'b_1'
                                                      * Derives a new DH shared secret using Alice's
-                                                       public key received in the data message (A_1)
-                                                         k_dh = DH(A_1, b_1)
-                                                     * Derives the new brace key from the k_dh
-                                                         M_3 = KDF_1(0x02 || k_dh, 32)
+                                                       public key received in the data message ('A_1')
+                                                         'k_dh = DH(A_1, b_1)'
+                                                     * Derives the new brace key from the 'k_dh'
+                                                         'brace_key_3 = KDF_1(0x02 || k_dh, 32)'
                                                      * Mixes the brace key with the ECDH shared secret
-                                                       to create the shared secret K_3
-                                                         K_3 = KDF_1(0x04 || K_ecdh || M_3, 64)
+                                                       to create the shared secret 'K_3'
+                                                         'K_3 = KDF_1(0x04 || K_ecdh || brace_key_3, 64)'
                                                      * Generates the root and the receiving chain key
-                                                       from root key 2 (R_2) and the Mixed shared secret
-                                                       K_3
-                                                         R_3 = KDF_1(0x21 || R_2 || K_3, 64)
-                                                         Cr_3_0 = KDF_1(0x22 || R_2 || K_3, 64)
+                                                       from root key 2 ('root_key_2') and from the
+                                                       Mixed shared secret ('K_3')
+                                                        'root_key_3 = KDF_1(0x21 || root_key_2 ||
+                                                         K_3, 64)'
+                                                        'chain_key_r_3_0 = KDF_1(0x22 || root_key_2 ||
+                                                         K_3, 64)'
                                                      * Decrypts the received message with a message key
-                                                       derived from Cr_3_0
+                                                       derived from 'chain_key_r_3_0'
                                                      * Increases ratchet_id by one
-                                                     * Derives a new brace key from the one derived in the
+                                                     * Derives a new brace key from the one derived
                                                        previously
-                                                         M_4 = KDF_1(0x03 || brace_key, 32)
+                                                         'brace_key_4 = KDF_1(0x03 || brace_key, 32)'
                                                      * Generates new ECDH keys and uses Alice's ECDH
-                                                       public key (received in data_message_3_0) to create ECDH
-                                                       shared secret (K_ecdh).
-                                                     * Mixes the brace key with ECDH_4 to create the shared
-                                                       secret K_4
-                                                         K_4 = KDF_1(0x04 || K_ecdh || M_4, 64)
+                                                       public key (received in data_message_3_0) to
+                                                       create the ECDH shared secret ('K_ecdh').
+                                                     * Mixes the brace key with 'K_ecdh' to create
+                                                       the Mixed shared secret 'K_4'
+                                                         'K_4 = KDF_1(0x04 || K_ecdh ||
+                                                          brace_key_4, 64)'
                                                      * Generates the root and the sending chain key
-                                                       from root key 3 (R_3) and the Mixed shared secret
-                                                       K_4
-                                                         R_4 = KDF_1(0x21 || R_3 || K_4, 64)
-                                                         Cs_4_0 = KDF_1(0x22 || R_3 || K_4, 64)
+                                                       from root key 3 ('root_key_3') and from the
+                                                       Mixed shared secret ('K_4')
+                                                         'root_key_4 = KDF_1(0x21 || root_key_3 ||
+                                                          K_4, 64)'
+                                                         'chain_key_s_4_0 = KDF_1(0x22 || root_key_3 ||
+                                                          K_4, 64)'
                                                       * Encrypts data message with a message key derived
-                                                        from Cs_4_0
+                                                        from 'chain_key_s_4_0'
                                   <-----------------  * Sends data_message_4_0
 ```
 
 **Alice or Bob sends the first message in a ratchet (a first reply)**
 
 The ratchet identifier `ratchet_id` increases every time a new ratchet is
-received or sent (when `j == 0` and the advertised ECDH public key from the
-other party is different from the stored one).
+received (when `j == 0` and the advertised ECDH public key from the other party
+is different from the stored one) or sent.
 
 If `ratchet_id % 3 == 0 && sending the first message of a new ratchet`
 
   * Compute the new brace key from a DH computation e.g.
-    `M_i = KDF_1(0x02 || DH(our_DH.secret, their_DH.public), 32)
+    `brace_key_i = KDF_1(0x02 || DH(our_DH.secret, their_DH.public), 32)
   * Send the new `brace_key`'s public key (our_DH.public) to the other party
     for further key computation.
 
 Otherwise
 
-  * Compute the new brace key
-    `KDF_1(0x03 || M_(i-1), 32)`
+  * Derive the new brace key:
+    `KDF_1(0x03 || brace_key_(i-1), 32)`
 
 **Alice or Bob send a follow-up message**
 
 When a new public key has been generated and sent in the first message in a
 ratchet, all follow up messages in that ratchet will also need to advertise the
-public key in case they arrive in an out-of-order way.
+DH public key in case they arrive in an out-of-order way.
 
 **Alice or Bob receive the first message in a ratchet**
 
-// TODO: the ratchet_id is increased afterwards, is this right?
-
-The `ratchet_id` will need to be increased, so `ratchet_id += 1`
-
 If `ratchet_id % 3 == 0`:
 
-   * Check that a new public key is attached to the message.
+   * Check that a new DH public key is attached to the message.
 
     * If it is not:
       * Reject the message.
 
     * Otherwise:
-     * Compute the new brace key from a new DH computation e.g.
-       `M_i = KDF_1(0x02 || DH(our_DH.secret, their_DH.public), 32)
-     * Use `M_i` to calculate the Mixed shared secret.
+      * Compute the new brace key from a new DH computation e.g.
+        `brace_key_i = KDF_1(0x02 || DH(our_DH.secret, their_DH.public), 32)
+      * Use `brace_key_i` to calculate the Mixed shared secret.
+
+The `ratchet_id` will need to be increased, so `ratchet_id += 1`
 
 **Alice or Bob receive a follow up message**
 
-// TODO: check and rephrase this
-
-If the `ratchet_id` is not greater than the current state of `ratchet_id`,
-then this is not a new ratchet. In this case there is no further action to be
-taken for the brace key.
+If the received `ratchet_id` is not greater than the current state of
+`ratchet_id`, then this is not a new ratchet. In this case there is no further
+action to be taken regarding the brace key.
 
 **Diagram: Pattern of DH computations and key derivations in a conversation**
 
 This diagram describes when public keys should be sent and when Alice and Bob
-should compute the `brace_key` from KDF_1 or a new DH computation.
+should compute the `brace_key` from a KDF_1 or a new DH computation.
 
-// TODO: this is wrong now
-
-Both parties share knowledge of `M_0`, which is a `brace_key` established in
+Both parties share knowledge of `brace_key_0`, established immediately after
 the DAKE.
 
 Given
@@ -248,15 +246,15 @@ If Alice sends the first message:
     Alice                 ratchet_id        public_key           Bob
 ---------------------------------------------------------------------------------------
 
-M_1 = KDF_1(M_0)            -----1----------------------->     M_1 = KDF_1(M_0)
-M_2 = KDF_1(M_1)            <----2------------------------     M_2 = KDF_1(M_1)
-M_3 = KDF_1(DH(a_1, B_0))   -----3--------------A_1------>     M_3 = KDF_1(DH(b_0, A_1))
-M_4 = KDF_1(M_3)            <----4------------------------     M_4 = KDF_1(M_3)
-M_5 = KDF_1(M_4)            -----5----------------------->     M_5 = KDF_1(M_4)
-M_6 = KDF_1(DH(a_1, B_1))   <----6--------------B_1-------     M_6 = KDF_1(DH(b_1, A_1))
-M_7 = KDF_1(M_6)            -----7----------------------->     M_7 = KDF_1(M_6)
-M_8 = KDF_1(M_7)            <----8------------------------     M_8 = KDF_1(M_7)
-M_9 = KDF_1(DH(a_2, B_1))   -----9--------------A_2------>     M_9 = KDF_1(DH(b_1, A_2))
+brace_key_1 = KDF_1(brace_key_0)   -----1---------------->   brace_key_1 = KDF_1(brace_key_0)
+brace_key_2 = KDF_1(brace_key_1)   <----2-----------------   brace_key_2 = KDF_1(brace_key_1)
+brace_key_3 = KDF_1(DH(a_1, B_0))  -----3-------A_1------>   brace_key_3 = KDF_1(DH(b_0, A_1))
+brace_key_4 = KDF_1(brace_key_3)   <----4-----------------   brace_key_4 = KDF_1(brace_key_3)
+brace_key_5 = KDF_1(brace_key_4)   -----5---------------->   brace_key_5 = KDF_1(brace_key_4)
+brace_key_6 = KDF_1(DH(a_1, B_1))  <----6-------B_1-------   brace_key_6 = KDF_1(DH(b_1, A_1))
+brace_key_7 = KDF_1(brace_key_6)   -----7---------------->   brace_key_7 = KDF_1(brace_key_6)
+brace_key_8 = KDF_1(brace_key_7)   <----8-----------------   brace_key_8 = KDF_1(brace_key_7)
+brace_key_9 = KDF_1(DH(a_2, B_1))  -----9-------A_2------>   brace_key_9 = KDF_1(DH(b_1, A_2))
 ```
 
 ### Performance
@@ -275,25 +273,16 @@ i7 2.2GHz.
 We’ve decide to use a 3072-bit key produced by:
 
 1. a DH function which takes as an argument the other party’s exponent
-   through a data message to produce brace key.
+   (advertised through a data message) to produce brace key.
 2. a KDF `KDF_1(0x03 || brace_key, 32)` which uses the previous brace key
    to produce a new one.
 
 The DH function will run every n = 3 times because:
 
-// TODO: check this
-
 1. It is a small number so a particular key can only be compromised for a
-   maximum of 2 * n ratchets. This means that the maximum ratchets that will
-   use the brace key or a key derived from the brace key is 3.
-2. The benefit of using an odd number is for simplicity of implementation.
-   With an odd number, both Alice and Bob can generate a new public and
-   secret key at the same time as sending the public key and compute a new
-   brace key from a DH function. However, with an even number, Alice would
-   need to generate and send a key in a different ratchet to the one where
-   the public key would be used. This happens because the public key would
-   only be used in a brace key computed from a new DH function on even
-   numbers of ratchet_ids so only Bob would be the sender at these times.
+   maximum of n ratchets. This means that the maximum ratchets that will
+   use the brace key or a key derived from the brace key is 3 (from the
+   sender and from the receiver side).
 
 The group used for this key is the one assigned with id 15 in the IETF paper,
 RFC 3526 [\[4\]](#references):
