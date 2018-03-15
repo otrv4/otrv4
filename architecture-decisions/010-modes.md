@@ -21,8 +21,8 @@ can and may be also implemented in other modes.
 
 ### Decision
 
-To attain all of the purposes of OTRv4, the specification can work in
-three modes:
+To attain all of the purposes of OTRv4, the specification can work in three
+modes:
 
 1. OTRv4-standalone mode: an always encrypted mode. This mode will not know how
    to handle any kind of plaintext message, including query messages and
@@ -57,4 +57,3 @@ different modes when talking with each other. In those cases:
   and a request for an OTRv3 conversartion arrives, reject this request.
 * If a client implements OTRv4-interactive-only mode and a request for an
   offline conversartion arrives, reject this request.
-

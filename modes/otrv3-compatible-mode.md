@@ -1,6 +1,6 @@
 # OTR version 4: OTRv3 Compatible Mode
 
-[ADR#010](https://github.com/otrv4/otrv4/tree/master/architecture-decisions)
+[ADR 010](https://github.com/otrv4/otrv4/tree/master/architecture-decisions)
 defines the need for specifying alternative modes for the OTR protocol
 version 4.
 

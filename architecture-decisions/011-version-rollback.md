@@ -11,18 +11,18 @@ like to use. Alternatively, a Whitespace Tag can be used to indicate willingness
 of using OTR at specific versions.
 
 In a version rollback attack, a Query Message is intercepted and changed by
-a MiTM to enforce the lowest version advertised, and the protocol is unable to
+a MITM to enforce the lowest version advertised, and the protocol is unable to
 determine if participants are using the highest version they both support. The
 same applies to a Whitespace Tag.
 
-By exchanging authenticated version information, OTRv4 introduces a strategy that
-future versions of OTR can use to protect from version rollback attacks without
-compromising participation deniability.
+By exchanging authenticated version information, OTRv4 introduces a strategy by
+which  future versions of OTR can use to protect from version rollback attacks
+without compromising participation deniability.
 
 ### Decision
 
 A user MUST publish a statement of the versions they support. The version
-statement is a string with the same format and same meaning as OTR Query
+statement is a string with the same format and the same meaning as the OTR Query
 Message's "version string" (see OTR3, section "OTR Query Messages").
 
 This makes it possible for the receiver of a Query Message that contains
@@ -33,7 +33,8 @@ In order to preserve participation deniability, the version statement MUST be
 published publicly and updated before it expires.
 
 In order to obtain version statements for a participant, a user MUST obtain the
-participant's User Profile and verify its authenticity as described in ADR 003.
+participant's User Profile and verify its authenticity as described in
+[ADR 003](https://github.com/otrv4/otrv4/tree/master/architecture-decisions).
 
 #### Protecting from rollback in OTRv4
 
@@ -86,7 +87,7 @@ not stop an attacker from spoofing responses about whether the version statement
 (or a User Profile) exists or not. In this case an attacker can spoof the Query
 Message to contain version "3" and also spoof the response to a request for a
 version statement, making a rollback attack possible when the victims support
-OTR3.
+OTRv3.
 
 As OTRv4 upgrades do not fix any known security issue on OTRv3, it is
 acceptable for users to chat using version 3, but is preferable to use 4 if
@@ -94,4 +95,3 @@ both parties support it.
 
 We will support a conversation using version 3 if we don't find any user
 profile and the client allows it.
-

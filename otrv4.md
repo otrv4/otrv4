@@ -311,6 +311,10 @@ talking with each other. In those cases:
 * If a client implements OTRv4-interactive-only mode and a request for an
   offline conversartion arrives, reject this request.
 
+Take into account, as well, that OTRv4' state machine will need to know the mode
+is working on when initialized. It will also need to take this mode into account
+every time it makes a decision on how to transition from every state.
+
 ## Notation and parameters
 
 This section contains information needed to understand the parameters,
