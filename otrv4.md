@@ -37,6 +37,7 @@ an existing messaging protocol, such as XMPP.
    1. [Instance Tags](#instance-tags)
    1. [TLV Record Types](#tlv-record-types)
    1. [Shared session state](#shared-session-state)
+   1. [Secure Session ID](#secure-session-id)
    1. [OTR Error Messages](#otr-error-messages)
 1. [Key management](#key-management)
    1. [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys)
@@ -802,6 +803,25 @@ look like this:
   phi = 0x00000100 || 0x00000101 || "?OTRv4?" || "alice@jabber.net" ||
         "bob@jabber.net"
 ```
+
+### Secure Session ID
+
+The secure session ID is a 8-byte value. If the user requests to see it, it
+should be displayed as two 4-byte big-endian unsigned values. For example, in C
+language, in "%08x" format. If the party transmitted the Auth-R message during
+the DAKE, then display the first 4 bytes in bold, and the second 4 bytes in
+non-bold. If the party transmitted the Auth-I message instead, display the first
+4 bytes in non-bold, and the second 4 bytes in bold. If the party transmitted
+the Non-Interactive-Auth message during the DAKE, then display the first 4 bytes
+in bold, and the second 4 bytes in non-bold. If the party received the
+Non-Interactive-Auth message instead, display the first 4 bytes in non-bold, and
+the second 4 bytes in bold.
+
+This Secure Session ID can be used by the parties to verify (over the telephone,
+assuming the parties recognize each others' voices) that there is no
+man-in-the-middle by having each side read his bold part to the other. Note that
+this only needs to be done in the event that the users do not trust that their
+long-term keys have not been compromised.
 
 ### OTR Error Messages
 
