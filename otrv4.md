@@ -3823,7 +3823,7 @@ The major utilities for forging are:
 
 ```
 Parse
-  Parses OTR messages to the values of each of the fields in them and shows
+  Parses OTRv4 messages to the values of each of the fields in them and shows
   these fields.
 
 Modify Data Message
@@ -3831,7 +3831,7 @@ Modify Data Message
   know the message key (or one of the chain keys used to derive this message
   key) but it can be guessed that the string 'x' appears at a given place in
   the message, a participant can replace that string with some new desired
-  text with the same length. The result is a valid OTR message that contains
+  text with the same length. The result is a valid OTRv4 message that contains
   the new text. For example, if the string "hi" is accurately guessed to be
   at the beginning of an encrypted message, it can be replaced with the string
   "yo". Therefore, a valid data message can be created with new text.
@@ -3852,7 +3852,7 @@ included in the [Appendices](#appendices).
 Read and Forge Data Message
   Read and forge allows someone in possession of a chain key to decrypt OTR
   messages or modify them as forgeries. It takes three inputs: the chain key,
-  the OTR message and a new plain text message (optional). If a new
+  the OTRv4 message and a new plain text message (optional). If a new
   message is included, the original text is replaced with the new message and
   a new MAC tag is attached to the data message.
 
