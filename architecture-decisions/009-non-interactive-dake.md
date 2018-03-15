@@ -6,9 +6,10 @@ The non-interactive DAKE below is based on the XZDH protocol. It starts when
 the Responder requests the Initiator's prekey from an untrusted server. The
 Initiator's long-term public key should be verified by the Responder. The
 Responder then generates their ephemeral keys and derives a shared secret. These
-are used to start the double ratchet and send an encrypted data message with
-the final message of the non-interactive DAKE, called the non-interactive auth
-message.
+are used to start the double ratchet algorithm and send an encrypted data
+message with the final message of the non-interactive DAKE, called the
+Non-Interactive Auth message. Subsequent encrypted messages can be sent after
+this.
 
 #### Long-lived secret ephemeral key material
 
@@ -125,7 +126,7 @@ Protocol version (SHORT)
   The version number of this protocol is 0x0004.
 
 Message type (BYTE)
-  The message has type 0x66.
+  The message has type 0x8D.
 
 Sender's instance tag (INT)
   The instance tag of the person sending this message.
@@ -143,26 +144,21 @@ A (MPI)
   The ephemeral public DH key. Note that even though this is in uppercase,
   this is NOT a POINT.
 
+Sigma (RING-SIG)
+  The RING-SIG proof of authentication value.
+
+Attached XZDH Encrypted Message (XZDH-ENCRYPTED-MSG)
+  (optional: if an encrypted message is attached)
+  The XZDH-ENCRYPTED-MSG that consists of an attached encrypted ratchet
+  id, an attached message id, a public ecdh key (used for encrypting the
+  message), a public dh key (used for encrypting the message), a nonce
+  and the encrypted message.
+
 Auth MAC (MAC)
-  The MAC with the appropriate MAC key (see above) of the message of the
-  SNIZKPK.
+  The MAC with the appropriate MAC key (see above) of the message (t) for the
+  Ring Signature (RING-SIG). When an encrypted message is attached, this is also
+  the MAC of that message.
 
-Sigma (SNIZKPK)
-  The SNIZKPK Auth value.
-
-Message id (INT) (optional: if an encrypted message is attached)
-  This should be set with sender's j.
-
-Nonce (NONCE) (optional: if an encrypted message is attached)
-  The nonce used with XSalsa20 to create the encrypted message contained
-  in this packet.
-
-Encrypted message (DATA) (optional)
-  Using the appropriate encryption key (see below) derived from the
-  sender's and recipient's DH public keys (with the keyids given in this
-  message), perform XSalsa20 encryption of the message. The nonce used for
-  this operation is also included in the header of the data message
-  packet.
 ```
 
 #### Multiple OTR protocol versions
@@ -185,7 +181,7 @@ This means that if Bob has a client which only supports OTRv4 and he uploads
 three long term keys for OTRv4 to his client, Bob's client must publish 3
 prekey messages. Also, if Bob uploads two long term keys for OTRv4 and two long
 term keys for OTRvX (a future version of OTR) which also implements the
- non-interactive DAKE, Bob will upload 4 keys.
+non-interactive DAKE, Bob will upload 4 keys.
 
 #### Requesting prekey messages from a prekey server
 
@@ -281,7 +277,7 @@ If many prekey messages are received:
 #### Decreased participation deniability for the initiator
 
 OTRv4 will make it clear that non-interactive conversations have different,
-lower participation deniability properties for the initiator than interactive
+lower participation deniability properties for the responder than in interactive
 conversations. OTRv4 will also leave it up to the implementer to decide when it
 is appropriate to use the non-interactive DAKE and how to convey this security
 loss.

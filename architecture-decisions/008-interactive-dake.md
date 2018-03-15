@@ -8,7 +8,7 @@ place.
 
 We believe the security of OTRv4 can be improved by employing a Deniable
 Authenticated Key Exchange (DAKE) protocol. This would allow both parties to
-deny having participated in the conversation.  A DAKE is strongly deniable when
+deny having participated in the conversation. A DAKE is strongly deniable when
 its transcripts retain deniability even when long term key material has been
 compromised and when an outside party tries to collude one participant in order
 to reveal that a particular person is talking with them.
@@ -23,8 +23,8 @@ Implementing Strongly Deniable Authenticated Key Exchanges"
 [\[1\]](#references). DAKEZ is the most efficient DAKE out of Nik Unger and Ian
 Goldberg's research since it does not use Dual Receiver Encryption and digital
 signatures like RSDAKE. Instead, it uses a signature non-interactive zero
-knowledge proof of knowledge (RSig) for the authentication. It also has a
-shared session state (`phi`) variable that guards against misbinding of the
+knowledge proof of knowledge (`RSig`) for the authentication. It also has a
+shared session state (`phi`) variable that guards against misbinding of
 context.
 
 ### Consequences
@@ -32,7 +32,7 @@ context.
 Supporting both an interactive and a non-interactive DAKE in OTRv4 raises the
 complexity of the whole protocol.
 
-Choosing DAKEZ for the interactive DAKE maximizes the deniability properties of
+Choosing DAKEZ for the interactive DAKE maximizes the deniability properties for
 interactive conversations.
 
 ### References
