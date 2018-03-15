@@ -714,14 +714,14 @@ Type 0: Padding
   padding (to disguise the length of your message), use this TLV.
 
 Type 1: Disconnected
-  If the user requests to close the private connection, you may send a message
-  (possibly with empty human-readable part) containing a record with this TLV
-  type just before you discard the session keys, and transition to
+  If the participant requests to close the private connection, you may send a
+  message (possibly with empty human-readable part) containing a record with
+  this TLV type just before you discard the session keys, and transition to
   'START' state (see below). If you receive a TLV record of this type, you
-  should transition to 'FINISHED' state (see below), and inform the user that
-  its correspondent has closed its end of the private connection, and the user
-  should do the same. Old mac keys can be attached to this TLV when the session
-  is expired. This TLV should have the 'IGNORE_UNREADABLE' flag set.
+  should transition to 'FINISHED' state (see below), and inform the participant
+  that its correspondent has closed its end of the private connection, and the
+  participant should do the same. Old mac keys can be attached to this TLV when
+  the session is expired. This TLV should have the 'IGNORE_UNREADABLE' flag set.
 
 Type 2: SMP Message 1
   The value represents the initial message of the Socialist Millionaires'
@@ -741,7 +741,7 @@ Type 5: SMP Message 4
   should have the 'IGNORE_UNREADABLE' flag set.
 
 Type 6: SMP Abort Message
-  If the user cancels the SMP prematurely or encounters an error in the
+  If the participant cancels the SMP prematurely or encounters an error in the
   protocol and cannot continue, you may send a message (possibly with an empty
   human-readable part) with this TLV type to instruct the other party's client
   to abort the protocol. The associated length should be zero and the
@@ -806,9 +806,9 @@ look like this:
 
 ### Secure Session ID
 
-The secure session ID is a 8-byte value. If the user requests to see it, it
-should be displayed as two 4-byte big-endian unsigned values. For example, in C
-language, in "%08x" format. If the party transmitted the Auth-R message during
+The secure session ID is a 8-byte value. If the participant requests to see it,
+it should be displayed as two 4-byte big-endian unsigned values. For example, in
+C language, in "%08x" format. If the party transmitted the Auth-R message during
 the DAKE, then display the first 4 bytes in bold, and the second 4 bytes in
 non-bold. If the party transmitted the Auth-I message instead, display the first
 4 bytes in non-bold, and the second 4 bytes in bold. If the party transmitted
@@ -820,8 +820,8 @@ the second 4 bytes in bold.
 This Secure Session ID can be used by the parties to verify (over the telephone,
 assuming the parties recognize each others' voices) that there is no
 man-in-the-middle by having each side read his bold part to the other. Note that
-this only needs to be done in the event that the users do not trust that their
-long-term keys have not been compromised.
+this only needs to be done in the event that the participants do not trust that
+their long-term keys have not been compromised.
 
 ### OTR Error Messages
 
@@ -1613,8 +1613,8 @@ that its DH key is in the correct group.
 
 A valid Auth-R message is generated as follows:
 
-1. Create a user profile, as detailed as defined in
-   [Creating a user profile](#creating-a-user-profile) section.
+1. Create a User profile, as detailed as defined in
+   [Creating a User Profile](#creating-a-user-profile) section.
 2. Generate an ephemeral ECDH key pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
    * secret key `x` (57 bytes).
@@ -1642,7 +1642,7 @@ To verify an Auth-R message:
 1. Verify if the message type is `0x91`.
 2. Verify that protocol's version of the message is `0x0004`.
 3. Check that the receiver's instance tag matches your sender's instance tag.
-4. Validate the user profile as defined in
+4. Validate the User profile as defined in
    [Validating a User Profile](#validating-a-user-profile) section.
    Extract `H_a` from it.
 5. Compute `t = 0x0 || KDF_1(0x06 || Bobs_User_Profile, 64) ||
@@ -1747,8 +1747,9 @@ shared cryptographic keys while providing partial participation deniability.
 Unlike the interactive DAKE, the non-interactive DAKE does not provide online
 deniability for the party that completes the DAKE by sending a
 Non-Interactive-Auth message. Client implementations are expected to understand
-this deniability risk when allowing users to complete a non-interactive DAKE.
-They are also expected to decide how to convey this security loss to the user.
+this deniability risk when allowing participantss to complete a non-interactive
+DAKE. They are also expected to decide how to convey this security loss to the
+participant.
 
 This protocol is derived from the XZDH protocol [\[1\]](#references), which
 uses a ring signature non-interactive zero-knowledge proof of knowledge
@@ -1791,7 +1792,7 @@ Verify. Decrypt message if included
     * Sets the received ECDH ephemeral public key `Y` as `their_ecdh`.
     * Sets the received DH ephemeral public key `B` as `their_dh`.
 3. Extracts the Public Shared Prekey (`D_b`) and the Ed448 public key (`H_b`)
-   from Bob's user profile. Sets the first as `their_shared_prekey`.
+   from Bob's User profile. Sets the first as `their_shared_prekey`.
 4. Generates a Non-Interactive-Auth message. See
    [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 5. Sets `X` and `x` as `our_ecdh`: the ephemeral ECDH keys.
@@ -1873,7 +1874,7 @@ Verify. Decrypt message if included
       Securely deletes `k_dh`.
 4. Calculates
    `tmp_k = KDF_1(0x12 || K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh)
-    || ECDH(skb, their_ecdh) || brace_key, 64)`.
+    || ECDH(sk_hb, their_ecdh) || brace_key, 64)`.
 5. Computes the Auth MAC key `auth_mac_k = KDF_1(0x14 || tmp_k, 64)`.
 6. Computes the Mixed shared secret and the SSID:
     * `K = KDF_1(0x04 || tmp_k, 64)`. Securely deletes `tmp_k`.
@@ -1913,14 +1914,14 @@ Verify. Decrypt message if included
 #### Prekey message
 
 This message is created and published to an unstrusted prekey server to allow
-offline conversations. Each Prekey message contains the owner's user profile
+offline conversations. Each Prekey message contains the owner's User Profile
 (which contains a signed shared prekey) and two one-time use ephemeral public
 prekey values.
 
 A valid Prekey message is generated as follows:
 
-1. Create a user profile, as defined in
-   [Creating a user profile](#creating-a-user-profile) section.
+1. Create a User Profile, as defined in
+   [Creating a User Profile](#creating-a-user-profile) section.
 2. Create the first one-time use prekey by generating the ephemeral ECDH key
    pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
@@ -1941,7 +1942,7 @@ To verify a Prekey message:
 
 1. Verify if the message type is `0x0F`.
 2. Verify that protocol's version of the message is `0x0004`.
-3. [Validate the user profile](#validating-a-user-profile).
+3. [Validate the User Profile](#validating-a-user-profile).
 4. Check that the ECDH public key `Y` is on curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
@@ -1983,8 +1984,8 @@ also contain an attached encrypted message, which is highly recommended.
 
 A valid Non-Interactive-Auth message is generated as follows:
 
-1. Create a user profile, as defined in
-   [Creating a user profile](#creating-a-user-profile) section.
+1. Create a User Profile, as defined in
+   [Creating a User Profile](#creating-a-user-profile) section.
 2. Generate an ephemeral ECDH key pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
    * secret key `x` (57 bytes).
@@ -2081,12 +2082,12 @@ Auth MAC (MAC)
 An OTRv4 client must generate a user's prekey messages and publish them to a
 prekey server. Implementers are expected to create their own policy dictating
 how often their clients upload prekey messages to the prekey server. Prekey
-messages expire when their user profile expires. Thus new prekey messages
+messages expire when their User Profile expires. Thus new prekey messages
 should be published to the prekey server before they expire to keep valid
 prekey messages available. In addition, one Prekey message should be published
-for every long term key that belongs to a user. This means that if Bob uploads
-3 long term keys for OTRv4 to his client, Bob's client must publish 3 prekey
-messages.
+for every long term key that belongs to a participant. This means that if Bob
+uploads 3 long term keys for OTRv4 to his client, Bob's client must publish 3
+prekey messages.
 
 Details on how to interact with a prekey server to publish messages are outside
 the scope of this protocol.
@@ -2096,10 +2097,10 @@ the scope of this protocol.
 Use the following checks to validate a Prekey message. If any of the checks
 fail, ignore the message:
 
-  1. Check that the user profile is not expired.
+  1. Check that the User Profile is not expired.
   2. Check that the OTR version of the prekey message matches one of the
-     versions signed in the user profile contained in the prekey message.
-  3. Check if the user profile version is supported by the receiver.
+     versions signed in the User Profile contained in the prekey message.
+  3. Check if the User Profile's version is supported by the receiver.
 
 Note that these steps can be done in anticipation of sending a
 Non-Interactive-Auth message.
@@ -2288,7 +2289,7 @@ sections.
 
 A message with an empty human-readable part (the plaintext is of zero length, or
 starts with a NULL) is a "heartbeat" message. This message is useful for key
-rotations and revealing MAC keys. It should not be displayed to the user.
+rotations and revealing MAC keys. It should not be displayed to the participant.
 If you have not sent a message to a correspondent in some (configurable) time,
 send a "heartbeat" message, consisting of a Data Message encoding and an empty
 plaintext. The heartbeat message should have the `IGNORE_UNREADABLE` flag set.
@@ -2383,7 +2384,7 @@ Flags (BYTE)
     If you receive a Data Message with this flag set, and you are unable to
     decrypt the message or verify the MAC (because, for example, you don't have
     the right keys), just ignore the message instead of producing an error or a
-    notification to the user.
+    notification to the participant.
 
 Previous chain message number (INT)
   This should be set with sender's pn.
@@ -2544,8 +2545,8 @@ This is done by:
   * Store any message keys from the previous DH Ratchet that correspond to
     messages that have not yet arrived:
       * If `k` + `max_skip` < received `pn`:
-         * Raise an exception that informs the user that too many message keys
-           are stored.
+         * Raise an exception that informs the participant that too many message
+           keys are stored.
       * If `chain_key_r` is not `NIL`:
          * while `k` < received `pn`:
              * Derive
@@ -2576,8 +2577,8 @@ This is done by:
   * Store any message keys from the current DH Ratchet that correspond to
     messages that have not yet arrived:
     * If `k` + `max_skip` < received `j`:
-         * Raise an exception that informs the user that too many message keys
-           are stored.
+         * Raise an exception that informs the participant that too many message
+           keys are stored.
       * If `chain_key_r` is not `NIL`:
          * while `k` < received `j`:
              * Derive
@@ -2788,7 +2789,7 @@ for this _before_ checking for any of the other `?OTR:` markers):
   * Parse it (as the previous printf structure) extracting the `identifier`,
     the instance tags, `index`, `total`, and `piece[index]`.
 
-  * Discard the message and optionally pass a warning to the user if:
+  * Discard the message and optionally pass a warning to the participant if:
     * The recipient's own instance tag does not match the listed receiver
       instance tag.
     * The listed receiver's instance tag is not zero.
