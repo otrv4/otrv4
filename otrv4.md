@@ -185,7 +185,8 @@ The conversation can begin when one participant retrieves the other's
 participant Prekey message from a prekey server. Prior to the start of the
 conversation, this Prekey message would have had to be uploaded by the other
 participant's client to a server. This have to be done so other participants,
-like Alice, can send messages to them while they are offline.
+like Alice, can send messages to the other participant, like Bob, while they are
+offline.
 
 ## Assumptions
 
@@ -483,7 +484,7 @@ This `KDF_2` is used when referring to RFC 8032.
 
 ## Data Types
 
-OTRv4 uses many of the data types already specified in OTRv3:
+OTRv4 uses many of the data types already specified in OTRv3 specification:
 
 ```
 Bytes (BYTE):
@@ -512,10 +513,10 @@ Message Authentication Code (MAC):
   64 bytes MAC data
 
 Ed448 point (POINT):
-  57 bytes as defined in Encoding and Decoding section, little-endian
+  57 bytes as defined in "Encoding and Decoding" section, little-endian
 
 Ed448 scalar (SCALAR):
-  56 bytes as defined in Encoding and Decoding section, little-endian
+  56 bytes as defined in "Encoding and Decoding" section, little-endian
 
 User Profile (USER-PROF):
   Detailed in "User Profile Data Type" section
@@ -558,9 +559,9 @@ A curve point is decoded as follows:
    this value `x_0`.  The y-coordinate is recovered simply by clearing this bit.
    If the resulting value is `>= p`, decoding fails.
 3. To recover the x-coordinate, the curve equation implies
-   `x^2 = (y^2 - 1) / (d * y^2 - 1) (mod p)`.  The denominator is always
+   `x^2 = (y^2 - 1) / (d * y^2 - 1) (mod p)`. The denominator is always
    non-zero mod p.
-   1. Let `num = y^2 - 1` and `denom = d * y^2 - 1`.  To compute the square root
+   1. Let `num = y^2 - 1` and `denom = d * y^2 - 1`. To compute the square root
       of `(num/denom)`, compute the candidate root `x = (num/denom)^((p+1)/4)`.
       This can be done using a single modular powering for both the
       inversion of `denom` and the square root:
@@ -569,7 +570,7 @@ A curve point is decoded as follows:
            x = ((num ^ 3) * denom * (num^5 * denom^3) ^ ((p-3)/4)) (mod p)
       ```
 
-   2.  If `denom * x^2 = num`, the recovered x-coordinate is `x`.  Otherwise, no
+   2.  If `denom * x^2 = num`, the recovered x-coordinate is `x`. Otherwise, no
        square root exists, and decoding fails.
 4. Use the `x_0` bit to select the right square root:
    * If `x = 0`, and `x_0 = 1`:
@@ -601,8 +602,8 @@ Ring Signature Authentication (RING-SIG):
 
 ### Public keys, Shared Prekeys and Fingerprints
 
-OTR users have long-lived public keys that they use for authentication
-(but not encryption). OTRv4 introduces a new type of public key:
+OTR users have long-lived public keys that they use for authentication (but not 
+for encryption). OTRv4 introduces a new type of public key:
 
 ```
 OTRv4's public authentication Ed448 key (ED448-PUBKEY):
@@ -671,9 +672,9 @@ Clients include instance tags in all OTRv4 messages. Instance tags are
 4-byte values that are intended to be persistent. If the same client is logged
 into the same account from multiple locations, the intention is that the client
 will have different instance tags at each location. OTRv4 messages (fragmented
-and unfragmented) include the source and destination instance tags.
-If a client receives a message that lists a destination instance tag different
-from its own, the client should discard the message.
+and unfragmented) include the source and destination instance tags. If a client
+receives a message that lists a destination instance tag different from its own,
+the client should discard the message.
 
 The smallest valid instance tag is `0x00000100`. It is appropriate to set the
 destination instance tag to `0` when an actual destination instance tag is not
@@ -707,17 +708,17 @@ OTRv4 supports some TLV record types from OTRv3. The supported types are:
 Type 0: Padding
   The value may be an arbitrary amount of data. This data should be ignored.
   This type can be used to disguise the length of a plaintext message.
-  XSalsa20, the algorithm used for encryption of the message, is a stream cipher
-  and, therefore, no padding is required. If you want to do message padding (to
-  disguise the length of your message), use this TLV.
+  XSalsa20, the algorithm used for encryption of the messages, is a stream
+  cipher and, therefore, no padding is required. If you want to do message
+  padding (to disguise the length of your message), use this TLV.
 
 Type 1: Disconnected
   If the user requests to close the private connection, you may send a message
   (possibly with empty human-readable part) containing a record with this TLV
   type just before you discard the session keys, and transition to
-  'START' (see below). If you receive a TLV record of this type, you should
-  transition to 'FINISHED' (see below), and inform the user that its
-  correspondent has closed its end of the private connection, and the user
+  'START' state (see below). If you receive a TLV record of this type, you
+  should transition to 'FINISHED' state (see below), and inform the user that
+  its correspondent has closed its end of the private connection, and the user
   should do the same. Old mac keys can be attached to this TLV when the session
   is expired. This TLV should have the 'IGNORE_UNREADABLE' flag set.
 
@@ -727,13 +728,16 @@ Type 2: SMP Message 1
   This TLV should have the 'IGNORE_UNREADABLE' flag set.
 
 Type 3: SMP Message 2
-  The value represents the second message in an instance of the SMP.
+  The value represents the second message in an instance of the SMP. This TLV
+  should have the 'IGNORE_UNREADABLE' flag set.
 
 Type 4: SMP Message 3
-  The value represents the third message in an instance of the SMP.
+  The value represents the third message in an instance of the SMP. This TLV
+  should have the 'IGNORE_UNREADABLE' flag set.
 
 Type 5: SMP Message 4
-  The value represents the final message in an instance of the SMP.
+  The value represents the final message in an instance of the SMP. This TLV
+  should have the 'IGNORE_UNREADABLE' flag set.
 
 Type 6: SMP Abort Message
   If the user cancels the SMP prematurely or encounters an error in the
@@ -741,7 +745,7 @@ Type 6: SMP Abort Message
   human-readable part) with this TLV type to instruct the other party's client
   to abort the protocol. The associated length should be zero and the
   associated value should be empty. If you receive a TLV of this type,
-  you should change the SMP state to 'SMPSTATE_EXPECT1' (see below in SMP
+  you should change the SMP state to 'SMPSTATE_EXPECT1' (see below, in SMP
   section). This TLV should have the 'IGNORE_UNREADABLE' flag set.
 
 Type 7: Extra symmetric key
@@ -818,10 +822,10 @@ Currently, the following errors are supported:
 Note that the string "?OTR Error:" must be in at the start position of the
 message because of these reasons:
 
- - The possibility for playing games with the state machine by "embedding" this
-   string inside some other message.
- - The potential of social engineering depending on the UI of the used chat
-   client.
+- The possibility for playing games with the state machine by "embedding" this
+  string inside some other message.
+- The potential of social engineering depending on the UI of the used chat
+  client.
 
 ## Key Management
 
@@ -833,10 +837,11 @@ For exchanging data messages, OTRv4 uses KDF chains: the symmetric-key ratchet
 and the DH ratchet (with ECDH) from the Double Ratchet algorithm
 [\[2\]](#references). OTRv4 adds 3072-bit (384-byte) DH keys, called the brace
 key pair, to the Double Ratchet algorithm. These keys are used to protect
-transcripts of data messages in case ECC is broken. During the DAKE, both
-parties agree upon the first set of DH keys. Then, during every third DH ratchet
-in the Double Ratchet, a new key is agreed upon. Between each DH brace key
-ratchet, both sides will conduct a symmetric brace key ratchet.
+transcripts of data messages in case ECC is broken. During the DAKE and
+initialization of the Double Ratchet Algorithm, both parties agree upon the
+first set of ECDH and DH keys. Then, during every third DH ratchet in the Double
+Ratchet, a new DH key is agreed upon. Between each DH brace key ratchet, both
+sides will conduct a symmetric brace key ratchet.
 
 The following variables keep state as the ratchet moves forward:
 
@@ -930,7 +935,8 @@ K_ecdh:
 
 K:
   The Mixed shared secret is the final shared secret derived from both the
-  DH and ECDH shared secrets: KDF_1(0x04 || K_ecdh || brace_key, 64).
+  DH (brace key) and ECDH shared secrets:
+  KDF_1(0x04 || K_ecdh || brace_key, 64).
 ```
 
 ### Generating shared secrets
@@ -948,7 +954,7 @@ ECDH(a, B)
 Check, without leaking extra information about the value of `K_ecdh`, whether
 `K_ecdh` is the all-zero value and abort if so, as this process involves
 contributory behavior. Contributory behaviour means that both parties' private
-keys contribute to the resulting shared key.  Since Ed448 have a cofactor of 4,
+keys contribute to the resulting shared key. Since Ed448 have a cofactor of 4,
 an input point of small order will eliminate any contribution from the other
 party's private key. This situation can be detected by checking for the all-zero
 output.
@@ -962,8 +968,8 @@ DH(a, B)
 
 Before sending the first reply (i.e. a new message considering a previous
 message has been received) or sending the first data message, the sender will
-rotate their ECDH keys and brace key. This is for the computation of the Mixed
-shared secret `K` (see
+rotate their ECDH keys and their brace key. This is for the computation of the
+Mixed shared secret `K` (see
 [Deriving Double Ratchet Keys](#deriving-double-ratchet-keys)).
 
 Before rotating the keys:
@@ -972,14 +978,16 @@ Before rotating the keys:
 
 To rotate the ECDH keys:
 
-  * Generate a new ECDH key pair and assign it to `our_ecdh = generateECDH()`.
+  * Generate a new ECDH key pair and assign it to `our_ecdh = generateECDH()`
+    (by securely replacing the old value).
   * Calculate `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
 
 To rotate the brace key:
 
   * If `i % 3 == 0`:
 
-    * Generate the new DH key pair `our_dh = generateDH()`.
+    * Generate the new DH key pair and assign it to `our_dh = generateDH()`
+      (by securely replacing the old value).
     * Calculate `k_dh = DH(our_dh.secret, their_dh)`.
     * Calculate a `brace_key = KDF_1(0x02 || k_dh, 32)`.
 
@@ -989,7 +997,7 @@ To rotate the brace key:
 
 ### Rotating ECDH keys and brace key as receiver
 
-Every ratchet, the receiver will rotate their ECDH keys and brace key.
+Every ratchet, the receiver will rotate their ECDH keys and their brace key.
 This is for the computation of the Mixed shared secret `K` (see
 [Deriving Double Ratchet Keys](#deriving-double-ratchet-keys)).
 
@@ -1042,7 +1050,7 @@ derive_enc_mac_keys(chain_key):
 
 ### Resetting state variables and key variables
 
-The state variables are set to `0` and the key variables are set to `NIL`.
+The state variables are set to `0` and the key variables are set to `NULL`.
 
 ### Session expiration
 
@@ -1179,7 +1187,7 @@ DSA signature (SIG):
   len byte unsigned s, big-endian
 ```
 
-As defined in OTRv3 spec, the OTRv3 DSA public key looks like:
+As defined in OTRv3 spec, the OTRv3 DSA public key is defined as:
 
 ```
 OTRv3 public authentication DSA key (PUBKEY):
@@ -1206,7 +1214,7 @@ To create a user profile, assemble:
 4. Public Shared Prekey: An Ed448 Public Key used in multiple prekey messages.
    It adds partial protection against an attacker that modifies the first flow
    of the non-interactive DAKE and that compromises the receivers long term
-   secret key and their one-time prekey. For its generation, refer to
+   secret key and their one-time ephemeral keys. For its generation, refer to
    [Public keys, shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
    section. This key must expire when the user profile expires.
 5. Profile Signature: The symmetric key, the flag `f` (set to zero, as defined
@@ -1233,8 +1241,9 @@ only supports version 4 will have the 1-byte version string "4". Thus, a version
 string has varying size, and it is represented as a DATA type with its length
 specified.
 
-A compliant OTRv4 implementation is required to support version 3 of OTR, but
-not versions 1 and 2. Therefore, invalid version strings contain a "2" or a "1".
+A compliant OTRv4 implementation (in OTRv43-compatible mode) is required to
+support version 3 of OTR, but not versions 1 and 2. Therefore, invalid version
+strings contain a "2" or a "1".
 
 Any other version string that is not "4", "3", "2", or "1" should be ignored.
 
@@ -1284,32 +1293,31 @@ fingerprints' section. It is referred as 'sym_key'), a flag 'f', which is a byte
 with value 0, a context 'c' (a value set by the signer and verifier of maximum
 255 bytes), which is an empty string for this protocol, and a message 'm'.
 
-   1.  Hash the 'sym_key': 'KDF_2(sym_key, 114)'. Let 'h' denote the resulting
-       digest. Construct the secret key 'sk' from the first half of
-       'h' (57 bytes), and the corresponding public key 'H', as defined in the
-       'Public keys, Shared Prekeys and Fingerprints' section.
-       Let 'prefix' denote the second half of the 'h' (from h[57] to
-       h[113]).
+1.  Hash the 'sym_key': 'KDF_2(sym_key, 114)'. Let 'h' denote the resulting
+    digest. Construct the secret key 'sk' from the first half of 'h' (57 bytes),
+    and the corresponding public key 'H', as defined in the 'Public keys, Shared
+    Prekeys and Fingerprints' section. Let 'prefix' denote the second half of
+    the 'h' (from 'h[57]' to 'h[113]').
 
-   2.  Compute KDF_2("SigEd448" || f || len(c) || c || prefix || m, 114), where
-       'm' is the message to be signed. Let 'r' be the 114-byte resulting
-       digest and interpret it as a little-endian integer.
+2.  Compute KDF_2("SigEd448" || f || len(c) || c || prefix || m, 114), where
+    'm' is the message to be signed. Let 'r' be the 114-byte resulting digest
+    and interpret it as a little-endian integer.
 
-   3.  Multiply the scalar 'r' by the Base Point (G). For efficiency, do this by
-       first reducing 'r' modulo 'q', the group order.  Let 'R' be the encoding
-       of this resulting point. It should be encoded as a POINT.
+3.  Multiply the scalar 'r' by the Base Point (G). For efficiency, do this by
+    first reducing 'r' modulo 'q', the group order.  Let 'R' be the encoding
+    of this resulting point. It should be encoded as a POINT.
 
-   4.  Compute KDF_2("SigEd448" || f || len(c) || c || R || H || m, 114).
-       Interpret the 114-byte digest as a little-endian integer 'k'.
+4.  Compute KDF_2("SigEd448" || f || len(c) || c || R || H || m, 114). Interpret
+    the 114-byte digest as a little-endian integer 'k'.
 
-   5.  Compute 'S = (r + k * sk) mod q'.  For efficiency, reduce 'k' again
-       modulo q first.
+5.  Compute 'S = (r + k * sk) mod q'.  For efficiency, reduce 'k' again modulo
+    'q' first.
 
-   6.  Form the signature of the concatenation of 'R' (57 bytes) and the
-       little-endian encoding of 'S' (57 bytes, the ten most significant bits
-       are always zero).
+6.  Form the signature of the concatenation of 'R' (57 bytes) and the
+    little-endian encoding of 'S' (57 bytes, the ten most significant bits are
+    always zero).
 
-   7. Securely delete 'sym_key', 'sk', 'h', 'r' and 'k'.
+7. Securely delete 'sym_key', 'sk', 'h', 'r' and 'k'.
 ```
 
 ### Verify a User Profile Signature
@@ -1355,22 +1363,22 @@ conversation is authenticated using the interactive DAKE.
 ### Requesting conversation with older OTR versions
 
 Bob might respond to Alice's request (or notification of willingness to start a
-conversation) using OTRv3. If this is the case and Alice supports version 3,
-the protocol falls back to OTRv3 [\[7\]](#references). If Alice does not
-support version 3, this response is ignored.
+conversation) using OTRv3. If this is the case and Alice supports version 3, the
+protocol falls back to OTRv3 [\[7\]](#references). If Alice does not support
+version 3, this response is ignored.
 
 ### Interactive Deniable Authenticated Key Exchange (DAKE)
 
 This section outlines the flow of the interactive DAKE. This is a way to
-mutually agree upon shared keys for the two parties and authenticate one
-another while providing participation deniability.
+mutually agree upon shared keys for the two parties and authenticate one another
+while providing participation deniability.
 
 This protocol is derived from the DAKEZ protocol [\[1\]](#references), which
 uses a ring signature non-interactive zero-knowledge proof of knowledge
 (`RING-SIG`) for authentication (`RSig`).
 
-Alice's long-term Ed448 key pair is `(ska, Pka)` and Bob's long-term Ed448
-key pair is `(skb, Pkb)`. Both key pairs are generated as stated in the
+Alice's long-term Ed448 key pair is `(sk_ha, Ha)` and Bob's long-term Ed448
+key pair is `(sk_hb, Hb)`. Both key pairs are generated as stated in the
 [Public keys, shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
 section.
 
@@ -1469,15 +1477,15 @@ Bob will be initiating the DAKE with Alice.
       of using a random value `r`, it will use : `r = KDF_1(0x20 || K, 80)`.
       Securely replaces `our_dh` with the outputs.
     * Securely deletes `their_ecdh` and `their_dh`.
-7. At this point, the interactive DAKE is complete for Bob, but the
-   double ratchet still needs to be correctly set up.
+7. At this point, the interactive DAKE is complete for Bob, but the double
+   ratchet algorithm still needs to be correctly set up.
 
 **Alice:**
 
 1. Receives the Auth-I message from Bob:
    * Verifies the Auth-I message as defined in the
      [Auth-I message](#auth-i-message) section.
-2. Initializes the double ratchet:
+2. Initializes the double ratchet algorithm:
    * Sets ratchet id `i` as 0.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
    * Generates Bob's ECDH and DH public keys:
@@ -1563,18 +1571,18 @@ Sender's instance tag (INT)
 
 Receiver's instance tag (INT)
   The instance tag of the intended recipient. As the instance tag is used
-  to differentiate the clients that an user uses, this will often be 0 since
-  the other party may not have set its instance tag yet.
+  to differentiate the clients that a participant uses, this will often be 0
+  since the other party may not have set its instance tag yet.
 
 Sender's User Profile (USER-PROF)
-  As described in the section 'Creating a User Profile'.
+  As described in the section "Creating a User Profile".
 
 Y (POINT)
   The ephemeral public ECDH key.
 
 B (MPI)
-  The ephemeral public DH key. Note that even though this is in uppercase,
-  this is NOT a POINT.
+  The ephemeral public DH key. Note that even though this is in uppercase, this
+  is NOT a POINT.
 ```
 
 #### Auth-R message
@@ -1603,7 +1611,7 @@ A valid Auth-R message is generated as follows:
     KDF_1(0x08 || phi, 64)`.
    `phi` is the shared session state as mention in its
    [section](#shared-session-state).
-5. Compute `sigma = RSig(Pka, ska, {Pkb, Pka, Y}, t)`.
+5. Compute `sigma = RSig(H_a, sk_ha, {H_b, H_a, Y}, t)`.
 6. Generate a 4-byte instance tag to use as the sender's instance tag.
    Additional messages in this conversation will continue to use this tag as the
    sender's instance tag. Also, this tag is used to filter future received
@@ -1618,14 +1626,14 @@ To verify an Auth-R message:
 3. Check that the receiver's instance tag matches your sender's instance tag.
 4. Validate the user profile as defined in
    [Validating a User Profile](#validating-a-user-profile) section.
-   Extract `Pka` from it.
+   Extract `H_a` from it.
 5. Compute `t = 0x0 || KDF_1(0x06 || Bobs_User_Profile, 64) ||
    KDF_1(0x07 || Alices_User_Profile, 64) || Y || X || B || A ||
    KDF_1(0x08 || phi, 64)`. `phi` is the shared session state as mention in its
    [section](#shared-session-state).
 6. Verify the `sigma` with
    [Ring Signature Authentication](#ring-signature-authentication), that is
-   `sigma == RVrf({Pkb, Pka, Y}, t)`.
+   `sigma == RVrf({H_b, H_a, Y}, t)`.
 
 An Auth-R message is an OTRv4 message encoded as:
 
@@ -1643,14 +1651,14 @@ Receiver's instance tag (INT)
   The instance tag of the intended recipient.
 
 Sender's User Profile (USER-PROF)
-  As described in the section 'Creating a User Profile'.
+  As described in the section "Creating a User Profile".
 
 X (POINT)
   The ephemeral public ECDH key.
 
 A (MPI)
-  The ephemeral public DH key. Note that even though this is in uppercase,
-  this is NOT a POINT.
+  The ephemeral public DH key. Note that even though this is in uppercase, this
+  is NOT a POINT.
 
 sigma (RING-SIG)
   The RING-SIG proof of authentication value.
@@ -1669,7 +1677,7 @@ A valid Auth-I message is generated as follows:
     KDF_1(0x11 || phi, 64)`.
    `phi` is the shared session state as mention on its
    [section](#shared-session-state).
-2. Compute `sigma = RSig(Pkb, skb, {Pkb, Pka, X}, t)`.
+2. Compute `sigma = RSig(H_b, sk_hb, {H_b, H_a, X}, t)`.
 3. Continue to use the sender's instance tag.
 
 To verify an Auth-I message:
@@ -1686,7 +1694,7 @@ To verify an Auth-I message:
 5. Verify the `sigma` as defined in
    [Ring Signature Authentication](#verification-verifya1-a2-a3-sigma-m).
 
-An Auth-I is an OTR message encoded as:
+An Auth-I is an OTRv4 message encoded as:
 
 ```
 Protocol version (SHORT)
@@ -1702,7 +1710,7 @@ Receiver's instance tag (INT)
   The instance tag of the intended recipient.
 
 sigma (RING-SIG)
-  The RING-SIG proof of authentication value.
+  The 'RING-SIG' proof of authentication value.
 ```
 
 ## Offline Conversation Initialization
@@ -1711,8 +1719,8 @@ To begin an offline conversation, a Prekey message is published to an untrusted
 server. This action is considered as the start of the non-interactive DAKE.
 A Prekey message is retrieved by the party attempting to send a message to the
 Prekey's publisher. This participant, then, replies with a Non-Interactive-Auth
-message (created with the prekey). This action is considered to complete the
-non-interactive DAKE.
+message (created with the prekey's values). This action is considered to
+complete the non-interactive DAKE.
 
 ### Non-interactive Deniable Authenticated Key Exchange (DAKE)
 
@@ -1728,8 +1736,8 @@ This protocol is derived from the XZDH protocol [\[1\]](#references), which
 uses a ring signature non-interactive zero-knowledge proof of knowledge
 (`RING-SIG`) for authentication (`RSig`).
 
-Alice's long-term Ed448 key pair is `(ska, Pka)` and Bob's long-term Ed448
-key pair is `(skb, Pkb)`. Both key pairs are generated as stated in the
+Alice's long-term Ed448 key pair is `(sk_ha, H_a)` and Bob's long-term Ed448
+key pair is `(sk_hb, H_b)`. Both key pairs are generated as stated in the
 [Public keys, shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
 section.
 
@@ -1743,7 +1751,7 @@ Publish a Prekey message ---->
                                      <----- Request Prekey messages from Bob
                                      Prekeys messages from Bob ------------->
       <---------------------------------------- Non-Interactive-Auth message
-Verify and decrypt message if included
+Verify. Decrypt message if included
 ```
 
 **Bob:**
@@ -1764,8 +1772,8 @@ Verify and decrypt message if included
       messages.
     * Sets the received ECDH ephemeral public key `Y` as `their_ecdh`.
     * Sets the received DH ephemeral public key `B` as `their_dh`.
-3. Extracts the Public Shared Prekey and `Pkb` from Bob's user profile. Sets
-   the first as `their_shared_prekey`.
+3. Extracts the Public Shared Prekey (`D_b`) and the Ed448 public key (`H_b`)
+   from Bob's user profile. Sets the first as `their_shared_prekey`.
 4. Generates a Non-Interactive-Auth message. See
    [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 5. Sets `X` and `x` as `our_ecdh`: the ephemeral ECDH keys.
@@ -1812,7 +1820,7 @@ Verify and decrypt message if included
       Auth MAC = KDF_1(0x18 || auth_mac_k || t, 64)
       ```
 
-    * Includes this value on the Non-Interactive-Auth message and securely
+    * Includes this value in the Non-Interactive-Auth message and securely
       deletes the `auth_mac_k`.
 10. Sends Bob a Non-Interactive-Auth message. See
     [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
@@ -1826,11 +1834,11 @@ Verify and decrypt message if included
 **Bob:**
 
 1. Receives the Non-Interactive-Auth message from Alice:
-    * Validates Alice's User Profile and extracts `Pka` from it.
+    * Validates Alice's User Profile and extracts `H_a` from it.
     * Picks a compatible version of OTR listed on Alice's profile, and follows
       the specification for this version. If the versions are incompatible, Bob
       does not send any further messages.
-    * Sets his Public Shared Prekey from his User Profile as
+    * Sets his Public Shared Prekey (`D_b`) from his User Profile as
       `our_shared_prekey.public`.
     * Verifies the Non-Interactive-Auth message. See
       [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
@@ -1938,7 +1946,7 @@ Prekey owner's instance tag (INT)
   The instance tag of the client that created the prekey.
 
 Prekey owner's User Profile (USER-PROF)
-  As described in the section Creating a User Profile.
+  As described in the section "Creating a User Profile".
 
 Y Prekey owner's ECDH public key (POINT)
   First one-time use prekey value.
@@ -1951,11 +1959,11 @@ B Prekey owner's DH public key (MPI)
 
 #### Non-Interactive-Auth Message
 
-This message finishes the non-interactive. It contains a key-only unforgeable
-message authentication code function. Bob sends it to Alice to commit to a
-choice of his ECDH ephemeral key and his DH ephemeral key, and to acknowledge
-Alice's ECDH ephemeral key and DH ephemeral key. This message might also contain
-an attached encrypted message, which is highly recommended.
+This message finishes the non-interactive DAKE. It contains a key-only
+unforgeable message authentication code function. Bob sends it to Alice to
+commit to a choice of his ECDH ephemeral key and his DH ephemeral key, and to
+acknowledge Alice's ECDH ephemeral key and DH ephemeral key. This message might
+also contain an attached encrypted message, which is highly recommended.
 
 A valid Non-Interactive-Auth message is generated as follows:
 
@@ -1973,14 +1981,14 @@ A valid Non-Interactive-Auth message is generated as follows:
 5. Compute `k_dh = DH(a, their_dh)` and `brace_key = KDF_1(0x02 || k_dh, 32)`.
 6. Compute
    `tmp_k = KDF_1(0x12 || K_ecdh || ECDH(x, their_shared_prekey) ||
-    ECDH(x, Pkb) || brace_key, 64)`.
+    ECDH(x, H_b) || brace_key, 64)`.
    This value is needed for the generation of the Mixed shared secret.
 7. Calculate the Auth MAC key `auth_mac_k = KDF_1(0x13 || tmp_k, 64)`.
 8. Compute
    `t = KDF_1(0x14 || Bobs_User_Profile, 64) ||
     KDF_1(0x15 || Alices_User_Profile, 64) || Y || X || B || A ||
     their_shared_prekey || KDF_1(0x16 || phi, 64)`.
-9. Compute `sigma = RSig(Pka, ska, {Pkb, Pka, Y}, t)`. When computing `sigma`,
+9. Compute `sigma = RSig(H_a, sk_ha, {H_b, H_a, Y}, t)`. When computing `sigma`,
    keep the first 24 bytes of the generated `c` value to be used as a `nonce`
    in the next step. Refer to
    [Ring Signature Authentication](#ring-signature-authentication) for details.
@@ -2027,7 +2035,7 @@ Receiver's instance tag (INT)
   The instance tag of the intended recipient.
 
 Sender's User Profile (USER-PROF)
-  As described in the section 'Creating a User Profile'.
+  As described in the section "Creating a User Profile".
 
 X (POINT)
   The ephemeral public ECDH key.
@@ -2042,14 +2050,14 @@ Sigma (RING-SIG)
 Attached XZDH Encrypted Message (XZDH-ENCRYPTED-MSG)
   (optional: if an encrypted message is attached)
   The XZDH-ENCRYPTED-MSG that consists of an attached encrypted ratchet
-  id, an attached message id, a public ecdh key (used for encrypting the
-  message), a public dh key (used for encrypting the message), a nonce
+  id, an attached message id, a public ECDH key (used for encrypting the
+  message), a public DH key (used for encrypting the message), a nonce
   and the encrypted message.
 
 Auth MAC (MAC)
-  The MAC with the appropriate MAC key (see above) of the message (t) for the
-  Ring Signature (RING-SIG). When an encrypted message is attached, this is also
-  the MAC of that message.
+  The MAC with the appropriate MAC key (see above) of the message ('t') for the
+  Ring Signature ('RING-SIG'). When an encrypted message is attached, this is
+  also the MAC of that message.
 ```
 
 #### Publishing Prekey Messages
@@ -2074,7 +2082,7 @@ fail, ignore the message:
 
   1. Check that the user profile is not expired.
   2. Check that the OTR version of the prekey message matches one of the
-    versions signed in the user profile contained in the prekey message.
+     versions signed in the user profile contained in the prekey message.
   3. Check if the user profile version is supported by the receiver.
 
 Note that these steps can be done in anticipation of sending a
@@ -2111,8 +2119,8 @@ If many prekey messages are received:
         term keys.
       * If there are several instance tags in the list of prekey messages,
         decide which instance tags to send messages to.
-      * If there are multiple prekey messages per instance tag, decide
-        whether to send multiple messages to the same instance tag.
+      * If there are multiple prekey messages per instance tag, decide whether
+        to send multiple messages to the same instance tag.
 
 ### Encrypted messages in DAKE's messages
 
@@ -2134,9 +2142,10 @@ Non-Interactive-Auth message, but prior to sending it. For this, the
 participant:
 
 * Rotates the ECDH keys and brace key, see
-  [Rotating ECDH keys and brace key as sender](#rotating-ecdh-keys-and-brace-key-as-sender) section.
-  The derived ECDH public key will be the 'Public ECDH Key' for the message.
-  The derived DH public key will be the 'Public DH Key' for the message.
+  [Rotating ECDH keys and brace key as sender](#rotating-ecdh-keys-and-brace-key-as-sender)
+  section. The derived ECDH public key will be the 'Public ECDH Key' for the
+  message. The derived DH public key will be the 'Public DH Key' for the
+  message.
 * Calculates the shared secret `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`.
 * Derive new set of keys:
   `root_key[i], chain_key_s[i][j] = derive_ratchet_keys(sending,
@@ -2190,7 +2199,7 @@ Public DH Key (MPI)
   it is used as 'their_dh'.
 
 Encrypted message (DATA)
-  Using the appropriate encryption key, perform an XSalsa20 encryption
+  Using the appropriate encryption/message key, perform an XSalsa20 encryption
   of the message. The nonce used for this operation is also included in
   the header of the attached message packet.
 ```
@@ -2202,8 +2211,8 @@ like this:
 ```
   (Protocol version || message type || sender's instance tag || receiver's
    instance tag || Sender's User Profile || X || A || Sigma || Auth MAC ||
-  (attached message ratchet id || attached message id || public ecdh key ||
-   public dh key || encrypted message))
+  (attached message ratchet id || attached message id || public ECDH key ||
+   public DH key || encrypted message))
 ```
 
 ##### Decrypting the message
@@ -2217,8 +2226,8 @@ sending one. For this, the participant:
   [Rotating ECDH keys and brace key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
   section.
 * Calculates `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`.
-* Derive new set of keys `root_key[i], chain_key_r[i][k] =
-derive_ratchet_keys(receiving, root_key[i-1], K)`.
+* Derive new set of keys
+  `root_key[i], chain_key_r[i][k] = derive_ratchet_keys(receiving, root_key[i-1], K)`.
 * Securely delete the previous root key (`root_key[i-1]`) and `K`.
 * Increments the ratchet id `i = i + 1`.
 * Derives the next receiving chain key by using the `chain_key_r[i-1][k]`
@@ -2235,7 +2244,7 @@ derive_ratchet_keys(receiving, root_key[i-1], K)`.
   encrypted message (the `t` value here is the one computed during the
   verification of the Non-Interactive-Auth message):
   `Auth MAC = KDF_1(0x18 || auth_mac_k || t || (KDF_1(0x17 || attached encrypted
-   ratchet id || attached encrypted message id || public ecdh key || public dh
+   ratchet id || attached encrypted message id || public ECDH key || public DH
    key || nonce || encrypted message, 64)), 64)`.
 * Extracts the `Auth MAC` from the Non-Interactive-Auth message and verifies
   that it is equal to the one just calculated. If it is not, ignores
