@@ -2229,7 +2229,7 @@ like this:
 
 ```
   (Protocol version || message type || sender's instance tag || receiver's
-   instance tag || Sender's User Profile || X || A || Sigma || Auth MAC ||
+   instance tag || Sender's User Profile || X || A || sigma || Auth MAC ||
   (attached message ratchet id || attached message id || public ECDH key ||
    public DH key || encrypted message))
 ```
@@ -2534,7 +2534,7 @@ This is done by:
           * Decrypt the message using `MKenc` and `nonce`:
 
             ```
-            decrypted_message = XSalsa20_Dec(MKenc, nonce, m)
+              decrypted_message = XSalsa20_Dec(MKenc, nonce, m)
             ```
 
           * Securely delete `MKenc` and `nonce`.
@@ -2612,7 +2612,7 @@ This is done by:
       * Decrypt the message using `MKenc` and `nonce`:
 
       ```
-      decrypted_message = XSalsa20_Dec(MKenc, nonce, m)
+        decrypted_message = XSalsa20_Dec(MKenc, nonce, m)
       ```
 
       * If the message cannot be decrypted:
@@ -4024,7 +4024,7 @@ This function is `HashToScalar(d)`: d is an array of bytes.
 In this example, a forger guesses that "hi" is at the beginning of an encrypted
 message. Thus, its offset is 0. The forger wants to replace "hi" with "yo".
 
-  ```
+```
   offset = 0
   old_text = "hi"
   new_text = "yo"
@@ -4042,7 +4042,7 @@ message. Thus, its offset is 0. The forger wants to replace "hi" with "yo".
 
   new_data_message = replace(old_data_message, new_encrypted_message, new_mac_tag)
 
-  ```
+```
 
 ### OTRv3 Specific Encoded Messages
 
