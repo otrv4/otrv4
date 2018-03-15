@@ -1179,10 +1179,12 @@ Profile Expiration (PROF-EXP):
 
 User Profile (USER-PROF):
   Ed448 public key (ED448-PUBKEY)
+    Corresponds to 'H'.
   Versions (DATA)
   Profile Expiration (PROF-EXP)
   Public Shared Prekey (ED448-SHARED-PREKEY)
     The shared prekey used between different prekey messages.
+    Corresponds to 'D'.
   (optional) Transitional Signature (SIG)
   Profile Signature (EDDSA-SIG)
 ```
