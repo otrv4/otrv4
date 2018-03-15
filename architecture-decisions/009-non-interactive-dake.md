@@ -150,8 +150,8 @@ Sigma (RING-SIG)
 Attached XZDH Encrypted Message (XZDH-ENCRYPTED-MSG)
   (optional: if an encrypted message is attached)
   The XZDH-ENCRYPTED-MSG that consists of an attached encrypted ratchet
-  id, an attached message id, a public ecdh key (used for encrypting the
-  message), a public dh key (used for encrypting the message), a nonce
+  id, an attached message id, a public ECDH key (used for encrypting the
+  message), a public DH key (used for encrypting the message), a nonce
   and the encrypted message.
 
 Auth MAC (MAC)

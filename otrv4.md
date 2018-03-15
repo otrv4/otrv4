@@ -1027,7 +1027,7 @@ Before rotating the keys:
 
 To rotate the ECDH keys:
 
-  * Retrieve the ECDH key ("Public ECDH key") from the received data message and
+  * Retrieve the ECDH key ('Public ECDH key') from the received data message and
     assign it to `their_ecdh`.
   * Calculate `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
   * Securely delete `our_ecdh.secret`.
@@ -1036,7 +1036,7 @@ To rotate the brace key:
 
   * If `i % 3 == 0`:
 
-    * Retrieve the DH key ("Public DH key") from the received data message and
+    * Retrieve the DH key ('Public DH key') from the received data message and
       assign it to `their_dh`.
     * Calculate `k_dh = DH(our_dh.secret, their_dh)`.
     * Calculate a `brace_key = KDF_1(0x02 || k_dh, 32)`.
@@ -2520,8 +2520,8 @@ This is done by:
 * Try to decrypt the message with a stored skipped message key:
 
   * If the received `j` and `i` are in the `skipped_MKenc` dictionary:
-    * Compare the received `Public ECDH Key` and, if present, the
-      received `Public DH Key` with the stored ones.
+    * Compare the received 'Public ECDH Key' and, if present, the
+      received 'Public DH Key' with the stored ones.
       * If they are equal:
           * Get the message key and the extra symmetric key (if needed):
             `MKenc, extra_symm_key = skipped_MKenc[Public ECDH Key,
@@ -2540,8 +2540,8 @@ This is done by:
           * Securely delete `MKenc` and `nonce`.
           * Add `MKmac` to the list `mac_keys_to_reveal`.
 
-* Given a new ratchet (the received `j` is equal to 0, the `Public ECDH Key` is
-  different from `their_ecdh` and the `Public DH Key` is different from
+* Given a new ratchet (the received `j` is equal to 0, the 'Public ECDH Key' is
+  different from `their_ecdh` and the 'Public DH Key' is different from
   `their_dh` -if present-):
 
   * Store any message keys from the previous DH Ratchet that correspond to
@@ -2619,8 +2619,8 @@ This is done by:
         * Reject the message.
 
       * Securely delete `MKenc` and `nonce`.
-      * Set `their_ecdh` as the "Public ECDH key" from the message.
-      * Set `their_dh` as the "Public DH Key" from the message, if it is not
+      * Set `their_ecdh` as the 'Public ECDH key' from the message.
+      * Set `their_dh` as the 'Public DH Key' from the message, if it is not
         empty.
       * Add `MKmac` to the list `mac_keys_to_reveal`.
 
