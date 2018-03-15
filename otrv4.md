@@ -2549,7 +2549,7 @@ This is done by:
       * If `k` + `max_skip` < received `pn`:
          * Raise an exception that informs the participant that too many message
            keys are stored.
-      * If `chain_key_r` is not `NIL`:
+      * If `chain_key_r` is not `NULL`:
          * while `k` < received `pn`:
              * Derive
                `chain_key_r[i][k+1] = KDF_1(0x23 || chain_key_r[i][k], 64)`
@@ -2581,7 +2581,7 @@ This is done by:
     * If `k` + `max_skip` < received `j`:
          * Raise an exception that informs the participant that too many message
            keys are stored.
-      * If `chain_key_r` is not `NIL`:
+      * If `chain_key_r` is not `NULL`:
          * while `k` < received `j`:
              * Derive
                `chain_key_r[i][k+1] = KDF_1(0x23 || chain_key_r[i][k], 64)`
@@ -2821,8 +2821,8 @@ for this _before_ checking for any of the other `?OTR:` markers):
 
   * If `identifier == I`:
     * If `total == T`, and `C < T`:
-      * Check that the given position of the buffer is empty: `B[index] == NIL`.
-        If it is not, reject the fragment.
+      * Check that the given position of the buffer is empty:
+        `B[index] == NULL`. If it is not, reject the fragment.
       * Store the `piece` at the given position in the buffer:
         `insert(piece, index)`.
       * Increment the buffer counter: `C = C + 1`.
