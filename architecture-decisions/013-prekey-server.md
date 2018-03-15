@@ -35,7 +35,7 @@ This document describes the pre-key server as a component in the OTRv4 protocol.
 
 ### Notation
 
-We use the following notaiton to represent a prekey message stored on a server:
+We use the following notatiton to represent a prekey message stored on a server:
 
       (pre-key-msg, instance-tag, identity)
 
@@ -126,9 +126,8 @@ fingerprints in the non-interactive case?
 ### Consequences
 
 The server may implement measures to prevent DoS attacks, for example, limit the
-frequency of requests and/or the the number of prekey messages accepted.
+frequency of requests and/or the number of prekey messages accepted.
 
 TODO: Mention that there is no protection against DoS (server sends expired or
 already used prekey messages or does not send prekey messages for every
 instance tag it knows about).
-

@@ -60,7 +60,7 @@ array contains the x-coordinate followed by the y-coordinate.
 
 Usually, every specification defines a way of doing encodings. As OTRv4
 uses EdDSA for signature generation and verification, as well as for generation
-of private and public keys (by following RFC 8032), EdDSA encoding for ed448 is
+of private and public keys (by following RFC 8032), EdDSA encoding for Ed448 is
 used.
 
 ### Decision
@@ -104,7 +104,7 @@ conversion defined above, this results in big-endian encoding into bytes (if the
 length is not a multiple of 8, the least significant bits of the last byte
 remain unused).
 
-ed448-EdDSA encoding for elliptic curve related data types is defined as:
+Ed448-EdDSA encoding for elliptic curve related data types is defined as:
 
 Integers and field elements:
 
@@ -156,7 +156,7 @@ mechanism:
 
 Prior to do a key exchange or to encode a curve point, it should be multiplied
 by the cofactor (the ratio between the order of a group and that of the
-subgroup), which for ed448 is 4.
+subgroup), which for Ed448 is 4.
 
 ### References
 

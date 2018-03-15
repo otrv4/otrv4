@@ -307,9 +307,9 @@ Take into account, that some clients might implement different modes when
 talking with each other. In those cases:
 
 * If a client implements OTRv4-standalone mode or OTRv4-interactive-only mode
-  and a request for an OTRv3 conversartion arrives, reject this request.
+  and a request for an OTRv3 conversation arrives, reject this request.
 * If a client implements OTRv4-interactive-only mode and a request for an
-  offline conversartion arrives, reject this request.
+  offline conversation arrives, reject this request.
 
 Take into account, as well, that OTRv4' state machine will need to know the mode
 is working on when initialized. It will also need to take this mode into account
@@ -344,7 +344,7 @@ A point should be encoded and decoded as a `POINT` type, which is defined in the
 The byte representation of a value `x` is defined as `byte(x)`.
 
 The endianness is little and big-endian. Data types that are specific to
-elliptic curve arithmentic (`POINT`, `SCALAR`, `ED448-PUBKEY`,
+elliptic curve arithmetic (`POINT`, `SCALAR`, `ED448-PUBKEY`,
 `ED448-SHARED-PREKEY` and `EDDSA-SIG`) are encoded as little-endian. The rest of
 data types are encoded as big-endian. Little-endian encoding into bits places
 bits from left to right and from least significant to most significant.
@@ -777,7 +777,7 @@ imposed by this specification.
 
 ```
   session identifier mandated by the OTRv4 spec = sender and receiver's
-    instance tags, and the querry message or the whitespace tag
+    instance tags, and the query message or the whitespace tag
   Phi' = session identifier defined by the implementer
   Phi = session identifier mandated by the OTRv4 spec || Phi'
 ```
@@ -793,7 +793,7 @@ For example, a shared session state which higher-level protocol is XMPP, will
 look like this:
 
 ```
-  phi = sender's instance tag || receiver's instance tag || querry message ||
+  phi = sender's instance tag || receiver's instance tag || query message ||
         sender's bare JID || receiver's bare JID
   phi = 0x00000100 || 0x00000101 || "?OTRv4?" || "alice@jabber.net" ||
         "bob@jabber.net"
@@ -948,7 +948,7 @@ ECDH(a, B)
 Check, without leaking extra information about the value of `K_ecdh`, whether
 `K_ecdh` is the all-zero value and abort if so, as this process involves
 contributory behavior. Contributory behaviour means that both parties' private
-keys contribute to the resulting shared key.  Since ed448 have a cofactor of 4,
+keys contribute to the resulting shared key.  Since Ed448 have a cofactor of 4,
 an input point of small order will eliminate any contribution from the other
 party's private key. This situation can be detected by checking for the all-zero
 output.
@@ -1549,7 +1549,7 @@ To verify an Identity message:
    [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
    section for details.
 
-An Identity message is an OTR message encoded as:
+An Identity message is an OTRv4 message encoded as:
 
 ```
 Protocol version (SHORT)
@@ -1627,7 +1627,7 @@ To verify an Auth-R message:
    [Ring Signature Authentication](#ring-signature-authentication), that is
    `sigma == RVrf({Pkb, Pka, Y}, t)`.
 
-An Auth-R message is an OTR message encoded as:
+An Auth-R message is an OTRv4 message encoded as:
 
 ```
 Protocol version (SHORT)
@@ -1925,7 +1925,7 @@ To verify a Prekey message:
    [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
    section for details.
 
-A Prekey is an OTR message encoded as:
+A Prekey is an OTRv4 message encoded as:
 
 ```
 Protocol version (SHORT)
@@ -2011,7 +2011,7 @@ To verify a Non-Interactive-Auth message:
    See [Verification: RVrf({A1, A2, A3}, sigma, m)](#verification-verifya1-a2-a3-sigma-m)
    for details.
 
-A Non-Interactive-Auth is an OTR message encoded as:
+A Non-Interactive-Auth is an OTRv4 message encoded as:
 
 ```
 Protocol version (SHORT)
@@ -2739,7 +2739,7 @@ OTR message as follows:
   "?OTR|%x|%x|%x,%hu,%hu,%s,", identifier, sender_instance, receiver_instance, index, total, piece[index]
   ```
 
-  OTRv3 messages get fragmented in a similar format, but without the indentifier
+  OTRv3 messages get fragmented in a similar format, but without the identifier
   field:
 
   ```
@@ -3235,7 +3235,7 @@ Store plaintext message for possible retransmission.
 
 #### Receiving a data message
 
-A recevied data message will look like this:
+A received data message will look like this:
 
 ```
   ["?OTR" || protocol version || message type || sender's instance_tag ||receiver's instance tag || flags || previous chain message number || ratchet id || message id || public ECDH key || public DH key || nonce || enc(plaintext message || TLV) || authenticator || old MAC keys to be revealed ]

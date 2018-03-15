@@ -24,7 +24,7 @@ This document only changes the way root keys are derived during the Double
 Ratchet algorithm.
 
 The first 3072-bit DH key agreement takes place in the DAKE. This takes
-place as a traditional Diffie Hellman key exchange and not as the combined
+place as a traditional Diffie-Hellman key exchange and not as the combined
 quantum resistant key encapsulation mechanism (KEM) as proposed in Nik
 Unger's paper [\[1\]](#references) (which is described to be optionally used).
 Notice that the first derived DH key during the DAKE is used for generation
@@ -270,7 +270,7 @@ i7 2.2GHz.
 
 ### Decision
 
-We’ve decide to use a 3072-bit key produced by:
+We've decide to use a 3072-bit key produced by:
 
 1. a DH function which takes as an argument the other party’s exponent
    (advertised through a data message) to produce brace key.
