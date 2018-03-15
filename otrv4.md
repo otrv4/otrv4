@@ -1430,8 +1430,7 @@ Bob will be initiating the DAKE with Alice.
     * Calculates the Mixed shared secret
       `K = KDF_1(0x04 ||K_ecdh || brace_key, 64)`.
       Securely deletes `K_ecdh` and `brace_key`.
-    * Calculates the SSID from shared secret: the first 8 bytes of
-      `KDF_1(0x05 || K, 64)`.
+    * Calculates the SSID from shared secret: `KDF_1(0x05 || K, 8)`.
 6. Sends Bob the Auth-R message (see [Auth-R message](#auth-r-message) section).
 
 **Bob:**
@@ -1463,8 +1462,7 @@ Bob will be initiating the DAKE with Alice.
     * Calculates the Mixed shared secret
       `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`.
       Securely deletes `k_ecdh` and `brace_key`.
-    * Calculates the SSID from shared secret: the first 8 bytes of
-      `KDF_1(0x05 || K, 64)`.
+    * Calculates the SSID from shared secret: `KDF_1(0x05 || K, 8)`.
 6. Initializes the double-ratchet:
     * Sets ratchet id `i` as 0.
     * Sets `j` as 0, `k` as 0 and `pn` as 0.
@@ -1783,8 +1781,7 @@ Verify. Decrypt message if included
       [Non-Interactive-Auth Message](#non-interactive-auth-message).
     * Calculates the Mixed shared secret `K = KDF_1(0x04 || tmp_k, 64)`.
       Securely deletes `tmp_k`.
-    * Calculates the SSID from shared secret: it is the first 8 bytes of
-      `KDF_1(0x05 || K, 64)`.
+    * Calculates the SSID from shared secret: `KDF_1(0x05 || K, 8)`.
 7. Initializes the double-ratchet:
     * Sets ratchet id `i` as 0.
     * Sets `j` as 0, `k` as 0 and `pn` as 0.
@@ -1860,8 +1857,7 @@ Verify. Decrypt message if included
 5. Computes the Auth MAC key `auth_mac_k = KDF_1(0x14 || tmp_k, 64)`.
 6. Computes the Mixed shared secret and the SSID:
     * `K = KDF_1(0x04 || tmp_k, 64)`. Securely deletes `tmp_k`.
-    * Calculates the SSID from shared secret: it is the first 8 bytes of
-	   `KDF_1(0x05 || K, 64)`.
+    * Calculates the SSID from shared secret: `KDF_1(0x05 || K, 8)`.
 7. Initializes the double ratchet:
    * Sets ratchet id `i` as 0.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
@@ -2262,13 +2258,13 @@ sending one. For this, the participant:
 ## Data Exchange
 
 This section describes how each participant will use the Double Ratchet
-algorithm to exchange [data messages](#data-message). The Double Ratchet is
-initialized with the shared secret established in the DAKE and the public keys
-immediately exchanged. Detailed validation and processing of each data message
-is described in the
+algorithm to exchange [data messages](#data-message). The Double Ratchet
+algorithm is initialized with the shared secret established in the DAKE and the
+public keys immediately exchanged. Detailed validation and processing of each
+data message is described in the
 [sending an encrypted data messages](#rsending-an-encrypted-data-message)
 and [receiving encrypted data messages](#receiving-an-encrypted-data-message)
-section.
+sections.
 
 A message with an empty human-readable part (the plaintext is of zero length, or
 starts with a NULL) is a "heartbeat" message. This message is useful for key
@@ -2306,6 +2302,7 @@ Send data message 0_1            -------------------->
                                                        Verify MAC, Decrypt message 0_1
 
                                  Perform a new DH Ratchet
+
                                                        Derive MKenc & MKmac
                                                        Generate MAC,
                                                        Encrypt message 1_0
@@ -2339,7 +2336,7 @@ The plaintext message (either before encryption or after decryption) consists
 of a human-readable message (encoded in UTF-8, optionally with HTML markup),
 optionally followed by:
 
-* a single NUL (a BYTE with value 0x00)
+* a single `NUL` (a BYTE with value 0x00)
 * zero or more TLV (type/length/value) records (with no padding between them)
 
 #### Data Message format
@@ -2358,15 +2355,15 @@ Receiver's instance tag (INT)
   The instance tag of the intended recipient.
 
 Flags (BYTE)
-  The bitwise-OR of the flags for this message. Usually you should
-  set this to 0x00. The only currently defined flag is:
+  The bitwise-OR of the flags for this message. Usually you should set this to
+  0x00. The only currently defined flag is:
 
   IGNORE_UNREADABLE (0x01)
 
-    If you receive a Data Message with this flag set, and you are
-    unable to decrypt the message or verify the MAC (because, for
-    example, you don't have the right keys), just ignore the message
-    instead of producing an error or a notification to the user.
+    If you receive a Data Message with this flag set, and you are unable to
+    decrypt the message or verify the MAC (because, for example, you don't have
+    the right keys), just ignore the message instead of producing an error or a
+    notification to the user.
 
 Previous chain message number (INT)
   This should be set with sender's pn.
@@ -2378,14 +2375,14 @@ Message id (INT)
   This should be set with sender's j.
 
 Public ECDH Key (POINT)
-  This is the public part of the ECDH key pair. For the sender of this
-  message, this is their 'our_ecdh.public' value. For the receiver of
-  this message, it is used as 'their_ecdh'.
+  This is the public part of the ECDH key pair. For the sender of this message,
+  this is their 'our_ecdh.public' value. For the receiver of this message, it is
+  used as 'their_ecdh'.
 
 Public DH Key (MPI)
-  This is the public part of the DH key pair. For the sender of this
-  message, it is 'our_dh.public' value. For the receiver of this message,
-  it is used as 'their_dh'. If this value is empty, its length is zero.
+  This is the public part of the DH key pair. For the sender of this message, it
+  is 'our_dh.public' value. For the receiver of this message, it is used as
+  'their_dh'. If this value is empty, its length is zero.
 
 Nonce (NONCE)
   The nonce used with XSalsa20 to create the encrypted message contained
@@ -2395,13 +2392,12 @@ Encrypted message (DATA)
   Using the appropriate encryption key (see below) derived from the
   sender's and recipient's ECDH and DH public keys (with the keyids given in
   this message), perform an XSalsa20 encryption of the message. The nonce used
-  for this operation is also included in the header of the data message
-  packet.
+  for this operation is also included in the header of the data message packet.
 
 Authenticator (MAC)
   The MAC with the appropriate MAC key (see below) of everything:
-  from the protocol version to the end of the encrypted message.
-  Note that old MAC keys are not included in this field.
+  from the protocol version to the end of the encrypted message. Note that old
+  MAC keys are not included in this field.
 
 Old MAC keys to be revealed (DATA)
   See 'Revealing MAC Keys section'. This corresponds to the 'mac_keys_to_reveal'
@@ -2426,12 +2422,11 @@ Given a new DH Ratchet:
     The new ECDH public key created by the sender in this process will be the
     'Public ECDH Key' for the message. If a new public DH key is created in
     this process, it will be the 'Public DH Key' for the message. If it is
-    not created (meaning it is only a KDF of the previoud one), then it will be
+    not created (meaning it is only a KDF of the previous one), then it will be
     empty.
   * Calculate the shared secret `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`.
   * Derive new set of keys:
-    `root_key[i], chain_key_s[i][j] = derive_ratchet_keys(sending,
-     root_key[i-1], K)`.
+    `root_key[i], chain_key_s[i][j] = derive_ratchet_keys(sending, root_key[i-1], K)`.
   * Securely delete the previous root key (`root_key[i-1]`) and `K`.
   * Set `i` as the Data message's ratchet id.
   * Increment the ratchet id `i = i + 1`.
@@ -2445,8 +2440,7 @@ When sending a data message in the same DH Ratchet:
   * Set `j` as the Data message's message id.
   * Set `i - 1` as the Data message's ratchet id.
   * Derive the next sending chain key
-    `chain_key_s[i-1][j+1] = KDF_1(0x23 || chain_key_s[i-1][j], 64)`
-    when a data message is sent.
+    `chain_key_s[i-1][j+1] = KDF_1(0x23 || chain_key_s[i-1][j], 64)`.
   * Calculate the encryption key (`MKenc`), the MAC key (`MKmac`) and, if
     needed the extra symmetric key:
 
@@ -2478,21 +2472,22 @@ When sending a data message in the same DH Ratchet:
 
 The counterpart of the sending an encoded data message. As that one, it also
 needs a per-message key derived from the previous chain key to decrypt the
-message in it. If the receiving `j` is equal to 0, and the receiving `Public
-ECDH Key` has not yet been seen, ratchet keys should be rotated (the ECDH keys,
+message in it. If the receiving `j` is equal to 0, and the receiving 'Public
+ECDH Key' has not yet been seen, ratchet keys should be rotated (the ECDH keys,
 the brace key, the root key and the receiving chain key).
 
 Decrypting a data message consists of:
 
-1. If the encrypted message corresponds to a skipped and stored message key,
-   the message is verified and decrypted with that key which is deleted from the
-   storage.
-2. If a new ratchet key has been received, any skipped message keys from the
-   previous receiving ratchet are stored and a new DH ratchet is performed.
-3. If a new message from the current receiving ratchet is received, any skipped
-   message keys from it are stored, and a symmetric-key ratchet is performed to
-   derive the current message key and the next receiving chain key. The message
-   is then verified and decrypted.
+1. If the encrypted message corresponds to an stored message key corresponding
+   to an skipped message, the message is verified and decrypted with that key
+   which is deleted from the storage.
+2. If a new ratchet key has been received, any message keys corresponding to
+   skipped messages from the previous receiving ratchet are stored. A new DH
+   ratchet is performed.
+3. If a new message from the current receiving ratchet is received, any message
+   keys corresponding to skipped messages from the same ratchet are stored, and
+   a symmetric-key ratchet is performed to derive the current message key and
+   the next receiving chain key. The message is then verified and decrypted.
 
 This is done by:
 
@@ -2542,8 +2537,7 @@ This is done by:
                symmetric key):
                `extra_symm_key = KDF_1(0x26 || 0xFF || chain_key_r[i][j], 32)`.
              * Store
-               `MKenc, extra_sym_key = skipped_MKenc[Public ECDH Key,
-               Public DH Key, i, k]`.
+               `MKenc, extra_sym_key = skipped_MKenc[Public ECDH Key, Public DH Key, i, k]`.
              * Increment `k = k + 1`.
              * Delete `chain_key_r[i][k]`.
   * Rotate the ECDH keys and brace key, see
@@ -2552,8 +2546,7 @@ This is done by:
   * Set the received `pn` as `j`.
   * Calculate `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`.
   * Derive new set of keys
-    `root_key[i], chain_key_r[i][k] = derive_ratchet_keys(receiving,
-     root_key[i-1], K)`.
+    `root_key[i], chain_key_r[i][k] = derive_ratchet_keys(receiving, root_key[i-1], K)`.
   * Securely delete the previous root key (`root_key[i-1]`) and `K`.
   * Increment the ratchet id `i = i + 1`.
   * Derive the next receiving chain key, `MKenc` and `MKmac`, and decrypt the
@@ -2576,8 +2569,7 @@ This is done by:
                symmetric key):
                `extra_symm_key = KDF_1(0x26 || 0xFF || chain_key_r[i-1][j], 32)`.
              * Store
-               `MKenc, extra_sym_key = skipped_MKenc[Public ECDH Key,
-               Public DH Key, i, k]`.
+               `MKenc, extra_sym_key = skipped_MKenc[Public ECDH Key, Public DH Key, i, k]`.
              * Increment `k = k + 1`.
              * Delete `chain_key_r[i-1][k]`.
   * Calculate the encryption and MAC keys (`MKenc` and `MKmac`).
@@ -2606,10 +2598,11 @@ This is done by:
       * Securely delete `MKenc` and `nonce`.
       * Set `their_ecdh` as the "Public ECDH key" from the message.
       * Set `their_dh` as the "Public DH Key" from the message, if it is not
-        NULL.
+        empty.
       * Add `MKmac` to the list `mac_keys_to_reveal`.
 
-* If a message arrives that corresponds to a message key already deleted:
+* If a message arrives that corresponds to a message key already deleted or that
+  cannot be derived:
   * Reject the message.
 
 ### Deletion of stored message keys
@@ -2628,7 +2621,8 @@ risks, as defined in the
    decrypt the captured messages.
 
 To mitigate the first risk, parties should set reasonable per-conversation
-limits on the number of possible stored message keys (e.g. 1000).
+limits on the number of possible stored message keys (e.g. 1000). This limit
+is set by the implementers.
 
 To mitigate the second risk, parties should delete stored message keys after an
 appropriate interval. This deletion could be triggered by a timer, or by
@@ -2655,8 +2649,8 @@ extra symmetric key is not contained in the TLV itself.
 
 If more keys are wished to be derived from this already calculated extra
 symmetric key, this can be done by taking the index from the TLV list received
-in the data message and the context received in `7 TLV`, and use them as inputs
-to a KDF:
+in the data message and the context received in `7 TLV` (the 4-byte indication
+of what this symmetric key will be used for), and use them as inputs to a KDF:
 
 ```
   symkey1 = KDF_1(index || context || extra_sym_key, 32)
@@ -2687,7 +2681,7 @@ Every derived key and the `extra_symm_key` should be deleted after being used.
 
 ### Revealing MAC Keys
 
-Old MAC keys are keys from already received messages and that will no longer be
+Old MAC keys are keys from already received messages, that will no longer be
 used to verify the authenticity of that message. We reveal them in order to
 provide [forgeability of messages](#forging-transcripts): once MAC keys are
 revealed, anyone can modify an OTR message and still have it appear as valid.
@@ -2698,7 +2692,8 @@ expired or when the storage of message keys gets deleted, and the MAC keys for
 messages that have not arrived are derived.
 
 Old MAC keys are formatted as a list of 64-byte concatenated values. The first
-data message sent every ratchet reveals them.
+data message sent every ratchet reveals them or the `TLV` type 7 that is used
+then the session is expired..
 
 ## Fragmentation
 
@@ -2863,12 +2858,12 @@ required and if it will advertise OTR support.
 ```
 START
 
-  This is the initial state before an OTR conversation starts. For the
-  participant, the only way to enter this state is for the participant to
-  explicitly request it via some UI operation. Messages sent in this state are
-  plaintext messages. If a TLV type 1 (Disconnected) message is sent in any of
-  the other states, transition to this state. Note that this transition only
-  happens when TLV type 1 message is sent, not when it is received.
+  This is the initial state before an OTR conversation starts. The only way to
+  enter this state is for the participant to explicitly request it via some UI
+  operation. Messages sent in this state are plaintext messages. If a TLV type 1
+  (Disconnected) message is sent in any of the other states, transition to this
+  state. Note that this transition only happens when TLV type 1 message is sent,
+  not when it is received.
 
 WAITING_AUTH_R
 
@@ -2960,10 +2955,10 @@ Query Messages are not allowed to be sent in `ENCRYPTED_MESSAGES` state.
 
 The version string is constructed as follows:
 
-If she is willing to use OTR, she appends a byte identifier for the versions in
-question, followed by "?". The byte identifier for OTR version 3 is "3", and "4"
-for 4. Thus, if she is willing to use OTR versions 3 and 4, the identifier would
-be "34". The order of the identifiers between the "v" and the "?" does not
+If Alice is willing to use OTR, she appends a byte identifier for the versions
+in question, followed by "?". The byte identifier for OTR version 3 is "3", and
+"4" for 4. Thus, if she is willing to use OTR versions 3 and 4, the identifier
+would be "34". The order of the identifiers between the "v" and the "?" does not
 matter, but none should be listed more than once. The OTRv4 specification only
 supports versions 3 and higher. Thus, query messages for older versions have
 been omitted.
@@ -2991,10 +2986,10 @@ the AKE or DAKE according to the compatible version he supports.
 
 If Alice wishes to communicate to Bob that she is willing to use OTR, she can
 attach a special whitespace tag to any plaintext message she sends him.
-Whitespace tags may occur anywhere in the message, and may be hidden from the
+A Whitespace tag may occur anywhere in the message, and may be hidden from the
 user (as in the [Query Messages](#query-messages)). There should be only one
 whitespace tag per message. In the case that multiple whitespace tags arrive,
-only the first one should be considered.
+only the first one should be considered as valid.
 
 The tag consists of the following 16 bytes, followed by one or more sets of
 8 bytes indicating the version of OTR Alice is willing to use:
@@ -3074,7 +3069,7 @@ If the Query message offers OTR version 3 and version 3 is allowed:
 #### Starting a conversation interactively
 
 Rather than requesting an encrypted conversation, Alice can directly start an
-OTR conversation with Bob if she is certain that they both support and are
+OTRv4 conversation with Bob if she is certain that they both support it and are
 willing to do so. In such case, Alice should:
 
 * Send an Identity message.
@@ -3094,9 +3089,9 @@ If the state is `START`:
 If the state is `WAITING_AUTH_R`:
 
   ```
-  You and the other participant have sent Identity messages to each other.
-  This can happen if they send you an Identity message before receiving
-  yours. Only one Identity message must be chosen for use.
+    You and the other participant have sent Identity messages to each other.
+    This can happen if they send you an Identity message before receiving
+    yours. Only one Identity message must be chosen for use.
   ```
 
   * Validate the Identity message. Ignore the message if validation fails.
@@ -3107,7 +3102,7 @@ If the state is `WAITING_AUTH_R`:
     * If yours is the higher hash value:
       * Ignore the incoming Identity message, but resend your Identity message.
         This means that the other side have the lower hash value and, therefore,
-        keep going as stated below.
+        will keep going as stated below.
     * Otherwise:
       * Forget your old `B` value that you sent earlier.
       * Pretend you are on `START` state.
@@ -3117,13 +3112,14 @@ If the state is `WAITING_AUTH_R`:
 If the state is `WAITING_AUTH_I`:
 
   ```
-  There are a number of reasons that you may receive an Identity Message in this
-  state. Perhaps your correspondent simply started a new DAKE or they resent
-  their Identity Message. On some networks, like AIM, if your correspondent is
-  logged in multiple times, each of his clients will send an Identity Message
-  in response to a Query Message. Resending the same Auth-R Message in
-  response to each of those messages will prevent compounded confusion, since
-  each of their clients will see each of the Auth-R Messages you send.
+    There are a number of reasons that you may receive an Identity Message in
+    this state. Perhaps your correspondent simply started a new DAKE or they
+    resent their Identity Message. On some networks, like AIM, if your
+    correspondent is logged in multiple times, each of his clients will send an
+    Identity Message in response to a Query Message. Resending the same Auth-R
+    Message in response to each of those messages will prevent compounded
+    confusion, since each of their clients will see each of the Auth-R Messages
+    you send.
   ```
 
   * Validate the Identity message. Ignore the message if validation fails.
@@ -3157,7 +3153,7 @@ If the state is `WAITING_AUTH_R`:
       * Stay in state `WAITING_AUTH_R`.
     * If validation succeeds:
       * Reply with an Auth-I message, as defined in
-        [Sending an Auth-I message](##sending-an-auth-i-message).
+        [Sending an Auth-I message](##sending-an-auth-i-message) section.
 
 If the state is `ENCRYPTED_MESSAGES`:
 
@@ -3198,7 +3194,7 @@ If the state is not `WAITING_AUTH_R`:
 
 * Generate and send a Non-Interactive-Auth message.
 * Initialize the double ratcheting, as defined in the
-  [Non-Interactive DAKE Overview](#non-interactive-dake-overview).
+  [Non-Interactive DAKE Overview](#non-interactive-dake-overview) section.
 * Transition to state `ENCRYPTED_MESSAGES`.
 * If there is a recent stored message, encrypt it and send it as a Data
   Message.
@@ -3216,7 +3212,7 @@ If the state is not `WAITING_AUTH_R`:
   * Otherwise:
     * Validate the Non-Interactive-Auth message.
     * Initialize the double ratcheting, as defined in the
-      [Non-Interactive DAKE Overview](#non-interactive-dake-overview).
+      [Non-Interactive DAKE Overview](#non-interactive-dake-overview) section.
     * Transition to state `ENCRYPTED_MESSAGES`.
 
 #### Sending a data message
@@ -3247,7 +3243,10 @@ Store plaintext message for possible retransmission.
 A received data message will look like this:
 
 ```
-  ["?OTR" || protocol version || message type || sender's instance_tag ||receiver's instance tag || flags || previous chain message number || ratchet id || message id || public ECDH key || public DH key || nonce || enc(plaintext message || TLV) || authenticator || old MAC keys to be revealed ]
+  ["?OTR" || protocol version || message type || sender's instance_tag ||receiver's instance tag ||
+    flags || previous chain message number || ratchet id || message id || public ECDH key ||
+    public DH key || nonce || enc(plaintext message || TLV) || authenticator ||
+    old MAC keys to be revealed ]
 ```
 
 If the version is 4:
@@ -3255,10 +3254,10 @@ If the version is 4:
 * If the state is not `ENCRYPTED_MESSAGES`:
   * Inform the user that an unreadable encrypted message was received by
     replying with an Error Message: `ERROR_2`.
-  * There are only one other states in which a participant can receive an
+  * There are only one other state in which a participant can receive an
     encrypted message (that do not have the same format as a data message):
       * On `START`: when the other participant sends you an
-        Non-Interactive-Auth message that has an attached encrypted message with
+        Non-Interactive-Auth message that has an attached encrypted message in
         it.
 
 * Otherwise:
@@ -3342,7 +3341,7 @@ If the version is 3:
 If using version 3 and 'ERROR_START_AKE' policy is set (which expects that the
 AKE will start when receiving an OTR Error message, as defined in OTRv3):
 
-  * Reply with a query message
+  * Reply with a Query Message.
 
 #### User requests to end an OTR conversation
 
@@ -3466,17 +3465,7 @@ only information entered by the users, but also information unique to the
 conversation in which SMP takes place. This includes the Secure Session ID
 (SSID) whose creation is described
 [here](#interactive-deniable-authenticated-key-exchange-dake)
-and [here](#non-interactive-auth-message). If the user requests to see this
-Secure Session ID, it should be displayed as two 32-bit big-endian unsigned
-values, for example, in C language, "%08x" format. If the party transmitted the
-Auth-R message during the DAKE, then display the first 32 bits in bold, and the
-second 32 bits in non-bold. If the user transmitted the Auth-I message instead,
-display the first 32 bits in non-bold, and the second 32 bits in bold. This
-Secure Session ID can be used by the parties to verify (say, over the telephone,
-assuming the parties recognize each others' voices) that there is no
-man-in-the-middle by having each side read his bold part to the other. Note that
-this only needs to be done in the event that the users do not trust that their
-long-term keys have not been compromised.
+and [here](#non-interactive-auth-message).
 
 The format for the secret information is:
 
@@ -3801,11 +3790,11 @@ functions used for honest conversations. This section will outline the
 operations that must be exposed and include guidance to forge messages.
 
 In OTRv4, anyone can forge messages after a conversation to make them look like
-they came from you. However, during a conversation, your correspondent is
-assured the messages they sees are authentic and unmodified. Easily forgeable
-transcripts achieve the offline deniability property: if someone claims a
-participant said something over OTR, they'll have no way to proof so, as
-anyone could have modify a transcript.
+they came from them. However, during a conversation, your correspondent is
+assured that the messages they see are authentic and unmodified. Easily
+forgeable transcripts achieve the offline deniability property: if someone
+claims a participant said something over OTR, they'll have no way to proof so,
+as anyone could have modify a transcript.
 
 The major utilities for forging are:
 
