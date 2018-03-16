@@ -308,9 +308,9 @@ For details on how these modes work, review the
 Take into account, that some clients might implement different modes when
 talking with each other. In those cases:
 
-* If a client implements OTRv4-standalone mode or OTRv4-interactive-only mode
-  and a request for an OTRv3 conversation arrives, reject this request.
-* If a client implements OTRv4-interactive-only mode and a request for an
+* If a client implements "OTRv4-standalone" mode or "OTRv4-interactive-only"
+  mode and a request for an OTRv3 conversation arrives, reject this request.
+* If a client implements "OTRv4-interactive-only" mode and a request for an
   offline conversation arrives, reject this request.
 
 Take into account, as well, that OTRv4' state machine will need to know the mode
@@ -752,7 +752,7 @@ Type 6: SMP Abort Message
 
 Type 7: Extra symmetric key
   If you wish to use the extra symmetric key, compute it yourself as outlined
-  in the section "Extra symmetric key". Then send this 'type 7 TLV' to your peer
+  in the section "Extra symmetric key". Then send this type 7 TLV to your peer
   to indicate that you'd like to use the extra symmetric key for something. The
   value of the TLV begins with a 4-byte indication of what this symmetric key
   will be used for (file transfer, voice encryption, etc). After that, the
@@ -784,8 +784,8 @@ imposed by this specification.
 ```
   session identifier mandated by the OTRv4 spec = sender and receiver's
     instance tags, and the query message or the whitespace tag
-  Phi' = session identifier defined by the implementer
-  Phi = session identifier mandated by the OTRv4 spec || Phi'
+  phi' = session identifier defined by the implementer
+  phi = session identifier mandated by the OTRv4 spec || phi'
 ```
 
 In XMPP, for example, `Phi'` can be the node and domain parts of the sender
@@ -793,7 +793,7 @@ and receiver's jabber identifier, e.g. `alice@jabber.net` (often referred as the
 "bare JID"). In an application that assigns some attribute to users before a
 conversation (e.g., a networked game in which players take on specific roles),
 the expected attributes (expressed in fixed length) should be included in
-`Phi'`. A static password shared by both sides can also be included.
+`phi'`. A static password shared by both sides can also be included.
 
 For example, a shared session state which higher-level protocol is XMPP, will
 look like this:
@@ -807,16 +807,16 @@ look like this:
 
 ### Secure Session ID
 
-The secure session ID is a 8-byte value. If the participant requests to see it,
-it should be displayed as two 4-byte big-endian unsigned values. For example, in
-C language, in "%08x" format. If the party transmitted the Auth-R message during
-the DAKE, then display the first 4 bytes in bold, and the second 4 bytes in
-non-bold. If the party transmitted the Auth-I message instead, display the first
-4 bytes in non-bold, and the second 4 bytes in bold. If the party transmitted
-the Non-Interactive-Auth message during the DAKE, then display the first 4 bytes
-in bold, and the second 4 bytes in non-bold. If the party received the
-Non-Interactive-Auth message instead, display the first 4 bytes in non-bold, and
-the second 4 bytes in bold.
+The secure session ID (`SSID`) is a 8-byte value. If the participant requests
+to see it, it should be displayed as two 4-byte big-endian unsigned values. For
+example, in C language, in "%08x" format. If the party transmitted the Auth-R
+message during the DAKE, then display the first 4 bytes in bold, and the second
+4 bytes in non-bold. If the party transmitted the Auth-I message instead,
+display the first 4 bytes in non-bold, and the second 4 bytes in bold. If the
+party transmitted the Non-Interactive-Auth message during the DAKE, then display
+the first 4 bytes in bold, and the second 4 bytes in non-bold. If the party
+received the Non-Interactive-Auth message instead, display the first 4 bytes
+in non-bold, and the second 4 bytes in bold.
 
 This Secure Session ID can be used by the parties to verify (over the telephone,
 assuming the parties recognize each others' voices) that there is no
@@ -884,8 +884,8 @@ Key variables:
   'our_dh': our DH ephemeral key pair.
   'their_dh': their DH ephemeral public key.
   'brace_key': either a hash of the shared DH key: 'KDF_1(0x02 || k_dh, 32)'
-   (every thrid DH ratchet) or a hash of the previuos brace_key:
-   'KDF_1(0x03 || brace_key, 32)'
+   (every thrid DH ratchet) or a hash of the previuos 'brace_key:
+   KDF_1(0x03 || brace_key, 32)'
   'mac_keys_to_reveal': the MAC keys to be revealed in the first data message
     sent of the next ratchet.
   'skipped_MKenc': Dictionary of stored skipped-over message keys, indexed by
@@ -946,8 +946,7 @@ k_dh:
 
 brace_key:
   Either a hash of the shared DH key: 'KDF_1(0x02 || k_dh, 32)' (every third
-  DH ratchet) or a hash of the previuos brace_key:
-  'KDF_1(0x03 || brace_key, 32)'.
+  DH ratchet) or a hash of the previuos 'brace_key: KDF_1(0x03 || brace_key, 32)'.
 
 K_ecdh:
   The serialized ECDH shared secret computed from an ECDH exchange, serialized
@@ -955,8 +954,7 @@ K_ecdh:
 
 K:
   The Mixed shared secret is the final shared secret derived from both the
-  DH (brace key) and ECDH shared secrets:
-  KDF_1(0x04 || K_ecdh || brace_key, 64).
+  brace key and ECDH shared secrets: 'KDF_1(0x04 || K_ecdh || brace_key, 64)'.
 ```
 
 ### Generating shared secrets
@@ -1368,13 +1366,13 @@ To validate a user profile, you must (in this order):
 
 1. Verify that the user profile has not expired.
 2. Verify that the `Versions` field contains the character "4".
-3. Validate that the Public Shared Prekey and the Ed448 Public Key are on the
-   curve Ed448-Goldilocks. See
+3. Validate that the `Public Shared Prekey` and the `Ed448 Public Key` are on
+   the curve Ed448-Goldilocks. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
 3. If the `Transitional Signature` is present, verify its validity using the
    OTRv3 DSA key.
-4. [Verify that the user profile signature is valid](#verify-a-user-profile-signature).
+4. [Verify that the User Profile signature is valid](#verify-a-user-profile-signature).
 
 ## Online Conversation Initialization
 
@@ -1682,7 +1680,7 @@ A (MPI)
   is NOT a POINT.
 
 sigma (RING-SIG)
-  The RING-SIG proof of authentication value.
+  The 'RING-SIG' proof of authentication value.
 ```
 
 #### Auth-I message
@@ -1696,7 +1694,7 @@ A valid Auth-I message is generated as follows:
    `t = 0x1 || KDF_1(0x09 || Bobs_User_Profile, 64) ||
     KDF_1(0x10 || Alices_User_Profile, 64) || Y || X || B || A ||
     KDF_1(0x11 || phi, 64)`.
-   `phi` is the shared session state as mention on its
+   `phi` is the shared session state as mention in its
    [section](#shared-session-state).
 2. Compute `sigma = RSig(H_b, sk_hb, {H_b, H_a, X}, t)`, as defined in
    [Ring Signature Authentication](#ring-signature-authentication).
@@ -1711,7 +1709,7 @@ To verify an Auth-I message:
    `t = 0x1 || KDF_1(0x09 || Bobs_User_Profile, 64) ||
     KDF_1(0x10 || Alices_User_Profile, 64) || Y || X || B || A ||
     KDF_1(0x11 || phi, 64)`.
-   `phi` is the shared session state as mention on its
+   `phi` is the shared session state as mention in its
    [section](#shared-session-state).
 5. Verify the `sigma` as defined in
    [Ring Signature Authentication](#ring-signature-authentication).
@@ -1833,7 +1831,10 @@ Verify. Decrypt message if included
     * If an encrypted message is attached, she computes:
 
       ```
-        Auth MAC = KDF_1(0x18 || auth_mac_k || t || (KDF_1(0x17 || attached encrypted ratchet id || attached encrypted message id || public ecdh key || public dh key || nonce || encrypted message, 64)), 64)`.
+        Auth MAC = KDF_1(0x18 || auth_mac_k || t || (KDF_1(0x17 ||
+                   attached encrypted ratchet id ||
+                   attached encrypted message id || public ecdh key ||
+                   public dh key || nonce || encrypted message, 64)), 64)`.
       ```
 
     * Otherwise, she computes:
@@ -1973,8 +1974,8 @@ Y Prekey owner's ECDH public key (POINT)
   First one-time use prekey value.
 
 B Prekey owner's DH public key (MPI)
-  Second one-time use prekey value. The ephemeral public DH
-  key. Note that even though this is in uppercase, this is NOT a POINT.
+  Second one-time use prekey value. The ephemeral public DH key. Note that even
+  though this is in uppercase, this is NOT a POINT.
 
 ```
 
@@ -2060,18 +2061,18 @@ X (POINT)
   The ephemeral public ECDH key.
 
 A (MPI)
-  The ephemeral public DH key. Note that even though this is in uppercase,
-  this is NOT a POINT.
+  The ephemeral public DH key. Note that even though this is in uppercase, this
+  is NOT a POINT.
 
 Sigma (RING-SIG)
-  The RING-SIG proof of authentication value.
+  The 'RING-SIG' proof of authentication value.
 
 Attached XZDH Encrypted Message (XZDH-ENCRYPTED-MSG)
   (optional: if an encrypted message is attached)
-  The XZDH-ENCRYPTED-MSG that consists of an attached encrypted ratchet
-  id, an attached message id, a public ECDH key (used for encrypting the
-  message), a public DH key (used for encrypting the message), a nonce
-  and the encrypted message.
+  The XZDH-ENCRYPTED-MSG that consists of an attached encrypted ratchet id, an
+  attached message id, a public ECDH key (used for encrypting the message), a
+  public DH key (used for encrypting the message), a 'nonce' and the encrypted
+  message.
 
 Auth MAC (MAC)
   The MAC with the appropriate MAC key (see above) of the message ('t') for the
@@ -2218,7 +2219,7 @@ Public DH Key (MPI)
 
 Encrypted message (DATA)
   Using the appropriate encryption/message key, perform an XSalsa20 encryption
-  of the message. The nonce used for this operation is also included in
+  of the message. The 'nonce' used for this operation is also included in
   the header of the attached message packet.
 ```
 
@@ -2288,7 +2289,7 @@ data message is described in the
 and [receiving a data messages](#receiving-a-data-message) sections.
 
 A message with an empty human-readable part (the plaintext is of zero length, or
-starts with a NULL) is a "heartbeat" message. This message is useful for key
+starts with a `NULL`) is a "heartbeat" message. This message is useful for key
 rotations and revealing MAC keys. It should not be displayed to the participant.
 If you have not sent a message to a correspondent in some (configurable) time,
 send a "heartbeat" message, consisting of a Data Message encoding and an empty
@@ -2412,7 +2413,7 @@ Nonce (NONCE)
 Encrypted message (DATA)
   Using the appropriate encryption key (see below) derived from the
   sender's and recipient's ECDH and DH public keys (with the keyids given in
-  this message), perform an XSalsa20 encryption of the message. The nonce used
+  this message), perform an XSalsa20 encryption of the message. The 'nonce' used
   for this operation is also included in the header of the data message packet.
 
 Authenticator (MAC)
@@ -2421,7 +2422,7 @@ Authenticator (MAC)
   MAC keys are not included in this field.
 
 Old MAC keys to be revealed (DATA)
-  See 'Revealing MAC Keys section'. This corresponds to the 'mac_keys_to_reveal'
+  See "Revealing MAC Keys" section. This corresponds to the 'mac_keys_to_reveal'
   variable.
 ```
 
@@ -2658,18 +2659,18 @@ as defined in the [Session Expiration](#session-expiration) section.
 Like OTRv3, OTRv4 defines an additional symmetric key that can be derived by
 the communicating parties for use of application-specific purposes, such as
 file transfer, voice encryption, etc. When one party wishes to use the extra
-symmetric key, they create a type `7 TLV`, which they attach to a Data Message.
+symmetric key, they create a type 7 TLV, which they attach to a Data Message.
 The extra symmetric key itself is then derived using the same `chain_key` used
 to compute the message encryption key used to protect the Data Message. It is,
 therefore, derived by calculating `KDF_1(0x26 || 0xFF || chain_key)`.
 
-Upon receipt of the Data Message containing the type `7 TLV`, the recipient will
+Upon receipt of the Data Message containing the type 7 TLV, the recipient will
 compute the extra symmetric key in the same way. Note that the value of the
 extra symmetric key is not contained in the TLV itself.
 
 If more keys are wished to be derived from this already calculated extra
 symmetric key, this can be done by taking the index from the TLV list received
-in the data message and the context received in `7 TLV` (the 4-byte indication
+in the data message and the context received in 7 TLV (the 4-byte indication
 of what this symmetric key will be used for), and use them as inputs to a KDF:
 
 ```
@@ -2712,8 +2713,8 @@ expired or when the storage of message keys gets deleted, and the MAC keys for
 messages that have not arrived are derived.
 
 Old MAC keys are formatted as a list of 64-byte concatenated values. The first
-data message sent every ratchet reveals them or the `TLV` type 7 that is used
-then the session is expired..
+data message sent every ratchet reveals them or the TLV type 7 that is used then
+the session is expired.
 
 ## Fragmentation
 
@@ -2748,7 +2749,8 @@ If you have information about the _maximum message size_ you are able to send
 OTR message as follows:
 
   * Start with the OTR message as you would normally transmit it. For example,
-    a Data Message would start with `?OTR:AAQD` and end with `.`.
+    a Data Message would start with
+    `?OTR:AAQD` and end with `.`.
   * Assign an identifier, which will be used specifically for this fragmented
     data message. This is done in order to not confuse these fragments with
     other data message's fragments. The identifier is a unique randomly
@@ -3351,14 +3353,14 @@ If the version is 3:
 
 #### Receiving an Error Message
 
-* Detect if an error code exists in the form "ERROR_x" where x is a number.
+* Detect if an error code exists in the form `ERROR_x` where x is a number.
 * If the error code exists in the spec:
   * Display the human-readable error message to the user.
 
 * Otherwise:
   * Ignore the message.
 
-If using version 3 and 'ERROR_START_AKE' policy is set (which expects that the
+If using version 3 and `ERROR_START_AKE` policy is set (which expects that the
 AKE will start when receiving an OTR Error message, as defined in OTRv3):
 
   * Reply with a Query Message.
@@ -3541,7 +3543,7 @@ The SMP message 1 has the following data and format:
 Question (DATA)
   A user-specified question, which is associated with the user-specified secret
   information. If there is no question input from the user, the length of this
-  is 0 and the data is NULL.
+  is 0 and the data is 'NULL'.
 
 G2a (POINT)
   Alice's half of the ECDH exchange to determine G2.
@@ -3902,11 +3904,9 @@ Forge Entire Transcript
 
 The Authentication scheme consists of two functions:
 
-- An authentication function:
-  `sigma = RSig(A1, a1, {A1, A2, A3}, m)`
+- An authentication function: `sigma = RSig(A1, a1, {A1, A2, A3}, m)`.
 
-- A verification function:
-  `RVrf({A1, A2, A3}, sigma, m)`
+- A verification function: `RVrf({A1, A2, A3}, sigma, m)`.
 
 #### Domain parameters
 
@@ -4002,7 +4002,7 @@ can be inferred in practice).
 
 `A1`, `A2`, and `A3` should be checked to verify that they are on curve Ed448.
 
-1. Parse sigma to retrieve components `(c1, r1, c2, r2, c3, r3)`.
+1. Parse `sigma` to retrieve components `(c1, r1, c2, r2, c3, r3)`.
 2. Compute `T1 = G * r1 + A1 * c1`
 3. Compute `T2 = G * r2 + A2 * c2`
 4. Compute `T3 = G * r3 + A3 * c3`

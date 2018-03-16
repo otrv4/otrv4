@@ -105,7 +105,7 @@ Implementers should, nevertheless, be careful around the storage of message keys
 as attackers can try to cause denial-of-service (by storing large amounts of
 message keys), or to try to capture and retroactively decrypt messages.
 
-Sent data messages can always have a type `7 TLV` attached. In the case of the
+Sent data messages can always have a type 7 TLV attached. In the case of the
 receiver, this participant is never sure of when a message corresponding to a
 stored skipped message key will arrive with this TLV attached. For this reason,
 every time a message key is stored, an extra symmetric key is also derived an

@@ -277,7 +277,7 @@ We've decide to use a 3072-bit key produced by:
 2. a KDF `KDF_1(0x03 || brace_key, 32)` which uses the previous brace key
    to produce a new one.
 
-The DH function will run every n = 3 times because:
+The DH function will run every `n = 3` times because:
 
 1. It is a small number so a particular key can only be compromised for a
    maximum of n ratchets. This means that the maximum ratchets that will

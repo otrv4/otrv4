@@ -103,7 +103,7 @@ Prekey owner's instance tag (INT)
   The instance tag of the client that created the prekey.
 
 Prekey owner's User Profile (USER-PROF)
-  As described in the section 'Creating a User Profile'.
+  As described in the section "Creating a User Profile".
 
 Y Prekey owner's ECDH public key (POINT)
   First part of the one-time use prekey value.
@@ -135,7 +135,7 @@ Receiver's instance tag (INT)
   The instance tag of the intended recipient.
 
 Sender's User Profile (USER-PROF)
-  As described in the section 'Creating a User Profile'.
+  As described in the section "Creating a User Profile".
 
 X (POINT)
   The ephemeral public ECDH key.
@@ -145,11 +145,11 @@ A (MPI)
   this is NOT a POINT.
 
 Sigma (RING-SIG)
-  The RING-SIG proof of authentication value.
+  The 'RING-SIG' proof of authentication value.
 
 Attached XZDH Encrypted Message (XZDH-ENCRYPTED-MSG)
   (optional: if an encrypted message is attached)
-  The XZDH-ENCRYPTED-MSG that consists of an attached encrypted ratchet
+  The 'XZDH-ENCRYPTED-MSG' that consists of an attached encrypted ratchet
   id, an attached message id, a public ECDH key (used for encrypting the
   message), a public DH key (used for encrypting the message), a nonce
   and the encrypted message.
