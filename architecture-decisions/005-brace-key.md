@@ -190,7 +190,7 @@ is different from the stored one) or sent.
 If `ratchet_id % 3 == 0 && sending the first message of a new ratchet`
 
   * Compute the new brace key from a DH computation e.g.
-    `brace_key_i = KDF_1(0x02 || DH(our_DH.secret, their_DH.public), 32)
+    `brace_key_i = KDF_1(0x02 || DH(our_DH.secret, their_DH.public), 32)`.
   * Send the new `brace_key`'s public key (our_DH.public) to the other party
     for further key computation.
 

@@ -33,8 +33,8 @@ In OTRv3, query messages are used to:
 We propose to use query messages in OTRv4 with the same format as OTRv3, but
 with a slightly difference in the semantics:
 
-* "Force a key rotation" use case is made unnecessary by virtue of OTRv4
-  double ratchet.
+* "Force a key rotation" use case is made unnecessary by virtue of OTRv4's
+  Double Ratchet Algorithm.
 * Query messages can be sent at any time except when the participant is already
   in `ENCRYPTED_MESSAGES` state.
 

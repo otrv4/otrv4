@@ -1528,7 +1528,7 @@ Bob will be initiating the DAKE with Alice.
 **Bob:**
 
 1. At this point, the interactive DAKE is complete for Bob, but he has to
-   correctly setup the double ratchet mechanism:
+   correctly setup the double ratchet logarithm:
    * In the case that he immediately receives a data message that advertises the
      new public keys from Alice:
      * Follows what is defined in the
@@ -1884,7 +1884,7 @@ Verify. Decrypt message if included
 6. Computes the Mixed shared secret and the SSID:
     * `K = KDF_1(0x04 || tmp_k, 64)`. Securely deletes `tmp_k`.
     * Calculates the SSID from shared secret: `KDF_1(0x05 || K, 8)`.
-7. Initializes the double ratchet:
+7. Initializes the double ratchet algorithm:
    * Sets ratchet id `i` as 0.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
    * Generates an ephemeral ECDH key pair, as defined in
