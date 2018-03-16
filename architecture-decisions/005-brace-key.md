@@ -16,25 +16,25 @@ material. This additional key is called the “brace key”.
 
 This document specifies:
 
-1. The brace key to mix in with the ECDH shared secret when deriving a new
-   root key.
+1. The brace key to mix in with the ECDH shared secret when deriving a new root
+   key.
 2. An algorithm for ratcheting and deriving the brace key.
 
 This document only changes the way root keys are derived during the Double
 Ratchet algorithm.
 
-The first 3072-bit DH key agreement takes place in the DAKE. This takes
-place as a traditional Diffie-Hellman key exchange and not as the combined
-quantum resistant key encapsulation mechanism (KEM) as proposed in Nik
-Unger's paper [\[1\]](#references) (which is described to be optionally used).
-Notice that the first derived DH key during the DAKE is used for generation
-of the Mixed shared secret. For the initialization of the Double Ratchet
-Logarithm, a DH key must be advertised.
+The first 3072-bit DH key agreement takes place in the DAKE. This takes place as
+a traditional Diffie-Hellman key exchange and not as the combined quantum
+resistant key encapsulation mechanism (KEM) as proposed in Nik Unger's paper
+[\[1\]](#references) (which is described to be optionally used). Notice that the
+first derived DH key during the DAKE is used for generation of the Mixed shared
+secret. For the initialization of the Double Ratchet Logarithm, a DH key must be
+advertised.
 
 We are not using the same quantum resistant KEM, as defined in the mentioned
 paper (that recommends using either SIDH or New Hope), because we are aiming
-to give additional protection against transcript decryption in the case of
-ECC compromise and some protection if quantum computers arrive earlier than
+to give additional protection against transcript decryption in the case of ECC
+compromise and some protection if quantum computers arrive earlier than
 expected. Because of this, we will use a traditional DH key exchange.
 
 We considered two options for ratcheting/deriving the brace key:
@@ -42,9 +42,9 @@ We considered two options for ratcheting/deriving the brace key:
 1. Obtain a brace key from a DH function which requires the other party to
    contribute to the computation each time a new Mixed shared secret is derived.
 2. Obtain a brace key with DH functions which require the other party to
-   contribute to the computation every n times. Between these derivations,
-   the brace keys are obtained using a key derivation function (KDF) that is
-   seeded with the last DH key. We propose n = 3, but n can be adjusted for
+   contribute to the computation every n times. Between these derivations, the
+   brace keys are obtained using a key derivation function (KDF) that is seeded
+   with the last DH key. We propose n = 3, but n can be adjusted for
    performance.
 
 We chose the second option.
@@ -56,11 +56,11 @@ In this description of the algorithm's functions, we will assume n = 3.
 **k_dh = A_i, a_i**
 
 A brace key is a key that is added to the KDF used to derive a new Mixed shared
-secret. A brace key can be produced through a DH function or through a
-key derivation function. The first method produces a 3072-bit public key which
-is later used as an input to a key derivation function
-`KDF_1(0x02 || k_dh, 32)`. The second method produces a 32-byte key as a result
-of a key derivation function that takes as an input the previous brace key
+secret. A brace key can be produced through a DH function or through a key
+derivation function. The first method produces a 3072-bit public key which is
+later used as an input to a key derivation function `KDF_1(0x02 || k_dh, 32)`.
+The second method produces a 32-byte key as a result of a key derivation
+function that takes as an input the previous brace key
 `KDF_1(0x03 || brace_key, 32)`. This key has a 128-bit security level according
 to Table 2: Comparable strengths in NIST’s Recommendation for Key Management,
 page 53 [\[3\]](#references).
@@ -86,12 +86,12 @@ Given `brace_key`, the SHAKE-256 generates a 32-byte digest: a new `brace_key`.
 #### Considerations
 
 Transmitting the 3072-bit DH public key will increase the time it takes to
-exchange messages. To mitigate this, the key won’t be transmitted every time
-the root and chain keys are derived. Instead, this key will be computed with
-a DH function every third time and the interim keys will be derived from the
-previous `brace_key`. After generating new DH keys, the new public key will
-be sent in every message of that ratchet in order to allow transmission even
-if one of the messages is dropped.
+exchange messages. To mitigate this, the key won’t be transmitted every time the
+root and chain keys are derived. Instead, this key will be computed with a DH
+function every third time and the interim keys will be derived from the previous
+`brace_key`. After generating new DH keys, the new public key will be sent in
+every message of that ratchet in order to allow transmission even if one of the
+messages is dropped.
 
 The brace key will be mixed with the ECDH key to produce the Mixed shared
 secret.
@@ -114,8 +114,8 @@ The interim root key derivations will use a brace key derived from a
 _When n is configured to equal 3_
 
 ```
-If we assume messages have been sent by Alice and Bob after the DAKE and we
-are now at ratchet 3:
+If we assume messages have been sent by Alice and Bob after the DAKE and we are
+now at ratchet 3:
 
 Alice                                                 Bob
 ---------------------------------------------------------------------------------------------
@@ -281,8 +281,8 @@ The DH function will run every `n = 3` times because:
 
 1. It is a small number so a particular key can only be compromised for a
    maximum of n ratchets. This means that the maximum ratchets that will
-   use the brace key or a key derived from the brace key is 3 (from the
-   sender and from the receiver side).
+   use the brace key or a key derived from the brace key is 3 (from the sender
+   and from the receiver side).
 
 The group used for this key is the one assigned with id 15 in the IETF paper,
 RFC 3526 [\[4\]](#references):
@@ -314,9 +314,9 @@ RFC 3526 [\[4\]](#references):
 
 ### Consequences
 
-Using a 3072-bit DH function to produce the brace key increases the size of
-data messages by 56 bytes of extra key material. The increased size may cause
-some transport protocols to fragment these messages.
+Using a 3072-bit DH function to produce the brace key increases the size of data
+messages by 56 bytes of extra key material. The increased size may cause some
+transport protocols to fragment these messages.
 
 ### References
 

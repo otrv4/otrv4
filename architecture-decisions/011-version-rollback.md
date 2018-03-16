@@ -10,13 +10,13 @@ conversation by sending a Query Message that includes the versions they would
 like to use. Alternatively, a Whitespace Tag can be used to indicate willingness
 of using OTR at specific versions.
 
-In a version rollback attack, a Query Message is intercepted and changed by
-a MITM to enforce the lowest version advertised, and the protocol is unable to
+In a version rollback attack, a Query Message is intercepted and changed by a
+MITM to enforce the lowest version advertised, and the protocol is unable to
 determine if participants are using the highest version they both support. The
 same applies to a Whitespace Tag.
 
 By exchanging authenticated version information, OTRv4 introduces a strategy by
-which  future versions of OTR can use to protect from version rollback attacks
+which future versions of OTR can use to protect from version rollback attacks
 without compromising participation deniability.
 
 ### Decision
@@ -51,8 +51,8 @@ Alice                        Malory                         Bob
  The OTRv3 AKE continues.
 ```
 
-Rollback from vX (released after 4) protocol to v4 protocol can be
-detected by OTRv4:
+Rollback from vX (released after 4) protocol to v4 protocol can be detected by
+OTRv4:
 
 - For OTRvX (released after OTRv4), the known state machine versions are:
   X, ..., 4.
@@ -93,5 +93,5 @@ As OTRv4 upgrades do not fix any known security issue on OTRv3, it is
 acceptable for users to chat using version 3, but is preferable to use 4 if
 both parties support it.
 
-We will support a conversation using version 3 if we don't find any user
-profile and the client allows it.
+We will support a conversation using version 3 if we don't find any user profile
+and the client allows it.

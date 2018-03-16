@@ -39,12 +39,12 @@ Furthermore, ignore the whole OTRv4 Prekey Server specification.
 ### Scenarios and applications
 
 This mode will work on the same kind of applications and scenarios defined
-for the Otrv4-Standalone mode.
+for the OTRv4-Standalone mode.
 
 ## Considerations
 
 This mode will take into account the same kind considerations defined for the
-Otrv4-Standalone mode.
+OTRv4-Standalone mode.
 
 Nevertheless, this mode achieves different security properties as the ones
 described in the [security properties](../otrv4.md#security-properties) section,

@@ -13,8 +13,8 @@ reasons:
 
 Firstly, OTRv4 aims to be possible and easy to implement in today's environments
 in a reasonable time frame. OTRv4 only aims to lay the foundation for future
-changes by adding version rollback protection, DAKEs, upgrade of primitives,
-and non-interactive conversations.
+changes by adding version rollback protection, DAKEs, upgrade of primitives, and
+non-interactive conversations.
 
 Secondly, current quantum resistant algorithms and their respective libraries
 are not ready for incorporation. Production level libraries may take up to 6-18

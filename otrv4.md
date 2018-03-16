@@ -194,8 +194,8 @@ offline.
 Messages in a conversation can be exchanged over an insecure channel, where an
 attacker can eavesdrop or interfere with the messages.
 
-The network model provides in-order and out-of-order delivery of messages.
-Some messages may not be delivered.
+The network model provides in-order and out-of-order delivery of messages. Some
+messages may not be delivered.
 
 OTRv4 does not protect against an active attacker performing Denial of Service
 attacks.
@@ -232,10 +232,10 @@ exchange, because it could have been forged by anyone.
 
 In the non-interactive DAKE, the initiator (Bob, in the above overview) has
 participation deniability, but Alice, the responder, does not. A party that
-knows Alice's long-term secret and Bob's ephemeral secret cannot derive a
-shared key (as it will need to know either Bob's long-term secret or Alice's
-ephemeral key). This allows a participant to generate irrefutable cryptographic
-proof of a conversation with the aid of an interactive third party.
+knows Alice's long-term secret and Bob's ephemeral secret cannot derive a shared
+key (as it will need to know either Bob's long-term secret or Alice's ephemeral
+key). This allows a participant to generate irrefutable cryptographic proof of a
+conversation with the aid of an interactive third party.
 
 Although both DAKEs (interactive and non-interactive) provide offline
 deniability, take into account that there may be a loss of deniability if an
@@ -245,9 +245,9 @@ Once a conversation has been established with the DAKE, all data messages
 transmitted in it are confidential and retain their integrity. After a MAC
 key is used by a party to validate a received message, it is added to a list.
 It is also added when the stored message key that corresponds to messages that
-have not yet arrived is deleted (because the session has expired or because
-the storage of the message keys has been deleted). Those MAC keys are revealed
-in the first message sent of the next ratchet or in the TLV type 1 that is sent
+have not yet arrived is deleted (because the session has expired or because the
+storage of the message keys has been deleted). Those MAC keys are revealed in
+the first message sent of the next ratchet or in the TLV type 1 that is sent
 when a session is expired. This allows forgeability of the data messages and
 consequent deniability of their contents.
 
@@ -289,9 +289,9 @@ and may be also implemented in other modes.
 
 The modes are:
 
-1. OTRv3-compatible mode: a mode with backwards compatibility with OTRv3.
-   This mode will know how to handle plaintext messages, including
-   query messages and whitespace tags.
+1. OTRv3-compatible mode: a mode with backwards compatibility with OTRv3. This
+   mode will know how to handle plaintext messages, including query messages and
+   whitespace tags.
 2. OTRv4-standalone mode: an always encrypted mode. This mode will not know how
    to handle any kind of plaintext messages, including query messages and
    whitespace tags. It supports both interactive and non-interactive
@@ -319,13 +319,13 @@ every time it makes a decision on how to transition from every state.
 
 ## Notation and parameters
 
-This section contains information needed to understand the parameters,
-variables and arithmetic used in the specification.
+This section contains information needed to understand the parameters, variables
+and arithmetic used in the specification.
 
 ### Notation
 
-Scalars and secret keys are in lower case, such as `x` or `y`. Points and
-public keys are in upper case, such as `P` or `Q`.
+Scalars and secret keys are in lower case, such as `x` or `y`. Points and public
+keys are in upper case, such as `P` or `Q`.
 
 Addition of elliptic curve points `A` and `B` is `A + B`. Subtraction is
 `A - B`. Addition of a point to another point generates a third point. Scalar
@@ -395,7 +395,7 @@ To verify that a point (`X = x, y`) is on curve Ed448-Goldilocks:
 
 1. Check that `X` is not equal to the identity element (`I`).
 2. Check that `X` lies on the curve: `x` and `y` are on in interval
-   `[0, q - 1]`
+   `[0, q - 1]`.
 3. Check that `q * X = I`.
 
 
@@ -455,8 +455,8 @@ Hexadecimal value of dh_q:
 
 ```
 
-Whenever you see an operation on a field element from this group, the
-operation should be done modulo the prime `dh_p`.
+Whenever you see an operation on a field element from this group, the operation
+should be done modulo the prime `dh_p`.
 
 #### Verifying that an integer is in the DH group
 
@@ -548,11 +548,11 @@ scalar is not sent over the wire.
 A curve point `(x,y)`, with coordinates in the range `0 <= x,y < p`, is
 encoded as follows:
 
-1. Encode the y-coordinate as a little-endian array of 57 bytes. The
-   final byte is always zero.
-2. Copy the least significant bit of the x-coordinate to the most
-   significant bit of the final byte. This is `1` if the x-coordinate is
-   negative or `0` if it is not.
+1. Encode the y-coordinate as a little-endian array of 57 bytes. The final byte
+   is always zero.
+2. Copy the least significant bit of the x-coordinate to the most significant
+   bit of the final byte. This is `1` if the x-coordinate is negative or `0`
+   if it is not.
 
 A curve point is decoded as follows:
 
@@ -561,8 +561,8 @@ A curve point is decoded as follows:
    this value `x_0`.  The y-coordinate is recovered simply by clearing this bit.
    If the resulting value is `>= p`, decoding fails.
 3. To recover the x-coordinate, the curve equation implies
-   `x^2 = (y^2 - 1) / (d * y^2 - 1) (mod p)`. The denominator is always
-   non-zero mod p.
+   `x^2 = (y^2 - 1) / (d * y^2 - 1) (mod p)`. The denominator is always non-zero
+   mod `p`.
    1. Let `num = y^2 - 1` and `denom = d * y^2 - 1`. To compute the square root
       of `(num/denom)`, compute the candidate root `x = (num/denom)^((p+1)/4)`.
       This can be done using a single modular powering for both the
@@ -666,15 +666,15 @@ Protocol](#socialist-millionaires-protocol-smp) or a manual fingerprint
 comparison may be used. The fingerprint is generated as:
 
 * The first 56 bytes from the `KDF_1(0x00 || byte(H), 56)` (224-bit security
-  level)
+  level).
 
 ### Instance Tags
 
-Clients include instance tags in all OTRv4 messages. Instance tags are
-4-byte values that are intended to be persistent. If the same client is logged
-into the same account from multiple locations, the intention is that the client
-will have different instance tags at each location. OTRv4 messages (fragmented
-and unfragmented) include the source and destination instance tags. If a client
+Clients include instance tags in all OTRv4 messages. Instance tags are 4-byte
+values that are intended to be persistent. If the same client is logged into the
+same account from multiple locations, the intention is that the client will have
+different instance tags at each location. OTRv4 messages (fragmented and
+unfragmented) include the source and destination instance tags. If a client
 receives a message that lists a destination instance tag different from its own,
 the client should discard the message.
 
@@ -746,9 +746,9 @@ Type 6: SMP Abort Message
   protocol and cannot continue, you may send a message (possibly with an empty
   human-readable part) with this TLV type to instruct the other party's client
   to abort the protocol. The associated length should be zero and the
-  associated value should be empty. If you receive a TLV of this type,
-  you should change the SMP state to 'SMPSTATE_EXPECT1' (see below, in SMP
-  section). This TLV should have the 'IGNORE_UNREADABLE' flag set.
+  associated value should be empty. If you receive a TLV of this type, you
+  should change the SMP state to 'SMPSTATE_EXPECT1' (see below, in SMP section).
+  This TLV should have the 'IGNORE_UNREADABLE' flag set.
 
 Type 7: Extra symmetric key
   If you wish to use the extra symmetric key, compute it yourself as outlined
@@ -782,14 +782,14 @@ state from the higher-level protocol as `phi`, as well as include the values
 imposed by this specification.
 
 ```
-  session identifier mandated by the OTRv4 spec = sender and receiver's
-    instance tags, and the query message or the whitespace tag
+  session identifier mandated by the OTRv4 spec = sender and receiver's instance
+    tags, and the query message or the whitespace tag
   phi' = session identifier defined by the implementer
   phi = session identifier mandated by the OTRv4 spec || phi'
 ```
 
-In XMPP, for example, `Phi'` can be the node and domain parts of the sender
-and receiver's jabber identifier, e.g. `alice@jabber.net` (often referred as the
+In XMPP, for example, `Phi'` can be the node and domain parts of the sender and
+receiver's jabber identifier, e.g. `alice@jabber.net` (often referred as the
 "bare JID"). In an application that assigns some attribute to users before a
 conversation (e.g., a networked game in which players take on specific roles),
 the expected attributes (expressed in fixed length) should be included in
@@ -875,10 +875,10 @@ State variables:
 
 Key variables:
   'root_key[i]': the root key for ratchet i.
-  'chain_key_s[i][j]': the sending chain key for the sending message j in
-    ratchet i.
-  'chain_key_r[i][k]': the receiving chain key for the receiving message k in
-    ratchet i.
+  'chain_key_s[i][j]': the sending chain key for the sending message 'j' in
+    ratchet 'i'.
+  'chain_key_r[i][k]': the receiving chain key for the receiving message 'k' in
+    ratchet 'i'.
   'our_ecdh': our current ECDH ephemeral key pair.
   'their_ecdh': their ECDH ephemeral public key.
   'our_dh': our DH ephemeral key pair.
@@ -889,7 +889,7 @@ Key variables:
   'mac_keys_to_reveal': the MAC keys to be revealed in the first data message
     sent of the next ratchet.
   'skipped_MKenc': Dictionary of stored skipped-over message keys, indexed by
-    their_ecdh, their_dh, the ratchet id (i) and the message number (j).
+    their_ecdh, their_dh, the ratchet id ('i') and the message number ('j').
     Raises and exception if too many elements are stored.
   'max_skip' a constant that specifies the maximum number of message keys
     that can be skipped in a ratchet. It should be set by the implementer. Take
@@ -1430,8 +1430,8 @@ Bob will be initiating the DAKE with Alice.
       [Identity message](#identity-message) section. If the verification fails
       (for example, if Bob's public keys -`Y` or `B`- are not valid), rejects
       the message and does not send anything further.
-    * Picks the newest compatible version of OTR listed in Bob's profile.
-      If there aren't any compatible versions, Alice does not send any further
+    * Picks the newest compatible version of OTR listed in Bob's profile. If
+      there aren't any compatible versions, Alice does not send any further
       messages.
     * Sets `Y` as `their_ecdh`.
     * Sets `B` as `their_dh`.
@@ -1441,12 +1441,12 @@ Bob will be initiating the DAKE with Alice.
 4. Sets `A` and `a` as `our_dh`: the ephemeral 3072-bit DH keys.
 5. Calculates the Mixed shared secret (`K`) and the SSID:
     * Calculates ECDH shared secret
-      `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
-      Securely deletes `our_ecdh.secret`.
+      `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`. Securely deletes
+       `our_ecdh.secret`.
     * Calculates DH shared secret `k_dh = DH(our_dh.secret, their_dh)`.
       Securely deletes `our_dh.secret`.
-    * Calculates the brace key `brace_key = KDF_1(0x02 || k_dh, 32)`.
-      Securely deletes `k_dh`.
+    * Calculates the brace key `brace_key = KDF_1(0x02 || k_dh, 32)`. Securely
+      deletes `k_dh`.
     * Calculates the Mixed shared secret
       `K = KDF_1(0x04 ||K_ecdh || brace_key, 64)`.
       Securely deletes `K_ecdh` and `brace_key`.
@@ -1522,8 +1522,8 @@ Bob will be initiating the DAKE with Alice.
 3. At this point, the interactive DAKE is complete for Alice:
    * In the case that she wants to immediately send a data message:
      * Follows what is defined in the
-       [When you send a Data Message](#when-you-send-a-data-message)
-       section. Note that she will perform a new DH ratchet.
+       [When you send a Data Message](#when-you-send-a-data-message) section.
+       Note that she will perform a new DH ratchet.
 
 **Bob:**
 
@@ -1588,9 +1588,9 @@ Sender's instance tag (INT)
   The instance tag of the person sending this message.
 
 Receiver's instance tag (INT)
-  The instance tag of the intended recipient. As the instance tag is used
-  to differentiate the clients that a participant uses, this will often be 0
-  since the other party may not have set its instance tag yet.
+  The instance tag of the intended recipient. As the instance tag is used to
+  differentiate the clients that a participant uses, this will often be 0 since
+  the other party may not have set its instance tag yet.
 
 Sender's User Profile (USER-PROF)
   As described in the section "Creating a User Profile".
@@ -1736,8 +1736,8 @@ sigma (RING-SIG)
 ## Offline Conversation Initialization
 
 To begin an offline conversation, a Prekey message is published to an untrusted
-server. This action is considered as the start of the non-interactive DAKE.
-A Prekey message is retrieved by the party attempting to send a message to the
+server. This action is considered as the start of the non-interactive DAKE. A
+Prekey message is retrieved by the party attempting to send a message to the
 Prekey's publisher. This participant, then, replies with a Non-Interactive-Auth
 message (created with the prekey's values). This action is considered to
 complete the non-interactive DAKE.
@@ -1753,12 +1753,12 @@ this deniability risk when allowing participantss to complete a non-interactive
 DAKE. They are also expected to decide how to convey this security loss to the
 participant.
 
-This protocol is derived from the XZDH protocol [\[1\]](#references), which
-uses a ring signature non-interactive zero-knowledge proof of knowledge
-(`RING-SIG`) for authentication (`RSig`).
+This protocol is derived from the XZDH protocol [\[1\]](#references), which uses
+a ring signature non-interactive zero-knowledge proof of knowledge (`RING-SIG`)
+for authentication (`RSig`).
 
-Alice's long-term Ed448 key pair is `(sk_ha, H_a)` and Bob's long-term Ed448
-key pair is `(sk_hb, H_b)`. Both key pairs are generated as stated in the
+Alice's long-term Ed448 key pair is `(sk_ha, H_a)` and Bob's long-term Ed448 key
+pair is `(sk_hb, H_b)`. Both key pairs are generated as stated in the
 [Public keys, shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
 section.
 
@@ -2174,7 +2174,7 @@ participant:
 * Increments the ratchet id `i = i + 1`.
 * Sets `j` as the attached message id.
 * Derives the next sending chain key by using the `chain_key_s[i-1][j]` already
-  derived and decided:
+  derived:
 
   ```
     chain_key_s[i-1][j+1] = KDF_1(0x23 || chain_key_s[i-1][j], 64)
@@ -2208,14 +2208,14 @@ Attached Encrypted Message Id (INT)
   Set with sender's j.
 
 Public ECDH Key (POINT)
-  This is the public part of the ECDH key pair. For the sender of this
-  message, this is their 'our_ecdh.public' value. For the receiver of
-  this message, it is used as 'their_ecdh'.
+  This is the public part of the ECDH key pair. For the sender of this message,
+  this is their 'our_ecdh.public' value. For the receiver of this message, it is
+  used as 'their_ecdh'.
 
 Public DH Key (MPI)
-  This is the public part of the DH key pair. For the sender of this
-  message, it is 'our_dh.public' value. For the receiver of this message,
-  it is used as 'their_dh'.
+  This is the public part of the DH key pair. For the sender of this message, it
+  is 'our_dh.public' value. For the receiver of this message, it is used as
+  'their_dh'.
 
 Encrypted message (DATA)
   Using the appropriate encryption/message key, perform an XSalsa20 encryption
@@ -2223,9 +2223,8 @@ Encrypted message (DATA)
   the header of the attached message packet.
 ```
 
-After the encryption and MAC of the attached encrypted message, the
-participant attaches it to the Non-Interactive-Auth message, which will look
-like this:
+After the encryption and MAC of the attached encrypted message, the participant
+attaches it to the Non-Interactive-Auth message, which will look like this:
 
 ```
   (Protocol version || message type || sender's instance tag || receiver's
@@ -2236,8 +2235,8 @@ like this:
 
 ##### Decrypting the message
 
-After verifying `sigma` on the Non-Interactive-Auth message, a participant
-(Bob in the above overview) can decrypt an attached encrypted message if it was
+After verifying `sigma` on the Non-Interactive-Auth message, a participant (Bob
+in the above overview) can decrypt an attached encrypted message if it was
 attached. This has to be done prior to receiving any other data message, or
 sending one. For this, the participant:
 
@@ -2271,8 +2270,8 @@ sending one. For this, the participant:
 * Increments the next receiving message id `k = k + 1`.
 * Constructs the nonce from the first 24 bytes of the `c` variable generated
   when creating `sigma`. See
-  [Ring Signature Verification](#verification-rvrfa1-a2-a3-sigma-m) section
-  for details.
+  [Ring Signature Verification](#verification-rvrfa1-a2-a3-sigma-m) section for
+  details.
 * Uses the `MKenc` and `nonce` to decrypt the message:
   `decrypted_message = XSalsa20_Dec(MKenc, nonce, m)`.
 * Securely deletes `MKenc`.
@@ -2350,12 +2349,12 @@ Verify MAC, Decrypt message 1_1
 
 ### Data Message
 
-This message is used to transmit a private message to the correspondent.
-It is also used to [reveal old MAC keys](#revealing-mac-keys). This data message
-is encoded as defined in the [Encoded Messages](#encoded-messages) section.
+This message is used to transmit a private message to the correspondent. It is
+also used to [reveal old MAC keys](#revealing-mac-keys). This data message is
+encoded as defined in the [Encoded Messages](#encoded-messages) section.
 
-The plaintext message (either before encryption or after decryption) consists
-of a human-readable message (encoded in UTF-8, optionally with HTML markup),
+The plaintext message (either before encryption or after decryption) consists of
+a human-readable message (encoded in UTF-8, optionally with HTML markup),
 optionally followed by:
 
 * a single `NUL` (a BYTE with value 0x00)
@@ -2407,19 +2406,19 @@ Public DH Key (MPI)
   'their_dh'. If this value is empty, its length is zero.
 
 Nonce (NONCE)
-  The nonce used with XSalsa20 to create the encrypted message contained
-  in this packet.
+  The nonce used with XSalsa20 to create the encrypted message contained in this
+  packet.
 
 Encrypted message (DATA)
-  Using the appropriate encryption key (see below) derived from the
-  sender's and recipient's ECDH and DH public keys (with the keyids given in
-  this message), perform an XSalsa20 encryption of the message. The 'nonce' used
-  for this operation is also included in the header of the data message packet.
+  Using the appropriate encryption key (see below) derived from the sender's
+  and recipient's ECDH and DH public keys (with the keyids given in this
+  message), perform an XSalsa20 encryption of the message. The 'nonce' used for
+  this operation is also included in the header of the data message packet.
 
 Authenticator (MAC)
-  The MAC with the appropriate MAC key (see below) of everything:
-  from the protocol version to the end of the encrypted message. Note that old
-  MAC keys are not included in this field.
+  The MAC with the appropriate MAC key (see below) of everything: from the
+  protocol version to the end of the encrypted message. Note that old MAC keys
+  are not included in this field.
 
 Old MAC keys to be revealed (DATA)
   See "Revealing MAC Keys" section. This corresponds to the 'mac_keys_to_reveal'
@@ -2463,8 +2462,8 @@ When sending a data message in the same DH Ratchet:
   * Set `i - 1` as the Data message's ratchet id.
   * Derive the next sending chain key
     `chain_key_s[i-1][j+1] = KDF_1(0x23 || chain_key_s[i-1][j], 64)`.
-  * Calculate the encryption key (`MKenc`), the MAC key (`MKmac`) and, if
-    needed the extra symmetric key:
+  * Calculate the encryption key (`MKenc`), the MAC key (`MKmac`) and, if needed
+    the extra symmetric key:
 
    ```
      MKenc, MKmac = derive_enc_mac_keys(chain_key_s[i-1][j])
@@ -2632,14 +2631,14 @@ This is done by:
 Storing message keys from messages that haven't arrived yet introduces some
 risks, as defined in [\[2\]](#references):
 
-1. A malicious sender could induce receivers to store large numbers of
-   skipped message keys, possibly causing a denial-of-service due to consuming
-   storage space.
-2. An adversary can capture and drop some messages from sender, even
-   though they didn't reach the recipient. The attacker can later compromise the
-   intended recipient at a later time to reveal the stored message keys that
-   correspond to the dropped messages. The adversary can then retroactively
-   decrypt the captured messages.
+1. A malicious sender could induce receivers to store large numbers of skipped
+   message keys, possibly causing a denial-of-service due to consuming storage
+   space.
+2. An adversary can capture and drop some messages from sender, even though they
+   didn't reach the recipient. The attacker can later compromise the intended
+   recipient at a later time to reveal the stored message keys that correspond
+   to the dropped messages. The adversary can then retroactively decrypt the
+   captured messages.
 
 To mitigate the first risk, parties should set reasonable per-conversation
 limits on the number of possible stored message keys (e.g. 1000). This limit
@@ -2774,10 +2773,9 @@ OTR message as follows:
 
 The message should begin with `?OTR|` and end with `,`.
 
-Note that `index` and `total` are unsigned short int (2 bytes), and each has
-a maximum value of 65535. Each `piece[index]` must be non-empty.
-The `identifier`, instance tags, `index` and `total` values may have leading
-zeros.
+Note that `index` and `total` are unsigned short int (2 bytes), and each has a
+maximum value of 65535. Each `piece[index]` must be non-empty. The `identifier`,
+instance tags, `index` and `total` values may have leading zeros.
 
 Note that fragments are not messages that can be fragmented: you can't fragment
 a fragment.
@@ -3007,8 +3005,8 @@ the AKE or DAKE according to the compatible version he supports.
 ##### Whitespace Tags
 
 If Alice wishes to communicate to Bob that she is willing to use OTR, she can
-attach a special whitespace tag to any plaintext message she sends him.
-A Whitespace tag may occur anywhere in the message, and may be hidden from the
+attach a special whitespace tag to any plaintext message she sends him. A
+Whitespace tag may occur anywhere in the message, and may be hidden from the
 user (as in the [Query Messages](#query-messages)). There should be only one
 whitespace tag per message. In the case that multiple whitespace tags arrive,
 only the first one should be considered as valid.
@@ -3218,8 +3216,7 @@ If the state is not `WAITING_AUTH_R`:
 * Initialize the double ratcheting, as defined in the
   [Non-Interactive DAKE Overview](#non-interactive-dake-overview) section.
 * Transition to state `ENCRYPTED_MESSAGES`.
-* If there is a recent stored message, encrypt it and send it as a Data
-  Message.
+* If there is a recent stored message, encrypt it and send it as a Data Message.
 
 #### Receiving a Non-Interactive-Auth message
 
@@ -3397,8 +3394,8 @@ OTRv4 makes a few changes to SMP:
   * SMP in OTRv4 uses all of the [TLV record types](#tlv-record-types) as OTRv3,
     except for SMP Message 1Q. When SMP Message 1Q is used in OTRv4, SMP Message
     1 is used in OTRv4. When a question is not present, the user specified
-    question section has length `0` and value `NULL`. In OTRv3, SMP Message 1
-    is used when the user does not specify an SMP question. If a question is
+    question section has length `0` and value `NULL`. In OTRv3, SMP Message 1 is
+    used when the user does not specify an SMP question. If a question is
     supplied, SMP Message 1Q is used.
   * SMP in OTRv4 uses the same SMP State Machine as OTRv3, with the exception
     that `SMPSTATE_EXPECT1` only accepts SMP Message 1. Note that this
@@ -3524,11 +3521,11 @@ generators, `g2` and `g3`. A valid SMP message 1 is generated as follows:
 
 1. Determine her secret input `x`, which is to be compared to Bob's secret
    `y`, as specified in the [Secret Information section](#secret-information).
-2. Pick random values `a2` and `a3` in `Z_q`. These will be Alice's
-   exponents for the ECDH exchange to pick generators.
-3. Pick random values `r2` and `r3` in `Z_q`. These will be used to
-   generate zero-knowledge proofs that this message was created according
-   to the SMP protocol.
+2. Pick random values `a2` and `a3` in `Z_q`. These will be Alice's exponents
+   for the ECDH exchange to pick generators.
+3. Pick random values `r2` and `r3` in `Z_q`. These will be used to generate
+   zero-knowledge proofs that this message was created according to the SMP
+   protocol.
 4. Compute `G2a = G * a2` and `G3a = G * a3`.
 5. Generate a zero-knowledge proof that the value `a2` is known by setting
    `c2 = HashToScalar(0x01 || G * r2)` and `d2 = r2 - a2 * c2 mod q`.
@@ -3568,8 +3565,9 @@ generators, `g2` and `g3`. It also begins the construction of the values used in
 the final comparison of the protocol. A valid SMP message 2 is generated as
 follows:
 
-1. Validate that `G2a` and `G3a` are on curve Ed448, that they are in the
-   correct group, and that they do not degenerate.
+1. Validate that `G2a` and `G3a` are on curve Ed448. See
+   [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+   section for details.
 2. Determine Bob's secret input `y`, which is to be compared to Alice's secret
    `x`.
 3. Pick random values `b2` and `b3` in `Z_q`. These will be used for creating
@@ -3623,11 +3621,12 @@ SMP message 3 is Alice's final message in the SMP exchange. It has the last of
 the information required by Bob to determine if `x = y`. A valid SMP message 3
 is generated as follows:
 
-1. Validate that `G2b`, `G3b`, `Pb`, and `Qb` are on curve Ed448, that they
-   are in the correct group, and that they do not degenerate.
-2. Pick random values `r4`, `r5`, `r6` and `r7` in `Z_q`. These will
-   be used to add a blinding factor to the final results and to generate
-   zero-knowledge proofs that this message was created honestly.
+1. Validate that `G2b`, `G3b`, `Pb`, and `Qb` are on curve Ed448. See
+   [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+   section for details.
+2. Pick random values `r4`, `r5`, `r6` and `r7` in `Z_q`. These will be used to
+   add a blinding factor to the final results and to generate zero-knowledge
+   proofs that this message was created honestly.
 3. Compute `G2 = G2b * a2` and `G3 = G3b * a3`.
 4. Compute `Pa = G3 * r4` and `Qa = G * r4 + G2 * HashToScalar(x)`.
 5. Generate a zero-knowledge proof that `Pa` and `Qa` were created according to
@@ -3653,8 +3652,8 @@ cp (SCALAR), d5 (SCALAR), d6 (SCALAR)
   given above.
 
 Ra (POINT)
-  This value is used in the final comparison to determine if Alice and Bob
-  share the same secret.
+  This value is used in the final comparison to determine if Alice and Bob share
+  the same secret.
 
 cr (SCALAR), d7 (SCALAR)
   A zero-knowledge proof that Ra was created according to the protocol given
@@ -3663,14 +3662,15 @@ cr (SCALAR), d7 (SCALAR)
 
 ### SMP message 4
 
-SMP message 4 is Bob's final message in the SMP exchange. It has the last of
-the information required by Alice to determine if `x = y`. A valid SMP message
-4 is generated as follows:
+SMP message 4 is Bob's final message in the SMP exchange. It has the last of the
+information required by Alice to determine if `x = y`. A valid SMP message 4 is
+generated as follows:
 
-1. Validate that `Pa`, `Qa`, and `Ra` are on curve Ed448, that they are from the
-   correct group, and that they do not degenerate.
-2. Pick a random value `r7` in `Z_q`. This will be used to generate
-   Bob's final zero-knowledge proof that this message was created honestly.
+1. Validate that `Pa`, `Qa`, and `Ra` are on curve Ed448. See
+   [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+   section for details.
+2. Pick a random value `r7` in `Z_q`. This will be used to generate Bob's final
+   zero-knowledge proof that this message was created honestly.
 3. Compute `Rb = (Qa - Qb) * b3`.
 4. Generate a zero-knowledge proof that `Rb` was created according to the
    protocol by setting
@@ -3825,14 +3825,14 @@ Parse
   these fields.
 
 Modify Data Message
-  If an encrypted data message cannot be read because you don't
-  know the message key (or one of the chain keys used to derive this message
-  key) but it can be guessed that the string 'x' appears at a given place in
-  the message, a participant can replace that string with some new desired
-  text with the same length. The result is a valid OTRv4 message that contains
-  the new text. For example, if the string "hi" is accurately guessed to be
-  at the beginning of an encrypted message, it can be replaced with the string
-  "yo". Therefore, a valid data message can be created with new text.
+  If an encrypted data message cannot be read because you don't know the message
+  key (or one of the chain keys used to derive this message key) but it can be
+  guessed that the string 'x' appears at a given place in the message, a
+  participant can replace that string with some new desired text with the same
+  length. The result is a valid OTRv4 message that contains the new text. For
+  example, if the string "hi" is accurately guessed to be at the beginning of
+  an encrypted message, it can be replaced with the string "yo". Therefore, a
+  valid data message can be created with new text.
 
   To achieve this:
   - XOR the old text and the new text. Store this value.
@@ -3873,8 +3873,8 @@ Forge DAKE and Session Keys
 Show MAC Key
   This function takes a chain key and the number of a message key, and shows
   the MAC key associated with those two values. For example, if the message
-  key number is 3, the chain key is ratcheted 3 times, and the third MAC key
-  is derived and returned. 'Show MAC key' may be used with the ReMAC Message
+  key number is 3, the chain key is ratcheted 3 times, and the third MAC key is
+  derived and returned. 'Show MAC key' may be used with the ReMAC Message
   function below in the case where a chain key has been compromised by an
   attacker who wishes to forge messages.
 
@@ -3885,17 +3885,17 @@ ReMAC Message
   attacker may use this function to forge messages with a compromised MAC key.
 
 Forge Entire Transcript
-  The Forge Entire Transcript function will allow one participant to
-  completely forge a transcript between them and another person in a way
-  that its forgery cannot be cryptographically proven. The input will be:
-  one participant's user profile, their secret key, another participant's
-  user profile, and a list of plain text messages corresponding to what
-  messages were exchanged. Each message in the list will have the structure:
-  1) sender 2) plain text message, so that the function may precisely create
-  the desired transcript. The participant's private key is required since
-  it is used to authenticate the key exchange, but the resulting transcript
-  is created in such a way that a cryptographic expert cannot identify which
-  user profile owner authenticated the conversation.
+  The Forge Entire Transcript function will allow one participant to completely
+  forge a transcript between them and another person in a way that its forgery
+  cannot be cryptographically proven. The input will be: one participant's user
+  profile, their secret key, another participant's user profile, and a list of
+  plain text messages corresponding to what messages were exchanged. Each
+  message in the list will have the structure: 1) sender 2) plain text message,
+  so that the function may precisely create the desired transcript. The
+  participant's private key is required since it is used to authenticate the key
+  exchange, but the resulting transcript is created in such a way that a
+  cryptographic expert cannot identify which user profile owner authenticated
+  the conversation.
 ```
 
 ## Appendices
@@ -3905,7 +3905,6 @@ Forge Entire Transcript
 The Authentication scheme consists of two functions:
 
 - An authentication function: `sigma = RSig(A1, a1, {A1, A2, A3}, m)`.
-
 - A verification function: `RVrf({A1, A2, A3}, sigma, m)`.
 
 #### Domain parameters
@@ -3933,7 +3932,9 @@ to authenticate.
 To compute `RSig`, without loss of generality:
 
 `A1`, `A2`, and `A3` should be checked to verify that they are on the curve
-Ed448.
+Ed448. See
+[Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+section for details.
 
 1. Pick random values `t1, c2, c3, r2, r3` in `q`.
 2. Compute `T1 = G * t1`.

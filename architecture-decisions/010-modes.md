@@ -7,8 +7,7 @@ OTRv4 is a protocol that aims to:
 1. Be an alternative to current messaging applications that work in synchronous
    and asynchronous messaging environments.
 2. Be a comprehensive and up-to-date specification: it updates cryptographic
-   primitives and increase the security level of the whole protocol to 224
-   bits.
+   primitives and increase the security level of the whole protocol to 224 bits.
 3. Provide better deniability properties.
 4. Be compatible with OTRv3 and be useful for instant messaging protocols
    (e.g. XMPP).

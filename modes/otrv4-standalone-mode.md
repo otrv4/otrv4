@@ -11,8 +11,8 @@ mode".
 
 The 'OTRv4-Standalone' mode is an always encrypted mode. It does not know how to
 handle any kind of plaintext messages, including query messages and whitespace
-tags. It supports both interactive and non-interactive conversations. It is
-not backwards compatible with OTRv3.
+tags. It supports both interactive and non-interactive conversations. It is not
+backwards compatible with OTRv3.
 
 ## Mode description
 
@@ -46,8 +46,8 @@ differ in these sections:
   in this mode: there is no DSA signature generation or verification. Therefore,
   when validating a user profile, the DSA signature must not be verified.
 - "Establishing Versions": ignore the paragraph: "A compliant OTRv4
-  implementation is required to support version 3 of OTR, but not versions
-  1 and 2". This mode only allows version 4 of the protocol.
+  implementation is required to support version 3 of OTR, but not versions 1 and
+  2". This mode only allows version 4 of the protocol.
 - "Online Conversation Initialization": ignore everything that refers to query
   messages and whitespace tags. Always check that the compatible version in the
   participant's user profile includes "4".
@@ -210,8 +210,8 @@ Alice wants to send a message to Bob.
 
 1. Alice adds Bob as a contact:
    * A DAKE (interactive or non-interactive depending on the contact's
-     availability) is immediately done. The conversation keys are stored on
-     the device for later use.
+     availability) is immediately done. The conversation keys are stored on the
+     device for later use.
    * No identity verification is necessary and the app uses a Trust on first use
      (TOFU) policy. Bob's User Profile can be used to verify the information
      about the alleged identity.
@@ -234,13 +234,14 @@ Alice wants to send a message to Bob.
      card, a HTTPS website, etc.
    * Performs a interactive DAKE and uses SMP.
 2. Alice types a messages and "sends them" to Bob.
-   * A DAKE is performed if the application is not already in an encrypted state.
+   * A DAKE is performed if the application is not already in an encrypted
+     state.
    * Alice is warned about any problem to establish an encrypted channel and/or
      any problem with the identity verification for Bob.
    * The conversation keys do not need to be stored on the device for later use.
    * Instance tags are required because there may be multiple devices.
    * Fragmentation could be optional depending on the network, but this is
-    unlikely due support to multiple networks.
+     unlikely due support to multiple networks.
 3. Bob receives the message from Alice.
 
 If the network allows Alice to receive messages from devices not on the same
@@ -252,8 +253,7 @@ Bob by the application and not by the OTRv4 protocol in this mode.
 ## Considerations
 
 Plaintext messages are not allowed in conversations in OTRv4-Standalone mode.
-This means that query messages and whitespace tags are not allowed in this
-mode.
+This means that query messages and whitespace tags are not allowed in this mode.
 
 By always requiring encryption, this mode may encourage long-lived sessions.
 The section [session expiration](../otrv4.md#session-expiration) of the OTRv4

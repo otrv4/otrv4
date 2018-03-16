@@ -46,8 +46,8 @@ new DAKE.
 
 ### Decision
 
-We will prevent query messages to be used to force a key rotation in OTRv4
-by disallowing its sending in `ENCRYPTED_MESSAGES` state.
+We will prevent query messages to be used to force a key rotation in OTRv4 by
+disallowing its sending in `ENCRYPTED_MESSAGES` state.
 
 We will not prevent receiving query messages on the same state, because it would
 also prevent device mobility.

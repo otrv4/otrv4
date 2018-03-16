@@ -33,11 +33,12 @@ Alice wants to send a message to Bob.
      card, a HTTPS website, etc.
    * Performs an interactive DAKE with Bob and uses SMP.
 3. Alice types messages, encrypts them and "sends them" to Bob.
-   * A DAKE is performed if the application is not already in an encrypted state.
+   * A DAKE is performed if the application is not already in an encrypted
+     state.
    * She is warned about any problem while establishing an encrypted channel
      and/or any problem with the identity verification of Bob.
    * Instance tags are required because the same client might be logged into
-     Alice's account from multiple locations
+     Alice's account from multiple locations.
    * Fragmentation will be optional as it depends on the network. It is
      unlikely due support of multiple networks.
 4. Bob receives the encrypted messages from Alice.

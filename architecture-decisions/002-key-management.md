@@ -40,9 +40,9 @@ This three step DH Ratchet works as follows:
     as previously stated.
 
 This design introduces backward secrecy within conversations since a
-compromised key will be regularly replaced with new key material. A
-disadvantage of this DH Ratchet is that session keys might not be renewed for
-every message (forward secrecy is, therefore, only partially provided). It also
+compromised key will be regularly replaced with new key material. A disadvantage
+of this DH Ratchet is that session keys might not be renewed for every message
+(forward secrecy is, therefore, only partially provided). It also
 lacks out-of-order resilience: if a message arrives after a newly advertised
 key is accepted, then the necessary decryption key will be already deleted and
 the message will not be able to be decrypted.

@@ -2,8 +2,8 @@
 
 ### Context
 
-The non-interactive DAKE below is based on the XZDH protocol. It starts when
-the Responder requests the Initiator's prekey from an untrusted server. The
+The non-interactive DAKE below is based on the XZDH protocol. It starts when the
+Responder requests the Initiator's prekey from an untrusted server. The
 Initiator's long-term public key should be verified by the Responder. The
 Responder then generates their ephemeral keys and derives a shared secret. These
 are used to start the double ratchet algorithm and send an encrypted data
@@ -109,15 +109,15 @@ Y Prekey owner's ECDH public key (POINT)
   First part of the one-time use prekey value.
 
 B Prekey owner's DH public key (MPI)
-  Second part of the one-time use prekey value. The ephemeral public DH
-  key. Note that even though this is in uppercase, this is NOT a POINT.
+  Second part of the one-time use prekey value. The ephemeral public DH key.
+  Note that even though this is in uppercase, this is NOT a POINT.
 ```
 
 The public part of the shared prekey and its signature, which are essential to
 implementing XZDH, will be included in the published User Profile. The
-signature of the shared prekey must be published in order to be deniable
-as it is created using the participant's long term keys. We consider the
-signature of the user profile to be the signature of the shared prekey.
+signature of the shared prekey must be published in order to be deniable as it
+is created using the participant's long term keys. We consider the signature of
+the user profile to be the signature of the shared prekey.
 
 A Non-interactive Auth Message has the format:
 
@@ -141,18 +141,18 @@ X (POINT)
   The ephemeral public ECDH key.
 
 A (MPI)
-  The ephemeral public DH key. Note that even though this is in uppercase,
-  this is NOT a POINT.
+  The ephemeral public DH key. Note that even though this is in uppercase, this
+  is NOT a POINT.
 
 Sigma (RING-SIG)
   The 'RING-SIG' proof of authentication value.
 
 Attached XZDH Encrypted Message (XZDH-ENCRYPTED-MSG)
   (optional: if an encrypted message is attached)
-  The 'XZDH-ENCRYPTED-MSG' that consists of an attached encrypted ratchet
-  id, an attached message id, a public ECDH key (used for encrypting the
-  message), a public DH key (used for encrypting the message), a nonce
-  and the encrypted message.
+  The 'XZDH-ENCRYPTED-MSG' that consists of an attached encrypted ratchet id, an
+  attached message id, a public ECDH key (used for encrypting the message), a
+  public DH key (used for encrypting the message), a nonce and the encrypted
+  message.
 
 Auth MAC (MAC)
   The MAC with the appropriate MAC key (see above) of the message (t) for the
@@ -178,9 +178,9 @@ before they expire to keep valid prekey messages available.
 
 A prekey should be published for every long term key that belongs to a user.
 This means that if Bob has a client which only supports OTRv4 and he uploads
-three long term keys for OTRv4 to his client, Bob's client must publish 3
-prekey messages. Also, if Bob uploads two long term keys for OTRv4 and two long
-term keys for OTRvX (a future version of OTR) which also implements the
+three long term keys for OTRv4 to his client, Bob's client must publish 3 prekey
+messages. Also, if Bob uploads two long term keys for OTRv4 and two long term
+keys for OTRvX (a future version of OTR) which also implements the
 non-interactive DAKE, Bob will upload 4 keys.
 
 #### Requesting prekey messages from a prekey server
@@ -213,10 +213,10 @@ Bob, any of the following may happen:
    two different versions of OTR that use prekey messages or if the long term
    key used in each message's user profile is different.
 
-    1. If the versions and the long term keys used in the messages are the
-       same, and they are compatible with Alice's version, one of the prekey
-       messages must be invalid, but Alice cannot know which. She should not
-       send a message using either prekey message.
+    1. If the versions and the long term keys used in the messages are the same,
+       and they are compatible with Alice's version, one of the prekey messages
+       must be invalid, but Alice cannot know which. She should not send a
+       message using either prekey message.
     2. If the prekey message versions are the same and the version is supported
        by Alice, but the long term keys are different from each other, Alice
        should look at whether she trusts the keys. If she trusts both, she may
@@ -293,8 +293,8 @@ The machine has the following states:
 * Encrypted Message
 * Finished
 
-All states, except the finished state, may receive the second message of a non-
-interactive DAKE, called the Non-Interactive-Auth.
+All states, except the finished state, may receive the second message of a
+non-interactive DAKE, called the Non-Interactive-Auth.
 
 #### The prekey server runs out of prekey messages
 

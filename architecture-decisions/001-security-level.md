@@ -28,12 +28,11 @@ We will design OTRv4 with a target security level of ~224 bits using elliptic
 curve cryptography. In the case that elliptic curves are broken, data message
 transcripts of OTRv4 will have classic Diffie-Hellman ~128-bit security.
 
-To achieve ~224-bit elliptic curve security, we chose curve Ed448
-("Goldilocks") for ECDH. We use SHAKE-256 as the hash function during the
-generation of secret keys, since it gives a 256-bit security if the output is
-64 bytes and 128 if the output is 32 bytes. Although Ed448 does not have as much
-published cryptanalysis as Curve25519, it can be safely used as
-Curve25519 [\[1\]](#references).
+To achieve ~224-bit elliptic curve security, we chose curve Ed448 ("Goldilocks")
+for ECDH. We use SHAKE-256 as the hash function during the generation of secret
+keys, since it gives a 256-bit security if the output is 64 bytes and 128 if the
+output is 32 bytes. Although Ed448 does not have as much published cryptanalysis
+as Curve25519, it can be safely used as Curve25519 [\[1\]](#references).
 
 To achieve classic Diffie-Hellman ~128-bit security, we use a brace key, which
 is described in
@@ -64,7 +63,7 @@ KDF_2(values, size) = SHAKE-256(values, size)
 ```
 
 The `size` first bytes of the SHAKE-256 output for input `values`. This KDF will
-be  used when referring to RFC 8032.
+be used when referring to RFC 8032.
 
 To provide cryptographic domain separation, we set
 `x = OTRv4_domain || usageID || secret`, where the usageID changes for each
