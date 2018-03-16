@@ -1,6 +1,6 @@
 # OTR version 4: Standalone Mode
 
-[ADR#010](https://github.com/otrv4/otrv4/tree/master/architecture-decisions)
+[ADR 10](https://github.com/otrv4/otrv4/tree/master/architecture-decisions/010-modes.md)
 defines the need for specifying alternative modes for the OTR protocol
 version 4.
 
@@ -80,7 +80,7 @@ Alice will be initiating the DAKE with Bob.
 **Alice:**
 
 1. Generates an Identity message, as defined in
-   [Identity message](#identity-message) section.
+   [Identity message](../otrv4.md#identity-message) section.
 2. Sets `Y` and `y` as `our_ecdh`: the ephemeral ECDH keys.
 3. Sets `B` as  and `b` as `our_dh`: the ephemeral 3072-bit DH keys.
 4. Sends Bob the Identity message.
@@ -97,7 +97,7 @@ Alice will be initiating the DAKE with Bob.
     * Sets `Y` as `their_ecdh`.
     * Sets `B` as `their_dh`.
 2. Generates an Auth-R message, as defined in
-   [Auth-R message](#auth-r-message) section.
+   [Auth-R message](../otrv4.md#auth-r-message) section.
 3. Sets `X` and `x` as `our_ecdh`: the ephemeral ECDH keys.
 4. Sets `A` and `a` as `our_dh`: the ephemeral 3072-bit DH keys.
 5. Calculates the Mixed shared secret (`K`) and the SSID:
@@ -113,7 +113,7 @@ Alice will be initiating the DAKE with Bob.
       Securely deletes `K_ecdh` and `brace_key`.
     * Calculates the SSID from shared secret: the first 8 bytes of
       `KDF_1(0x05 || K, 64)`.
-6. Sends Alice the Auth-R message (see [Auth-R message](#auth-r-message) section).
+6. Sends Alice the Auth-R message (see [Auth-R message](../otrv4.md#auth-r-message) section).
 
 **Alice:**
 
@@ -124,15 +124,16 @@ Alice will be initiating the DAKE with Bob.
 2. Retrieves the ephemeral public keys from Bob:
     * Validates that the received ECDH ephemeral public key `X` is on curve
       Ed448 and sets it as `their_ecdh`.
-      See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+      See [Verifying that a point is on the curve](../otrv4.md#verifying-that-a-point-is-on-the-curve)
       section for details.
     * Validates that the received DH ephemeral public key `A` is on the correct
       group and sets it as `their_dh`. See
-      [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
+      [Verifying that an integer is in the DH group](../otrv4.md#verifying-that-an-integer-is-in-the-dh-group)
       section for details.
 3. Verifies the Auth-R message as defined in the
-   [Auth-R message](#auth-r-message) section.
-4. Creates an Auth-I message (see [Auth-I message](#auth-i-message) section).
+   [Auth-R message](../otrv4.md#auth-r-message) section.
+4. Creates an Auth-I message (see [Auth-I message](../otrv4.md#auth-i-message)
+   section).
 5. Calculates the Mixed shared secret (`K`) and the SSID:
     * Calculates ECDH shared secret
       `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
@@ -165,7 +166,7 @@ Alice will be initiating the DAKE with Bob.
 7. At this point, the interactive DAKE is complete for Alice:
    * In the case that she wants to immediately send a data message:
      * Follows what is defined in the
-       [When you send a Data Message](#when-you-send-a-data-message)
+       [When you send a Data Message](../otrv4.md#when-you-send-a-data-message)
        section. Note that she will perform a new DH ratchet.
 
 7. At this point, the interactive DAKE is complete for Alice, but the
@@ -175,31 +176,32 @@ Alice will be initiating the DAKE with Bob.
 
 1. Receives the Auth-I message from Alice:
    * Verifies the Auth-I message as defined in the
-     [Auth-I message](#auth-i-message) section.
+     [Auth-I message](../otrv4.md#auth-i-message) section.
 2. Initializes the double ratchet:
    * Sets ratchet id `i` as 0.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
    * Generates an ephemeral ECDH key pair, as defined in
-     [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
-     of using a random value `r`, it will use : `r = KDF_1(0x19 || K, 57)`.
+     [Generating ECDH and DH keys](../otrv4.md#generating-ecdh-and-dh-keys),
+     but instead of using a random value `r`, it will use :
+     `r = KDF_1(0x19 || K, 57)`.
      Securely replaces `our_ecdh` with the outputs.
    * Generates an ephemeral DH key pair, as defined in
-     [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
-     of using a random value `r`, it will use : `r = KDF_1(0x20 || K, 80)`.
-     Securely replaces `our_dh` with the outputs.
+     [Generating ECDH and DH keys](../otrv4.md#generating-ecdh-and-dh-keys),
+     but instead of using a random value `r`, it will use :
+     `r = KDF_1(0x20 || K, 80)`. Securely replaces `our_dh` with the outputs.
    * Securely deletes `their_ecdh` and `their_dh`.
 1. At this point, the interactive DAKE is complete for Bob, but he has to
    correctly setup the double ratchet mechanism:
    * In the case that he immediately receives a data message that advertises the
      new public keys from Alice:
      * Follows what is defined in the
-       [When you receive a Data Message](#when-you-receive-a-data-message)
+       [When you receive a Data Message](../otrv4.md#when-you-receive-a-data-message)
        section. Note that he will perform a new DH ratchet for the first
        received data message. When he wants to send a data message after
        receiving one, she will follow the
-       [When you send a Data Message](#when-you-send-a-data-message) section,
-       and perform a new DH Ratchet. He is only allowed to send data messages
-       after having received one from Alice.
+       [When you send a Data Message](../otrv4.md#when-you-send-a-data-message)
+       section, and perform a new DH Ratchet. He is only allowed to send data
+       messages after having received one from Alice.
 
 ### Scenarios and applications
 

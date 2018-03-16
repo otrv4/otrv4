@@ -34,7 +34,7 @@ published publicly and updated before it expires.
 
 In order to obtain version statements for a participant, a user MUST obtain the
 participant's User Profile and verify its authenticity as described in
-[ADR 003](https://github.com/otrv4/otrv4/tree/master/architecture-decisions).
+[ADR 3](https://github.com/otrv4/otrv4/tree/master/architecture-decisions/003-user-profile.md).
 
 #### Protecting from rollback in OTRv4
 

@@ -133,7 +133,7 @@ be stored. This also changes how fragmentation of data messages work.
 
 
 1. Marlinspike, M. (2013). *Advanced cryptographic ratcheting*, Signal blog.
-   Available at: http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf
+   Available at: https://signal.org/blog/advanced-ratcheting/
 2. Bonneau, J., Morrison, A. (2006) *Finite-State Security Analysis of OTR
    Version 2*. Available at:
    http://www.jbonneau.com/doc/BM06-OTR_v2_analysis.pdf

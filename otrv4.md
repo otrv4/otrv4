@@ -46,10 +46,10 @@ an existing messaging protocol, such as XMPP.
    1. [Deciding between chain keys](#deciding-between-chain-keys)
    1. [Rotating ECDH keys and brace key as sender](#rotating-ecdh-keys-and-brace-key-as-sender)
    1. [Rotating ECDH keys and brace key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
-   1. [Deriving Double Ratchet keys](#deriving-double-ratchet-keys)
+   1. [Deriving Double Ratchet Keys](#deriving-double-ratchet-keys)
    1. [Calculating encryption and MAC keys](#calculating-encryption-and-mac-keys)
    1. [Resetting state variables and key variables](#resetting-state-variables-and-key-variables)
-   1. [Session expiration](#session-expiration)
+   1. [Session Expiration](#session-expiration)
 1. [User Profile](#user-profile)
    1. [User Profile Data Type](#user-profile-data-type)
    1. [Creating a User Profile](#creating-a-user-profile)
@@ -330,7 +330,8 @@ public keys are in upper case, such as `P` or `Q`.
 Addition of elliptic curve points `A` and `B` is `A + B`. Subtraction is
 `A - B`. Addition of a point to another point generates a third point. Scalar
 multiplication of an elliptic curve point `B` with a scalar `a` yields a new
-point: `C = B * a`.
+point: `C = B * a`. For details on how to implement these operations, see the
+[Elliptic curve operations](#elliptic-curve-operations) section.
 
 The concatenation of byte sequences `I` and `J` is `I || J`. In this case, `I`
 and `J` represent a fixed-length byte sequence encoding of the respective
@@ -907,7 +908,7 @@ variable values are replaced:
 * When you complete the [interactive DAKE](#interactive-dake-overview) by
   receiving and validating an [Auth-I Message](#auth-i-message).
 * When you start a new [non-interactive DAKE](#non-interactive-dake-overview) by
-  publishing or retrieving a [Prekey message](##prekey-message).
+  publishing or retrieving a [Prekey message](#prekey-message).
 * When you complete a [non-interactive DAKE](#non-interactive-dake-overview) by
   sending a [non-interactive-Auth message](#non-interactive-auth-message).
 * When you complete a [non-interactive DAKE](#non-interactive-dake-overview) by
@@ -916,7 +917,6 @@ variable values are replaced:
 * When you [send a Data Message](#when-you-send-a-data-message) or
   [receive a Data Message](#when-you-receive-a-data-message).
 * When you [send a TLV type 1 (Disconnected)](#sending-a-tlv-type-1-disconnected-message).
-* When you [receive a TLV type 1 (Disconnected)](#receiving-a-tlv-type-1-disconnected-message).
 
 ### Generating ECDH and DH keys
 
@@ -1046,7 +1046,7 @@ To rotate the brace key:
 
     * Derive and securely overwrite `brace_key = KDF_1(0x03 || brace_key, 32)`.
 
-### Deriving Double Ratchet keys
+### Deriving Double Ratchet Keys
 
 To derive the next root key and the current chain key:
 
@@ -1072,7 +1072,7 @@ derive_enc_mac_keys(chain_key):
 
 The state variables are set to `0` and the key variables are set to `NULL`.
 
-### Session expiration
+### Session Expiration
 
 OTRv4 can vulnerable to a situation when an attacker capture some messages to
 compromise their ephemeral secrets at a later time. To mitigate against this,
@@ -1631,7 +1631,8 @@ A valid Auth-R message is generated as follows:
     KDF_1(0x08 || phi, 64)`.
    `phi` is the shared session state as mention in its
    [section](#shared-session-state).
-5. Compute `sigma = RSig(H_a, sk_ha, {H_b, H_a, Y}, t)`.
+5. Compute `sigma = RSig(H_a, sk_ha, {H_b, H_a, Y}, t)`, as defined in
+   [Ring Signature Authentication](#ring-signature-authentication).
 6. Generate a 4-byte instance tag to use as the sender's instance tag.
    Additional messages in this conversation will continue to use this tag as the
    sender's instance tag. Also, this tag is used to filter future received
@@ -1697,7 +1698,8 @@ A valid Auth-I message is generated as follows:
     KDF_1(0x11 || phi, 64)`.
    `phi` is the shared session state as mention on its
    [section](#shared-session-state).
-2. Compute `sigma = RSig(H_b, sk_hb, {H_b, H_a, X}, t)`.
+2. Compute `sigma = RSig(H_b, sk_hb, {H_b, H_a, X}, t)`, as defined in
+   [Ring Signature Authentication](#ring-signature-authentication).
 3. Continue to use the sender's instance tag.
 
 To verify an Auth-I message:
@@ -1712,7 +1714,7 @@ To verify an Auth-I message:
    `phi` is the shared session state as mention on its
    [section](#shared-session-state).
 5. Verify the `sigma` as defined in
-   [Ring Signature Authentication](#verification-verifya1-a2-a3-sigma-m).
+   [Ring Signature Authentication](#ring-signature-authentication).
 
 An Auth-I is an OTRv4 message encoded as:
 
@@ -1893,7 +1895,7 @@ Verify. Decrypt message if included
      of using a random value `r`, it will use : `r = KDF_1(0x20, K, 80)`.
      Securely replaces `our_dh` with the outputs.
    * If an encrypted message was attached to the Non-Interactive-Auth message:
-     * Follows what is defined in [Decrypting an attached encrypted message](#decrypting-the-message-1)
+     * Follows what is defined in [Decrypting an attached encrypted message](#decrypting-the-message)
        section.
      * Otherwise:
         * Computes `Auth MAC = KDF_1(0x18 || auth_mac_k || t, 64)`.
@@ -2033,10 +2035,8 @@ To verify a Non-Interactive-Auth message:
    `t = KDF_1(0x14 || Bobs_User_Profile, 64) ||
     KDF_1(0x15 ||Alices_User_Profile, 64) ||
     Y || X || B || A || our_shared_prekey.public || KDF_1(0x16 || phi, 64)`.
-7. Verify the `sigma` with
+7. Verify the `sigma` as defined in
    [Ring Signature Authentication](#ring-signature-authentication).
-   See [Verification: RVrf({A1, A2, A3}, sigma, m)](#verification-verifya1-a2-a3-sigma-m)
-   for details.
 
 A Non-Interactive-Auth is an OTRv4 message encoded as:
 
@@ -2190,7 +2190,7 @@ participant:
 * Increments the next sending message id `j = j + 1`.
 * Constructs a nonce from the first 24 bytes of the `c` variable generated when
   creating `sigma`. See
-  [Ring Signature Authentication](authentication-rsiga1-a1-a1-a2-a3-m) section
+  [Ring Signature Authentication](#ring-signature-authentication) section
   for details.
 * Uses the `MKenc` to encrypt the message:
   `encrypted_message = XSalsa20_Enc(MKenc, nonce, m)`.
@@ -2285,9 +2285,8 @@ algorithm to exchange [data messages](#data-message). The Double Ratchet
 algorithm is initialized with the shared secret established in the DAKE and the
 public keys immediately exchanged. Detailed validation and processing of each
 data message is described in the
-[sending an encrypted data messages](#rsending-an-encrypted-data-message)
-and [receiving encrypted data messages](#receiving-an-encrypted-data-message)
-sections.
+[sending a data message](#sending-a-data-message)
+and [receiving a data messages](#receiving-a-data-message) sections.
 
 A message with an empty human-readable part (the plaintext is of zero length, or
 starts with a NULL) is a "heartbeat" message. This message is useful for key
@@ -2454,7 +2453,7 @@ Given a new DH Ratchet:
   * Set `i` as the Data message's ratchet id.
   * Increment the ratchet id `i = i + 1`.
   * If present, forget and reveal MAC keys. The conditions for revealing MAC
-    keys are stated in the [Revealing MAC keys](#revealing-mac-keys) section.
+    keys are stated in the [Revealing MAC Keys](#revealing-mac-keys) section.
   * Derive the next sending chain key, `MKenc` and `MKmac`, and encrypt the
     message as described below.
 
@@ -2631,8 +2630,7 @@ This is done by:
 ### Deletion of stored message keys
 
 Storing message keys from messages that haven't arrived yet introduces some
-risks, as defined in the
-[The Double Ratchet Algorithm specification](https://signal.org/docs/specifications/doubleratchet/):
+risks, as defined in [\[2\]](#references):
 
 1. A malicious sender could induce receivers to store large numbers of
    skipped message keys, possibly causing a denial-of-service due to consuming
@@ -2654,7 +2652,7 @@ should be decided by the implementer. This partially defends against the second
 risk as it only protects "lost" messages, not messages sent using a new
 DH ratchet key that has not yet been received by the compromised party.
 To also defend against the second risk, the session should be regularly expired,
-as defined in the [Session expiration](#session-expiration) section.
+as defined in the [Session Expiration](#session-expiration) section.
 
 ### Extra symmetric key
 
@@ -3176,7 +3174,7 @@ If the state is `WAITING_AUTH_R`:
       * Stay in state `WAITING_AUTH_R`.
     * If validation succeeds:
       * Reply with an Auth-I message, as defined in
-        [Sending an Auth-I message](##sending-an-auth-i-message) section.
+        [Sending an Auth-I message](#auth-i-message) section.
 
 If the state is `ENCRYPTED_MESSAGES`:
 
@@ -3395,13 +3393,12 @@ OTRv4 makes a few changes to SMP:
 
       * Use of the first 56 bytes from the `KDF_1(0x00 || byte(H), 56)`
 
-  * SMP in OTRv4 uses all of the
-    [type/length/value (TLV) record types](#tlv-record-types) as OTRv3, except
-    for SMP Message 1Q. When SMP Message 1Q is used in OTRv4, SMP Message 1 is
-    used in OTRv4. When a question is not present, the user specified question
-    section has length `0` and value `NULL`. In OTRv3, SMP Message 1 is used
-    when the user does not specify an SMP question. If a question is supplied,
-    SMP Message 1Q is used.
+  * SMP in OTRv4 uses all of the [TLV record types](#tlv-record-types) as OTRv3,
+    except for SMP Message 1Q. When SMP Message 1Q is used in OTRv4, SMP Message
+    1 is used in OTRv4. When a question is not present, the user specified
+    question section has length `0` and value `NULL`. In OTRv3, SMP Message 1
+    is used when the user does not specify an SMP question. If a question is
+    supplied, SMP Message 1Q is used.
   * SMP in OTRv4 uses the same SMP State Machine as OTRv3, with the exception
     that `SMPSTATE_EXPECT1` only accepts SMP Message 1. Note that this
     state machine has no effect on type 0 or type 1 TLVs, which are always
@@ -3951,8 +3948,11 @@ Ed448.
 
 This function can be generalized so it is not possible to determine which secret
 key was used to produce this ring signature, even if all secret keys are
-revealed. For this, constant-time conditional operations should be used. The
-prover knows a secret `ai` and, therefore:
+revealed. For this, constant-time conditional operations should be used. For
+details on how to implement these operations, see the
+[Constant-time operations](#constant-time-operations) section.
+
+The prover knows a secret `ai` and, therefore:
 
 1. Pick random values `t1, c2, c3, r2, r3` in `q`.
 1. Compute:

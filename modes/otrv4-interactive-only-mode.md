@@ -1,6 +1,6 @@
 # OTR version 4: Interactive-Only Mode
 
-[ADR#010](https://github.com/otrv4/otrv4/tree/master/architecture-decisions)
+[ADR 10](https://github.com/otrv4/otrv4/tree/master/architecture-decisions/010-modes.md)
 defines the need for specifying alternative modes for the OTR protocol
 version 4.
 
