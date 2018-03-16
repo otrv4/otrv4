@@ -16,7 +16,7 @@ this.
 In OTRv4, the window of key compromise is equivalent to how long it takes for
 the double ratchet to refresh the ephemeral key material (2 ratchets, including
 the first compromised ratchet) and how long a prekey remains unused before the
-user profile becomes expired. We recommend expiration of the user profile to be
+User Profile becomes expired. We recommend expiration of the User Profile to be
 a week long, so the window of key compromise will be one week. This is done as
 with offline conversations, participants may not receive messages or reply to
 them for days, weeks, or months at a time. As a result, the window of
@@ -117,7 +117,7 @@ The public part of the shared prekey and its signature, which are essential to
 implementing XZDH, will be included in the published User Profile. The
 signature of the shared prekey must be published in order to be deniable as it
 is created using the participant's long term keys. We consider the signature of
-the user profile to be the signature of the shared prekey.
+the User Profile to be the signature of the shared prekey.
 
 A Non-interactive Auth Message has the format:
 
@@ -172,7 +172,7 @@ communication. This is only relevant for OTRv4 and subsequent versions.
 Describing the details of interactions between OTRv4 clients and a prekey
 server are outside the scope of this specification. Implementers are expected
 to create their own policy dictating how often their clients upload prekey
-messages to the prekey server. Prekey messages expire when their user profile
+messages to the prekey server. Prekey messages expire when their User Profile
 expires. Thus, new prekey messages should be published to the prekey server
 before they expire to keep valid prekey messages available.
 
@@ -211,7 +211,7 @@ Bob, any of the following may happen:
 2. Alice receives two prekey messages for Bob with different user profiles but
    the same instance tag. This can only validly happen if Bob's client supports
    two different versions of OTR that use prekey messages or if the long term
-   key used in each message's user profile is different.
+   key used in each message's User Profile is different.
 
     1. If the versions and the long term keys used in the messages are the same,
        and they are compatible with Alice's version, one of the prekey messages
@@ -247,15 +247,15 @@ Here is the guide:
 To validate a prekey message, use the following checks. If any of them fail,
 ignore the message:
 
-    Check if the user profile is not expired
+    Check if the User Profile is not expired
     Check if the OTR version of the prekey message matches one of the versions
-    signed in the user profile contained in the prekey message
-    Check if the user profile version is supported by the receiver
+    signed in the User Profile contained in the prekey message
+    Check if the User Profile version is supported by the receiver
 
 If one Prekey message is received:
 
     If the prekey message is valid, decide whether to send a non-interactive
-    auth message based on whether the long term key in the user profile is
+    auth message based on whether the long term key in the User Profile is
     trusted or not.
 
 If many prekey messages are received:

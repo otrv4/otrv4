@@ -114,7 +114,7 @@ every group.
 
 Another problem with the step is that once an attacker impersonates the
 identity to the server (someone steals your XMPP password), they can simply
-publish a new user profile (with a new long-term key, with new prekey
+publish a new User Profile (with a new long-term key, with new prekey
 messages) and guarantee they will receive encrypted copies of every "first"
 message the Responder sends.
 

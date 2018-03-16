@@ -1142,12 +1142,12 @@ an attacker.
 
 ## User Profile
 
-OTRv4 introduces user profiles. The user profile contains the Ed448 long term
+OTRv4 introduces user profiles. The User Profile contains the Ed448 long term
 public key, a shared prekey for offline conversations, information about
 supported versions, a profile expiration date, a signature of all these, and an
 optional transitional signature.
 
-There are two instances of the user profile that should be generated. One is
+There are two instances of the User Profile that should be generated. One is
 used for authentication in both DAKEs (interactive and non-interactive). The
 other should be published in a public place to achieve deniability properties.
 This procedure allows two parties to send and verify each other's signed User
@@ -1161,12 +1161,12 @@ subscribe extension (XEP-0060 [\[8\]](#references)) for publishing profiles. A
 protocol for publication must be defined, but the definition is out of scope
 for this specification.
 
-When the user profile expires, it should be updated. Client implementations
+When the User Profile expires, it should be updated. Client implementations
 should determine the frequency of user's profile expiration and renewal. The
 recommended expiration time is one week. Note, though, that the long term public
 key has its own expiration time.
 
-It is also important to note that the absence of a user profile is not a proof
+It is also important to note that the absence of a User Profile is not a proof
 that a user does not support OTRv4.
 
 ### User Profile Data Type
@@ -1222,11 +1222,11 @@ OTRv3 public authentication DSA key (PUBKEY):
 
 ### Creating a User Profile
 
-To create a user profile, assemble:
+To create a User Profile, assemble:
 
 1. User's Ed448 long term public key.
 2. Versions: a string corresponding to the user's supported OTR versions.
-   A user profile can advertise multiple OTR versions. The format is described
+   A User Profile can advertise multiple OTR versions. The format is described
    under the section [Establishing Versions](#establishing-versions) below.
 3. Profile Expiration: Expiration date in standard Unix 64-bit format
    (seconds since the midnight starting Jan 1, 1970, UTC, ignoring leap
@@ -1236,18 +1236,18 @@ To create a user profile, assemble:
    of the non-interactive DAKE and that compromises the receivers long term
    secret key and their one-time ephemeral keys. For its generation, refer to
    [Public keys, shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
-   section. This key must expire when the user profile expires.
+   section. This key must expire when the User Profile expires.
 5. Profile Signature: The symmetric key, the flag `f` (set to zero, as defined
    on RFC 8032 [\[9\]](#references)) and the empty context `c` are used to
    create signatures of the entire profile excluding the signature itself. The
    size of the signature is 114 bytes. For its generation, refer to
-   [Create a user profile signature](#create-a-user-profile-signature) section.
+   [Create a User Profile Signature](#create-a-user-profile-signature) section.
 6. Transitional Signature (optional): A signature of the profile excluding the
    Profile Signature and the user's OTRv3 DSA key. The Transitional Signature
    enables parties that trust user's version 3 DSA key to trust the user's
    profile in version 4. This is only used if the user supports versions 3
    and 4. For more information, refer to
-   [Create a user profile signature](#create-a-user-profile-signature) section.
+   [Create a User Profile signature](#create-a-user-profile-signature) section.
 
 After the profile is created, it must be published in a public place, like an
 untrusted server, as defined above.
@@ -1276,7 +1276,7 @@ expired profile during the DAKE is considered invalid.
 
 Before the profile expires, the user must publish an updated profile with a
 new expiration date. The client establishes the frequency of expiration and
-when to publish (before the current user profile expires). Note that this can be
+when to publish (before the current User Profile expires). Note that this can be
 configurable. A recommended value is one week.
 
 ### Create a User Profile Signature
@@ -1298,7 +1298,7 @@ If only version 4 is supported:
    * Sign `m` with the symmetric key, as stated below. Denote this value
      `Profile Signature`.
 
-The user profile signature for version 4 is generated as defined in RFC 8032
+The User Profile signature for version 4 is generated as defined in RFC 8032
 [\[9\]](#references), section 5.2.6. The flag `f` is set to `0` and the context
 `c` is an empty constant string.
 
@@ -1342,7 +1342,7 @@ with value 0, a context 'c' (a value set by the signer and verifier of maximum
 
 ### Verify a User Profile Signature
 
-The user profile signature is verified as defined in RFC 8032
+The User Profile signature is verified as defined in RFC 8032
 [\[9\]](#references), section 5.2.7. It works as follows:
 
 ```
@@ -1362,9 +1362,9 @@ The user profile signature is verified as defined in RFC 8032
 
 ### Validating a User Profile
 
-To validate a user profile, you must (in this order):
+To validate a User Profile, you must (in this order):
 
-1. Verify that the user profile has not expired.
+1. Verify that the User Profile has not expired.
 2. Verify that the `Versions` field contains the character "4".
 3. Validate that the `Public Shared Prekey` and the `Ed448 Public Key` are on
    the curve Ed448-Goldilocks. See
@@ -1546,8 +1546,8 @@ and DH key.
 
 A valid Identity message is generated as follows:
 
-1. Create a user profile, as defined in
-   [Creating a user profile](#creating-a-user-profile) section.
+1. Create a User Profile, as defined in
+   [Creating a User Profile](#creating-a-user-profile) section.
 2. Generate an ephemeral ECDH key pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
    * secret key `y` (57 bytes).
@@ -1613,7 +1613,7 @@ that its DH key is in the correct group.
 
 A valid Auth-R message is generated as follows:
 
-1. Create a User profile, as detailed as defined in
+1. Create a User Profile, as detailed as defined in
    [Creating a User Profile](#creating-a-user-profile) section.
 2. Generate an ephemeral ECDH key pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
@@ -1643,7 +1643,7 @@ To verify an Auth-R message:
 1. Verify if the message type is `0x91`.
 2. Verify that protocol's version of the message is `0x0004`.
 3. Check that the receiver's instance tag matches your sender's instance tag.
-4. Validate the User profile as defined in
+4. Validate the User Profile as defined in
    [Validating a User Profile](#validating-a-user-profile) section.
    Extract `H_a` from it.
 5. Compute `t = 0x0 || KDF_1(0x06 || Bobs_User_Profile, 64) ||
@@ -1794,7 +1794,7 @@ Verify. Decrypt message if included
     * Sets the received ECDH ephemeral public key `Y` as `their_ecdh`.
     * Sets the received DH ephemeral public key `B` as `their_dh`.
 3. Extracts the Public Shared Prekey (`D_b`) and the Ed448 public key (`H_b`)
-   from Bob's User profile. Sets the first as `their_shared_prekey`.
+   from Bob's User Profile. Sets the first as `their_shared_prekey`.
 4. Generates a Non-Interactive-Auth message. See
    [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 5. Sets `X` and `x` as `our_ecdh`: the ephemeral ECDH keys.
@@ -3862,9 +3862,9 @@ Read and Forge Data Message
 
 Forge DAKE and Session Keys
   Any participant of an OTR conversation may forge a DAKE with another
-  participant as long as they have their user profile. This function will
-  take the user profile and the secret long term key of one participant, and
-  the user profile of the other. It will return a DAKE transcript between
+  participant as long as they have their User Profile. This function will
+  take the User Profile and the secret long term key of one participant, and
+  the User Profile of the other. It will return a DAKE transcript between
   the two parties. The participant's private key is required since it is used
   to authenticate the key exchange, but the resulting transcript is created
   in such a way that a cryptographic expert cannot identify which user
@@ -3888,13 +3888,13 @@ Forge Entire Transcript
   The Forge Entire Transcript function will allow one participant to completely
   forge a transcript between them and another person in a way that its forgery
   cannot be cryptographically proven. The input will be: one participant's user
-  profile, their secret key, another participant's user profile, and a list of
+  profile, their secret key, another participant's User Profile, and a list of
   plain text messages corresponding to what messages were exchanged. Each
   message in the list will have the structure: 1) sender 2) plain text message,
   so that the function may precisely create the desired transcript. The
   participant's private key is required since it is used to authenticate the key
   exchange, but the resulting transcript is created in such a way that a
-  cryptographic expert cannot identify which user profile owner authenticated
+  cryptographic expert cannot identify which User Profile owner authenticated
   the conversation.
 ```
 

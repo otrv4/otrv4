@@ -44,15 +44,15 @@ differ in these sections:
   version string "4".
 - "Creating a User Profile": the `Transitional Signature` field is not allowed
   in this mode: there is no DSA signature generation or verification. Therefore,
-  when validating a user profile, the DSA signature must not be verified.
+  when validating a User Profile, the DSA signature must not be verified.
 - "Establishing Versions": ignore the paragraph: "A compliant OTRv4
   implementation is required to support version 3 of OTR, but not versions 1 and
   2". This mode only allows version 4 of the protocol.
 - "Online Conversation Initialization": ignore everything that refers to query
   messages and whitespace tags. Always check that the compatible version in the
-  participant's user profile includes "4".
+  participant's User Profile includes "4".
 - "Offline Conversation Initialization": always check that the compatible
-  version in the participant's user profile includes "4".
+  version in the participant's User Profile includes "4".
 - "Fragmentation": only OTRv4 fragmentation is allowed. Ignore this paragraph:
   "For fragmentation in OTRv3, refer to the "Fragmentation" section on OTRv3
   specification".
@@ -92,7 +92,7 @@ Alice will be initiating the DAKE with Bob.
       [Identity message](#identity-message) section. If the verification fails
       (for example, if Alice's public keys -`Y` or `B`- are not valid), rejects
       the message and does not send anything further.
-    * Checks that the version in Alice's user profile includes "4". If it is not,
+    * Checks that the version in Alice's User Profile includes "4". If it is not,
       Bob does not send any further messages.
     * Sets `Y` as `their_ecdh`.
     * Sets `B` as `their_dh`.

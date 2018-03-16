@@ -93,5 +93,5 @@ As OTRv4 upgrades do not fix any known security issue on OTRv3, it is
 acceptable for users to chat using version 3, but is preferable to use 4 if
 both parties support it.
 
-We will support a conversation using version 3 if we don't find any user profile
+We will support a conversation using version 3 if we don't find any User Profile
 and the client allows it.
