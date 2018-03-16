@@ -47,7 +47,7 @@ This mode will take into account the same kind considerations defined for the
 OTRv4-Standalone mode.
 
 Nevertheless, this mode achieves different security properties as the ones
-described in the [security properties](../otrv4.md#security-properties) section,
+described in the [Security Properties](../otrv4.md#security-properties) section,
 as it does not include the security properties given by a non-interactive DAKE.
 Therefore, it provides offline and online (participation) deniability for both
 participants.

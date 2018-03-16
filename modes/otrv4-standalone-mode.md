@@ -18,7 +18,7 @@ backwards compatible with OTRv3.
 
 An implementation of the OTRv4 protocol in a OTRv4-Standalone mode must be
 compliant with the overall protocol specification
-[OTRv4 protocol](../otrv4.md#table-of-contents), with the following exceptions
+[OTRv4 Protocol](../otrv4.md#table-of-contents), with the following exceptions
 and the following changes.
 
 Ignore these sections:
@@ -80,7 +80,7 @@ Alice will be initiating the DAKE with Bob.
 **Alice:**
 
 1. Generates an Identity message, as defined in
-   [Identity message](../otrv4.md#identity-message) section.
+   [Identity Message](../otrv4.md#identity-message) section.
 2. Sets `Y` and `y` as `our_ecdh`: the ephemeral ECDH keys.
 3. Sets `B` as  and `b` as `our_dh`: the ephemeral 3072-bit DH keys.
 4. Sends Bob the Identity message.
@@ -97,7 +97,7 @@ Alice will be initiating the DAKE with Bob.
     * Sets `Y` as `their_ecdh`.
     * Sets `B` as `their_dh`.
 2. Generates an Auth-R message, as defined in
-   [Auth-R message](../otrv4.md#auth-r-message) section.
+   [Auth-R Message](../otrv4.md#auth-r-message) section.
 3. Sets `X` and `x` as `our_ecdh`: the ephemeral ECDH keys.
 4. Sets `A` and `a` as `our_dh`: the ephemeral 3072-bit DH keys.
 5. Calculates the Mixed shared secret (`K`) and the SSID:
@@ -113,7 +113,7 @@ Alice will be initiating the DAKE with Bob.
       Securely deletes `K_ecdh` and `brace_key`.
     * Calculates the SSID from shared secret: the first 8 bytes of
       `KDF_1(0x05 || K, 64)`.
-6. Sends Alice the Auth-R message (see [Auth-R message](../otrv4.md#auth-r-message) section).
+6. Sends Alice the Auth-R message (see [Auth-R Message](../otrv4.md#auth-r-message) section).
 
 **Alice:**
 
@@ -131,8 +131,8 @@ Alice will be initiating the DAKE with Bob.
       [Verifying that an integer is in the DH group](../otrv4.md#verifying-that-an-integer-is-in-the-dh-group)
       section for details.
 3. Verifies the Auth-R message as defined in the
-   [Auth-R message](../otrv4.md#auth-r-message) section.
-4. Creates an Auth-I message (see [Auth-I message](../otrv4.md#auth-i-message)
+   [Auth-R Message](../otrv4.md#auth-r-message) section.
+4. Creates an Auth-I message (see [Auth-I Message](../otrv4.md#auth-i-message)
    section).
 5. Calculates the Mixed shared secret (`K`) and the SSID:
     * Calculates ECDH shared secret
@@ -152,13 +152,13 @@ Alice will be initiating the DAKE with Bob.
     * Sets `j` as 0, `k` as 0 and `pn` as 0.
     * Generates Bob's ECDH and DH public keys:
        * Generates an ephemeral ECDH key pair, as defined in
-         [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
+         [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys), but instead
          of using a random value `r`, it will use : `r = KDF_1(0x19 || K, 57)`.
          Securely replaces `their_ecdh` with the output
          `our_ecdh.public (G * s)` and securely deletes the output
          `our_ecdh.secret (s)`.
        * Generates an ephemeral DH key pair, as defined in
-         [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
+         [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys), but instead
          of using a random value `r`, it will use : `r = KDF_1(0x20 || K, 80)`.
          Securely replaces `their_dh` with the output
          `our_dh.public (g3 ^ r)` and securely deletes the output
@@ -173,12 +173,12 @@ Alice will be initiating the DAKE with Bob.
 
 1. Receives the Auth-I message from Alice:
    * Verifies the Auth-I message as defined in the
-     [Auth-I message](../otrv4.md#auth-i-message) section.
+     [Auth-I Message](../otrv4.md#auth-i-message) section.
 2. Initializes the double ratchet:
    * Sets ratchet id `i` as 0.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
    * Generates an ephemeral ECDH key pair, as defined in
-     [Generating ECDH and DH keys](../otrv4.md#generating-ecdh-and-dh-keys),
+     [Generating ECDH and DH Keys](../otrv4.md#generating-ecdh-and-dh-keys),
      but instead of using a random value `r`, it will use :
      `r = KDF_1(0x19 || K, 57)`.
      Securely replaces `our_ecdh` with the outputs.
@@ -256,7 +256,7 @@ Plaintext messages are not allowed in conversations in OTRv4-Standalone mode.
 This means that query messages and whitespace tags are not allowed in this mode.
 
 By always requiring encryption, this mode may encourage long-lived sessions.
-The section [session expiration](../otrv4.md#session-expiration) of the OTRv4
+The section [Session Expiration](../otrv4.md#session-expiration) of the OTRv4
 protocol specification outlines how to mitigate the risks of long-lived
 sessions. For this reason, TLVs type 1 (Disconnected) are necessary in this
 mode.
@@ -271,7 +271,7 @@ since the protocol only handles OTR messages, this mode does not modify this
 encoding for convenience.
 
 This mode is compliant with the security properties described in the
-[security properties](../otrv4.md#security-properties) section. But, take into
+[Security Properties](../otrv4.md#security-properties) section. But, take into
 account that there may be a loss of deniability if an interactive DAKE is
 followed by a non-interactive one. Implementers are recommended to warn the
 users about it when it happens.

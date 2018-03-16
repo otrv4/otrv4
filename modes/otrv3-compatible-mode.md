@@ -16,7 +16,7 @@ whitespace tags. It is considered the 'default' mode.
 
 An implementation of the OTRv4 protocol in an OTRv3-compatible mode must be
 compliant with the full protocol specification:
-[OTRv4 protocol](../otrv4.md#table-of-contents). That is, it must comply with
+[OTRv4 Protocol](../otrv4.md#table-of-contents). That is, it must comply with
 every section on it.
 
 ### Scenarios and applications
@@ -50,7 +50,7 @@ OTRv3-Compatible mode. The use of policies, similar to OTRv3, can be used to
 safely handle the transition from an "encrypted" to a "plaintext" state.
 
 Notice that in this mode, the security properties stated in the
-[security properties](../otrv4.md#security-properties) section only hold for
+[Security Properties](../otrv4.md#security-properties) section only hold for
 when a conversation with OTRv4 is started. They do not hold for the previous
 versions of the OTR protocol, meaning that if a user that supports version 3 and
 4 starts a conversation with someone that only supports version 3, a
