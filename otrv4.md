@@ -19,14 +19,14 @@ an existing messaging protocol, such as XMPP.
    1. [Conversation started by a Non-Interactive DAKE](#conversation-started-by-a-non-interactive-dake)
 1. [Assumptions](#assumptions)
 1. [Security Properties](#security-properties)
-1. [OTRv4 modes](#otrv4-modes)
-1. [Notation and parameters](#notation-and-parameters)
+1. [OTRv4 Modes](#otrv4-modes)
+1. [Notation and Parameters](#notation-and-parameters)
    1. [Notation](#notation)
    1. [Elliptic Curve Parameters](#elliptic-curve-parameters)
       1. [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    1. [3072-bit Diffie-Hellman Parameters](#3072-bit-diffie-hellman-parameters)
       1. [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
-   1. [Key derivation functions](#key-derivation-functions)
+   1. [Key Derivation Functions](#key-derivation-functions)
 1. [Data Types](#data-types)
    1. [Encoding and Decoding](#encoding-and-decoding)
       1. [Scalar](#scalar)
@@ -36,19 +36,19 @@ an existing messaging protocol, such as XMPP.
    1. [Public keys, Shared Prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
    1. [Instance Tags](#instance-tags)
    1. [TLV Record Types](#tlv-record-types)
-   1. [Shared session state](#shared-session-state)
+   1. [Shared Session State](#shared-session-state)
    1. [Secure Session ID](#secure-session-id)
    1. [OTR Error Messages](#otr-error-messages)
 1. [Key management](#key-management)
    1. [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys)
-   1. [Shared secrets](#shared-secrets)
-   1. [Generating shared secrets](#generating-shared-secrets)
-   1. [Deciding between chain keys](#deciding-between-chain-keys)
-   1. [Rotating ECDH keys and brace key as sender](#rotating-ecdh-keys-and-brace-key-as-sender)
-   1. [Rotating ECDH keys and brace key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
+   1. [Shared Secrets](#shared-secrets)
+   1. [Generating Shared Secrets](#generating-shared-secrets)
+   1. [Deciding between Chain Keys](#deciding-between-chain-keys)
+   1. [Rotating ECDH Keys and Brace Key as Sender](#rotating-ecdh-keys-and-brace-key-as-sender)
+   1. [Rotating ECDH Keys and Brace Key as Receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
    1. [Deriving Double Ratchet Keys](#deriving-double-ratchet-keys)
-   1. [Calculating encryption and MAC keys](#calculating-encryption-and-mac-keys)
-   1. [Resetting state variables and key variables](#resetting-state-variables-and-key-variables)
+   1. [Calculating Encryption and MAC Keys](#calculating-encryption-and-mac-keys)
+   1. [Resetting State Variables and Key Variables](#resetting-state-variables-and-key-variables)
    1. [Session Expiration](#session-expiration)
 1. [User Profile](#user-profile)
    1. [User Profile Data Type](#user-profile-data-type)
@@ -59,12 +59,12 @@ an existing messaging protocol, such as XMPP.
    1. [Verify a User Profile Signature](#verify-a-user-profile-signature)
    1. [Validating a User Profile](#validating-a-user-profile)
 1. [Online Conversation Initialization](#online-conversation-initialization)
-   1. [Requesting conversation with older OTR versions](#requesting-conversation-with-older-otr-versions)
+   1. [Requesting Conversation with Older OTR Versions](#requesting-conversation-with-older-otr-versions)
    1. [Interactive Deniable Authenticated Key Exchange (DAKE)](#interactive-deniable-authenticated-key-exchange-dake)
       1. [Interactive DAKE Overview](#interactive-dake-overview)
-      1. [Identity message](#identity-message)
-      1. [Auth-R message](#auth-r-message)
-      1. [Auth-I message](#auth-i-message)
+      1. [Identity Message](#identity-message)
+      1. [Auth-R Message](#auth-r-message)
+      1. [Auth-I Message](#auth-i-message)
 1. [Offline Conversation Initialization](#offline-conversation-initialization)
    1. [Non-interactive Deniable Authenticated Key Exchange (DAKE)](#non-interactive-deniable-authenticated-key-exchange-dake)
       1. [Non-interactive DAKE Overview](#non-interactive-dake-overview)
@@ -73,47 +73,47 @@ an existing messaging protocol, such as XMPP.
       1. [Publishing Prekey Messages](#publishing-prekey-messages)
       1. [Receiving Prekey Messages](#receiving-prekey-messages)
       1. [Validating Prekey Messages](#validating-prekey-messages)
-   1. [Encrypted messages in DAKE's messages](#encrypted-messages-in-dakes-messages)
-      1. [Attaching an encrypted message to Non-Interactive-Auth message in XZDH](#attaching-an-encrypted-message-to-non-interactive-auth-message-in-xzdh)
-         1. [Encrypting the message](#encrypting-the-message)
-         1. [Decrypting the message](#decrypting-the-message)
+   1. [Encrypted Messages in DAKE's Messages](#encrypted-messages-in-dakes-messages)
+      1. [Attaching an Encrypted Message to Non-Interactive-Auth Message in XZDH](#attaching-an-encrypted-message-to-non-interactive-auth-message-in-xzdh)
+         1. [Encrypting the Message](#encrypting-the-message)
+         1. [Decrypting the Message](#decrypting-the-message)
 1. [Data Exchange](#data-exchange)
    1. [Data Message](#data-message)
       1. [Data Message Format](#data-message-format)
       1. [When you send a Data Message:](#when-you-send-a-data-message)
       1. [When you receive a Data Message:](#when-you-receive-a-data-message)
-   1. [Deletion of stored message keys](#deletion-of-stored-message-keys)
+   1. [Deletion of Stored Message Keys](#deletion-of-stored-message-keys)
    1. [Extra Symmetric Key](#extra-symmetric-key)
    1. [Revealing MAC Keys](#revealing-mac-keys)
 1. [Fragmentation](#fragmentation)
    1. [Transmitting Fragments](#transmitting-fragments)
    1. [Receiving Fragments](#receiving-fragments)
-1. [The protocol state machine](#the-protocol-state-machine)
-   1. [Protocol states](#protocol-states)
-   1. [Protocol events](#protocol-events)
+1. [The protocol State Machine](#the-protocol-state-machine)
+   1. [Protocol States](#protocol-states)
+   1. [Protocol Events](#protocol-events)
 1. [Socialist Millionaires Protocol (SMP)](#socialist-millionaires-protocol-smp)
    1. [SMP Overview](#smp-overview)
-   1. [Secret information](#secret-information)
-   1. [SMP Hash function](#smp-hash-function)
-   1. [SMP message 1](#smp-message-1)
-   1. [SMP message 2](#smp-message-2)
-   1. [SMP message 3](#smp-message-3)
-   1. [SMP message 4](#smp-message-4)
-   1. [The SMP state machine](#the-smp-state-machine)
+   1. [Secret Information](#secret-information)
+   1. [SMP Hash Function](#smp-hash-function)
+   1. [SMP Message 1](#smp-message-1)
+   1. [SMP Message 2](#smp-message-2)
+   1. [SMP Message 3](#smp-message-3)
+   1. [SMP Message 4](#smp-message-4)
+   1. [The SMP State Machine](#the-smp-state-machine)
 1. [Implementation Notes](#implementation-notes)
-   1. [Considerations for networks that allow multiple devices](#considerations-for-networks-that-allow-multiple-devices)
+   1. [Considerations for Networks that allow Multiple Devices](#considerations-for-networks-that-allow-multiple-devices)
 1. [Forging Transcripts](#forging-transcripts)
 1. [Appendices](#appendices)
    1. [Ring Signature Authentication](#ring-signature-authentication)
    1. [HashToScalar](#hashtoscalar)
-   1. [Modify an encrypted data message](#modify-an-encrypted-data-message)
+   1. [Modify an Encrypted Data Message](#modify-an-encrypted-data-message)
    1. [OTRv3 Specific Encoded Messages](#otrv3-specific-encoded-messages)
    1. [OTRv3 Protocol State Machine](#otrv3-protocol-state-machine)
-   1. [Elliptic curve operations](elliptic-curve-operations)
-      1. [Point addition](point-addition)
+   1. [Elliptic Curve Operations](elliptic-curve-operations)
+      1. [Point Addition](point-addition)
    1. [Constant-time Operations](constant-time-operations)
-      1. [Constant-time equality](constant-time-equality)
-      1. [Constant-time selection](constant-time-selection)
+      1. [Constant-time Equality](constant-time-equality)
+      1. [Constant-time Selection](constant-time-selection)
 1. [References](#references)
 
 ## Main Changes over Version 3
@@ -277,7 +277,7 @@ that if a user that supports version 3 and 4 starts a conversation with someone
 that only supports version 3, a conversation with OTRv3 will start, and its
 security properties will not be the ones stated in these paragraphs.
 
-## OTRv4 modes
+## OTRv4 Modes
 
 In order for OTRv4 to be an alternative to current messaging applications, to
 be compatible with the OTRv3 specification and to be useful for instant
@@ -317,7 +317,7 @@ Take into account, as well, that OTRv4' state machine will need to know the mode
 is working on when initialized. It will also need to take this mode into account
 every time it makes a decision on how to transition from every state.
 
-## Notation and parameters
+## Notation and Parameters
 
 This section contains information needed to understand the parameters, variables
 and arithmetic used in the specification.
@@ -331,7 +331,7 @@ Addition of elliptic curve points `A` and `B` is `A + B`. Subtraction is
 `A - B`. Addition of a point to another point generates a third point. Scalar
 multiplication of an elliptic curve point `B` with a scalar `a` yields a new
 point: `C = B * a`. For details on how to implement these operations, see the
-[Elliptic curve operations](#elliptic-curve-operations) section.
+[Elliptic Curve Operations](#elliptic-curve-operations) section.
 
 The concatenation of byte sequences `I` and `J` is `I || J`. In this case, `I`
 and `J` represent a fixed-length byte sequence encoding of the respective
@@ -466,7 +466,7 @@ To verify that an integer (`x`) is on the group with a 3072-bit modulus:
 2. Compute `x ^ q mod p`. If `result == 1`, the integer is a valid element.
    Otherwise the integer is an invalid element.
 
-### Key derivation functions
+### Key Derivation Functions
 
 The following key derivation functions are used:
 
@@ -901,19 +901,19 @@ Key variables:
 Depending on the event, the state variables are incremented and some key
 variable values are replaced:
 
-* When you start a new [interactive DAKE](#interactive-dake-overview) by sending
-  or receiving an [Identity message](#identity-message).
-* When you complete the [interactive DAKE](#interactive-dake-overview) by
+* When you start a new [Interactive DAKE](#interactive-dake-overview) by sending
+  or receiving an [Identity Message](#identity-message).
+* When you complete the [Interactive DAKE](#interactive-dake-overview) by
   sending an [Auth-I Message](#auth-i-message).
-* When you complete the [interactive DAKE](#interactive-dake-overview) by
+* When you complete the [Interactive DAKE](#interactive-dake-overview) by
   receiving and validating an [Auth-I Message](#auth-i-message).
-* When you start a new [non-interactive DAKE](#non-interactive-dake-overview) by
+* When you start a new [Non-interactive DAKE](#non-interactive-dake-overview) by
   publishing or retrieving a [Prekey message](#prekey-message).
-* When you complete a [non-interactive DAKE](#non-interactive-dake-overview) by
-  sending a [non-interactive-Auth message](#non-interactive-auth-message).
-* When you complete a [non-interactive DAKE](#non-interactive-dake-overview) by
+* When you complete a [Non-interactive DAKE](#non-interactive-dake-overview) by
+  sending a [Non-interactive-Auth Message](#non-interactive-auth-message).
+* When you complete a [Non-interactive DAKE](#non-interactive-dake-overview) by
   receiving and validating a
-  [non-interactive-Auth message](#non-interactive-auth-message).
+  [Non-interactive-Auth Message](#non-interactive-auth-message).
 * When you [send a Data Message](#when-you-send-a-data-message) or
   [receive a Data Message](#when-you-receive-a-data-message).
 * When you [send a TLV type 1 (Disconnected)](#sending-a-tlv-type-1-disconnected-message).
@@ -937,7 +937,7 @@ generateDH()
   - return our_dh.public = g3 ^ r, our_dh.secret = r
 ```
 
-### Shared secrets
+### Shared Secrets
 
 ```
 k_dh:
@@ -957,7 +957,7 @@ K:
   brace key and ECDH shared secrets: 'KDF_1(0x04 || K_ecdh || brace_key, 64)'.
 ```
 
-### Generating shared secrets
+### Generating Shared Secrets
 
 ```
 ECDH(a, B)
@@ -982,7 +982,7 @@ DH(a, B)
   return k_dh = a ^ B
 ```
 
-### Rotating ECDH keys and brace key as sender
+### Rotating ECDH Keys and Brace Key as sender
 
 Before sending the first reply (i.e. a new message considering a previous
 message has been received) or sending the first data message, the sender will
@@ -1013,7 +1013,7 @@ To rotate the brace key:
 
     * Derive and securely overwrite `brace_key = KDF_1(0x03 || brace_key, 32)`.
 
-### Rotating ECDH keys and brace key as receiver
+### Rotating ECDH Keys and Brace Key as receiver
 
 Every ratchet, the receiver will rotate their ECDH keys and their brace key.
 This is for the computation of the Mixed shared secret `K` (see
@@ -1055,7 +1055,7 @@ derive_ratchet_keys(purpose, root_key[i-1], K):
   return root_key[i], chain_key_purpose[i][j]
 ```
 
-### Calculating encryption and MAC keys
+### Calculating Encryption and MAC Keys
 
 When sending or receiving data messages, you must calculate the message keys:
 
@@ -1066,7 +1066,7 @@ derive_enc_mac_keys(chain_key):
   return MKenc, MKmac
 ```
 
-### Resetting state variables and key variables
+### Resetting State Variables and Key Variables
 
 The state variables are set to `0` and the key variables are set to `NULL`.
 
@@ -1235,7 +1235,7 @@ To create a User Profile, assemble:
    It adds partial protection against an attacker that modifies the first flow
    of the non-interactive DAKE and that compromises the receivers long term
    secret key and their one-time ephemeral keys. For its generation, refer to
-   [Public keys, shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
+   [Public keys, Shared Prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
    section. This key must expire when the User Profile expires.
 5. Profile Signature: The symmetric key, the flag `f` (set to zero, as defined
    on RFC 8032 [\[9\]](#references)) and the empty context `c` are used to
@@ -1247,7 +1247,7 @@ To create a User Profile, assemble:
    enables parties that trust user's version 3 DSA key to trust the user's
    profile in version 4. This is only used if the user supports versions 3
    and 4. For more information, refer to
-   [Create a User Profile signature](#create-a-user-profile-signature) section.
+   [Create a User Profile Signature](#create-a-user-profile-signature) section.
 
 After the profile is created, it must be published in a public place, like an
 untrusted server, as defined above.
@@ -1357,7 +1357,6 @@ The User Profile signature is verified as defined in RFC 8032
 
 3.  Check the group equation '4 * (S * G) = (4 * R) + (4 * (k * H_1))'. It's is
     sufficient to check '(S * G) = R + (k * H_1)'.
-
 ```
 
 ### Validating a User Profile
@@ -1380,7 +1379,7 @@ Online OTRv4 conversations are initialized through a [Query Message or a
 Whitespace Tag](#user-requests-to-start-an-otr-conversation). After this, the
 conversation is authenticated using the interactive DAKE.
 
-### Requesting conversation with older OTR versions
+### Requesting Conversation with Older OTR Versions
 
 Bob might respond to Alice's request (or notification of willingness to start a
 conversation) using OTRv3. If this is the case and Alice supports version 3, the
@@ -1418,7 +1417,7 @@ Bob will be initiating the DAKE with Alice.
 **Bob:**
 
 1. Generates an Identity message, as defined in
-   [Identity message](#identity-message) section.
+   [Identity Message](#identity-message) section.
 2. Sets `Y` and `y` as `our_ecdh`: the ephemeral ECDH keys.
 3. Sets `B` as  and `b` as `our_dh`: the ephemeral 3072-bit DH keys.
 4. Sends Alice the Identity message.
@@ -1436,7 +1435,7 @@ Bob will be initiating the DAKE with Alice.
     * Sets `Y` as `their_ecdh`.
     * Sets `B` as `their_dh`.
 2. Generates an Auth-R message, as defined in
-   [Auth-R message](#auth-r-message) section.
+   [Auth-R Message](#auth-r-message) section.
 3. Sets `X` and `x` as `our_ecdh`: the ephemeral ECDH keys.
 4. Sets `A` and `a` as `our_dh`: the ephemeral 3072-bit DH keys.
 5. Calculates the Mixed shared secret (`K`) and the SSID:
@@ -1451,7 +1450,7 @@ Bob will be initiating the DAKE with Alice.
       `K = KDF_1(0x04 ||K_ecdh || brace_key, 64)`.
       Securely deletes `K_ecdh` and `brace_key`.
     * Calculates the SSID from shared secret: `KDF_1(0x05 || K, 8)`.
-6. Sends Bob the Auth-R message (see [Auth-R message](#auth-r-message) section).
+6. Sends Bob the Auth-R message (see [Auth-R Message](#auth-r-message) section).
 
 **Bob:**
 
@@ -1469,8 +1468,8 @@ Bob will be initiating the DAKE with Alice.
       [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
       section for details.
 3. Verifies the Auth-R message as defined in the
-   [Auth-R message](#auth-r-message) section.
-4. Creates an Auth-I message (see [Auth-I message](#auth-i-message) section).
+   [Auth-R Message](#auth-r-message) section.
+4. Creates an Auth-I message (see [Auth-I Message](#auth-i-message) section).
 5. Calculates the Mixed shared secret (`K`) and the SSID:
     * Calculates ECDH shared secret
       `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
@@ -1539,7 +1538,7 @@ Bob will be initiating the DAKE with Alice.
        [When you send a Data Message](#when-you-send-a-data-message) section,
        and perform a new DH Ratchet.
 
-#### Identity message
+#### Identity Message
 
 This is the first message of the DAKE. It is sent to commit to a choice of ECDH
 and DH key.
@@ -1603,7 +1602,7 @@ B (MPI)
   is NOT a POINT.
 ```
 
-#### Auth-R message
+#### Auth-R Message
 
 This is the second message of the DAKEZ. It is sent to commit to a choice of a
 ECDH ephemeral key and a DH ephemeral key, and to acknowledge the other
@@ -1683,7 +1682,7 @@ sigma (RING-SIG)
   The 'RING-SIG' proof of authentication value.
 ```
 
-#### Auth-I message
+#### Auth-I Message
 
 This is the final message of the DAKE. It is sent to verify the authentication
 `sigma`.
@@ -1759,10 +1758,10 @@ for authentication (`RSig`).
 
 Alice's long-term Ed448 key pair is `(sk_ha, H_a)` and Bob's long-term Ed448 key
 pair is `(sk_hb, H_b)`. Both key pairs are generated as stated in the
-[Public keys, shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
+[Public keys, Shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
 section.
 
-#### Non-interactive DAKE Overview
+#### Non-Interactive DAKE Overview
 
 ```
 Bob                            Server                               Alice
@@ -1778,7 +1777,7 @@ Verify. Decrypt message if included
 **Bob:**
 
 1. Generates a Prekey message, as defined in
-   [Prekey message](#prekey-message) section.
+   [Prekey Message](#prekey-message) section.
 2. Sets `Y` and `y` as `our_ecdh`: the ephemeral ECDH keys.
 3. Sets `B` as  and `b` as `our_dh`: the ephemeral 3072-bit DH keys.
 4. Publishes the Prekey message to an untrusted server.
@@ -1787,7 +1786,7 @@ Verify. Decrypt message if included
 
 1. Requests prekey messages from the untrusted server.
 2. For each Prekey message received from the server:
-    * [Validates each Prekey message](#validating-prekey-messages).
+    * [Validates each Prekey Message](#validating-prekey-messages).
     * Picks a compatible version of OTR listed in Bob's profile.
       If the versions are incompatible, Alice does not send any further
       messages.
@@ -1810,7 +1809,7 @@ Verify. Decrypt message if included
     * Sets `j` as 0, `k` as 0 and `pn` as 0.
     * Generates Bob's ECDH and DH public keys:
       * Generates an ephemeral ECDH key pair, as defined in
-        [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
+        [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys), but instead
         of using a random value `r`, it will use : `r = KDF_1(0x19, K, 57)`.
         Securely replaces `their_ecdh` with the output
         `our_ecdh.public (G * s)` and securely deletes the output
@@ -1824,7 +1823,7 @@ Verify. Decrypt message if included
 9. At this point, she can attach an encrypted message to the
    Non-Interactive-Auth message:
     * Follows what is defined in the
-      [Attaching an encrypted message to the Non-Interactive-Auth message](#attaching-an-encrypted-message-to-non-interactive-auth-message-in-xzdh)
+      [Attaching an Encrypted Message to the Non-Interactive-Auth Message](#attaching-an-encrypted-message-to-non-interactive-auth-message-in-xzdh)
       section.
 10. Calculates the `Auth MAC`:
 
@@ -1888,15 +1887,15 @@ Verify. Decrypt message if included
    * Sets ratchet id `i` as 0.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
    * Generates an ephemeral ECDH key pair, as defined in
-     [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
+     [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys), but instead
      of using a random value `r`, it will use : `r = KDF_1(0x19, K, 57)`.
      Securely replaces `our_ecdh` with the outputs.
    * Generates an ephemeral DH key pair, as defined in
-     [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
+     [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys), but instead
      of using a random value `r`, it will use : `r = KDF_1(0x20, K, 80)`.
      Securely replaces `our_dh` with the outputs.
    * If an encrypted message was attached to the Non-Interactive-Auth message:
-     * Follows what is defined in [Decrypting an attached encrypted message](#decrypting-the-message)
+     * Follows what is defined in [Decrypting an Attached Encrypted Message](#decrypting-the-message)
        section.
      * Otherwise:
         * Computes `Auth MAC = KDF_1(0x18 || auth_mac_k || t, 64)`.
@@ -1929,12 +1928,12 @@ A valid Prekey message is generated as follows:
    [Creating a User Profile](#creating-a-user-profile) section.
 2. Create the first one-time use prekey by generating the ephemeral ECDH key
    pair, as defined in
-   [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
+   [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys):
    * secret key `y` (57 bytes).
    * public key `Y`.
 3. Create the second one-time use prekey by generating the ephemeral DH key
    pair, as defined in
-   [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
+   [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys):
    * secret key `b` (80 bytes).
    * public key `B`.
 4. Generate a 4-byte instance tag to use as the sender's instance tag.
@@ -1992,11 +1991,11 @@ A valid Non-Interactive-Auth message is generated as follows:
 1. Create a User Profile, as defined in
    [Creating a User Profile](#creating-a-user-profile) section.
 2. Generate an ephemeral ECDH key pair, as defined in
-   [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
+   [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys):
    * secret key `x` (57 bytes).
    * public key `X`.
 3. Generate an ephemeral DH key pair, as defined in
-   [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
+   [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys):
    * secret key `a` (80 bytes).
    * public key `A`.
 4. Compute `K_ecdh = ECDH(x, their_ecdh)`.
@@ -2141,7 +2140,7 @@ If many prekey messages are received:
     * If there are multiple prekey messages per instance tag, decide whether
       to send multiple messages to the same instance tag.
 
-### Encrypted messages in DAKE's messages
+### Encrypted Messages in DAKE's Messages
 
 One message of XZDH allows participants to attach an encrypted message to it.
 This message will be referred as "attached encrypted message".
@@ -2151,9 +2150,9 @@ Non-Interactive-Auth message, this data message will be ignored. An attached
 encrypted message to the Non-Interactive-Auth message cannot contain any TLV
 types.
 
-#### Attaching an encrypted message to Non-Interactive-Auth message in XZDH
+#### Attaching an Encrypted Message to Non-Interactive-Auth Message in XZDH
 
-##### Encrypting the message
+##### Encrypting the Message
 
 After deriving the Mixed shared secret `K`, a participant (Alice in the above
 overview) can attach an encrypted message to the already generated
@@ -2161,7 +2160,7 @@ Non-Interactive-Auth message, but prior to sending it. For this, the
 participant:
 
 * Rotates the ECDH keys and brace key, see
-  [Rotating ECDH keys and brace key as sender](#rotating-ecdh-keys-and-brace-key-as-sender)
+  [Rotating ECDH Keys and Brace Key as sender](#rotating-ecdh-keys-and-brace-key-as-sender)
   section. The derived ECDH public key will be the 'Public ECDH Key' for the
   message. The derived DH public key will be the 'Public DH Key' for the
   message.
@@ -2233,7 +2232,7 @@ attaches it to the Non-Interactive-Auth message, which will look like this:
    public DH key || encrypted message))
 ```
 
-##### Decrypting the message
+##### Decrypting the Message
 
 After verifying `sigma` on the Non-Interactive-Auth message, a participant (Bob
 in the above overview) can decrypt an attached encrypted message if it was
@@ -2241,7 +2240,7 @@ attached. This has to be done prior to receiving any other data message, or
 sending one. For this, the participant:
 
 * Rotates the ECDH keys and brace key, see
-  [Rotating ECDH keys and brace key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
+  [Rotating ECDH Keys and Brace Key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
   section.
 * Calculates `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`.
 * Derive new set of keys
@@ -2280,12 +2279,12 @@ sending one. For this, the participant:
 ## Data Exchange
 
 This section describes how each participant will use the Double Ratchet
-algorithm to exchange [data messages](#data-message). The Double Ratchet
+algorithm to exchange [Data Messages](#data-message). The Double Ratchet
 algorithm is initialized with the shared secret established in the DAKE and the
 public keys immediately exchanged. Detailed validation and processing of each
 data message is described in the
-[sending a data message](#sending-a-data-message)
-and [receiving a data messages](#receiving-a-data-message) sections.
+[sending a Data Message](#sending-a-data-message)
+and [receiving a Data Messages](#receiving-a-data-message) sections.
 
 A message with an empty human-readable part (the plaintext is of zero length, or
 starts with a `NULL`) is a "heartbeat" message. This message is useful for key
@@ -2350,7 +2349,7 @@ Verify MAC, Decrypt message 1_1
 ### Data Message
 
 This message is used to transmit a private message to the correspondent. It is
-also used to [reveal old MAC keys](#revealing-mac-keys). This data message is
+also used to [Reveal Old MAC Keys](#revealing-mac-keys). This data message is
 encoded as defined in the [Encoded Messages](#encoded-messages) section.
 
 The plaintext message (either before encryption or after decryption) consists of
@@ -2360,7 +2359,7 @@ optionally followed by:
 * a single `NUL` (a BYTE with value 0x00)
 * zero or more TLV (type/length/value) records (with no padding between them)
 
-#### Data Message format
+#### Data Message Format
 
 ```
 Protocol version (SHORT)
@@ -2438,7 +2437,7 @@ parameter should be set to 0.
 Given a new DH Ratchet:
 
   * Rotate the ECDH keys and brace key, see
-    [Rotating ECDH keys and brace key as sender](#rotating-ecdh-keys-and-brace-key-as-sender)
+    [Rotating ECDH Keys and Brace Key as sender](#rotating-ecdh-keys-and-brace-key-as-sender)
     section.
     The new ECDH public key created by the sender in this process will be the
     'Public ECDH Key' for the message. If a new public DH key is created in
@@ -2562,7 +2561,7 @@ This is done by:
              * Increment `k = k + 1`.
              * Delete `chain_key_r[i][k]`.
   * Rotate the ECDH keys and brace key, see
-    [Rotating ECDH keys and brace key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
+    [Rotating ECDH Keys and Brace Key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
     section.
   * Set the received `pn` as `j`.
   * Calculate `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`.
@@ -2626,7 +2625,7 @@ This is done by:
   cannot be derived:
   * Reject the message.
 
-### Deletion of stored message keys
+### Deletion of Stored Message Keys
 
 Storing message keys from messages that haven't arrived yet introduces some
 risks, as defined in [\[2\]](#references):
@@ -2653,7 +2652,7 @@ DH ratchet key that has not yet been received by the compromised party.
 To also defend against the second risk, the session should be regularly expired,
 as defined in the [Session Expiration](#session-expiration) section.
 
-### Extra symmetric key
+### Extra Symmetric Key
 
 Like OTRv3, OTRv4 defines an additional symmetric key that can be derived by
 the communicating parties for use of application-specific purposes, such as
@@ -2703,7 +2702,7 @@ Every derived key and the `extra_symm_key` should be deleted after being used.
 
 Old MAC keys are keys from already received messages, that will no longer be
 used to verify the authenticity of that message. We reveal them in order to
-provide [forgeability of messages](#forging-transcripts): once MAC keys are
+provide [Forgeability of Messages](#forging-transcripts): once MAC keys are
 revealed, anyone can modify an OTR message and still have it appear as valid.
 
 A MAC key is added to `mac_keys_to_reveal` list after a participant has verified
@@ -2863,7 +2862,7 @@ We could fragment this message into three pieces:
     ?OTR|5a73a599|27e31597,00003,00003,pkTtquknfx6HodLvk3RAAAAAA
     ==.,
 
-## The protocol state machine
+## The Protocol State Machine
 
 An OTR client maintains separate state for every correspondent. For example,
 Alice may have an active OTR conversation with Bob, while having an insecure
@@ -2873,7 +2872,7 @@ The way the client reacts to user input and to received messages depends on
 whether the client has decided to allow version 3 and/or 4, if encryption is
 required and if it will advertise OTR support.
 
-### Protocol states
+### Protocol States
 
 ```
 START
@@ -2918,7 +2917,7 @@ FINISHED
   sent. This state indicates that outgoing messages are not delivered at all.
 ```
 
-### Protocol events
+### Protocol Events
 
 The following sections outline the actions that the protocol should implement.
 This assumes that the client is initialized with the allowed versions
@@ -2951,11 +2950,11 @@ optionally warn the user. The exception here is the Identity Message where the
 receiver's instance tag may be 0, indicating that no particular instance is
 specified, and the Prekey Message that does not include this field.
 
-#### User requests to start an OTR conversation
+#### User requests to start an OTR Conversation
 
 Send an OTR Query Message or a plaintext message with a whitespace
-tag to the correspondent. [Query messages](#query-messages) and [whitespace
-tags](#whitespace-tags) are constructed according to the sections below.
+tag to the correspondent. [Query Messages](#query-messages) and [Whitespace
+Tags](#whitespace-tags) are constructed according to the sections below.
 
 ##### Query Messages
 
@@ -3095,7 +3094,7 @@ willing to do so. In such case, Alice should:
 * Send an Identity message.
 * Transition the state to `WAITING_AUTH_R`.
 
-#### Receiving an Identity message
+#### Receiving an Identity Message
 
 If the state is `START`:
 
@@ -3156,12 +3155,12 @@ If the state is `ENCRYPTED_MESSAGES`:
    * Otherwise:
      * Ignore the message.
 
-#### Sending an Auth-R message
+#### Sending an Auth-R Message
 
 * Generate and send an Auth-R Message.
 * Transition to state `WAITING_AUTH_I`.
 
-#### Receiving an Auth-R message
+#### Receiving an Auth-R Message
 
 If the state is `WAITING_AUTH_R`:
 
@@ -3173,7 +3172,7 @@ If the state is `WAITING_AUTH_R`:
       * Stay in state `WAITING_AUTH_R`.
     * If validation succeeds:
       * Reply with an Auth-I message, as defined in
-        [Sending an Auth-I message](#auth-i-message) section.
+        [Sending an Auth-I Message](#auth-i-message) section.
 
 If the state is `ENCRYPTED_MESSAGES`:
 
@@ -3185,14 +3184,14 @@ If the state is not `WAITING_AUTH_R`:
 
   * Ignore this message.
 
-#### Sending an Auth-I message
+#### Sending an Auth-I Message
 
-* Generate and send an Auth-I Message.
+* Generate and send an Auth-I message.
 * Initialize the double ratcheting, as defined in the
   [Interactive DAKE Overview](#interactive-dake-overview) section.
 * Transition to state `ENCRYPTED_MESSAGES`.
 
-#### Receiving an Auth-I message
+#### Receiving an Auth-I Message
 
 * If the state is `WAITING_AUTH_I`:
   * If the receiver's instance tag in the message is not the sender's instance
@@ -3210,7 +3209,7 @@ If the state is not `WAITING_AUTH_R`:
 * If the state is not `WAITING_AUTH_I`:
   * Ignore this message.
 
-#### Sending a data message to an offline participant
+#### Sending a Data Message to an offline participant
 
 * Generate and send a Non-Interactive-Auth message.
 * Initialize the double ratcheting, as defined in the
@@ -3218,7 +3217,7 @@ If the state is not `WAITING_AUTH_R`:
 * Transition to state `ENCRYPTED_MESSAGES`.
 * If there is a recent stored message, encrypt it and send it as a Data Message.
 
-#### Receiving a Non-Interactive-Auth message
+#### Receiving a Non-Interactive-Auth Message
 
 * If the state is `FINISHED` or `MSGSTATE_FINISHED`:
   * Ignore the message.
@@ -3234,7 +3233,7 @@ If the state is not `WAITING_AUTH_R`:
       [Non-Interactive DAKE Overview](#non-interactive-dake-overview) section.
     * Transition to state `ENCRYPTED_MESSAGES`.
 
-#### Sending a data message
+#### Sending a Data Message
 
 The `ENCRYPTED_MESSAGES` state is the state where a participant is allowed to
 send encrypted data messages. There are only one other state in which a
@@ -3257,7 +3256,7 @@ to send encrypted messages:
 If the state is `ENCRYPTED`, encrypt the message, and send it as a Data Message.
 Store plaintext message for possible retransmission.
 
-#### Receiving a data message
+#### Receiving a Data Message
 
 A received data message will look like this:
 
@@ -3362,7 +3361,7 @@ AKE will start when receiving an OTR Error message, as defined in OTRv3):
 
   * Reply with a Query Message.
 
-#### User requests to end an OTR conversation
+#### User requests to end an OTR Conversation
 
 * Send a data message with an encoding of the message with an empty
   human-readable part, and the TLV type 1.
@@ -3391,7 +3390,7 @@ OTRv4 makes a few changes to SMP:
 
       * Use of the first 56 bytes from the `KDF_1(0x00 || byte(H), 56)`
 
-  * SMP in OTRv4 uses all of the [TLV record types](#tlv-record-types) as OTRv3,
+  * SMP in OTRv4 uses all of the [TLV Record Types](#tlv-record-types) as OTRv3,
     except for SMP Message 1Q. When SMP Message 1Q is used in OTRv4, SMP Message
     1 is used in OTRv4. When a question is not present, the user specified
     question section has length `0` and value `NULL`. In OTRv3, SMP Message 1 is
@@ -3404,7 +3403,7 @@ OTRv4 makes a few changes to SMP:
 
 ### SMP Overview
 
-The computations below use the [SMP secret information](#secret-information).
+The computations below use the [SMP Secret Information](#secret-information).
 
 Assuming that Alice begins the exchange:
 
@@ -3476,7 +3475,7 @@ secret information provided by each participant are equal (essentially `x == y`)
 Further, since `G2 * a3 * b3` is a random number not known to any party, if `x`
 is not equal to `y`, no other information is revealed.
 
-### Secret information
+### Secret Information
 
 The secret information `x` and `y` compared during this protocol contains not
 only information entered by the users, but also information unique to the
@@ -3506,7 +3505,7 @@ becomes the SMP secret value (`x` or `y`) to be used in SMP. The additional
 fields ensure that not only do both parties know the same secret input string,
 but no man-in-the-middle is capable of reading their communication either.
 
-### SMP Hash function
+### SMP Hash Function
 
 There are many places where the first 64 bytes of a SHAKE-256 hash are taken of
 an integer followed by other values. This is defined as `HashToScalar(i || v)`
@@ -3514,7 +3513,7 @@ where `i` is an integer used to distinguish the calls to the hash function and
 `v` are some values. Hashing is done in this way to prevent Alice from replaying
 Bob's zero knowledge proofs or vice versa.
 
-### SMP message 1
+### SMP Message 1
 
 Alice sends SMP message 1 to begin an ECDH exchange to determine two new
 generators, `g2` and `g3`. A valid SMP message 1 is generated as follows:
@@ -3558,7 +3557,7 @@ c3 (SCALAR), d3 (SCALAR)
 
 ```
 
-### SMP message 2
+### SMP Message 2
 
 SMP message 2 is sent by Bob to complete the ECDH exchange to determine the new
 generators, `g2` and `g3`. It also begins the construction of the values used in
@@ -3615,7 +3614,7 @@ cp (SCALAR), d5 (SCALAR), d6 (SCALAR)
   given above.
 ```
 
-### SMP message 3
+### SMP Message 3
 
 SMP message 3 is Alice's final message in the SMP exchange. It has the last of
 the information required by Bob to determine if `x = y`. A valid SMP message 3
@@ -3660,7 +3659,7 @@ cr (SCALAR), d7 (SCALAR)
   above.
 ```
 
-### SMP message 4
+### SMP Message 4
 
 SMP message 4 is Bob's final message in the SMP exchange. It has the last of the
 information required by Alice to determine if `x = y`. A valid SMP message 4 is
@@ -3688,7 +3687,7 @@ cr (SCALAR), d7 (SCALAR)
   A zero-knowledge proof that Rb was created according to this SMP protocol.
 ```
 
-### The SMP state machine
+### The SMP State Machine
 
 OTRv4 does not change the state machine for SMP from OTRv3. But the following
 sections detail how values are computed differently during some states. Each
@@ -3697,7 +3696,7 @@ into account that state `SMPSTATE_EXPECT1` is reached whenever an error occurs
 or SMP is aborted. In that case, the protocol must be restarted from the
 beginning.
 
-#### Receiving a SMP message 1
+#### Receiving a SMP Message 1
 
 If the instance tag in the message is not the instance tag you are currently
 using, ignore the message.
@@ -3717,7 +3716,7 @@ If smpstate is `SMPSTATE_EXPECT1`:
 * Create a SMP message 2 and send it to Alice.
 * Set smpstate to `SMPSTATE_EXPECT3`.
 
-#### Receiving a SMP message 2
+#### Receiving a SMP Message 2
 
 If the instance tag in the message is not the instance tag you are currently
 using, ignore the message.
@@ -3739,7 +3738,7 @@ If smpstate is `SMPSTATE_EXPECT2`:
 * Create SMP message 3 and send it to Bob.
 * Set smpstate to `SMPSTATE_EXPECT4`.
 
-#### Receiving a SMP message 3
+#### Receiving a SMP Message 3
 
 If the instance tag in the message is not the instance tag you are currently
 using, ignore the message.
@@ -3766,7 +3765,7 @@ If smpstate is `SMPSTATE_EXPECT3`:
 * Set smpstate to `SMPSTATE_EXPECT1`, as no more messages are expected from
   Alice.
 
-#### Receiving a SMP message 4
+#### Receiving a SMP Message 4
 
 If the instance tag in the message is not the instance tag you are currently
 using, ignore the message.
@@ -3792,7 +3791,7 @@ If smpstate is `SMPSTATE_EXPECT4`:
 
 ## Implementation Notes
 
-### Considerations for networks that allow multiple devices
+### Considerations for Networks that allow Multiple Devices
 
 When using a transport network that allows multiple devices to be
 simultaneously logged in with the same peer identifier, make sure to identify
@@ -3907,7 +3906,7 @@ The Authentication scheme consists of two functions:
 - An authentication function: `sigma = RSig(A1, a1, {A1, A2, A3}, m)`.
 - A verification function: `RVrf({A1, A2, A3}, sigma, m)`.
 
-#### Domain parameters
+#### Domain Parameters
 
 We reuse the previously defined G generator in elliptic curve parameters:
 
@@ -3950,7 +3949,7 @@ This function can be generalized so it is not possible to determine which secret
 key was used to produce this ring signature, even if all secret keys are
 revealed. For this, constant-time conditional operations should be used. For
 details on how to implement these operations, see the
-[Constant-time operations](#constant-time-operations) section.
+[Constant-time Operations](#constant-time-operations) section.
 
 The prover knows a secret `ai` and, therefore:
 
@@ -4019,7 +4018,7 @@ This function is `HashToScalar(d)`: d is an array of bytes.
 1. Compute `h = KDF_1(d, 64)` as an unsigned value, little-endian.
 2. Return `h (mod q)`
 
-### Modify an encrypted data message
+### Modify an Encrypted Data Message
 
 In this example, a forger guesses that "hi" is at the beginning of an encrypted
 message. Thus, its offset is 0. The forger wants to replace "hi" with "yo".
@@ -4248,7 +4247,7 @@ just before you discard the session keys. You should then transition to
 
 OTRv3 defines three main state variables:
 
-#### Message state
+#### Message State
 
 The message state variable `msgstate` controls what happens to outgoing messages
 typed by the user. It can take one of three values:
@@ -4277,7 +4276,7 @@ MSGSTATE_FINISHED
   logs out, just as Alice hits Enter.)
 ```
 
-#### Authentication state
+#### Authentication State
 
 The authentication state variable `authstate` can take one of four values:
 
@@ -4300,9 +4299,9 @@ AUTHSTATE_AWAITING_SIG
 
 ```
 
-### Elliptic curve operations
+### Elliptic Curve Operations
 
-#### Point addition
+#### Point Addition
 
 For point addition, the following method is recommended, as defined in RFC 8032.
 A point `(x,y)` is represented in projective coordinates `(X, Y, Z)`, with
@@ -4332,9 +4331,9 @@ Compute:
                  Z3 = F * G
 ```
 
-### Constant-time operations
+### Constant-time Operations
 
-#### Constant-time equality
+#### Constant-time Equality
 
 A constant-time equality function should return `1` if `x == y` and `0`
 otherwise.
@@ -4352,7 +4351,7 @@ constant_time_equals(x, y):
   return result
 ```
 
-#### Constant-time selection
+#### Constant-time Selection
 
 A constant-time selection function should return `x` if `v` is `1` and `y` if
 `v` is `0`. The behavior is undefined if `v` takes any other value.
