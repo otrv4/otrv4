@@ -169,9 +169,6 @@ Alice will be initiating the DAKE with Bob.
        [When you send a Data Message](../otrv4.md#when-you-send-a-data-message)
        section. Note that she will perform a new DH ratchet.
 
-7. At this point, the interactive DAKE is complete for Alice, but the
-   double ratchet still needs to be correctly set up.
-
 **Bob:**
 
 1. Receives the Auth-I message from Alice:
@@ -190,7 +187,7 @@ Alice will be initiating the DAKE with Bob.
      but instead of using a random value `r`, it will use :
      `r = KDF_1(0x20 || K, 80)`. Securely replaces `our_dh` with the outputs.
    * Securely deletes `their_ecdh` and `their_dh`.
-1. At this point, the interactive DAKE is complete for Bob, but he has to
+3. At this point, the interactive DAKE is complete for Bob, but he has to
    correctly setup the double ratchet mechanism:
    * In the case that he immediately receives a data message that advertises the
      new public keys from Alice:

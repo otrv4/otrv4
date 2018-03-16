@@ -1102,7 +1102,7 @@ To expire a session:
    5. Reset the state and key variables, as defined in
       [its section](#resetting-state-variables-and-key-variables).
 
-4. Transition the protocol state machine to `START`
+4. Transition the protocol state machine to `START`.
 
 The session expiration time is decided individually by each party so it is
 possible for one person to have an expiration time of two hours and the other
@@ -1807,7 +1807,7 @@ Verify. Decrypt message if included
     * Calculates the Mixed shared secret `K = KDF_1(0x04 || tmp_k, 64)`.
       Securely deletes `tmp_k`.
     * Calculates the SSID from shared secret: `KDF_1(0x05 || K, 8)`.
-7. Initializes the double-ratchet:
+8. Initializes the double-ratchet:
     * Sets ratchet id `i` as 0.
     * Sets `j` as 0, `k` as 0 and `pn` as 0.
     * Generates Bob's ECDH and DH public keys:
@@ -1823,12 +1823,12 @@ Verify. Decrypt message if included
         Securely replaces `their_dh` with the output
         `our_dh.public (g3 ^ r)` and securely deletes the output
         `our_dh.secret (r)`.
-8. At this point, she can attach an encrypted message to the
+9. At this point, she can attach an encrypted message to the
    Non-Interactive-Auth message:
     * Follows what is defined in the
       [Attaching an encrypted message to the Non-Interactive-Auth message](#attaching-an-encrypted-message-to-non-interactive-auth-message-in-xzdh)
       section.
-9. Calculates the `Auth MAC`:
+10. Calculates the `Auth MAC`:
 
     * If an encrypted message is attached, she computes:
 
@@ -1839,14 +1839,14 @@ Verify. Decrypt message if included
     * Otherwise, she computes:
 
       ```
-      Auth MAC = KDF_1(0x18 || auth_mac_k || t, 64)
+        Auth MAC = KDF_1(0x18 || auth_mac_k || t, 64)
       ```
 
     * Includes this value in the Non-Interactive-Auth message and securely
       deletes the `auth_mac_k`.
-10. Sends Bob a Non-Interactive-Auth message. See
+11. Sends Bob a Non-Interactive-Auth message. See
     [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
-11. At this point, the non-interactive DAKE is complete for Alice:
+12. At this point, the non-interactive DAKE is complete for Alice:
     * In the case that she wants to immediately send a data message:
        * Follows what is defined in the
          [When you send a Data Message](#when-you-send-a-data-message)
@@ -2119,27 +2119,26 @@ prekey messages.
 
 If one Prekey message is received:
 
-  1. [Validate the Prekey message](#validating-prekey-messages).
-  2. If the Prekey message is valid, decide whether to send a
-     Non-Interactive-Auth message depending on whether the long term key in the
-     use profile is trusted or not.
+1. [Validate the Prekey message](#validating-prekey-messages).
+2. If the Prekey message is valid, decide whether to send a
+   Non-Interactive-Auth message depending on whether the long term key in the
+   use profile is trusted or not.
 
 If many prekey messages are received:
 
-  1. [Validate the Prekey messages](#validating-prekey-messages).
-  2. Discard all invalid prekey messages.
-  3. Discard all duplicate prekey messages in the list.
-  4. If one Prekey message remains:
-      * Decide whether to send a message using this Prekey message if the long
-        term key within the use profile is trusted or not.
-  5. If multiple valid prekey messages remain:
-      * If there are keys that are untrusted and trusted in the list of
-        messages, decide whether to only use messages that contain trusted long
-        term keys.
-      * If there are several instance tags in the list of prekey messages,
-        decide which instance tags to send messages to.
-      * If there are multiple prekey messages per instance tag, decide whether
-        to send multiple messages to the same instance tag.
+1. [Validate the Prekey messages](#validating-prekey-messages).
+2. Discard all invalid prekey messages.
+3. Discard all duplicate prekey messages in the list.
+4. If one Prekey message remains:
+    * Decide whether to send a message using this Prekey message if the long
+      term key within the use profile is trusted or not.
+5. If multiple valid prekey messages remain:
+    * If there are keys that are untrusted and trusted in the list of messages,
+      decide whether to only use messages that contain trusted long term keys.
+    * If there are several instance tags in the list of prekey messages,
+      decide which instance tags to send messages to.
+    * If there are multiple prekey messages per instance tag, decide whether
+      to send multiple messages to the same instance tag.
 
 ### Encrypted messages in DAKE's messages
 
@@ -2177,13 +2176,13 @@ participant:
   derived and decided:
 
   ```
-  chain_key_s[i-1][j+1] = KDF_1(0x23 || chain_key_s[i-1][j], 64)
+    chain_key_s[i-1][j+1] = KDF_1(0x23 || chain_key_s[i-1][j], 64)
   ```
 
 * Calculates the encryption key (`MKenc`):
 
   ```
-  MKenc = KDF_1(0x24 || chain_key_s[i-1][j], 32)
+    MKenc = KDF_1(0x24 || chain_key_s[i-1][j], 32)
   ```
 
 * Securely deletes `chain_key_s[i-1][j]`.
@@ -2253,7 +2252,7 @@ sending one. For this, the participant:
   already derived and decided:
 
   ```
-  chain_key_r[i-1][k+1] = KDF_1(0x23 || chain_key_r[i-1][k], 64)
+    chain_key_r[i-1][k+1] = KDF_1(0x23 || chain_key_r[i-1][k], 64)
   ```
 
 * Calculates the encryption key (`MKenc`):
@@ -3955,7 +3954,7 @@ details on how to implement these operations, see the
 The prover knows a secret `ai` and, therefore:
 
 1. Pick random values `t1, c2, c3, r2, r3` in `q`.
-1. Compute:
+2. Compute:
 
 ```
   P = G * ai
@@ -3964,7 +3963,7 @@ The prover knows a secret `ai` and, therefore:
   eq3 = constant_time_eq(P, A3)
 ```
 
-2. Depending the result of the above operations, compute:
+3. Depending the result of the above operations, compute:
 
 ```
   T1 = constant_time_select(eq1, encode(G * t1), encode(G * r1 + A1 * c1))
@@ -3972,13 +3971,13 @@ The prover knows a secret `ai` and, therefore:
   T3 = constant_time_select(eq3, encode(G * t3), encode(G * r3 + A3 * c3))
 ```
 
-3. Compute `c = HashToScalar(0x29 || G || q || A1 || A2 || A3 || T1 || T2 ||
+4. Compute `c = HashToScalar(0x29 || G || q || A1 || A2 || A3 || T1 || T2 ||
    T3 || m)`.
-4. For whichever equally returns true (if `eqi == 1`, `eqj == 0` and
+5. For whichever equally returns true (if `eqi == 1`, `eqj == 0` and
    `eqk == 0`, for `i != j != k`): `ci = c - cj - ck (mod q)`.
-5. For whichever equally returns true (if `eqi == 1`):
+6. For whichever equally returns true (if `eqi == 1`):
    `ri = ti - ci * ai (mod q)`.
-6. Compute `sigma = (ci, ri, cj, rj, ck, rk)`.
+7. Compute `sigma = (ci, ri, cj, rj, ck, rk)`.
 
 If the prover knows `a2`, for example, the `RSig` function looks like this:
 `RSig(A2, a2, {A1, A2, A3}, m)`
