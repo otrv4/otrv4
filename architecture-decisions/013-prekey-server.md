@@ -2,40 +2,36 @@
 
 ### Context
 
-In order to send an offline message, the Responder needs to obtain
-cryptographic keys from the Initiator so they can engage in a
-non-interactive DAKE. These cryptographic keys are distributed as
-prekey messages, who is made public in a untrusted pre-key server.
+In order to send an offline message, the Responder needs to obtain cryptographic
+keys from the Initiator so they can engage in a non-interactive DAKE. These
+cryptographic keys are distributed as prekey messages, which are made public in
+a untrusted pre-key server.
 
-A participant is identified by some identity in the underlying network
-(be it alice@xmpp.org for the XMPP network, or +99 1234-5678 for the
-SMS network). We assume this is everything each participant is required
-to know about who they want to send a message to.
+A participant is identified by some identity in the underlying network (be it
+alice@xmpp.org for the XMPP network, or +99 1234-5678 for the SMS network).
+We assume this is everything each participant is required to know about who they
+want to send a message to.
 
 ### Decision
 
-Having in mind a client-server architecture, a prekey server instance MUST
-offer the following services to its users:
+Having in mind a client-server architecture, a prekey server instance MUST offer
+the following services to its users:
 
 - prekey message retrieval
 - prekey message publication
 
-To publish prekey messages, a participant deniably authenticates itself to
-the server through a interactive DAKE, and sends prekeys to be stored and
-published by the server. The server will associate the prekeys received to
-the identity used by the sender to identify itself to the server.
+To publish prekey messages, a participant deniably authenticates itself to the
+server through a interactive DAKE, and sends prekeys to be stored and published
+by the server. The server will associate the prekeys received to the identity
+used by the sender to identify itself to the server.
 
 To obtain prekey messages, a participant asks the server for prekey messages
-from a particular identity, and the server delivers one prekey message for
-each instance tag it knows about from that particular identity.
-
-This document describes the pre-key server as a component in the OTRv4 protocol.
-
-(TODO: evaluate consequences of each service to the protocol)
+from a particular identity, and the server delivers one prekey message for each
+instance tag it knows about from that particular identity.
 
 ### Notation
 
-We use the following notatiton to represent a prekey message stored on a server:
+We use the following notation to represent a prekey message stored on a server:
 
       (pre-key-msg, instance-tag, identity)
 
@@ -43,15 +39,15 @@ We use the following notatiton to represent a prekey message stored on a server:
 
 1. The Initiator starts a interactive DAKE with the server.
 2. The Initiator sends multiple prekey messages to be published by the server.
-3. The server stores all valid (not-expired) prekey messages and associates them
+3. The server stores all valid (non-expired) prekey messages and associates them
    with the publisher's identity.
 
-### How to serve a prekey message retrieval
+### Prekey message retrieval
 
 #### SCENARIO 1
 
-The server MUST deliver only ONE prekey message when multiple
-are available for the same identity.
+The server MUST deliver only ONE prekey message when multiple are available for
+the same identity.
 
     GIVEN the server has the following prekey messages stored:
 
@@ -67,8 +63,8 @@ are available for the same identity.
 
 #### SCENARIO 2
 
-The server MUST deliver additional prekey messages when multiple
-instance tags are found for the same identity.
+The server MUST deliver additional prekey messages when multiple instance tags
+are found for the same identity.
 
     GIVEN the server has the following prekey messages stored:
 
@@ -92,7 +88,7 @@ instance tags are found for the same identity.
 
 Clients should not trust the server will always return valid prekey messages,
 and must validate them by themselves. If a client can find any usable prekey
-message from the server's response, it may perform additional requests.
+messages from the server's response, it may perform additional requests.
 
 #### Receiving multiple prekey messages
 
@@ -112,22 +108,16 @@ with the INITIATOR (one for each received pre-key message) or always terminate
 the conversation after the offline message is sent (which drains prekeys from
 every group.
 
-Another problem with the step is that once an attacker impersonates the
-identity to the server (someone steals your XMPP password), they can simply
-publish a new User Profile (with a new long-term key, with new prekey
-messages) and guarantee they will receive encrypted copies of every "first"
-message the Responder sends.
-
-TODO: Does it mean non-interactive is more fragile
-in regard to this attack than OTRv3? Can we add recommendations to the spec
-to make sure client implementations are extra careful with how they handle
-fingerprints in the non-interactive case?
+Another problem with the step is that once an attacker impersonates the identity
+to the server (someone steals your XMPP password), they can simply publish a new
+User Profile (with a new long-term key, with new prekey messages) and guarantee
+they will receive encrypted copies of every "first" message the Responder sends.
 
 ### Consequences
 
 The server may implement measures to prevent DoS attacks, for example, limit the
 frequency of requests and/or the number of prekey messages accepted.
 
-TODO: Mention that there is no protection against DoS (server sends expired or
-already used prekey messages or does not send prekey messages for every
-instance tag it knows about).
+There is no protection when the server sends expired or already used prekey
+messages or when it does not send prekey messages for every instance tag it
+knows about.
