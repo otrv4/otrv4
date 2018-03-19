@@ -5,10 +5,17 @@
 Currently, OTRv3 supports previous versions by allowing the user to configure
 their version policy to allow previous versions or not: when a user wants to
 have a conversation with someone, they should send a query message telling
-which versions they support.
+which versions they support. This message is sent as plaintext at the beginning
+of the protocol and can be intercepted and changed by a MITM in a rollback
+attack.
 
-OTRv4 seeks to protect future versions of OTR against rollback attacks when
-backward compatibility is kept.
+In a version rollback attack a query message is intercepted and changed by
+a MITM to enforce the lowest version advertised, and the protocol is unable to
+really determine if participants are using the highest version they both
+support.
+
+OTRv4 seeks to protect future versions of OTR against these rollback attacks
+while providing backward compatibility.
 
 Furthermore, as both DAKEs in OTRv4 (interactive and non-interactive) require
 an implementation-defined identifier for both parties, we are using the User
@@ -72,7 +79,58 @@ The signature should be generated as defined in RFC 8032 according to the
 EdDSA scheme. We chose this scheme because we are using Ed448 for the rest of
 OTRv4.
 
+#### Protecting from rollback in OTRv4
+
+Rollback from v4 protocol to v3 protocol can't be detected by OTRv4. Bob's
+DH-Commit message does not contain a User Profile. After the AKE finishes,
+Alice could contact the Profiles server and ask for Bob's User Profile to
+validate if Bob really does not support 4, but this puts the trust on the
+server.
+
+```
+Alice                        Malory                         Bob
+ ?OTRv43  ---------------->  ?OTRv3  --------------------->
+          <------------------------------------------------ DH-Commit (v3)
+ The OTRv3 AKE continues.
+```
+
+Rollback from vX (released after 4) protocol to v4 protocol can be
+detected by OTRv4:
+
+- For OTRvX (released after OTRv4), the known state machine versions are:
+  X, ..., 4.
+- After receiving a User Profile, an OTRvX client may cryptographically
+  verify that OTRvX is supported and enforce using that version.
+
+```
+Alice                               Malory                                Bob
+ ?OTRvX4  ----------------------->  ?OTRv4  ---------------------------->
+          <-------------------------------------------------------------  Identity Message (v4)
+                                                                          + User Profile (versions "X4")
+ Detects the rollback and notifies the user. Should also abort the DAKE.
+```
+
+Notice the following case is not a rollback because "X" is not a known version
+from Alice's perspective. Also notice that the list of known versions for OTRv4
+is (4, 3) - and 3 does not support User Profiles. In this case, the only check
+you need to perform in OTRv4 is making sure "4" is in the received User Profile.
+
+```
+Alice                               Malory                                Bob
+ ?OTRv43  ----------------------->  ?OTRv4  ---------------------------->
+          <-------------------------------------------------------------  Identity Message (v4)
+                                                                          + User Profile (versions "X43")
+ The DAKE continues.
+```
+
 ### Consequences
+
+Although it is possible to check for a version statement publication, this does
+not stop an attacker from spoofing responses about whether the version statement
+(or a User Profile) exists or not. In this case an attacker can spoof the Query
+Message to contain version "3" and also spoof the response to a request for a
+version statement, making a rollback attack possible when the victims support
+OTRv3.
 
 As OTRv4 upgrades do not fix any known security issue on OTRv3, it is
 acceptable for users to chat using version 3, but is preferable to use 4 if
