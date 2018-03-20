@@ -201,74 +201,93 @@ attacks.
 
 ## Security Properties
 
-OTRv4 does not take advantage of quantum resistant algorithms. There are several
-reasons for this. Mainly, OTRv4 aims to be a protocol that is easy to implement
-in today's environments and within a year. Current quantum resistant algorithms
-and their respective implementations are not ready enough to allow for this
-implementation time frame. As a result, the properties mentioned in the
-following paragraphs only apply to non-quantum adversaries.
+OTRv4 is the version 4 of the cryptographic protocol OTR. It provides end-to-end
+encryption, which is a system by which information is sent over a network in
+such a way that only the recipient and sender can read the it.
 
-The only exception is the usage of a "brace key" to provide some
-post-conversation transcript protection against potential weaknesses of elliptic
-curves and the early arrival of quantum computers.
+OTRv4 provides trust establishment (user verification) by fingerprint
+verification or by the ability to perform the Socialist Millionaires Protocol
+(SMP). This is a zero-knowledge proof of knowledge protocol that determines if
+secret values held by two parties are equal without revealing the value
+itself.
 
 In the interactive DAKE, although access to one participant's private long term
 key is required for authentication, both participants can deny having used
 their private long term keys. A forged transcript of the DAKE can be produced at
-any time and a cryptographic expert is able to prove that this transcript was
-produced by someone who knows the long-term public key of any of both alleged
-participants. This provides offline deniability for both participants in the
-interactive DAKE. Furthermore, participants in the interactive DAKE, cannot
-provide proof of participation to third parties without making themselves
-vulnerable to Key Compromise Impersonation (KCI) attacks, even if they perform
-arbitrary protocols with these third parties. This latter property is known as
-online or participation deniability.
+any time by anyone who knows the long-term public keys of both alleged
+participants. This capability is called offline deniability because no
+transcript provides evidence of a past key exchange, as this could have been
+forged. It is provided for both participants in an interactive DAKE.
+
+Furthermore, participants in the interactive DAKE, cannot provide proof of
+participation to third parties without making themselves vulnerable to Key
+Compromise Impersonation (KCI) attacks, even if they perform arbitrary protocols
+with these third parties. A KCI attack begins when the long-term secret key of a
+participant of a vulnerable DAKE is compromised. With this secret key, an
+adversary can impersonate other users to the owner of the key. The property by
+which participants  cannot provide proof of participation to third parties is
+known as online or participation deniability.
 
 Both DAKEs (interactive and non-interactive) provide offline deniability as
 anyone can forge a DAKE transcript between two parties using their long-term
-public keys. Consequently, no transcript provides evidence of a past key
-exchange, because it could have been forged by anyone.
+public keys.
 
 In the non-interactive DAKE, the initiator (Bob, in the above overview) has
-participation deniability, but Alice, the responder, does not. A party that
-knows Alice's long-term secret and Bob's ephemeral secret cannot derive a shared
-key (as it will need to know either Bob's long-term secret or Alice's ephemeral
-key). This allows a participant to generate irrefutable cryptographic proof of a
-conversation with the aid of an interactive third party.
+participation deniability, but Alice, the responder, does not. This happens as
+there can exist a protocol whereby a third party, with Alice's help, can
+establish an authenticated conversation with Bob in Alice's name without having
+to learn her private keys. This generates irrefutable cryptographic proof that a
+conversation took place.
 
 Although both DAKEs (interactive and non-interactive) provide offline
 deniability, take into account that there may be a loss of deniability if an
 interactive DAKE is followed by a non-interactive one.
 
 Once a conversation has been established with the DAKE, all data messages
-transmitted in it are confidential and retain their integrity. After a MAC
-key is used by a party to validate a received message, it is added to a list.
-It is also added when the stored message key that corresponds to messages that
-have not yet arrived is deleted (because the session has expired or because the
-storage of the message keys has been deleted). Those MAC keys are revealed in
-the first message sent of the next ratchet or in the TLV type 1 that is sent
-when a session is expired. This allows forgeability of the data messages and
-consequent deniability of their contents.
+transmitted in it are confidential and retain their integrity. They are
+authenticated using a MAC. As MAC keys are published and OTRv4 uses malleable
+encryption, anyone can forge data messages, and consequently, deny their
+contents.
 
-Furthermore, OTRv4 provides forward secrecy. A classical adversary that
-compromises the long-term secret keys of both parties cannot retroactively
-compromise past session keys. The interactive DAKE offers strong forward secrecy
-(it protects the session key when at least one party completes the exchange).
-The non-interactive DAKE offers a forward secrecy that is between strong and
+Furthermore, OTRv4 provides forward secrecy. An adversary that compromises the
+long-term secret keys of both parties cannot retroactively compromise past
+session keys. The interactive DAKE offers strong forward secrecy (it protects
+the session key when at least one party completes the exchange). The
+non-interactive DAKE offers a forward secrecy that is between strong and
 weak, as it protects completed sessions and incomplete sessions that stall long
 enough to be invalidated by a participant. The key exchange mechanism used
 in OTRv4 is the Double Ratchet algorithm which provides forward and backward
-secrecy as parties negotiate secrets several times using an ephemeral key
+secrecy, as parties negotiate secrets several times using an ephemeral key
 exchange.
 
 A protocol provides forward secrecy if the compromise of a long-term key does
 not allow ciphertexts encrypted with previous session keys to be decrypted. If
 the compromise of a long-term key does not allow subsequent ciphertexts to be
 decrypted by passive attackers, then the protocol is said to have backward
-secrecy. OTRv4, by using the Double Ratchet Algorithm, provides both. If key
-material used to encrypt a particular data message is compromised, previous
-messages are protected. Additionally, future messages are protected by the
-Diffie-Hellman and Elliptic Curve Diffie-Hellman ratchets.
+secrecy. Furthermore, if the compromise of a single session key is not
+permanent, as, after some time, subsequent messages will be impossible to
+decrypt again because of the "self-healing" nature of the algorithm, then the
+protocol is said to have post-compromise security. OTRv4, by using the Double
+Ratchet Algorithm, provides these three properties. If key material used to
+encrypt a particular data message is compromised, previous messages are
+protected. Additionally, future messages are protected by the Diffie-Hellman and
+Elliptic Curve Diffie-Hellman ratchets.
+
+The DAKEs in OTRv4 provide contributiveness as well. This means that the
+initiator of the protocol cannot force the shared secret to take on a specific
+value. It is also computationally infeasible for the responder to select a
+specific shared secret. Bothe DAKEs are provable secure.
+
+OTRv4 does not take advantage of quantum resistant algorithms. There are several
+reasons for this. Mainly, OTRv4 aims to be a protocol that is easy to implement
+in today's environments and within a year. Current quantum resistant algorithms
+and their respective implementations are not ready enough to allow for this
+implementation time frame. As a result, the properties mentioned in these
+paragraphs only apply to non-quantum adversaries.
+
+The only exception is the usage of a "brace key" to provide some
+post-conversation transcript protection against potential weaknesses of elliptic
+curves and the early arrival of quantum computers.
 
 These security properties only hold for when a conversation with OTRv4 is
 started. They do not hold for the previous versions of the OTR protocol, meaning
