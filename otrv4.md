@@ -4585,10 +4585,10 @@ constant_time_equals(x, y):
 
   result = 0
 
-  for i= 0; i < len(x); i++
-    result |= x ^ y
+  for i = 0; i < len(x); i++
+    result |= x[i] ^ y[i]
 
-  return result
+  return 1 & ~((-result) >> 8)
 ```
 
 #### Constant-time Selection
@@ -4598,7 +4598,7 @@ A constant-time selection function should return `x` if `v` is `1` and `y` if
 
 ```
 constant_time_select(v, x, y):
-  return ^(v - 1)&x | (v - 1)&y
+  return ((-v) & x) | ((v - 1) & y)
 ```
 
 ## References
