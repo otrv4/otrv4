@@ -2077,7 +2077,7 @@ Verify. Decrypt message if included
 11. Sends Bob a Non-Interactive-Auth message. See
     [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 12. At this point, the non-interactive DAKE is complete for Alice:
-   * In the case that she wants to immediately send a data message:
+    * In the case that she wants to immediately send a data message:
       * Follows what is defined in the
         [When you send a Data Message](#when-you-send-a-data-message)
         section. Note that she will perform a new DH ratchet if no encrypted
