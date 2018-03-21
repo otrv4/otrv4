@@ -1193,6 +1193,13 @@ key has its own expiration time.
 It is also important to note that the absence of a User Profile is not a proof
 that a user does not support OTRv4.
 
+Note that a User Profile is generated per client and device basis. Users are not
+expected to manage user profiles (theirs or from others) in a client. As a
+consequence, clients are discouraged to allow importing or exporting of user
+profiles. Also, if a user has multiple clients/devices concurrently in use, it
+is expected that they have multiple user profiles simultaneously published and
+valid.
+
 ### User Profile Data Type
 
 ```
@@ -1406,6 +1413,13 @@ to send offline messages. The other should be stored locally.
 When the Prekey Profile expires, it should be updated. Client implementations
 should determine the frequency of the prekey's profile expiration and renewal.
 The recommended expiration time is one week.
+
+Note that a Prekey Profile is generated per client and device basis. Users are
+not expected to manage prekey profiles (theirs or from others) in a client. As a
+consequence, clients are discouraged to allow importing or exporting of prekey
+profiles. Also, if a user has multiple clients/devices concurrently in use, it
+is expected that they have multiple prekey profiles simultaneously published and
+valid.
 
 ### User Profile Data Type
 
