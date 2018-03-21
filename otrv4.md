@@ -2017,12 +2017,12 @@ Verify. Decrypt message if included
 
 1. Requests prekey messages from the untrusted server.
 2. For each Prekey message received from the server:
-    * [Validates each Prekey Message](#validating-prekey-messages).
-    * Picks a compatible version of OTR listed in Bob's profile.
-      If the versions are incompatible, Alice does not send any further
-      messages.
-    * Sets the received ECDH ephemeral public key `Y` as `their_ecdh`.
-    * Sets the received DH ephemeral public key `B` as `their_dh`.
+   * [Validates each Prekey Message](#validating-prekey-messages).
+   * Picks a compatible version of OTR listed in Bob's profile.
+     If the versions are incompatible, Alice does not send any further
+     messages.
+   * Sets the received ECDH ephemeral public key `Y` as `their_ecdh`.
+   * Sets the received DH ephemeral public key `B` as `their_dh`.
 3. Extracts the Public Shared Prekey (`D_b`) and the Ed448 public key (`H_b`)
    from Bob's User Profile. Sets the first as `their_shared_prekey`.
 4. Generates a Non-Interactive-Auth message. See
@@ -2030,90 +2030,89 @@ Verify. Decrypt message if included
 5. Sets `X` and `x` as `our_ecdh`: the ephemeral ECDH keys.
 6. Sets `A` and `a` as `our_dh`: ephemeral 3072-bit DH keys.
 7. Calculates the Mixed shared secret (`K`) and the SSID:
-    * Gets `tmp_k` from the
-      [Non-Interactive-Auth Message](#non-interactive-auth-message).
-    * Calculates the Mixed shared secret `K = KDF_1(0x04 || tmp_k, 64)`.
-      Securely deletes `tmp_k`.
-    * Calculates the SSID from shared secret: `KDF_1(0x05 || K, 8)`.
+   * Gets `tmp_k` from the
+     [Non-Interactive-Auth Message](#non-interactive-auth-message).
+   * Calculates the Mixed shared secret `K = KDF_1(0x04 || tmp_k, 64)`.
+     Securely deletes `tmp_k`.
+   * Calculates the SSID from shared secret: `KDF_1(0x05 || K, 8)`.
 8. Initializes the double-ratchet:
-    * Sets ratchet id `i` as 0.
-    * Sets `j` as 0, `k` as 0 and `pn` as 0.
-    * Generates Bob's ECDH and DH public keys:
-      * Generates an ephemeral ECDH key pair, as defined in
-        [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys), but instead
-        of using a random value `r`, it will use : `r = KDF_1(0x19, K, 57)`.
-        Securely replaces `their_ecdh` with the output
-        `our_ecdh.public (G * s)` and securely deletes the output
-        `our_ecdh.secret (s)`.
-      * Generates an ephemeral DH key pair, as defined in
-        [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
-        of using a random value `r`, it will use : `r = KDF_1(0x20, K, 80)`.
-        Securely replaces `their_dh` with the output
-        `our_dh.public (g3 ^ r)` and securely deletes the output
-        `our_dh.secret (r)`.
+   * Sets ratchet id `i` as 0.
+   * Sets `j` as 0, `k` as 0 and `pn` as 0.
+   * Generates Bob's ECDH and DH public keys:
+     * Generates an ephemeral ECDH key pair, as defined in
+       [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys), but instead
+       of using a random value `r`, it will use : `r = KDF_1(0x19, K, 57)`.
+       Securely replaces `their_ecdh` with the output
+       `our_ecdh.public (G * s)` and securely deletes the output
+       `our_ecdh.secret (s)`.
+     * Generates an ephemeral DH key pair, as defined in
+       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
+       of using a random value `r`, it will use : `r = KDF_1(0x20, K, 80)`.
+       Securely replaces `their_dh` with the output
+       `our_dh.public (g3 ^ r)` and securely deletes the output
+       `our_dh.secret (r)`.
 9. At this point, she can attach an encrypted message to the
    Non-Interactive-Auth message:
-    * Follows what is defined in the
-      [Attaching an Encrypted Message to the Non-Interactive-Auth Message](#attaching-an-encrypted-message-to-non-interactive-auth-message-in-xzdh)
-      section.
+   * Follows what is defined in the
+     [Attaching an Encrypted Message to the Non-Interactive-Auth Message](#attaching-an-encrypted-message-to-non-interactive-auth-message-in-xzdh)
+     section.
 10. Calculates the `Auth MAC`:
+   * If an encrypted message is attached, she computes:
 
-    * If an encrypted message is attached, she computes:
+     ```
+       Auth MAC = KDF_1(0x18 || auth_mac_k || t || (KDF_1(0x17 ||
+                  attached encrypted ratchet id ||
+                  attached encrypted message id || public ecdh key ||
+                  public dh key || nonce || encrypted message, 64)), 64)`.
+     ```
 
-      ```
-        Auth MAC = KDF_1(0x18 || auth_mac_k || t || (KDF_1(0x17 ||
-                   attached encrypted ratchet id ||
-                   attached encrypted message id || public ecdh key ||
-                   public dh key || nonce || encrypted message, 64)), 64)`.
-      ```
+   * Otherwise, she computes:
 
-    * Otherwise, she computes:
+     ```
+       Auth MAC = KDF_1(0x18 || auth_mac_k || t, 64)
+     ```
 
-      ```
-        Auth MAC = KDF_1(0x18 || auth_mac_k || t, 64)
-      ```
-
-    * Includes this value in the Non-Interactive-Auth message and securely
-      deletes the `auth_mac_k`.
+   * Includes this value in the Non-Interactive-Auth message and securely
+     deletes the `auth_mac_k`.
 11. Sends Bob a Non-Interactive-Auth message. See
     [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 12. At this point, the non-interactive DAKE is complete for Alice:
-    * In the case that she wants to immediately send a data message:
-       * Follows what is defined in the
-         [When you send a Data Message](#when-you-send-a-data-message)
-         section. Note that she will perform a new DH ratchet if no encrypted
-         message was attached to the Non-Interactive-Auth message.
+   * In the case that she wants to immediately send a data message:
+      * Follows what is defined in the
+        [When you send a Data Message](#when-you-send-a-data-message)
+        section. Note that she will perform a new DH ratchet if no encrypted
+        message was attached to the Non-Interactive-Auth message.
 
 **Bob:**
 
 1. Receives the Non-Interactive-Auth message from Alice:
-    * Validates Alice's User Profile and extracts `H_a` from it.
-    * Picks a compatible version of OTR listed on Alice's profile, and follows
-      the specification for this version. If the versions are incompatible, Bob
-      does not send any further messages.
-    * Sets his Public Shared Prekey (`D_b`) from his User Profile as
-      `our_shared_prekey.public`.
-    * Verifies the Non-Interactive-Auth message. See
-      [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
+   * Validates Alice's User Profile and extracts `H_a` from it.
+   * Picks a compatible version of OTR listed on Alice's profile, and follows
+     the specification for this version. If the versions are incompatible, Bob
+     does not send any further messages.
+   * Sets his Public Shared Prekey (`D_b`) from his User Profile as
+     `our_shared_prekey.public`.
+   * Verifies the Non-Interactive-Auth message. See
+     [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 2. Retrieves the ephemeral public keys from Alice:
-    * Sets the received ECDH ephemeral public key `X` as `their_ecdh`.
-    * Sets the received DH ephemeral public key `A` as `their_dh`.
+   * Sets the received ECDH ephemeral public key `X` as `their_ecdh`.
+   * Sets the received DH ephemeral public key `A` as `their_dh`.
 3. Calculates the keys needed for the generation of the Mixed shared secret
    (`K`):
-    * Calculates the ECDH shared secret
-      `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`. Securely deletes
-      `our_ecdh.secret`.
-    * Calculates the DH shared secret `k_dh = DH(our_dh.secret, their_dh)`.
-      Securely deletes `our_dh.secret`.
-    * Calculates the brace key `brace_key = KDF_1(0x02 || k_dh, 32)`.
-      Securely deletes `k_dh`.
+   * Calculates the ECDH shared secret
+     `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`. Securely deletes
+     `our_ecdh.secret`.
+   * Calculates the DH shared secret `k_dh = DH(our_dh.secret, their_dh)`.
+     Securely deletes `our_dh.secret`.
+   * Calculates the brace key `brace_key = KDF_1(0x02 || k_dh, 32)`.
+     Securely deletes `k_dh`.
 4. Calculates
    `tmp_k = KDF_1(0x12 || K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh)
     || ECDH(sk_hb, their_ecdh) || brace_key, 64)`.
 5. Computes the Auth MAC key `auth_mac_k = KDF_1(0x14 || tmp_k, 64)`.
 6. Computes the Mixed shared secret and the SSID:
-    * `K = KDF_1(0x04 || tmp_k, 64)`. Securely deletes `tmp_k`.
-    * Calculates the SSID from shared secret: `KDF_1(0x05 || K, 8)`.
+   * `K = KDF_1(0x04 || tmp_k, 64)`. Securely deletes `tmp_k`.
+   * Calculates the SSID from shared secret: `KDF_1(0x05 || K, 8)`.
 7. Initializes the double ratchet algorithm:
    * Sets ratchet id `i` as 0.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
@@ -2132,9 +2131,9 @@ Verify. Decrypt message if included
         * Computes `Auth MAC = KDF_1(0x18 || auth_mac_k || t, 64)`.
           The `t` value here is the one computed during the verification of the
           Non-Interactive-Auth message.
-    * Extracts the `Auth MAC` from the Non-Interactive-Auth message and verifies
-      that it is equal to the one just calculated. If it is not, ignore the
-      Non-Interactive-Auth message.
+   * Extracts the `Auth MAC` from the Non-Interactive-Auth message and verifies
+     that it is equal to the one just calculated. If it is not, ignore the
+     Non-Interactive-Auth message.
 8. At this point, the non-interactive DAKE is complete for Bob:
    * In the case that he immediately receives a data message that advertises the
      new public keys from Alice:
