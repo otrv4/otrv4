@@ -2057,23 +2057,23 @@ Verify. Decrypt message if included
      [Attaching an Encrypted Message to the Non-Interactive-Auth Message](#attaching-an-encrypted-message-to-non-interactive-auth-message-in-xzdh)
      section.
 10. Calculates the `Auth MAC`:
-   * If an encrypted message is attached, she computes:
+    * If an encrypted message is attached, she computes:
 
-     ```
-       Auth MAC = KDF_1(0x18 || auth_mac_k || t || (KDF_1(0x17 ||
-                  attached encrypted ratchet id ||
-                  attached encrypted message id || public ecdh key ||
-                  public dh key || nonce || encrypted message, 64)), 64)`.
-     ```
+      ```
+        Auth MAC = KDF_1(0x18 || auth_mac_k || t || (KDF_1(0x17 ||
+                   attached encrypted ratchet id ||
+                   attached encrypted message id || public ecdh key ||
+                   public dh key || nonce || encrypted message, 64)), 64)`.
+      ```
 
-   * Otherwise, she computes:
+    * Otherwise, she computes:
 
-     ```
-       Auth MAC = KDF_1(0x18 || auth_mac_k || t, 64)
-     ```
+      ```
+        Auth MAC = KDF_1(0x18 || auth_mac_k || t, 64)
+      ```
 
-   * Includes this value in the Non-Interactive-Auth message and securely
-     deletes the `auth_mac_k`.
+    * Includes this value in the Non-Interactive-Auth message and securely
+      deletes the `auth_mac_k`.
 11. Sends Bob a Non-Interactive-Auth message. See
     [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 12. At this point, the non-interactive DAKE is complete for Alice:
