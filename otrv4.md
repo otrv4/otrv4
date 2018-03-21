@@ -547,6 +547,9 @@ Ed448 scalar (SCALAR):
 
 User Profile (USER-PROF):
   Detailed in "User Profile Data Type" section
+
+Prekey Profile (PREKEY-PROF)
+  Detailed in "Prekey Profile Data Type" section
 ```
 
 In order to encode a point or a scalar into `POINT` or `SCALAR` data types, and
@@ -678,9 +681,11 @@ The symmetric key (sym_key) is 57 bytes of cryptographically secure random data.
    it in 'D', encoded as POINT.
 4. Securely store 'sk' locally, as 'sk_h' for 'ED448-PUBKEY' and 'sk_d' for
    'ED448-SHARED-PREKEY'. These keys will be stored for as long as the
-   'ED448-PUBKEY' and the 'ED448-SHARED-PREKEY' respectevely live. After their
-   public key counterpart expires, they should be securely deleted.
-5. Securely delete 'sym_key' and 'h'.
+   'ED448-PUBKEY' and the 'ED448-SHARED-PREKEY' respectevely live. Addionally,
+   securely store 'sym_key'. This key will be used for the User and Prekey
+   profiles signature. After their public key counterpart expires, they should
+   be securely deleted or replaced.
+5. Securely delete 'h'.
 ```
 
 Public keys have fingerprints, which are hex strings that serve as identifiers
@@ -1203,22 +1208,22 @@ valid.
 ### User Profile Data Type
 
 ```
-Profile Expiration (PROF-EXP):
+Profile Expiration (USER-PROF-EXP):
   8 byte signed value, big-endian
 
 User Profile (USER-PROF):
   Ed448 public key (ED448-PUBKEY)
     Corresponds to 'H'.
   Versions (DATA)
-  Profile Expiration (PROF-EXP)
-  (optional) Transitional Signature (SIG)
-  Profile Signature (EDDSA-SIG)
+  Profile Expiration (USER-PROF-EXP)
+  (optional) Transitional Signature (USER-SIG)
+  Profile Signature (USER-EDDSA-SIG)
 ```
 
-`EDDSA-SIG` refers to the OTRv4 EDDSA signature:
+`USER-EDDSA-SIG` refers to the OTRv4 EDDSA signature:
 
 ```
-EDDSA signature (EDDSA-SIG):
+EDDSA signature (USER-EDDSA-SIG):
   (len is the expected length of the signature, which is 114 bytes)
   len byte unsigned value, little-endian
 ```
@@ -1228,7 +1233,7 @@ From the OTRv3 protocol, section "Public keys, signatures, and fingerprints",
 the format for a signature made by a OTRv3 DSA public key is as follows:
 
 ```
-DSA signature (SIG):
+DSA signature (USER-SIG):
   (len is the length of the DSA public parameter q, which in current
   implementations is 20 bytes)
   len byte unsigned r, big-endian
@@ -1359,7 +1364,7 @@ with value 0, a context 'c' (a value set by the signer and verifier of maximum
     little-endian encoding of 'S' (57 bytes, the ten most significant bits are
     always zero).
 
-7. Securely delete 'sym_key', 'sk', 'h', 'r' and 'k'.
+7. Securely delete 'sk', 'h', 'r' and 'k'.
 ```
 
 ### Verify a User Profile Signature
@@ -1439,7 +1444,7 @@ Prekey Profile (PREKEY-PROF):
 `PREKEY-EDDSA-SIG` refers to the OTRv4 EDDSA signature:
 
 ```
-PREKEY-EDDSA-SIG signature (EDDSA-SIG):
+PREKEY-EDDSA-SIG signature (PREKEY-EDDSA-SIG):
   (len is the expected length of the signature, which is 114 bytes)
   len byte unsigned value, little-endian
 ```
@@ -1486,13 +1491,15 @@ To create a Prekey Profile, assemble:
    on RFC 8032 [\[9\]](#references)) and the empty context `c` are used to
    create signatures of the entire profile excluding the signature itself. The
    size of the signature is 114 bytes. For its generation, refer to the
-   [Create a User Profile Signature](#create-a-user-profile-signature) section.
+   [Create a Prekey Profile Signature](#create-a-prekey-profile-signature)
+   section.
 6. Transitional Signature (optional): A signature of the profile excluding the
    Profile Signature and the user's OTRv3 DSA key. The Transitional Signature
    enables parties that trust user's version 3 DSA key to trust the user's
    profile in version 4. This is only used if the user supports versions 3
    and 4. For more information, refer to the
-   [Create a User Profile Signature](#create-a-user-profile-signature) section.
+   [Create a Prekey Profile Signature](#create-a-prekey-profile-signature)
+   section.
 
 After the prekey profile is created, it must be published in an untrusted
 server.
@@ -1562,7 +1569,7 @@ with value 0, a context 'c' (a value set by the signer and verifier of maximum
     little-endian encoding of 'S' (57 bytes, the ten most significant bits are
     always zero).
 
-7. Securely delete 'sym_key', 'sk', 'h', 'r' and 'k'.
+7. Securely delete 'sk', 'h', 'r' and 'k'.
 ```
 
 ### Verify a Prekey Profile Signature
