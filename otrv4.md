@@ -117,9 +117,6 @@ an existing messaging protocol, such as XMPP.
    1. [OTRv3 Protocol State Machine](#otrv3-protocol-state-machine)
    1. [Elliptic Curve Operations](#elliptic-curve-operations)
       1. [Point Addition](#point-addition)
-   1. [Constant-time Operations](#constant-time-operations)
-      1. [Constant-time Equality](#constant-time-equality)
-      1. [Constant-time Selection](#constant-time-selection)
 1. [References](#references)
 
 ## Main Changes over Version 3
@@ -4187,9 +4184,7 @@ section for details.
 
 This function can be generalized so it is not possible to determine which secret
 key was used to produce this ring signature, even if all secret keys are
-revealed. For this, constant-time conditional operations should be used. For
-details on how to implement these operations, see the
-[Constant-time Operations](#constant-time-operations) section.
+revealed. For this, constant-time conditional operations should be used.
 
 The prover knows a secret `ai` and, therefore:
 
@@ -4569,36 +4564,6 @@ Compute:
                  X3 = A * F * (H - C - D)
                  Y3 = A * G * (D - C)
                  Z3 = F * G
-```
-
-### Constant-time Operations
-
-#### Constant-time Equality
-
-A constant-time equality function should return `1` if `x == y` and `0`
-otherwise.
-
-```
-constant_time_equals(x, y):
-  if len(x) != len(y)
-    return 0
-
-  result = 0
-
-  for i= 0; i < len(x); i++
-    result |= x ^ y
-
-  return result
-```
-
-#### Constant-time Selection
-
-A constant-time selection function should return `x` if `v` is `1` and `y` if
-`v` is `0`. The behavior is undefined if `v` takes any other value.
-
-```
-constant_time_select(v, x, y):
-  return ^(v - 1)&x | (v - 1)&y
 ```
 
 ## References
