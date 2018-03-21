@@ -1426,7 +1426,7 @@ profiles. Also, if a user has multiple clients/devices concurrently in use, it
 is expected that they have multiple prekey profiles simultaneously published and
 valid.
 
-### User Profile Data Type
+### Prekey Profile Data Type
 
 ```
 Prekey Profile Expiration (PREKEY-PROF-EXP):
