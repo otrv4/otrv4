@@ -17,6 +17,7 @@ compliant with the OTRv4-Standalone mode, with exceptions described below.
 
 Ignore the sections:
 
+- "Prekey Profile"
 - "Offline Conversation Initialization".
 - "Conversation started by a Non-Interactive DAKE".
 - "Encrypted messages in DAKE's messages".
@@ -28,9 +29,6 @@ version, will differ in these sections:
 
 - "Public keys, Shared Prekeys and Fingerprints": an OTRv4's public shared
   prekey will never be created.
-- "Creating a User Profile": the `Public Shared Prekey` field is not allowed
-  for this mode: there is no Public Shared Prekey generation or verification.
-  When validating the user profile, this field must not be verified.
 - The `ENCRYPTED_MESSAGES` state is the only state where a participant is
   allowed to send encrypted data messages.
 

@@ -40,9 +40,7 @@ We introduce a User Profile in OTRv4, which includes:
    they trust this key or not.
 2. Supported versions in the form of a Query Message string.
 3. Expiration date of the User Profile.
-4. Public Shared Prekey which is required for the [Non-Interactive
-   DAKE](https://github.com/otrv4/otrv4/blob/master/architecture-decisions/009-non-interactive-dake.md).
-6. Transitional Signature (optional): A signature of the profile excluding
+4. Transitional Signature (optional): A signature of the profile excluding
    the Profile Signature and itself. It is signed by the user's OTRv3 DSA key.
 5. Profile signature of the above parts (including the Transitional Signature if
    present).

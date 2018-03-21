@@ -3,10 +3,10 @@
 ### Context
 
 The non-interactive DAKE below is based on the XZDH protocol. It starts when the
-Responder requests the Initiator's prekey from an untrusted server. The
+Responder requests the Initiator's Prekey message from an untrusted server. The
 Initiator's long-term public key should be verified by the Responder. The
 Responder then generates their ephemeral keys and derives a shared secret. These
-are used to start the double ratchet algorithm and send an encrypted data
+are used to start the Double Ratchet Algorithm and send an encrypted data
 message with the final message of the non-interactive DAKE, called the
 Non-Interactive Auth message. Subsequent encrypted messages can be sent after
 this.
@@ -15,13 +15,14 @@ this.
 
 In OTRv4, the window of key compromise is equivalent to how long it takes for
 the double ratchet to refresh the ephemeral key material (2 ratchets, including
-the first compromised ratchet) and how long a prekey remains unused before the
-User Profile becomes expired. We recommend expiration of the User Profile to be
-a week long, so the window of key compromise will be one week. This is done as
-with offline conversations, participants may not receive messages or reply to
-them for days, weeks, or months at a time. As a result, the window of
-compromise for these kind of conversations can be very long if no limitations
-are set. We set an expiration date to reduce this window of compromise.
+the first compromised ratchet) and how long a prekey message remains unused
+before the User Profile and/or the Prekey Profile becomes expired. We recommend
+expiration of the User Profile and the Prekey Profile to be a week long, so the
+window of key compromise will be one week. This is done as with offline
+conversations, participants may not receive messages or reply to them for days,
+weeks, or months at a time. As a result, the window of compromise for these kind
+of conversations can be very long if no limitations are set. We set an
+expiration date to reduce this window of compromise.
 
 Primarily, there are two attacks that we want to mitigate:
 
@@ -105,6 +106,9 @@ Prekey owner's instance tag (INT)
 Prekey owner's User Profile (USER-PROF)
   As described in the section "Creating a User Profile".
 
+Prekey owner's Prekey Profile (USER-PROF)
+  As described in the section "Creating a Prekey Profile".
+
 Y Prekey owner's ECDH public key (POINT)
   First part of the one-time use prekey value.
 
@@ -114,10 +118,9 @@ B Prekey owner's DH public key (MPI)
 ```
 
 The public part of the shared prekey and its signature, which are essential to
-implementing XZDH, will be included in the published User Profile. The
+implementing XZDH, will be included in the published Prekey Profile. The
 signature of the shared prekey must be published in order to be deniable as it
-is created using the participant's long term keys. We consider the signature of
-the User Profile to be the signature of the shared prekey.
+is created using the participant's long term keys.
 
 A Non-interactive Auth Message has the format:
 
@@ -173,8 +176,8 @@ Describing the details of interactions between OTRv4 clients and a prekey
 server are outside the scope of this specification. Implementers are expected
 to create their own policy dictating how often their clients upload prekey
 messages to the prekey server. Prekey messages expire when their User Profile
-expires. Thus, new prekey messages should be published to the prekey server
-before they expire to keep valid prekey messages available.
+and/or the Prekey Profile expires. Thus, new prekey messages should be published
+to the prekey server before they expire to keep valid prekey messages available.
 
 A prekey should be published for every long term key that belongs to a user.
 This means that if Bob has a client which only supports OTRv4 and he uploads
@@ -190,35 +193,37 @@ messages may be returned. For example, when Alice requests prekey messages for
 Bob, any of the following may happen:
 
 1. Alice receives two prekey messages for Bob because Bob uses two OTRv4
-   clients, one for his phone and one for his laptop. Each client maintains
-   their own set of prekey messages on the same prekey server. These two prekey
-   messages will be different by instance tag. This scenario can also follow
-   different paths:
+   clients, one for his phone and one for his laptop (or the same client in
+   different devices). Each client maintains their own set of prekey messages
+   on the same prekey server. These two prekey messages will be different by
+   instance tag. This scenario can, therefore, follow different paths:
 
     1. The two prekey messages may have user profiles created with different
-       long term keys. At this point, if Alice trusts only one key, she may
-       decide to send a message only to the client with the key she trusts. If
-       Alice trusts both keys, she may decide to send a message to one or both.
-       If Alice does not trust either key, she may decide not to send a message
+       long term keys and two prekey profiles signed by those different keys
+       respectevely. At this point, if Alice trusts only one key, she may decide
+       to send a message only to the client with the key she trusts. If Alice
+       trusts both keys, she may decide to send a message to one or both. If
+       Alice does not trust either key, she may decide not to send a message
        or she may send messages without validating the keys.
     2. The two prekey messages may have user profiles created with the same
-       long term key. If this key is trusted, Alice may decide to send a
-       message to both client instances. Or Alice may decide to send a message
-       only to the first Prekey message received. If Alice does not trust the
-       key, she may decide not to send a message or send an message to both
-       instances without validating the keys.
+       long term key and prekey profiles signed by the same key. If this key is
+       trusted, Alice may decide to send a message to both client instances. Or
+       Alice may decide to send a message only to the first Prekey message
+       received. If Alice does not trust the key, she may decide not to send a
+       message or send an message to both instances without validating the keys.
 
-2. Alice receives two prekey messages for Bob with different user profiles but
-   the same instance tag. This can only validly happen if Bob's client supports
-   two different versions of OTR that use prekey messages or if the long term
-   key used in each message's User Profile is different.
+2. Alice receives two prekey messages from Bob with different user profiles but
+   the same instance tag (the prekey profiles are signed with the corresponding
+   long-term key stated on the user profiles). This can only validly happen if
+   Bob's client supports two different versions of OTR that use prekey messages
+   or if the long-term key used in each message's User Profile is different.
 
-    1. If the versions and the long term keys used in the messages are the same,
+    1. If the versions and the long-term keys used in the messages are the same,
        and they are compatible with Alice's version, one of the prekey messages
        must be invalid, but Alice cannot know which. She should not send a
        message using either prekey message.
     2. If the prekey message versions are the same and the version is supported
-       by Alice, but the long term keys are different from each other, Alice
+       by Alice, but the long-term keys are different from each other, Alice
        should look at whether she trusts the keys. If she trusts both, she may
        send a message to both. If she trusts only one, she may decide to only
        send one message or she may send a message to the untrusted key as well.
@@ -230,7 +235,7 @@ Bob, any of the following may happen:
        associated with them.
     4. If the prekey message versions are different and Alice supports only
        one, then she can only send a message with the prekey message she
-       supports. If the long term key associated with this message is
+       supports. If the long-term key associated with this message is
        untrusted, she may decide not to send a message. If it is trusted, she
        may send a message.
 
@@ -247,32 +252,41 @@ Here is the guide:
 To validate a prekey message, use the following checks. If any of them fail,
 ignore the message:
 
-    Check if the User Profile is not expired
-    Check if the OTR version of the prekey message matches one of the versions
-    signed in the User Profile contained in the prekey message
-    Check if the User Profile version is supported by the receiver
+```
+  1. Check if the User Profile is not expired.
+  2. Check if the Prekey Profile is not expired.
+  3. Check that the Prekey Profile was signed by the long-term key advertised
+     on the User Profile.
+  4. Check if the OTR version of the prekey message matches one of the versions
+     signed in the User Profile contained in the prekey message.
+  5. Check if the User Profile version is supported by the receiver.
+```
 
 If one Prekey message is received:
 
-    If the prekey message is valid, decide whether to send a non-interactive
-    auth message based on whether the long term key in the User Profile is
-    trusted or not.
+```
+  If the prekey message is valid, decide whether to send a Non-Interactive
+  Auth message based on whether the long term key in the User Profile is trusted
+  or not.
+```
 
 If many prekey messages are received:
 
-    Remove all invalid prekey messages.
-    Remove all duplicate prekey messages in the list.
-    If one prekey message remains:
-        Decide whether to send a message using this prekey message based on
+```
+  1. Remove all invalid prekey messages.
+  2. Remove all duplicate prekey messages in the list.
+  3. If one prekey message remains:
+     a. Decide whether to send a message using this prekey message based on
         whether the long term key within the use profile is trusted or not.
-    If multiple valid prekey messages remain:
-        If there are keys that are untrusted and trusted in the list of
+  4. If multiple valid prekey messages remain:
+     a. If there are keys that are untrusted and trusted in the list of
         messages, decide whether to only use messages that contain trusted long
         term keys.
-        If there are several instance tags in the list of prekey messages,
+     b. If there are several instance tags in the list of prekey messages,
         decide which instance tags to send messages to.
-        If there are multiple prekey messages per instance tag, decide whether
+     c. If there are multiple prekey messages per instance tag, decide whether
         to send multiple messages to the same instance tag.
+```
 
 #### Decreased participation deniability for the initiator
 
@@ -303,9 +317,10 @@ implementations to wait until a prekey message can be transmitted before
 continuing with a non-interactive DAKE.
 
 This is purposely different from what we expect from protocols like Signal. In
-Signal, when a prekey server runs out of messages, a default message is used
-until new messages are uploaded. With this method, the consequences for
-participation deniability are currently undefined and thus risky.
+the Signal protocol, when a prekey server runs out of messages, a default
+message is used until new messages are uploaded. The consequences to
+participation deniability with this technique are currently undefined and thus
+risky.
 
 By waiting for the server to send prekey messages, OTRv4 will be subject to DoS
 attacks when a server is compromised or the network is undermined to return a

@@ -46,8 +46,8 @@ not allow the Transitional Signature parameter on the same profile.
 
 In addition to only supporting the version 4 of OTR (and imposing the same
 restrictions to the User Profile as the "OTRv4-standalone" mode), the
-"OTRv4 interactive-only" mode will only support the interactive DAKE. The User
-Profile should not allow the Public Shared Prekey as a parameter.
+"OTRv4 interactive-only" mode will only support the interactive DAKE. This mode
+will not handle or generate any Prekey Profile.
 
 It should be taken into account, also, that some clients might implement
 different modes when talking with each other. In those cases:
