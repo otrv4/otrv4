@@ -53,10 +53,17 @@ an existing messaging protocol, such as XMPP.
    1. [User Profile Data Type](#user-profile-data-type)
    1. [Creating a User Profile](#creating-a-user-profile)
    1. [Establishing Versions](#establishing-versions)
-   1. [Profile Expiration and Renewal](#profile-expiration-and-renewal)
+   1. [User Profile Expiration and Renewal](#user-profile-expiration-and-renewal)
    1. [Create a User Profile Signature](#create-a-user-profile-signature)
    1. [Verify a User Profile Signature](#verify-a-user-profile-signature)
    1. [Validating a User Profile](#validating-a-user-profile)
+1. [Prekey Profile](#prekey-profile)
+   1. [Prekey Profile Data Type](#prekey-profile-data-type)
+   1. [Creating a Prekey Profile](#creating-a-prekey-profile)
+   1. [Prekey Profile Expiration and Renewal](#prekey-profile-expiration-and-renewal)
+   1. [Create a Prekey Profile Signature](#create-a-prekey-profile-signature)
+   1. [Verify a Prekey Profile Signature](#verify-a-prekey-profile-signature)
+   1. [Validating a Prekey Profile](#validating-a-prekey-profile)
 1. [Online Conversation Initialization](#online-conversation-initialization)
    1. [Requesting Conversation with Older OTR Versions](#requesting-conversation-with-older-otr-versions)
    1. [Interactive Deniable Authenticated Key Exchange (DAKE)](#interactive-deniable-authenticated-key-exchange-dake)
@@ -1161,9 +1168,8 @@ an attacker.
 ## User Profile
 
 OTRv4 introduces user profiles. The User Profile contains the Ed448 long term
-public key, a shared prekey for offline conversations, information about
-supported versions, a profile expiration date, a signature of all these, and an
-optional transitional signature.
+public key, information about supported versions, a profile expiration date, a
+signature of all these, and an optional transitional signature.
 
 There are two instances of the User Profile that should be generated. One is
 used for authentication in both DAKEs (interactive and non-interactive). The
@@ -1198,9 +1204,6 @@ User Profile (USER-PROF):
     Corresponds to 'H'.
   Versions (DATA)
   Profile Expiration (PROF-EXP)
-  Public Shared Prekey (ED448-SHARED-PREKEY)
-    The shared prekey used between different prekey messages.
-    Corresponds to 'D'.
   (optional) Transitional Signature (SIG)
   Profile Signature (EDDSA-SIG)
 ```
@@ -1242,25 +1245,19 @@ OTRv3 public authentication DSA key (PUBKEY):
 
 To create a User Profile, assemble:
 
-1. User's Ed448 long term public key.
+1. User's Ed448 long-term public key.
 2. Versions: a string corresponding to the user's supported OTR versions.
    A User Profile can advertise multiple OTR versions. The format is described
    under the section [Establishing Versions](#establishing-versions) below.
 3. Profile Expiration: Expiration date in standard Unix 64-bit format
    (seconds since the midnight starting Jan 1, 1970, UTC, ignoring leap
    seconds).
-4. Public Shared Prekey: An Ed448 Public Key used in multiple prekey messages.
-   It adds partial protection against an attacker that modifies the first flow
-   of the non-interactive DAKE and that compromises the receivers long term
-   secret key and their one-time ephemeral keys. For its generation, refer to
-   [Public keys, Shared Prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
-   section. This key must expire when the User Profile expires.
-5. Profile Signature: The symmetric key, the flag `f` (set to zero, as defined
+4. Profile Signature: The symmetric key, the flag `f` (set to zero, as defined
    on RFC 8032 [\[9\]](#references)) and the empty context `c` are used to
    create signatures of the entire profile excluding the signature itself. The
    size of the signature is 114 bytes. For its generation, refer to
    [Create a User Profile Signature](#create-a-user-profile-signature) section.
-6. Transitional Signature (optional): A signature of the profile excluding the
+5. Transitional Signature (optional): A signature of the profile excluding the
    Profile Signature and the user's OTRv3 DSA key. The Transitional Signature
    enables parties that trust user's version 3 DSA key to trust the user's
    profile in version 4. This is only used if the user supports versions 3
@@ -1285,21 +1282,21 @@ strings contain a "2" or a "1".
 
 Any other version string that is not "4", "3", "2", or "1" should be ignored.
 
-### Profile Expiration and Renewal
+### User Profile Expiration and Renewal
 
-If a renewed profile is not published in a public place, the user's
+If a renewed user profile is not published in a public place, the user's
 participation deniability is at risk. Participation deniability is also at risk
-if the only publicly available profile is expired. For that reason, a received
-expired profile during the DAKE is considered invalid.
+if the only publicly available user profile is expired. For that reason, a
+received expired user profile during the DAKE is considered invalid.
 
-Before the profile expires, the user must publish an updated profile with a
+Before the profile expires, the user must publish an updated user profile with a
 new expiration date. The client establishes the frequency of expiration and
 when to publish (before the current User Profile expires). Note that this can be
 configurable. A recommended value is one week.
 
 ### Create a User Profile Signature
 
-If version 3 and 4 are supported, and the user has a pre-existing OTRv3 long
+If version 3 and 4 are supported and the user has a pre-existing OTRv3 long
 term key:
 
    * Concatenate `Ed448 public key || Versions || Profile Expiration || Public
@@ -1390,6 +1387,201 @@ To validate a User Profile, you must (in this order):
 3. If the `Transitional Signature` is present, verify its validity using the
    OTRv3 DSA key.
 4. [Verify that the User Profile signature is valid](#verify-a-user-profile-signature).
+
+## Prekey Profile
+
+OTRv4 introduces prekey profiles. The Prekey Profile contains a shared prekey, a
+prekey profile expiration date, a signature of all these, and an optional
+transitional signature. It is signed by the Ed448 long-term public key and/or
+the OTRv3 DSA key.
+
+A prekey profile is needed for it's signed shared prekey, which is used for
+offline conversations. It is changed on a regular basis as defined by the
+expiration date of the prekey profile.
+
+There are two instances of the Prekey Profile that should be generated. One is
+used for publication in an untrusted prekey server, so parties can use it
+to send offline messages. The other should be stored locally.
+
+When the Prekey Profile expires, it should be updated. Client implementations
+should determine the frequency of the prekey's profile expiration and renewal.
+The recommended expiration time is one week.
+
+### User Profile Data Type
+
+```
+Prekey Profile Expiration (PREKEY-PROF-EXP):
+  8 byte signed value, big-endian
+
+Prekey Profile (PREKEY-PROF):
+  Prekey Profile Expiration (PREKEY-PROF-EXP)
+  Public Shared Prekey (ED448-SHARED-PREKEY)
+    The shared prekey used between different prekey messages.
+    Corresponds to 'D'.
+  (optional) Prekey Transitional Signature (PREKEY-SIG)
+  Prekey Profile Signature (PREKEY-EDDSA-SIG)
+```
+
+`PREKEY-EDDSA-SIG` refers to the OTRv4 EDDSA signature:
+
+```
+PREKEY-EDDSA-SIG signature (EDDSA-SIG):
+  (len is the expected length of the signature, which is 114 bytes)
+  len byte unsigned value, little-endian
+```
+
+`PREKEY-SIG` is the DSA Signature. It is the same signature as used in OTRv3.
+From the OTRv3 protocol, section "Public keys, signatures, and fingerprints",
+the format for a signature made by a OTRv3 DSA public key is as follows:
+
+```
+DSA signature (PREKEY-SIG):
+  (len is the length of the DSA public parameter q, which in current
+  implementations is 20 bytes)
+  len byte unsigned r, big-endian
+  len byte unsigned s, big-endian
+```
+
+As defined in OTRv3 spec, the OTRv3 DSA public key is defined as:
+
+```
+OTRv3 public authentication DSA key (PUBKEY):
+  Pubkey type (SHORT)
+    DSA public keys have type 0x0000
+  p (MPI)
+  q (MPI)
+  g (MPI)
+  y (MPI)
+(p,q,g,y) are the OTRv3 DSA public key parameters
+```
+
+### Creating a Prekey Profile
+
+To create a Prekey Profile, assemble:
+
+1. Prekey Profile Expiration: Expiration date in standard Unix 64-bit format
+   (seconds since the midnight starting Jan 1, 1970, UTC, ignoring leap
+   seconds).
+4. Public Shared Prekey: An Ed448 Public Key used in multiple prekey messages.
+   It adds partial protection against an attacker that modifies the first flow
+   of the non-interactive DAKE and that compromises the receivers long term
+   secret key and their one-time ephemeral keys. For its generation, refer to
+   [Public keys, Shared Prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
+   section. This key must expire when the Prekey Profile expires.
+5. Profile Signature: The symmetric key, the flag `f` (set to zero, as defined
+   on RFC 8032 [\[9\]](#references)) and the empty context `c` are used to
+   create signatures of the entire profile excluding the signature itself. The
+   size of the signature is 114 bytes. For its generation, refer to the
+   [Create a User Profile Signature](#create-a-user-profile-signature) section.
+6. Transitional Signature (optional): A signature of the profile excluding the
+   Profile Signature and the user's OTRv3 DSA key. The Transitional Signature
+   enables parties that trust user's version 3 DSA key to trust the user's
+   profile in version 4. This is only used if the user supports versions 3
+   and 4. For more information, refer to the
+   [Create a User Profile Signature](#create-a-user-profile-signature) section.
+
+After the prekey profile is created, it must be published in an untrusted
+server.
+
+### Prekey Profile Expiration and Renewal
+
+Before the prekey profile expires, the user must publish an updated prekey
+profile with a new expiration date. The client establishes the frequency of
+expiration and when to publish (before the current Prekey Profile expires). Note
+that this can be configurable. A recommended value is one week.
+
+### Create a Prekey Profile Signature
+
+If version 3 and 4 are supported, and the user has a pre-existing OTRv3 long
+term key:
+
+   * Concatenate `Prekey Profile Expiration || Public Shared Prekey`. Denote
+     this value `m`.
+   * Sign `m` with the user's OTRv3 DSA key. Denote this value
+     `Prekey Transitional Signature`.
+   * Sign `m || Prekey Transitional Signature`  with the symmetric key, as
+     stated below. Denote this value `Prekey Profile Signature`.
+
+If only version 4 is supported:
+
+   * Concatenate `Profile Expiration || Public Shared Prekey`.
+     Denote this value `m`.
+   * Sign `m` with the symmetric key, as stated below. Denote this value
+     `Profile Signature`.
+
+The Prekey Profile signature for version 4 is generated as defined in RFC 8032
+[\[9\]](#references), section 5.2.6. The flag `f` is set to `0` and the context
+`c` is an empty constant string.
+
+Note that, although the RFC 8032 defines parameters as octet strings, they are
+defined as bytes here.
+
+It is generated as follows:
+
+```
+The inputs are the symmetric key (57 bytes, defined in the 'Public keys and
+fingerprints' section. It is referred as 'sym_key'), a flag 'f', which is a byte
+with value 0, a context 'c' (a value set by the signer and verifier of maximum
+255 bytes), which is an empty string for this protocol, and a message 'm'.
+
+1.  Hash the 'sym_key': 'KDF_2(sym_key, 114)'. Let 'h' denote the resulting
+    digest. Construct the secret key 'sk' from the first half of 'h' (57 bytes),
+    and the corresponding public key 'H', as defined in the 'Public keys, Shared
+    Prekeys and Fingerprints' section. Let 'prefix' denote the second half of
+    the 'h' (from 'h[57]' to 'h[113]').
+
+2.  Compute KDF_2("SigEd448" || f || len(c) || c || prefix || m, 114), where
+    'm' is the message to be signed. Let 'r' be the 114-byte resulting digest
+    and interpret it as a little-endian integer.
+
+3.  Multiply the scalar 'r' by the Base Point (G). For efficiency, do this by
+    first reducing 'r' modulo 'q', the group order.  Let 'R' be the encoding
+    of this resulting point. It should be encoded as a POINT.
+
+4.  Compute KDF_2("SigEd448" || f || len(c) || c || R || H || m, 114). Interpret
+    the 114-byte digest as a little-endian integer 'k'.
+
+5.  Compute 'S = (r + k * sk) mod q'.  For efficiency, reduce 'k' again modulo
+    'q' first.
+
+6.  Form the signature of the concatenation of 'R' (57 bytes) and the
+    little-endian encoding of 'S' (57 bytes, the ten most significant bits are
+    always zero).
+
+7. Securely delete 'sym_key', 'sk', 'h', 'r' and 'k'.
+```
+
+### Verify a Prekey Profile Signature
+
+The Prekey Profile signature is verified as defined in RFC 8032
+[\[9\]](#references), section 5.2.7. It works as follows:
+
+```
+1.  To verify a signature on a message 'm', using the public key 'H', with 'f'
+    being 0, and 'c' being empty, split the signature into two 57-byte halves.
+    Decode the first half as a point 'R', and the second half as a scalar
+    'S'. Decode the public key 'H' as a point 'H_1'. If any of the
+    decodings fail (including 'S' being out of range), the signature is invalid.
+
+2.  Compute KDF_2("SigEd448" || f || len(c) || c || R || H || m, 114). Interpret
+    the 114-byte digest as a little-endian integer 'k'.
+
+3.  Check the group equation '4 * (S * G) = (4 * R) + (4 * (k * H_1))'. It's is
+    sufficient to check '(S * G) = R + (k * H_1)'.
+```
+
+### Validating a Prekey Profile
+
+To validate a Prekey Profile, you must (in this order):
+
+1. Verify that the Prekey Profile has not expired.
+2. Validate that the `Public Shared Prekey` is on the curve Ed448-Goldilocks.
+   See
+   [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+   section for details.
+3. If the `Transitional Signature` is present, verify its validity using the
+   OTRv3 DSA key.
+4. [Verify that the Prekey Profile signature is valid](#verify-a-prekey-profile-signature).
 
 ## Online Conversation Initialization
 
