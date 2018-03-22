@@ -221,16 +221,17 @@ their private long term keys. A forged transcript of the DAKE can be produced at
 any time by anyone who knows the long-term public keys of both alleged
 participants. This capability is called offline deniability because no
 transcript provides evidence of a past key exchange, as this could have been
-forged. It is provided for both participants in an interactive DAKE.
+forged by anyone. It is provided for both participants in the interactive DAKE,
+described below.
 
 Furthermore, participants in the interactive DAKE, cannot provide proof of
 participation to third parties without making themselves vulnerable to Key
-Compromise Impersonation (KCI) attacks, even if they perform arbitrary protocols
-with these third parties. A KCI attack begins when the long-term secret key of a
-participant of a vulnerable DAKE is compromised. With this secret key, an
-adversary can impersonate other users to the owner of the key. The property by
-which participants  cannot provide proof of participation to third parties is
-known as online or participation deniability.
+Compromise Impersonation (KCI) attacks [\[11\]](#references), even if they
+perform arbitrary protocols with these third parties. A KCI attack begins when
+the long-term secret key of a participant of a vulnerable DAKE is compromised.
+With this secret key, an adversary can impersonate other users to the owner of
+the key. The property by which participants cannot provide proof of
+participation to third parties is known as online or participation deniability.
 
 Both DAKEs (interactive and non-interactive) provide offline deniability as
 anyone can forge a DAKE transcript between two parties using their long-term
@@ -280,7 +281,9 @@ Elliptic Curve Diffie-Hellman ratchets.
 The DAKEs in OTRv4 provide contributiveness as well. This means that the
 initiator of the protocol cannot force the shared secret to take on a specific
 value. It is also computationally infeasible for the responder to select a
-specific shared secret. Bothe DAKEs are provable secure.
+specific shared secret. Additionally, both DAKEs in this specification are
+provable secure, meaning that both of them come with a rigorous logical
+argument.
 
 OTRv4 does not take advantage of quantum resistant algorithms. There are several
 reasons for this. Mainly, OTRv4 aims to be a protocol that is easy to implement
@@ -4598,3 +4601,6 @@ Compute:
 10. Bernstein, D. and T. Lange. (2007). *Projective coordinates for Edwards
     curves*, The 'add-2007-bl' addition formulas. Available at:
     http://www.hyperelliptic.org/EFD/g1p/auto-edwards-projective.html#addition-add-2007-bl
+11. Blake-Wilson, S., Johnson, D., Menezes, A. (1997) *Key Agreement Protocols
+    and their Security Analysis*. Available at:
+    https://dl.acm.org/citation.cfm?id=742138
