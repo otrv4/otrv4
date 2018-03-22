@@ -493,18 +493,20 @@ To verify that an integer (`x`) is on the group with a 3072-bit modulus:
 The following key derivation functions are used:
 
 ```
-KDF_1(usageID || values, output_size) = SHAKE-256("OTRv4" || usageID || values, size)
+  KDF_1(usageID || values, output_size) = SHAKE-256("OTRv4" || usageID || values, size)
 ```
 
 The `size` first bytes of the SHAKE-256 output for input
 `"OTRv4" || usageID || m` are returned.
 
+The only different KDF function used in this specification is the one used when
+referring to RFC 8032. As defined in that document:
+
 ```
-KDF_2(values, size) = SHAKE-256(values, size)
+  SHAKE-256(x, y) = The 'y' first bytes of SHAKE-256 output for input 'x'
 ```
 
-The `size` first bytes of the SHAKE-256 output for input `values` are returned.
-This `KDF_2` is used when referring to RFC 8032.
+Unlike SHAKE standard, notice that the output size here is defined in bytes.
 
 ## Data Types
 
@@ -665,9 +667,9 @@ bytes here:
 ```
 The symmetric key (sym_key) is 57 bytes of cryptographically secure random data.
 
-1. Hash the 'sym_key' using KDF_2(sym_key, 114). Store the digest in a 114-byte
-   buffer. Only the lower 57 bytes (denoted 'h') are used for generating the
-   public key.
+1. Hash the 'sym_key' using 'SHAKE-256(sym_key, 114)'. Store the digest in a
+   114-byte buffer. Only the lower 57 bytes (denoted 'h') are used for
+   generating the public key.
 2. Prune the buffer 'h': the two least significant bits of the first
    byte are cleared, all eight bits of the last byte are cleared, and the
    highest bit of the second to last byte is set.
@@ -1337,22 +1339,22 @@ fingerprints' section. It is referred as 'sym_key'), a flag 'f', which is a byte
 with value 0, a context 'c' (a value set by the signer and verifier of maximum
 255 bytes), which is an empty string for this protocol, and a message 'm'.
 
-1.  Hash the 'sym_key': 'KDF_2(sym_key, 114)'. Let 'h' denote the resulting
+1.  Hash the 'sym_key': 'SHAKE-256(sym_key, 114)'. Let 'h' denote the resulting
     digest. Construct the secret key 'sk' from the first half of 'h' (57 bytes),
     and the corresponding public key 'H', as defined in the 'Public keys, Shared
     Prekeys and Fingerprints' section. Let 'prefix' denote the second half of
     the 'h' (from 'h[57]' to 'h[113]').
 
-2.  Compute KDF_2("SigEd448" || f || len(c) || c || prefix || m, 114), where
-    'm' is the message to be signed. Let 'r' be the 114-byte resulting digest
-    and interpret it as a little-endian integer.
+2.  Compute 'SHAKE-256("SigEd448" || f || len(c) || c || prefix || m, 114)',
+    where 'm' is the message to be signed. Let 'r' be the 114-byte resulting
+    digest and interpret it as a little-endian integer.
 
 3.  Multiply the scalar 'r' by the Base Point (G). For efficiency, do this by
     first reducing 'r' modulo 'q', the group order.  Let 'R' be the encoding
     of this resulting point. It should be encoded as a POINT.
 
-4.  Compute KDF_2("SigEd448" || f || len(c) || c || R || H || m, 114). Interpret
-    the 114-byte digest as a little-endian integer 'k'.
+4.  Compute 'SHAKE-256("SigEd448" || f || len(c) || c || R || H || m, 114)'.
+    Interpret the 114-byte digest as a little-endian integer 'k'.
 
 5.  Compute 'S = (r + k * sk) mod q'.  For efficiency, reduce 'k' again modulo
     'q' first.
@@ -1376,8 +1378,8 @@ The User Profile signature is verified as defined in RFC 8032
     'S'. Decode the public key 'H' as a point 'H_1'. If any of the
     decodings fail (including 'S' being out of range), the signature is invalid.
 
-2.  Compute KDF_2("SigEd448" || f || len(c) || c || R || H || m, 114). Interpret
-    the 114-byte digest as a little-endian integer 'k'.
+2.  Compute 'SHAKE-256("SigEd448" || f || len(c) || c || R || H || m, 114)'.
+    Interpret the 114-byte digest as a little-endian integer 'k'.
 
 3.  Check the group equation '4 * (S * G) = (4 * R) + (4 * (k * H_1))'. It's is
     sufficient to check '(S * G) = R + (k * H_1)'.
@@ -1542,22 +1544,22 @@ fingerprints' section. It is referred as 'sym_key'), a flag 'f', which is a byte
 with value 0, a context 'c' (a value set by the signer and verifier of maximum
 255 bytes), which is an empty string for this protocol, and a message 'm'.
 
-1.  Hash the 'sym_key': 'KDF_2(sym_key, 114)'. Let 'h' denote the resulting
+1.  Hash the 'sym_key': 'SHAKE-256(sym_key, 114)'. Let 'h' denote the resulting
     digest. Construct the secret key 'sk' from the first half of 'h' (57 bytes),
     and the corresponding public key 'H', as defined in the 'Public keys, Shared
     Prekeys and Fingerprints' section. Let 'prefix' denote the second half of
     the 'h' (from 'h[57]' to 'h[113]').
 
-2.  Compute KDF_2("SigEd448" || f || len(c) || c || prefix || m, 114), where
-    'm' is the message to be signed. Let 'r' be the 114-byte resulting digest
-    and interpret it as a little-endian integer.
+2.  Compute 'SHAKE-256("SigEd448" || f || len(c) || c || prefix || m, 114)',
+    where 'm' is the message to be signed. Let 'r' be the 114-byte resulting
+    digest and interpret it as a little-endian integer.
 
 3.  Multiply the scalar 'r' by the Base Point (G). For efficiency, do this by
     first reducing 'r' modulo 'q', the group order.  Let 'R' be the encoding
     of this resulting point. It should be encoded as a POINT.
 
-4.  Compute KDF_2("SigEd448" || f || len(c) || c || R || H || m, 114). Interpret
-    the 114-byte digest as a little-endian integer 'k'.
+4.  Compute 'SHAKE-256("SigEd448" || f || len(c) || c || R || H || m, 114)'.
+    Interpret the 114-byte digest as a little-endian integer 'k'.
 
 5.  Compute 'S = (r + k * sk) mod q'.  For efficiency, reduce 'k' again modulo
     'q' first.
@@ -1581,8 +1583,8 @@ The Prekey Profile signature is verified as defined in RFC 8032
     'S'. Decode the public key 'H' as a point 'H_1'. If any of the
     decodings fail (including 'S' being out of range), the signature is invalid.
 
-2.  Compute KDF_2("SigEd448" || f || len(c) || c || R || H || m, 114). Interpret
-    the 114-byte digest as a little-endian integer 'k'.
+2.  Compute 'SHAKE-256("SigEd448" || f || len(c) || c || R || H || m, 114)'.
+    Interpret the 114-byte digest as a little-endian integer 'k'.
 
 3.  Check the group equation '4 * (S * G) = (4 * R) + (4 * (k * H_1))'. It's is
     sufficient to check '(S * G) = R + (k * H_1)'.
