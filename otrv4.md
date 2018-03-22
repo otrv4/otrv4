@@ -2009,11 +2009,9 @@ Verify. Decrypt message if included
 
 **Bob:**
 
-1. Generates a Prekey message, as defined in
+1. Generates prekey messages, as defined in the
    [Prekey Message](#prekey-message) section.
-2. Sets `Y` and `y` as `our_ecdh`: the ephemeral ECDH keys.
-3. Sets `B` as  and `b` as `our_dh`: the ephemeral 3072-bit DH keys.
-4. Publishes the Prekey message to an untrusted server.
+2. Publishes the prekey messages to an untrusted server.
 
 **Alice:**
 
@@ -2089,6 +2087,11 @@ Verify. Decrypt message if included
 **Bob:**
 
 1. Receives the Non-Interactive-Auth message from Alice:
+   * Retrieves his corresponding Prekey message from local storage, by
+     using the 'Prekey Indentifier' attached to the Non-Interactive-Auth
+     message. From this Prekey message:
+     * Sets `Y` and `y` as `our_ecdh`: the ephemeral ECDH keys.
+     * Sets `B` as  and `b` as `our_dh`: the ephemeral 3072-bit DH keys.
    * Validates Alice's User Profile and extracts `H_a` from it.
    * Picks a compatible version of OTR listed on Alice's profile, and follows
      the specification for this version. If the versions are incompatible, Bob
@@ -2161,17 +2164,19 @@ A valid Prekey message is generated as follows:
    [Creating a User Profile](#creating-a-user-profile) section.
 2. Create a Prekey Profile, as defined in
    [Creating a Prekey Profile](#creating-a-prekey-profile) section.
-3. Create the first one-time use prekey by generating the ephemeral ECDH key
+3. Generate a unique random id that is going to act as an identifier for this
+   prekey message. It should be 4 byte unsigned value, big-endian (INT).
+4. Create the first one-time use prekey by generating the ephemeral ECDH key
    pair, as defined in
    [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys):
    * secret key `y` (57 bytes).
    * public key `Y`.
-4. Create the second one-time use prekey by generating the ephemeral DH key
+5. Create the second one-time use prekey by generating the ephemeral DH key
    pair, as defined in
    [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys):
    * secret key `b` (80 bytes).
    * public key `B`.
-5. Generate a 4-byte instance tag to use as the sender's instance tag.
+6. Generate a 4-byte instance tag to use as the sender's instance tag.
    Additional messages in this conversation will continue to use this tag as the
    sender's instance tag. Also, this tag is used to filter future received
    messages. Messages intended for this instance of the client will have this
@@ -2200,6 +2205,9 @@ Protocol version (SHORT)
 
 Message type (BYTE)
   The message has type 0x0F.
+
+Prekey Message Indentifier (INT)
+  A prekey message id used for local retrieval.
 
 Prekey owner's instance tag (INT)
   The instance tag of the client that created the prekey.
@@ -2254,7 +2262,9 @@ A valid Non-Interactive-Auth message is generated as follows:
    keep the first 24 bytes of the generated `c` value to be used as a `nonce`
    in the next step. Refer to
    [Ring Signature Authentication](#ring-signature-authentication) for details.
-10. Generate a 4-byte instance tag to use as the sender's instance tag.
+10. Attach the 'Prekey Message Indentifier' that is stated in the retrieved
+    Prekey message.
+11. Generate a 4-byte instance tag to use as the sender's instance tag.
     Additional messages in this conversation will continue to use this tag as
     the sender's instance tag. Also, this tag is used to filter future received
     messages. Messages intended for this instance of the client will have this
@@ -2306,6 +2316,10 @@ A (MPI)
 
 Sigma (RING-SIG)
   The 'RING-SIG' proof of authentication value.
+
+Prekey Message Indentifier (INT)
+  The 'Prekey Message Identifier' from the Prekey message that was retrieved
+  from the untrusted server.
 
 Attached XZDH Encrypted Message (XZDH-ENCRYPTED-MSG)
   (optional: if an encrypted message is attached)
