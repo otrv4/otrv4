@@ -496,7 +496,7 @@ To verify that an integer (`x`) is on the group with a 3072-bit modulus:
 The following key derivation functions are used:
 
 ```
-  KDF_1(usageID || values, output_size) = SHAKE-256("OTRv4" || usageID || values, size)
+  KDF_1(usageID || values, size) = SHAKE-256("OTRv4" || usageID || values, size)
 ```
 
 The `size` first bytes of the SHAKE-256 output for input
