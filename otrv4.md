@@ -916,7 +916,7 @@ Key variables:
   'our_dh': our DH ephemeral key pair.
   'their_dh': their DH ephemeral public key.
   'brace_key': either a hash of the shared DH key: 'KDF_1(0x02 || k_dh, 32)'
-   (every thrid DH ratchet) or a hash of the previuos 'brace_key:
+   (every third DH ratchet) or a hash of the previuos 'brace_key:
    KDF_1(0x03 || brace_key, 32)'
   'mac_keys_to_reveal': the MAC keys to be revealed in the first data message
     sent of the next ratchet.
@@ -1981,7 +1981,7 @@ shared cryptographic keys while providing partial participation deniability.
 Unlike the interactive DAKE, the non-interactive DAKE does not provide online
 deniability for the party that completes the DAKE by sending a
 Non-Interactive-Auth message. Client implementations are expected to understand
-this deniability risk when allowing participantss to complete a non-interactive
+this deniability risk when allowing participants to complete a non-interactive
 DAKE. They are also expected to decide how to convey this security loss to the
 participant.
 
@@ -2153,7 +2153,7 @@ Verify. Decrypt message if included
 
 #### Prekey message
 
-This message is created and published to an unstrusted prekey server to allow
+This message is created and published to an untrusted prekey server to allow
 offline conversations. Each Prekey message contains the owner's User Profile
 (which contains a signed shared prekey) and two one-time use ephemeral public
 prekey values.
@@ -2262,7 +2262,7 @@ A valid Non-Interactive-Auth message is generated as follows:
    keep the first 24 bytes of the generated `c` value to be used as a `nonce`
    in the next step. Refer to
    [Ring Signature Authentication](#ring-signature-authentication) for details.
-10. Attach the 'Prekey Message Indentifier' that is stated in the retrieved
+10. Attach the 'Prekey Message Identifier' that is stated in the retrieved
     Prekey message.
 11. Generate a 4-byte instance tag to use as the sender's instance tag.
     Additional messages in this conversation will continue to use this tag as
