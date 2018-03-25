@@ -1080,6 +1080,10 @@ To rotate the brace key:
 
 To derive the next root key and the current chain key:
 
+Note that if there is no previous root key (because this is the first ratchet:
+`i == 0`), then the keys are derived from the previous Mixed shared secret `K`
+(interpreted as `root_key[i-1]`) and the current Mixed shared secret `K`.
+
 ```
 derive_ratchet_keys(purpose, root_key[i-1], K):
   root_key[i] = KDF_1(0x21 || root_key[i-1] || K, 64)
@@ -1722,6 +1726,7 @@ Bob will be initiating the DAKE with Alice.
 6. Initializes the double-ratchet:
     * Sets ratchet id `i` as 0.
     * Sets `j` as 0, `k` as 0 and `pn` as 0.
+    * Interprets `K` as the first root key (`root_key[i-1]`).
     * Generates an ephemeral ECDH key pair, as defined in
       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
       of using a random value `r`, it will use : `r = KDF_1(0x19 || K, 57)`.
@@ -1742,6 +1747,7 @@ Bob will be initiating the DAKE with Alice.
 2. Initializes the double ratchet algorithm:
    * Sets ratchet id `i` as 0.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
+   * Interprets `K` as the first root key (`root_key[i-1]`).
    * Generates Bob's ECDH and DH public keys:
       * Generates an ephemeral ECDH key pair, as defined in
         [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
@@ -2043,6 +2049,7 @@ Verify. Decrypt message if included
 8. Initializes the double-ratchet:
    * Sets ratchet id `i` as 0.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
+   * Interprets `K` as the first root key (`root_key[i-1]`).
    * Generates Bob's ECDH and DH public keys:
      * Generates an ephemeral ECDH key pair, as defined in
        [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys), but instead
@@ -2126,6 +2133,7 @@ Verify. Decrypt message if included
 7. Initializes the double ratchet algorithm:
    * Sets ratchet id `i` as 0.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
+   * Interprets `K` as the first root key (`root_key[i-1]`).
    * Generates an ephemeral ECDH key pair, as defined in
      [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys), but instead
      of using a random value `r`, it will use : `r = KDF_1(0x19, K, 57)`.
@@ -2424,7 +2432,8 @@ participant:
   section. The derived ECDH public key will be the 'Public ECDH Key' for the
   message. The derived DH public key will be the 'Public DH Key' for the
   message.
-* Calculates the shared secret `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`.
+* Calculates the Mixed shared secret
+  `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`.
 * Derive new set of keys:
   `root_key[i], chain_key_s[i][j] = derive_ratchet_keys(sending,
   root_key[i-1], K)`.
@@ -2502,7 +2511,8 @@ sending one. For this, the participant:
 * Rotates the ECDH keys and brace key, see
   [Rotating ECDH Keys and Brace Key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
   section.
-* Calculates `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`.
+* Calculates the Mixed shared secret
+  `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`.
 * Derive new set of keys
   `root_key[i], chain_key_r[i][k] = derive_ratchet_keys(receiving, root_key[i-1], K)`.
 * Securely delete the previous root key (`root_key[i-1]`) and `K`.
@@ -2704,7 +2714,8 @@ Given a new DH Ratchet:
     this process, it will be the 'Public DH Key' for the message. If it is
     not created (meaning it is only a KDF of the previous one), then it will be
     empty.
-  * Calculate the shared secret `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`.
+  * Calculate the Mixed shared secret
+    `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`.
   * Derive new set of keys:
     `root_key[i], chain_key_s[i][j] = derive_ratchet_keys(sending, root_key[i-1], K)`.
   * Securely delete the previous root key (`root_key[i-1]`) and `K`.
