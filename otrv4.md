@@ -1340,14 +1340,15 @@ It is generated as follows:
 The inputs are the symmetric key (57 bytes, defined in the 'Public keys and
 fingerprints' section. It is referred as 'sym_key'), a flag 'f', which is a byte
 with value 0, a context 'c' (a value set by the signer and verifier of maximum
-255 bytes), which is an empty string for this protocol, and a message 'm'.
+255 bytes), which is an empty byte string for this protocol, and a message 'm'.
+The function 'len(x)' should be interpreted here as the number of bytes in the
+string 'x'.
 
 1.  Hash the 'sym_key': 'SHAKE-256(sym_key, 114)'. Let 'h' denote the resulting
     digest. Construct the secret key 'sk' from the first half of 'h' (57 bytes),
     and the corresponding public key 'H', as defined in the 'Public keys, Shared
     Prekeys and Fingerprints' section. Let 'prefix' denote the second half of
-    the 'h' (from 'h[57]' to 'h[113]'). The function 'len(x)' should be
-    interpreted here as the number of bytes in the string 'x'.
+    the 'h' (from 'h[57]' to 'h[113]').
 
 2.  Compute 'SHAKE-256("SigEd448" || byte(f) || byte(len(c)) || c || prefix ||
     m, 114)', where 'm' is the message to be signed. Let 'r' be the 114-byte
@@ -1546,7 +1547,9 @@ It is generated as follows:
 The inputs are the symmetric key (57 bytes, defined in the 'Public keys and
 fingerprints' section. It is referred as 'sym_key'), a flag 'f', which is a byte
 with value 0, a context 'c' (a value set by the signer and verifier of maximum
-255 bytes), which is an empty string for this protocol, and a message 'm'.
+255 bytes), which is an empty byte string for this protocol, and a message 'm'.
+The function 'len(x)' should be interpreted here as the number of bytes in the
+string 'x'.
 
 1.  Hash the 'sym_key': 'SHAKE-256(sym_key, 114)'. Let 'h' denote the resulting
     digest. Construct the secret key 'sk' from the first half of 'h' (57 bytes),
@@ -1554,9 +1557,9 @@ with value 0, a context 'c' (a value set by the signer and verifier of maximum
     Prekeys and Fingerprints' section. Let 'prefix' denote the second half of
     the 'h' (from 'h[57]' to 'h[113]').
 
-2.  Compute 'SHAKE-256("SigEd448" || f || len(c) || c || prefix || m, 114)',
-    where 'm' is the message to be signed. Let 'r' be the 114-byte resulting
-    digest and interpret it as a little-endian integer.
+2.  Compute 'SHAKE-256("SigEd448" || byte(f) || byte(len(c)) || c || prefix ||
+    m, 114)', where 'm' is the message to be signed. Let 'r' be the 114-byte
+    resulting digest and interpret it as a little-endian integer.
 
 3.  Multiply the scalar 'r' by the Base Point (G). For efficiency, do this by
     first reducing 'r' modulo 'q', the group order.  Let 'R' be the encoding
@@ -1587,8 +1590,8 @@ The Prekey Profile signature is verified as defined in RFC 8032
     'S'. Decode the public key 'H' as a point 'H_1'. If any of the
     decodings fail (including 'S' being out of range), the signature is invalid.
 
-2.  Compute 'SHAKE-256("SigEd448" || f || len(c) || c || R || H || m, 114)'.
-    Interpret the 114-byte digest as a little-endian integer 'k'.
+2.  Compute 'SHAKE-256("SigEd448" || byte(f) || byte(len(c)) || c || R || H ||
+    m, 114)'. Interpret the 114-byte digest as a little-endian integer 'k'.
 
 3.  Check the group equation '4 * (S * G) = (4 * R) + (4 * (k * H_1))'. It's is
     sufficient to check '(S * G) = R + (k * H_1)'.
