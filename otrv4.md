@@ -1736,7 +1736,8 @@ Bob will be initiating the DAKE with Alice.
       of using a random value `r`, it will use : `r = KDF_1(0x20 || K, 80)`.
       Securely replaces `our_dh` with the outputs.
     * Securely deletes `their_ecdh` and `their_dh`.
-7. At this point, the interactive DAKE is complete for Bob, but the double
+7. Sends Alice the Auth-I message (see [Auth-I message](#auth-i-message) section).
+8. At this point, the interactive DAKE is complete for Bob, but the double
    ratchet algorithm still needs to be correctly set up.
 
 **Alice:**
