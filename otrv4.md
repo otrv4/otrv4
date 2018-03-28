@@ -3552,6 +3552,7 @@ If the version is 4:
 
 * Otherwise:
   * Validate the data message:
+     * Verify that the message type is `0x03`.
      * Verify the MAC tag.
      * Check if the message version is allowed.
      * Check that the instance tag in the message is the instance tag you are
