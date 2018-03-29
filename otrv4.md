@@ -1447,7 +1447,6 @@ Prekey Profile (PREKEY-PROF):
   Public Shared Prekey (ED448-SHARED-PREKEY)
     The shared prekey used between different prekey messages.
     Corresponds to 'D'.
-  (optional) Prekey Transitional Signature (PREKEY-SIG)
   Prekey Profile Signature (PREKEY-EDDSA-SIG)
 ```
 
@@ -1459,31 +1458,6 @@ PREKEY-EDDSA-SIG signature (PREKEY-EDDSA-SIG):
   len byte unsigned value, little-endian
 ```
 
-`PREKEY-SIG` is the DSA Signature. It is the same signature as used in OTRv3.
-From the OTRv3 protocol, section "Public keys, signatures, and fingerprints",
-the format for a signature made by a OTRv3 DSA public key is as follows:
-
-```
-DSA signature (PREKEY-SIG):
-  (len is the length of the DSA public parameter q, which in current
-  implementations is 20 bytes)
-  len byte unsigned r, big-endian
-  len byte unsigned s, big-endian
-```
-
-As defined in OTRv3 spec, the OTRv3 DSA public key is defined as:
-
-```
-OTRv3 public authentication DSA key (PUBKEY):
-  Pubkey type (SHORT)
-    DSA public keys have type 0x0000
-  p (MPI)
-  q (MPI)
-  g (MPI)
-  y (MPI)
-(p,q,g,y) are the OTRv3 DSA public key parameters
-```
-
 ### Creating a Prekey Profile
 
 To create a Prekey Profile, assemble:
@@ -1491,23 +1465,16 @@ To create a Prekey Profile, assemble:
 1. Prekey Profile Expiration: Expiration date in standard Unix 64-bit format
    (seconds since the midnight starting Jan 1, 1970, UTC, ignoring leap
    seconds).
-4. Public Shared Prekey: An Ed448 Public Key used in multiple prekey messages.
+2. Public Shared Prekey: An Ed448 Public Key used in multiple prekey messages.
    It adds partial protection against an attacker that modifies the first flow
    of the non-interactive DAKE and that compromises the receivers long term
    secret key and their one-time ephemeral keys. For its generation, refer to
    [Public keys, Shared Prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
    section. This key must expire when the Prekey Profile expires.
-5. Profile Signature: The symmetric key, the flag `f` (set to zero, as defined
+3. Profile Signature: The symmetric key, the flag `f` (set to zero, as defined
    on RFC 8032 [\[9\]](#references)) and the empty context `c` are used to
    create signatures of the entire profile excluding the signature itself. The
    size of the signature is 114 bytes. For its generation, refer to the
-   [Create a Prekey Profile Signature](#create-a-prekey-profile-signature)
-   section.
-6. Transitional Signature (optional): A signature of the profile excluding the
-   Profile Signature and the user's OTRv3 DSA key. The Transitional Signature
-   enables parties that trust user's version 3 DSA key to trust the user's
-   profile in version 4. This is only used if the user supports versions 3
-   and 4. For more information, refer to the
    [Create a Prekey Profile Signature](#create-a-prekey-profile-signature)
    section.
 
@@ -1523,17 +1490,7 @@ that this can be configurable. A recommended value is one week.
 
 ### Create a Prekey Profile Signature
 
-If version 3 and 4 are supported, and the user has a pre-existing OTRv3 long
-term key:
-
-   * Concatenate `Prekey Profile Expiration || Public Shared Prekey`. Denote
-     this value `m`.
-   * Sign `m` with the user's OTRv3 DSA key. Denote this value
-     `Prekey Transitional Signature`.
-   * Sign `m || Prekey Transitional Signature`  with the symmetric key, as
-     stated below. Denote this value `Prekey Profile Signature`.
-
-If only version 4 is supported:
+For this:
 
    * Concatenate `Profile Expiration || Public Shared Prekey`.
      Denote this value `m`.
@@ -1612,9 +1569,7 @@ To validate a Prekey Profile, you must (in this order):
    See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
-3. If the `Transitional Signature` is present, verify its validity using the
-   OTRv3 DSA key.
-4. [Verify that the Prekey Profile signature is valid](#verify-a-prekey-profile-signature).
+3. [Verify that the Prekey Profile signature is valid](#verify-a-prekey-profile-signature).
 
 ## Online Conversation Initialization
 
