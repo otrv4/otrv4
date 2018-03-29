@@ -978,7 +978,8 @@ k_dh:
 
 brace_key:
   Either a hash of the shared DH key: 'KDF_1(0x02 || k_dh, 32)' (every third
-  DH ratchet) or a hash of the previuos 'brace_key: KDF_1(0x03 || brace_key, 32)'.
+  DH ratchet) or a hash of the previuos
+   'brace_key: KDF_1(0x03 || brace_key, 32)'.
 
 K_ecdh:
   The serialized ECDH shared secret computed from an ECDH exchange, serialized
@@ -1039,6 +1040,7 @@ To rotate the brace key:
     * Generate the new DH key pair and assign it to `our_dh = generateDH()`
       (by securely replacing the old value).
     * Calculate `k_dh = DH(our_dh.secret, their_dh)`.
+    * Securely delete `k_dh`.
     * Calculate a `brace_key = KDF_1(0x02 || k_dh, 32)`.
 
   * Otherwise:
@@ -2044,8 +2046,9 @@ Verify. Decrypt message if included
 7. Calculates the Mixed shared secret (`K`) and the SSID:
    * Gets `tmp_k` from the
      [Non-Interactive-Auth Message](#non-interactive-auth-message).
-   * Calculates the Mixed shared secret `K = KDF_1(0x04 || tmp_k, 64)`.
-     Securely deletes `tmp_k`.
+   * Calculates the Mixed shared secret
+     `K = KDF_1(0x04 || tmp_k || brace_key, 64)`. Securely deletes `tmp_k` and
+     `brace_key`.
    * Calculates the SSID from shared secret: `KDF_1(0x05 || K, 8)`.
 8. Initializes the double-ratchet:
    * Sets ratchet id `i` as 0.
@@ -2076,7 +2079,7 @@ Verify. Decrypt message if included
         Auth MAC = KDF_1(0x18 || auth_mac_k || t || (KDF_1(0x17 ||
                    attached encrypted ratchet id ||
                    attached encrypted message id || public ecdh key ||
-                   public dh key || nonce || encrypted message, 64)), 64)`.
+                   public dh key || nonce || encrypted message, 64), 64)`.
       ```
 
     * Otherwise, she computes:
@@ -2126,10 +2129,11 @@ Verify. Decrypt message if included
      Securely deletes `k_dh`.
 4. Calculates
    `tmp_k = KDF_1(0x12 || K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh)
-    || ECDH(sk_hb, their_ecdh) || brace_key, 64)`.
+    || ECDH(sk_hb, their_ecdh) || brace_key, 64)`. Securely deletes `K_ecdh`.
 5. Computes the Auth MAC key `auth_mac_k = KDF_1(0x14 || tmp_k, 64)`.
 6. Computes the Mixed shared secret and the SSID:
-   * `K = KDF_1(0x04 || tmp_k, 64)`. Securely deletes `tmp_k`.
+   * `K = KDF_1(0x04 || tmp_k || brace_key, 64)`. Securely deletes `tmp_k` and
+     `brace_key`.
    * Calculates the SSID from shared secret: `KDF_1(0x05 || K, 8)`.
 7. Initializes the double ratchet algorithm:
    * Sets ratchet id `i` as 0.
@@ -2262,9 +2266,10 @@ A valid Non-Interactive-Auth message is generated as follows:
    * public key `A`.
 4. Compute `K_ecdh = ECDH(x, their_ecdh)`.
 5. Compute `k_dh = DH(a, their_dh)` and `brace_key = KDF_1(0x02 || k_dh, 32)`.
+   Securely delete `k_dh`.
 6. Compute
    `tmp_k = KDF_1(0x12 || K_ecdh || ECDH(x, their_shared_prekey) ||
-    ECDH(x, H_b) || brace_key, 64)`.
+    ECDH(x, H_b) || brace_key, 64)`. Securely delete `K_ecdh`.
    This value is needed for the generation of the Mixed shared secret.
 7. Calculate the Auth MAC key `auth_mac_k = KDF_1(0x13 || tmp_k, 64)`.
 8. Compute
@@ -2434,7 +2439,7 @@ participant:
   message. The derived DH public key will be the 'Public DH Key' for the
   message.
 * Calculates the Mixed shared secret
-  `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`.
+  `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`. Securely deletes `K_ecdh`.
 * Derive new set of keys:
   `root_key[i], chain_key_s[i][j] = derive_ratchet_keys(sending,
   root_key[i-1], K)`.
@@ -2513,7 +2518,7 @@ sending one. For this, the participant:
   [Rotating ECDH Keys and Brace Key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
   section.
 * Calculates the Mixed shared secret
-  `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`.
+  `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`. Securely deletes `K_ecdh`.
 * Derive new set of keys
   `root_key[i], chain_key_r[i][k] = derive_ratchet_keys(receiving, root_key[i-1], K)`.
 * Securely delete the previous root key (`root_key[i-1]`) and `K`.
@@ -2716,7 +2721,7 @@ Given a new DH Ratchet:
     not created (meaning it is only a KDF of the previous one), then it will be
     empty.
   * Calculate the Mixed shared secret
-    `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`.
+    `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`. Securely deletes `K_ecdh`.
   * Derive new set of keys:
     `root_key[i], chain_key_s[i][j] = derive_ratchet_keys(sending, root_key[i-1], K)`.
   * Securely delete the previous root key (`root_key[i-1]`) and `K`.
@@ -2806,7 +2811,7 @@ This is done by:
               decrypted_message = XSalsa20_Dec(MKenc, nonce, m)
             ```
 
-          * Securely delete `MKenc` and `nonce`.
+          * Securely delete `MKenc`.
           * Add `MKmac` to the list `mac_keys_to_reveal`.
 
 * Given a new ratchet (the received `j` is equal to 0, the 'Public ECDH Key' is
@@ -2836,7 +2841,8 @@ This is done by:
     [Rotating ECDH Keys and Brace Key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
     section.
   * Set the received `pn` as `j`.
-  * Calculate `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`.
+  * Calculate `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`. Securely deletes
+    `K_ecdh`.
   * Derive new set of keys
     `root_key[i], chain_key_r[i][k] = derive_ratchet_keys(receiving, root_key[i-1], K)`.
   * Securely delete the previous root key (`root_key[i-1]`) and `K`.
@@ -2887,7 +2893,7 @@ This is done by:
       * If the message cannot be decrypted:
         * Reject the message.
 
-      * Securely delete `MKenc` and `nonce`.
+      * Securely delete `MKenc`.
       * Set `their_ecdh` as the 'Public ECDH key' from the message.
       * Set `their_dh` as the 'Public DH Key' from the message, if it is not
         empty.
