@@ -2132,6 +2132,12 @@ Verify. Decrypt message if attached.
      message. From this Prekey message:
      * Sets `Y` and `y` as `our_ecdh`: the ephemeral ECDH keys.
      * Sets `B` as  and `b` as `our_dh`: the ephemeral 3072-bit DH keys.
+   * Retrieves his corresponding User Profile from local storage, by
+     using the 'User Profile Indentifier' attached to the Non-Interactive-Auth
+     message.
+   * Retrieves his corresponding Prekey Profile from local storage, by
+     using the 'Prekey Profile Indentifier' attached to the Non-Interactive-Auth
+     message.
    * Validates Alice's User Profile and extracts `H_a` from it.
    * Picks a compatible version of OTR listed on Alice's profile, and follows
      the specification for this version. If the versions are incompatible, Bob
@@ -2292,7 +2298,11 @@ A valid Non-Interactive-Auth message is generated as follows:
    [Ring Signature Authentication](#ring-signature-authentication) for details.
 10. Attach the 'Prekey Message Identifier' that is stated in the retrieved
     Prekey message.
-11. Generate a 4-byte instance tag to use as the sender's instance tag.
+11. Attach the 'User Profile Message Identifier' that is stated in the retrieved
+    User Profile.
+12. Attach the 'Prekey Profile Message Identifier' that is stated in the
+    retrieved Prekey Profile.
+13. Generate a 4-byte instance tag to use as the sender's instance tag.
     Additional messages in this conversation will continue to use this tag as
     the sender's instance tag. Also, this tag is used to filter future received
     messages. Messages intended for this instance of the client will have this
@@ -2347,7 +2357,15 @@ Sigma (RING-SIG)
 
 Prekey Message Indentifier (INT)
   The 'Prekey Message Identifier' from the Prekey message that was retrieved
-  from the untrusted server.
+  from the untrusted Prekey Server, as part of the Prekey Ensemble.
+
+User Profile Indentifier (INT)
+  The 'User Profile Identifier' from the User Profile that was retrieved
+  from the untrusted Prekey Server, as part of the Prekey Ensemble.
+
+Prekey Profile Indentifier (INT)
+  The 'Prekey Profile Identifier' from the Prekey Profile that was retrieved
+  from the untrusted Prekey Server, as part of the Prekey Ensemble.
 
 Attached XZDH Encrypted Message (XZDH-ENCRYPTED-MSG)
   (optional: if an encrypted message is attached)
@@ -2423,28 +2441,31 @@ Details on how prekey ensambles may be received from an unstrusted Prekey Server
 are outside the scope of this protocol. This specification assumes that for
 every received User Profile and Prekey Profile, at least, one prekey message
 might arrive. However, this specification also assumes that none, one or more
-than one prekey ensambles may arrive. If the prekey server cannot return one
+than one prekey ensembles may arrive. If the prekey server cannot return one
 of the three values needed for a Prekey Ensemble, the non-interactive DAKE must
-wait until this value can be obtained.
+wait until this value can be obtained. Note that for every prekey message
+deliever, it should be deleted from storage on the untrusted Prekey Server.
+Nevertheless, the User Profile and the Prekey Profile should not be deleted
+until they are replaced.
 
 The following guide is meant to help implementers identify and remove invalid
 prekey ensambles.
 
-If the prekey server cannot return one of the three values needed for a Prekey
-Ensemble (a User Profile, a Prekey Profile and a prekey message):
+If the untrusted Prekey Server cannot return one of the three values needed for
+a Prekey Ensemble (a User Profile, a Prekey Profile and a prekey message):
 
 1. The non-interactive DAKE must wait until this value can be obtained.
 
-If one Prekey message is received:
+If one Prekey Ensemble is received:
 
 1. [Validate the Prekey Ensemble](#validating-prekey-ensembles).
 2. If the Prekey Ensemble is valid, decide whether to send a
    Non-Interactive-Auth message depending on whether the long term key in the
-   use profile is trusted or not.
+   User Profile is trusted or not.
 
 If many prekey ensembles are received:
 
-1. [Validate the Prekey ensembles](#validating-prekey-messages).
+1. [Validate the Prekey Ensembles](#validating-prekey-messages).
 2. Discard all invalid prekey ensembles.
 3. Discard all duplicate prekey ensembles in the list.
 4. If one Prekey Ensemble remains:
@@ -2546,9 +2567,10 @@ attaches it to the Non-Interactive-Auth message, which will look like this:
 
 ```
   (Protocol version || message type || sender's instance tag || receiver's
-   instance tag || Sender's User Profile || X || A || sigma || Auth MAC ||
+   instance tag || Sender's User Profile || X || A || sigma || Prekey Message
+   Indentifier || User Profile Indentifier || Prekey Profile Indentifier ||
   (attached message ratchet id || attached message id || public ECDH key ||
-   public DH key || encrypted message))
+   public DH key || encrypted message) || Auth MAC)
 ```
 
 ##### Decrypting the Message
