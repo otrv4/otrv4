@@ -1995,12 +1995,13 @@ sigma (RING-SIG)
 
 ## Offline Conversation Initialization
 
-To begin an offline conversation, a Prekey message is published to an untrusted
-server. This action is considered as the start of the non-interactive DAKE. A
-Prekey message is retrieved by the party attempting to send a message to the
-Prekey's publisher. This participant, then, replies with a Non-Interactive-Auth
-message (created with the prekey's values). This action is considered to
-complete the non-interactive DAKE.
+To begin an offline conversation, a Prekey message, a User Profile and a Prekey
+Profile are published to an untrusted Prekey Server. These three publications
+are defined as a Prekey Ensemble. This action is considered as the start of the
+non-interactive DAKE. A Prekey Ensemble is retrieved by the party attempting to
+send a message to the Prekey Ensemble's publisher. This participant, then,
+replies with a Non-Interactive-Auth message (created with the Prekey Ensemble's
+values). This action is considered to complete the non-interactive DAKE.
 
 ### Non-interactive Deniable Authenticated Key Exchange (DAKE)
 
@@ -2027,26 +2028,35 @@ section.
 ```
 Bob                            Server                               Alice
 ----------------------------------------------------------------------
-Publish a Prekey message ---->
+Publish a Prekey Ensemble ---->
 								....
-                                     <----- Request Prekey messages from Bob
-                                     Prekeys messages from Bob ------------->
+                                     <----- Request Prekey ensembles from Bob
+                                     Prekeys ensembles from Bob ------------->
       <---------------------------------------- Non-Interactive-Auth message
-Verify. Decrypt message if included
+Verify. Decrypt message if attached.
 ```
 
 **Bob:**
 
-1. Generates prekey messages, as defined in the
+1. Creates a User Profile, as defined in
+   [Creating a User Profile](#creating-a-user-profile) section.
+2. Creates a Prekey Profile, as defined in
+   [Creating a Prekey Profile](#creating-a-prekey-profile) section.
+3. Generates prekey messages, as defined in the
    [Prekey Message](#prekey-message) section.
-2. Publishes the prekey messages to an untrusted server.
+2. Publishes the User Profile, the Prekey Profile and the prekey messages to an
+   untrusted Prekey Server. Note that he needs to publish the User Profile and
+   Prekey Profile once for every long-term public key he locally has until the
+   profiles respectevely expire. He may upload new prekey messages at other
+   times. See [Publishing Prekey Ensembles](#publishind-prekey-ensembles)
+   section for details.
 
 **Alice:**
 
-1. Requests prekey messages from the untrusted server.
-2. For each Prekey message received from the server:
-   * [Validates each Prekey Message](#validating-prekey-messages).
-   * Picks a compatible version of OTR listed in Bob's profile.
+1. Requests prekey ensembles from the untrusted server.
+2. For each Prekey Ensemble received from the server:
+   * [Validates each Prekey Message](#validating-prekey-ensembles).
+   * Picks a compatible version of OTR listed in Bob's User Profile.
      If the versions are incompatible, Alice does not send any further
      messages.
    * Sets the received ECDH ephemeral public key `Y` as `their_ecdh`.
@@ -2183,53 +2193,44 @@ Verify. Decrypt message if included
        [When you send a Data Message](#when-you-send-a-data-message) section,
        and perform a new DH Ratchet.
 
-#### Prekey message
+#### Prekey Message
 
-This message is created and published to an untrusted prekey server to allow
-offline conversations. Each Prekey message contains the owner's User Profile
-(which contains a signed shared prekey) and two one-time use ephemeral public
-prekey values.
+This message is created and published to an untrusted Prekey Server to allow
+offline conversations. Each Prekey message contains two one-time use ephemeral
+public prekey values.
 
 A valid Prekey message is generated as follows:
 
-1. Create a User Profile, as defined in
-   [Creating a User Profile](#creating-a-user-profile) section.
-2. Create a Prekey Profile, as defined in
-   [Creating a Prekey Profile](#creating-a-prekey-profile) section.
-3. Generate a unique random id that is going to act as an identifier for this
+1. Generate a unique random id that is going to act as an identifier for this
    prekey message. It should be 4 byte unsigned value, big-endian (INT).
-4. Create the first one-time use prekey by generating the ephemeral ECDH key
+2. Create the first one-time use prekey by generating the ephemeral ECDH key
    pair, as defined in
    [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys):
-   * secret key `y` (57 bytes).
-   * public key `Y`.
-5. Create the second one-time use prekey by generating the ephemeral DH key
+    * secret key `y` (57 bytes).
+    * public key `Y`.
+3. Create the second one-time use prekey by generating the ephemeral DH key
    pair, as defined in
    [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys):
    * secret key `b` (80 bytes).
    * public key `B`.
-6. Generate a 4-byte instance tag to use as the sender's instance tag.
-   Additional messages in this conversation will continue to use this tag as the
-   sender's instance tag. Also, this tag is used to filter future received
-   messages. Messages intended for this instance of the client will have this
-   number as the receiver's instance tag.
+4. Use the same instance tag from the User Profile and Prekey Profile's
+   owner. Additional messages in this conversation will continue to use this
+   tag as the sender's instance tag. Also, this tag is used to filter future
+   received messages. Messages intended for this instance of the client will
+   have this number as the receiver's instance tag.
 
-To verify a Prekey message:
+To verify the Prekey message:
 
 1. Verify if the message type is `0x0F`.
 2. Verify that protocol's version of the message is `0x0004`.
-3. [Validate the User Profile](#validating-a-user-profile).
-4. [Validate the Prekey Profile](#validating-a-prekey-profile). Check that the
-   prekey profile' signature was generated by using the Ed448 long-term public
-   key stated in the User Profile.
-5. Check that the ECDH public key `Y` is on curve Ed448. See
+3. Check that the ECDH public key `Y` is on curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
-6. Verify that the DH public key `B` is from the correct group. See
+4. Verify that the DH public key `B` is from the correct group. See
    [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
    section for details.
 
-A Prekey is an OTRv4 message encoded as:
+A Prekey message is an OTRv4 message encoded as:
 
 ```
 Protocol version (SHORT)
@@ -2243,12 +2244,6 @@ Prekey Message Indentifier (INT)
 
 Prekey owner's instance tag (INT)
   The instance tag of the client that created the prekey.
-
-Prekey owner's User Profile (USER-PROF)
-  As described in the section "Creating a User Profile".
-
-Prekey owner's Prekey Profile (PREKEY-PROF)
-  As described in the section "Creating a Prekey Profile".
 
 Y Prekey owner's ECDH public key (POINT)
   First one-time use prekey value.
@@ -2367,66 +2362,100 @@ Auth MAC (MAC)
   also the MAC of that message.
 ```
 
-#### Publishing Prekey Messages
+#### Publishing Prekey Ensembles
+
+For starting a non-interactive conversation, a party must publish to an
+untrusted Prekey Server these values:
+
+- A User Profile (`USER-PROF`)
+- A Prekey Profile (`PREKEY-PROF`)
+- A set of prekey messages
+
+A party only needs to upload its User Profile and Prekey profile to the
+untrusted Prekey Server once for every long-term public key it locally has.
+This means that if Bob uploads 3 long term keys for OTRv4 to his client, Bob's
+client must publish 3 user profiles and 3 prekey profiles.
+
+However, this party may upload new prekey messages at other times, as defined in
+the [Publishing Prekey Messages](#publishing-prekey-messages) section.
+
+The party will also need to upload a new User Profile and a new Prekey Profile
+when they expire. These new values replace the old ones. Take into account,
+however, that user profiles and prekey profiles will have an overlapp period of
+extra validity, so they can be used when a delayed encrypted offline messages
+arrive. After its extra validity time ends, they must be securely deleted from
+storage.
+
+The combination of one User Profile, one Prekey Profile and one Prekey message
+is called a "Prekey Ensemble".
+
+Details on how to interact with an untrusted Prekey Server to publish these
+values are outside the scope of this protocol.
+
+##### Publishing Prekey Messages
 
 An OTRv4 client must generate a user's prekey messages and publish them to a
 prekey server. Implementers are expected to create their own policy dictating
-how often their clients upload prekey messages to the prekey server. Prekey
-messages expire when their User Profile and/or the Prekey Profile expires. Thus
-new prekey messages should be published to the prekey server before they expire
-to keep valid prekey messages available. In addition, one Prekey message should
-be published for every long term key that belongs to a participant. This means
-that if Bob uploads 3 long term keys for OTRv4 to his client, Bob's client must
-publish 3 prekey messages.
+how often their clients upload prekey messages to the prekey server.
 
-Details on how to interact with a prekey server to publish messages are outside
-the scope of this protocol.
+#### Validating Prekey Ensembles
 
-#### Validating Prekey Messages
+Use the following checks to validate a Prekey Ensamble. If any of the checks
+fail, ignore the ensamble:
 
-Use the following checks to validate a Prekey message. If any of the checks
-fail, ignore the message:
-
-  1. Check that the User Profile is not expired.
-  2. Check that the Prekey Profile is not expired.
-  3. Check that the OTR version of the prekey message matches one of the
-     versions signed in the User Profile contained in the prekey message.
-  4. Check if the User Profile's version is supported by the receiver.
+  1. Check that all the instance tags on the Prekey Ensemble's values are the
+     same.
+  2. [Validate the User Profile](#validating-a-user-profile).
+  3. [Validate the Prekey Profile](#validating-a-prekey-profile).
+  4. Check that the Prekey Profile is signed by the same long-term public key
+     stated on it and on the User Profile.
+  5. Verify the Prekey message as stated on its [section](prekey-message).
+  6. Check that the OTR version of the prekey message matches one of the
+     versions signed in the User Profile contained in the Prekey Ensemble.
+  7. Check if the User Profile's version is supported by the receiver.
 
 Note that these steps can be done in anticipation of sending a
 Non-Interactive-Auth message.
 
-#### Receiving Prekey Messages
+#### Receiving Prekey Ensembles
 
-Details on how prekey messages may be received from a prekey server are outside
-the scope of this protocol. This specification assumes that none, one, or more
-than one prekey messages may arrive. If the prekey server cannot return any
-prekey messages, the non-interactive DAKE must wait until one can be obtained.
+Details on how prekey ensambles may be received from an unstrusted Prekey Server
+are outside the scope of this protocol. This specification assumes that for
+every received User Profile and Prekey Profile, at least, one prekey message
+might arrive. However, this specification also assumes that none, one or more
+than one prekey ensambles may arrive. If the prekey server cannot return one
+of the three values needed for a Prekey Ensemble, the non-interactive DAKE must
+wait until this value can be obtained.
 
 The following guide is meant to help implementers identify and remove invalid
-prekey messages.
+prekey ensambles.
+
+If the prekey server cannot return one of the three values needed for a Prekey
+Ensemble (a User Profile, a Prekey Profile and a prekey message):
+
+1. The non-interactive DAKE must wait until this value can be obtained.
 
 If one Prekey message is received:
 
-1. [Validate the Prekey message](#validating-prekey-messages).
-2. If the Prekey message is valid, decide whether to send a
+1. [Validate the Prekey Ensemble](#validating-prekey-ensembles).
+2. If the Prekey Ensemble is valid, decide whether to send a
    Non-Interactive-Auth message depending on whether the long term key in the
    use profile is trusted or not.
 
-If many prekey messages are received:
+If many prekey ensembles are received:
 
-1. [Validate the Prekey messages](#validating-prekey-messages).
-2. Discard all invalid prekey messages.
-3. Discard all duplicate prekey messages in the list.
-4. If one Prekey message remains:
-    * Decide whether to send a message using this Prekey message if the long
-      term key within the use profile is trusted or not.
-5. If multiple valid prekey messages remain:
+1. [Validate the Prekey ensembles](#validating-prekey-messages).
+2. Discard all invalid prekey ensembles.
+3. Discard all duplicate prekey ensembles in the list.
+4. If one Prekey Ensemble remains:
+    * Decide whether to send a message using this Prekey Ensemble if the
+      long-term key within the User Profile is trusted or not.
+5. If multiple valid prekey ensembles remain:
     * If there are keys that are untrusted and trusted in the list of messages,
-      decide whether to only use messages that contain trusted long term keys.
-    * If there are several instance tags in the list of prekey messages,
+      decide whether to only use messages that contain trusted long-term keys.
+    * If there are several instance tags in the list of prekey ensembles,
       decide which instance tags to send messages to.
-    * If there are multiple prekey messages per instance tag, decide whether
+    * If there are multiple prekey ensembles per instance tag, decide whether
       to send multiple messages to the same instance tag.
 
 ### Encrypted Messages in DAKE's Messages
