@@ -942,7 +942,7 @@ variable values are replaced:
 * When you complete the [Interactive DAKE](#interactive-dake-overview) by
   receiving and validating an [Auth-I Message](#auth-i-message).
 * When you start a new [Non-interactive DAKE](#non-interactive-dake-overview) by
-  publishing or retrieving a [Prekey message](#prekey-message).
+  publishing or retrieving a Prekey Ensemble.
 * When you complete a [Non-interactive DAKE](#non-interactive-dake-overview) by
   sending a [Non-interactive-Auth Message](#non-interactive-auth-message).
 * When you complete a [Non-interactive DAKE](#non-interactive-dake-overview) by
@@ -2431,8 +2431,8 @@ how often their clients upload prekey messages to the prekey server.
 
 #### Validating Prekey Ensembles
 
-Use the following checks to validate a Prekey Ensamble. If any of the checks
-fail, ignore the ensamble:
+Use the following checks to validate a Prekey Ensemble. If any of the checks
+fail, ignore the Prekey Ensemble:
 
   1. Check that all the instance tags on the Prekey Ensemble's values are the
      same.
@@ -2450,7 +2450,7 @@ Non-Interactive-Auth message.
 
 #### Receiving Prekey Ensembles
 
-Details on how prekey ensambles may be received from an unstrusted Prekey Server
+Details on how prekey ensembles may be received from an untrusted Prekey Server
 are outside the scope of this protocol. This specification assumes that for
 every received User Profile and Prekey Profile, at least, one prekey message
 might arrive. However, this specification also assumes that none, one or more
@@ -2462,7 +2462,7 @@ Nevertheless, the User Profile and the Prekey Profile should not be deleted
 until they are replaced when expired.
 
 The following guide is meant to help implementers identify and remove invalid
-prekey ensambles.
+prekey ensembles.
 
 If the untrusted Prekey Server cannot return one of the three values needed for
 a Prekey Ensemble (a User Profile, a Prekey Profile and a prekey message):
@@ -3291,7 +3291,7 @@ please refer to previous OTR protocol document):
   * Identity Message
   * Auth-R Message
   * Auth-I Message
-  * Prekey Message
+  * Prekey Ensemble
   * Non-Interactive-Auth Message
   * Data Message
 
@@ -3305,7 +3305,7 @@ For version 4 messages, someone receiving a message with a recipient instance
 tag specified that does not equal their own, should discard the message and
 optionally warn the user. The exception here is the Identity Message where the
 receiver's instance tag may be 0, indicating that no particular instance is
-specified, and the Prekey Message that does not include this field.
+specified, and the Prekey Ensemble, whose values do not include this field.
 
 #### User requests to start an OTR Conversation
 
