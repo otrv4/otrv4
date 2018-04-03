@@ -2131,15 +2131,25 @@ Verify. Decrypt message if attached.
 1. Receives the Non-Interactive-Auth message from Alice:
    * Retrieves his corresponding Prekey message from local storage, by
      using the 'Prekey Indentifier' attached to the Non-Interactive-Auth
-     message. From this Prekey message:
-     * Sets `Y` and `y` as `our_ecdh`: the ephemeral ECDH keys.
-     * Sets `B` as  and `b` as `our_dh`: the ephemeral 3072-bit DH keys.
+     message.
+     * If this 'Prekey Identifier' does not correspond to any Prekey message on
+       local storage:
+       * Aborts the DAKE.
+     * Otherwise:
+       * Sets `Y` and `y` as `our_ecdh`: the ephemeral ECDH keys.
+       * Sets `B` as  and `b` as `our_dh`: the ephemeral 3072-bit DH keys.
    * Retrieves his corresponding User Profile from local storage, by
      using the 'User Profile Indentifier' attached to the Non-Interactive-Auth
      message.
+     * If this 'User Profile Identifier' does not correspond to any User Profile
+       on local storage:
+       * Aborts the DAKE.
    * Retrieves his corresponding Prekey Profile from local storage, by
      using the 'Prekey Profile Indentifier' attached to the Non-Interactive-Auth
      message.
+     * If this 'Prekey Profile Identifier' does not correspond to any Prekey
+       Profile on local storage:
+       * Aborts the DAKE.
    * Validates Alice's User Profile and extracts `H_a` from it.
    * Picks a compatible version of OTR listed on Alice's profile, and follows
      the specification for this version. If the versions are incompatible, Bob
