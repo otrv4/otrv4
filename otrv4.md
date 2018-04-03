@@ -173,9 +173,9 @@ with strong forward secrecy.
 Alice                      Untrusted Prekey Server         Bob
 --------------------------------------------------------------------------------
                                     (<--------------------- Pre-conversation: Creates
-                                                            and sends a Prekey Message)
+                                                            and sends a Prekey Ensemble)
 Retrieves Bob's  ----------------->
-Prekey Message
+Prekey Ensemble
 
 Establishes Conversation  ------------------------------->
 with XZDH and sends the
@@ -186,11 +186,12 @@ Exchanges Data Messages <---------------------------------->  Exchanges Data Mes
 ```
 
 The conversation can begin when one participant retrieves the other's
-participant Prekey message from a prekey server. Prior to the start of the
-conversation, this Prekey message would have had to be uploaded by the other
-participant's client to a server. This have to be done so other participants,
-like Alice, can send messages to the other participant, like Bob, while they are
-offline.
+participant Prekey Ensemble from an untrusted Prekey Server (consisting of a
+User Profile, a Prekey Profile and a set of prekey messages). Prior to the start
+of the conversation, this Prekey Ensemble would have had to be uploaded by the
+other participant's client to a server. This have to be done so other
+participants, like Alice, can send messages to the other participant, like Bob,
+while they are offline.
 
 ## Assumptions
 
@@ -1995,13 +1996,14 @@ sigma (RING-SIG)
 
 ## Offline Conversation Initialization
 
-To begin an offline conversation, a Prekey message, a User Profile and a Prekey
-Profile are published to an untrusted Prekey Server. These three publications
-are defined as a Prekey Ensemble. This action is considered as the start of the
-non-interactive DAKE. A Prekey Ensemble is retrieved by the party attempting to
-send a message to the Prekey Ensemble's publisher. This participant, then,
-replies with a Non-Interactive-Auth message (created with the Prekey Ensemble's
-values). This action is considered to complete the non-interactive DAKE.
+To begin an offline conversation, a set of prekey messages, a User Profile and a
+Prekey Profile are published to an untrusted Prekey Server. These three
+publications are defined as a Prekey Ensemble. This action is considered as the
+start of the non-interactive DAKE. A Prekey Ensemble is retrieved by the party
+attempting to send a message to the Prekey Ensemble's publisher. This
+participant, then, replies with a Non-Interactive-Auth message (created with the
+Prekey Ensemble's values). This action is considered to complete the
+non-interactive DAKE.
 
 ### Non-interactive Deniable Authenticated Key Exchange (DAKE)
 
@@ -2047,15 +2049,15 @@ Verify. Decrypt message if attached.
 2. Publishes the User Profile, the Prekey Profile and the prekey messages to an
    untrusted Prekey Server. Note that he needs to publish the User Profile and
    Prekey Profile once for every long-term public key he locally has until the
-   profiles respectevely expire. He may upload new prekey messages at other
-   times. See [Publishing Prekey Ensembles](#publishind-prekey-ensembles)
+   profiles respectively expire. He may upload new prekey messages at other
+   times. See [Publishing Prekey Ensembles](#publishing-prekey-ensembles)
    section for details.
 
 **Alice:**
 
 1. Requests prekey ensembles from the untrusted server.
 2. For each Prekey Ensemble received from the server:
-   * [Validates each Prekey Message](#validating-prekey-ensembles).
+   * [Validates each Prekey Ensemble](#validating-prekey-ensembles).
    * Picks a compatible version of OTR listed in Bob's User Profile.
      If the versions are incompatible, Alice does not send any further
      messages.
@@ -2382,14 +2384,14 @@ Auth MAC (MAC)
 
 #### Publishing Prekey Ensembles
 
-For starting a non-interactive conversation, a party must publish to an
+For starting a non-interactive conversation, an user must publish to an
 untrusted Prekey Server these values:
 
 - A User Profile (`USER-PROF`)
 - A Prekey Profile (`PREKEY-PROF`)
 - A set of prekey messages
 
-A party only needs to upload its User Profile and Prekey profile to the
+An user only needs to upload its User Profile and Prekey profile to the
 untrusted Prekey Server once for every long-term public key it locally has.
 This means that if Bob uploads 3 long term keys for OTRv4 to his client, Bob's
 client must publish 3 user profiles and 3 prekey profiles.
@@ -2401,7 +2403,7 @@ The party will also need to upload a new User Profile and a new Prekey Profile
 when they expire. These new values replace the old ones. Take into account,
 however, that user profiles and prekey profiles will have an overlapp period of
 extra validity, so they can be used when a delayed encrypted offline messages
-arrive. After its extra validity time ends, they must be securely deleted from
+arrive. After this extra validity time ends, they must be securely deleted from
 storage.
 
 The combination of one User Profile, one Prekey Profile and one Prekey message
@@ -2444,9 +2446,9 @@ might arrive. However, this specification also assumes that none, one or more
 than one prekey ensembles may arrive. If the prekey server cannot return one
 of the three values needed for a Prekey Ensemble, the non-interactive DAKE must
 wait until this value can be obtained. Note that for every prekey message
-deliever, it should be deleted from storage on the untrusted Prekey Server.
+retrieved, it should be deleted from storage on the untrusted Prekey Server.
 Nevertheless, the User Profile and the Prekey Profile should not be deleted
-until they are replaced.
+until they are replaced when expired.
 
 The following guide is meant to help implementers identify and remove invalid
 prekey ensambles.
