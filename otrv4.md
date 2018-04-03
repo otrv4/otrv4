@@ -289,7 +289,7 @@ initiator of the protocol cannot force the shared secret to take on a specific
 value. It is also computationally infeasible for the responder to select a
 specific shared secret. Additionally, both DAKEs in this specification are
 provable secure, meaning that both of them come with a rigorous logical
-argument.
+argument as proof.
 
 OTRv4 does not take advantage of quantum resistant algorithms. There are several
 reasons for this. Mainly, OTRv4 aims to be a protocol that is easy to implement
@@ -710,11 +710,11 @@ comparison may be used. The fingerprint is generated as:
 
 Clients include instance tags in all OTRv4 messages. Instance tags are 4-byte
 values that are intended to be persistent. If the same client is logged into the
-same account from multiple locations, the intention is that the client will have
-different instance tags at each location. OTRv4 messages (fragmented and
-unfragmented) include the source and destination instance tags. If a client
-receives a message that lists a destination instance tag different from its own,
-the client should discard the message.
+same account from multiple locations/devices, the intention is that the client
+will have different instance tags at each location/device. OTRv4 messages
+(fragmented and unfragmented) include the source and destination instance tags.
+If a client receives a message that lists a destination instance tag different
+from its own, the client should discard the message.
 
 The smallest valid instance tag is `0x00000100`. It is appropriate to set the
 destination instance tag to `0` when an actual destination instance tag is not
@@ -1225,12 +1225,12 @@ publicly expired. A recommended amount of time for this extra validity is of
 It is also important to note that the absence of a User Profile is not a proof
 that a user does not support OTRv4.
 
-Note that a User Profile is generated per client and device basis. Users are not
-expected to manage user profiles (theirs or from others) in a client. As a
-consequence, clients are discouraged to allow importing or exporting of user
-profiles. Also, if a user has multiple clients/devices concurrently in use, it
-is expected that they have multiple user profiles simultaneously published and
-valid.
+Note that a User Profile is generated per device/client location basis. Users
+are not expected to manage user profiles (theirs or from others) in a client.
+As a consequence, clients are discouraged to allow importing or exporting of
+user profiles. Also, if a user has multiple devices/client locations
+concurrently in use, it is expected that they have multiple user profiles
+simultaneously published and valid.
 
 ### User Profile Data Type
 
@@ -1478,12 +1478,12 @@ to still be able to read these messages, the Prekey Profile can still be valid
 even if it has publicly expired. A recommended amount of time for this extra
 validity is of 1 day.
 
-Note that a Prekey Profile is generated per client and device basis. Users are
-not expected to manage prekey profiles (theirs or from others) in a client. As a
-consequence, clients are discouraged to allow importing or exporting of prekey
-profiles. Also, if a user has multiple clients/devices concurrently in use, it
-is expected that they have multiple prekey profiles simultaneously published and
-valid.
+Note that a Prekey Profile is generated per device/client location basis. Users
+are not expected to manage prekey profiles (theirs or from others) in a client.
+As a consequence, clients are discouraged to allow importing or exporting of
+prekey profiles. Also, if a user has multiple devices/client locations
+concurrently in use, it is expected that they have multiple prekey profiles
+simultaneously published and valid.
 
 ### Prekey Profile Data Type
 
