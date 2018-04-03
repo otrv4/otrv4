@@ -1218,9 +1218,9 @@ non-interactive conversations as a party, Alice, can send offline encrypted
 messages using a non-expired User Profile. This User Profile, nevertheless,
 could have had expired prior to the moment in which the other party, Bob,
 receives the offline encrypted messages. To allow this party, Bob, to still be
-able to read these messages, the User Profile can still be valid even if it has
-publicly expired. A recommended amount of time for this extra validity is of
-1 day.
+able to read these messages, the User Profile can still be locally valid even
+if it has publicly expired. A recommended amount of time for this extra validity
+is of 1 day.
 
 It is also important to note that the absence of a User Profile is not a proof
 that a user does not support OTRv4.
@@ -1242,7 +1242,7 @@ User Profile (USER-PROF):
   User Profile's Identifier (INT)
     A User Profile id used for local retrieval.
   User Profile owner's instance tag (INT)
-    The instance tag of the client that created the User Profile.
+    The instance tag of the client/device that created the User Profile.
   Ed448 public key (ED448-PUBKEY)
     Corresponds to 'H'.
   Versions (DATA)
@@ -1259,9 +1259,9 @@ EDDSA signature (USER-EDDSA-SIG):
   len byte unsigned value, little-endian
 ```
 
-`SIG` is the DSA Signature. It is the same signature as used in OTRv3.
-From the OTRv3 protocol, section "Public keys, signatures, and fingerprints",
-the format for a signature made by a OTRv3 DSA public key is as follows:
+`SIG` is the DSA Signature. It is the same signature as used in OTRv3. From the
+OTRv3 protocol, section "Public keys, signatures, and fingerprints", the format
+for a signature made by a OTRv3 DSA public key is as follows:
 
 ```
 DSA signature (USER-SIG):
@@ -1447,7 +1447,7 @@ To validate a User Profile, you must (in this order):
 
 ## Prekey Profile
 
-OTRv4 introduces prekey profiles. The Prekey Profile contains a User Profile's
+OTRv4 introduces prekey profiles. The Prekey Profile contains a Prekey Profile's
 Identifier, the User Profile owner's instance tag, the Ed448 long term
 public key, a shared prekey, a prekey profile expiration date and a signature of
 all these. It is signed by the Ed448 long-term public key.
@@ -1495,7 +1495,7 @@ Prekey Profile (PREKEY-PROF):
   Prekey Profile's Identifier (INT)
     A Prekey Profile id used for local retrieval.
   Prekey Profile owner's instance tag (INT)
-    The instance tag of the client that created the Prekey Profile.
+    The instance tag of the client/device that created the Prekey Profile.
   Ed448 public key (ED448-PUBKEY)
     Corresponds to 'H'.
   Prekey Profile Expiration (PREKEY-PROF-EXP)
@@ -1519,7 +1519,6 @@ To create a Prekey Profile, generate:
 
 1. A unique random id that is going to act as an identifier for this User
    Profile. It should be 4 byte unsigned value, big-endian.
-
 
 To create a Prekey Profile, assemble:
 
