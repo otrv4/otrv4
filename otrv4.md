@@ -1197,14 +1197,24 @@ client may publish profiles to a server pool (similar to a keyserver pool,
 where PGP public keys can be published). Another client may use XMPP's publish-
 subscribe extension (XEP-0060 [\[8\]](#references)) for publishing profiles. A
 protocol for publication must be defined, but the definition is out of scope
-for this specification. When using OTRv4 in OTRv3-compatible mode and
-OTRv4-standalone mode, notice that the User Profile has to be published and
-stored in the same untrusted Prekey Server used to store prekey messages.
+for this specification. For sending offline messages, notice that the User
+Profile has to be published and stored in the same untrusted Prekey Server used
+to store prekey messages, so the Prekey Ensemble can be assembled.
 
 When the User Profile expires, it should be updated. Client implementations
-should determine the frequency of user's profile expiration and renewal. The
+should determine the frequency of the User's Profile expiration and renewal. The
 recommended expiration time is one week. Note, though, that the long term public
 key has its own expiration time.
+
+Nevertheless, for a short amount of time (decided by the client) a User Profile
+can still be locally valid even if it has publicly expired. This is needed for
+non-interactive conversations as a party, Alice, can send offline encrypted
+messages using a non-expired User Profile. This User Profile, nevertheless,
+could have had expired prior to the moment in which the other party, Bob,
+receives the offline encrypted messages. To allow this party, Bob, to still be
+able to read these messages, the User Profile can still be valid even if it has
+publicly expired. A recommended amount of time for this extra validity is of
+1 day.
 
 It is also important to note that the absence of a User Profile is not a proof
 that a user does not support OTRv4.
@@ -1444,11 +1454,23 @@ There are two instances of the Prekey Profile that should be generated. One is
 used for publication in an untrusted prekey server, so parties can use it
 to send offline messages. The other should be stored locally to be used in the
 Non-Interactive DAKE. Notice that the Prekey Profile has to be published and
-stored in the same untrusted Prekey Server used to store prekey messages.
+stored in the same untrusted Prekey Server used to store prekey messages. This
+is needed in order to generate the Prekey Ensemble needed for non-interactive
+conversations.
 
 When the Prekey Profile expires, it should be updated. Client implementations
 should determine the frequency of the prekey's profile expiration and renewal.
 The recommended expiration time is one week.
+
+Nevertheless, for a short amount of time (decided by the client) a Prekey
+Profile can still be locally valid even if it has publicly expired. This is
+needed for non-interactive conversations as a party, Alice, can send offline
+encrypted messages using a non-expired Prekey Profile. This Prekey Profile,
+nevertheless, could have had expired prior to the moment in which the other
+party, Bob, receives the offline encrypted messages. To allow this party, Bob,
+to still be able to read these messages, the Prekey Profile can still be valid
+even if it has publicly expired. A recommended amount of time for this extra
+validity is of 1 day.
 
 Note that a Prekey Profile is generated per client and device basis. Users are
 not expected to manage prekey profiles (theirs or from others) in a client. As a
