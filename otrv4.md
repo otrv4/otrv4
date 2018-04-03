@@ -174,9 +174,13 @@ with strong forward secrecy.
 Alice                      Untrusted Prekey Server         Bob
 --------------------------------------------------------------------------------
                                     (<--------------------- Pre-conversation: Creates
-                                                            and sends a Prekey Ensemble)
+                                                            and sends a Prekey Ensemble: creates
+                                                            a User Profile, Prekey Profile and a set of
+                                                            prekey messages)
 Retrieves Bob's  ----------------->
-Prekey Ensemble
+Prekey Ensemble: asks for
+a User Profile, Prekey
+Profile and a prekey message
 
 Establishes Conversation  ------------------------------->
 with XZDH and sends the
