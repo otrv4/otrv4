@@ -2439,7 +2439,7 @@ fail, ignore the ensamble:
   3. [Validate the Prekey Profile](#validating-a-prekey-profile).
   4. Check that the Prekey Profile is signed by the same long-term public key
      stated on it and on the User Profile.
-  5. Verify the Prekey message as stated on its [section](prekey-message).
+  5. Verify the Prekey message as stated on its [section](#prekey-message).
   6. Check that the OTR version of the prekey message matches one of the
      versions signed in the User Profile contained in the Prekey Ensemble.
   7. Check if the User Profile's version is supported by the receiver.
@@ -2477,7 +2477,7 @@ If one Prekey Ensemble is received:
 
 If many prekey ensembles are received:
 
-1. [Validate the Prekey Ensembles](#validating-prekey-messages).
+1. [Validate the Prekey Ensembles](#validating-prekey-ensembles).
 2. Discard all invalid prekey ensembles.
 3. Discard all duplicate prekey ensembles in the list.
 4. If one Prekey Ensemble remains:
