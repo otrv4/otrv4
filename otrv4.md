@@ -1180,7 +1180,8 @@ an attacker.
 
 ## User Profile
 
-OTRv4 introduces user profiles. The User Profile contains the Ed448 long term
+OTRv4 introduces user profiles. The User Profile contains a User Profile's
+Identifier, the User Profile owner's instance tag, the Ed448 long term
 public key, information about supported versions, a profile expiration date, a
 signature of all these, and an optional transitional signature.
 
@@ -1196,7 +1197,9 @@ client may publish profiles to a server pool (similar to a keyserver pool,
 where PGP public keys can be published). Another client may use XMPP's publish-
 subscribe extension (XEP-0060 [\[8\]](#references)) for publishing profiles. A
 protocol for publication must be defined, but the definition is out of scope
-for this specification.
+for this specification. When using OTRv4 in OTRv3-compatible mode and
+OTRv4-standalone mode, notice that the User Profile has to be published and
+stored in the same untrusted Prekey Server used to store prekey messages.
 
 When the User Profile expires, it should be updated. Client implementations
 should determine the frequency of user's profile expiration and renewal. The
@@ -1220,6 +1223,10 @@ Profile Expiration (USER-PROF-EXP):
   8 byte signed value, big-endian
 
 User Profile (USER-PROF):
+  User Profile's Identifier (INT)
+    A User Profile id used for local retrieval.
+  User Profile owner's instance tag (INT)
+    The instance tag of the client that created the User Profile.
   Ed448 public key (ED448-PUBKEY)
     Corresponds to 'H'.
   Versions (DATA)
@@ -1263,29 +1270,39 @@ OTRv3 public authentication DSA key (PUBKEY):
 
 ### Creating a User Profile
 
-To create a User Profile, assemble:
+To create a User Profile, generate:
 
-1. User's Ed448 long-term public key.
-2. Versions: a string corresponding to the user's supported OTR versions.
+1. A unique random id that is going to act as an identifier for this User
+   Profile. It should be 4 byte unsigned value, big-endian.
+2. A 4-byte instance tag to use as the User Profile owner's instance tag.
+
+Then, assemble:
+
+1. User Profile's identifier.
+2. User Profile owner's instance tag.
+3. User's Ed448 long-term public key.
+4. Versions: a string corresponding to the user's supported OTR versions.
    A User Profile can advertise multiple OTR versions. The format is described
    under the section [Establishing Versions](#establishing-versions) below.
-3. Profile Expiration: Expiration date in standard Unix 64-bit format
+5. Profile Expiration: Expiration date in standard Unix 64-bit format
    (seconds since the midnight starting Jan 1, 1970, UTC, ignoring leap
    seconds).
-4. Profile Signature: The symmetric key, the flag `f` (set to zero, as defined
+6. Profile Signature: The symmetric key, the flag `f` (set to zero, as defined
    on RFC 8032 [\[9\]](#references)) and the empty context `c` are used to
    create signatures of the entire profile excluding the signature itself. The
    size of the signature is 114 bytes. For its generation, refer to
    [Create a User Profile Signature](#create-a-user-profile-signature) section.
-5. Transitional Signature (optional): A signature of the profile excluding the
+7. Transitional Signature (optional): A signature of the profile excluding the
    Profile Signature and the user's OTRv3 DSA key. The Transitional Signature
    enables parties that trust user's version 3 DSA key to trust the user's
    profile in version 4. This is only used if the user supports versions 3
    and 4. For more information, refer to
    [Create a User Profile Signature](#create-a-user-profile-signature) section.
 
-After the profile is created, it must be published in a public place, like an
-untrusted server, as defined above.
+After the profile is created, it must be published in a public place.
+When using OTRv4 in OTRv3-compatible mode and OTRv4-standalone mode, notice that
+the User Profile has to be published and stored in the untrusted Prekey Server
+used to store prekey messages.
 
 ### Establishing Versions
 
@@ -1319,8 +1336,9 @@ configurable. A recommended value is one week.
 If version 3 and 4 are supported and the user has a pre-existing OTRv3 long
 term key:
 
-   * Concatenate `Ed448 public key || Versions || Profile Expiration || Public
-     Shared Prekey`. Denote this value `m`.
+   * Concatenate `User Profile's Identifier ||
+     User Profile owner's instance tag ||Ed448 public key || Versions ||
+     Profile Expiration || Public Shared Prekey`. Denote this value `m`.
    * Sign `m` with the user's OTRv3 DSA key. Denote this value
      `Transitional Signature`.
    * Sign `m || Transitional Signature`  with the symmetric key, as stated
@@ -1328,8 +1346,9 @@ term key:
 
 If only version 4 is supported:
 
-   * Concatenate `Ed448 public key || Versions || Profile Expiration || Public
-     Shared Prekey`. Denote this value `m`.
+   * Concatenate `User Profile's Identifier ||
+     User Profile owner's instance tag || Ed448 public key || Versions ||
+     Profile Expiration || Public Shared Prekey`. Denote this value `m`.
    * Sign `m` with the symmetric key, as stated below. Denote this value
      `Profile Signature`.
 
@@ -1412,10 +1431,10 @@ To validate a User Profile, you must (in this order):
 
 ## Prekey Profile
 
-OTRv4 introduces prekey profiles. The Prekey Profile contains a shared prekey, a
-prekey profile expiration date, a signature of all these, and an optional
-transitional signature. It is signed by the Ed448 long-term public key and/or
-the OTRv3 DSA key.
+OTRv4 introduces prekey profiles. The Prekey Profile contains a User Profile's
+Identifier, the User Profile owner's instance tag, the Ed448 long term
+public key, a shared prekey, a prekey profile expiration date and a signature of
+all these. It is signed by the Ed448 long-term public key.
 
 A prekey profile is needed for it's signed shared prekey, which is used for
 offline conversations. It is changed on a regular basis as defined by the
@@ -1423,7 +1442,9 @@ expiration date of the prekey profile.
 
 There are two instances of the Prekey Profile that should be generated. One is
 used for publication in an untrusted prekey server, so parties can use it
-to send offline messages. The other should be stored locally.
+to send offline messages. The other should be stored locally to be used in the
+Non-Interactive DAKE. Notice that the Prekey Profile has to be published and
+stored in the same untrusted Prekey Server used to store prekey messages.
 
 When the Prekey Profile expires, it should be updated. Client implementations
 should determine the frequency of the prekey's profile expiration and renewal.
@@ -1443,6 +1464,12 @@ Prekey Profile Expiration (PREKEY-PROF-EXP):
   8 byte signed value, big-endian
 
 Prekey Profile (PREKEY-PROF):
+  Prekey Profile's Identifier (INT)
+    A Prekey Profile id used for local retrieval.
+  Prekey Profile owner's instance tag (INT)
+    The instance tag of the client that created the Prekey Profile.
+  Ed448 public key (ED448-PUBKEY)
+    Corresponds to 'H'.
   Prekey Profile Expiration (PREKEY-PROF-EXP)
   Public Shared Prekey (ED448-SHARED-PREKEY)
     The shared prekey used between different prekey messages.
@@ -1460,26 +1487,35 @@ PREKEY-EDDSA-SIG signature (PREKEY-EDDSA-SIG):
 
 ### Creating a Prekey Profile
 
+To create a Prekey Profile, generate:
+
+1. A unique random id that is going to act as an identifier for this User
+   Profile. It should be 4 byte unsigned value, big-endian.
+
+
 To create a Prekey Profile, assemble:
 
-1. Prekey Profile Expiration: Expiration date in standard Unix 64-bit format
+1. The Prekey Profile's identifier.
+2. The same User Profile owner's instance tag. Denote this value Prekey Profile
+   owner's instance tag.
+3. Prekey Profile Expiration: Expiration date in standard Unix 64-bit format
    (seconds since the midnight starting Jan 1, 1970, UTC, ignoring leap
    seconds).
-2. Public Shared Prekey: An Ed448 Public Key used in multiple prekey messages.
+4. Public Shared Prekey: An Ed448 Public Key used in multiple prekey messages.
    It adds partial protection against an attacker that modifies the first flow
    of the non-interactive DAKE and that compromises the receivers long term
    secret key and their one-time ephemeral keys. For its generation, refer to
    [Public keys, Shared Prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
    section. This key must expire when the Prekey Profile expires.
-3. Profile Signature: The symmetric key, the flag `f` (set to zero, as defined
+5. Profile Signature: The symmetric key, the flag `f` (set to zero, as defined
    on RFC 8032 [\[9\]](#references)) and the empty context `c` are used to
    create signatures of the entire profile excluding the signature itself. The
    size of the signature is 114 bytes. For its generation, refer to the
    [Create a Prekey Profile Signature](#create-a-prekey-profile-signature)
    section.
 
-After the prekey profile is created, it must be published in an untrusted
-server.
+After the prekey profile is created, it must be published in the untrusted
+Prekey Server.
 
 ### Prekey Profile Expiration and Renewal
 
@@ -1492,7 +1528,9 @@ that this can be configurable. A recommended value is one week.
 
 For this:
 
-   * Concatenate `Profile Expiration || Public Shared Prekey`.
+   * Concatenate `Prekey Profile's Identifier ||
+     Prekey Profile's owner's instance tag || Ed448 public key ||
+     Prekey Profile Expiration || Public Shared Prekey`.
      Denote this value `m`.
    * Sign `m` with the symmetric key, as stated below. Denote this value
      `Profile Signature`.
