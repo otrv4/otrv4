@@ -3,12 +3,12 @@
 ### Context
 
 The non-interactive DAKE below is based on the XZDH protocol. It starts when the
-Responder requests the Initiator's Prekey ensemble from an untrusted Prekey
+Responder requests the Initiator's Prekey Ensemble from an untrusted Prekey
 Server. The Initiator's long-term public key should be verified by the
 Responder. The Responder then generates their ephemeral keys and derives a
 Mixed shared secret. These are used to start the Double Ratchet Algorithm and
 send an encrypted data messages with the final message of the non-interactive
-DAKE, called the Non-Interactive Auth message. Subsequent encrypted messages
+DAKE, called the Non-Interactive-Auth message. Subsequent encrypted messages
 can be sent after this.
 
 #### Long-lived secret ephemeral key material
@@ -16,20 +16,24 @@ can be sent after this.
 In OTRv4, the window of key compromise is equivalent to how long it takes for
 the double ratchet to refresh the ephemeral key material (2 ratchets, including
 the first compromised ratchet) and how long a prekey message remains unused
-before the User Profile and/or the Prekey Profile becomes expired. We recommend
-expiration of the User Profile and the Prekey Profile to be a week long, so the
-window of key compromise will be one week. This is done as with offline
-conversations, participants may not receive messages or reply to them for days,
-weeks, or months at a time. As a result, the window of compromise for these kind
-of conversations can be very long if no limitations are set. We set an
-expiration date to reduce this window of compromise.
+before the Prekey Profile becomes expired. We recommend expiration of the User
+Profile and the Prekey Profile to be a week long, so the window of key
+compromise will be one week. This is done as with offline conversations,
+participants may not receive messages or reply to them for days, weeks, or
+months at a time. As a result, the window of compromise for these kind of
+conversations can be very long if no limitations are set. We set an expiration
+date to reduce this window of compromise.
 
 Primarily, there are two attacks that we want to mitigate:
 
-1. Initiator uploads a prekey. Responder replies, but the adversary intercepts
-   and drops the message. The adversary compromises Initiator's prekey secret,
-   and Initiator's identity secret key. The adversary can now retroactively
-   decrypt the captured initial message.
+1. An active adversary modifies the first flow from the Initiator to use an
+   adversarially controlled prekey's ephemeral key, captures and drops the
+   response from the Responder, and then compromises the Initiator's long-term
+   secret key. The Initiator will never see the message, and the adversary will
+   be able to decrypt it. Moreover, since long-term keys are usually meant to
+   last for years, a long time may pass between the Responder sending the
+   message and the adversary compromising the Initiator’s key. This attack
+   requires a powerful adversary.
 
 2. Initiator and Responder complete an exchange and engage in a conversation.
    At some point, the adversary captures and drops some messages to (for
@@ -37,12 +41,11 @@ Primarily, there are two attacks that we want to mitigate:
    secrets, revealing the message keys corresponding to the dropped messages.
    The adversary can now retroactively decrypt the captured messages.
 
-The first attack is mitigated through the use of XZDH. XZDH uses signed prekeys
-with a relatively short expiration time. As a result, an attacker would need to
-compromise the secret part of the signed prekey before this expiration time
-along with the identity secret key in order to gain access to the message.
-The signed prekey in the context of the OTRv4 protocol is the signed shared
-prekey.
+The first attack is mitigated through the use of XZDH. XZDH uses signed shared
+prekeys with a relatively short expiration time. As a result, an attacker would
+need to compromise the secret part of the signed shared prekey before this
+expiration time along with the long-term secret key in order to be able to
+decrypt the message.
 
 The second attack is mitigated in two ways. Keys for dropped messages or
 skipped messages are kept for a period of time. If Alice, for example, receives
@@ -117,9 +120,9 @@ These prekey messages are uploaded to the untrusted Prekey Server along with
 a User Profile and a Prekey Profile. These three values create what is defined
 as a Prekey Ensemble.
 
-The public part of the shared prekey and its signature, which are essential to
+The public part of the Shared Prekey and its signature, which are essential to
 implementing XZDH, will be included in the published Prekey Profile. The
-signature of the shared prekey must be published in order to be deniable as it
+signature of the Shared Prekey must be published in order to be deniable as it
 is created using the participant's long term keys.
 
 A Non-interactive Auth Message has the format:
@@ -182,41 +185,40 @@ Prekey messages contain version information. Each client is expected to upload
 one prekey per supported version of OTR which uses non-interactive
 communication. This is only relevant for OTRv4 and subsequent versions.
 
-#### Publishing and retrieving prekey messages from a prekey server
+#### Publishing and retrieving prekey emsembles from a prekey server
 
 Describing the details of interactions between OTRv4 clients and a Prekey
 Server are outside the scope of this specification. Implementers are expected
 to create their own policy dictating how often their clients upload Prekey
-messages to the prekey server. Nevertheless, clients are expected to upload
+ensembles to the prekey server. Nevertheless, clients are expected to upload
 User Profile and Prekey Profile when the old ones are expired. Thus, new user
 profiles and prekey profiles should be published to the untrusted Prekey Server
 before they expire to keep valid values for the Prekey Ensemble available.
 
 A User Profile and Prekey Profile should be published for every long-term public
-key that belongs to a user. This means that if Bob has a client which only
-supports OTRv4 and he uploads three long term keys for OTRv4 to his client,
-Bob's client must publish 3 user profiles and 3 prekey profiles. Also, if Bob
-uploads two long term keys for OTRv4 and two long term keys for OTRvX (a future
-version of OTR) which also implements the non-interactive DAKE, Bob will upload
-4 profiles respectively.
+key that belongs to a user for this device. This means that if Bob has a client
+which only supports OTRv4 and he uploads three long term keys for OTRv4 to his
+client, Bob's client must publish 3 user profiles and 3 prekey profiles. Also,
+if Bob uploads two long term keys for OTRv4 and two long term keys for OTRvX (a
+future version of OTR) which also implements the non-interactive DAKE, Bob will
+upload 4 profiles respectively.
 
-#### Requesting prekey messages from a prekey server
+#### Requesting prekey ensembles from a Prekey Server
 
 When a client requests prekey ensembles from a Prekey Server, many prekey
 ensembles may be returned. For example, when Alice requests prekey ensembles for
 Bob, any of the following may happen:
 
 1. Alice receives two prekey ensembles for Bob because Bob uses two OTRv4
-   clients, one for his phone and one for his laptop (or the same client in
-   different devices). Each client maintains their own set of prekey ensembles
-   on the same Prekey Server. These two prekey ensembles will be different by
-   instance tag (meaning there will be two user profiles, two prekey profiles
-   and two prekey message with different instance tags). This scenario can,
-   therefore, follow different paths:
+   clients, one for his phone and one for his laptop. Each client maintains
+   their own set of prekey ensembles on the same Prekey Server. These two prekey
+   ensembles will be different by instance tag (meaning there will be two user
+   profiles, two prekey profiles and two prekey message with different instance
+   tags). This scenario can, therefore, follow different paths:
 
     1. The two prekey ensembles may have user profiles created with different
        long-term keys and two prekey profiles signed by those different keys
-       respectevely. At this point, if Alice trusts only one key, she may decide
+       respectively. At this point, if Alice trusts only one key, she may decide
        to send a message only to the client with the key she trusts. If Alice
        trusts both keys, she may decide to send a message to one or both. If
        Alice does not trust either key, she may decide not to send a message
@@ -232,12 +234,13 @@ Bob, any of the following may happen:
    the same instance tag (the prekey profiles are signed with the corresponding
    long-term key stated on the user profiles). This can only validly happen if
    Bob's client supports two different versions of OTR that use prekey ensembles
-   or if the long-term key used in each ensemble's User Profile is different.
+   or if the long-term public key used in each ensemble's User Profile is
+   different.
 
-    1. If the versions and the long-term keys used in the ensembles are the
-       same, and they are compatible with Alice's version, one of the prekey
-       ensembles must be invalid, but Alice cannot know which. She should not
-       send a message using either prekey ensemble.
+    1. If the versions and the long-term keys used in the User Profiles
+       and prekey messages are the same, and they are compatible with Alice's
+       version, one of the prekey ensembles must be invalid, but Alice cannot
+       know which. She should not send a message using either prekey ensemble.
     2. If the prekey ensemble versions are the same and the version is supported
        by Alice, but the long-term keys are different from each other, Alice
        should look at whether she trusts the keys. If she trusts both, she may
@@ -331,20 +334,20 @@ The machine has the following states:
 All states, except the finished state, may receive the second message of a
 non-interactive DAKE, called the Non-Interactive-Auth.
 
-#### The prekey server runs out of prekey messages
+#### The prekey server runs out of prekey ensembles
 
-When the server runs out of prekey messages, OTRv4 expects client
-implementations to wait until a prekey message can be transmitted before
-continuing with a non-interactive DAKE.
+When the server runs out of prekey ensembles (or one of its values), OTRv4
+expects client implementations to wait until a prekey ensemble can be
+retrieved before continuing with a non-interactive DAKE.
 
 This is purposely different from what we expect from protocols like Signal. In
-the Signal protocol, when a prekey server runs out of messages, a default
+the Signal protocol, when a Prekey Server runs out of messages, a default
 message is used until new messages are uploaded. The consequences to
 participation deniability with this technique are currently undefined and thus
 risky.
 
-By waiting for the server to send prekey messages, OTRv4 will be subject to DoS
-attacks when a server is compromised or the network is undermined to return a
-"no prekey message available" response from the server. This is preferred over
-the possible compromise of multiple non-interactive DAKEs due to the reuse of a
-prekey message.
+By waiting for the Prekey Server to send prekey ensembles, OTRv4 will be subject
+to DoS attacks when a server is compromised or the network is undermined to
+return a "No prekey message available" response from the server. This is
+preferred over the possible compromise of multiple non-interactive DAKEs due to
+the reuse of a prekey ensemble.

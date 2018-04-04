@@ -4,10 +4,10 @@
 
 In order to send an offline message, the Responder needs to obtain cryptographic
 keys from the Initiator so they can engage in a non-interactive DAKE. These
-cryptographic keys are distributed as prekey messages, which are made public in
-a untrusted pre-key server.
+cryptographic keys are distributed as prekey ensembles, which are made public in
+a untrusted Prekey Server.
 
-A participant is identified by some identity in the underlying network (be it
+A participant is identified by some identity in the underlying network (like
 alice@xmpp.org for the XMPP network, or +99 1234-5678 for the SMS network).
 We assume this is everything each participant is required to know about who they
 want to send a message to.
