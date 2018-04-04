@@ -2032,9 +2032,11 @@ section.
 #### Non-Interactive DAKE Overview
 
 ```
-Bob                            Server                               Alice
+Bob                            Prekey Server                           Alice
 ----------------------------------------------------------------------
-Publish a Prekey Ensemble ---->
+Publish a Prekey Ensemble:
+a User Profile, a Prekey Profile
+and a set of prekey messages         ----->
 								....
                                      <----- Request Prekey ensembles from Bob
                                      Prekeys ensembles from Bob ------------->
@@ -2265,7 +2267,7 @@ Prekey Message Indentifier (INT)
   A prekey message id used for local retrieval.
 
 Prekey owner's instance tag (INT)
-  The instance tag of the client that created the prekey.
+  The instance tag of the client/device that created the prekey.
 
 Y Prekey owner's ECDH public key (POINT)
   First one-time use prekey value.
@@ -2406,17 +2408,18 @@ untrusted Prekey Server these values:
 - A set of prekey messages
 
 An user only needs to upload its User Profile and Prekey profile to the
-untrusted Prekey Server once for every long-term public key it locally has.
-This means that if Bob uploads 3 long term keys for OTRv4 to his client, Bob's
-client must publish 3 user profiles and 3 prekey profiles.
+untrusted Prekey Server once for every long-term public key it locally has,
+until this two profiles respectively expire. This means that if Bob uploads 3
+long term keys for OTRv4 to his client, Bob's client must publish 3 user
+profiles and 3 prekey profiles.
 
 However, this party may upload new prekey messages at other times, as defined in
 the [Publishing Prekey Messages](#publishing-prekey-messages) section.
 
 The party will also need to upload a new User Profile and a new Prekey Profile
 when they expire. These new values replace the old ones. Take into account,
-however, that user profiles and prekey profiles will have an overlapp period of
-extra validity, so they can be used when a delayed encrypted offline messages
+however, that user profiles and prekey profiles will have an overlap period of
+extra validity, so they can be used when delayed encrypted offline messages
 arrive. After this extra validity time ends, they must be securely deleted from
 storage.
 
@@ -2428,9 +2431,11 @@ values are outside the scope of this protocol.
 
 ##### Publishing Prekey Messages
 
-An OTRv4 client must generate a user's prekey messages and publish them to a
-prekey server. Implementers are expected to create their own policy dictating
-how often their clients upload prekey messages to the prekey server.
+An OTRv4 client must generate a user's prekey messages and publish them to an
+untrusted Prekey Server. Implementers are expected to create their own policy
+dictating how often their clients upload prekey messages to the Prekey Server.
+Nevertheless, prekey messages should be published to the Prekey Server once the
+server's store of prekeys messages gets low.
 
 #### Validating Prekey Ensembles
 
@@ -2468,7 +2473,7 @@ The following guide is meant to help implementers identify and remove invalid
 prekey ensembles.
 
 If the untrusted Prekey Server cannot return one of the three values needed for
-a Prekey Ensemble (a User Profile, a Prekey Profile and a prekey message):
+a Prekey Ensemble (a User Profile, a Prekey Profile and a Prekey message):
 
 1. The non-interactive DAKE must wait until this value can be obtained.
 
@@ -2477,7 +2482,7 @@ If one Prekey Ensemble is received:
 1. [Validate the Prekey Ensemble](#validating-prekey-ensembles).
 2. If the Prekey Ensemble is valid, decide whether to send a
    Non-Interactive-Auth message depending on whether the long term key in the
-   User Profile is trusted or not.
+   User Profile is trusted or not. This decision is optional.
 
 If many prekey ensembles are received:
 
@@ -2486,10 +2491,12 @@ If many prekey ensembles are received:
 3. Discard all duplicate prekey ensembles in the list.
 4. If one Prekey Ensemble remains:
     * Decide whether to send a message using this Prekey Ensemble if the
-      long-term key within the User Profile is trusted or not.
+      long-term key within the User Profile is trusted or not. This decision is
+      optional.
 5. If multiple valid prekey ensembles remain:
     * If there are keys that are untrusted and trusted in the list of messages,
       decide whether to only use messages that contain trusted long-term keys.
+      This decision is optional.
     * If there are several instance tags in the list of prekey ensembles,
       decide which instance tags to send messages to.
     * If there are multiple prekey ensembles per instance tag, decide whether
