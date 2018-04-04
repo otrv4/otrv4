@@ -15,7 +15,7 @@ with OTRv3.
 An implementation of the OTRv4 protocol in an Interactive-Only mode must be
 compliant with the OTRv4-Standalone mode, with exceptions described below.
 
-Ignore the sections:
+Ignore this whole sections:
 
 - "Prekey Profile"
 - "Offline Conversation Initialization".
