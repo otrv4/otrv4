@@ -153,15 +153,15 @@ A (MPI)
 Sigma (RING-SIG)
   The 'RING-SIG' proof of authentication value.
 
-Prekey Message Indentifier (INT)
+Prekey Message Identifier (INT)
   The 'Prekey Message Identifier' from the Prekey message that was retrieved
   from the untrusted Prekey Server, as part of the Prekey Ensemble.
 
-User Profile Indentifier (INT)
+User Profile Identifier (INT)
   The 'User Profile Identifier' from the User Profile that was retrieved
   from the untrusted Prekey Server, as part of the Prekey Ensemble.
 
-Prekey Profile Indentifier (INT)
+Prekey Profile Identifier (INT)
   The 'Prekey Profile Identifier' from the Prekey Profile that was retrieved
   from the untrusted Prekey Server, as part of the Prekey Ensemble.
 
