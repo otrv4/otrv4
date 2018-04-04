@@ -2592,7 +2592,7 @@ attaches it to the Non-Interactive-Auth message, which will look like this:
   (Protocol version || message type || sender's instance tag || receiver's
    instance tag || Sender's User Profile || X || A || sigma || Prekey Message
    Indentifier || User Profile Indentifier || Prekey Profile Indentifier ||
-  (attached message ratchet id || attached message id || public ECDH key ||
+   (attached message ratchet id || attached message id || public ECDH key ||
    public DH key || encrypted message) || Auth MAC)
 ```
 
@@ -3290,8 +3290,8 @@ The following sections outline the actions that the protocol should implement.
 This assumes that the client is initialized with the allowed versions
 (3 and/or 4).
 
-There are fourteen events an OTRv4 client must handle (for version 3 messages,
-please refer to previous OTR protocol document):
+There are thirteen events an OTRv4 client must handle (for version 3 messages,
+please refer to the previous OTR protocol document):
 
 * Received messages:
   * Plaintext without the whitespace tag
@@ -3301,7 +3301,6 @@ please refer to previous OTR protocol document):
   * Identity Message
   * Auth-R Message
   * Auth-I Message
-  * Prekey Ensemble
   * Non-Interactive-Auth Message
   * Data Message
 
