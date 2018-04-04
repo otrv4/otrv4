@@ -213,7 +213,7 @@ attacks.
 
 OTRv4 is the version 4 of the cryptographic protocol OTR. It provides end-to-end
 encryption, which is a system by which information is sent over a network in
-such a way that only the recipient and sender can read the it.
+such a way that only the recipient and sender can read it.
 
 OTRv4 provides trust establishment (user verification) by fingerprint
 verification or by the ability to perform the Socialist Millionaires Protocol
