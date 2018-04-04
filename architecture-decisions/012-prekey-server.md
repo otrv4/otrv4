@@ -17,107 +17,129 @@ want to send a message to.
 Having in mind a client-server architecture, a prekey server instance MUST offer
 the following services to its users:
 
-- prekey message retrieval
-- prekey message publication
+- Receive user profiles, prekey profiles and a set of prekey messages, and store
+  them. Inform that this operation have failed or has been successful.
+- Deliver prekey ensembles previously stored.
+- Inform the publisher about how many prekey messages are stored for them.
+- Inform the retriever when there are no prekey ensembles (or any of its values)
+  from an specific party.
 
-To publish prekey messages, a participant deniably authenticates itself to the
-server through a interactive DAKE, and sends prekeys to be stored and published
-by the server. The server will associate the prekeys received to the identity
-used by the sender to identify itself to the server.
+To publish user profiles, prekey profiles and a set of prekey messages, a
+participant deniably authenticates itself to the Prekey Server through a
+interactive DAKE, and sends those values to be stored and published by the
+Prekey Server. The Prekey Server will associate the prekeys received to the
+identity used by the sender to identify itself to the Prekey Server.
 
-To obtain prekey messages, a participant asks the server for prekey messages
-from a particular identity, and the server delivers one prekey message for each
-instance tag it knows about from that particular identity.
+To obtain prekey ensembles, a participant asks the Prekey Server for prekey
+ensembles from a particular identity, and the server delivers one prekey ensemble
+for each instance tag and long-term public key it knows about from that
+particular identity.
 
 ### Notation
 
-We use the following notation to represent a prekey message stored on a server:
+We use the following notation to represent a the three values stored on a
+Prekey Server for an identity:
 
-      (pre-key-msg, instance-tag, identity)
+```
+  (Identity || User Profile)
+```
 
-### How to serve a prekey message publication
+```
+  (Identity || Prekey Profile)
+```
 
-1. The Initiator starts a interactive DAKE with the server.
-2. The Initiator sends multiple prekey messages to be published by the server.
-3. The server stores all valid (non-expired) prekey messages and associates them
-   with the publisher's identity.
+```
+  (Identity || prekey message)
+```
+
+### How to publish user profiles, prekey profiles and prekey messages
+
+1. The Initiator starts a interactive DAKE with the Prekey Server.
+2. The Initiator sends user profiles, prekey profiles and a set prekey messages
+   to be published by the server.
+3. The server stores all valid (non-expired) user profiles and prekey profiles,
+   and all prekey messages, and associates them with the publisher's identity.
 
 ### Prekey message retrieval
 
 #### SCENARIO 1
 
-The server MUST deliver only ONE prekey message when multiple are available for
-the same identity.
+The server must deliver only one prekey ensemble when multiple prekey messages
+are available for the same identity and the same instance tag.
 
-    GIVEN the server has the following prekey messages stored:
+    Given the server has the following values stored:
 
-      (pre-key-msg1, instance-tag1, identity1)
-      (pre-key-msg2, instance-tag1, identity1)
+      (Identity 0x01 || User Profile (instance tag 0x01))
+      (Identity 0x01 || Prekey Profile (instance tag 0x01))
+      (Identity 0x01 || Prekey message 1 (instance tag 0x01))
+      (Identity 0x01 || Prekey message 2 (instance tag 0x01))
 
-    WHEN I ask a prekey for identity1
-    THEN the server should send me any ONE of the following prekey messages:
+    When a participant asks the Prekey Server for Indentity 0x01,
+    Then the Prekey server should send any one of the following prekey
+    messages, along with the User Profile and Prekey Profile:
 
-      pre-key-msg1
-      pre-key-msg2
-
+      (Identity 0x01 || User Profile (instance tag 0x01) || Prekey Profile
+      (instance tag 0x01) || Prekey message 1 (instance tag 0x01))
 
 #### SCENARIO 2
 
-The server MUST deliver additional prekey messages when multiple instance tags
+The server must deliver additional prekey ensembles when multiple instance tags
 are found for the same identity.
 
-    GIVEN the server has the following prekey messages stored:
+    Given the server has the following prekey messages stored:
 
-      (pre-key-msg1, instance-tag1, identity1)
-      (pre-key-msg2, instance-tag1, identity1)
-      (pre-key-msg3, instance-tag2, identity1)
-      (pre-key-msg4, instance-tag2, identity1)
+      (Identity 0x01 || User Profile (instance tag 0x01))
+      (Identity 0x01 || User Profile (instance tag 0x02))
+      (Identity 0x01 || Prekey Profile (instance tag 0x01))
+      (Identity 0x01 || Prekey Profile (instance tag 0x02))
+      (Identity 0x01 || Prekey message 1 (instance tag 0x01))
+      (Identity 0x01 || Prekey message 2 (instance tag 0x02))
 
-    WHEN I ask a prekey for identity1
-    THEN the server should send me any ONE of the following prekey messages:
+    When a participant asks a Prekey Server for Identity 0x01,
+    Then the Prekey Server should send two prekey ensembles:
 
-      pre-key-msg1
-      pre-key-msg2
+      (Identity 0x01 || User Profile (instance tag 0x01) || Prekey Profile
+      (instance tag 0x01) || Prekey message 1 (instance tag 0x01))
 
-    AND the server should send me any ONE of the following prekey messages:
+      (Identity 0x01 || User Profile (instance tag 0x02) || Prekey Profile
+      (instance tag 0x02) || Prekey message 1 (instance tag 0x02))
 
-      pre-key-msg3
-      pre-key-msg4
+#### Receiving prekey ensembles
 
-#### Receiving prekey messages
-
-Clients should not trust the server will always return valid prekey messages,
-and must validate them by themselves. If a client can find any usable prekey
-messages from the server's response, it may perform additional requests.
+Clients should not trust that the Prekey Server will always return valid Prekey
+ensembles, and must validate them by themselves. If a client can find any usable
+prekey ensembles (or any of its values) from the Prekey Server's response, it
+may perform additional requests.
 
 #### Receiving multiple prekey messages
 
-Clients should group all received prekey messages by instance tag, and choose
-from each group only the one with the latest expiry time. This must be done to
-avoid sending multiple offline messages to the same instance tag.
+Clients should group all received prekey ensembles by instance tag, and, from
+these groups by long-term public key. They should choose from each group only
+the one with the latest expiry time. This must be done to avoid sending multiple
+offline messages to the same instance tag.
 
-If there's still multiple prekey messages after filtering out duplicate
+If there's still multiple prekey ensembles after filtering out duplicate
 instance tags, the client needs to decide which client the offline message
 should be sent to, or even send to all of them. Clients may need to inform
-the user before sending the offline message to multiple instance tags, or ask
-the user about which from the many possible actions should be taken.
+the user before sending the offline encrypted messages to multiple instance
+tags, or ask the user about which from the many possible actions should be
+taken.
 
-If the client decides to send the same offline message to multiple instances
-tags it also needs to decide to either keep multiple conversations established
-with the INITIATOR (one for each received pre-key message) or always terminate
-the conversation after the offline message is sent (which drains prekeys from
-every group.
+If the client decides to send offline encrypted messages to multiple instances
+tags, it also needs to decide to either keep multiple conversations established
+with the publisher (one for each received Prekey Ensemble) or always terminate
+the conversation after the offline message is sent.
 
-Another problem with the step is that once an attacker impersonates the identity
-to the server (someone steals your XMPP password), they can simply publish a new
-User Profile (with a new long-term key, with new prekey messages) and guarantee
-they will receive encrypted copies of every "first" message the Responder sends.
+Notice that an attacker that impersonates the publisher's identity to the
+Prekey Server (someone can, for example, steal the XMPP password) can publish a
+new user profile (with a new long-term public key), prekey profile and prekey
+messages, and guarantee they will receive copies of every encrypted offline
+message sent by the retriever. Notice, although, that an attacker can do this
+until the profiles expire.
 
 ### Consequences
 
-The server may implement measures to prevent DoS attacks, for example, limit the
-frequency of requests and/or the number of prekey messages accepted.
-
-There is no protection when the server sends expired or already used prekey
-messages or when it does not send prekey messages for every instance tag it
-knows about.
+The Prekey Server can be subject to DoS attacks. As it is untrusted, it can,
+furthermore, send expired prekey ensembles, or send incomplete values or not
+send anything at all to a retriever. Clients are expected to keep this in mind
+while working with the Prekey Server.
