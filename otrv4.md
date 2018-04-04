@@ -221,9 +221,9 @@ verification or by the ability to perform the Socialist Millionaires Protocol
 secret values held by two parties are equal without revealing the value
 itself.
 
-In the interactive DAKE, although access to one participant's private long term
+In the interactive DAKE, although access to one participant's private long-term
 key is required for authentication, both participants can deny having used
-their private long term keys. A forged transcript of the DAKE can be produced at
+their private long-term keys. A forged transcript of the DAKE can be produced at
 any time by anyone who knows the long-term public keys of both alleged
 participants. This capability is called offline deniability because no
 transcript provides evidence of a past key exchange, as this could have been
@@ -1187,7 +1187,7 @@ an attacker.
 ## User Profile
 
 OTRv4 introduces user profiles. The User Profile contains a User Profile's
-Identifier, the User Profile owner's instance tag, the Ed448 long term
+Identifier, the User Profile owner's instance tag, the Ed448 long-term
 public key, information about supported versions, a profile expiration date, a
 signature of all these, and an optional transitional signature.
 
@@ -1209,7 +1209,7 @@ to store prekey messages, so the Prekey Ensemble can be assembled.
 
 When the User Profile expires, it should be updated. Client implementations
 should determine the frequency of the User's Profile expiration and renewal. The
-recommended expiration time is one week. Note, though, that the long term public
+recommended expiration time is one week. Note, though, that the long-term public
 key has its own expiration time.
 
 Nevertheless, for a short amount of time (decided by the client) a User Profile
@@ -1349,8 +1349,8 @@ configurable. A recommended value is one week.
 
 ### Create a User Profile Signature
 
-If version 3 and 4 are supported and the user has a pre-existing OTRv3 long
-term key:
+If version 3 and 4 are supported and the user has a pre-existing OTRv3
+long-term key:
 
    * Concatenate `User Profile's Identifier ||
      User Profile owner's instance tag ||Ed448 public key || Versions ||
@@ -1448,7 +1448,7 @@ To validate a User Profile, you must (in this order):
 ## Prekey Profile
 
 OTRv4 introduces prekey profiles. The Prekey Profile contains a Prekey Profile's
-Identifier, the User Profile owner's instance tag, the Ed448 long term
+Identifier, the User Profile owner's instance tag, the Ed448 long-term
 public key, a shared prekey, a prekey profile expiration date and a signature of
 all these. It is signed by the Ed448 long-term public key.
 
@@ -1530,7 +1530,7 @@ To create a Prekey Profile, assemble:
    seconds).
 4. Public Shared Prekey: An Ed448 Public Key used in multiple prekey messages.
    It adds partial protection against an attacker that modifies the first flow
-   of the non-interactive DAKE and that compromises the receivers long term
+   of the non-interactive DAKE and that compromises the receivers long-term
    secret key and their one-time ephemeral keys. For its generation, refer to
    [Public keys, Shared Prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
    section. This key must expire when the Prekey Profile expires.
@@ -2410,7 +2410,7 @@ untrusted Prekey Server these values:
 An user only needs to upload its User Profile and Prekey profile to the
 untrusted Prekey Server once for every long-term public key it locally has,
 until this two profiles respectively expire. This means that if Bob uploads 3
-long term keys for OTRv4 to his client, Bob's client must publish 3 user
+long-term keys for OTRv4 to his client, Bob's client must publish 3 user
 profiles and 3 prekey profiles.
 
 However, this party may upload new prekey messages at other times, as defined in
@@ -2481,7 +2481,7 @@ If one Prekey Ensemble is received:
 
 1. [Validate the Prekey Ensemble](#validating-prekey-ensembles).
 2. If the Prekey Ensemble is valid, decide whether to send a
-   Non-Interactive-Auth message depending on whether the long term key in the
+   Non-Interactive-Auth message depending on whether the long-term key in the
    User Profile is trusted or not. This decision is optional.
 
 If many prekey ensembles are received:
@@ -4229,7 +4229,7 @@ Read and Forge Data Message
 Forge DAKE and Session Keys
   Any participant of an OTR conversation may forge a DAKE with another
   participant as long as they have their User Profile. This function will
-  take the User Profile and the secret long term key of one participant, and
+  take the User Profile and the secret long-term key of one participant, and
   the User Profile of the other. It will return a DAKE transcript between
   the two parties. The participant's private key is required since it is used
   to authenticate the key exchange, but the resulting transcript is created
