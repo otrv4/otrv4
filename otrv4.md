@@ -171,22 +171,22 @@ with strong forward secrecy.
 ### Conversation started by a Non-Interactive DAKE
 
 ```
-Alice                      Untrusted Prekey Server         Bob
+Alice                            Untrusted Prekey Server    Bob
 --------------------------------------------------------------------------------
-                                    (<--------------------- Pre-conversation: Creates
-                                                            and sends a Prekey Ensemble: creates
-                                                            a User Profile, Prekey Profile and a set of
-                                                            prekey messages)
+                                    (<---------------------- Pre-conversation: Creates
+                                                             and sends a Prekey Ensemble: creates
+                                                             a User Profile, Prekey Profile and a set of
+                                                             prekey messages)
 Retrieves Bob's  ----------------->
 Prekey Ensemble: asks for
 a User Profile, Prekey
 Profile and a prekey message
 
-Establishes Conversation  ------------------------------->
+Establishes Conversation  --------------------------------->
 with XZDH and sends the
 first Data Message
 
-Exchanges Data Messages <---------------------------------->  Exchanges Data Messages
+Exchanges Data Messages <----------------------------------> Exchanges Data Messages
 
 ```
 
