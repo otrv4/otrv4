@@ -689,7 +689,7 @@ The symmetric key (sym_key) is 57 bytes of cryptographically secure random data.
    it in 'D', encoded as POINT.
 4. Securely store 'sk' locally, as 'sk_h' for 'ED448-PUBKEY' and 'sk_d' for
    'ED448-SHARED-PREKEY'. These keys will be stored for as long as the
-   'ED448-PUBKEY' and the 'ED448-SHARED-PREKEY' respectevely live. Addionally,
+   'ED448-PUBKEY' and the 'ED448-SHARED-PREKEY' respectevely live. Additionally,
    securely store 'sym_key'. This key will be used for the User and Prekey
    profiles signature. After their public key counterpart expires, they should
    be securely deleted or replaced.
@@ -2263,7 +2263,7 @@ Protocol version (SHORT)
 Message type (BYTE)
   The message has type 0x0F.
 
-Prekey Message Indentifier (INT)
+Prekey Message Identifier (INT)
   A prekey message id used for local retrieval.
 
 Prekey owner's instance tag (INT)
@@ -2373,15 +2373,15 @@ A (MPI)
 Sigma (RING-SIG)
   The 'RING-SIG' proof of authentication value.
 
-Prekey Message Indentifier (INT)
+Prekey Message Identifier (INT)
   The 'Prekey Message Identifier' from the Prekey message that was retrieved
   from the untrusted Prekey Server, as part of the Prekey Ensemble.
 
-User Profile Indentifier (INT)
+User Profile Identifier (INT)
   The 'User Profile Identifier' from the User Profile that was retrieved
   from the untrusted Prekey Server, as part of the Prekey Ensemble.
 
-Prekey Profile Indentifier (INT)
+Prekey Profile Identifier (INT)
   The 'Prekey Profile Identifier' from the Prekey Profile that was retrieved
   from the untrusted Prekey Server, as part of the Prekey Ensemble.
 
@@ -2591,7 +2591,7 @@ attaches it to the Non-Interactive-Auth message, which will look like this:
 ```
   (Protocol version || message type || sender's instance tag || receiver's
    instance tag || Sender's User Profile || X || A || sigma || Prekey Message
-   Indentifier || User Profile Indentifier || Prekey Profile Indentifier ||
+   Identifier || User Profile Identifier || Prekey Profile Identifier ||
    (attached message ratchet id || attached message id || public ECDH key ||
    public DH key || encrypted message) || Auth MAC)
 ```
