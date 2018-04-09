@@ -174,7 +174,7 @@ with strong forward secrecy.
 Alice                             Untrusted Prekey Server    Bob
 --------------------------------------------------------------------------------
                                   (<----------------------   Pre-conversation: Creates
-                                                             and sends a Prekey Ensemble: creates
+                                                             and sends a Prekey values: creates
                                                              a User Profile, Prekey Profile and a set of
                                                              prekey messages)
 Retrieves Bob's  ----------------->
@@ -193,10 +193,10 @@ Exchanges Data Messages <---------------------------------> Exchanges Data Messa
 The conversation can begin when one participant retrieves the other's
 participant Prekey Ensemble from an untrusted Prekey Server (consisting of a
 User Profile, a Prekey Profile and a set of prekey messages). Prior to the start
-of the conversation, this Prekey Ensemble would have had to be uploaded by the
+of the conversation, these Prekey values would have had to be uploaded by the
 other participant's client to a server. This have to be done so other
 participants, like Alice, can send messages to the other participant, like Bob,
-while they are offline.
+while the latter is offline.
 
 ## Assumptions
 
@@ -2034,9 +2034,9 @@ section.
 ```
 Bob                            Prekey Server                           Alice
 ----------------------------------------------------------------------
-Publish a Prekey Ensemble:
-a User Profile, a Prekey Profile
-and a set of prekey messages         ----->
+Publish a User Profile, a
+Prekey Profile and a set of
+prekey messages                ----->
 								....
                                      <----- Request Prekey ensembles from Bob
                                      Prekeys ensembles from Bob ------------->
@@ -2220,8 +2220,8 @@ Verify. Decrypt message if attached.
 #### Prekey Message
 
 This message is created and published to an untrusted Prekey Server to allow
-offline conversations. Each Prekey message contains two one-time use ephemeral
-public prekey values.
+offline conversations (in a set). Each Prekey message contains two one-time use
+ephemeral public prekey values.
 
 A valid Prekey message is generated as follows:
 
