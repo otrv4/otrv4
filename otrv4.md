@@ -1240,7 +1240,7 @@ Profile Expiration (USER-PROF-EXP):
 
 User Profile (USER-PROF):
   User Profile's Identifier (INT)
-    A User Profile id used for local retrieval.
+    A User Profile id used for local storage and retrieval.
   User Profile owner's instance tag (INT)
     The instance tag of the client/device that created the User Profile.
   Ed448 public key (ED448-PUBKEY)
@@ -1493,7 +1493,7 @@ Prekey Profile Expiration (PREKEY-PROF-EXP):
 
 Prekey Profile (PREKEY-PROF):
   Prekey Profile's Identifier (INT)
-    A Prekey Profile id used for local retrieval.
+    A Prekey Profile id used for local storage and retrieval.
   Prekey Profile owner's instance tag (INT)
     The instance tag of the client/device that created the Prekey Profile.
   Ed448 public key (ED448-PUBKEY)
@@ -2264,7 +2264,7 @@ Message type (BYTE)
   The message has type 0x0F.
 
 Prekey Message Identifier (INT)
-  A prekey message id used for local retrieval.
+  A prekey message id used for local storage and retrieval.
 
 Prekey owner's instance tag (INT)
   The instance tag of the client/device that created the prekey.
