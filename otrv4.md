@@ -3247,7 +3247,7 @@ START
   This is the initial state before an OTR conversation starts. The only way to
   enter this state is for the participant to explicitly request it via some UI
   operation. Messages sent in this state are plaintext messages. If a TLV type 1
-  (Disconnected) message is sent in any of the other states, transition to this
+  (Disconnected) message is sent in ENCRYPTED_MESSAGES state, transition to this
   state. Note that this transition only happens when TLV type 1 message is sent,
   not when it is received.
 
@@ -3489,9 +3489,9 @@ If the state is `WAITING_AUTH_R`:
         This means that the other side have the lower hash value and, therefore,
         will keep going as stated below.
     * Otherwise:
-      * Forget your old `B` value that you sent earlier.
+      * Forget your old `our_ecdh` and `our_dh` values that you sent earlier.
       * Pretend you are on `START` state.
-      * Send an Auth-R message.
+      * Send a new Auth-R message.
       * Transition state to `WAITING_AUTH_I`.
 
 If the state is `WAITING_AUTH_I`:
@@ -3509,8 +3509,8 @@ If the state is `WAITING_AUTH_I`:
 
   * Validate the Identity message. Ignore the message if validation fails.
   * If validation succeeds:
-    * Forget the old `their_ecdh` and `their_dh` from the previously received
-      Identity message.
+    * Forget the old `their_ecdh`, `their_dh` and User Profile from the
+      previously received Identity message.
     * Send a new Auth-R message with the new values received.
 
 If the state is `ENCRYPTED_MESSAGES`:
