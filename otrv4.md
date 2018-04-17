@@ -835,7 +835,7 @@ The shared session state (Φ) verifies shared state from the higher-level
 protocol as well as from OTR itself. Therefore, an implementer (who has complete
 knowledge of the application network stack) should define a known shared session
 state from the higher-level protocol as `phi`, as well as include the values
-imposed by this specification.
+imposed by this specification. All the fields are encoded as DATA.
 
 ```
   session identifier mandated by the OTRv4 spec = sender and receiver's instance
@@ -855,10 +855,11 @@ For example, a shared session state which higher-level protocol is XMPP, will
 look like this:
 
 ```
-  phi = sender's instance tag || receiver's instance tag || query message ||
-        sender's bare JID || receiver's bare JID
-  phi = 0x00000100 || 0x00000101 || "?OTRv4?" || "alice@jabber.net" ||
-        "bob@jabber.net"
+  phi = DATA(sender's instance tag) || DATA(receiver's instance tag) ||
+        DATA(query message) || DATA(sender's bare JID) ||
+        DATA(receiver's bare JID
+  phi = DATA(0x00000100) || DATA(0x00000101) || DATA("?OTRv4?") ||
+        DATA("alice@jabber.net") || DATA("bob@jabber.net")
 ```
 
 ### Secure Session ID
