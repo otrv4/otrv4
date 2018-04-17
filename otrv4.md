@@ -2833,7 +2833,6 @@ Given a new DH Ratchet:
   * Derive new set of keys:
     `root_key[i], chain_key_s[i][j] = derive_ratchet_keys(sending, root_key[i-1], K)`.
   * Securely delete the previous root key (`root_key[i-1]`) and `K`.
-  * Set `i` as the Data message's ratchet id.
   * Increment the ratchet id `i = i + 1`.
   * If present, forget and reveal MAC keys. The conditions for revealing MAC
     keys are stated in the [Revealing MAC Keys](#revealing-mac-keys) section.
