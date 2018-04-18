@@ -2854,7 +2854,6 @@ When sending a data message in the same DH Ratchet:
    ```
 
   * Securely delete `chain_key_s[i-1][j]`.
-  * Increment the next sending message id `j = j + 1`.
   * Generate a new random 24 bytes value to be the `nonce`.
   * Use the `MKenc` to encrypt the message:
 
@@ -2869,6 +2868,7 @@ When sending a data message in the same DH Ratchet:
      Authenticator = KDF_1(0x28 || MKmac || KDF_1(0x27 || data_message_sections, 64), 64)
    ```
 
+  * Increment the next sending message id `j = j + 1`.
   * Securely delete `MKenc` and `MKmac`.
   * Continue to use the sender's instance tag.
 
