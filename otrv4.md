@@ -1113,8 +1113,8 @@ Note that if there is no previous root key (because this is the first ratchet:
 
 ```
 derive_ratchet_keys(purpose, root_key[i-1], K):
-  root_key[i] = KDF_1(0x21 || root_key[i-1] || K, 64)
-  chain_key_purpose[i][j] = KDF_1(0x22 || root_key[i-1] || K, 64)
+  root_key[i] = KDF_1(0x15 || root_key[i-1] || K, 64)
+  chain_key_purpose[i][j] = KDF_1(0x16 || root_key[i-1] || K, 64)
   return root_key[i], chain_key_purpose[i][j]
 ```
 
@@ -1124,8 +1124,8 @@ When sending or receiving data messages, you must calculate the message keys:
 
 ```
 derive_enc_mac_keys(chain_key):
-  MKenc = KDF_1(0x24 || chain_key, 32)
-  MKmac = KDF_1(0x25 || MKenc, 64)
+  MKenc = KDF_1(0x18 || chain_key, 32)
+  MKmac = KDF_1(0x19 || MKenc, 64)
   return MKenc, MKmac
 ```
 
@@ -1770,11 +1770,11 @@ Bob will be initiating the DAKE with Alice.
     * Interprets `K` as the first root key (`root_key[i-1]`).
     * Generates an ephemeral ECDH key pair, as defined in
       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
-      of using a random value `r`, it will use : `r = KDF_1(0x19 || K, 57)`.
+      of using a random value `r`, it will use : `r = KDF_1(0x13 || K, 57)`.
       Securely replaces `our_ecdh` with the outputs.
     * Generates an ephemeral DH key pair, as defined in
       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
-      of using a random value `r`, it will use : `r = KDF_1(0x20 || K, 80)`.
+      of using a random value `r`, it will use : `r = KDF_1(0x14 || K, 80)`.
       Securely replaces `our_dh` with the outputs.
     * Securely deletes `their_ecdh` and `their_dh`.
 7. Sends Alice the Auth-I message (see [Auth-I message](#auth-i-message) section).
@@ -1793,13 +1793,13 @@ Bob will be initiating the DAKE with Alice.
    * Generates Bob's ECDH and DH public keys:
       * Generates an ephemeral ECDH key pair, as defined in
         [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
-        of using a random value `r`, it will use : `r = KDF_1(0x19 || K, 57)`.
+        of using a random value `r`, it will use : `r = KDF_1(0x13 || K, 57)`.
         Securely replaces `their_ecdh` with the output
         `our_ecdh.public (G * s)` and securely deletes the output
         `our_ecdh.secret (s)`.
       * Generates an ephemeral DH key pair, as defined in
         [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
-        of using a random value `r`, it will use : `r = KDF_1(0x20 || K, 80)`.
+        of using a random value `r`, it will use : `r = KDF_1(0x14 || K, 80)`.
         Securely replaces `their_dh` with the output
         `our_dh.public (g3 ^ r)` and securely deletes the output
         `our_dh.secret (r)`.
@@ -1976,8 +1976,8 @@ A valid Auth-I message is generated as follows:
 
 1. Compute
    `t = 0x1 || KDF_1(0x09 || Bobs_User_Profile, 64) ||
-    KDF_1(0x10 || Alices_User_Profile, 64) || Y || X || B || A ||
-    KDF_1(0x11 || phi, 64)`.
+    KDF_1(0x0A || Alices_User_Profile, 64) || Y || X || B || A ||
+    KDF_1(0x0B || phi, 64)`.
    `phi` is the shared session state as mention in its
    [section](#shared-session-state).
 2. Compute `sigma = RSig(H_b, sk_hb, {H_b, H_a, X}, t)`, as defined in
@@ -1991,8 +1991,8 @@ To verify an Auth-I message:
 3. Check that the receiver's instance tag matches your sender's instance tag.
 4. Compute
    `t = 0x1 || KDF_1(0x09 || Bobs_User_Profile, 64) ||
-    KDF_1(0x10 || Alices_User_Profile, 64) || Y || X || B || A ||
-    KDF_1(0x11 || phi, 64)`.
+    KDF_1(0x0A || Alices_User_Profile, 64) || Y || X || B || A ||
+    KDF_1(0x0B || phi, 64)`.
    `phi` is the shared session state as mention in its
    [section](#shared-session-state).
 5. Verify the `sigma` as defined in
@@ -2109,13 +2109,13 @@ Verify. Decrypt message if attached.
    * Generates Bob's ECDH and DH public keys:
      * Generates an ephemeral ECDH key pair, as defined in
        [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys), but instead
-       of using a random value `r`, it will use : `r = KDF_1(0x19, K, 57)`.
+       of using a random value `r`, it will use : `r = KDF_1(0x13, K, 57)`.
        Securely replaces `their_ecdh` with the output
        `our_ecdh.public (G * s)` and securely deletes the output
        `our_ecdh.secret (s)`.
      * Generates an ephemeral DH key pair, as defined in
        [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
-       of using a random value `r`, it will use : `r = KDF_1(0x20, K, 80)`.
+       of using a random value `r`, it will use : `r = KDF_1(0x14, K, 80)`.
        Securely replaces `their_dh` with the output
        `our_dh.public (g3 ^ r)` and securely deletes the output
        `our_dh.secret (r)`.
@@ -2128,7 +2128,7 @@ Verify. Decrypt message if attached.
     * If an encrypted message is attached, she computes:
 
       ```
-        Auth MAC = KDF_1(0x18 || auth_mac_k || t || (KDF_1(0x17 ||
+        Auth MAC = KDF_1(0x12 || auth_mac_k || t || (KDF_1(0x11 ||
                    attached encrypted ratchet id ||
                    attached encrypted message id || public ecdh key ||
                    public dh key || nonce || encrypted message, 64), 64)`.
@@ -2137,7 +2137,7 @@ Verify. Decrypt message if attached.
     * Otherwise, she computes:
 
       ```
-        Auth MAC = KDF_1(0x18 || auth_mac_k || t, 64)
+        Auth MAC = KDF_1(0x12 || auth_mac_k || t, 64)
       ```
 
     * Includes this value in the Non-Interactive-Auth message and securely
@@ -2196,9 +2196,9 @@ Verify. Decrypt message if attached.
    * Calculates the brace key `brace_key = KDF_1(0x02 || k_dh, 32)`.
      Securely deletes `k_dh`.
 4. Calculates
-   `tmp_k = KDF_1(0x12 || K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh)
+   `tmp_k = KDF_1(0x0C || K_ecdh || ECDH(our_shared_prekey.secret, their_ecdh)
     || ECDH(sk_hb, their_ecdh) || brace_key, 64)`. Securely deletes `K_ecdh`.
-5. Computes the Auth MAC key `auth_mac_k = KDF_1(0x14 || tmp_k, 64)`.
+5. Computes the Auth MAC key `auth_mac_k = KDF_1(0x0E || tmp_k, 64)`.
 6. Computes the Mixed shared secret and the SSID:
    * `K = KDF_1(0x04 || tmp_k || brace_key, 64)`. Securely deletes `tmp_k` and
      `brace_key`.
@@ -2209,17 +2209,17 @@ Verify. Decrypt message if attached.
    * Interprets `K` as the first root key (`root_key[i-1]`).
    * Generates an ephemeral ECDH key pair, as defined in
      [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys), but instead
-     of using a random value `r`, it will use : `r = KDF_1(0x19, K, 57)`.
+     of using a random value `r`, it will use : `r = KDF_1(0x13, K, 57)`.
      Securely replaces `our_ecdh` with the outputs.
    * Generates an ephemeral DH key pair, as defined in
      [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys), but instead
-     of using a random value `r`, it will use : `r = KDF_1(0x20, K, 80)`.
+     of using a random value `r`, it will use : `r = KDF_1(0x14, K, 80)`.
      Securely replaces `our_dh` with the outputs.
    * If an encrypted message was attached to the Non-Interactive-Auth message:
      * Follows what is defined in [Decrypting an Attached Encrypted Message](#decrypting-the-message)
        section.
      * Otherwise:
-        * Computes `Auth MAC = KDF_1(0x18 || auth_mac_k || t, 64)`.
+        * Computes `Auth MAC = KDF_1(0x12 || auth_mac_k || t, 64)`.
           The `t` value here is the one computed during the verification of the
           Non-Interactive-Auth message.
    * Extracts the `Auth MAC` from the Non-Interactive-Auth message and verifies
@@ -2321,14 +2321,14 @@ A valid Non-Interactive-Auth message is generated as follows:
 5. Compute `k_dh = DH(a, their_dh)` and `brace_key = KDF_1(0x02 || k_dh, 32)`.
    Securely delete `k_dh`.
 6. Compute
-   `tmp_k = KDF_1(0x12 || K_ecdh || ECDH(x, their_shared_prekey) ||
+   `tmp_k = KDF_1(0x0C || K_ecdh || ECDH(x, their_shared_prekey) ||
     ECDH(x, H_b) || brace_key, 64)`. Securely delete `K_ecdh`.
    This value is needed for the generation of the Mixed shared secret.
-7. Calculate the Auth MAC key `auth_mac_k = KDF_1(0x13 || tmp_k, 64)`.
+7. Calculate the Auth MAC key `auth_mac_k = KDF_1(0x0D || tmp_k, 64)`.
 8. Compute
-   `t = KDF_1(0x14 || Bobs_User_Profile, 64) ||
-    KDF_1(0x15 || Alices_User_Profile, 64) || Y || X || B || A ||
-    their_shared_prekey || KDF_1(0x16 || phi, 64)`.
+   `t = KDF_1(0x0E || Bobs_User_Profile, 64) ||
+    KDF_1(0x0F || Alices_User_Profile, 64) || Y || X || B || A ||
+    their_shared_prekey || KDF_1(0x10 || phi, 64)`.
 9. Compute `sigma = RSig(H_a, sk_ha, {H_b, H_a, Y}, t)`. When computing `sigma`,
    keep the first 24 bytes of the generated `c` value to be used as a `nonce`
    in the next step. Refer to
@@ -2358,9 +2358,9 @@ To verify a Non-Interactive-Auth message:
    [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
    section for details.
 6. Compute
-   `t = KDF_1(0x14 || Bobs_User_Profile, 64) ||
-    KDF_1(0x15 ||Alices_User_Profile, 64) ||
-    Y || X || B || A || our_shared_prekey.public || KDF_1(0x16 || phi, 64)`.
+   `t = KDF_1(0x0E || Bobs_User_Profile, 64) ||
+    KDF_1(0x0F || Alices_User_Profile, 64) ||
+    Y || X || B || A || our_shared_prekey.public || KDF_1(0x10 || phi, 64)`.
 7. Verify the `sigma` as defined in
    [Ring Signature Authentication](#ring-signature-authentication).
 
@@ -2558,13 +2558,13 @@ participant:
   derived:
 
   ```
-    chain_key_s[i-1][j+1] = KDF_1(0x23 || chain_key_s[i-1][j], 64)
+    chain_key_s[i-1][j+1] = KDF_1(0x17 || chain_key_s[i-1][j], 64)
   ```
 
 * Calculates the encryption key (`MKenc`):
 
   ```
-    MKenc = KDF_1(0x24 || chain_key_s[i-1][j], 32)
+    MKenc = KDF_1(0x18 || chain_key_s[i-1][j], 32)
   ```
 
 * Securely deletes `chain_key_s[i-1][j]`.
@@ -2635,16 +2635,16 @@ sending one. For this, the participant:
   already derived and decided:
 
   ```
-    chain_key_r[i-1][k+1] = KDF_1(0x23 || chain_key_r[i-1][k], 64)
+    chain_key_r[i-1][k+1] = KDF_1(0x17 || chain_key_r[i-1][k], 64)
   ```
 
 * Calculates the encryption key (`MKenc`):
-  `MKenc = KDF_1(0x24 || chain_key_r[i-1][k], 32)`
+  `MKenc = KDF_1(0x18 || chain_key_r[i-1][k], 32)`
 * Securely deletes `chain_key_r[i-1][k]`.
 * Uses `auth_mac_k` to generate the `Auth MAC` of the attached
   encrypted message (the `t` value here is the one computed during the
   verification of the Non-Interactive-Auth message):
-  `Auth MAC = KDF_1(0x18 || auth_mac_k || t || (KDF_1(0x17 || attached encrypted
+  `Auth MAC = KDF_1(0x12 || auth_mac_k || t || (KDF_1(0x11 || attached encrypted
    ratchet id || attached encrypted message id || public ECDH key || public DH
    key || nonce || encrypted message, 64)), 64)`.
 * Extracts the `Auth MAC` from the Non-Interactive-Auth message and verifies
@@ -2844,13 +2844,13 @@ When sending a data message in the same DH Ratchet:
   * Set `j` as the Data message's message id.
   * Set `i - 1` as the Data message's ratchet id.
   * Derive the next sending chain key
-    `chain_key_s[i-1][j+1] = KDF_1(0x23 || chain_key_s[i-1][j], 64)`.
+    `chain_key_s[i-1][j+1] = KDF_1(0x17 || chain_key_s[i-1][j], 64)`.
   * Calculate the encryption key (`MKenc`), the MAC key (`MKmac`) and, if needed
     the extra symmetric key:
 
    ```
      MKenc, MKmac = derive_enc_mac_keys(chain_key_s[i-1][j])
-     extra_symm_key = KDF_1(0x26 || 0xFF || chain_key_s[i-1][j], 32)
+     extra_symm_key = KDF_1(0x1A || 0xFF || chain_key_s[i-1][j], 32)
    ```
 
   * Securely delete `chain_key_s[i-1][j]`.
@@ -2865,7 +2865,7 @@ When sending a data message in the same DH Ratchet:
     message from the protocol version to the encrypted message.
 
    ```
-     Authenticator = KDF_1(0x28 || MKmac || KDF_1(0x27 || data_message_sections, 64), 64)
+     Authenticator = KDF_1(0x1C || MKmac || KDF_1(0x1B || data_message_sections, 64), 64)
    ```
 
   * Increment the next sending message id `j = j + 1`.
@@ -2909,7 +2909,7 @@ This is done by:
             Public DH Key, i, j]`.
           * Securely delete
             `skipped_MKenc[Public ECDH Key, Public DH Key, i, j]`.
-          * Calculate `MKmac = KDF_1(0x25 || MKenc, 64)`.
+          * Calculate `MKmac = KDF_1(0x19 || MKenc, 64)`.
           * Use the `MKmac` to verify the MAC of the data message.
           * Set `nonce` as the "nonce" from the received data message.
           * Decrypt the message using `MKenc` and `nonce`:
@@ -2933,13 +2933,13 @@ This is done by:
       * If `chain_key_r` is not `NULL`:
          * while `k` < received `pn`:
              * Derive
-               `chain_key_r[i][k+1] = KDF_1(0x23 || chain_key_r[i][k], 64)`
-               and `MKenc = KDF_1(0x24 || chain_key_r[i][k], 32)`
+               `chain_key_r[i][k+1] = KDF_1(0x17 || chain_key_r[i][k], 64)`
+               and `MKenc = KDF_1(0x18 || chain_key_r[i][k], 32)`
              * Derive (this is done any time a message key is stored as
                there is no way of knowing if the message that will be received
                in the future will ask for the computation of the extra
                symmetric key):
-               `extra_symm_key = KDF_1(0x26 || 0xFF || chain_key_r[i][j], 32)`.
+               `extra_symm_key = KDF_1(0x1A || 0xFF || chain_key_r[i][j], 32)`.
              * Store
                `MKenc, extra_sym_key = skipped_MKenc[Public ECDH Key, Public DH Key, i, k]`.
              * Increment `k = k + 1`.
@@ -2966,13 +2966,13 @@ This is done by:
       * If `chain_key_r` is not `NULL`:
          * while `k` < received `j`:
              * Derive
-               `chain_key_r[i][k+1] = KDF_1(0x23 || chain_key_r[i][k], 64)`
-               and `MKenc = KDF_1(0x24 || chain_key_r[i][k], 32)`
+               `chain_key_r[i][k+1] = KDF_1(0x17 || chain_key_r[i][k], 64)`
+               and `MKenc = KDF_1(0x18 || chain_key_r[i][k], 32)`
              * Derive (this is done any time a message key is stored as
                there is no way of knowing if the message that will be received
                in the future will ask for the computation of the extra
                symmetric key):
-               `extra_symm_key = KDF_1(0x26 || 0xFF || chain_key_r[i-1][j], 32)`.
+               `extra_symm_key = KDF_1(0x1A || 0xFF || chain_key_r[i-1][j], 32)`.
              * Store
                `MKenc, extra_sym_key = skipped_MKenc[Public ECDH Key, Public DH Key, i, k]`.
              * Increment `k = k + 1`.
@@ -2981,10 +2981,10 @@ This is done by:
 
     ```
       MKenc, MKmac = derive_enc_mac_keys(chain_key_r[i-1][k])
-      extra_symm_key = KDF_1(0x26 || 0xFF || chain_key_r[i-1][k], 32)
+      extra_symm_key = KDF_1(0x1A || 0xFF || chain_key_r[i-1][k], 32)
     ```
   * Derive the next receiving chain key:
-    `chain_key_r[i-1][k+1] = KDF_1(0x23 || chain_key_r[i-1][k], 64)`.
+    `chain_key_r[i-1][k+1] = KDF_1(0x17 || chain_key_r[i-1][k], 64)`.
   * Securely delete `chain_key_r[i-1][k]`.
   * Use the `MKmac` to verify the MAC of the message. If the verification fails:
       * Reject the message.
@@ -3045,7 +3045,7 @@ file transfer, voice encryption, etc. When one party wishes to use the extra
 symmetric key, they create a type 7 TLV, which they attach to a Data Message.
 The extra symmetric key itself is then derived using the same `chain_key` used
 to compute the message encryption key used to protect the Data Message. It is,
-therefore, derived by calculating `KDF_1(0x26 || 0xFF || chain_key)`.
+therefore, derived by calculating `KDF_1(0x1A || 0xFF || chain_key)`.
 
 Upon receipt of the Data Message containing the type 7 TLV, the recipient will
 compute the extra symmetric key in the same way. Note that the value of the
@@ -3075,7 +3075,7 @@ Three keys can, therefore, be calculated from the already derived extra
 symmetric key:
 
 ```
-  extra_sym_key = KDF_1(0x26 || 0xFF || chain_key, 32)
+  extra_sym_key = KDF_1(0x1A || 0xFF || chain_key, 32)
   symkey1 = KDF_1(0x00 || 0x0042 || extra_sym_key, 32)
   symkey2 = KDF_1(0x01 || 0x104A || extra_sym_key, 32)
   symkey3 = KDF_1(0x02 || 0x0001 || extra_sym_key, 32)
@@ -4324,7 +4324,7 @@ section for details.
 2. Compute `T1 = G * t1`.
 3. Compute `T2 = G * r2 + A2 * c2`.
 4. Compute `T3 = G * r3 + A3 * c3`.
-5. Compute `c = HashToScalar(0x29 || G || q || A1 || A2 || A3 || T1 || T2 ||
+5. Compute `c = HashToScalar(0x1D || G || q || A1 || A2 || A3 || T1 || T2 ||
    T3 || m)`.
 6. Compute `c1 = c - c2 - c3 (mod q)`.
 7. Compute `r1 = t1 - c1 * a1 (mod q)`.
