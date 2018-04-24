@@ -855,7 +855,7 @@ For example, a shared session state which higher-level protocol is XMPP, will
 look like this:
 
 ```
-  phi = DATA(sender's instance tag) || DATA(receiver's instance tag) ||
+  phi = sender's instance tag || receiver's instance tag ||
         DATA(query message) || DATA(sender's bare JID) ||
         DATA(receiver's bare JID
   phi = DATA(0x00000100) || DATA(0x00000101) || DATA("?OTRv4?") ||
