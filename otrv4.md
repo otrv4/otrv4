@@ -4364,7 +4364,7 @@ The prover knows a secret `ai` and, therefore:
   T3 = constant_time_select(eq3, encode(G * t3), encode(G * r3 + A3 * c3))
 ```
 
-4. Compute `c = HashToScalar(0x29 || G || q || A1 || A2 || A3 || T1 || T2 ||
+4. Compute `c = HashToScalar(0x1D || G || q || A1 || A2 || A3 || T1 || T2 ||
    T3 || m)`.
 5. For whichever equally returns true (if `eqi == 1`, `eqj == 0` and
    `eqk == 0`, for `i != j != k`): `ci = c - cj - ck (mod q)`.
@@ -4379,7 +4379,7 @@ If the prover knows `a2`, for example, the `RSig` function looks like this:
 2. Compute `T2 = G * t2`.
 3. Compute `T1 = G * r1 + A1 * c1`.
 4. Compute `T3 = G * r3 + A3 * c3`.
-5. Compute `c = HashToScalar(0x29 || G || q || A1 || A2 || A3 || T1 || T2 ||
+5. Compute `c = HashToScalar(0x1D || G || q || A1 || A2 || A3 || T1 || T2 ||
    T3 || m)`.
 6. Compute `c2 = c - c1 - c3 (mod q)`.
 7. Compute `r2 = t2 - c2 * a2 (mod q)`.
@@ -4399,7 +4399,7 @@ can be inferred in practice).
 2. Compute `T1 = G * r1 + A1 * c1`
 3. Compute `T2 = G * r2 + A2 * c2`
 4. Compute `T3 = G * r3 + A3 * c3`
-5. Compute `c = HashToScalar(0x29 || G || q || A1 || A2 || A3 || T1 || T2 ||
+5. Compute `c = HashToScalar(0x1D || G || q || A1 || A2 || A3 || T1 || T2 ||
    T3 || m)`.
 6. Check if `c ≟ c1 + c2 + c3 (mod q)`. If it is true, verification succeeds.
    If not, it fails.
