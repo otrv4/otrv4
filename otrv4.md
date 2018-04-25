@@ -2109,7 +2109,7 @@ Verify. Decrypt message if attached.
    * Gets `tmp_k` from the
      [Non-Interactive-Auth Message](#non-interactive-auth-message).
    * Calculates the Mixed shared secret
-     `K = KDF_1(0x04 || tmp_k || brace_key, 64)`. Securely deletes `tmp_k` and
+     `K = KDF_1(0x04 || tmp_k, 64)`. Securely deletes `tmp_k` and
      `brace_key`.
    * Calculates the SSID from shared secret: `KDF_1(0x05 || K, 8)`.
 8. Initializes the double-ratchet:
@@ -2210,7 +2210,7 @@ Verify. Decrypt message if attached.
     || ECDH(sk_hb, their_ecdh) || brace_key, 64)`. Securely deletes `K_ecdh`.
 5. Computes the Auth MAC key `auth_mac_k = KDF_1(0x0E || tmp_k, 64)`.
 6. Computes the Mixed shared secret and the SSID:
-   * `K = KDF_1(0x04 || tmp_k || brace_key, 64)`. Securely deletes `tmp_k` and
+   * `K = KDF_1(0x04 || tmp_k, 64)`. Securely deletes `tmp_k` and
      `brace_key`.
    * Calculates the SSID from shared secret: `KDF_1(0x05 || K, 8)`.
 7. Initializes the double ratchet algorithm:
