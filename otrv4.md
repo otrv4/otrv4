@@ -49,14 +49,14 @@ an existing messaging protocol, such as XMPP.
    1. [Calculating Encryption and MAC Keys](#calculating-encryption-and-mac-keys)
    1. [Resetting State Variables and Key Variables](#resetting-state-variables-and-key-variables)
    1. [Session Expiration](#session-expiration)
-1. [User Profile](#user-profile)
-   1. [User Profile Data Type](#user-profile-data-type)
-   1. [Creating a User Profile](#creating-a-user-profile)
+1. [Client Profile](#client-profile)
+   1. [Client Profile Data Type](#client-profile-data-type)
+   1. [Creating a Client Profile](#creating-a-user-profile)
    1. [Establishing Versions](#establishing-versions)
-   1. [User Profile Expiration and Renewal](#user-profile-expiration-and-renewal)
-   1. [Create a User Profile Signature](#create-a-user-profile-signature)
-   1. [Verify a User Profile Signature](#verify-a-user-profile-signature)
-   1. [Validating a User Profile](#validating-a-user-profile)
+   1. [Client Profile Expiration and Renewal](#client-profile-expiration-and-renewal)
+   1. [Create a Client Profile Signature](#create-a-client-profile-signature)
+   1. [Verify a Client Profile Signature](#verify-a-client-profile-signature)
+   1. [Validating a Client Profile](#validating-a-client-profile)
 1. [Prekey Profile](#prekey-profile)
    1. [Prekey Profile Data Type](#prekey-profile-data-type)
    1. [Creating a Prekey Profile](#creating-a-prekey-profile)
@@ -193,11 +193,11 @@ Alice                             Untrusted Prekey Server    Bob
 --------------------------------------------------------------------------------
                                   (<----------------------   Pre-conversation: Creates
                                                              and sends a Prekey values: creates
-                                                             a User Profile, Prekey Profile and a set of
+                                                             a Client Profile, Prekey Profile and a set of
                                                              prekey messages)
 Retrieves Bob's  ----------------->
 Prekey Ensemble: asks for
-a User Profile, Prekey
+a Client Profile, Prekey
 Profile and a prekey message
 
 Establishes Conversation  -------------------------------->
@@ -210,9 +210,9 @@ Exchanges Data Messages <---------------------------------> Exchanges Data Messa
 
 The conversation can begin when one participant retrieves the other's
 participant Prekey Ensemble from an untrusted Prekey Server (consisting of a
-User Profile, a Prekey Profile and a set of prekey messages). Prior to the start
-of the conversation, these Prekey values would have had to be uploaded by the
-other participant's client to a server. This have to be done so other
+Client Profile, a Prekey Profile and a set of prekey messages). Prior to the
+start of the conversation, these Prekey values would have had to be uploaded by
+the other participant's client to a server. This have to be done so other
 participants, like Alice, can send messages to the other participant, like Bob,
 while the latter is offline.
 
@@ -572,8 +572,8 @@ Ed448 point (POINT):
 Ed448 scalar (SCALAR):
   56 bytes as defined in "Encoding and Decoding" section, little-endian
 
-User Profile (USER-PROF):
-  Detailed in "User Profile Data Type" section
+Client Profile (CLIENT-PROF):
+  Detailed in "Client Profile Data Type" section
 
 Prekey Profile (PREKEY-PROF)
   Detailed in "Prekey Profile Data Type" section
@@ -624,7 +624,7 @@ A curve point is decoded as follows:
       inversion of `denom` and the square root:
 
       ```
-           x = ((num ^ 3) * denom * (num^5 * denom^3) ^ ((p-3)/4)) (mod p)
+        x = ((num ^ 3) * denom * (num^5 * denom^3) ^ ((p-3)/4)) (mod p)
       ```
 
    2.  If `denom * x^2 = num`, the recovered x-coordinate is `x`. Otherwise, no
@@ -709,7 +709,7 @@ The symmetric key (sym_key) is 57 bytes of cryptographically secure random data.
 4. Securely store 'sk' locally, as 'sk_h' for 'ED448-PUBKEY' and 'sk_d' for
    'ED448-SHARED-PREKEY'. These keys will be stored for as long as the
    'ED448-PUBKEY' and the 'ED448-SHARED-PREKEY' respectevely live. Additionally,
-   securely store 'sym_key'. This key will be used for the User and Prekey
+   securely store 'sym_key'. This key will be used for the Client and Prekey
    profiles signature. After their public key counterpart expires, they should
    be securely deleted or replaced.
 5. Securely delete 'h'.
@@ -853,7 +853,7 @@ the expected attributes (expressed in fixed length) should be included in
 `phi'`. A static password shared by both sides can also be included.
 
 For example, a shared session state which higher-level protocol is XMPP, will
-look like this, for the intiator of the interactive DAKE:
+look like this, for the initiator of the interactive DAKE:
 
 ```
   phi = sender's instance tag || receiver's instance tag ||
@@ -1214,87 +1214,88 @@ moving forward which would cause a session to never expire. To mitigate this,
 implementers should use secure and reliable clocks that can't be manipulated by
 an attacker.
 
-## User Profile
+## Client Profile
 
-OTRv4 introduces user profiles. The User Profile contains a User Profile's
-Identifier, the User Profile owner's instance tag, the Ed448 long-term
+OTRv4 introduces client profiles. The Client Profile contains a Client Profile's
+Identifier, the Client Profile owner's instance tag, the Ed448 long-term
 public key, information about supported versions, a profile expiration date, a
 signature of all these, and an optional transitional signature.
 
-There are two instances of the User Profile that should be generated. One is
+There are two instances of the Client Profile that should be generated. One is
 used for authentication in both DAKEs (interactive and non-interactive). The
 other should be published in a public place to achieve deniability properties.
-This procedure allows two parties to send and verify each other's signed User
+This procedure allows two parties to send and verify each other's signed Client
 Profile during the DAKE without damaging participation deniability for the
-conversation, since the signed profile is public information.
+conversation, since the signed Client Profile is public information.
 
-Each implementation should decide how to publish the profile. For example, one
-client may publish profiles to a server pool (similar to a keyserver pool,
-where PGP public keys can be published). Another client may use XMPP's publish-
-subscribe extension (XEP-0060 [\[8\]](#references)) for publishing profiles. A
-protocol for publication must be defined, but the definition is out of scope
-for this specification. For sending offline messages, notice that the User
-Profile has to be published and stored in the same untrusted Prekey Server used
-to store prekey messages, so the Prekey Ensemble can be assembled.
+Each implementation should decide how to publish the Client Profile. For
+example, one client may publish profiles to a server pool (similar to a
+keyserver pool, where PGP public keys can be published). Another client may use
+XMPP's publish-subscribe extension (XEP-0060 [\[8\]](#references)) for
+publishing Client Profiles. A protocol for publication must be defined, but the
+definition is out of scope for this specification. For sending offline messages,
+notice that the Client Profile has to be published and stored in the same
+untrusted Prekey Server used to store prekey messages and Prekey Profiles, so
+the Prekey Ensemble can be assembled.
 
-When the User Profile expires, it should be updated. Client implementations
-should determine the frequency of the User's Profile expiration and renewal. The
-recommended expiration time is one week. Note, though, that the long-term public
-key has its own expiration time.
+When the Client Profile expires, it should be updated. Client implementations
+should determine the frequency of the Client's Profile expiration and renewal.
+The recommended expiration time is one week. Note, though, that the long-term
+public key has its own expiration time.
 
-Nevertheless, for a short amount of time (decided by the client) a User Profile
-can still be locally valid even if it has publicly expired. This is needed for
-non-interactive conversations as a party, Alice, can send offline encrypted
-messages using a non-expired User Profile. This User Profile, nevertheless,
-could have had expired prior to the moment in which the other party, Bob,
-receives the offline encrypted messages. To allow this party, Bob, to still be
-able to read these messages, the User Profile can still be locally valid even
-if it has publicly expired. A recommended amount of time for this extra validity
-is of 1 day.
+Nevertheless, for a short amount of time (decided by the client) a Client
+Profile can still be locally valid even if it has publicly expired. This is
+needed for non-interactive conversations as a party, Alice, can send offline
+encrypted messages using a non-expired Client Profile. This Client Profile,
+nevertheless, could have had expired prior to the moment in which the other
+party, Bob, receives the offline encrypted messages. To allow this party, Bob,
+to still be able to read these messages, the Client Profile can still be locally
+valid even if it has publicly expired. A recommended amount of time for this
+extra validity time is of 1 day.
 
-It is also important to note that the absence of a User Profile is not a proof
+It is also important to note that the absence of a Client Profile is not a proof
 that a user does not support OTRv4.
 
-Note that a User Profile is generated per device/client location basis. Users
-are not expected to manage user profiles (theirs or from others) in a client.
+Note that a Client Profile is generated per device/client location basis. Users
+are not expected to manage Client Profiles (theirs or from others) in a client.
 As a consequence, clients are discouraged to allow importing or exporting of
-user profiles. Also, if a user has multiple devices/client locations
-concurrently in use, it is expected that they have multiple user profiles
+Client Profiles. Also, if a user has multiple devices/client locations
+concurrently in use, it is expected that they have multiple Client Profiles
 simultaneously published and valid.
 
-### User Profile Data Type
+### Client Profile Data Type
 
 ```
-Profile Expiration (USER-PROF-EXP):
+Client Profile Expiration (CLIENT-PROF-EXP):
   8 byte signed value, big-endian
 
-User Profile (USER-PROF):
-  User Profile's Identifier (INT)
-    A User Profile id used for local storage and retrieval.
-  User Profile owner's instance tag (INT)
-    The instance tag of the client/device that created the User Profile.
+Client Profile (CLIENT-PROF):
+  Client Profile's Identifier (INT)
+    A Client Profile id used for local storage and retrieval.
+  Client Profile owner's instance tag (INT)
+    The instance tag of the client/device that created the Client Profile.
   Ed448 public key (ED448-PUBKEY)
     Corresponds to 'H'.
   Versions (DATA)
-  Profile Expiration (USER-PROF-EXP)
-  (optional) Transitional Signature (USER-SIG)
-  Profile Signature (USER-EDDSA-SIG)
+  Client Profile Expiration (CLIENT-PROF-EXP)
+  (optional) Transitional Signature (CLIENT-SIG)
+  Client Profile Signature (CLIENT-EDDSA-SIG)
 ```
 
-`USER-EDDSA-SIG` refers to the OTRv4 EDDSA signature:
+`CLIENT-EDDSA-SIG` refers to the OTRv4 EDDSA signature:
 
 ```
-EDDSA signature (USER-EDDSA-SIG):
+EDDSA signature (CLIENT-EDDSA-SIG):
   (len is the expected length of the signature, which is 114 bytes)
   len byte unsigned value, little-endian
 ```
 
-`SIG` is the DSA Signature. It is the same signature as used in OTRv3. From the
-OTRv3 protocol, section "Public keys, signatures, and fingerprints", the format
-for a signature made by a OTRv3 DSA public key is as follows:
+`CLIENT-SIG` is the DSA Signature. It is the same signature as used in OTRv3.
+From the OTRv3 protocol, section "Public keys, signatures, and fingerprints",
+the format for a signature made by a OTRv3 DSA public key is as follows:
 
 ```
-DSA signature (USER-SIG):
+DSA signature (CLIENT-SIG):
   (len is the length of the DSA public parameter q, which in current
   implementations is 20 bytes)
   len byte unsigned r, big-endian
@@ -1314,50 +1315,52 @@ OTRv3 public authentication DSA key (PUBKEY):
 (p,q,g,y) are the OTRv3 DSA public key parameters
 ```
 
-### Creating a User Profile
+### Creating a Client Profile
 
-To create a User Profile, generate:
+To create a Client Profile, generate:
 
-1. A unique random id that is going to act as an identifier for this User
+1. A unique random id that is going to act as an identifier for this Client
    Profile. It should be 4 byte unsigned value, big-endian.
-2. A 4-byte instance tag to use as the User Profile owner's instance tag.
+2. A 4-byte instance tag to use as the Client Profile owner's instance tag.
 
 Then, assemble:
 
-1. User Profile's identifier.
-2. User Profile owner's instance tag.
-3. User's Ed448 long-term public key.
+1. Client Profile's identifier.
+2. Client Profile owner's instance tag.
+3. Client's Ed448 long-term public key.
 4. Versions: a string corresponding to the user's supported OTR versions.
-   A User Profile can advertise multiple OTR versions. The format is described
+   A Client Profile can advertise multiple OTR versions. The format is described
    under the section [Establishing Versions](#establishing-versions) below.
-5. Profile Expiration: Expiration date in standard Unix 64-bit format
+5. Client Profile Expiration: Expiration date in standard Unix 64-bit format
    (seconds since the midnight starting Jan 1, 1970, UTC, ignoring leap
    seconds).
-6. Profile Signature: The symmetric key, the flag `f` (set to zero, as defined
-   on RFC 8032 [\[9\]](#references)) and the empty context `c` are used to
-   create signatures of the entire profile excluding the signature itself. The
-   size of the signature is 114 bytes. For its generation, refer to
-   [Create a User Profile Signature](#create-a-user-profile-signature) section.
-7. Transitional Signature (optional): A signature of the profile excluding the
-   Profile Signature and the user's OTRv3 DSA key. The Transitional Signature
-   enables parties that trust user's version 3 DSA key to trust the user's
-   profile in version 4. This is only used if the user supports versions 3
-   and 4. For more information, refer to
-   [Create a User Profile Signature](#create-a-user-profile-signature) section.
+6. Client Profile Signature: The symmetric key, the flag `f` (set to zero, as
+   defined on RFC 8032 [\[9\]](#references)) and the empty context `c` are used
+   to create signatures of the entire Client Profile excluding the signature
+   itself. The size of the signature is 114 bytes. For its generation, refer to
+   [Create a Client Profile Signature](#create-a-client-profile-signature)
+   section.
+7. Transitional Signature (optional): A signature of the Client Profile
+   excluding the Client Profile Signature and the user's OTRv3 DSA key. The
+   Transitional Signature enables parties that trust user's version 3 DSA key to
+   trust the Client Profile in version 4. This is only used if the user supports
+   versions 3 and 4. For more information, refer to
+   [Create a Client Profile Signature](#create-a-client-profile-signature)
+   section.
 
-After the profile is created, it must be published in a public place.
+After the Client Profile is created, it must be published in a public place.
 When using OTRv4 in OTRv3-compatible mode and OTRv4-standalone mode, notice that
-the User Profile has to be published and stored in the untrusted Prekey Server
+the Client Profile has to be published and stored in the untrusted Prekey Server
 used to store prekey messages.
 
 ### Establishing Versions
 
 A valid versions string can be created by concatenating supported version
 numbers together in any order. For example, a user who supports versions 3 and 4
-will have the 2-byte version string "43" or "34" in their profile. A user who
-only supports version 4 will have the 1-byte version string "4". Thus, a version
-string has varying size, and it is represented as a DATA type with its length
-specified.
+will have the 2-byte version string "43" or "34" in their Client Profile. A user
+who only supports version 4 will have the 1-byte version string "4". Thus, a
+version string has varying size, and it is represented as a DATA type with its
+length specified.
 
 A compliant OTRv4 implementation (in OTRv43-compatible mode) is required to
 support version 3 of OTR, but not versions 1 and 2. Therefore, invalid version
@@ -1365,40 +1368,40 @@ strings contain a "2" or a "1".
 
 Any other version string that is not "4", "3", "2", or "1" should be ignored.
 
-### User Profile Expiration and Renewal
+### Client Profile Expiration and Renewal
 
-If a renewed user profile is not published in a public place, the user's
+If a renewed Client Profile is not published in a public place, the user's
 participation deniability is at risk. Participation deniability is also at risk
-if the only publicly available user profile is expired. For that reason, a
-received expired user profile during the DAKE is considered invalid.
+if the only publicly available Client Profile is expired. For that reason, a
+received expired Client Profile during the DAKE is considered invalid.
 
-Before the profile expires, the user must publish an updated user profile with a
-new expiration date. The client establishes the frequency of expiration and
-when to publish (before the current User Profile expires). Note that this can be
-configurable. A recommended value is one week.
+Before the Client Profile expires, the user must publish an updated Client
+Profile with a new expiration date. The client establishes the frequency of
+expiration and when to publish (before the current Client Profile expires). Note
+that this can be configurable. A recommended value is one week.
 
-### Create a User Profile Signature
+### Create a Client Profile Signature
 
 If version 3 and 4 are supported and the user has a pre-existing OTRv3
 long-term key:
 
-   * Concatenate `User Profile's Identifier ||
-     User Profile owner's instance tag ||Ed448 public key || Versions ||
-     Profile Expiration || Public Shared Prekey`. Denote this value `m`.
+   * Concatenate `Client Profile's Identifier ||
+     Client Profile owner's instance tag || Ed448 public key || Versions ||
+     Client Profile Expiration || Public Shared Prekey`. Denote this value `m`.
    * Sign `m` with the user's OTRv3 DSA key. Denote this value
      `Transitional Signature`.
-   * Sign `m || Transitional Signature`  with the symmetric key, as stated
-     below. Denote this value `Profile Signature`.
+   * Sign `m || Transitional Signature` with the symmetric key, as stated
+     below. Denote this value `Client Profile Signature`.
 
 If only version 4 is supported:
 
-   * Concatenate `User Profile's Identifier ||
-     User Profile owner's instance tag || Ed448 public key || Versions ||
-     Profile Expiration || Public Shared Prekey`. Denote this value `m`.
+   * Concatenate `Client Profile's Identifier ||
+     Client Profile owner's instance tag || Ed448 public key || Versions ||
+     Client Profile Expiration || Public Shared Prekey`. Denote this value `m`.
    * Sign `m` with the symmetric key, as stated below. Denote this value
-     `Profile Signature`.
+     `Client Profile Signature`.
 
-The User Profile signature for version 4 is generated as defined in RFC 8032
+The Client Profile signature for version 4 is generated as defined in RFC 8032
 [\[9\]](#references), section 5.2.6. The flag `f` is set to `0` and the context
 `c` is an empty constant string.
 
@@ -1442,9 +1445,9 @@ string 'x'.
 7. Securely delete 'sk', 'h', 'r' and 'k'.
 ```
 
-### Verify a User Profile Signature
+### Verify a Client Profile Signature
 
-The User Profile signature is verified as defined in RFC 8032
+The Client Profile signature is verified as defined in RFC 8032
 [\[9\]](#references), section 5.2.7. It works as follows:
 
 ```
@@ -1461,11 +1464,11 @@ The User Profile signature is verified as defined in RFC 8032
     sufficient to check '(S * G) = R + (k * H_1)'.
 ```
 
-### Validating a User Profile
+### Validating a Client Profile
 
-To validate a User Profile, you must (in this order):
+To validate a Client Profile, you must (in this order):
 
-1. Verify that the User Profile has not expired.
+1. Verify that the Client Profile has not expired.
 2. Verify that the `Versions` field contains the character "4".
 3. Validate that the `Public Shared Prekey` and the `Ed448 Public Key` are on
    the curve Ed448-Goldilocks. See
@@ -1473,12 +1476,12 @@ To validate a User Profile, you must (in this order):
    section for details.
 3. If the `Transitional Signature` is present, verify its validity using the
    OTRv3 DSA key.
-4. [Verify that the User Profile signature is valid](#verify-a-user-profile-signature).
+4. [Verify that the Client Profile signature is valid](#verify-a-client-profile-signature).
 
 ## Prekey Profile
 
 OTRv4 introduces prekey profiles. The Prekey Profile contains a Prekey Profile's
-Identifier, the User Profile owner's instance tag, the Ed448 long-term
+Identifier, the Client Profile owner's instance tag, the Ed448 long-term
 public key, a shared prekey, a prekey profile expiration date and a signature of
 all these. It is signed by the Ed448 long-term public key.
 
@@ -1547,13 +1550,13 @@ PREKEY-EDDSA-SIG signature (PREKEY-EDDSA-SIG):
 
 To create a Prekey Profile, generate:
 
-1. A unique random id that is going to act as an identifier for this User
+1. A unique random id that is going to act as an identifier for this Prekey
    Profile. It should be 4 byte unsigned value, big-endian.
 
 To create a Prekey Profile, assemble:
 
 1. The Prekey Profile's identifier.
-2. The same User Profile owner's instance tag. Denote this value Prekey Profile
+2. The same Client Profile owner's instance tag. Denote this value Prekey Profile
    owner's instance tag.
 3. Prekey Profile Expiration: Expiration date in standard Unix 64-bit format
    (seconds since the midnight starting Jan 1, 1970, UTC, ignoring leap
@@ -1571,7 +1574,7 @@ To create a Prekey Profile, assemble:
    [Create a Prekey Profile Signature](#create-a-prekey-profile-signature)
    section.
 
-After the prekey profile is created, it must be published in the untrusted
+After the Prekey Profile is created, it must be published in the untrusted
 Prekey Server.
 
 ### Prekey Profile Expiration and Renewal
@@ -1585,12 +1588,11 @@ that this can be configurable. A recommended value is one week.
 
 For this:
 
-   * Concatenate `Prekey Profile's Identifier ||
-     Prekey Profile's owner's instance tag || Ed448 public key ||
-     Prekey Profile Expiration || Public Shared Prekey`.
-     Denote this value `m`.
-   * Sign `m` with the symmetric key, as stated below. Denote this value
-     `Profile Signature`.
+* Concatenate `Prekey Profile's Identifier ||
+  Prekey Profile's owner's instance tag || Ed448 public key ||
+  Prekey Profile Expiration || Public Shared Prekey`. Denote this value `m`.
+* Sign `m` with the symmetric key, as stated below. Denote this value
+  `Profile Signature`.
 
 The Prekey Profile signature for version 4 is generated as defined in RFC 8032
 [\[9\]](#references), section 5.2.6. The flag `f` is set to `0` and the context
@@ -1841,8 +1843,8 @@ and DH key.
 
 A valid Identity message is generated as follows:
 
-1. Create a User Profile, as defined in
-   [Creating a User Profile](#creating-a-user-profile) section.
+1. Create a Client Profile, as defined in
+   [Creating a Client Profile](#creating-a-client-profile) section.
 2. Generate an ephemeral ECDH key pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
    * secret key `y` (57 bytes).
@@ -1861,8 +1863,8 @@ To verify an Identity message:
 
 1. Verify if the message type is `0x08`.
 2. Verify that protocol's version of the message is `0x0004`.
-3. Validate the User Profile, as defined in
-   [Validating a User Profile](#validating-a-user-profile) section.
+3. Validate the Client Profile, as defined in
+   [Validating a Client Profile](#validating-a-client-profile) section.
 4. Verify that the point `Y` received is on curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
@@ -1887,8 +1889,8 @@ Receiver's instance tag (INT)
   differentiate the clients that a participant uses, this will often be 0 since
   the other party may not have set its instance tag yet.
 
-Sender's User Profile (USER-PROF)
-  As described in the section "Creating a User Profile".
+Sender's Client Profile (CLIENT-PROF)
+  As described in the section "Creating a Client Profile".
 
 Y (POINT)
   The ephemeral public ECDH key.
@@ -1908,8 +1910,8 @@ that its DH key is in the correct group.
 
 A valid Auth-R message is generated as follows:
 
-1. Create a User Profile, as detailed as defined in
-   [Creating a User Profile](#creating-a-user-profile) section.
+1. Create a Client Profile, as detailed as defined in
+   [Creating a Client Profile](#creating-a-client-profile) section.
 2. Generate an ephemeral ECDH key pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
    * secret key `x` (57 bytes).
@@ -1919,8 +1921,8 @@ A valid Auth-R message is generated as follows:
    * secret key `a` (80 bytes).
    * public key `A`.
 4. Compute
-   `t = 0x0 || KDF_1(0x06 || Bobs_User_Profile, 64) ||
-    KDF_1(0x07 || Alices_User_Profile, 64) || Y || X || B || A ||
+   `t = 0x0 || KDF_1(0x06 || Bobs_Client_Profile, 64) ||
+    KDF_1(0x07 || Alices_Client_Profile, 64) || Y || X || B || A ||
     KDF_1(0x08 || phi, 64)`.
    `phi` is the shared session state as mention in its
    [section](#shared-session-state).
@@ -1938,11 +1940,11 @@ To verify an Auth-R message:
 1. Verify if the message type is `0x91`.
 2. Verify that protocol's version of the message is `0x0004`.
 3. Check that the receiver's instance tag matches your sender's instance tag.
-4. Validate the User Profile as defined in
-   [Validating a User Profile](#validating-a-user-profile) section.
+4. Validate the Client Profile as defined in
+   [Validating a Client Profile](#validating-a-client-profile) section.
    Extract `H_a` from it.
-5. Compute `t = 0x0 || KDF_1(0x06 || Bobs_User_Profile, 64) ||
-   KDF_1(0x07 || Alices_User_Profile, 64) || Y || X || B || A ||
+5. Compute `t = 0x0 || KDF_1(0x06 || Bobs_Client_Profile, 64) ||
+   KDF_1(0x07 || Alices_Client_Profile, 64) || Y || X || B || A ||
    KDF_1(0x08 || phi, 64)`. `phi` is the shared session state as mention in its
    [section](#shared-session-state).
 6. Verify the `sigma` with
@@ -1964,8 +1966,8 @@ Sender's instance tag (INT)
 Receiver's instance tag (INT)
   The instance tag of the intended recipient.
 
-Sender's User Profile (USER-PROF)
-  As described in the section "Creating a User Profile".
+Sender's Client Profile (CLIENT-PROF)
+  As described in the section "Creating a Client Profile".
 
 X (POINT)
   The ephemeral public ECDH key.
@@ -1986,8 +1988,8 @@ This is the final message of the DAKE. It is sent to verify the authentication
 A valid Auth-I message is generated as follows:
 
 1. Compute
-   `t = 0x1 || KDF_1(0x09 || Bobs_User_Profile, 64) ||
-    KDF_1(0x0A || Alices_User_Profile, 64) || Y || X || B || A ||
+   `t = 0x1 || KDF_1(0x09 || Bobs_Client_Profile, 64) ||
+    KDF_1(0x0A || Alices_Client_Profile, 64) || Y || X || B || A ||
     KDF_1(0x0B || phi, 64)`.
    `phi` is the shared session state as mention in its
    [section](#shared-session-state).
@@ -2001,8 +2003,8 @@ To verify an Auth-I message:
 2. Verify that protocol's version of the message is `0x0004`.
 3. Check that the receiver's instance tag matches your sender's instance tag.
 4. Compute
-   `t = 0x1 || KDF_1(0x09 || Bobs_User_Profile, 64) ||
-    KDF_1(0x0A || Alices_User_Profile, 64) || Y || X || B || A ||
+   `t = 0x1 || KDF_1(0x09 || Bobs_Client_Profile, 64) ||
+    KDF_1(0x0A || Alices_Client_Profile, 64) || Y || X || B || A ||
     KDF_1(0x0B || phi, 64)`.
    `phi` is the shared session state as mention in its
    [section](#shared-session-state).
@@ -2030,7 +2032,7 @@ sigma (RING-SIG)
 
 ## Offline Conversation Initialization
 
-To begin an offline conversation, a set of prekey messages, a User Profile and a
+To begin an offline conversation, a set of prekey messages, a Client Profile and a
 Prekey Profile are published to an untrusted Prekey Server. These three
 publications are defined as a Prekey Ensemble. This action is considered as the
 start of the non-interactive DAKE. A Prekey Ensemble is retrieved by the party
@@ -2064,7 +2066,7 @@ section.
 ```
 Bob                            Prekey Server                           Alice
 ----------------------------------------------------------------------
-Publish a User Profile, a
+Publish a Client Profile, a
 Prekey Profile and a set of
 prekey messages                ----->
 								....
@@ -2076,16 +2078,16 @@ Verify. Decrypt message if attached.
 
 **Bob:**
 
-1. Creates a User Profile, as defined in
-   [Creating a User Profile](#creating-a-user-profile) section.
+1. Creates a Client Profile, as defined in
+   [Creating a Client Profile](#creating-a-client-profile) section.
 2. Creates a Prekey Profile, as defined in
    [Creating a Prekey Profile](#creating-a-prekey-profile) section.
 3. Generates prekey messages, as defined in the
    [Prekey Message](#prekey-message) section.
-2. Publishes the User Profile, the Prekey Profile and the prekey messages to an
-   untrusted Prekey Server. Note that he needs to publish the User Profile and
-   Prekey Profile once for every long-term public key he locally has until the
-   profiles respectively expire. He may upload new prekey messages at other
+2. Publishes the Client Profile, the Prekey Profile and the prekey messages to
+   an untrusted Prekey Server. Note that he needs to publish the Client Profile
+   and Prekey Profile once for every long-term public key he locally has until
+   the profiles respectively expire. He may upload new prekey messages at other
    times. See [Publishing Prekey Ensembles](#publishing-prekey-ensembles)
    section for details.
 
@@ -2094,13 +2096,13 @@ Verify. Decrypt message if attached.
 1. Requests prekey ensembles from the untrusted server.
 2. For each Prekey Ensemble received from the server:
    * [Validates each Prekey Ensemble](#validating-prekey-ensembles).
-   * Picks a compatible version of OTR listed in Bob's User Profile.
+   * Picks a compatible version of OTR listed in Bob's Client Profile.
      If the versions are incompatible, Alice does not send any further
      messages.
    * Sets the received ECDH ephemeral public key `Y` as `their_ecdh`.
    * Sets the received DH ephemeral public key `B` as `their_dh`.
 3. Extracts the Public Shared Prekey (`D_b`) from Bob's Prekey Profile. Extracts
-   the Ed448 public key (`H_b`) from Bob's User Profile. Sets the first as
+   the Ed448 public key (`H_b`) from Bob's Client Profile. Sets the first as
    `their_shared_prekey`.
 4. Generates a Non-Interactive-Auth message. See
    [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
@@ -2174,11 +2176,11 @@ Verify. Decrypt message if attached.
      * Otherwise:
        * Sets `Y` and `y` as `our_ecdh`: the ephemeral ECDH keys.
        * Sets `B` as  and `b` as `our_dh`: the ephemeral 3072-bit DH keys.
-   * Retrieves his corresponding User Profile from local storage, by
-     using the 'User Profile Indentifier' attached to the Non-Interactive-Auth
+   * Retrieves his corresponding Client Profile from local storage, by
+     using the 'Client Profile Indentifier' attached to the Non-Interactive-Auth
      message.
-     * If this 'User Profile Identifier' does not correspond to any User Profile
-       on local storage:
+     * If this 'Client Profile Identifier' does not correspond to any Client
+       Profile on local storage:
        * Aborts the DAKE.
    * Retrieves his corresponding Prekey Profile from local storage, by
      using the 'Prekey Profile Indentifier' attached to the Non-Interactive-Auth
@@ -2186,11 +2188,11 @@ Verify. Decrypt message if attached.
      * If this 'Prekey Profile Identifier' does not correspond to any Prekey
        Profile on local storage:
        * Aborts the DAKE.
-   * Validates Alice's User Profile and extracts `H_a` from it.
-   * Picks a compatible version of OTR listed on Alice's profile, and follows
-     the specification for this version. If the versions are incompatible, Bob
-     does not send any further messages.
-   * Sets his Public Shared Prekey (`D_b`) from his User Profile as
+   * Validates Alice's Client Profile and extracts `H_a` from it.
+   * Picks a compatible version of OTR listed on Alice's Client Profile, and
+     follows the specification for this version. If the versions are
+     incompatible, Bob does not send any further messages.
+   * Sets his Public Shared Prekey (`D_b`) from his Client Profile as
      `our_shared_prekey.public`.
    * Verifies the Non-Interactive-Auth message. See
      [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
@@ -2267,7 +2269,7 @@ A valid Prekey message is generated as follows:
    [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys):
    * secret key `b` (80 bytes).
    * public key `B`.
-4. Use the same instance tag from the User Profile and Prekey Profile's
+4. Use the same instance tag from the Client Profile and Prekey Profile's
    owner. Additional messages in this conversation will continue to use this
    tag as the sender's instance tag. Also, this tag is used to filter future
    received messages. Messages intended for this instance of the client will
@@ -2318,8 +2320,8 @@ also contain an attached encrypted message, which is highly recommended.
 
 A valid Non-Interactive-Auth message is generated as follows:
 
-1. Create a User Profile, as defined in
-   [Creating a User Profile](#creating-a-user-profile) section.
+1. Create a Client Profile, as defined in the
+   [Creating a Client Profile](#creating-a-client-profile) section.
 2. Generate an ephemeral ECDH key pair, as defined in
    [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys):
    * secret key `x` (57 bytes).
@@ -2337,8 +2339,8 @@ A valid Non-Interactive-Auth message is generated as follows:
    This value is needed for the generation of the Mixed shared secret.
 7. Calculate the Auth MAC key `auth_mac_k = KDF_1(0x0D || tmp_k, 64)`.
 8. Compute
-   `t = KDF_1(0x0E || Bobs_User_Profile, 64) ||
-    KDF_1(0x0F || Alices_User_Profile, 64) || Y || X || B || A ||
+   `t = KDF_1(0x0E || Bobs_Client_Profile, 64) ||
+    KDF_1(0x0F || Alices_Client_Profile, 64) || Y || X || B || A ||
     their_shared_prekey || KDF_1(0x10 || phi, 64)`.
 9. Compute `sigma = RSig(H_a, sk_ha, {H_b, H_a, Y}, t)`. When computing `sigma`,
    keep the first 24 bytes of the generated `c` value to be used as a `nonce`
@@ -2346,8 +2348,8 @@ A valid Non-Interactive-Auth message is generated as follows:
    [Ring Signature Authentication](#ring-signature-authentication) for details.
 10. Attach the 'Prekey Message Identifier' that is stated in the retrieved
     Prekey message.
-11. Attach the 'User Profile Message Identifier' that is stated in the retrieved
-    User Profile.
+11. Attach the 'Client Profile Message Identifier' that is stated in the
+    retrieved Client Profile.
 12. Attach the 'Prekey Profile Message Identifier' that is stated in the
     retrieved Prekey Profile.
 13. Generate a 4-byte instance tag to use as the sender's instance tag.
@@ -2369,8 +2371,8 @@ To verify a Non-Interactive-Auth message:
    [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
    section for details.
 6. Compute
-   `t = KDF_1(0x0E || Bobs_User_Profile, 64) ||
-    KDF_1(0x0F || Alices_User_Profile, 64) ||
+   `t = KDF_1(0x0E || Bobs_Client_Profile, 64) ||
+    KDF_1(0x0F || Alices_Client_Profile, 64) ||
     Y || X || B || A || our_shared_prekey.public || KDF_1(0x10 || phi, 64)`.
 7. Verify the `sigma` as defined in
    [Ring Signature Authentication](#ring-signature-authentication).
@@ -2390,8 +2392,8 @@ Sender's instance tag (INT)
 Receiver's instance tag (INT)
   The instance tag of the intended recipient.
 
-Sender's User Profile (USER-PROF)
-  As described in the section "Creating a User Profile".
+Sender's Client Profile (CLIENT-PROF)
+  As described in the section "Creating a Client Profile".
 
 X (POINT)
   The ephemeral public ECDH key.
@@ -2407,8 +2409,8 @@ Prekey Message Identifier (INT)
   The 'Prekey Message Identifier' from the Prekey message that was retrieved
   from the untrusted Prekey Server, as part of the Prekey Ensemble.
 
-User Profile Identifier (INT)
-  The 'User Profile Identifier' from the User Profile that was retrieved
+Client Profile Identifier (INT)
+  The 'Client Profile Identifier' from the Client Profile that was retrieved
   from the untrusted Prekey Server, as part of the Prekey Ensemble.
 
 Prekey Profile Identifier (INT)
@@ -2433,11 +2435,11 @@ Auth MAC (MAC)
 For starting a non-interactive conversation, an user must publish to an
 untrusted Prekey Server these values:
 
-- A User Profile (`USER-PROF`)
+- A Client Profile (`CLIENT-PROF`)
 - A Prekey Profile (`PREKEY-PROF`)
 - A set of prekey messages
 
-An user only needs to upload its User Profile and Prekey profile to the
+An user only needs to upload its Client Profile and Prekey profile to the
 untrusted Prekey Server once for every long-term public key it locally has,
 until this two profiles respectively expire. This means that if Bob uploads 3
 long-term keys for OTRv4 to his client, Bob's client must publish 3 user
@@ -2446,14 +2448,14 @@ profiles and 3 prekey profiles.
 However, this party may upload new prekey messages at other times, as defined in
 the [Publishing Prekey Messages](#publishing-prekey-messages) section.
 
-The party will also need to upload a new User Profile and a new Prekey Profile
+The party will also need to upload a new Client Profile and a new Prekey Profile
 when they expire. These new values replace the old ones. Take into account,
-however, that user profiles and prekey profiles will have an overlap period of
+however, that Client Profiles and Prekey Profiles will have an overlap period of
 extra validity, so they can be used when delayed encrypted offline messages
 arrive. After this extra validity time ends, they must be securely deleted from
 storage.
 
-The combination of one User Profile, one Prekey Profile and one Prekey message
+The combination of one Client Profile, one Prekey Profile and one Prekey message
 is called a "Prekey Ensemble".
 
 Details on how to interact with an untrusted Prekey Server to publish these
@@ -2474,14 +2476,14 @@ fail, ignore the Prekey Ensemble:
 
   1. Check that all the instance tags on the Prekey Ensemble's values are the
      same.
-  2. [Validate the User Profile](#validating-a-user-profile).
+  2. [Validate the Client Profile](#validating-a-client-profile).
   3. [Validate the Prekey Profile](#validating-a-prekey-profile).
   4. Check that the Prekey Profile is signed by the same long-term public key
-     stated on it and on the User Profile.
+     stated on it and on the Client Profile.
   5. Verify the Prekey message as stated on its [section](#prekey-message).
   6. Check that the OTR version of the prekey message matches one of the
-     versions signed in the User Profile contained in the Prekey Ensemble.
-  7. Check if the User Profile's version is supported by the receiver.
+     versions signed in the Client Profile contained in the Prekey Ensemble.
+  7. Check if the Client Profile's version is supported by the receiver.
 
 Note that these steps can be done in anticipation of sending a
 Non-Interactive-Auth message.
@@ -2490,20 +2492,20 @@ Non-Interactive-Auth message.
 
 Details on how prekey ensembles may be received from an untrusted Prekey Server
 are outside the scope of this protocol. This specification assumes that for
-every received User Profile and Prekey Profile, at least, one prekey message
+every received Client Profile and Prekey Profile, at least, one prekey message
 might arrive. However, this specification also assumes that none, one or more
 than one prekey ensembles may arrive. If the prekey server cannot return one
 of the three values needed for a Prekey Ensemble, the non-interactive DAKE must
 wait until this value can be obtained. Note that for every prekey message
 retrieved, it should be deleted from storage on the untrusted Prekey Server.
-Nevertheless, the User Profile and the Prekey Profile should not be deleted
+Nevertheless, the Client Profile and the Prekey Profile should not be deleted
 until they are replaced when expired.
 
 The following guide is meant to help implementers identify and remove invalid
 prekey ensembles.
 
 If the untrusted Prekey Server cannot return one of the three values needed for
-a Prekey Ensemble (a User Profile, a Prekey Profile and a Prekey message):
+a Prekey Ensemble (a Client Profile, a Prekey Profile and a Prekey message):
 
 1. The non-interactive DAKE must wait until this value can be obtained.
 
@@ -2512,7 +2514,7 @@ If one Prekey Ensemble is received:
 1. [Validate the Prekey Ensemble](#validating-prekey-ensembles).
 2. If the Prekey Ensemble is valid, decide whether to send a
    Non-Interactive-Auth message depending on whether the long-term key in the
-   User Profile is trusted or not. This decision is optional.
+   Client Profile is trusted or not. This decision is optional.
 
 If many prekey ensembles are received:
 
@@ -2521,8 +2523,8 @@ If many prekey ensembles are received:
 3. Discard all duplicate prekey ensembles in the list.
 4. If one Prekey Ensemble remains:
     * Decide whether to send a message using this Prekey Ensemble if the
-      long-term key within the User Profile is trusted or not. This decision is
-      optional.
+      long-term key within the Client Profile is trusted or not. This decision
+      is optional.
 5. If multiple valid prekey ensembles remain:
     * If there are keys that are untrusted and trusted in the list of messages,
       decide whether to only use messages that contain trusted long-term keys.
@@ -2620,8 +2622,8 @@ attaches it to the Non-Interactive-Auth message, which will look like this:
 
 ```
   (Protocol version || message type || sender's instance tag || receiver's
-   instance tag || Sender's User Profile || X || A || sigma || Prekey Message
-   Identifier || User Profile Identifier || Prekey Profile Identifier ||
+   instance tag || Sender's Client Profile || X || A || sigma || Prekey Message
+   Identifier || Client Profile Identifier || Prekey Profile Identifier ||
    (attached message ratchet id || attached message id || public ECDH key ||
    public DH key || encrypted message) || Auth MAC)
 ```
@@ -3538,7 +3540,7 @@ If the state is `WAITING_AUTH_I`:
 
   * Validate the Identity message. Ignore the message if validation fails.
   * If validation succeeds:
-    * Forget the old `their_ecdh`, `their_dh` and User Profile from the
+    * Forget the old `their_ecdh`, `their_dh` and Client Profile from the
       previously received Identity message.
     * Send a new Auth-R message with the new values received.
 
@@ -4257,9 +4259,9 @@ Read and Forge Data Message
 
 Forge DAKE and Session Keys
   Any participant of an OTR conversation may forge a DAKE with another
-  participant as long as they have their User Profile. This function will
-  take the User Profile and the secret long-term key of one participant, and
-  the User Profile of the other. It will return a DAKE transcript between
+  participant as long as they have their Client Profile. This function will
+  take the Client Profile and the secret long-term key of one participant, and
+  the Client Profile of the other. It will return a DAKE transcript between
   the two parties. The participant's private key is required since it is used
   to authenticate the key exchange, but the resulting transcript is created
   in such a way that a cryptographic expert cannot identify which user
@@ -4283,13 +4285,13 @@ Forge Entire Transcript
   The Forge Entire Transcript function will allow one participant to completely
   forge a transcript between them and another person in a way that its forgery
   cannot be cryptographically proven. The input will be: one participant's user
-  profile, their secret key, another participant's User Profile, and a list of
+  profile, their secret key, another participant's Client Profile, and a list of
   plain text messages corresponding to what messages were exchanged. Each
   message in the list will have the structure: 1) sender 2) plain text message,
   so that the function may precisely create the desired transcript. The
   participant's private key is required since it is used to authenticate the key
   exchange, but the resulting transcript is created in such a way that a
-  cryptographic expert cannot identify which User Profile owner authenticated
+  cryptographic expert cannot identify which Client Profile owner authenticated
   the conversation.
 ```
 
