@@ -850,7 +850,7 @@ Note that varible length fields are encoded as DATA.
   phi = session identifier mandated by the OTRv4 spec || phi'
 ```
 
-In XMPP, for example, `Phi'` can be the node and domain parts of the sender and
+In XMPP, for example, `phi'` can be the node and domain parts of the sender and
 receiver's jabber identifier, e.g. `alice@jabber.net` (often referred as the
 "bare JID"). In an application that assigns some attribute to users before a
 conversation (e.g., a networked game in which players take on specific roles),
@@ -863,7 +863,7 @@ look like this, for the initiator of the interactive DAKE:
 ```
   phi = sender's instance tag || receiver's instance tag ||
         DATA(query message) || DATA(sender's bare JID) ||
-        DATA(receiver's bare JID
+        DATA(receiver's bare JID)
   phi = DATA(0x00000100) || DATA(0x00000101) || DATA("?OTRv4?") ||
         DATA("alice@jabber.net") || DATA("bob@jabber.net")
 ```
