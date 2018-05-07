@@ -349,7 +349,8 @@ The modes are:
    deniability properties when compared to the previous two modes, as it
    achieves offline and online deniability for both participants in a
    conversation. It only supports interactive conversations. It is not backwards
-   compatible with OTRv3.
+   compatible with OTRv3. This mode can be used by network models that do not
+   have a central infrastructure, like Ricochet.
 
 For details on how these modes work, review the
 [modes](https://github.com/otrv4/otrv4/tree/master/modes) folder.
@@ -1060,7 +1061,7 @@ Mixed shared secret `K` (see
 
 Before rotating the keys:
 
-  * Reset the next message id (`j`) to 0.
+  * Reset the sending message id (`j`) to 0.
 
 To rotate the ECDH keys:
 
@@ -2957,7 +2958,7 @@ This is done by:
   * Rotate the ECDH keys and brace key, see
     [Rotating ECDH Keys and Brace Key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
     section.
-  * Set the received `pn` as `j`.
+  * Set `pn` as the received `j`.
   * Calculate `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`. Securely deletes
     `K_ecdh`.
   * Derive new set of keys
