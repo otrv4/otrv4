@@ -836,11 +836,15 @@ The shared session state (Φ) verifies shared state from the higher-level
 protocol as well as from OTR itself. Therefore, an implementer (who has complete
 knowledge of the application network stack) should define a known shared session
 state from the higher-level protocol as `phi`, as well as include the values
-imposed by this specification. All the fields are encoded as DATA.
+imposed by this specification. Notice that the inclusion of the query message or
+the whitespace tag depends of the mode the protocol is initialized. In the case
+of OTRv4-only and OTRv4-only modes, these values are not included.
+
+Note that varible lenght fields are encoded as DATA.
 
 ```
   session identifier mandated by the OTRv4 spec = sender and receiver's instance
-    tags, and the query message or the whitespace tag
+    tags, or/and the query message or the whitespace tag
   phi' = session identifier defined by the implementer
   phi = session identifier mandated by the OTRv4 spec || phi'
 ```
