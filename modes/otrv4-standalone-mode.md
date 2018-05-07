@@ -40,19 +40,19 @@ differ in these sections:
   a participant sends an identity message. In this mode, there is no
   advertisement of which version a participant supports as both parties
   only support OTRv4.
-- "Creating a User Profile": the `Versions` field must only allow the 1-byte
+- "Creating a Client Profile": the `Versions` field must only allow the 1-byte
   version string "4".
-- "Creating a User Profile": the `Transitional Signature` field is not allowed
+- "Creating a Client Profile": the `Transitional Signature` field is not allowed
   in this mode: there is no DSA signature generation or verification. Therefore,
-  when validating a User Profile, the DSA signature must not be verified.
+  when validating a Client Profile, the DSA signature must not be verified.
 - "Establishing Versions": ignore the paragraph: "A compliant OTRv4
   implementation is required to support version 3 of OTR, but not versions 1 and
   2". This mode only allows version 4 of the protocol.
 - "Online Conversation Initialization": ignore everything that refers to query
   messages and whitespace tags. Always check that the compatible version in the
-  participant's User Profile includes "4".
+  participant's Client Profile includes "4".
 - "Offline Conversation Initialization": always check that the compatible
-  version in the participant's User Profile includes "4".
+  version in the participant's Client Profile includes "4".
 - "Fragmentation": only OTRv4 fragmentation is allowed. Ignore this paragraph:
   "For fragmentation in OTRv3, refer to the "Fragmentation" section on OTRv3
   specification".
@@ -92,8 +92,8 @@ Alice will be initiating the DAKE with Bob.
       [Identity message](#identity-message) section. If the verification fails
       (for example, if Alice's public keys -`Y` or `B`- are not valid), rejects
       the message and does not send anything further.
-    * Checks that the version in Alice's User Profile includes "4". If it is not,
-      Bob does not send any further messages.
+    * Checks that the version in Alice's Client Profile includes "4". If it is
+      not, Bob does not send any further messages.
     * Sets `Y` as `their_ecdh`.
     * Sets `B` as `their_dh`.
 2. Generates an Auth-R message, as defined in
@@ -213,7 +213,7 @@ Alice wants to send a message to Bob.
      availability) is immediately done. The conversation keys are stored on the
      device for later use.
    * No identity verification is necessary and the app uses a Trust on first use
-     (TOFU) policy. Bob's User Profile can be used to verify the information
+     (TOFU) policy. Bob's Client Profile can be used to verify the information
      about the alleged identity.
 2. Alice types messages, encrypts them and "sends them" to Bob.
    * Every message will always be encrypted.
@@ -230,7 +230,7 @@ Alice wants to send a message to Bob.
 
 1. Alice adds Bob as a contact
 2. Alice verifies Bob's identity. She either:
-   * Uses Bob's User Profile and verifies Bob's fingerprint using a business
+   * Uses Bob's Client Profile and verifies Bob's fingerprint using a business
      card, a HTTPS website, etc.
    * Performs a interactive DAKE and uses SMP.
 2. Alice types a messages and "sends them" to Bob.
