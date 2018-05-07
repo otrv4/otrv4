@@ -16,7 +16,7 @@ can be sent after this.
 In OTRv4, the window of key compromise is equivalent to how long it takes for
 the double ratchet to refresh the ephemeral key material (2 ratchets, including
 the first compromised ratchet) and how long a prekey message remains unused
-before the Prekey Profile becomes expired. We recommend expiration of the User
+before the Prekey Profile becomes expired. We recommend expiration of the Client
 Profile and the Prekey Profile to be a week long, so the window of key
 compromise will be one week. This is done as with offline conversations,
 participants may not receive messages or reply to them for days, weeks, or
@@ -117,7 +117,7 @@ B Prekey owner's DH public key (MPI)
 ```
 
 These prekey messages are uploaded to the untrusted Prekey Server along with
-a User Profile and a Prekey Profile. These three values create what is defined
+a Client Profile and a Prekey Profile. These three values create what is defined
 as a Prekey Ensemble.
 
 The public part of the Shared Prekey and its signature, which are essential to
@@ -140,8 +140,8 @@ Sender's instance tag (INT)
 Receiver's instance tag (INT)
   The instance tag of the intended recipient.
 
-Sender's User Profile (USER-PROF)
-  As described in the section "Creating a User Profile".
+Sender's Client Profile (CLIENT-PROF)
+  As described in the section "Creating a Client Profile".
 
 X (POINT)
   The ephemeral public ECDH key.
@@ -157,8 +157,8 @@ Prekey Message Identifier (INT)
   The 'Prekey Message Identifier' from the Prekey message that was retrieved
   from the untrusted Prekey Server, as part of the Prekey Ensemble.
 
-User Profile Identifier (INT)
-  The 'User Profile Identifier' from the User Profile that was retrieved
+Client Profile Identifier (INT)
+  The 'Client Profile Identifier' from the Client Profile that was retrieved
   from the untrusted Prekey Server, as part of the Prekey Ensemble.
 
 Prekey Profile Identifier (INT)
@@ -191,17 +191,18 @@ Describing the details of interactions between OTRv4 clients and a Prekey
 Server are outside the scope of this specification. Implementers are expected
 to create their own policy dictating how often their clients upload Prekey
 ensembles to the prekey server. Nevertheless, clients are expected to upload
-User Profile and Prekey Profile when the old ones are expired. Thus, new user
-profiles and prekey profiles should be published to the untrusted Prekey Server
-before they expire to keep valid values for the Prekey Ensemble available.
+Client Profile and Prekey Profile when the old ones are expired. Thus, new
+Client Profiles and Prekey Profiles should be published to the untrusted Prekey
+Server before they expire to keep valid values for the Prekey Ensemble
+available.
 
-A User Profile and Prekey Profile should be published for every long-term public
-key that belongs to a user for this device. This means that if Bob has a client
-which only supports OTRv4 and he uploads three long term keys for OTRv4 to his
-client, Bob's client must publish 3 user profiles and 3 prekey profiles. Also,
-if Bob uploads two long term keys for OTRv4 and two long term keys for OTRvX (a
-future version of OTR) which also implements the non-interactive DAKE, Bob will
-upload 4 profiles respectively.
+A Client Profile and Prekey Profile should be published for every long-term
+public key that belongs to a user for this device. This means that if Bob has a
+client which only supports OTRv4 and he uploads three long term keys for OTRv4
+to his client, Bob's client must publish 3 Client Profiles and 3 Prekey
+Profiles. Also, if Bob uploads two long term keys for OTRv4 and two long term
+keys for OTRvX (a future version of OTR) which also implements the
+non-interactive DAKE, Bob will upload 4 profiles respectively.
 
 #### Requesting prekey ensembles from a Prekey Server
 
@@ -212,32 +213,32 @@ Bob, any of the following may happen:
 1. Alice receives two prekey ensembles for Bob because Bob uses two OTRv4
    clients, one for his phone and one for his laptop. Each client maintains
    their own set of prekey ensembles on the same Prekey Server. These two prekey
-   ensembles will be different by instance tag (meaning there will be two user
-   profiles, two prekey profiles and two prekey message with different instance
+   ensembles will be different by instance tag (meaning there will be two Client
+   Profiles, two Prekey Profiles and two prekey messages with different instance
    tags). This scenario can, therefore, follow different paths:
 
-    1. The two prekey ensembles may have user profiles created with different
-       long-term keys and two prekey profiles signed by those different keys
+    1. The two prekey ensembles may have Client Profiles created with different
+       long-term keys and two Prekey Profiles signed by those different keys
        respectively. At this point, if Alice trusts only one key, she may decide
        to send a message only to the client with the key she trusts. If Alice
        trusts both keys, she may decide to send a message to one or both. If
        Alice does not trust either key, she may decide not to send a message
        or she may send messages without validating the keys.
-    2. The two prekey ensembles may have user profiles created with the same
-       long-term key and prekey profiles signed by the same key. If this key is
+    2. The two prekey ensembles may have Client Profiles created with the same
+       long-term key and Prekey Profiles signed by the same key. If this key is
        trusted, Alice may decide to send a message to both client instances. Or
-       Alice may decide to send a message only to the first Prekey ensemble
+       Alice may decide to send a message only to the first Prekey Ensemble
        received. If Alice does not trust the key, she may decide not to send a
        message or send an message to both instances without validating the keys.
 
-2. Alice receives two prekey ensembles from Bob with different user profiles but
-   the same instance tag (the prekey profiles are signed with the corresponding
-   long-term key stated on the user profiles). This can only validly happen if
-   Bob's client supports two different versions of OTR that use prekey ensembles
-   or if the long-term public key used in each ensemble's User Profile is
-   different.
+2. Alice receives two prekey ensembles from Bob with different Client Profiles
+   but the same instance tag (the Prekey Profiles are signed with the
+   corresponding long-term key stated in the Client profiles). This can only
+   validly happen if Bob's client supports two different versions of OTR that
+   use Prekey Ensembles or if the long-term public key used in each ensemble's
+   Client Profile is different.
 
-    1. If the versions and the long-term keys used in the User Profiles
+    1. If the versions and the long-term keys used in the Client Profiles
        and prekey messages are the same, and they are compatible with Alice's
        version, one of the prekey ensembles must be invalid, but Alice cannot
        know which. She should not send a message using either prekey ensemble.
@@ -274,23 +275,23 @@ ignore the message:
 ```
   1. Check that all the instance tags on the Prekey Ensemble's values are the
      same.
-  2. [Validate the User Profile](../otrv4.md#validating-a-user-profile).
+  2. [Validate the Client Profile](../otrv4.md#validating-a-client-profile).
   3. [Validate the Prekey Profile](../otrv4.md#validating-a-prekey-profile).
   4. Check that the Prekey Profile is signed by the same long-term public key
-     stated on it and on the User Profile.
+     stated on it and on the Client Profile.
   5. Verify the Prekey message as stated on its
      [section](../otrv4.md#prekey-message).
   6. Check that the OTR version of the prekey message matches one of the
-     versions signed in the User Profile contained in the Prekey Ensemble.
-  7. Check if the User Profile's version is supported by the receiver.
+     versions signed in the Client Profile contained in the Prekey Ensemble.
+  7. Check if the Client Profile's version is supported by the receiver.
 ```
 
 If one Prekey Ensemble is received:
 
 ```
   If the prekey ensemble is valid, decide whether to send a Non-Interactive
-  Auth message based on whether the long-term public key in the User Profile is
-  trusted or not.
+  Auth message based on whether the long-term public key in the Client Profile
+  is trusted or not.
 ```
 
 If many prekey ensembles are received:

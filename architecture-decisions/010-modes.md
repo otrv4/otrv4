@@ -40,12 +40,12 @@ initialized. It will also need to take this mode into account every time it
 makes a decision on how to transition from every state. This increases the
 complexity of the specification and implementation.
 
-Furthermore, "OTRv4-standalone" mode will only support version 4 of OTR. The User
-Profile, therefore will only allow the 1-byte version string "4". It will also
-not allow the Transitional Signature parameter on the same profile.
+Furthermore, "OTRv4-standalone" mode will only support version 4 of OTR. The
+Client Profile, therefore will only allow the 1-byte version string "4". It will
+also not allow the Transitional Signature parameter on the same Client Profile.
 
 In addition to only supporting the version 4 of OTR (and imposing the same
-restrictions to the User Profile as the "OTRv4-standalone" mode), the
+restrictions to the Client Profile as the "OTRv4-standalone" mode), the
 "OTRv4 interactive-only" mode will only support the interactive DAKE. This mode
 will not handle or generate any Prekey Profile or prekey messages, nor implement
 a Prekey Sever, not retrieve prekey ensembles.
