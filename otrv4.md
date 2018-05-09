@@ -858,7 +858,8 @@ the expected attributes (expressed in fixed length) should be included in
 `phi'`. A static password shared by both sides can also be included.
 
 For example, a shared session state which higher-level protocol is XMPP, will
-look like this, for the initiator of the interactive DAKE:
+look like this, for the initiator of the interactive DAKE (which is defined as
+the "receiver" by the responder of the interactive DAKE):
 
 ```
   phi = sender's instance tag || receiver's instance tag ||
@@ -868,11 +869,12 @@ look like this, for the initiator of the interactive DAKE:
         DATA("alice@jabber.net") || DATA("bob@jabber.net")
 ```
 
-For the receiver of the interactive DAKE, it will look like this:
+For the responder of the interactive DAKE, it will look like this (which is
+defined as the "receiver" by the initiator of the interactive DAKE):
 
 ```
   phi = receiver's instance tag || sender's instance tag ||
-        DATA(query message) ||  DATA(receiver's bare JID ||
+        DATA(query message) ||  DATA(receiver's bare JID) ||
         DATA(sender's bare JID)
   phi = DATA(0x00000100) || DATA(0x00000101) || DATA("?OTRv4?") ||
         DATA("alice@jabber.net") || DATA("bob@jabber.net")
@@ -1221,7 +1223,7 @@ an attacker.
 
 ## Client Profile
 
-OTRv4 introduces client profiles. The Client Profile contains a Client Profile's
+OTRv4 introduces Client Profiles. The Client Profile contains a Client Profile's
 Identifier, the Client Profile owner's instance tag, the Ed448 long-term
 public key, information about supported versions, a profile expiration date, a
 signature of all these, and an optional transitional signature.
