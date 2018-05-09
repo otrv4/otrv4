@@ -1313,9 +1313,7 @@ Transitional Signature (CLIENT-SIG)
 All of these fields should not be duplicated, except for the Ed448 public key,
 as a client/device can locally have more than one long-term Ed448 public key. In
 the case that more than one long-term Ed448 public key is found, the Client
-Profile should be signed with both of them. To assemble, include first the older
-long-term public key followed by the newer one. To sign, first sign with the
-older long-term public key and then with the newer one.
+Profile should be signed with both of them.
 
 `CLIENT-EDDSA-SIG` refers to the OTRv4 EDDSA signature:
 
@@ -1362,7 +1360,9 @@ Then, assemble:
 
 1. Client Profile's identifier.
 2. Client Profile owner's instance tag.
-3. Client's Ed448 long-term public key.
+3. Client's Ed448 long-term public keys. In the case that more than one Ed448
+   long-term public key is found, include first the older long-term public key
+   followed by the newer ones.
 4. Versions: a string corresponding to the user's supported OTR versions.
    A Client Profile can advertise multiple OTR versions. The format is described
    under the section [Establishing Versions](#establishing-versions) below.
@@ -1374,7 +1374,8 @@ Then, assemble:
    to create signatures of the entire Client Profile excluding the signature
    itself. The size of the signature is 114 bytes. For its generation, refer to
    [Create a Client Profile Signature](#create-a-client-profile-signature)
-   section.
+   section. To sign, first sign with the older Ed448 long-term public keys and
+   then with the newer ones.
 7. Transitional Signature (optional): A signature of the Client Profile
    excluding the Client Profile Signature and the user's OTRv3 DSA key. The
    Transitional Signature enables parties that trust user's version 3 DSA key to
