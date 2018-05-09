@@ -2647,10 +2647,13 @@ Public DH Key (MPI)
   is 'our_dh.public' value. For the receiver of this message, it is used as
   'their_dh'.
 
+Nonce (NONCE)
+  The nonce used with XSalsa20 to create the encrypted message contained in this
+  packet.
+
 Encrypted message (DATA)
   Using the appropriate encryption/message key, perform an XSalsa20 encryption
-  of the message. The 'nonce' used for this operation is also included in
-  the header of the attached message packet.
+  of the message.
 ```
 
 After the encryption and MAC of the attached encrypted message, the participant
