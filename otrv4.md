@@ -1223,10 +1223,12 @@ an attacker.
 
 ## Client Profile
 
-OTRv4 introduces Client Profiles. The Client Profile contains a Client Profile's
-Identifier, the Client Profile owner's instance tag, the Ed448 long-term
-public key, information about supported versions, a profile expiration date, a
-signature of all these, and an optional transitional signature.
+OTRv4 introduces Client Profiles. A Client Profile has an arbitrary number of
+fields. At minimum, a Client Profile contains a Client Profile's
+Identifier, the Client Profile owner's instance tag, Ed448 long-term
+public keys, information about supported versions, a profile expiration date, a
+signature of all these, and an optional transitional signature. It has variable
+length.
 
 There are two instances of the Client Profile that should be generated. One is
 used for authentication in both DAKEs (interactive and non-interactive). The
@@ -1273,21 +1275,47 @@ simultaneously published and valid.
 ### Client Profile Data Type
 
 ```
-Client Profile Expiration (CLIENT-PROF-EXP):
-  8 byte signed value, big-endian
-
 Client Profile (CLIENT-PROF):
-  Client Profile's Identifier (INT)
-    A Client Profile id used for local storage and retrieval.
-  Client Profile owner's instance tag (INT)
-    The instance tag of the client/device that created the Client Profile.
-  Ed448 public key (ED448-PUBKEY)
-    Corresponds to 'H'.
-  Versions (DATA)
-  Client Profile Expiration (CLIENT-PROF-EXP)
-  (optional) Transitional Signature (CLIENT-SIG)
-  Client Profile Signature (CLIENT-EDDSA-SIG)
+  Number of Fields (INT)
+  Fields (SEQ-FIELDS)
+    2 byte unsigned type, big-endian
+    the encoded field
+  Profile Signature (CLIENT-EDDSA-SIG)
 ```
+
+The supported fields are:
+
+```
+Client Profile's Identifier (INT)
+  Type = 0x0001
+  A Client Profile ID used for local storage and retrieval.
+
+Client Profile owner's instance tag (INT)
+  Type = 0x0002
+  The instance tag of the client/device that created the Client Profile.
+
+Ed448 public key (ED448-PUBKEY)
+  Type = 0x0003
+  Corresponds to 'H'.
+
+Versions (DATA)
+  Type = 0x0004
+
+Client Profile Expiration (CLIENT-PROF-EXP)
+  Type = 0x0005
+
+Transitional Signature (CLIENT-SIG)
+  Type = 0x0005
+  This signature is defined as a signature over fields 0x0001,
+  0x0002, 0x0003, 0x0004, 0x0005 only.
+```
+
+All of these fields should not be duplicated, except for the Ed448 public key,
+as a client/device can locally have more than one long-term Ed448 public key. In
+the case that more than one long-term Ed448 public key is found, the Client
+Profile should be signed with both of them. To assemble, include first the older
+long-term public key followed by the newer one. To sign, first sign with the
+older long-term public key and then with the newer one.
 
 `CLIENT-EDDSA-SIG` refers to the OTRv4 EDDSA signature:
 
