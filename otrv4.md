@@ -1985,9 +1985,8 @@ To verify an Auth-R message:
    KDF_1(0x07 || Alices_Client_Profile, 64) || Y || X || B || A ||
    KDF_1(0x08 || phi, 64)`. `phi` is the shared session state as mention in its
    [section](#shared-session-state).
-8. Verify the `sigma` with
-   [Ring Signature Authentication](#ring-signature-authentication), that is
-   `sigma == RVrf({H_b, H_a, Y}, t)`.
+8. Verify the `sigma` as defined in
+   [Ring Signature Authentication](#ring-signature-authentication).
 
 An Auth-R message is an OTRv4 message encoded as:
 
