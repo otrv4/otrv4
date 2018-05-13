@@ -1789,19 +1789,12 @@ Bob will be initiating the DAKE with Alice.
    * Picks a compatible version of OTR listed on Alice's profile, and follows
      the specification for this version. If the versions are incompatible, Bob
      does not send any further messages.
-2. Retrieves the ephemeral public keys from Alice:
-    * Validates that the received ECDH ephemeral public key `X` is on curve
-      Ed448 and sets it as `their_ecdh`.
-      See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
-      section for details.
-    * Validates that the received DH ephemeral public key `A` is on the correct
-      group and sets it as `their_dh`. See
-      [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
-      section for details.
-3. Verifies the Auth-R message as defined in the
+2. Verifies the Auth-R message as defined in the
    [Auth-R Message](#auth-r-message) section.
-4. Creates an Auth-I message (see [Auth-I Message](#auth-i-message) section).
-5. Calculates the Mixed shared secret (`K`) and the SSID:
+   * Sets `X` as `their_ecdh`.
+   * Sets `A` as `their_dh`.
+3. Creates an Auth-I message (see [Auth-I Message](#auth-i-message) section).
+4. Calculates the Mixed shared secret (`K`) and the SSID:
     * Calculates ECDH shared secret
       `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
       Securely deletes `our_ecdh.secret`.
@@ -1813,7 +1806,7 @@ Bob will be initiating the DAKE with Alice.
       `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`.
       Securely deletes `k_ecdh` and `brace_key`.
     * Calculates the SSID from shared secret: `KDF_1(0x05 || K, 8)`.
-6. Initializes the double-ratchet:
+5. Initializes the double-ratchet:
     * Sets ratchet id `i` as 0.
     * Sets `j` as 0, `k` as 0 and `pn` as 0.
     * Interprets `K` as the first root key (`root_key[i-1]`).
@@ -1826,8 +1819,8 @@ Bob will be initiating the DAKE with Alice.
       of using a random value `r`, it will use : `r = KDF_1(0x14 || K, 80)`.
       Securely replaces `our_dh` with the outputs.
     * Securely deletes `their_ecdh` and `their_dh`.
-7. Sends Alice the Auth-I message (see [Auth-I message](#auth-i-message) section).
-8. At this point, the interactive DAKE is complete for Bob, but the double
+6. Sends Alice the Auth-I message (see [Auth-I message](#auth-i-message) section).
+7. At this point, the interactive DAKE is complete for Bob, but the double
    ratchet algorithm still needs to be correctly set up.
 
 **Alice:**
@@ -1979,11 +1972,17 @@ To verify an Auth-R message:
 4. Validate the Client Profile as defined in
    [Validating a Client Profile](#validating-a-client-profile) section.
    Extract `H_a` from it.
-5. Compute `t = 0x0 || KDF_1(0x06 || Bobs_Client_Profile, 64) ||
+5. Verify that the point `X` received is on curve Ed448. See
+   [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+   section for details.
+6. Verify that the DH public key `A` is from the correct group. See
+   [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
+   section for details.
+7. Compute `t = 0x0 || KDF_1(0x06 || Bobs_Client_Profile, 64) ||
    KDF_1(0x07 || Alices_Client_Profile, 64) || Y || X || B || A ||
    KDF_1(0x08 || phi, 64)`. `phi` is the shared session state as mention in its
    [section](#shared-session-state).
-6. Verify the `sigma` with
+8. Verify the `sigma` with
    [Ring Signature Authentication](#ring-signature-authentication), that is
    `sigma == RVrf({H_b, H_a, Y}, t)`.
 
