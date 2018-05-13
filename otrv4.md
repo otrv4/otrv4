@@ -1225,8 +1225,8 @@ an attacker.
 
 OTRv4 introduces Client Profiles. A Client Profile has an arbitrary number of
 fields. At minimum, a Client Profile contains a Client Profile's
-Identifier, the Client Profile owner's instance tag, Ed448 long-term
-public keys, information about supported versions, a profile expiration date, a
+Identifier, the Client Profile owner's instance tag, a Ed448 long-term
+public key, information about supported versions, a profile expiration date, a
 signature of all these, and an optional transitional signature. It has variable
 length.
 
@@ -1280,7 +1280,8 @@ Client Profile (CLIENT-PROF):
   Fields (SEQ-FIELDS)
     2 byte unsigned type, big-endian
     the encoded field
-  Profile Signature (CLIENT-EDDSA-SIG)
+  Number of Client Profile Signatures (INT)
+  Client Profile Signatures (CLIENT-EDDSA-SIG)
 ```
 
 The supported fields are:
@@ -1310,7 +1311,7 @@ Transitional Signature (CLIENT-SIG)
   0x0002, 0x0003, 0x0004, 0x0005 only.
 ```
 
-All of these fields should not be duplicated, except for the Ed448 public key,
+The supported fields should not be duplicated, except for the Ed448 public key,
 as a client/device can locally have more than one long-term Ed448 public key. In
 the case that more than one long-term Ed448 public key is found, the Client
 Profile should be signed with both of them.
@@ -1356,12 +1357,12 @@ To create a Client Profile, generate:
    Profile. It should be 4 byte unsigned value, big-endian.
 2. A 4-byte instance tag to use as the Client Profile owner's instance tag.
 
-Then, assemble:
+Then, generate:
 
 1. Client Profile's identifier.
 2. Client Profile owner's instance tag.
 3. Client's Ed448 long-term public keys. In the case that more than one Ed448
-   long-term public key is found, include first the older long-term public key
+   long-term public key is found, include first the older long-term public keys
    followed by the newer ones.
 4. Versions: a string corresponding to the user's supported OTR versions.
    A Client Profile can advertise multiple OTR versions. The format is described
@@ -1369,20 +1370,31 @@ Then, assemble:
 5. Client Profile Expiration: Expiration date in standard Unix 64-bit format
    (seconds since the midnight starting Jan 1, 1970, UTC, ignoring leap
    seconds).
-6. Client Profile Signature: The symmetric key, the flag `f` (set to zero, as
-   defined on RFC 8032 [\[9\]](#references)) and the empty context `c` are used
-   to create signatures of the entire Client Profile excluding the signature
-   itself. The size of the signature is 114 bytes. For its generation, refer to
-   [Create a Client Profile Signature](#create-a-client-profile-signature)
-   section. To sign, first sign with the older Ed448 long-term public keys and
-   then with the newer ones.
-7. Transitional Signature (optional): A signature of the Client Profile
+6. Transitional Signature (optional): A signature of the Client Profile
    excluding the Client Profile Signature and the user's OTRv3 DSA key. The
    Transitional Signature enables parties that trust user's version 3 DSA key to
    trust the Client Profile in version 4. This is only used if the user supports
    versions 3 and 4. For more information, refer to
    [Create a Client Profile Signature](#create-a-client-profile-signature)
    section.
+
+Then:
+
+1. Assemble the previous fields as `Fields`.
+2. Assign the number of `Fields` as `Number of Fields`.
+3. Depending on how many Ed448 long-term are there, generate Client Profile
+   Signatures for each one of them. The symmetric key, the flag `f` (set to
+   zero, as defined on RFC 8032 [\[9\]](#references)) and the empty context `c`
+   are used to create a signature of the entire Client Profile excluding the
+   signature itself. The size of the signature is 114 bytes. For its generation,
+   refer to
+   [Create a Client Profile Signature](#create-a-client-profile-signature)
+   section. To sign, first sign with the older Ed448 long-term public keys and
+   then with the newer ones. Assign these signatures to
+   `Client Profile Signatures` by concatenating the ones that correspond to
+   older signatures first.
+4. Assign the number of `Client Profile Signatures` as
+   `Number of Client Profile Signatures`.
 
 After the Client Profile is created, it must be published in a public place.
 When using OTRv4 in OTRv3-compatible mode and OTRv4-standalone mode, notice that
@@ -1504,15 +1516,21 @@ The Client Profile signature is verified as defined in RFC 8032
 
 To validate a Client Profile, you must (in this order):
 
-1. Verify that the Client Profile has not expired.
-2. Verify that the `Versions` field contains the character "4".
-3. Validate that the `Public Shared Prekey` and the `Ed448 Public Key` are on
+1. Verify that the `Number of Fields` is equal to the number of fields present
+   on the Client Profile.
+2. Verify that the `Client Profile Signatures` field is not empty.
+3. Verify that the Client Profile has not expired.
+4. Verify that the `Versions` field contains the character "4".
+5. Validate that each `Ed448 Public Key` are on
    the curve Ed448-Goldilocks. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
-3. If the `Transitional Signature` is present, verify its validity using the
+6. If the `Transitional Signature` is present, verify its validity using the
    OTRv3 DSA key.
-4. [Verify that the Client Profile signature is valid](#verify-a-client-profile-signature).
+7. [Verify that the Client Profile signature is valid](#verify-a-client-profile-signature).
+   Notice that in the case that several Client Profile Signatures and
+   Ed448 long-term public keys are present, you should verify each signture with
+   the corresponding key.
 
 ## Prekey Profile
 
