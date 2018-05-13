@@ -1790,7 +1790,9 @@ Bob will be initiating the DAKE with Alice.
      the specification for this version. If the versions are incompatible, Bob
      does not send any further messages.
 2. Verifies the Auth-R message as defined in the
-   [Auth-R Message](#auth-r-message) section.
+   [Auth-R Message](#auth-r-message) section. If the verification fails
+   (for example, if Alice's public keys -`X` or `A`- are not valid), rejects
+   the message and does not send anything further.
    * Sets `X` as `their_ecdh`.
    * Sets `A` as `their_dh`.
 3. Creates an Auth-I message (see [Auth-I Message](#auth-i-message) section).
@@ -1827,7 +1829,8 @@ Bob will be initiating the DAKE with Alice.
 
 1. Receives the Auth-I message from Bob:
    * Verifies the Auth-I message as defined in the
-     [Auth-I message](#auth-i-message) section.
+     [Auth-I message](#auth-i-message) section. If the verification fails,
+     rejects the message and does not send anything further.
 2. Initializes the double ratchet algorithm:
    * Sets ratchet id `i` as 0.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
@@ -2130,7 +2133,8 @@ Verify. Decrypt message if attached.
 
 1. Requests prekey ensembles from the untrusted server.
 2. For each Prekey Ensemble received from the server:
-   * [Validates each Prekey Ensemble](#validating-prekey-ensembles).
+   * [Validates each Prekey Ensemble](#validating-prekey-ensembles). If the
+     verification fails, rejects the message and does not send anything further.
    * Picks a compatible version of OTR listed in Bob's Client Profile.
      If the versions are incompatible, Alice does not send any further
      messages.
@@ -2230,7 +2234,9 @@ Verify. Decrypt message if attached.
    * Sets his Public Shared Prekey (`D_b`) from his Client Profile as
      `our_shared_prekey.public`.
    * Verifies the Non-Interactive-Auth message. See
-     [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
+     [Non-Interactive-Auth Message](#non-interactive-auth-message) section. If
+     the verification fails, rejects the message and does not send anything
+     further.
 2. Retrieves the ephemeral public keys from Alice:
    * Sets the received ECDH ephemeral public key `X` as `their_ecdh`.
    * Sets the received DH ephemeral public key `A` as `their_dh`.
