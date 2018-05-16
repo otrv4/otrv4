@@ -2148,9 +2148,9 @@ Verify. Decrypt message if attached.
 3. Generates prekey messages, as defined in the
    [Prekey Message](#prekey-message) section.
 2. Publishes the Client Profile, the Prekey Profile and the prekey messages to
-   an untrusted Prekey Server. Note that he needs to publish the Client Profile
-   and Prekey Profile once for every long-term public key he locally has until
-   the profiles respectively expire. He may upload new prekey messages at other
+   an untrusted Prekey Server. Note that he needs to publish a Prekey Profile
+   once for every long-term public key he locally has until the profiles
+   respectively expire. He may upload new prekey messages at other
    times. See [Publishing Prekey Ensembles](#publishing-prekey-ensembles)
    section for details.
 
@@ -2166,8 +2166,8 @@ Verify. Decrypt message if attached.
    * Sets the received ECDH ephemeral public key `Y` as `their_ecdh`.
    * Sets the received DH ephemeral public key `B` as `their_dh`.
 3. Extracts the Public Shared Prekey (`D_b`) from Bob's Prekey Profile. Extracts
-   the Ed448 public key (`H_b`) from Bob's Client Profile. Sets the first as
-   `their_shared_prekey`.
+   one Ed448 public key (`H_b`) from Bob's Client Profile (the newest one). Sets
+   the first as `their_shared_prekey`.
 4. Generates a Non-Interactive-Auth message. See
    [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 5. Sets `X` and `x` as `our_ecdh`: the ephemeral ECDH keys.
@@ -2240,12 +2240,13 @@ Verify. Decrypt message if attached.
      * Otherwise:
        * Sets `Y` and `y` as `our_ecdh`: the ephemeral ECDH keys.
        * Sets `B` as  and `b` as `our_dh`: the ephemeral 3072-bit DH keys.
-   * Retrieves his corresponding Client Profile from local storage, by
-     using the 'Client Profile Indentifier' attached to the Non-Interactive-Auth
-     message.
-     * If this 'Client Profile Identifier' does not correspond to any Client
-       Profile on local storage:
+   * Retrieves his corresponding Ed448 long-term public key from local storage,
+     by using the 'Ed448 Long-term Public Key Identifier' attached to the
+     Non-Interactive-Auth message.
+     * If this 'Ed448 Long-term Public Key Identifier' does not correspond to
+       any stored Ed488 long-term public key on local storage:
        * Aborts the DAKE.
+     * Sets it as `H_b`.
    * Retrieves his corresponding Prekey Profile from local storage, by
      using the 'Prekey Profile Indentifier' attached to the Non-Interactive-Auth
      message.
@@ -2414,8 +2415,9 @@ A valid Non-Interactive-Auth message is generated as follows:
    [Ring Signature Authentication](#ring-signature-authentication) for details.
 10. Attach the 'Prekey Message Identifier' that is stated in the retrieved
     Prekey message.
-11. Attach the 'Client Profile Message Identifier' that is stated in the
-    retrieved Client Profile.
+11. Attach the 'Ed448 Long-term Public Key Identifier' that is stated in the
+    Ed488 long-term public key used in this message, retrieved from the Client
+    Profile.
 12. Attach the 'Prekey Profile Message Identifier' that is stated in the
     retrieved Prekey Profile.
 13. Generate a 4-byte instance tag to use as the sender's instance tag.
@@ -2475,9 +2477,10 @@ Prekey Message Identifier (INT)
   The 'Prekey Message Identifier' from the Prekey message that was retrieved
   from the untrusted Prekey Server, as part of the Prekey Ensemble.
 
-Client Profile Identifier (INT)
-  The 'Client Profile Identifier' from the Client Profile that was retrieved
-  from the untrusted Prekey Server, as part of the Prekey Ensemble.
+Ed448 Long-term Public Key Identifier (INT)
+  The 'Client Ed448 long-term public key ID' from the Client Ed448 long-term
+  public key, that is part of the Client Profile retrieved from the untrusted
+  Prekey Server, as part of the Prekey Ensemble.
 
 Prekey Profile Identifier (INT)
   The 'Prekey Profile Identifier' from the Prekey Profile that was retrieved
@@ -2505,11 +2508,13 @@ untrusted Prekey Server these values:
 - A Prekey Profile (`PREKEY-PROF`)
 - A set of prekey messages
 
-An user only needs to upload its Client Profile and Prekey profile to the
-untrusted Prekey Server once for every long-term public key it locally has,
-until this two profiles respectively expire. This means that if Bob uploads 3
-long-term keys for OTRv4 to his client, Bob's client must publish 3 user
-profiles and 3 prekey profiles.
+An user only needs to upload its Prekey Profile to the untrusted Prekey Server
+once for every long-term public key it locally has, until this profile expire.
+An user needs to upload its Client Profile to the untrusted Prekey Server
+with every Ed448 long-term public key it locally has, until this profile
+expire. This means that if Bob uploads 3 long-term keys for OTRv4 to his client,
+Bob's client must publish 1 Client Profile (with 3 long-term keys) and 3 Prekey
+Profiles.
 
 However, this party may upload new prekey messages at other times, as defined in
 the [Publishing Prekey Messages](#publishing-prekey-messages) section.
@@ -2592,9 +2597,9 @@ If many prekey ensembles are received:
       long-term key within the Client Profile is trusted or not. This decision
       is optional.
 5. If multiple valid prekey ensembles remain:
-    * If there are keys that are untrusted and trusted in the list of messages,
-      decide whether to only use messages that contain trusted long-term keys.
-      This decision is optional.
+    * If there are keys that are untrusted and trusted in the Client Profile,
+      decide whether to only use the trusted long-term keys; and send messages
+      with each one of them. This decision is optional.
     * If there are several instance tags in the list of prekey ensembles,
       decide which instance tags to send messages to.
     * If there are multiple prekey ensembles per instance tag, decide whether
