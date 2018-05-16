@@ -1291,9 +1291,9 @@ Client Profile owner's instance tag (INT)
   Type = 0x0001
   The instance tag of the client/device that created the Client Profile.
 
-Ed448 public key (CLIENT-ED448-PUBKEY)
+Client Ed448 public key (CLIENT-ED448-PUBKEY)
   Type = 0x0002
-  Corresponds to 'H'.
+  Corresponds to the Client Ed448 long-term public key, as stated below.
 
 Versions (DATA)
   Type = 0x0003
