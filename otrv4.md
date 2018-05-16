@@ -2712,6 +2712,7 @@ sending one. For this, the participant:
 * Rotates the ECDH keys and brace key, see
   [Rotating ECDH Keys and Brace Key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
   section.
+* Sets `pn` as the received `Attached Encrypted Message Id`.
 * Calculates the Mixed shared secret
   `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`. Securely deletes `K_ecdh`.
 * Derive new set of keys
