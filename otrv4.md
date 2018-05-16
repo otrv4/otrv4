@@ -3224,7 +3224,7 @@ OTR message as follows:
   * Assign an identifier, which will be used specifically for this fragmented
     data message. This is done in order to not confuse these fragments with
     other data message's fragments. The identifier is a unique randomly
-    generated 8-byte value that must be unique for the time the data message
+    generated 4-byte value that must be unique for the time the data message
     is fragmented.
   * Break it up into sufficiently small pieces. Let this number of pieces be
     `total`, and the pieces be `piece[1],piece[2],...,piece[total]`.
@@ -3232,7 +3232,7 @@ OTR message as follows:
     structure (as `index` runs from 1 to `total` inclusive:
 
   ```
-  "?OTR|%x|%x|%x,%hu,%hu,%s,", identifier, sender_instance, receiver_instance, index, total, piece[index]
+  "?OTR|%hu|%x|%x,%hu,%hu,%s,", identifier, sender_instance, receiver_instance, index, total, piece[index]
   ```
 
   OTRv3 messages get fragmented in a similar format, but without the identifier
