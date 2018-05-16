@@ -3035,7 +3035,7 @@ This is done by:
   * Rotate the ECDH keys and brace key, see
     [Rotating ECDH Keys and Brace Key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
     section.
-  * Set `pn` as the received `j`.
+  * Set `pn` as the received `Message id`.
   * Calculate `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`. Securely deletes
     `K_ecdh`.
   * Derive new set of keys
