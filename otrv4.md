@@ -1287,34 +1287,40 @@ Client Profile (CLIENT-PROF):
 The supported fields are:
 
 ```
-Client Profile's Identifier (INT)
-  Type = 0x0001
-  A Client Profile ID used for local storage and retrieval.
-
 Client Profile owner's instance tag (INT)
-  Type = 0x0002
+  Type = 0x0001
   The instance tag of the client/device that created the Client Profile.
 
-Ed448 public key (ED448-PUBKEY)
-  Type = 0x0003
+Ed448 public key (CLIENT-ED448-PUBKEY)
+  Type = 0x0002
   Corresponds to 'H'.
 
 Versions (DATA)
-  Type = 0x0004
+  Type = 0x0003
 
 Client Profile Expiration (CLIENT-PROF-EXP)
-  Type = 0x0005
+  Type = 0x0004
 
 Transitional Signature (CLIENT-SIG)
   Type = 0x0005
   This signature is defined as a signature over fields 0x0001,
-  0x0002, 0x0003, 0x0004, 0x0005 only.
+  0x0002, 0x0003, 0x0004 only.
 ```
 
 The supported fields should not be duplicated, except for the Ed448 public key,
 as a client/device can locally have more than one long-term Ed448 public key. In
 the case that more than one long-term Ed448 public key is found, the Client
 Profile should be signed with both of them.
+
+`CLIENT-ED448-PUBKEY` refers to the Ed488 long-term public key with a unique
+ID used for local storage and retrieval:
+
+```
+Client Ed448 long-term public key (CLIENT-ED448-PUBKEY):
+  4 byte unsigned value, little-endian
+    A Client Ed448 long-term public key ID used for local storage and retrieval.
+  The Ed448 long-term public key (ED448-PUBKEY)
+```
 
 `CLIENT-EDDSA-SIG` refers to the OTRv4 EDDSA signature:
 
@@ -1361,9 +1367,11 @@ Then, generate:
 
 1. Client Profile's identifier.
 2. Client Profile owner's instance tag.
-3. Client's Ed448 long-term public keys. In the case that more than one Ed448
-   long-term public key is found, include first the older long-term public keys
-   followed by the newer ones.
+3. Client's Ed448 long-term public keys:
+   * Assing a unique random id to each key, that is going to act as an
+     identifier for this key. It should be 4 byte unsigned value,
+     little-endian.
+   * Include first the older long-term public keys followed by the newer ones.
 4. Versions: a string corresponding to the user's supported OTR versions.
    A Client Profile can advertise multiple OTR versions. The format is described
    under the section [Establishing Versions](#establishing-versions) below.
@@ -1433,9 +1441,9 @@ that this can be configurable. A recommended value is one week.
 If version 3 and 4 are supported and the user has a pre-existing OTRv3
 long-term key:
 
-   * Concatenate `Client Profile's Identifier ||
-     Client Profile owner's instance tag || Ed448 public key || Versions ||
-     Client Profile Expiration || Public Shared Prekey`. Denote this value `m`.
+   * Concatenate ` Client Profile owner's instance tag ||
+     Client Ed448 public key || Versions || Client Profile Expiration`. Denote
+     this value `m`.
    * Sign `m` with the user's OTRv3 DSA key. Denote this value
      `Transitional Signature`.
    * Sign `m || Transitional Signature` with the symmetric key, as stated
@@ -1443,9 +1451,9 @@ long-term key:
 
 If only version 4 is supported:
 
-   * Concatenate `Client Profile's Identifier ||
-     Client Profile owner's instance tag || Ed448 public key || Versions ||
-     Client Profile Expiration || Public Shared Prekey`. Denote this value `m`.
+   * Concatenate `Client Profile owner's instance tag ||
+     Client Ed448 public key || Versions || Client Profile Expiration`. Denote
+     this value `m`.
    * Sign `m` with the symmetric key, as stated below. Denote this value
      `Client Profile Signature`.
 
