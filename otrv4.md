@@ -144,6 +144,7 @@ an existing messaging protocol, such as XMPP.
   (ECC).
 - Additional protection against transcript decryption in the case of ECC
   compromise.
+- Support of conversations where one party is offline.
 - The cryptographic primitives and protocols have been updated:
   - Deniable authenticated key exchanges (DAKE) using "DAKE with Zero Knowledge"
     (DAKEZ) and "Extended Zero-knowledge Diffie-Hellman" (XZDH)
