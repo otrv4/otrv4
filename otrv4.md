@@ -3577,7 +3577,7 @@ If the state is `START`:
     * Remember the sender's instance tag to use as the receiver's instance tag
       for future messages.
     * Reply with an Auth-R message.
-    * Transition to the `WAITING_AUTH_R` state.
+    * Transition to the `WAITING_AUTH_I` state.
 
 If the state is `WAITING_AUTH_R`:
 
