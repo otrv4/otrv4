@@ -194,7 +194,7 @@ Alice                             Untrusted Prekey Server    Bob
 --------------------------------------------------------------------------------
                                   (<----------------------   Pre-conversation: Creates
                                                              and sends a Prekey values: creates
-                                                             a Client Profile, Prekey Profile and a set of
+                                                             a Client Profile, Prekey Profiles and a set of
                                                              prekey messages)
 Retrieves Bob's  ----------------->
 Prekey Ensemble: asks for
@@ -206,7 +206,6 @@ with XZDH and sends the
 first Data Message
 
 Exchanges Data Messages <---------------------------------> Exchanges Data Messages
-
 ```
 
 The conversation can begin when one participant retrieves the other's
