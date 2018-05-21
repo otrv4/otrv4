@@ -2759,12 +2759,12 @@ data message is described in the
 [sending a Data Message](#sending-a-data-message)
 and [receiving a Data Messages](#receiving-a-data-message) sections.
 
-A message with an empty human-readable part (the plaintext is of zero length, or
-starts with a `NULL`) is a "heartbeat" message. This message is useful for key
-rotations and revealing MAC keys. It should not be displayed to the participant.
-If you have not sent a message to a correspondent in some (configurable) time,
-send a "heartbeat" message, consisting of a Data Message encoding and an empty
-plaintext. The heartbeat message should have the `IGNORE_UNREADABLE` flag set.
+A data message with an empty human-readable part (the plaintext is of zero
+length, or starts with a `NULL`) is a "heartbeat" message. This message is
+useful for key rotations and revealing MAC keys. It should not be displayed to
+the participant. If you have not sent a message to a correspondent in some
+(configurable) time, send a "heartbeat" message. The heartbeat message should
+have the `IGNORE_UNREADABLE` flag set.
 
 ```
 Alice                                                                           Bob
