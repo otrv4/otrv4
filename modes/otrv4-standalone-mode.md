@@ -168,6 +168,9 @@ Alice will be initiating the DAKE with Bob.
      * Follows what is defined in the
        [When you send a Data Message](../otrv4.md#when-you-send-a-data-message)
        section. Note that she will perform a new DH ratchet.
+   * In the case that she does not immediately send a data message with a
+     human-readable part:
+     * Sends a "heartbeat" message to correctly rotate the ratchet keys.
 
 **Bob:**
 
@@ -189,8 +192,8 @@ Alice will be initiating the DAKE with Bob.
    * Securely deletes `their_ecdh` and `their_dh`.
 3. At this point, the interactive DAKE is complete for Bob, but he has to
    correctly setup the double ratchet mechanism:
-   * In the case that he immediately receives a data message that advertises the
-     new public keys from Alice:
+   * In the case that he immediately receives a data message (or a "heartbeat"
+     message) that advertises the new public keys from Alice:
      * Follows what is defined in the
        [When you receive a Data Message](../otrv4.md#when-you-receive-a-data-message)
        section. Note that he will perform a new DH ratchet for the first
