@@ -3296,7 +3296,7 @@ for this _before_ checking for any of the other `?OTR:` markers):
       * Increment the buffer counter: `C = C + 1`.
     * Otherwise:
       * Forget any stored fragments of this buffer you may have.
-      * Reset `C`, `N` and `I` to 0, and discard this buffer.
+      * Reset `C` and `I` to 0, and discard this buffer.
 
   * Otherwise:
     * Consider this fragment as part of another buffer: either create a new
