@@ -1842,13 +1842,17 @@ Bob will be initiating the DAKE with Alice.
     * Generates an ephemeral ECDH key pair, as defined in
       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
       of using a random value `r`, it will use : `r = KDF_1(0x13 || K, 57)`.
-      Securely replaces `our_ecdh` with the outputs.
+      Securely replaces `their_ecdh` with the with the output
+      `our_ecdh.public (G * s)` and securely deletes the output
+      `our_ecdh.secret (s)`.
     * Generates an ephemeral DH key pair, as defined in
       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
       of using a random value `r`, it will use : `r = KDF_1(0x14 || K, 80)`.
-      Securely replaces `our_dh` with the outputs.
-    * Securely deletes `their_ecdh` and `their_dh`.
-6. Sends Alice the Auth-I message (see [Auth-I message](#auth-i-message) section).
+      Securely replaces `their_dh` with the output
+      `our_dh.public (g3 ^ r)` and securely deletes the output
+      `our_dh.secret (r)`.
+6. Sends Alice the Auth-I message (see [Auth-I message](#auth-i-message)
+   section).
 7. At this point, the interactive DAKE is complete for Bob, but the double
    ratchet algorithm still needs to be correctly set up.
 
@@ -1866,15 +1870,11 @@ Bob will be initiating the DAKE with Alice.
       * Generates an ephemeral ECDH key pair, as defined in
         [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
         of using a random value `r`, it will use : `r = KDF_1(0x13 || K, 57)`.
-        Securely replaces `their_ecdh` with the output
-        `our_ecdh.public (G * s)` and securely deletes the output
-        `our_ecdh.secret (s)`.
+        Securely replaces `our_ecdh` with the outputs.
       * Generates an ephemeral DH key pair, as defined in
         [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
         of using a random value `r`, it will use : `r = KDF_1(0x14 || K, 80)`.
-        Securely replaces `their_dh` with the output
-        `our_dh.public (g3 ^ r)` and securely deletes the output
-        `our_dh.secret (r)`.
+        Securely replaces `out_dh` with the outputs.
 3. At this point, the interactive DAKE is complete for Alice:
    * In the case that she wants to immediately send a data message:
      * Follows what is defined in the
@@ -2994,10 +2994,9 @@ This is done by:
       received 'Public DH Key' with the stored ones.
       * If they are equal:
           * Get the message key and the extra symmetric key (if needed):
-            `MKenc, extra_symm_key = skipped_MKenc[Public ECDH Key,
-            Public DH Key, i, j]`.
+            `MKenc, extra_symm_key = skipped_MKenc[i, j]`.
           * Securely delete
-            `skipped_MKenc[Public ECDH Key, Public DH Key, i, j]`.
+            `skipped_MKenc[i, j]`.
           * Calculate `MKmac = KDF_1(0x19 || MKenc, 64)`.
           * Use the `MKmac` to verify the MAC of the data message.
           * Set `nonce` as the "nonce" from the received data message.
@@ -3030,7 +3029,7 @@ This is done by:
                symmetric key):
                `extra_symm_key = KDF_1(0x1A || 0xFF || chain_key_r[i][j], 32)`.
              * Store
-               `MKenc, extra_sym_key = skipped_MKenc[Public ECDH Key, Public DH Key, i, k]`.
+               `MKenc, extra_sym_key = skipped_MKenc[i, k]`.
              * Increment `k = k + 1`.
              * Delete `chain_key_r[i][k]`.
   * Rotate the ECDH keys and brace key, see
@@ -3050,22 +3049,21 @@ This is done by:
   * Store any message keys from the current DH Ratchet that correspond to
     messages that have not yet arrived:
     * If `k` + `max_skip` < received `j`:
-         * Raise an exception that informs the participant that too many message
-           keys are stored.
-      * If `chain_key_r` is not `NULL`:
-         * while `k` < received `j`:
-             * Derive
-               `chain_key_r[i][k+1] = KDF_1(0x17 || chain_key_r[i][k], 64)`
-               and `MKenc = KDF_1(0x18 || chain_key_r[i][k], 32)`
-             * Derive (this is done any time a message key is stored as
-               there is no way of knowing if the message that will be received
-               in the future will ask for the computation of the extra
-               symmetric key):
-               `extra_symm_key = KDF_1(0x1A || 0xFF || chain_key_r[i-1][j], 32)`.
-             * Store
-               `MKenc, extra_sym_key = skipped_MKenc[Public ECDH Key, Public DH Key, i, k]`.
-             * Increment `k = k + 1`.
-             * Delete `chain_key_r[i-1][k]`.
+      * Abort the decryption of that data message.
+    * If `chain_key_r` is not `NULL`:
+      * while `k` < received `j`:
+        * Derive
+          `chain_key_r[i][k+1] = KDF_1(0x17 || chain_key_r[i][k], 64)`
+           and `MKenc = KDF_1(0x18 || chain_key_r[i][k], 32)`
+        * Derive (this is done any time a message key is stored as
+          there is no way of knowing if the message that will be received
+          in the future will ask for the computation of the extra
+          symmetric key):
+          `extra_symm_key = KDF_1(0x1A || 0xFF || chain_key_r[i-1][j], 32)`.
+        * Store
+          `MKenc, extra_sym_key = skipped_MKenc[i, k]`.
+        * Increment `k = k + 1`.
+        * Delete `chain_key_r[i-1][k]`.
   * Calculate the encryption and MAC keys (`MKenc` and `MKmac`).
 
     ```
