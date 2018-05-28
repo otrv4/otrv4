@@ -257,6 +257,16 @@ With this secret key, an adversary can impersonate other users to the owner of
 the key. The property by which participants cannot provide proof of
 participation to third parties is known as online or participation deniability.
 
+Online deniability can be broken in two ways: 1. coercive judges, when an
+online judge coerces a participant into interactively proving that messages were
+authored by a victim, without compromising long-term secrets; 2. malicious
+users, when a malicious participant interacts with a purpose-built third-party
+service during a conversation with a victim to produce non-repudiable proof of
+message authorship by the victim. This second attack can happen with remote
+attestation, where an adversary uses it on a participant's device
+to produce a non-repudiable proof/transcript of an otherwise deniable protocol
+[\[12\]](#references).
+
 Both DAKEs (interactive and non-interactive) provide offline deniability as
 anyone can forge a DAKE transcript between two parties using their long-term
 public keys.
@@ -4846,3 +4856,6 @@ Compute:
 11. Blake-Wilson, S., Johnson, D., Menezes, A. (1997) *Key Agreement Protocols
     and their Security Analysis*. Available at:
     https://dl.acm.org/citation.cfm?id=742138
+12. Lachlan J., Vieitez, R., Asokan, N. (2018) *On The Use of Remote Attestation
+    to Break and Repair Deniability*. Available at:
+    https://eprint.iacr.org/2018/424.pdf
