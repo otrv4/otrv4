@@ -1853,8 +1853,9 @@ Bob will be initiating the DAKE with Alice.
       `our_dh.secret (r)`.
 6. Sends Alice the Auth-I message (see [Auth-I message](#auth-i-message)
    section).
-7. At this point, the interactive DAKE is complete for Bob, but the double
-   ratchet algorithm still needs to be correctly set up.
+7. At this point, the interactive DAKE is complete for Bob:
+   * Sends a "heartbeat" message to correctly rotate the ratchet keys. Note that
+     he will perform a new ratchet.
 
 **Alice:**
 
@@ -1875,6 +1876,8 @@ Bob will be initiating the DAKE with Alice.
         [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
         of using a random value `r`, it will use : `r = KDF_1(0x14 || K, 80)`.
         Securely replaces `out_dh` with the outputs.
+3. Receives the "heart-beat" data message from Bob, which advertizes his new
+   ECDH and DH public key. Sets this as `their_ecdh` and `their_dh` respectevly.
 3. At this point, the interactive DAKE is complete for Alice:
    * In the case that she wants to immediately send a data message:
      * Follows what is defined in the
