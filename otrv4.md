@@ -352,7 +352,8 @@ The modes are:
    compatible with OTRv3. This mode can be used by network models that do not
    have a central infrastructure, like Ricochet.
 
-For details on how these modes work, review the
+For details on how these modes work and how the DAKEs and double ratchet is
+initialized in them, review the
 [modes](https://github.com/otrv4/otrv4/tree/master/modes) folder.
 
 Take into account, that some clients might implement different modes when
@@ -3568,6 +3569,10 @@ willing to do so. In such case, Alice should:
 * Send an Identity message.
 * Transition the state to `WAITING_AUTH_R`.
 
+For how to start a conversation interactively, check the
+[modes](https://github.com/otrv4/otrv4/tree/master/modes) folder, either the
+OTRv4-interactive-only mode or the OTRv4-standalone-mode one.
+
 #### Receiving an Identity Message
 
 If the state is `START`:
@@ -3663,7 +3668,11 @@ If the state is not `WAITING_AUTH_R`:
 * Generate and send an Auth-I message.
 * Initialize the double ratcheting, as defined in the
   [Interactive DAKE Overview](#interactive-dake-overview) section.
-* Transition to state `ENCRYPTED_MESSAGES`.
+* Transition to state `ENCRYPTED_MESSAGES`. In the case of the interactive
+  DAKE in the OTRv3-compatible mode, after sending an Auth-I Message, a
+  participant is only allowed to send a "heartbeat" message. After receiving a
+  data message from the other side, this participant is allowed to send
+  encrypted messages.
 
 #### Receiving an Auth-I Message
 
