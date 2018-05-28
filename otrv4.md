@@ -17,6 +17,7 @@ an existing messaging protocol, such as XMPP.
 1. [High Level Overview](#high-level-overview)
    1. [Conversation started by an Interactive DAKE](#conversation-started-by-an-interactive-dake)
    1. [Conversation started by a Non-Interactive DAKE](#conversation-started-by-a-non-interactive-dake)
+1. [Conventions](#conventions)
 1. [Assumptions](#assumptions)
 1. [Security Properties](#security-properties)
 1. [OTRv4 Modes](#otrv4-modes)
@@ -216,6 +217,24 @@ the other participant's client to a server. This have to be done so other
 participants, like Alice, can send messages to the other participant, like Bob,
 while the latter is offline.
 
+### Conventions
+
+Unless otherwise noted, these conventions and definitions are used for this document:
+
+* "Participant" refers to the one that takes part in a conversation.
+* "Adversary" refers to a malicious entity whose aim is to prevent the
+  participants of this protocol from achieving their goal.
+* "Initiator" refers to the participant initiating a DAKE.
+* "Responder" refers to the participant respoding an Initiator's request.
+* "Prekey Server" refers to the untrusted server used to store Prekey Ensemble's
+  values.
+* "Publisher" refers to the participant publishing Prekey Ensemble's values to
+  the Prekey Server.
+* "Retriever" refers to the participant retrieving Prekey Ensemble's values from
+  the Prekey Server that correspond to the publishing participant.
+* "Sender" refers to the participant sending an encoded message.
+* "Receiver" refers to the participant receiving an encoded message.
+
 ## Assumptions
 
 Messages in a conversation can be exchanged over an insecure channel, where an
@@ -264,7 +283,7 @@ users, when a malicious participant interacts with a purpose-built third-party
 service during a conversation with a victim to produce non-repudiable proof of
 message authorship by the victim. This second attack can happen with remote
 attestation, where an adversary uses it on a participant's device
-to produce a non-repudiable proof/transcript of an otherwise deniable protocol
+to produce a non-repudiable proof/transcript of the otherwise deniable protocol
 [\[12\]](#references).
 
 Both DAKEs (interactive and non-interactive) provide offline deniability as
