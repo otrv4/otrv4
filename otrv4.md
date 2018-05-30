@@ -2665,7 +2665,7 @@ participant:
   message.
 * Calculates the Mixed shared secret
   `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`. Securely deletes `K_ecdh`.
-* Derive new set of keys:
+* Derives a new set of keys:
   `root_key[i], chain_key_s[i][j] = derive_ratchet_keys(sending,
   root_key[i-1], K)`.
   Securely deletes the previous root key (`root_key[i-1]`) and `K`.
@@ -2746,12 +2746,13 @@ sending one. For this, the participant:
 * Rotates the ECDH keys and brace key, see
   [Rotating ECDH Keys and Brace Key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
   section.
-* Sets `pn` as the received `Attached Encrypted Message Id`.
 * Calculates the Mixed shared secret
   `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`. Securely deletes `K_ecdh`.
 * Derive new set of keys
   `root_key[i], chain_key_r[i][k] = derive_ratchet_keys(receiving, root_key[i-1], K)`.
 * Securely delete the previous root key (`root_key[i-1]`) and `K`.
+* Sets `pn` as `j`.
+* Sets `j` to 0.
 * Increments the ratchet id `i = i + 1`.
 * Derives the next receiving chain key by using the `chain_key_r[i-1][k]`
   already derived and decided:
@@ -3042,8 +3043,8 @@ This is done by:
           * Securely delete `MKenc`.
           * Add `MKmac` to the list `mac_keys_to_reveal`.
 
-* Given a new ratchet (the received `j` is equal to 0, the 'Public ECDH Key' is
-  different from `their_ecdh` and the 'Public DH Key' is different from
+* Given a new ratchet (the received `message id` is equal to 0, the 'Public ECDH
+  Key' is different from `their_ecdh` and the 'Public DH Key' is different from
   `their_dh` -if present-):
 
   * Store any message keys from the previous DH Ratchet that correspond to
@@ -3068,7 +3069,8 @@ This is done by:
   * Rotate the ECDH keys and brace key, see
     [Rotating ECDH Keys and Brace Key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
     section.
-  * Set `pn` as the received `Message id`.
+  * Set `pn` as `j`.
+  * Set `j` as 0.
   * Calculate `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`. Securely deletes
     `K_ecdh`.
   * Derive new set of keys
