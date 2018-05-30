@@ -1872,7 +1872,7 @@ Bob will be initiating the DAKE with Alice.
     * Generates an ephemeral ECDH key pair, as defined in
       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
       of using a random value `r`, it will use : `r = KDF_1(0x13 || K, 57)`.
-      Securely replaces `their_ecdh` with the with the output
+      Securely replaces `their_ecdh` with the output
       `our_ecdh.public (G * s)` and securely deletes the output
       `our_ecdh.secret (s)`.
     * Generates an ephemeral DH key pair, as defined in
