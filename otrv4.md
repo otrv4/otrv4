@@ -2753,6 +2753,7 @@ sending one. For this, the participant:
 * Securely delete the previous root key (`root_key[i-1]`) and `K`.
 * Sets `pn` as `j`.
 * Sets `j` to 0.
+* Sets `k` to 0.
 * Increments the ratchet id `i = i + 1`.
 * Derives the next receiving chain key by using the `chain_key_r[i-1][k]`
   already derived and decided:
@@ -3023,14 +3024,15 @@ This is done by:
 
 * Try to decrypt the message with a stored skipped message key:
 
-  * If the received `j` and `i` are in the `skipped_MKenc` dictionary:
+  * If the received `message_id` and `ratchet_id` are in the `skipped_MKenc`
+    dictionary:
     * Compare the received 'Public ECDH Key' and, if present, the
       received 'Public DH Key' with the stored ones.
       * If they are equal:
           * Get the message key and the extra symmetric key (if needed):
-            `MKenc, extra_symm_key = skipped_MKenc[i, j]`.
+            `MKenc, extra_symm_key = skipped_MKenc[ratchet_id, message_id]`.
           * Securely delete
-            `skipped_MKenc[i, j]`.
+            `skipped_MKenc[ratchet_id, message_id]`.
           * Calculate `MKmac = KDF_1(0x19 || MKenc, 64)`.
           * Use the `MKmac` to verify the MAC of the data message.
           * Set `nonce` as the "nonce" from the received data message.
@@ -3049,11 +3051,11 @@ This is done by:
 
   * Store any message keys from the previous DH Ratchet that correspond to
     messages that have not yet arrived:
-      * If `k` + `max_skip` < received `pn`:
+      * If `k` + `max_skip` < received `Previous chain message number`:
          * Raise an exception that informs the participant that too many message
            keys are stored.
       * If `chain_key_r` is not `NULL`:
-         * while `k` < received `pn`:
+         * while `k` < received `Previous chain message number`:
              * Derive
                `chain_key_r[i][k+1] = KDF_1(0x17 || chain_key_r[i][k], 64)`
                and `MKenc = KDF_1(0x18 || chain_key_r[i][k], 32)`
@@ -3071,6 +3073,7 @@ This is done by:
     section.
   * Set `pn` as `j`.
   * Set `j` as 0.
+  * Set `k` as 0.
   * Calculate `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`. Securely deletes
     `K_ecdh`.
   * Derive new set of keys
@@ -3083,10 +3086,10 @@ This is done by:
 * When receiving a data message in the same DH Ratchet:
   * Store any message keys from the current DH Ratchet that correspond to
     messages that have not yet arrived:
-    * If `k` + `max_skip` < received `j`:
+    * If `k` + `max_skip` < received `message_id`:
       * Abort the decryption of that data message.
     * If `chain_key_r` is not `NULL`:
-      * while `k` < received `j`:
+      * while `k` < received `message_id`:
         * Derive
           `chain_key_r[i][k+1] = KDF_1(0x17 || chain_key_r[i][k], 64)`
            and `MKenc = KDF_1(0x18 || chain_key_r[i][k], 32)`
