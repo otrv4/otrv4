@@ -1872,20 +1872,16 @@ Bob will be initiating the DAKE with Alice.
     * Generates an ephemeral ECDH key pair, as defined in
       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
       of using a random value `r`, it will use : `r = KDF_1(0x13 || K, 57)`.
-      Securely replaces `their_ecdh` with the output
-      `our_ecdh.public (G * s)` and securely deletes the output
-      `our_ecdh.secret (s)`.
+      Securely replaces `our_ecdh` with the outputs.
     * Generates an ephemeral DH key pair, as defined in
       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
       of using a random value `r`, it will use : `r = KDF_1(0x14 || K, 80)`.
-      Securely replaces `their_dh` with the output
-      `our_dh.public (g3 ^ r)` and securely deletes the output
-      `our_dh.secret (r)`.
+      Securely replaces `our_dh` with the outputs.
+    * Securely deletes `their_ecdh` and `their_dh`.
 6. Sends Alice the Auth-I message (see [Auth-I message](#auth-i-message)
    section).
-7. At this point, the interactive DAKE is complete for Bob:
-   * Sends a "heartbeat" message to correctly rotate the ratchet keys. Note that
-     he will perform a new ratchet.
+7. At this point, the interactive DAKE is complete for Bob, but the double
+   ratchet algorithm still needs to be correctly set up.
 
 **Alice:**
 
@@ -1901,29 +1897,30 @@ Bob will be initiating the DAKE with Alice.
       * Generates an ephemeral ECDH key pair, as defined in
         [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
         of using a random value `r`, it will use : `r = KDF_1(0x13 || K, 57)`.
-        Securely replaces `our_ecdh` with the outputs.
+        Securely replaces `their_ecdh` with the output `our_ecdh.public (G * s)`
+        and securely deletes the output	`our_ecdh.secret (s)`.
       * Generates an ephemeral DH key pair, as defined in
         [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
         of using a random value `r`, it will use : `r = KDF_1(0x14 || K, 80)`.
-        Securely replaces `out_dh` with the outputs.
-3. Receives the "heart-beat" data message from Bob, which advertizes his new
-   ECDH and DH public key. Sets this as `their_ecdh` and `their_dh` respectevly.
+        Securely replaces `their_dh` with the output `our_dh.public (g3 ^ r)`
+        and securely deletes the output	`our_dh.secret (r)`.
 3. At this point, the interactive DAKE is complete for Alice:
+   * Sends a "heartbeat" message. Note that she will perfomr a new DH ratchet.
    * In the case that she wants to immediately send a data message:
      * Follows what is defined in the
        [When you send a Data Message](#when-you-send-a-data-message) section.
-       Note that she will perform a new DH ratchet.
 
 **Bob:**
 
 1. At this point, the interactive DAKE is complete for Bob, but he has to
    correctly setup the double ratchet logarithm:
-   * In the case that he immediately receives a data message that advertises the
-     new public keys from Alice:
+   * Receives the "heartbeat" message that advertizes the new public keys
+     from Alice. Note that he will perform a new DH ratchet for this first
+     message.
+   * In the case that he immediately receives a data message:
      * Follows what is defined in the
        [When you receive a Data Message](#when-you-receive-a-data-message)
-       section. Note that he will perform a new DH ratchet for the first
-       received data message. When he wants to send a data message after
+       section. When he wants to send a data message after
        receiving one, he will follow the
        [When you send a Data Message](#when-you-send-a-data-message) section,
        and perform a new DH Ratchet.
@@ -3221,7 +3218,7 @@ expired or when the storage of message keys gets deleted, and the MAC keys for
 messages that have not arrived are derived.
 
 Old MAC keys are formatted as a list of 64-byte concatenated values. The first
-data message sent every ratchet reveals them or the TLV type 7 that is used then
+data message sent every ratchet reveals them or the TLV type 7 that is used when
 the session is expired.
 
 ## Fragmentation
