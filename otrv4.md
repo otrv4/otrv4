@@ -1894,18 +1894,18 @@ Bob will be initiating the DAKE with Alice.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
    * Interprets `K` as the first root key (`root_key[i-1]`).
    * Generates Bob's ECDH and DH public keys:
-      * Generates an ephemeral ECDH key pair, as defined in
-        [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
-        of using a random value `r`, it will use : `r = KDF_1(0x13 || K, 57)`.
-        Securely replaces `their_ecdh` with the output `our_ecdh.public (G * s)`
-        and securely deletes the output	`our_ecdh.secret (s)`.
-      * Generates an ephemeral DH key pair, as defined in
-        [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
-        of using a random value `r`, it will use : `r = KDF_1(0x14 || K, 80)`.
-        Securely replaces `their_dh` with the output `our_dh.public (g3 ^ r)`
-        and securely deletes the output	`our_dh.secret (r)`.
+     * Generates an ephemeral ECDH key pair, as defined in
+       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
+       of using a random value `r`, it will use : `r = KDF_1(0x13 || K, 57)`.
+       Securely replaces `their_ecdh` with the output `our_ecdh.public (G * s)`
+       and securely deletes the output	`our_ecdh.secret (s)`.
+     * Generates an ephemeral DH key pair, as defined in
+       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
+       of using a random value `r`, it will use : `r = KDF_1(0x14 || K, 80)`.
+       Securely replaces `their_dh` with the output `our_dh.public (g3 ^ r)`
+       and securely deletes the output	`our_dh.secret (r)`.
 3. At this point, the interactive DAKE is complete for Alice:
-   * Sends a "heartbeat" message. Note that she will perfomr a new DH ratchet.
+   * Sends a "heartbeat" message. Note that she will perform a new DH ratchet.
    * In the case that she wants to immediately send a data message:
      * Follows what is defined in the
        [When you send a Data Message](#when-you-send-a-data-message) section.
@@ -1914,9 +1914,8 @@ Bob will be initiating the DAKE with Alice.
 
 1. At this point, the interactive DAKE is complete for Bob, but he has to
    correctly setup the double ratchet logarithm:
-   * Receives the "heartbeat" message that advertizes the new public keys
-     from Alice. Note that he will perform a new DH ratchet for this first
-     message.
+   * Receives the "heartbeat" message that advertises the new public keys
+     from Alice. He retrieves the new advertised public keys.
    * In the case that he immediately receives a data message:
      * Follows what is defined in the
        [When you receive a Data Message](#when-you-receive-a-data-message)
