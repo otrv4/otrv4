@@ -3699,10 +3699,9 @@ If the state is not `WAITING_AUTH_R`:
 * Initialize the double ratcheting, as defined in the
   [Interactive DAKE Overview](#interactive-dake-overview) section.
 * Transition to state `ENCRYPTED_MESSAGES`. In the case of the interactive
-  DAKE in the OTRv3-compatible mode, after sending an Auth-I Message, a
-  participant is only allowed to send a "heartbeat" message. After receiving a
-  data message from the other side, this participant is allowed to send
-  encrypted messages.
+  DAKE, after sending an Auth-I Message, a participant must wait for the
+  "heartbeat" message from the other participant in order to be able to send
+  data messages.
 
 #### Receiving an Auth-I Message
 
