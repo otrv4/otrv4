@@ -149,11 +149,11 @@ Alice will be initiating the DAKE with Bob.
     * Generates an ephemeral ECDH key pair, as defined in
       [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys), but instead
       of using a random value `r`, it will use : `r = KDF_1(0x19 || K, 57)`.
-      Securely replaces `our_ecdh` with the outputs.
+      Securely deletes `our_ecdh` and replaces it with the outputs.
     * Generates an ephemeral DH key pair, as defined in
       [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys), but instead
       of using a random value `r`, it will use : `r = KDF_1(0x20 || K, 80)`.
-      Securely replaces `our_dh` with the outputs.
+      Securely deletes `our_dh` and replaces it with the outputs.
     * Securely deletes `their_ecdh` and `their_dh`.
 6. Sends Bob the Auth-I message (see [Auth-I message](../otrv4.md#auth-i-message)
    section).
@@ -174,13 +174,15 @@ Alice will be initiating the DAKE with Bob.
       * Generates an ephemeral ECDH key pair, as defined in
         [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
         of using a random value `r`, it will use : `r = KDF_1(0x13 || K, 57)`.
-        Securely replaces `their_ecdh` with the output `our_ecdh.public (G * s)`
-        and securely deletes the output	`our_ecdh.secret (s)`.
+        Securely deletes `their_ecdh` and replaces it with the output
+        `our_ecdh.public (G * s)`, and securely deletes the output
+	`our_ecdh.secret (s)`.
       * Generates an ephemeral DH key pair, as defined in
         [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
         of using a random value `r`, it will use : `r = KDF_1(0x14 || K, 80)`.
-        Securely replaces `their_dh` with the output `our_dh.public (g3 ^ r)`
-        and securely deletes the output	`our_dh.secret (r)`.
+        Securely deletes `their_dh` and replaces it with the output
+        `our_dh.public (g3 ^ r)`, and securely deletes the output
+	`our_dh.secret (r)`.
 3. At this point, the interactive DAKE is complete for Bob:
    * Sends a "heartbeat" message. Note that he will perform a new DH ratchet.
 

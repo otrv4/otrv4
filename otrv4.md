@@ -1872,11 +1872,11 @@ Bob will be initiating the DAKE with Alice.
     * Generates an ephemeral ECDH key pair, as defined in
       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
       of using a random value `r`, it will use : `r = KDF_1(0x13 || K, 57)`.
-      Securely replaces `our_ecdh` with the outputs.
+      Securely deletes `our_ecdh` and replaces it with the outputs.
     * Generates an ephemeral DH key pair, as defined in
       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
       of using a random value `r`, it will use : `r = KDF_1(0x14 || K, 80)`.
-      Securely replaces `our_dh` with the outputs.
+      Securely deletes `our_dh` and replaces it with the outputs.
     * Securely deletes `their_ecdh` and `their_dh`.
 6. Sends Alice the Auth-I message (see [Auth-I message](#auth-i-message)
    section).
@@ -1897,13 +1897,15 @@ Bob will be initiating the DAKE with Alice.
      * Generates an ephemeral ECDH key pair, as defined in
        [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
        of using a random value `r`, it will use : `r = KDF_1(0x13 || K, 57)`.
-       Securely replaces `their_ecdh` with the output `our_ecdh.public (G * s)`
-       and securely deletes the output	`our_ecdh.secret (s)`.
+       Securely deletes `their_ecdh` and replaces its with the output
+       `our_ecdh.public (G * s)`, and securely deletes the output
+       `our_ecdh.secret (s)`.
      * Generates an ephemeral DH key pair, as defined in
        [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
        of using a random value `r`, it will use : `r = KDF_1(0x14 || K, 80)`.
-       Securely replaces `their_dh` with the output `our_dh.public (g3 ^ r)`
-       and securely deletes the output	`our_dh.secret (r)`.
+       Securely deletes `their_dh` and replaces it with the output
+       `our_dh.public (g3 ^ r)`, and securely deletes the output
+       `our_dh.secret (r)`.
 3. At this point, the interactive DAKE is complete for Alice:
    * Sends a "heartbeat" message. Note that she will perform a new DH ratchet.
    * In the case that she wants to immediately send a data message:
@@ -2217,14 +2219,14 @@ Verify. Decrypt message if attached.
      * Generates an ephemeral ECDH key pair, as defined in
        [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys), but instead
        of using a random value `r`, it will use : `r = KDF_1(0x13, K, 57)`.
-       Securely replaces `their_ecdh` with the output
-       `our_ecdh.public (G * s)` and securely deletes the output
+       Securely deletes `their_ecdh` and replaces it with the output
+       `our_ecdh.public (G * s)`, and securely deletes the output
        `our_ecdh.secret (s)`.
      * Generates an ephemeral DH key pair, as defined in
        [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
        of using a random value `r`, it will use : `r = KDF_1(0x14, K, 80)`.
-       Securely replaces `their_dh` with the output
-       `our_dh.public (g3 ^ r)` and securely deletes the output
+       Securely deletes `their_dh` and replaces it with the output
+       `our_dh.public (g3 ^ r)`, and securely deletes the output
        `our_dh.secret (r)`.
 9. At this point, she can attach an encrypted message to the
    Non-Interactive-Auth message:
@@ -2320,11 +2322,11 @@ Verify. Decrypt message if attached.
    * Generates an ephemeral ECDH key pair, as defined in
      [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys), but instead
      of using a random value `r`, it will use : `r = KDF_1(0x13, K, 57)`.
-     Securely replaces `our_ecdh` with the outputs.
+     Securely deletes `our_ecdh` and replaces it with the outputs.
    * Generates an ephemeral DH key pair, as defined in
      [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys), but instead
      of using a random value `r`, it will use : `r = KDF_1(0x14, K, 80)`.
-     Securely replaces `our_dh` with the outputs.
+     Securely deletes `our_dh` and replaces it with the outputs.
    * If an encrypted message was attached to the Non-Interactive-Auth message:
      * Follows what is defined in [Decrypting an Attached Encrypted Message](#decrypting-the-message)
        section.
@@ -3217,7 +3219,7 @@ expired or when the storage of message keys gets deleted, and the MAC keys for
 messages that have not arrived are derived.
 
 Old MAC keys are formatted as a list of 64-byte concatenated values. The first
-data message sent every ratchet reveals them or the TLV type 7 that is used when
+data message sent every ratchet reveals them or the TLV type 1 that is used when
 the session is expired.
 
 ## Fragmentation
