@@ -3541,6 +3541,8 @@ If the state is not `WAITING_AUTH_R`:
       * Transition to state `ENCRYPTED_MESSAGES`.
       * Initialize the double ratcheting, as defined in the
         [Interactive DAKE Overview](#interactive-dake-overview) section.
+      * If there are stored Data Messages, remove them from storage - there is
+        no way these messages can be valid for the current DAKE.
 
 * If the state is not `WAITING_AUTH_I`:
   * Ignore this message.
@@ -3568,6 +3570,8 @@ If the state is not `WAITING_AUTH_R`:
     * Initialize the double ratcheting, as defined in the
       [Non-Interactive DAKE Overview](#non-interactive-dake-overview) section.
     * Transition to state `ENCRYPTED_MESSAGES`.
+    * If there are stored Data Messages, for each one of them, transition to the
+      instructions in Receiving a Data Message and remove them from the store.
 
 #### Sending a Data Message
 
@@ -3606,13 +3610,16 @@ A received data message will look like this:
 If the version is 4:
 
 * If the state is not `ENCRYPTED_MESSAGES`:
-  * Inform the user that an unreadable encrypted message was received by
-    replying with an Error Message: `ERROR_2`.
-  * There are only one other state in which a participant can receive an
-    encrypted message (that do not have the same format as a data message):
-      * On `START`: when the other participant sends you an
-        Non-Interactive-Auth message that has an attached encrypted message in
-        it.
+  * If the ratchet id is 0, store this message for a configurable, short amount
+    of time (10-60 minutes is recommended).
+  * Otherwise:
+    * Inform the user that an unreadable encrypted message was received by
+      replying with an Error Message: `ERROR_2`.
+    * There are only one other state in which a participant can receive an
+      encrypted message (that do not have the same format as a data message):
+        * On `START`: when the other participant sends you an
+          Non-Interactive-Auth message that has an attached encrypted message in
+          it.
 
 * Otherwise:
   * Validate the data message:
