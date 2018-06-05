@@ -81,10 +81,6 @@ an existing messaging protocol, such as XMPP.
          1. [Publishing Prekey Messages](#publishing-prekey-messages)
       1. [Validating Prekey Ensembles](#validating-prekey-ensembles)
       1. [Receiving Prekey Ensembles](#receiving-prekey-ensembles)
-   1. [Encrypted Messages in DAKE's Messages](#encrypted-messages-in-dakes-messages)
-      1. [Attaching an Encrypted Message to Non-Interactive-Auth Message in XZDH](#attaching-an-encrypted-message-to-non-interactive-auth-message-in-xzdh)
-         1. [Encrypting the Message](#encrypting-the-message)
-         1. [Decrypting the Message](#decrypting-the-message)
 1. [Data Exchange](#data-exchange)
    1. [Data Message](#data-message)
       1. [Data Message Format](#data-message-format)
@@ -194,7 +190,7 @@ with strong forward secrecy.
 Alice                             Untrusted Prekey Server    Bob
 --------------------------------------------------------------------------------
                                   (<----------------------   Pre-conversation: Creates
-                                                             and sends a Prekey values: creates
+                                                             and sends Prekey values: creates
                                                              a Client Profile, Prekey Profiles and a set of
                                                              prekey messages)
 Retrieves Bob's  ----------------->
@@ -1184,7 +1180,7 @@ The state variables are set to `0` and the key variables are set to `NULL`.
 
 ### Session Expiration
 
-OTRv4 can vulnerable to a situation when an attacker capture some messages to
+OTRv4 can be vulnerable to a situation when an attacker capture some messages to
 compromise their ephemeral secrets at a later time. To mitigate against this,
 message keys should be deleted regularly. OTRv4 implements this by detecting
 whether a new ECDH key has been generated within a certain amount of time. If it
@@ -2168,7 +2164,7 @@ prekey messages                ----->
                                      <----- Request Prekey ensembles from Bob
                                      Prekeys ensembles from Bob ------------->
       <---------------------------------------- Non-Interactive-Auth message
-Verify. Decrypt message if attached.
+Verify.
 ```
 
 **Bob:**
@@ -2228,37 +2224,22 @@ Verify. Decrypt message if attached.
        Securely deletes `their_dh` and replaces it with the output
        `our_dh.public (g3 ^ r)`, and securely deletes the output
        `our_dh.secret (r)`.
-9. At this point, she can attach an encrypted message to the
-   Non-Interactive-Auth message:
-   * Follows what is defined in the
-     [Attaching an Encrypted Message to the Non-Interactive-Auth Message](#attaching-an-encrypted-message-to-non-interactive-auth-message-in-xzdh)
-     section.
-10. Calculates the `Auth MAC`:
-    * If an encrypted message is attached, she computes:
-
-      ```
-        Auth MAC = KDF_1(0x12 || auth_mac_k || t || (KDF_1(0x11 ||
-                   attached encrypted ratchet id ||
-                   attached encrypted message id || public ecdh key ||
-                   public dh key || nonce || encrypted message, 64), 64)`.
-      ```
-
-    * Otherwise, she computes:
-
+9. Calculates the `Auth MAC`:
+    * Calculates the value
       ```
         Auth MAC = KDF_1(0x12 || auth_mac_k || t, 64)
       ```
-
     * Includes this value in the Non-Interactive-Auth message and securely
       deletes the `auth_mac_k`.
 11. Sends Bob a Non-Interactive-Auth message. See
     [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 12. At this point, the non-interactive DAKE is complete for Alice:
-    * In the case that she wants to immediately send a data message:
-      * Follows what is defined in the
-        [When you send a Data Message](#when-you-send-a-data-message)
-        section. Note that she will perform a new DH ratchet if no encrypted
-        message was attached to the Non-Interactive-Auth message.
+    * She has to send a regular Data Message at this point, to initialize the
+      Double Ratchet correctly. If a plaintext message is waiting to be sent,
+      this can be used. Otherwise an empty heartbeat message should be sent.
+    * Follows what is defined in the
+      [When you send a Data Message](#when-you-send-a-data-message)
+      section. Note that she will perform a new DH ratchet for this message.
 
 **Bob:**
 
@@ -2327,26 +2308,20 @@ Verify. Decrypt message if attached.
      [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys), but instead
      of using a random value `r`, it will use : `r = KDF_1(0x14, K, 80)`.
      Securely deletes `our_dh` and replaces it with the outputs.
-   * If an encrypted message was attached to the Non-Interactive-Auth message:
-     * Follows what is defined in [Decrypting an Attached Encrypted Message](#decrypting-the-message)
-       section.
-     * Otherwise:
-        * Computes `Auth MAC = KDF_1(0x12 || auth_mac_k || t, 64)`.
-          The `t` value here is the one computed during the verification of the
-          Non-Interactive-Auth message.
+   * Computes `Auth MAC = KDF_1(0x12 || auth_mac_k || t, 64)`.
+     The `t` value here is the one computed during the verification of the
+     Non-Interactive-Auth message.
    * Extracts the `Auth MAC` from the Non-Interactive-Auth message and verifies
      that it is equal to the one just calculated. If it is not, ignore the
      Non-Interactive-Auth message.
 8. At this point, the non-interactive DAKE is complete for Bob:
-   * In the case that he immediately receives a data message that advertises the
+   * He should immediately receives a data message that advertises the
      new public keys from Alice:
-     * Follows what is defined in the
-       [When you receive a Data Message](#when-you-receive-a-data-message)
-       section. Note that he will perform a new DH ratchet if no encrypted
-       message was attached to the Non-Interactive-Auth message. When he wants
-       to send a data message after receiving one, he will follow the
-       [When you send a Data Message](#when-you-send-a-data-message) section,
-       and perform a new DH Ratchet.
+     * Follows what is defined in the [When you receive a Data Message](#when-you-receive-a-data-message) 
+       section. Note that he will perform a new DH ratchet at this point. 
+       When he wants to send a data message after receiving one, he will 
+       follow the [When you send a Data Message](#when-you-send-a-data-message) 
+       section, and perform a new DH Ratchet.
 
 #### Prekey Message
 
@@ -2414,8 +2389,7 @@ B Prekey owner's DH public key (MPI)
 This message finishes the non-interactive DAKE. It contains a key-only
 unforgeable message authentication code function. Bob sends it to Alice to
 commit to a choice of his ECDH ephemeral key and his DH ephemeral key, and to
-acknowledge Alice's ECDH ephemeral key and DH ephemeral key. This message might
-also contain an attached encrypted message, which is highly recommended.
+acknowledge Alice's ECDH ephemeral key and DH ephemeral key.
 
 A valid Non-Interactive-Auth message is generated as follows:
 
@@ -2517,13 +2491,6 @@ Ed448 Long-term Public Key Identifier (INT)
 Prekey Profile Identifier (INT)
   The 'Prekey Profile Identifier' from the Prekey Profile that was retrieved
   from the untrusted Prekey Server, as part of the Prekey Ensemble.
-
-Attached XZDH Encrypted Message (XZDH-ENCRYPTED-MSG)
-  (optional: if an encrypted message is attached)
-  The XZDH-ENCRYPTED-MSG that consists of an attached encrypted ratchet id, an
-  attached message id, a public ECDH key (used for encrypting the message), a
-  public DH key (used for encrypting the message), a 'nonce' and the encrypted
-  message.
 
 Auth MAC (MAC)
   The MAC with the appropriate MAC key (see above) of the message ('t') for the
@@ -2636,151 +2603,6 @@ If many prekey ensembles are received:
       decide which instance tags to send messages to.
     * If there are multiple prekey ensembles per instance tag, decide whether
       to send multiple messages to the same instance tag.
-
-### Encrypted Messages in DAKE's Messages
-
-One message of XZDH allows participants to attach an encrypted message to it.
-This message will be referred as "attached encrypted message".
-
-Note that if a data message arrives prior to the Auth-I or the
-Non-Interactive-Auth message, this data message will be ignored. An attached
-encrypted message to the Non-Interactive-Auth message cannot contain any TLV
-types.
-
-#### Attaching an Encrypted Message to Non-Interactive-Auth Message in XZDH
-
-##### Encrypting the Message
-
-After deriving the Mixed shared secret `K`, a participant (Alice in the above
-overview) can attach an encrypted message to the already generated
-Non-Interactive-Auth message, but prior to sending it. For this, the
-participant:
-
-* Rotates the ECDH keys and brace key, see
-  [Rotating ECDH Keys and Brace Key as sender](#rotating-ecdh-keys-and-brace-key-as-sender)
-  section. The derived ECDH public key will be the 'Public ECDH Key' for the
-  message. The derived DH public key will be the 'Public DH Key' for the
-  message.
-* Calculates the Mixed shared secret
-  `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`. Securely deletes `K_ecdh`.
-* Derives a new set of keys:
-  `root_key[i], chain_key_s[i][j] = derive_ratchet_keys(sending,
-  root_key[i-1], K)`.
-  Securely deletes the previous root key (`root_key[i-1]`) and `K`.
-* Sets `i` as the attached message ratchet id.
-* Increments the ratchet id `i = i + 1`.
-* Sets `j` as the attached message id.
-* Derives the next sending chain key by using the `chain_key_s[i-1][j]` already
-  derived:
-
-  ```
-    chain_key_s[i-1][j+1] = KDF_1(0x17 || chain_key_s[i-1][j], 64)
-  ```
-
-* Calculates the encryption key (`MKenc`):
-
-  ```
-    MKenc = KDF_1(0x18 || chain_key_s[i-1][j], 32)
-  ```
-
-* Securely deletes `chain_key_s[i-1][j]`.
-* Increments the next sending message id `j = j + 1`.
-* Constructs a nonce from the first 24 bytes of the `c` variable generated when
-  creating `sigma`. See
-  [Ring Signature Authentication](#ring-signature-authentication) section
-  for details.
-* Uses the `MKenc` to encrypt the message:
-  `encrypted_message = XSalsa20_Enc(MKenc, nonce, m)`.
-* Securely deletes `MKenc`.
-
-The format of this attached message in the Non-Interactive-Auth message will be:
-
-```
-Attached XZDH Encrypted Message (XZDH-ENCRYPTED-MSG)
-
-Attached Encrypted Ratchet Id (INT)
-  Set with sender's i.
-
-Attached Encrypted Message Id (INT)
-  Set with sender's j.
-
-Public ECDH Key (POINT)
-  This is the public part of the ECDH key pair. For the sender of this message,
-  this is their 'our_ecdh.public' value. For the receiver of this message, it is
-  used as 'their_ecdh'.
-
-Public DH Key (MPI)
-  This is the public part of the DH key pair. For the sender of this message, it
-  is 'our_dh.public' value. For the receiver of this message, it is used as
-  'their_dh'.
-
-Nonce (NONCE)
-  The nonce used with XSalsa20 to create the encrypted message contained in this
-  packet.
-
-Encrypted message (DATA)
-  Using the appropriate encryption/message key, perform an XSalsa20 encryption
-  of the message.
-```
-
-After the encryption and MAC of the attached encrypted message, the participant
-attaches it to the Non-Interactive-Auth message, which will look like this:
-
-```
-  (Protocol version || message type || sender's instance tag || receiver's
-   instance tag || Sender's Client Profile || X || A || sigma || Prekey Message
-   Identifier || Client Profile Identifier || Prekey Profile Identifier ||
-   (attached message ratchet id || attached message id || public ECDH key ||
-   public DH key || encrypted message) || Auth MAC)
-```
-
-##### Decrypting the Message
-
-After verifying `sigma` on the Non-Interactive-Auth message, a participant (Bob
-in the above overview) can decrypt an attached encrypted message if it was
-attached. This has to be done prior to receiving any other data message, or
-sending one. For this, the participant:
-
-* Rotates the ECDH keys and brace key, see
-  [Rotating ECDH Keys and Brace Key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
-  section.
-* Calculates the Mixed shared secret
-  `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`. Securely deletes `K_ecdh`.
-* Derive new set of keys
-  `root_key[i], chain_key_r[i][k] = derive_ratchet_keys(receiving, root_key[i-1], K)`.
-* Securely delete the previous root key (`root_key[i-1]`) and `K`.
-* Sets `pn` as `j`.
-* Sets `j` to 0.
-* Sets `k` to 0.
-* Increments the ratchet id `i = i + 1`.
-* Derives the next receiving chain key by using the `chain_key_r[i-1][k]`
-  already derived and decided:
-
-  ```
-    chain_key_r[i-1][k+1] = KDF_1(0x17 || chain_key_r[i-1][k], 64)
-  ```
-
-* Calculates the encryption key (`MKenc`):
-  `MKenc = KDF_1(0x18 || chain_key_r[i-1][k], 32)`
-* Securely deletes `chain_key_r[i-1][k]`.
-* Uses `auth_mac_k` to generate the `Auth MAC` of the attached
-  encrypted message (the `t` value here is the one computed during the
-  verification of the Non-Interactive-Auth message):
-  `Auth MAC = KDF_1(0x12 || auth_mac_k || t || (KDF_1(0x11 || attached encrypted
-   ratchet id || attached encrypted message id || public ECDH key || public DH
-   key || nonce || encrypted message, 64)), 64)`.
-* Extracts the `Auth MAC` from the Non-Interactive-Auth message and verifies
-  that it is equal to the one just calculated. If it is not, ignores
-  the Non-Interactive-Auth message and rejects the attached encrypted message.
-* Increments the next receiving message id `k = k + 1`.
-* Constructs the nonce from the first 24 bytes of the `c` variable generated
-  when creating `sigma`. See
-  [Ring Signature Verification](#verification-rvrfa1-a2-a3-sigma-m) section for
-  details.
-* Uses the `MKenc` and `nonce` to decrypt the message:
-  `decrypted_message = XSalsa20_Dec(MKenc, nonce, m)`.
-* Securely deletes `MKenc`.
-* Adds `auth_mac_k` to the list `mac_keys_to_reveal`.
 
 ## Data Exchange
 
