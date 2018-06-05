@@ -5,11 +5,10 @@
 The non-interactive DAKE below is based on the XZDH protocol. It starts when the
 Responder requests the Initiator's Prekey Ensemble from an untrusted Prekey
 Server. The Initiator's long-term public key should be verified by the
-Responder. The Responder then generates their ephemeral keys and derives a
-Mixed shared secret. These are used to start the Double Ratchet Algorithm and
-send an encrypted data messages with the final message of the non-interactive
-DAKE, called the Non-Interactive-Auth message. Subsequent encrypted messages
-can be sent after this.
+Responder. The Responder then generates their ephemeral keys and derives a Mixed
+shared secret. These are used to start the Double Ratchet Algorithm and allow
+for sending a data message directly after the DAKE. Subsequent encrypted
+messages can be sent after this.
 
 #### Long-lived secret ephemeral key material
 
@@ -165,17 +164,9 @@ Prekey Profile Identifier (INT)
   The 'Prekey Profile Identifier' from the Prekey Profile that was retrieved
   from the untrusted Prekey Server, as part of the Prekey Ensemble.
 
-Attached XZDH Encrypted Message (XZDH-ENCRYPTED-MSG)
-  (optional: if an encrypted message is attached)
-  The 'XZDH-ENCRYPTED-MSG' that consists of an attached encrypted ratchet id, an
-  attached message id, a public ECDH key (used for encrypting the message), a
-  public DH key (used for encrypting the message), a nonce and the encrypted
-  message.
-
 Auth MAC (MAC)
   The MAC with the appropriate MAC key (see above) of the message (t) for the
-  Ring Signature (RING-SIG). When an encrypted message is attached, this is also
-  the MAC of that message.
+  Ring Signature (RING-SIG). 
 
 ```
 

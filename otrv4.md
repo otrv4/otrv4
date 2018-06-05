@@ -1239,7 +1239,7 @@ The session expiration timer begins at different times for the sender and the
 receiver of the first data message in a conversation. The sender begins their
 timer as they send the first data message or as they attach an encrypted
 message to the Non-Interactive-Auth message. The receiver begins their timer
-when they receive this first data message or the attached encrypted message.
+when they receive this first data message.
 
 Since the session expiration uses a timer, it can be compromised by clock
 errors. Some errors may cause the session to be deleted too early and result in
@@ -2494,8 +2494,7 @@ Prekey Profile Identifier (INT)
 
 Auth MAC (MAC)
   The MAC with the appropriate MAC key (see above) of the message ('t') for the
-  Ring Signature ('RING-SIG'). When an encrypted message is attached, this is
-  also the MAC of that message.
+  Ring Signature ('RING-SIG').
 ```
 
 #### Publishing Prekey Ensembles
@@ -3575,17 +3574,12 @@ If the state is not `WAITING_AUTH_R`:
 
 #### Sending a Data Message
 
-The `ENCRYPTED_MESSAGES` state is the state where a participant is allowed to
-send encrypted data messages. There are only one other state in which a
-participant can send an attached encrypted message (that do not have the same
-format as a data message):
+The `ENCRYPTED_MESSAGES` state is the only state where a participant is allowed to
+send encrypted data messages. 
 
-* On `START`: when a participant attaches an encrypted message to the
-  Non-Interactive-Auth message.
-
-In any other case and if the state is `START`, `WAITING_AUTH_R`, or
-`WAITING_AUTH_I`, queue the message for encrypting and sending it when the
-participant transitions to the `ENCRYPTED_MESSAGES` state.
+If the state is `START`, `WAITING_AUTH_R`, or `WAITING_AUTH_I`, queue the
+message for encrypting and sending it when the participant transitions to the
+`ENCRYPTED_MESSAGES` state.
 
 If the state is `FINISHED`, the participant must start another OTR conversation
 to send encrypted messages:
@@ -3615,11 +3609,6 @@ If the version is 4:
   * Otherwise:
     * Inform the user that an unreadable encrypted message was received by
       replying with an Error Message: `ERROR_2`.
-    * There are only one other state in which a participant can receive an
-      encrypted message (that do not have the same format as a data message):
-        * On `START`: when the other participant sends you an
-          Non-Interactive-Auth message that has an attached encrypted message in
-          it.
 
 * Otherwise:
   * Validate the data message:
