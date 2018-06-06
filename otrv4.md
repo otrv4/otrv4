@@ -2315,7 +2315,7 @@ Verify.
      that it is equal to the one just calculated. If it is not, ignore the
      Non-Interactive-Auth message.
 8. At this point, the non-interactive DAKE is complete for Bob:
-   * He should immediately receives a data message that advertises the
+   * He should immediately receive a data message that advertises the
      new public keys from Alice:
      * Follows what is defined in the [When you receive a Data Message](#when-you-receive-a-data-message) 
        section. Note that he will perform a new DH ratchet at this point. 
