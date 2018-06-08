@@ -46,7 +46,7 @@ We introduce a Client Profile in OTRv4, which includes:
 5. Client Profile signature of the above parts (including the Transitional
    Signature if present).
 
-Note that a Client Profile is generated per client and device basis. Users are
+Note that a Client Profile is generated per client basis. Users are
 not expected to manage Client Profiles (theirs or from others) in a client. As a
 consequence, clients are discouraged to allow importing or exporting of Client
 Profiles. Also, if a user has multiple clients concurrently in use, it is

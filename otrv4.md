@@ -123,7 +123,7 @@ an existing messaging protocol, such as XMPP.
    1. [SMP Message 4](#smp-message-4)
    1. [The SMP State Machine](#the-smp-state-machine)
 1. [Implementation Notes](#implementation-notes)
-   1. [Considerations for Networks that allow Multiple Devices](#considerations-for-networks-that-allow-multiple-devices)
+   1. [Considerations for Networks that allow Multiple Clients](#considerations-for-networks-that-allow-multiple-clients)
 1. [Forging Transcripts](#forging-transcripts)
 1. [Appendices](#appendices)
    1. [Ring Signature Authentication](#ring-signature-authentication)
@@ -278,7 +278,7 @@ authored by a victim, without compromising long-term secrets; 2. malicious
 users, when a malicious participant interacts with a purpose-built third-party
 service during a conversation with a victim to produce non-repudiable proof of
 message authorship by the victim. This second attack can happen with remote
-attestation, where an adversary uses it on a participant's device
+attestation, where an adversary uses it on a participant's client
 to produce a non-repudiable proof/transcript of the otherwise deniable protocol
 [\[12\]](#references).
 
@@ -755,8 +755,8 @@ comparison may be used. The fingerprint is generated as:
 
 Clients include instance tags in all OTRv4 messages. Instance tags are 4-byte
 values that are intended to be persistent. If the same client is logged into the
-same account from multiple locations/devices, the intention is that the client
-will have different instance tags at each location/device. OTRv4 messages
+same account from multiple locations/clients, the intention is that the client
+will have different instance tags at each location/client. OTRv4 messages
 (fragmented and unfragmented) include the source and destination instance tags.
 If a client receives a message that lists a destination instance tag different
 from its own, the client should discard the message.
@@ -1292,10 +1292,10 @@ extra validity time is of 1 day.
 It is also important to note that the absence of a Client Profile is not a proof
 that a user does not support OTRv4.
 
-Note that a Client Profile is generated per device/client location basis. Users
+Note that a Client Profile is generated per client location basis. Users
 are not expected to manage Client Profiles (theirs or from others) in a client.
 As a consequence, clients are discouraged to allow importing or exporting of
-Client Profiles. Also, if a user has multiple devices/client locations
+Client Profiles. Also, if a user has multiple client locations
 concurrently in use, it is expected that they have multiple Client Profiles
 simultaneously published and valid.
 
@@ -1316,7 +1316,7 @@ The supported fields are:
 ```
 Client Profile owner's instance tag (INT)
   Type = 0x0001
-  The instance tag of the client/device that created the Client Profile.
+  The instance tag of the client that created the Client Profile.
 
 Client Ed448 public key (CLIENT-ED448-PUBKEY)
   Type = 0x0002
@@ -1335,7 +1335,7 @@ Transitional Signature (CLIENT-SIG)
 ```
 
 The supported fields should not be duplicated, except for the Ed448 public key,
-as a client/device can locally have more than one long-term Ed448 public key. In
+as a client can locally have more than one long-term Ed448 public key. In
 the case that more than one long-term Ed448 public key is found, the Client
 Profile should be signed with both of them.
 
@@ -1600,10 +1600,10 @@ to still be able to read these messages, the Prekey Profile can still be valid
 even if it has publicly expired. A recommended amount of time for this extra
 validity is of 1 day.
 
-Note that a Prekey Profile is generated per device/client location basis. Users
+Note that a Prekey Profile is generated per client location basis. Users
 are not expected to manage prekey profiles (theirs or from others) in a client.
 As a consequence, clients are discouraged to allow importing or exporting of
-prekey profiles. Also, if a user has multiple devices/client locations
+prekey profiles. Also, if a user has multiple client locations
 concurrently in use, it is expected that they have multiple prekey profiles
 simultaneously published and valid.
 
@@ -1617,7 +1617,7 @@ Prekey Profile (PREKEY-PROF):
   Prekey Profile's Identifier (INT)
     A Prekey Profile id used for local storage and retrieval.
   Prekey Profile owner's instance tag (INT)
-    The instance tag of the client/device that created the Prekey Profile.
+    The instance tag of the client that created the Prekey Profile.
   Ed448 public key (ED448-PUBKEY)
     Corresponds to 'H'.
   Prekey Profile Expiration (PREKEY-PROF-EXP)
@@ -2317,10 +2317,10 @@ Verify.
 8. At this point, the non-interactive DAKE is complete for Bob:
    * He should immediately receive a data message that advertises the
      new public keys from Alice:
-     * Follows what is defined in the [When you receive a Data Message](#when-you-receive-a-data-message) 
-       section. Note that he will perform a new DH ratchet at this point. 
-       When he wants to send a data message after receiving one, he will 
-       follow the [When you send a Data Message](#when-you-send-a-data-message) 
+     * Follows what is defined in the [When you receive a Data Message](#when-you-receive-a-data-message)
+       section. Note that he will perform a new DH ratchet at this point.
+       When he wants to send a data message after receiving one, he will
+       follow the [When you send a Data Message](#when-you-send-a-data-message)
        section, and perform a new DH Ratchet.
 
 #### Prekey Message
@@ -2373,7 +2373,7 @@ Prekey Message Identifier (INT)
   A prekey message id used for local storage and retrieval.
 
 Prekey owner's instance tag (INT)
-  The instance tag of the client/device that created the prekey.
+  The instance tag of the client that created the prekey.
 
 Y Prekey owner's ECDH public key (POINT)
   First one-time use prekey value.
@@ -3575,7 +3575,7 @@ If the state is not `WAITING_AUTH_R`:
 #### Sending a Data Message
 
 The `ENCRYPTED_MESSAGES` state is the only state where a participant is allowed to
-send encrypted data messages. 
+send encrypted data messages.
 
 If the state is `START`, `WAITING_AUTH_R`, or `WAITING_AUTH_I`, queue the
 message for encrypting and sending it when the participant transitions to the
@@ -4124,15 +4124,15 @@ If smpstate is `SMPSTATE_EXPECT4`:
 
 ## Implementation Notes
 
-### Considerations for Networks that allow Multiple Devices
+### Considerations for Networks that allow Multiple Clients
 
-When using a transport network that allows multiple devices to be
+When using a transport network that allows multiple clients to be
 simultaneously logged in with the same peer identifier, make sure to identify
-the other participant by its device-specific identifier and not only the peer
+the other participant by its client-specific identifier and not only the peer
 identifier (for example, using XMPP full JID instead of bare JID). Doing so
-allows establishing multiple OTR channels at the same time with multiple devices
+allows establishing multiple OTR channels at the same time with multiple clients
 from the other participant. This can cost that the client manages this exposure
-(for example, XMPP clients can decide to reply only to the device you have more
+(for example, XMPP clients can decide to reply only to the client you have more
 recently received a message from).
 
 ## Forging Transcripts

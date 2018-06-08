@@ -24,9 +24,9 @@ In OTRv3, query messages are used to:
     this issue). Because a new AKE behaves exactly like a normal key rotation,
     there is no loss of messages.
 
-  * **Provide device mobility**: If Alice is in an OTR conversation with Bob,
-    all she needs to do in order to continue the conversation in another device
-    is to login to another device and send a new Query Message by choosing to
+  * **Provide client mobility**: If Alice is in an OTR conversation with Bob,
+    all she needs to do in order to continue the conversation in another client
+    is to login to another client and send a new Query Message by choosing to
     "start an OTR conversation". Instance tags are another essential part of
     this.
 
@@ -50,7 +50,7 @@ We will prevent query messages to be used to force a key rotation in OTRv4 by
 disallowing its sending in `ENCRYPTED_MESSAGES` state.
 
 We will not prevent receiving query messages on the same state, because it would
-also prevent device mobility.
+also prevent client mobility.
 
 ### Consequences
 

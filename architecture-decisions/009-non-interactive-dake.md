@@ -89,7 +89,7 @@ this time. For example, if the time is set to 15 minutes, messages received
 after 15 minutes are unreadable and undeniable, but an attacker must compromise
 the local keys within 15 minutes in order to read and tamper with the last
 message sent before that time passes. If the time is set to one month, this
-allows the receiver to reply within one month. However, if the device is
+allows the receiver to reply within one month. However, if the client is
 compromised within one month, an attacker is able to read and tamper with the
 last message sent.
 
@@ -166,7 +166,7 @@ Prekey Profile Identifier (INT)
 
 Auth MAC (MAC)
   The MAC with the appropriate MAC key (see above) of the message (t) for the
-  Ring Signature (RING-SIG). 
+  Ring Signature (RING-SIG).
 
 ```
 
@@ -188,7 +188,7 @@ Server before they expire to keep valid values for the Prekey Ensemble
 available.
 
 A Client Profile and Prekey Profile should be published for every long-term
-public key that belongs to a user for this device. This means that if Bob has a
+public key that belongs to a user for this client. This means that if Bob has a
 client which only supports OTRv4 and he uploads three long term keys for OTRv4
 to his client, Bob's client must publish 3 Client Profiles and 3 Prekey
 Profiles. Also, if Bob uploads two long term keys for OTRv4 and two long term
