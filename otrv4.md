@@ -1334,10 +1334,7 @@ Transitional Signature (CLIENT-SIG)
   0x0002, 0x0003, 0x0004 only.
 ```
 
-The supported fields should not be duplicated, except for the Ed448 public key,
-as a client can locally have more than one long-term Ed448 public key. In
-the case that more than one long-term Ed448 public key is found, the Client
-Profile should be signed with both of them.
+The supported fields should not be duplicated
 
 `CLIENT-ED448-PUBKEY` refers to the Ed488 long-term public key with a unique
 ID used for local storage and retrieval:
@@ -1394,11 +1391,7 @@ Then, generate:
 
 1. Client Profile's identifier.
 2. Client Profile owner's instance tag.
-3. Client's Ed448 long-term public keys:
-   * Assing a unique random id to each key, that is going to act as an
-     identifier for this key. It should be 4 byte unsigned value,
-     little-endian.
-   * Include first the older long-term public keys followed by the newer ones.
+3. Client's Ed448 long-term public key.
 4. Versions: a string corresponding to the user's supported OTR versions.
    A Client Profile can advertise multiple OTR versions. The format is described
    under the section [Establishing Versions](#establishing-versions) below.
@@ -1417,19 +1410,13 @@ Then:
 
 1. Assemble the previous fields as `Fields`.
 2. Assign the number of `Fields` as `Number of Fields`.
-3. Depending on how many Ed448 long-term are there, generate Client Profile
-   Signatures for each one of them. The symmetric key, the flag `f` (set to
+3. The symmetric key, the flag `f` (set to
    zero, as defined on RFC 8032 [\[9\]](#references)) and the empty context `c`
    are used to create a signature of the entire Client Profile excluding the
    signature itself. The size of the signature is 114 bytes. For its generation,
    refer to
    [Create a Client Profile Signature](#create-a-client-profile-signature)
-   section. To sign, first sign with the older Ed448 long-term public keys and
-   then with the newer ones. Assign these signatures to
-   `Client Profile Signatures` by concatenating the ones that correspond to
-   older signatures first.
-4. Assign the number of `Client Profile Signatures` as
-   `Number of Client Profile Signatures`.
+   section.
 
 After the Client Profile is created, it must be published in a public place.
 When using OTRv4 in OTRv3-compatible mode and OTRv4-standalone mode, notice that
@@ -1556,7 +1543,7 @@ To validate a Client Profile, you must (in this order):
 2. Verify that the `Client Profile Signatures` field is not empty.
 3. Verify that the Client Profile has not expired.
 4. Verify that the `Versions` field contains the character "4".
-5. Validate that each `Ed448 Public Key` are on
+5. Validate that `Ed448 Public Key` are on
    the curve Ed448-Goldilocks. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
