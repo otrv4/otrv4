@@ -1251,11 +1251,10 @@ an attacker.
 ## Client Profile
 
 OTRv4 introduces Client Profiles. A Client Profile has an arbitrary number of
-fields. At minimum, a Client Profile contains a Client Profile's
-Identifier, the Client Profile owner's instance tag, a Ed448 long-term
-public key, information about supported versions, a profile expiration date, a
-signature of all these, and an optional transitional signature. It has variable
-length.
+fields. A Client Profile contains a Client Profile's Identifier, the Client
+Profile owner's instance tag, a Ed448 long-term public key, information about
+supported versions, a profile expiration date, a signature of all these, and an
+optional transitional signature. It has variable length.
 
 There are two instances of the Client Profile that should be generated. One is
 used for authentication in both DAKEs (interactive and non-interactive). The
@@ -1308,43 +1307,37 @@ Client Profile (CLIENT-PROF):
     2 byte unsigned type, big-endian
     the encoded field
   Number of Client Profile Signatures (INT)
-  Client Profile Signatures (CLIENT-EDDSA-SIG)
+  Client Profile Signature (CLIENT-EDDSA-SIG)
 ```
 
 The supported fields are:
 
 ```
-Client Profile owner's instance tag (INT)
+Client Profile's Identifier (INT)
   Type = 0x0001
+  A Client Profile ID used for local storage and retrieval.
+
+Client Profile owner's instance tag (INT)
+  Type = 0x0002
   The instance tag of the client that created the Client Profile.
 
-Client Ed448 public key (CLIENT-ED448-PUBKEY)
-  Type = 0x0002
-  Corresponds to the Client Ed448 long-term public key, as stated below.
+Ed448 public key (ED448-PUBKEY)
+  Type = 0x0003
+  Corresponds to 'H'.
 
 Versions (DATA)
-  Type = 0x0003
-
-Client Profile Expiration (CLIENT-PROF-EXP)
   Type = 0x0004
 
-Transitional Signature (CLIENT-SIG)
+Client Profile Expiration (CLIENT-PROF-EXP)
   Type = 0x0005
+
+Transitional Signature (CLIENT-SIG)
+  Type = 0x0006
   This signature is defined as a signature over fields 0x0001,
-  0x0002, 0x0003, 0x0004 only.
+  0x0002, 0x0003, 0x0004 and 0x0005 only.
 ```
 
-The supported fields should not be duplicated
-
-`CLIENT-ED448-PUBKEY` refers to the Ed488 long-term public key with a unique
-ID used for local storage and retrieval:
-
-```
-Client Ed448 long-term public key (CLIENT-ED448-PUBKEY):
-  4 byte unsigned value, little-endian
-    A Client Ed448 long-term public key ID used for local storage and retrieval.
-  The Ed448 long-term public key (ED448-PUBKEY)
-```
+The supported fields should not be duplicated.
 
 `CLIENT-EDDSA-SIG` refers to the OTRv4 EDDSA signature:
 
@@ -1387,11 +1380,11 @@ To create a Client Profile, generate:
    Profile. It should be 4 byte unsigned value, big-endian.
 2. A 4-byte instance tag to use as the Client Profile owner's instance tag.
 
-Then, generate:
+Then, assemble:
 
 1. Client Profile's identifier.
 2. Client Profile owner's instance tag.
-3. Client's Ed448 long-term public key.
+3. Ed448 long-term public key.
 4. Versions: a string corresponding to the user's supported OTR versions.
    A Client Profile can advertise multiple OTR versions. The format is described
    under the section [Establishing Versions](#establishing-versions) below.
@@ -1455,9 +1448,9 @@ that this can be configurable. A recommended value is one week.
 If version 3 and 4 are supported and the user has a pre-existing OTRv3
 long-term key:
 
-   * Concatenate ` Client Profile owner's instance tag ||
-     Client Ed448 public key || Versions || Client Profile Expiration`. Denote
-     this value `m`.
+   * Concatenate `Client Profile's Identifier ||
+     Client Profile owner's instance tag || Ed448 public key || Versions ||
+     Client Profile Expiration`. Denote this value `m`.
    * Sign `m` with the user's OTRv3 DSA key. Denote this value
      `Transitional Signature`.
    * Sign `m || Transitional Signature` with the symmetric key, as stated
@@ -1465,9 +1458,9 @@ long-term key:
 
 If only version 4 is supported:
 
-   * Concatenate `Client Profile owner's instance tag ||
-     Client Ed448 public key || Versions || Client Profile Expiration`. Denote
-     this value `m`.
+   * Concatenate `Client Profile's Identifier ||
+     Client Profile owner's instance tag || Ed448 public key || Versions ||
+     Client Profile Expiration`. Denote this value `m`.
    * Sign `m` with the symmetric key, as stated below. Denote this value
      `Client Profile Signature`.
 
@@ -1540,19 +1533,16 @@ To validate a Client Profile, you must (in this order):
 
 1. Verify that the `Number of Fields` is equal to the number of fields present
    on the Client Profile.
-2. Verify that the `Client Profile Signatures` field is not empty.
+2. Verify that the `Client Profile Signature` field is not empty.
 3. Verify that the Client Profile has not expired.
 4. Verify that the `Versions` field contains the character "4".
-5. Validate that `Ed448 Public Key` are on
+5. Validate that `Ed448 Public Key` is on
    the curve Ed448-Goldilocks. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
 6. If the `Transitional Signature` is present, verify its validity using the
    OTRv3 DSA key.
 7. [Verify that the Client Profile signature is valid](#verify-a-client-profile-signature).
-   Notice that in the case that several Client Profile Signatures and
-   Ed448 long-term public keys are present, you should verify each signture with
-   the corresponding key.
 
 ## Prekey Profile
 
