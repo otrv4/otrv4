@@ -1917,24 +1917,25 @@ Bob will be initiating the DAKE with Alice.
        and replaces it with the output `our_dh.public (g3 ^ r)`, and securely
        deletes the output `our_dh.secret (r)`.
 3. At this point, the interactive DAKE is complete for Alice:
-   * Sends a "heartbeat" message. Note that she will perform a new DH ratchet.
+   * She has to send a regular Data Message at this point, to initialize the
+     Double Ratchet correctly. If a plaintext message is waiting to be sent,
+     this can be used. Otherwise an empty heartbeat message should be sent.
    * In the case that she wants to immediately send a data message:
      * Follows what is defined in the
        [When you send a Data Message](#when-you-send-a-data-message) section.
+       Note that she will perform a new DH ratchet for this message.
 
 **Bob:**
 
 1. At this point, the interactive DAKE is complete for Bob, but he has to
    correctly setup the double ratchet logarithm:
-   * Receives the "heartbeat" message that advertises the new public keys
-     from Alice. He retrieves the new advertised public keys.
-   * In the case that he immediately receives a data message:
-     * Follows what is defined in the
-       [When you receive a Data Message](#when-you-receive-a-data-message)
-       section. When he wants to send a data message after
-       receiving one, he will follow the
-       [When you send a Data Message](#when-you-send-a-data-message) section,
-       and perform a new DH Ratchet.
+   * He should immediately receive a data message that advertises the
+     new public keys from Alice:
+     * Follows what is defined in the [When you receive a Data Message](#when-you-receive-a-data-message)
+       section. Note that he will perform a new DH ratchet at this point.
+       When he wants to send a data message after receiving one, he will
+       follow the [When you send a Data Message](#when-you-send-a-data-message)
+       section, and perform a new DH Ratchet.
 
 #### Identity Message
 
@@ -2634,7 +2635,7 @@ A data message with an empty human-readable part (the plaintext is of zero
 length, or starts with a `NULL`) is a "heartbeat" message. This message is
 useful for key rotations and revealing MAC keys. It should not be displayed to
 the participant. If you have not sent a message to a correspondent in some
-(configurable) time, send a "heartbeat" message. The heartbeat message should
+(configurable) time, send a "heartbeat" message. The "heartbeat" message should
 have the `IGNORE_UNREADABLE` flag set.
 
 ```
@@ -3536,8 +3537,8 @@ If the state is not `WAITING_AUTH_R`:
   [Interactive DAKE Overview](#interactive-dake-overview) section.
 * Transition to state `ENCRYPTED_MESSAGES`. In the case of the interactive
   DAKE, after sending an Auth-I Message, a participant must wait for the
-  "heartbeat" message from the other participant in order to be able to send
-  data messages.
+  a data message (including a "heartbeat" message) from the other participant
+  in order to be able to send data messages.
 
 #### Receiving an Auth-I Message
 
