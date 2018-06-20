@@ -1304,15 +1304,14 @@ Each implementation should decide how to publish the Client Profile. For
 example, one client may publish profiles to a server pool (similar to a
 keyserver pool, where PGP public keys can be published). Another client may use
 XMPP's publish-subscribe extension (XEP-0060 [\[8\]](#references)) for
-publishing Client Profiles. A protocol for publication must be defined, but the
-definition is out of scope for this specification. For sending offline messages,
-notice that the Client Profile has to be published and stored in the same
-untrusted Prekey Server used to store prekey messages and Prekey Profiles, so
-the Prekey Ensemble can be assembled.
+publishing Client Profiles. For sending offline messages, notice that the Client
+Profile has to be published and stored in the same untrusted Prekey Server used
+to store prekey messages and Prekey Profiles, so the Prekey Ensemble can be
+assembled.
 
 When the Client Profile expires, it should be updated. Client implementations
 should determine the frequency of the Client's Profile expiration and renewal.
-The recommended expiration time is one week. Note, though, that the long-term
+The recommended expiration time is one week. Notice, though, that the long-term
 public key has its own expiration time.
 
 Nevertheless, for a short amount of time (decided by the client) a Client
@@ -1331,9 +1330,9 @@ that a user does not support OTRv4.
 Note that a Client Profile is generated per client location basis. Users
 are not expected to manage Client Profiles (theirs or from others) in a client.
 As a consequence, clients are discouraged to allow importing or exporting of
-Client Profiles. Also, if a user has multiple client locations
-concurrently in use, it is expected that they have multiple Client Profiles
-simultaneously published and valid.
+Client Profiles. Also, if a user has multiple client locations concurrently in
+use, it is expected that they have multiple Client Profiles simultaneously
+published and valid.
 
 ### Client Profile Data Type
 
@@ -1368,10 +1367,13 @@ Versions (DATA)
 Client Profile Expiration (CLIENT-PROF-EXP)
   Type = 0x0005
 
+OTRv3 public authentication DSA key (PUBKEY)
+  Type = 0x0006
+
 Transitional Signature (CLIENT-SIG)
   Type = 0x0006
   This signature is defined as a signature over fields 0x0001,
-  0x0002, 0x0003, 0x0004 and 0x0005 only.
+  0x0002, 0x0003, 0x0004 0x0005 and 0x006 only.
 ```
 
 The supported fields should not be duplicated.
@@ -1396,7 +1398,9 @@ DSA signature (CLIENT-SIG):
   len byte unsigned s, big-endian
 ```
 
-As defined in OTRv3 spec, the OTRv3 DSA public key is defined as:
+If version 3 and 4 are supported, the OTRv3 DSA public key must be included in
+the Client Profile. As defined in OTRv3 spec, the OTRv3 DSA public key is
+defined as:
 
 ```
 OTRv3 public authentication DSA key (PUBKEY):
@@ -1428,7 +1432,9 @@ Then, assemble:
 5. Client Profile Expiration: Expiration date in standard Unix 64-bit format
    (seconds since the midnight starting Jan 1, 1970, UTC, ignoring leap
    seconds).
-6. Transitional Signature (optional): A signature of the Client Profile
+6. OTRv3 public authentication DSA key (optional): The OTRv3 long-term public
+   key. It should be included if version 3 and 4 are supported.
+7. Transitional Signature (optional): A signature of the Client Profile
    excluding the Client Profile Signature and the user's OTRv3 DSA key. The
    Transitional Signature enables parties that trust user's version 3 DSA key to
    trust the Client Profile in version 4. This is only used if the user supports
@@ -1487,7 +1493,8 @@ long-term key:
 
    * Concatenate `Client Profile's Identifier ||
      Client Profile owner's instance tag || Ed448 public key || Versions ||
-     Client Profile Expiration`. Denote this value `m`.
+     Client Profile Expiration || OTRv3 public authentication DSA key`. Denote
+     this value `m`.
    * Sign `m` with the user's OTRv3 DSA key. Denote this value
      `Transitional Signature`.
    * Sign `m || Transitional Signature` with the symmetric key, as stated
