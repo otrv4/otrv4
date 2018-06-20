@@ -217,7 +217,8 @@ while the latter is offline.
 
 Unless otherwise noted, these conventions and definitions are used for this document:
 
-* "Participant" refers to the one that takes part in a conversation.
+* "Participant" refers to any of the end-points that take part in a
+  conversation.
 * "Adversary" refers to a malicious entity whose aim is to prevent the
   participants of this protocol from achieving their goal.
 * "Initiator" refers to the participant initiating a DAKE.
@@ -230,6 +231,8 @@ Unless otherwise noted, these conventions and definitions are used for this docu
   the Prekey Server that correspond to the publishing participant.
 * "Sender" refers to the participant sending an encoded message.
 * "Receiver" refers to the participant receiving an encoded message.
+* "Network" refers to the system which computing devices use to exchange data
+  with each other using connections between nodes.
 
 ## Assumptions
 
@@ -260,8 +263,8 @@ their private long-term keys. A forged transcript of the DAKE can be produced at
 any time by anyone who knows the long-term public keys of both alleged
 participants. This capability is called offline deniability because no
 transcript provides evidence of a past key exchange, as this could have been
-forged by anyone. It is provided for both participants in the interactive DAKE,
-described below.
+forged by anyone. This property is provided for both participants taking part in
+the interactive DAKE as described below.
 
 Furthermore, participants in the interactive DAKE, cannot provide proof of
 participation to third parties without making themselves vulnerable to Key
@@ -277,8 +280,8 @@ online judge coerces a participant into interactively proving that messages were
 authored by a victim, without compromising long-term secrets; 2. malicious
 users, when a malicious participant interacts with a purpose-built third-party
 service during a conversation with a victim to produce non-repudiable proof of
-message authorship by the victim. This second attack can happen with remote
-attestation, where an adversary uses it on a participant's client
+message authorship by the victim. This second attack can happen with the help
+of remote attestation, where an adversary uses it on a participant's client
 to produce a non-repudiable proof/transcript of the otherwise deniable protocol
 [\[12\]](#references).
 
@@ -358,7 +361,7 @@ be compatible with the OTRv3 specification and to be useful for instant
 messaging protocols (e.g. XMPP), the OTRv4 protocol must define different modes
 in which it can be implemented: a OTRv3-compatible mode, a OTRv4 standalone
 mode, and a OTRv4 interactive-only-mode. These are the three modes enforced by
-this protocol specification, but, it must be taken into account, that OTRv4 can
+this protocol specification; but, it must be taken into account, that OTRv4 can
 and may be also implemented in other modes.
 
 The modes are:
@@ -377,7 +380,7 @@ The modes are:
    compatible with OTRv3. This mode can be used by network models that do not
    have a central infrastructure, like Ricochet.
 
-For details on how these modes work and how the DAKEs and double ratchet is
+For details on how these modes work, and how the DAKEs and double ratchet is
 initialized in them, review the
 [modes](https://github.com/otrv4/otrv4/tree/master/modes) folder.
 
@@ -389,9 +392,9 @@ talking with each other. In those cases:
 * If a client implements "OTRv4-interactive-only" mode and a request for an
   offline conversation arrives, reject this request.
 
-Take into account, as well, that OTRv4' state machine will need to know the mode
-is working on when initialized. It will also need to take this mode into account
-every time it makes a decision on how to transition from every state.
+The OTRv4 state machine will also need to know the mode in which is working on
+when initialized. It will also need to take this mode into account every time it
+makes a decision aound how to transition from every state.
 
 ## Notation and Parameters
 
@@ -564,6 +567,7 @@ Unlike SHAKE standard, notice that the output size here is defined in bytes.
 
 The following usageID variables are defined:
 
+```
   * usageFingerprint = 0x00
   * usageSK = 0x01
   * usageThirdBraceKey = 0x02
@@ -591,6 +595,7 @@ The following usageID variables are defined:
   * usageMACKey = 0x18
   * usageExtraSymmKey = 0x19
   * usageAuthenticator = 0x1A
+```
 
 ## Data Types
 
@@ -716,7 +721,7 @@ Ring Signature Authentication (RING-SIG):
 ### Public keys, Shared Prekeys and Fingerprints
 
 OTR users have long-lived public keys that they use for authentication (but not 
-for encryption). OTRv4 introduces a new type of public key:
+for encryption). OTRv4 introduces a new type of this long-term public key:
 
 ```
 OTRv4's public authentication Ed448 key (ED448-PUBKEY):
@@ -778,8 +783,7 @@ authenticate a long-term key pair, the [Socialist Millionaire's
 Protocol](#socialist-millionaires-protocol-smp) or a manual fingerprint
 comparison may be used. The fingerprint is generated as:
 
-* The first 56 bytes from the `KDF_1(usageFingerprint || byte(H), 56)`
-  (224-bit security level).
+* `KDF_1(usageFingerprint || byte(H), 56)` (224-bit security level).
 
 ### Instance Tags
 
@@ -893,8 +897,8 @@ protocol as well as from OTR itself. Therefore, an implementer (who has complete
 knowledge of the application network stack) should define a known shared session
 state from the higher-level protocol as `phi'`, as well as include the values
 imposed by this specification. Notice that the inclusion of the query message or
-the whitespace tag depends on the mode the protocol is initialized. In the case
-of OTRv4-standalone and OTRv4-interactive-only modes, these values are not
+the whitespace tag depends on the mode the protocol is initialized with. In the
+case of OTRv4-standalone and OTRv4-interactive-only modes, these values are not
 included.
 
 Note that varible length fields are encoded as DATA. If `phi'` is a string, it
@@ -1079,7 +1083,7 @@ k_dh:
 brace_key:
   Either a hash of the shared DH key: 'KDF_1(usageThridBraceKey || k_dh, 32)'
   (every third DH ratchet) or a hash of the previuos:
-   'brace_key: KDF_1(usageBraceKey || brace_key, 32)'.
+  'brace_key: KDF_1(usageBraceKey || brace_key, 32)'.
 
 K_ecdh:
   The serialized ECDH shared secret computed from an ECDH exchange, serialized
