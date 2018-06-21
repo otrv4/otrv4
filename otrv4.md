@@ -3411,15 +3411,6 @@ For OTRv3, if msgstate is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
   * Display the message to the user. The user should be warned that the message
     received was unencrypted.
 
-If the client has some policy dictating that 'OTR is always required' or that
-'encryption is always required' (like `REQUIRE_ENCRYPTION` in OTRv3), and the
-tag offers OTR version 4 and version 4 is allowed:
-
-  * Queue the message for encrypting and sending it when the participant
-    transitions to the `ENCRYPTED_MESSAGES` state.
-  * Send an Identity message.
-  * Transition the state to `WAITING_AUTH_R`.
-
 In any event:
 
   * If the tag offers OTR version 4 and version 4 is allowed:
