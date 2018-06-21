@@ -1954,8 +1954,9 @@ and DH key.
 
 A valid Identity message is generated as follows:
 
-1. Create a Client Profile, as defined in
-   [Creating a Client Profile](#creating-a-client-profile) section.
+1. If there is not a valid Client Profile, create a Client Profile, as defined
+   in [Creating a Client Profile](#creating-a-client-profile) section.
+   Otherwise, use the one you have on local storage.
 2. Generate an ephemeral ECDH key pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
    * secret key `y` (57 bytes).
@@ -2021,8 +2022,9 @@ that its DH key is in the correct group.
 
 A valid Auth-R message is generated as follows:
 
-1. Create a Client Profile, as detailed as defined in
-   [Creating a Client Profile](#creating-a-client-profile) section.
+1. If there is not a valid Client Profile, create a Client Profile, as detailed
+   as defined in [Creating a Client Profile](#creating-a-client-profile)
+   section. Otherwise, use the one you have on local storage.
 2. Generate an ephemeral ECDH key pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
    * secret key `x` (57 bytes).
@@ -2195,10 +2197,12 @@ Verify.
 
 **Bob:**
 
-1. Creates a Client Profile, as defined in
-   [Creating a Client Profile](#creating-a-client-profile) section.
-2. Creates a Prekey Profile, as defined in
-   [Creating a Prekey Profile](#creating-a-prekey-profile) section.
+1. If there is not a valid Client Profile, creates a Client Profile, as defined
+   in [Creating a Client Profile](#creating-a-client-profile) section.
+   Otherwise, use the one you have on local storage.
+2. If there is not a valid Prekey Profile, creates a Prekey Profile, as defined
+   in [Creating a Prekey Profile](#creating-a-prekey-profile) section.
+   Otherwise, use the one you have on local storage.
 3. Generates prekey messages, as defined in the
    [Prekey Message](#prekey-message) section.
 2. Publishes the Client Profile, the Prekey Profile and the prekey messages to
@@ -2356,8 +2360,8 @@ Verify.
 #### Prekey Message
 
 This message is created and published to an untrusted Prekey Server to allow
-offline conversations (in a set). Each Prekey message contains two one-time use
-ephemeral public prekey values.
+offline conversations. Each Prekey message contains two one-time use ephemeral
+public prekey values.
 
 A valid Prekey message is generated as follows:
 
@@ -2423,8 +2427,9 @@ acknowledge Alice's ECDH ephemeral key and DH ephemeral key.
 
 A valid Non-Interactive-Auth message is generated as follows:
 
-1. Create a Client Profile, as defined in the
-   [Creating a Client Profile](#creating-a-client-profile) section.
+1. If there is not a valid Client Profile, create a Client Profile, as defined
+   in the [Creating a Client Profile](#creating-a-client-profile) section.
+   Otherwise, use the one you have on local storage.
 2. Generate an ephemeral ECDH key pair, as defined in
    [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys):
    * secret key `x` (57 bytes).
