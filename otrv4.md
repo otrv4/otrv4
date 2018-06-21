@@ -2150,14 +2150,14 @@ sigma (RING-SIG)
 
 ## Offline Conversation Initialization
 
-To begin an offline conversation, a set of prekey messages, a Client Profile and a
-Prekey Profile are published to an untrusted Prekey Server. These three
+To begin an offline conversation, a set of prekey messages, a Client Profile and
+a Prekey Profile are published to an untrusted Prekey Server. These three
 publications are defined as a Prekey Ensemble. This action is considered as the
 start of the non-interactive DAKE. A Prekey Ensemble is retrieved by the party
-attempting to send a message to the Prekey Ensemble's publisher. This
-participant, then, replies with a Non-Interactive-Auth message (created with the
-Prekey Ensemble's values). This action is considered to complete the
-non-interactive DAKE.
+attempting to send a message to the Prekey Ensemble publisher. This participant,
+then, replies with a Non-Interactive-Auth message (created with the Prekey
+Ensemble values). This action is considered to complete the non-interactive
+DAKE.
 
 ### Non-interactive Deniable Authenticated Key Exchange (DAKE)
 
@@ -2234,7 +2234,14 @@ Verify.
      `K = KDF_1(usageSharedSecret || tmp_k, 64)`. Securely deletes `tmp_k` and
      `brace_key`.
    * Calculates the SSID from shared secret: `KDF_1(usageSSID || K, 8)`.
-8. Initializes the double-ratchet:
+8. Calculates the `Auth MAC`:
+    * Calculates the value
+      ```
+        Auth MAC = KDF_1(usageAuthMAC || auth_mac_k || t, 64)
+      ```
+    * Includes this value in the Non-Interactive-Auth message and securely
+      deletes the `auth_mac_k`.
+9. Initializes the double-ratchet:
    * Sets ratchet id `i` as 0.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
    * Interprets `K` as the first root key (`root_key[i-1]`).
@@ -2251,16 +2258,9 @@ Verify.
        `r = KDF_1(usageDHFirstEphemeral, K, 80)`. Securely deletes `their_dh`
        and replaces it with the output `our_dh.public (g3 ^ r)`, and securely
        deletes the output `our_dh.secret (r)`.
-9. Calculates the `Auth MAC`:
-    * Calculates the value
-      ```
-        Auth MAC = KDF_1(usageAuthMAC || auth_mac_k || t, 64)
-      ```
-    * Includes this value in the Non-Interactive-Auth message and securely
-      deletes the `auth_mac_k`.
-11. Sends Bob a Non-Interactive-Auth message. See
+10. Sends Bob a Non-Interactive-Auth message. See
     [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
-12. At this point, the non-interactive DAKE is complete for Alice:
+11. At this point, the non-interactive DAKE is complete for Alice:
     * She has to send a regular Data Message at this point, to initialize the
       Double Ratchet correctly. If a plaintext message is waiting to be sent,
       this can be used. Otherwise an empty heartbeat message should be sent.
@@ -2447,10 +2447,9 @@ A valid Non-Interactive-Auth message is generated as follows:
     KDF_1(usageNonIntAuthAliceClientProfile || Alice_Client_Profile, 64) ||
     Y || X || B || A || their_shared_prekey ||
     KDF_1(usageNonIntAuthPh || phi, 64)`.
-9. Compute `sigma = RSig(H_a, sk_ha, {H_b, H_a, Y}, t)`. When computing `sigma`,
-   keep the first 24 bytes of the generated `c` value to be used as a `nonce`
-   in the next step. Refer to
-   [Ring Signature Authentication](#ring-signature-authentication) for details.
+9. Compute `sigma = RSig(H_a, sk_ha, {H_b, H_a, Y}, t)`. Refer to
+   the [Ring Signature Authentication](#ring-signature-authentication) section
+   for details.
 10. Attach the 'Prekey Message Identifier' that is stated in the retrieved
     Prekey message.
 11. Attach the 'Client Profile Message Identifier' that is stated in the
