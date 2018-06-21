@@ -1311,8 +1311,7 @@ assembled.
 
 When the Client Profile expires, it should be updated. Client implementations
 should determine the frequency of the Client's Profile expiration and renewal.
-The recommended expiration time is one week. Notice, though, that the long-term
-public key has its own expiration time.
+The recommended expiration time is one week.
 
 Nevertheless, for a short amount of time (decided by the client) a Client
 Profile can still be locally valid even if it has publicly expired. This is
