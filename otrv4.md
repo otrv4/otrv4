@@ -1481,9 +1481,9 @@ participation deniability is at risk. Participation deniability is also at risk
 if the only publicly available Client Profile is expired. For that reason, a
 received expired Client Profile during the DAKE is considered invalid.
 
-Before the Client Profile expires, the user must publish an updated Client
+When the Client Profile expires, the user must publish an updated Client
 Profile with a new expiration date. The client establishes the frequency of
-expiration and when to publish (before the current Client Profile expires). Note
+expiration and when to publish (when the current Client Profile expires). Note
 that this can be configurable. A recommended value is one week.
 
 ### Create a Client Profile Signature
@@ -1666,8 +1666,8 @@ To create a Prekey Profile, generate:
 To create a Prekey Profile, assemble:
 
 1. The Prekey Profile's identifier.
-2. The same Client Profile owner's instance tag. Denote this value Prekey Profile
-   owner's instance tag.
+2. The same Client Profile owner's instance tag. Denote this value Prekey
+   Profile owner's instance tag.
 3. Prekey Profile Expiration: Expiration date in standard Unix 64-bit format
    (seconds since the midnight starting Jan 1, 1970, UTC, ignoring leap
    seconds).
@@ -1675,7 +1675,7 @@ To create a Prekey Profile, assemble:
    It adds partial protection against an attacker that modifies the first flow
    of the non-interactive DAKE and that compromises the receivers long-term
    secret key and their one-time ephemeral keys. For its generation, refer to
-   [Public keys, Shared Prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
+   the [Public keys, Shared Prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
    section. This key must expire when the Prekey Profile expires.
 5. Profile Signature: The symmetric key, the flag `f` (set to zero, as defined
    on RFC 8032 [\[9\]](#references)) and the empty context `c` are used to
@@ -1802,7 +1802,7 @@ uses a ring signature non-interactive zero-knowledge proof of knowledge
 (`RING-SIG`) for authentication (`RSig`).
 
 Alice's long-term Ed448 key pair is `(sk_ha, Ha)` and Bob's long-term Ed448
-key pair is `(sk_hb, Hb)`. Both key pairs are generated as stated in the
+keypair is `(sk_hb, Hb)`. Both keypairs are generated as stated in the
 [Public keys, shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
 section.
 
