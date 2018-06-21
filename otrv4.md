@@ -2117,9 +2117,9 @@ A valid Auth-I message is generated as follows:
 
 To verify an Auth-I message:
 
-1. Verify if the message type is `0x88`.
-2. Verify that protocol's version of the message is `0x0004`.
-3. Check that the receiver's instance tag matches your sender's instance tag.
+1. Check that the receiver's instance tag matches your sender's instance tag.
+2. Verify if the message type is `0x88`.
+3. Verify that protocol's version of the message is `0x0004`.
 4. Compute
    `t = 0x1 || KDF_1(usageAuthIBobClientProfile || Bobs_Client_Profile, 64) ||
     KDF_1(usageAuthIAliceClientProfile || Alices_Client_Profile, 64) || Y ||
@@ -2465,9 +2465,10 @@ A valid Non-Interactive-Auth message is generated as follows:
 
 To verify a Non-Interactive-Auth message:
 
-1. Verify if the message type is `0x8D`.
-2. Verify that protocol's version of the message is `0x0004`.
-3. Check that the receiver's instance tag matches your sender's instance tag.
+1. Check that the receiver's instance tag matches your prekey message sender's
+   instance tag.
+2. Verify if the message type is `0x8D`.
+3. Verify that protocol's version of the message is `0x0004`.
 4. Validate the received ECDH ephemeral public key `X` is on curve Ed448.
    See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
