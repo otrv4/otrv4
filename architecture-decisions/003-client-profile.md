@@ -29,13 +29,23 @@ A Client Profile has an expiration date as this helps to revoke any past value
 stated on the profile. If a user's client, for example, changes its long-term
 public key, only the valid non-expired Client Profile is the one used for
 attesting that this is indeed the valid long-term public key. Any expired Client
-Profiles with the old long-term public key are invalid. Moreover, as version
+Profiles with old long-term public keys are invalid. Moreover, as version
 advertisement is public information (it is stated in the published Client
 Profile), a participant will not be able to delete this information from public
 servers (if the Client Profile is published in them). To facilitate versions
-revocation, the Client Profile can be regenerated and published once the older
-Client Profile expires. That is also the reason why we recommend a short
-expiration date.
+revocation or any of the other values revocation, the Client Profile can be
+regenerated and published once the older Client Profile expires. That is also
+the reason why we recommend a short expiration date.
+
+Furthermore, notice that the lifetime of the long-term public key is exactly the
+same as the lifetime of the Client Profile. If you have no valid Client Profile
+available for a specific long-term public key, that long-term public key should
+be treated as invalid.
+
+A Client Profile also includes an instance tag. This value is used for locally
+storing and retrieving the Client Profile during the non-interactive DAKE. This
+instance tag has to match the sender instance tag of the message the Client
+Profile is attached to.
 
 ### Decision
 
