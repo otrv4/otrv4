@@ -594,7 +594,9 @@ The following usageID variables are defined:
   * usageMessageKey = 0x17
   * usageMACKey = 0x18
   * usageExtraSymmKey = 0x19
-  * usageAuthenticator = 0x1A
+  * usageDataMessageSections = 0x1A
+  * usageAuthenticator = 0x1B
+  * usageSMPSecret = 0x1C
 ```
 
 ## Data Types
@@ -2242,7 +2244,7 @@ Verify.
      `brace_key`.
    * Calculates the SSID from shared secret: `KDF_1(usageSSID || K, 8)`.
 8. Calculates the `Auth MAC`:
-    * Calculates the value
+    * Calculates the value:
       ```
         Auth MAC = KDF_1(usageAuthMAC || auth_mac_k || t, 64)
       ```
@@ -2846,7 +2848,8 @@ When sending a data message in the same DH Ratchet:
     message from the protocol version to the encrypted message.
 
    ```
-     Authenticator = KDF_1(0x1C || MKmac || KDF_1(usageAuthenticator || data_message_sections, 64), 64)
+     Authenticator = KDF_1(usageAuthenticator || MKmac ||
+     KDF_1(usageDataMessageSections || data_message_sections, 64), 64)
    ```
 
   * Increment the next sending message id `j = j + 1`.
@@ -3860,7 +3863,13 @@ User-specified secret
 The first 64 bytes of a SHAKE-256 hash of the above is taken, and the digest
 becomes the SMP secret value (`x` or `y`) to be used in SMP. The additional
 fields ensure that not only do both parties know the same secret input string,
-but no man-in-the-middle is capable of reading their communication either.
+but no man-in-the-middle is capable of reading their communication either:
+
+```
+  smp secret = KDF_1(usageSMPSecret || version || Initiator fingerprint ||
+  Responder fingerprint, Secure Session ID or SSID || User-specified secret),
+  64)
+```
 
 ### SMP Hash Function
 
