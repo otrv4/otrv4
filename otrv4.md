@@ -3786,10 +3786,10 @@ Assuming that Alice begins the exchange:
 * Computes `c2 = HashToScalar(0x03 || G * r2)` and `d2 = r2 - b2 * c2`.
 * Computes `c3 = HashToScalar(0x04 || G * r3)` and `d3 = r3 - b3 * c3`.
 * Computes `G2 = G2a * b2` and `G3 = G3a * b3`.
-* Computes `Pb = G3 * r4` and `Qb = G * r4 + G2 * HashToScalar(y)`, where y is
-  the SMP secret value.
+* Computes `Pb = G3 * r4` and `Qb = G * r4 + G2 * SHAKE-256(y, 64) mod q`, where
+  `y` is the SMP secret value.
 * Computes `cp = HashToScalar(5 || G3 * r5 || G * r5 + G2 * r6)`,
-  `d5 = r5 - r4 * cp` and `d6 = r6 - HashToScalar(y) * cp`.
+  `d5 = r5 - r4 * cp` and `d6 = r6 - (SHAKE-256(y, 64) mod q) * cp`.
 * Sends Alice a SMP message 2 with `G2b`, `c2`, `d2`, `G3b`, `c3`, `d3`, `Pb`,
   `Qb`, `cp`, `d5` and `d6`.
 
@@ -3799,10 +3799,10 @@ Assuming that Alice begins the exchange:
   the correct group and that they do not degenerate.
 * Computes `G2 = G2b * a2` and `G3 = G3b * a3`.
 * Picks random values `r4`, `r5`, `r6` and `r7` in `Z_q`.
-* Computes `Pa = G3 * r4` and `Qa = G * r4 + G2 * HashToScalar(x)`, where x is
-  the SMP secret value.
+* Computes `Pa = G3 * r4` and `Qa = G * r4 + G2 * (SHAKE-256(x, 64) mod q)`,
+  where `x` is the SMP secret value.
 * Computes `cp = HashToScalar(0x06 || G3 * r5 || G * r5 + G2 * r6)`,
-  `d5 = r5 - r4 * cp` and `d6 = r6 - HashToScalar(x) * cp`.
+  `d5 = r5 - r4 * cp` and `d6 = r6 - (SHAKE-256(x, 64) mod q) * cp`.
 * Computes `Ra = (Qa - Qb) * a3`.
 * Computes `cr = HashToScalar(0x07 || G * r7 || (Qa - Qb) * r7)` and
   `d7 = r7 - a3 * cr`.
@@ -3946,11 +3946,12 @@ follows:
 7. Generate a zero-knowledge proof that the value `b3` is known by setting
    `c3 = HashToScalar(0x04 || G * r3)` and `d3 = r3 - b3 * c3 mod q`.
 8. Compute `G2 = G2a * b2` and `G3 = G3a * b3`.
-9. Compute `Pb = G3 * r4` and `Qb = G * r4 + G2 * HashToScalar(y)`.
+9. Compute `Pb = G3 * r4` and `Qb = G * r4 + G2 * (SHAKE-256(y, 64) mod q)`.
 10. Generate a zero-knowledge proof that `Pb` and `Qb` were created according
    to the protocol by setting
    `cp = HashToScalar(0x05 || G3 * r5 || G * r5 + G2 * r6)`,
-   `d5 = r5 - r4 * cp mod q` and `d6 = r6 - HashToScalar(y) * cp mod q`.
+   `d5 = r5 - r4 * cp mod q` and `d6 = r6 - (SHAKE-256(y, 64) mod q) *
+    cp mod q`.
 11. Store the values of `G3a`, `G2`, `G3`, `b3`, `Pb` and `Qb` for use later
     in the protocol.
 
@@ -3993,11 +3994,12 @@ is generated as follows:
    add a blinding factor to the final results and to generate zero-knowledge
    proofs that this message was created honestly.
 3. Compute `G2 = G2b * a2` and `G3 = G3b * a3`.
-4. Compute `Pa = G3 * r4` and `Qa = G * r4 + G2 * HashToScalar(x)`.
+4. Compute `Pa = G3 * r4` and `Qa = G * r4 + G2 * (SHAKE-256(x, 64) mod q)`.
 5. Generate a zero-knowledge proof that `Pa` and `Qa` were created according to
    the protocol by setting
    `cp = HashToScalar(0x06 || G3 * r5 || G * r5 + G2 * r6)`,
-   `d5 = r5 - r4 * cp mod q` and `d6 = r6 - HashToScalar(x) * cp mod q`.
+   `d5 = r5 - r4 * cp mod q` and `d6 = (r6 - (SHAKE-256(x, 64) mod q) * cp) mod
+    q`.
 6. Compute `Ra = (Qa - Qb) * a3`.
 7. Generate a zero-knowledge proof that `Ra` was created according to the
    protocol by setting `cr = HashToScalar(0x07 || G * r7 || (Qa - Qb) * r7)` and
@@ -4377,9 +4379,10 @@ can be inferred in practice).
 
 ### HashToScalar
 
-This function is `HashToScalar(d)`: d is an array of bytes.
+This function is `HashToScalar(smpUsageID || d, 64)`, where d is an array of
+bytes.
 
-1. Compute `h = KDF_1(d, 64)` as an unsigned value, little-endian.
+1. Compute `h = KDF_1(smpUsageID || d, 64)` as an unsigned value, little-endian.
 2. Return `h (mod q)`
 
 ### Modify an Encrypted Data Message
