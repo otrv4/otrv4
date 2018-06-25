@@ -81,6 +81,9 @@ an existing messaging protocol, such as XMPP.
          1. [Publishing Prekey Messages](#publishing-prekey-messages)
       1. [Validating Prekey Ensembles](#validating-prekey-ensembles)
       1. [Receiving Prekey Ensembles](#receiving-prekey-ensembles)
+1. [KCI Attacks](#kci-attacks)
+   1. [Prekey Server Forged Conversations](#prekey-server-forged-conversations)
+   1. [Forger Keys](#forger-keys)
 1. [Data Exchange](#data-exchange)
    1. [Data Message](#data-message)
       1. [Data Message Format](#data-message-format)
@@ -750,10 +753,25 @@ OTRv4's public shared prekey (ED448-SHARED-PREKEY):
     RFC 8032.
 ```
 
-The public key and shared prekey are generated as follows (refer to RFC 8032
-[\[9\]](#references), for more information on key generation). Note that,
-although the RFC 8032 defines parameters as octet strings, they are defined as
-bytes here:
+OTRv4's long-term public forging key is defined as follows:
+
+```
+OTRv4's public shared prekey (ED448-FORGER-PUBKEY):
+
+  Forger key type
+    2 byte unsigned value, little-endian
+    Ed448 shared prekey have type 0x0111
+
+  F (POINT)
+    F is the Ed448 forger key generated the same way as the public key in
+    RFC 8032.
+```
+
+
+The public key, forger key and shared prekey are generated as follows (refer to
+RFC 8032 [\[9\]](#references), for more information on key generation). Note
+that, although the RFC 8032 defines parameters as octet strings, they are
+defined as bytes here:
 
 ```
 The symmetric key (sym_key) is 57 bytes of cryptographically secure random data.
@@ -767,14 +785,15 @@ The symmetric key (sym_key) is 57 bytes of cryptographically secure random data.
 3. Interpret the buffer as the little-endian integer, forming the
    secret scalar 'sk'.  Perform a known-base-point scalar multiplication
    'sk * Base point (G)'. If the result is for the 'ED448-PUBKEY', store it in
-   'H', encoded as POINT.  If the result is for the 'ED448-SHARED-PREKEY', store
-   it in 'D', encoded as POINT.
-4. Securely store 'sk' locally, as 'sk_h' for 'ED448-PUBKEY' and 'sk_d' for
-   'ED448-SHARED-PREKEY'. These keys will be stored for as long as the
-   'ED448-PUBKEY' and the 'ED448-SHARED-PREKEY' respectevely live. Additionally,
-   securely store 'sym_key'. This key will be used for the Client and Prekey
-   profiles signature. After their public key counterpart expires, they should
-   be securely deleted or replaced.
+   'H', encoded as POINT.  If the result is for the 'ED448-FORGER-PUBKEY', store
+   it in 'F', encoded as POINT. If the result is for the 'ED448-SHARED-PREKEY',
+   store it in 'D', encoded as POINT.
+4. Securely store 'sk' locally, as 'sk_h' for 'ED448-PUBKEY', 'sk_f' for
+   'ED448-FORGER-PUBKEY' and 'sk_d' for 'ED448-SHARED-PREKEY'. These keys will
+   be stored for as long as the 'ED448-PUBKEY' and the 'ED448-SHARED-PREKEY'
+   respectevely live. Additionally, securely store 'sym_key'. This key will be
+   used for the Client and Prekey profiles signature. After their public key
+   counterpart expires, they should be securely deleted or replaced.
 5. Securely delete 'h'.
 ```
 
@@ -1366,19 +1385,23 @@ Ed448 public key (ED448-PUBKEY)
   Type = 0x0003
   Corresponds to 'H'.
 
-Versions (DATA)
+Ed448 forger public key (ED448-FORGER-PUBKEY)
   Type = 0x0004
+  Corresponds to 'F'.
 
-Client Profile Expiration (CLIENT-PROF-EXP)
+Versions (DATA)
   Type = 0x0005
 
-OTRv3 public authentication DSA key (PUBKEY)
+Client Profile Expiration (CLIENT-PROF-EXP)
   Type = 0x0006
 
+OTRv3 public authentication DSA key (PUBKEY)
+  Type = 0x0007
+
 Transitional Signature (CLIENT-SIG)
-  Type = 0x0006
+  Type = 0x0008
   This signature is defined as a signature over fields 0x0001,
-  0x0002, 0x0003, 0x0004 0x0005 and 0x006 only.
+  0x0002, 0x0003, 0x0004 0x0005, 0x006 and 0x007 only.
 ```
 
 The supported fields should not be duplicated.
@@ -2641,6 +2664,97 @@ If many prekey ensembles are received:
       decide which instance tags to send messages to.
     * If there are multiple prekey ensembles per instance tag, decide whether
       to send multiple messages to the same instance tag.
+
+## KCI Attacks
+
+One aspect of online deniability that is often overlooked is the relationship
+between DAKEs and key compromise impersonation attacks. A KCI attack begins when
+the long-term secret key of a party is compromised. With this long-term secret
+key, an attacker can impersonate other users to the owner of the key. Usually,
+this property, in the context of OTRv4, is a desirable property.
+
+In theory, a user who claims to cooperate with a judge may justifiably refuse to
+reveal their long-term secret key because it would make them vulnerable to
+a KCI attack. The design of the DAKEs used in OTRv4 makes it impossible for the
+user to provide proof of communication to a judge without revealing their
+long-term secret key. This prevents a judge and informant from devising a
+protocol where the judge is given cryptographic proof of communication
+while the informant suffers no repercussions. However, this scenario seems to be
+mostly theoretical. The more common case in practice may be the one in which the
+judge has access to the party's long-term secret keys.
+
+To prevent an scenario where a judge has access to the party's long-term secret
+key and still make it impossible for this party to provide proof of
+communication, we can use two alternatives:
+
+1. In the case of the non-interactive DAKE, ask the Prekey Server for a forged
+   conversation.
+2. Include long-term "forger" keys in the DAKEs for both participants.
+
+### Prekey Server Forged Conversations
+
+The security of the non-interactive DAKE does not require trusting the prekey
+server used to distribute prekeys ensembles. However, if we allow a scenario in
+which one party’s long-term keys have been compromised but the prekey server has
+not, we can achieve better deniability. The party may ask the prekey server in
+advance for a forged conversation, which will cast doubt on all conversations
+conducted by an attacker using the compromised device.
+
+If an attacker attempts to act as Bob in the above non-interactive DAKE section
+using the compromised device, then he (or a trusted accomplice with access to
+Bob's long-term secret key) can impersonate Alice by executing `RSig`
+with Bob's long-term public and secret keys
+(`sigma = RSig(H_b, sk_hb, {H_a, H_b, Y}, t)` instead. In practice, the Bob (or
+his accomplice) simply needs to run the non-interactive DAKE honestly, but
+pretend to be Alice in their response to the prekey message.
+
+If an attacker attempts to act as Alice in the above non-interactive DAKE
+section using the compromised device, we cannot offer full deniability. Alice
+must ask the prekey server to return a false prekey ensemble from Bob that was
+generated by Bob or his trusted accomplice, and to redirect all traffic to the
+associated forging device. This false prekey ensemble must be returned to the
+attacker when they request one. Alice can derive the Mixed shared secret by
+using Bob's long-term public key instead of hers. In practice, the attacker can
+always bypass this forgery attempt by obtaining a legitimate prekey ensemble
+from Bob and using this to respond. This limitation of the non-interactive DAKE
+is conjectured to be insurmountable by a two-flow non-interactive protocol
+[\[13\]](#references).
+
+### Forger Keys
+
+If the KCI vulnerability is undesirable, it is possible to make all both DAKEs
+(interactive and non-interactive) more resilient to it while maintaining their
+deniability properties. To do so, long-term “forger” keys must be included for
+both participants. For example, for both the interactive and non-interactive
+DAKEs, both parties would distribute both the Ed448 public key and the Ed448
+forger public key, as part of the Client Profile. Bob's long-term forger keys
+will be `F_b` and `sk_fb` (public and private respectively); Alice's long-term
+forger keys will be `F_a` and `sk_fa` (public and private respectively).
+
+In the case of the interactive DAKE, Alice will compute
+`sigma = RSig(H_a, sk_ha, {F_b, H_a, Y}, t)` and Bob will compute
+`sigma = RSig(H_b, sk_hb, {F_b, H_a, X}, t)`.
+
+In the case of the non-interactive DAKE, Alice will compute
+`sigma = RSig(H_a, sk_ha, {F_b, H_a, Y}, t)` and Bob will compute
+`sigma = RSig(H_b, sk_hb, {F_b, H_a, X}, t)`.
+
+In general, this transformation changes all long-term public keys in the
+protocol to reference the forging long-term keys instead. This alteration also
+allows the forging keys to be stored in different ways: they may be stored
+offline (e.g., on paper in a vault). They can also be destroyed immediately
+after generation, which will sacrifice online deniability for this party, but
+will prevent KCI attacks against them.
+
+Implementing this option for parties can provide more benefits in practice.
+Consider a secure messaging application that asks users whether or not they
+would like to save forging long-term keys during setup. Even if most users
+select the default option to not store them, thereby preventing them from
+performing the online forgery techniques, an attacker does not generally know
+the choice of a particular user. Consequently, an attacker cannot known if
+conversation is genuine, or if the owner of the device is using the forging
+keys. Note that trust establishment (e.g., physical verification of
+fingerprints) must cover both keys.
 
 ## Data Exchange
 
@@ -4734,3 +4848,6 @@ Compute:
 12. Gunn, L. J., Vieitez Parra, R. and Asokan, N. (2018) *On The Use of Remote Attestation
     to Break and Repair Deniability*. Available at:
     https://eprint.iacr.org/2018/424.pdf
+13. Unger, N. and Goldberg, I. (2015). *Deniable Key Exchanges for Secure
+    Messaging*. Available at:
+    https://www.cypherpunks.ca/~iang/pubs/dake-ccs15.pdf
