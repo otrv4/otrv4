@@ -746,7 +746,7 @@ OTRv4's public shared prekey (ED448-SHARED-PREKEY):
 
   Shared Prekey type
     2 byte unsigned value, little-endian
-    Ed448 shared prekey have type 0x0011
+    Ed448 shared prekeys have type 0x0011
 
   D (POINT)
     D is the Ed448 shared prekey generated the same way as the public key in
@@ -756,11 +756,11 @@ OTRv4's public shared prekey (ED448-SHARED-PREKEY):
 OTRv4's long-term public forging key is defined as follows:
 
 ```
-OTRv4's public shared prekey (ED448-FORGER-PUBKEY):
+OTRv4's forger public Ed448 key (ED448-FORGER-PUBKEY):
 
   Forger key type
     2 byte unsigned value, little-endian
-    Ed448 shared prekey have type 0x0111
+    Forger Ed448 public keys have type 0x0111
 
   F (POINT)
     F is the Ed448 forger key generated the same way as the public key in
@@ -805,6 +805,10 @@ Protocol](#socialist-millionaires-protocol-smp) or a manual fingerprint
 comparison may be used. The fingerprint is generated as:
 
 * `KDF_1(usageFingerprint || byte(H), 56)` (224-bit security level).
+
+The forger public key must have a fingerprint as well. It is calculated as:
+
+* `KDF_1(usageFingerprint || byte(F), 56)` (224-bit security level).
 
 ### Instance Tags
 
@@ -1314,9 +1318,10 @@ an attacker.
 
 OTRv4 introduces Client Profiles. A Client Profile has an arbitrary number of
 fields. A Client Profile contains a Client Profile's Identifier, the Client
-Profile owner's instance tag, a Ed448 long-term public key, information about
-supported versions, a profile expiration date, a signature of all these, and an
-optional transitional signature. It has variable length.
+Profile owner's instance tag, a Ed448 long-term public key, a Ed448 forger
+public key, information about supported versions, a profile expiration date, a
+signature of all these, and an optional transitional signature. It has variable
+length.
 
 There are two instances of the Client Profile that should be generated. One is
 used for authentication in both DAKEs (interactive and non-interactive). The
@@ -1350,6 +1355,13 @@ extra validity time is of 1 day.
 
 It is also important to note that the absence of a Client Profile is not a proof
 that a user does not support OTRv4.
+
+A Client profile also contains a Ed448 forger public key, which is a long-term
+public key used to prevent the KCI vulnerability, as defined in the
+[KCI Attacks](#kci-attacks) section. If this functionality is going to be used,
+sign the Client Profile with this keypair, and use the
+'Forge with Forge Key' functionality as defined in the
+[Forging Transcripts](#forging-transcripts) section.
 
 Note that a Client Profile is generated per client location basis. Users
 are not expected to manage Client Profiles (theirs or from others) in a client.
@@ -2670,8 +2682,9 @@ If many prekey ensembles are received:
 One aspect of online deniability that is often overlooked is the relationship
 between DAKEs and key compromise impersonation attacks. A KCI attack begins when
 the long-term secret key of a party is compromised. With this long-term secret
-key, an attacker can impersonate other users to the owner of the key. Usually,
-this property, in the context of OTRv4, is a desirable property.
+key, an attacker can impersonate other users to the owner of the key. The DAKEs
+used in OTRv4 are inherently vulnerable to KCI, but this can be a desirable
+property.
 
 In theory, a user who claims to cooperate with a judge may justifiably refuse to
 reveal their long-term secret key because it would make them vulnerable to
@@ -2681,7 +2694,8 @@ long-term secret key. This prevents a judge and informant from devising a
 protocol where the judge is given cryptographic proof of communication
 while the informant suffers no repercussions. However, this scenario seems to be
 mostly theoretical. The more common case in practice may be the one in which the
-judge has access to the party's long-term secret keys.
+judge has access to the party's long-term secret keys. In this latter case, a
+KCI vulnerability can be a desirale property.
 
 To prevent an scenario where a judge has access to the party's long-term secret
 key and still make it impossible for this party to provide proof of
@@ -2704,7 +2718,7 @@ If an attacker attempts to act as Bob in the above non-interactive DAKE section
 using the compromised device, then he (or a trusted accomplice with access to
 Bob's long-term secret key) can impersonate Alice by executing `RSig`
 with Bob's long-term public and secret keys
-(`sigma = RSig(H_b, sk_hb, {H_a, H_b, Y}, t)` instead. In practice, the Bob (or
+(`sigma = RSig(H_b, sk_hb, {H_a, H_b, Y}, t)` instead. In practice, Bob (or
 his accomplice) simply needs to run the non-interactive DAKE honestly, but
 pretend to be Alice in their response to the prekey message.
 
@@ -2722,7 +2736,7 @@ is conjectured to be insurmountable by a two-flow non-interactive protocol
 
 ### Forger Keys
 
-If the KCI vulnerability is undesirable, it is possible to make all both DAKEs
+If the KCI vulnerability is undesirable, it is possible to make both DAKEs
 (interactive and non-interactive) more resilient to it while maintaining their
 deniability properties. To do so, long-term “forger” keys must be included for
 both participants. For example, for both the interactive and non-interactive
@@ -4364,6 +4378,18 @@ ReMAC Message
   OTR data message. The user's message in the OTR data message is already
   encrypted. A new MAC tag will be generated and replaced for the message. An
   attacker may use this function to forge messages with a compromised MAC key.
+
+Impersonate Responder
+  This function takes the long-term secret key of the Identifier as input.
+  It will make the owner of this long-term secret key to pretend to be the
+  Responder by executing the RSig functionality with its keys.
+
+False Prekey Ensemble
+  This function will return a false Prekey Ensemble for the Identifier.
+
+Forge with Forge Key
+  This function takes the Ed448 forge long-term key and use it all over the
+  protocol in place of the "honest" Ed448 long-term key.
 
 Forge Entire Transcript
   The Forge Entire Transcript function will allow one participant to completely
