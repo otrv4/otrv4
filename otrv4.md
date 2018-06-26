@@ -372,11 +372,11 @@ The modes are:
 1. OTRv3-compatible mode: a mode with backwards compatibility with OTRv3. This
    mode will know how to handle plaintext messages, including query messages and
    whitespace tags.
-2. OTRv4-standalone mode: an always encrypted mode. This mode will not know how
+1. OTRv4-standalone mode: an always encrypted mode. This mode will not know how
    to handle any kind of plaintext messages, including query messages and
    whitespace tags. It supports both interactive and non-interactive
    conversations. It is not backwards compatible with OTRv3.
-3. OTRv4-interactive-only: an always encrypted mode that provides higher
+1. OTRv4-interactive-only: an always encrypted mode that provides higher
    deniability properties when compared to the previous two modes, as it
    achieves offline and online deniability for both participants in a
    conversation. It only supports interactive conversations. It is not backwards
@@ -476,9 +476,9 @@ Non-square element in Z_p (d)
 To verify that a point (`X = x, y`) is on curve Ed448-Goldilocks:
 
 1. Check that `X` is not equal to the identity element (`I`).
-2. Check that `X` lies on the curve: `x` and `y` are on in interval
+1. Check that `X` lies on the curve: `x` and `y` are on in interval
    `[0, q - 1]`.
-3. Check that `q * X = I`.
+1. Check that `q * X = I`.
 
 
 ### 3072-bit Diffie-Hellman Parameters
@@ -545,7 +545,7 @@ should be done modulo the prime `dh_p`.
 To verify that an integer (`x`) is on the group with a 3072-bit modulus:
 
 1. Check that `x` is `>= g3` and `<= dh_p - g3`.
-2. Compute `x ^ q mod p`. If `result == 1`, the integer is a valid element.
+1. Compute `x ^ q mod p`. If `result == 1`, the integer is a valid element.
    Otherwise the integer is an invalid element.
 
 ### Key Derivation Functions
@@ -671,17 +671,17 @@ encoded as follows:
 
 1. Encode the y-coordinate as a little-endian array of 57 bytes. The final byte
    is always zero.
-2. Copy the least significant bit of the x-coordinate to the most significant
+1. Copy the least significant bit of the x-coordinate to the most significant
    bit of the final byte. This is `1` if the x-coordinate is negative or `0`
    if it is not.
 
 A curve point is decoded as follows:
 
 1. Interpret the 57-byte array as an integer in little-endian representation.
-2. Interpret bit 455 as the least significant bit of the x-coordinate. Denote
+1. Interpret bit 455 as the least significant bit of the x-coordinate. Denote
    this value `x_0`.  The y-coordinate is recovered simply by clearing this bit.
    If the resulting value is `>= p`, decoding fails.
-3. To recover the x-coordinate, the curve equation implies
+1. To recover the x-coordinate, the curve equation implies
    `x^2 = (y^2 - 1) / (d * y^2 - 1) (mod p)`. The denominator is always non-zero
    mod `p`.
    1. Let `num = y^2 - 1` and `denom = d * y^2 - 1`. To compute the square root
@@ -693,9 +693,9 @@ A curve point is decoded as follows:
         x = ((num ^ 3) * denom * (num^5 * denom^3) ^ ((p-3)/4)) (mod p)
       ```
 
-   2.  If `denom * x^2 = num`, the recovered x-coordinate is `x`. Otherwise, no
+   1.  If `denom * x^2 = num`, the recovered x-coordinate is `x`. Otherwise, no
        square root exists, and decoding fails.
-4. Use the `x_0` bit to select the right square root:
+1. Use the `x_0` bit to select the right square root:
    * If `x = 0`, and `x_0 = 1`:
      * Decoding fails.
    * Otherwise, if `x_0 != x mod 2`:
@@ -1257,24 +1257,24 @@ To expire a session:
 1. Calculate the MAC keys corresponding to the stored message keys in the
    `skipped_MKenc` dictionary and put them on the `old_mac_keys` list (so they
    are revealed in TLV type 1 (Disconnected) message).
-2. Send a TLV type 1 (Disconnected) message, with the `old_mac_keys` list
+1. Send a TLV type 1 (Disconnected) message, with the `old_mac_keys` list
    attached to it.
-3. Securely delete all keys and data associated with the conversation.
+1. Securely delete all keys and data associated with the conversation.
    This includes:
 
    1. The root key and all chain keys.
-   2. All message keys and extra symmetric keys stored in the `skipped_MKenc`
+   1. All message keys and extra symmetric keys stored in the `skipped_MKenc`
       dictionary.
-   3. The ECDH keys, DH keys and brace keys.
-   4. The Secure Session ID (SSID) whose creation is described
+   1. The ECDH keys, DH keys and brace keys.
+   1. The Secure Session ID (SSID) whose creation is described
       [here](#interactive-deniable-authenticated-key-exchange-dake)
       and [here](#non-interactive-auth-message),
       any old MAC keys that remain unrevealed, and the
       extra symmetric key if present.
-   5. Reset the state and key variables, as defined in
+   1. Reset the state and key variables, as defined in
       [its section](#resetting-state-variables-and-key-variables).
 
-4. Transition the protocol state machine to `START`.
+1. Transition the protocol state machine to `START`.
 
 The session expiration time is decided individually by each party so it is
 possible for one person to have an expiration time of two hours and the other
@@ -1459,22 +1459,22 @@ To create a Client Profile, generate:
 
 1. A unique random id that is going to act as an identifier for this Client
    Profile. It should be 4 byte unsigned value, big-endian.
-2. A 4-byte instance tag to use as the Client Profile owner's instance tag.
+1. A 4-byte instance tag to use as the Client Profile owner's instance tag.
 
 Then, assemble:
 
 1. Client Profile's identifier.
-2. Client Profile owner's instance tag.
-3. Ed448 long-term public key.
-4. Versions: a string corresponding to the user's supported OTR versions.
+1. Client Profile owner's instance tag.
+1. Ed448 long-term public key.
+1. Versions: a string corresponding to the user's supported OTR versions.
    A Client Profile can advertise multiple OTR versions. The format is described
    under the section [Establishing Versions](#establishing-versions) below.
-5. Client Profile Expiration: Expiration date in standard Unix 64-bit format
+1. Client Profile Expiration: Expiration date in standard Unix 64-bit format
    (seconds since the midnight starting Jan 1, 1970, UTC, ignoring leap
    seconds).
-6. OTRv3 public authentication DSA key (optional): The OTRv3 long-term public
+1. OTRv3 public authentication DSA key (optional): The OTRv3 long-term public
    key. It should be included if version 3 and 4 are supported.
-7. Transitional Signature (optional): A signature of the Client Profile
+1. Transitional Signature (optional): A signature of the Client Profile
    excluding the Client Profile Signature and the user's OTRv3 DSA key. The
    Transitional Signature enables parties that trust user's version 3 DSA key to
    trust the Client Profile in version 4. This is only used if the user supports
@@ -1485,8 +1485,8 @@ Then, assemble:
 Then:
 
 1. Assemble the previous fields as `Fields`.
-2. Assign the number of `Fields` as `Number of Fields`.
-3. The symmetric key, the flag `f` (set to
+1. Assign the number of `Fields` as `Number of Fields`.
+1. The symmetric key, the flag `f` (set to
    zero, as defined on RFC 8032 [\[9\]](#references)) and the empty context `c`
    are used to create a signature of the entire Client Profile excluding the
    signature itself. The size of the signature is 114 bytes. For its generation,
@@ -1615,18 +1615,21 @@ The Client Profile signature is verified as defined in RFC 8032
 
 To validate a Client Profile, you must (in this order):
 
+1. Verify that the Client Profile owner's instance tag is equal to the Sender
+   Instance tag of the person that sent the DAKE message in which the Client
+   Profile is received.
 1. Verify that the `Number of Fields` is equal to the number of fields present
    on the Client Profile.
-2. Verify that the `Client Profile Signature` field is not empty.
-3. Verify that the Client Profile has not expired.
-4. Verify that the `Versions` field contains the character "4".
-5. Validate that `Ed448 Public Key` is on
+1. Verify that the `Client Profile Signature` field is not empty.
+1. Verify that the Client Profile has not expired.
+1. Verify that the `Versions` field contains the character "4".
+1. Validate that `Ed448 Public Key` is on
    the curve Ed448-Goldilocks. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
-6. If the `Transitional Signature` is present, verify its validity using the
+1. If the `Transitional Signature` is present, verify its validity using the
    OTRv3 DSA key.
-7. [Verify that the Client Profile signature is valid](#verify-a-client-profile-signature).
+1. [Verify that the Client Profile signature is valid](#verify-a-client-profile-signature).
 
 ## Prekey Profile
 
@@ -1706,18 +1709,18 @@ To create a Prekey Profile, generate:
 To create a Prekey Profile, assemble:
 
 1. The Prekey Profile's identifier.
-2. The same Client Profile owner's instance tag. Denote this value Prekey
+1. The same Client Profile owner's instance tag. Denote this value Prekey
    Profile owner's instance tag.
-3. Prekey Profile Expiration: Expiration date in standard Unix 64-bit format
+1. Prekey Profile Expiration: Expiration date in standard Unix 64-bit format
    (seconds since the midnight starting Jan 1, 1970, UTC, ignoring leap
    seconds).
-4. Public Shared Prekey: An Ed448 Public Key used in multiple prekey messages.
+1. Public Shared Prekey: An Ed448 Public Key used in multiple prekey messages.
    It adds partial protection against an attacker that modifies the first flow
    of the non-interactive DAKE and that compromises the receivers long-term
    secret key and their one-time ephemeral keys. For its generation, refer to
    the [Public keys, Shared Prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
    section. This key must expire when the Prekey Profile expires.
-5. Profile Signature: The symmetric key, the flag `f` (set to zero, as defined
+1. Profile Signature: The symmetric key, the flag `f` (set to zero, as defined
    on RFC 8032 [\[9\]](#references)) and the empty context `c` are used to
    create signatures of the entire profile excluding the signature itself. The
    size of the signature is 114 bytes. For its generation, refer to the
@@ -1812,11 +1815,14 @@ The Prekey Profile signature is verified as defined in RFC 8032
 To validate a Prekey Profile, you must (in this order):
 
 1. Verify that the Prekey Profile has not expired.
-2. Validate that the `Public Shared Prekey` is on the curve Ed448-Goldilocks.
+1. Verify that the Prekey Profile owner's instance tag is equal to the Sender
+   Instance tag of the person that sent the DAKE message in which the Client
+   Profile is received.
+1. Validate that the `Public Shared Prekey` is on the curve Ed448-Goldilocks.
    See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
-3. [Verify that the Prekey Profile signature is valid](#verify-a-prekey-profile-signature).
+1. [Verify that the Prekey Profile signature is valid](#verify-a-prekey-profile-signature).
 
 ## Online Conversation Initialization
 
@@ -1863,9 +1869,9 @@ Bob will be initiating the DAKE with Alice.
 
 1. Generates an Identity message, as defined in
    [Identity Message](#identity-message) section.
-2. Sets `Y` and `y` as `our_ecdh`: the ephemeral ECDH keys.
-3. Sets `B` as  and `b` as `our_dh`: the ephemeral 3072-bit DH keys.
-4. Sends Alice the Identity message.
+1. Sets `Y` and `y` as `our_ecdh`: the ephemeral ECDH keys.
+1. Sets `B` as  and `b` as `our_dh`: the ephemeral 3072-bit DH keys.
+1. Sends Alice the Identity message.
 
 **Alice:**
 
@@ -1879,11 +1885,11 @@ Bob will be initiating the DAKE with Alice.
       messages.
     * Sets `Y` as `their_ecdh`.
     * Sets `B` as `their_dh`.
-2. Generates an Auth-R message, as defined in
+1. Generates an Auth-R message, as defined in
    [Auth-R Message](#auth-r-message) section.
-3. Sets `X` and `x` as `our_ecdh`: the ephemeral ECDH keys.
-4. Sets `A` and `a` as `our_dh`: the ephemeral 3072-bit DH keys.
-5. Calculates the Mixed shared secret (`K`) and the SSID:
+1. Sets `X` and `x` as `our_ecdh`: the ephemeral ECDH keys.
+1. Sets `A` and `a` as `our_dh`: the ephemeral 3072-bit DH keys.
+1. Calculates the Mixed shared secret (`K`) and the SSID:
     * Calculates ECDH shared secret
       `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`. Securely deletes
        `our_ecdh.secret`.
@@ -1896,7 +1902,7 @@ Bob will be initiating the DAKE with Alice.
       `K = KDF_1(usageSharedSecret ||K_ecdh || brace_key, 64)`.
       Securely deletes `K_ecdh` and `brace_key`.
     * Calculates the SSID from shared secret: `KDF_1(usageSSID || K, 8)`.
-6. Sends Bob the Auth-R message (see [Auth-R Message](#auth-r-message) section).
+1. Sends Bob the Auth-R message (see [Auth-R Message](#auth-r-message) section).
 
 **Bob:**
 
@@ -1904,14 +1910,14 @@ Bob will be initiating the DAKE with Alice.
    * Picks a compatible version of OTR listed on Alice's profile, and follows
      the specification for this version. If the versions are incompatible, Bob
      does not send any further messages.
-2. Verifies the Auth-R message as defined in the
+1. Verifies the Auth-R message as defined in the
    [Auth-R Message](#auth-r-message) section. If the verification fails
    (for example, if Alice's public keys -`X` or `A`- are not valid), rejects
    the message and does not send anything further.
    * Sets `X` as `their_ecdh`.
    * Sets `A` as `their_dh`.
-3. Creates an Auth-I message (see [Auth-I Message](#auth-i-message) section).
-4. Calculates the Mixed shared secret (`K`) and the SSID:
+1. Creates an Auth-I message (see [Auth-I Message](#auth-i-message) section).
+1. Calculates the Mixed shared secret (`K`) and the SSID:
     * Calculates ECDH shared secret
       `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
       Securely deletes `our_ecdh.secret`.
@@ -1924,7 +1930,7 @@ Bob will be initiating the DAKE with Alice.
       `K = KDF_1(usageSharedSecret || K_ecdh || brace_key, 64)`.
       Securely deletes `k_ecdh` and `brace_key`.
     * Calculates the SSID from shared secret: `KDF_1(usageSSID || K, 8)`.
-5. Initializes the double-ratchet:
+1. Initializes the double-ratchet:
     * Sets ratchet id `i` as 0.
     * Sets `j` as 0, `k` as 0 and `pn` as 0.
     * Interprets `K` as the first root key (`root_key[i-1]`).
@@ -1939,9 +1945,9 @@ Bob will be initiating the DAKE with Alice.
       `r = KDF_1(usageDHFirstEphemeral  || K, 80)`. Securely deletes `our_dh`
       and replaces it with the outputs.
     * Securely deletes `their_ecdh` and `their_dh`.
-6. Sends Alice the Auth-I message (see [Auth-I message](#auth-i-message)
+1. Sends Alice the Auth-I message (see [Auth-I message](#auth-i-message)
    section).
-7. At this point, the interactive DAKE is complete for Bob, but the double
+1. At this point, the interactive DAKE is complete for Bob, but the double
    ratchet algorithm still needs to be correctly set up.
 
 **Alice:**
@@ -1950,7 +1956,7 @@ Bob will be initiating the DAKE with Alice.
    * Verifies the Auth-I message as defined in the
      [Auth-I message](#auth-i-message) section. If the verification fails,
      rejects the message and does not send anything further.
-2. Initializes the double ratchet algorithm:
+1. Initializes the double ratchet algorithm:
    * Sets ratchet id `i` as 0.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
    * Interprets `K` as the first root key (`root_key[i-1]`).
@@ -1967,7 +1973,7 @@ Bob will be initiating the DAKE with Alice.
        `r = KDF_1(usageDHFirstEphemeral || K, 80)`. Securely deletes `their_dh`
        and replaces it with the output `our_dh.public (g3 ^ r)`, and securely
        deletes the output `our_dh.secret (r)`.
-3. At this point, the interactive DAKE is complete for Alice:
+1. At this point, the interactive DAKE is complete for Alice:
    * She has to send a regular Data Message at this point, to initialize the
      Double Ratchet correctly. If a plaintext message is waiting to be sent,
      this can be used. Otherwise an empty heartbeat message should be sent.
@@ -1998,15 +2004,15 @@ A valid Identity message is generated as follows:
 1. If there is not a valid Client Profile, create a Client Profile, as defined
    in [Creating a Client Profile](#creating-a-client-profile) section.
    Otherwise, use the one you have on local storage.
-2. Generate an ephemeral ECDH key pair, as defined in
+1. Generate an ephemeral ECDH key pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
    * secret key `y` (57 bytes).
    * public key `Y`.
-3. Generate an ephemeral DH key pair, as defined in
+1. Generate an ephemeral DH key pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
    * secret key `b` (80 bytes).
    * public key `B`.
-4. Generate a 4-byte instance tag to use as the sender's instance tag.
+1. Generate a 4-byte instance tag to use as the sender's instance tag.
    Additional messages in this conversation will continue to use this tag as the
    sender's instance tag. Also, this tag is used to filter future received
    messages. Messages intended for this instance of the client will have this
@@ -2015,13 +2021,13 @@ A valid Identity message is generated as follows:
 To verify an Identity message:
 
 1. Verify if the message type is `0x08`.
-2. Verify that protocol's version of the message is `0x0004`.
-3. Validate the Client Profile, as defined in
+1. Verify that protocol's version of the message is `0x0004`.
+1. Validate the Client Profile, as defined in
    [Validating a Client Profile](#validating-a-client-profile) section.
-4. Verify that the point `Y` received is on curve Ed448. See
+1. Verify that the point `Y` received is on curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
-5. Verify that the DH public key `B` is from the correct group. See
+1. Verify that the DH public key `B` is from the correct group. See
    [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
    section for details.
 
@@ -2066,49 +2072,49 @@ A valid Auth-R message is generated as follows:
 1. If there is not a valid Client Profile, create a Client Profile, as detailed
    as defined in [Creating a Client Profile](#creating-a-client-profile)
    section. Otherwise, use the one you have on local storage.
-2. Generate an ephemeral ECDH key pair, as defined in
+1. Generate an ephemeral ECDH key pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
    * secret key `x` (57 bytes).
    * public key `X`.
-3. Generate an ephemeral DH key pair, as defined in
+1. Generate an ephemeral DH key pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
    * secret key `a` (80 bytes).
    * public key `A`.
-4. Compute
+1. Compute
    `t = 0x0 || KDF_1(usageAuthRBobClientProfile || Bob_Client_Profile, 64) ||
     KDF_1(usageAuthRAliceClientProfile || Alice_Client_Profile, 64) || Y || X ||
     B || A || KDF_1(usageAuthRPhi || phi, 64)`.
    `phi` is the shared session state as mention in its
    [section](#shared-session-state).
-5. Compute `sigma = RSig(H_a, sk_ha, {H_b, H_a, Y}, t)`, as defined in
+1. Compute `sigma = RSig(H_a, sk_ha, {H_b, H_a, Y}, t)`, as defined in
    [Ring Signature Authentication](#ring-signature-authentication).
-6. Generate a 4-byte instance tag to use as the sender's instance tag.
+1. Generate a 4-byte instance tag to use as the sender's instance tag.
    Additional messages in this conversation will continue to use this tag as the
    sender's instance tag. Also, this tag is used to filter future received
    messages. For the other party, this will be the receiver's instance tag.
-7. Use the sender's instance tag from the Identity Message as the receiver's
+1. Use the sender's instance tag from the Identity Message as the receiver's
    instance tag.
 
 To verify an Auth-R message:
 
 1. Verify if the message type is `0x91`.
-2. Verify that protocol's version of the message is `0x0004`.
-3. Check that the receiver's instance tag matches your sender's instance tag.
-4. Validate the Client Profile as defined in
+1. Verify that protocol's version of the message is `0x0004`.
+1. Check that the receiver's instance tag matches your sender's instance tag.
+1. Validate the Client Profile as defined in
    [Validating a Client Profile](#validating-a-client-profile) section.
    Extract `H_a` from it.
-5. Verify that the point `X` received is on curve Ed448. See
+1. Verify that the point `X` received is on curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
-6. Verify that the DH public key `A` is from the correct group. See
+1. Verify that the DH public key `A` is from the correct group. See
    [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
    section for details.
-7. Compute `t = 0x0 ||
+1. Compute `t = 0x0 ||
    KDF_1(usageAuthRBobClientProfile || Bob_Client_Profile, 64) ||
    KDF_1(usageAuthRAliceClientProfile || Alice_Client_Profile, 64) || Y || X ||
    B || A || KDF_1(usageAuthRPhi || phi, 64)`. `phi` is the shared session state
    as mention in its [section](#shared-session-state).
-8. Verify the `sigma` as defined in
+1. Verify the `sigma` as defined in
    [Ring Signature Authentication](#ring-signature-authentication).
 
 An Auth-R message is an OTRv4 message encoded as:
@@ -2153,22 +2159,22 @@ A valid Auth-I message is generated as follows:
     B || A || KDF_1(usageAuthIPhi || phi, 64)`.
    `phi` is the shared session state as mention in its
    [section](#shared-session-state).
-2. Compute `sigma = RSig(H_b, sk_hb, {H_b, H_a, X}, t)`, as defined in
+1. Compute `sigma = RSig(H_b, sk_hb, {H_b, H_a, X}, t)`, as defined in
    [Ring Signature Authentication](#ring-signature-authentication).
-3. Continue to use the sender's instance tag.
+1. Continue to use the sender's instance tag.
 
 To verify an Auth-I message:
 
 1. Check that the receiver's instance tag matches your sender's instance tag.
-2. Verify if the message type is `0x88`.
-3. Verify that protocol's version of the message is `0x0004`.
-4. Compute
+1. Verify if the message type is `0x88`.
+1. Verify that protocol's version of the message is `0x0004`.
+1. Compute
    `t = 0x1 || KDF_1(usageAuthIBobClientProfile || Bobs_Client_Profile, 64) ||
     KDF_1(usageAuthIAliceClientProfile || Alices_Client_Profile, 64) || Y ||
     X || B || A || KDF_1(usageAuthIPhi || phi, 64)`.
    `phi` is the shared session state as mention in its
    [section](#shared-session-state).
-5. Verify the `sigma` as defined in
+1. Verify the `sigma` as defined in
    [Ring Signature Authentication](#ring-signature-authentication).
 
 An Auth-I is an OTRv4 message encoded as:
@@ -2241,12 +2247,12 @@ Verify.
 1. If there is not a valid Client Profile, creates a Client Profile, as defined
    in [Creating a Client Profile](#creating-a-client-profile) section.
    Otherwise, use the one you have on local storage.
-2. If there is not a valid Prekey Profile, creates a Prekey Profile, as defined
+1. If there is not a valid Prekey Profile, creates a Prekey Profile, as defined
    in [Creating a Prekey Profile](#creating-a-prekey-profile) section.
    Otherwise, use the one you have on local storage.
-3. Generates prekey messages, as defined in the
+1. Generates prekey messages, as defined in the
    [Prekey Message](#prekey-message) section.
-2. Publishes the Client Profile, the Prekey Profile and the prekey messages to
+1. Publishes the Client Profile, the Prekey Profile and the prekey messages to
    an untrusted Prekey Server. Note that he needs to publish a Client and Prekey
    Profile once for every long-term public key he locally has until the profiles
    respectively expire. He may upload new prekey messages at other
@@ -2256,7 +2262,7 @@ Verify.
 **Alice:**
 
 1. Requests prekey ensembles from the untrusted server.
-2. For each Prekey Ensemble received from the server:
+1. For each Prekey Ensemble received from the server:
    * [Validates each Prekey Ensemble](#validating-prekey-ensembles). If the
      verification fails, rejects the message and does not send anything further.
    * Picks a compatible version of OTR listed in Bob's Client Profile.
@@ -2264,28 +2270,28 @@ Verify.
      messages.
    * Sets the received ECDH ephemeral public key `Y` as `their_ecdh`.
    * Sets the received DH ephemeral public key `B` as `their_dh`.
-3. Extracts the Public Shared Prekey (`D_b`) from Bob's Prekey Profile. Extracts
+1. Extracts the Public Shared Prekey (`D_b`) from Bob's Prekey Profile. Extracts
    the Ed448 public key (`H_b`) from Bob's Client Profile. Sets
    the first as `their_shared_prekey`.
-4. Generates a Non-Interactive-Auth message. See
+1. Generates a Non-Interactive-Auth message. See
    [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
-5. Sets `X` and `x` as `our_ecdh`: the ephemeral ECDH keys.
-6. Sets `A` and `a` as `our_dh`: ephemeral 3072-bit DH keys.
-7. Calculates the Mixed shared secret (`K`) and the SSID:
+1. Sets `X` and `x` as `our_ecdh`: the ephemeral ECDH keys.
+1. Sets `A` and `a` as `our_dh`: ephemeral 3072-bit DH keys.
+1. Calculates the Mixed shared secret (`K`) and the SSID:
    * Gets `tmp_k` from the
      [Non-Interactive-Auth Message](#non-interactive-auth-message).
    * Calculates the Mixed shared secret
      `K = KDF_1(usageSharedSecret || tmp_k, 64)`. Securely deletes `tmp_k` and
      `brace_key`.
    * Calculates the SSID from shared secret: `KDF_1(usageSSID || K, 8)`.
-8. Calculates the `Auth MAC`:
+1. Calculates the `Auth MAC`:
     * Calculates the value:
       ```
         Auth MAC = KDF_1(usageAuthMAC || auth_mac_k || t, 64)
       ```
     * Includes this value in the Non-Interactive-Auth message and securely
       deletes the `auth_mac_k`.
-9. Initializes the double-ratchet:
+1. Initializes the double-ratchet:
    * Sets ratchet id `i` as 0.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
    * Interprets `K` as the first root key (`root_key[i-1]`).
@@ -2302,15 +2308,15 @@ Verify.
        `r = KDF_1(usageDHFirstEphemeral, K, 80)`. Securely deletes `their_dh`
        and replaces it with the output `our_dh.public (g3 ^ r)`, and securely
        deletes the output `our_dh.secret (r)`.
-10. Sends Bob a Non-Interactive-Auth message. See
-    [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
-11. At this point, the non-interactive DAKE is complete for Alice:
-    * She has to send a regular Data Message at this point, to initialize the
-      Double Ratchet correctly. If a plaintext message is waiting to be sent,
-      this can be used. Otherwise an empty heartbeat message should be sent.
-    * Follows what is defined in the
-      [When you send a Data Message](#when-you-send-a-data-message)
-      section. Note that she will perform a new DH ratchet for this message.
+1. Sends Bob a Non-Interactive-Auth message. See
+   [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
+1. At this point, the non-interactive DAKE is complete for Alice:
+   * She has to send a regular Data Message at this point, to initialize the
+     Double Ratchet correctly. If a plaintext message is waiting to be sent,
+     this can be used. Otherwise an empty heartbeat message should be sent.
+   * Follows what is defined in the
+     [When you send a Data Message](#when-you-send-a-data-message)
+     section. Note that she will perform a new DH ratchet for this message.
 
 **Bob:**
 
@@ -2347,10 +2353,10 @@ Verify.
      [Non-Interactive-Auth Message](#non-interactive-auth-message) section. If
      the verification fails, rejects the message and does not send anything
      further.
-2. Retrieves the ephemeral public keys from Alice:
+1. Retrieves the ephemeral public keys from Alice:
    * Sets the received ECDH ephemeral public key `X` as `their_ecdh`.
    * Sets the received DH ephemeral public key `A` as `their_dh`.
-3. Calculates the keys needed for the generation of the Mixed shared secret
+1. Calculates the keys needed for the generation of the Mixed shared secret
    (`K`):
    * Calculates the ECDH shared secret
      `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`. Securely deletes
@@ -2360,16 +2366,16 @@ Verify.
    * Calculates the brace key
      `brace_key = KDF_1(usageThirdBraceKey || k_dh, 32)`. Securely deletes
      `k_dh`.
-4. Calculates
+1. Calculates
    `tmp_k = KDF_1(usageTmpKey || K_ecdh ||
     ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(sk_hb, their_ecdh) ||
     brace_key, 64)`. Securely deletes `K_ecdh`.
-5. Computes the Auth MAC key `auth_mac_k = KDF_1(usageAuthMACKey || tmp_k, 64)`.
-6. Computes the Mixed shared secret and the SSID:
+1. Computes the Auth MAC key `auth_mac_k = KDF_1(usageAuthMACKey || tmp_k, 64)`.
+1. Computes the Mixed shared secret and the SSID:
    * `K = KDF_1(usageSharedSecret || tmp_k, 64)`. Securely deletes `tmp_k` and
      `brace_key`.
    * Calculates the SSID from shared secret: `KDF_1(usageSSID || K, 8)`.
-7. Initializes the double ratchet algorithm:
+1. Initializes the double ratchet algorithm:
    * Sets ratchet id `i` as 0.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
    * Interprets `K` as the first root key (`root_key[i-1]`).
@@ -2389,7 +2395,7 @@ Verify.
    * Extracts the `Auth MAC` from the Non-Interactive-Auth message and verifies
      that it is equal to the one just calculated. If it is not, ignore the
      Non-Interactive-Auth message.
-8. At this point, the non-interactive DAKE is complete for Bob:
+1. At this point, the non-interactive DAKE is complete for Bob:
    * He should immediately receive a data message that advertises the
      new public keys from Alice:
      * Follows what is defined in the [When you receive a Data Message](#when-you-receive-a-data-message)
@@ -2408,17 +2414,17 @@ A valid Prekey message is generated as follows:
 
 1. Generate a unique random id that is going to act as an identifier for this
    prekey message. It should be 4 byte unsigned value, big-endian (INT).
-2. Create the first one-time use prekey by generating the ephemeral ECDH key
+1. Create the first one-time use prekey by generating the ephemeral ECDH key
    pair, as defined in
    [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys):
     * secret key `y` (57 bytes).
     * public key `Y`.
-3. Create the second one-time use prekey by generating the ephemeral DH key
+1. Create the second one-time use prekey by generating the ephemeral DH key
    pair, as defined in
    [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys):
    * secret key `b` (80 bytes).
    * public key `B`.
-4. Use the same instance tag from the Client Profile and Prekey Profile's
+1. Use the same instance tag from the Client Profile and Prekey Profile's
    owner. Additional messages in this conversation will continue to use this
    tag as the sender's instance tag. Also, this tag is used to filter future
    received messages. Messages intended for this instance of the client will
@@ -2427,11 +2433,11 @@ A valid Prekey message is generated as follows:
 To verify the Prekey message:
 
 1. Verify if the message type is `0x0F`.
-2. Verify that protocol's version of the message is `0x0004`.
-3. Check that the ECDH public key `Y` is on curve Ed448. See
+1. Verify that protocol's version of the message is `0x0004`.
+1. Check that the ECDH public key `Y` is on curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
-4. Verify that the DH public key `B` is from the correct group. See
+1. Verify that the DH public key `B` is from the correct group. See
    [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
    section for details.
 
@@ -2471,61 +2477,62 @@ A valid Non-Interactive-Auth message is generated as follows:
 1. If there is not a valid Client Profile, create a Client Profile, as defined
    in the [Creating a Client Profile](#creating-a-client-profile) section.
    Otherwise, use the one you have on local storage.
-2. Generate an ephemeral ECDH key pair, as defined in
+1. Generate an ephemeral ECDH key pair, as defined in
    [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys):
    * secret key `x` (57 bytes).
    * public key `X`.
-3. Generate an ephemeral DH key pair, as defined in
+1. Generate an ephemeral DH key pair, as defined in
    [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys):
    * secret key `a` (80 bytes).
    * public key `A`.
-4. Compute `K_ecdh = ECDH(x, their_ecdh)`.
-5. Compute `k_dh = DH(a, their_dh)` and
+1. Compute `K_ecdh = ECDH(x, their_ecdh)`.
+1. Compute `k_dh = DH(a, their_dh)` and
    `brace_key = KDF_1(usageThirdBraceKey || k_dh, 32)`. Securely delete `k_dh`.
-6. Compute
+1. Compute
    `tmp_k = KDF_1(usageTmpKey || K_ecdh || ECDH(x, their_shared_prekey) ||
     ECDH(x, H_b) || brace_key, 64)`. Securely delete `K_ecdh`.
    This value is needed for the generation of the Mixed shared secret.
-7. Calculate the Auth MAC key `auth_mac_k = KDF_1(usageAuthMACKey || tmp_k, 64)`.
-8. Compute
+1. Calculate the Auth MAC key
+   `auth_mac_k = KDF_1(usageAuthMACKey || tmp_k, 64)`.
+1. Compute
    `t = KDF_1(usageNonIntAuthBobClientProfile || Bob_Client_Profile, 64) ||
     KDF_1(usageNonIntAuthAliceClientProfile || Alice_Client_Profile, 64) ||
     Y || X || B || A || their_shared_prekey ||
     KDF_1(usageNonIntAuthPh || phi, 64)`.
-9. Compute `sigma = RSig(H_a, sk_ha, {H_b, H_a, Y}, t)`. Refer to
+1. Compute `sigma = RSig(H_a, sk_ha, {H_b, H_a, Y}, t)`. Refer to
    the [Ring Signature Authentication](#ring-signature-authentication) section
    for details.
-10. Attach the 'Prekey Message Identifier' that is stated in the retrieved
-    Prekey message.
-11. Attach the 'Client Profile Message Identifier' that is stated in the
-    retrieved Client Profile.
-12. Attach the 'Prekey Profile Message Identifier' that is stated in the
-    retrieved Prekey Profile.
-13. Generate a 4-byte instance tag to use as the sender's instance tag.
-    Additional messages in this conversation will continue to use this tag as
-    the sender's instance tag. Also, this tag is used to filter future received
-    messages. Messages intended for this instance of the client will have this
-    number as the receiver's instance tag.
+1. Attach the 'Prekey Message Identifier' that is stated in the retrieved
+   Prekey message.
+1. Attach the 'Client Profile Message Identifier' that is stated in the
+   retrieved Client Profile.
+1. Attach the 'Prekey Profile Message Identifier' that is stated in the
+   retrieved Prekey Profile.
+1. Generate a 4-byte instance tag to use as the sender's instance tag.
+   Additional messages in this conversation will continue to use this tag as
+   the sender's instance tag. Also, this tag is used to filter future received
+   messages. Messages intended for this instance of the client will have this
+   number as the receiver's instance tag.
 
 To verify a Non-Interactive-Auth message:
 
 1. Check that the receiver's instance tag matches your prekey message sender's
    instance tag.
-2. Verify if the message type is `0x8D`.
-3. Verify that protocol's version of the message is `0x0004`.
-4. Validate the received ECDH ephemeral public key `X` is on curve Ed448.
+1. Verify if the message type is `0x8D`.
+1. Verify that protocol's version of the message is `0x0004`.
+1. Validate the received ECDH ephemeral public key `X` is on curve Ed448.
    See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
-5. Validate that the received DH ephemeral public key `A` is on the correct
+1. Validate that the received DH ephemeral public key `A` is on the correct
    group. See
    [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
    section for details.
-6. Compute
+1. Compute
    `t = KDF_1(usageNonIntAuthBobClientProfile || Bobs_Client_Profile, 64) ||
     KDF_1(usageNonIntAuthAliceClientProfile || Alices_Client_Profile, 64) ||
     Y || X || B || A || our_shared_prekey.public ||
     KDF_1(usageNonIntAuthPhi || phi, 64)`.
-7. Verify the `sigma` as defined in
+1. Verify the `sigma` as defined in
    [Ring Signature Authentication](#ring-signature-authentication).
 
 A Non-Interactive-Auth is an OTRv4 message encoded as:
@@ -2617,16 +2624,16 @@ server's store of prekeys messages gets low.
 Use the following checks to validate a Prekey Ensemble. If any of the checks
 fail, ignore the Prekey Ensemble:
 
-  1. Check that all the instance tags on the Prekey Ensemble's values are the
-     same.
-  2. [Validate the Client Profile](#validating-a-client-profile).
-  3. [Validate the Prekey Profile](#validating-a-prekey-profile).
-  4. Check that the Prekey Profile is signed by the same long-term public key
-     stated on it and on the Client Profile.
-  5. Verify the Prekey message as stated on its [section](#prekey-message).
-  6. Check that the OTR version of the prekey message matches one of the
-     versions signed in the Client Profile contained in the Prekey Ensemble.
-  7. Check if the Client Profile's version is supported by the receiver.
+1. Check that all the instance tags on the Prekey Ensemble's values are the
+   same.
+1. [Validate the Client Profile](#validating-a-client-profile).
+1. [Validate the Prekey Profile](#validating-a-prekey-profile).
+1. Check that the Prekey Profile is signed by the same long-term public key
+   stated on it and on the Client Profile.
+1. Verify the Prekey message as stated on its [section](#prekey-message).
+1. Check that the OTR version of the prekey message matches one of the
+   versions signed in the Client Profile contained in the Prekey Ensemble.
+1. Check if the Client Profile's version is supported by the receiver.
 
 Note that these steps can be done in anticipation of sending a
 Non-Interactive-Auth message.
@@ -2655,20 +2662,20 @@ a Prekey Ensemble (a Client Profile, a Prekey Profile and a Prekey message):
 If one Prekey Ensemble is received:
 
 1. [Validate the Prekey Ensemble](#validating-prekey-ensembles).
-2. If the Prekey Ensemble is valid, decide whether to send a
+1. If the Prekey Ensemble is valid, decide whether to send a
    Non-Interactive-Auth message depending on whether the long-term key in the
    Client Profile is trusted or not. This decision is optional.
 
 If many prekey ensembles are received:
 
 1. [Validate the Prekey Ensembles](#validating-prekey-ensembles).
-2. Discard all invalid prekey ensembles.
-3. Discard all duplicate prekey ensembles in the list.
-4. If one Prekey Ensemble remains:
+1. Discard all invalid prekey ensembles.
+1. Discard all duplicate prekey ensembles in the list.
+1. If one Prekey Ensemble remains:
     * Decide whether to send a message using this Prekey Ensemble if the
       long-term key within the Client Profile is trusted or not. This decision
       is optional.
-5. If multiple valid prekey ensembles remain:
+1. If multiple valid prekey ensembles remain:
     * If there are keys that are untrusted and trusted in the list of messages,
       decide whether to only use the trusted long-term keys; and send messages
       with each one of them. This decision is optional.
@@ -2703,7 +2710,7 @@ communication, we can use two alternatives:
 
 1. In the case of the non-interactive DAKE, ask the Prekey Server for a forged
    conversation.
-2. Include long-term "forger" keys in the DAKEs for both participants.
+1. Include long-term "forger" keys in the DAKEs for both participants.
 
 ### Prekey Server Forged Conversations
 
@@ -2997,10 +3004,10 @@ Decrypting a data message consists of:
 1. If the encrypted message corresponds to an stored message key corresponding
    to an skipped message, the message is verified and decrypted with that key
    which is deleted from the storage.
-2. If a new ratchet key has been received, any message keys corresponding to
+1. If a new ratchet key has been received, any message keys corresponding to
    skipped messages from the previous receiving ratchet are stored. A new DH
    ratchet is performed.
-3. If a new message from the current receiving ratchet is received, any message
+1. If a new message from the current receiving ratchet is received, any message
    keys corresponding to skipped messages from the same ratchet are stored, and
    a symmetric-key ratchet is performed to derive the current message key and
    the next receiving chain key. The message is then verified and decrypted.
@@ -3126,7 +3133,7 @@ risks, as defined in [\[2\]](#references):
 1. A malicious sender could induce receivers to store large numbers of skipped
    message keys, possibly causing a denial-of-service due to consuming storage
    space.
-2. An adversary can capture and drop some messages from sender, even though they
+1. An adversary can capture and drop some messages from sender, even though they
    didn't reach the recipient. The attacker can later compromise the intended
    recipient at a later time to reveal the stored message keys that correspond
    to the dropped messages. The adversary can then retroactively decrypt the
@@ -4014,17 +4021,17 @@ generators, `g2` and `g3`. A valid SMP message 1 is generated as follows:
 
 1. Determine her secret input `x`, which is to be compared to Bob's secret
    `y`, as specified in the [Secret Information section](#secret-information).
-2. Pick random values `a2` and `a3` in `Z_q`. These will be Alice's exponents
+1. Pick random values `a2` and `a3` in `Z_q`. These will be Alice's exponents
    for the ECDH exchange to pick generators.
-3. Pick random values `r2` and `r3` in `Z_q`. These will be used to generate
+1. Pick random values `r2` and `r3` in `Z_q`. These will be used to generate
    zero-knowledge proofs that this message was created according to the SMP
    protocol.
-4. Compute `G2a = G * a2` and `G3a = G * a3`.
-5. Generate a zero-knowledge proof that the value `a2` is known by setting
+1. Compute `G2a = G * a2` and `G3a = G * a3`.
+1. Generate a zero-knowledge proof that the value `a2` is known by setting
    `c2 = HashToScalar(0x01 || G * r2)` and `d2 = r2 - a2 * c2 mod q`.
-6. Generate a zero-knowledge proof that the value `a3` is known by setting
+1. Generate a zero-knowledge proof that the value `a3` is known by setting
    `c3 = HashToScalar(0x02 || G * r3)` and `d3 = r3 - a3 * c3 mod q`.
-7. Store the values of `x`, `a2` and `a3` for use later in the protocol.
+1. Store the values of `x`, `a2` and `a3` for use later in the protocol.
 
 
 The SMP message 1 has the following data and format:
@@ -4061,27 +4068,27 @@ follows:
 1. Validate that `G2a` and `G3a` are on curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
-2. Determine Bob's secret input `y`, which is to be compared to Alice's secret
+1. Determine Bob's secret input `y`, which is to be compared to Alice's secret
    `x`.
-3. Pick random values `b2` and `b3` in `Z_q`. These will be used for creating
+1. Pick random values `b2` and `b3` in `Z_q`. These will be used for creating
    the generators `g2` and `g3`.
-4. Pick random values `r2`, `r3`, `r4`, `r5` and `r6` in `Z_q`. These
+1. Pick random values `r2`, `r3`, `r4`, `r5` and `r6` in `Z_q`. These
    will be used to add a blinding factor to the final results, and to generate
    zero-knowledge proofs that this message was created honestly.
-5. Compute `G2b = G * b2` and `G3b = G * b3`.
-6. Generate a zero-knowledge proof that the value `b2` is known by setting
+1. Compute `G2b = G * b2` and `G3b = G * b3`.
+1. Generate a zero-knowledge proof that the value `b2` is known by setting
    `c2 = HashToScalar(0x03 || G * r2)` and `d2 = r2 - b2 * c2 mod q`.
-7. Generate a zero-knowledge proof that the value `b3` is known by setting
+1. Generate a zero-knowledge proof that the value `b3` is known by setting
    `c3 = HashToScalar(0x04 || G * r3)` and `d3 = r3 - b3 * c3 mod q`.
-8. Compute `G2 = G2a * b2` and `G3 = G3a * b3`.
-9. Compute `Pb = G3 * r4` and `Qb = G * r4 + G2 * (SHAKE-256(y, 64) mod q)`.
-10. Generate a zero-knowledge proof that `Pb` and `Qb` were created according
+1. Compute `G2 = G2a * b2` and `G3 = G3a * b3`.
+1. Compute `Pb = G3 * r4` and `Qb = G * r4 + G2 * (SHAKE-256(y, 64) mod q)`.
+1. Generate a zero-knowledge proof that `Pb` and `Qb` were created according
    to the protocol by setting
    `cp = HashToScalar(0x05 || G3 * r5 || G * r5 + G2 * r6)`,
    `d5 = r5 - r4 * cp mod q` and `d6 = r6 - (SHAKE-256(y, 64) mod q) *
     cp mod q`.
-11. Store the values of `G3a`, `G2`, `G3`, `b3`, `Pb` and `Qb` for use later
-    in the protocol.
+1. Store the values of `G3a`, `G2`, `G3`, `b3`, `Pb` and `Qb` for use later
+   in the protocol.
 
 The SMP message 2 has the following data and format:
 
@@ -4118,21 +4125,21 @@ is generated as follows:
 1. Validate that `G2b`, `G3b`, `Pb`, and `Qb` are on curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
-2. Pick random values `r4`, `r5`, `r6` and `r7` in `Z_q`. These will be used to
+1. Pick random values `r4`, `r5`, `r6` and `r7` in `Z_q`. These will be used to
    add a blinding factor to the final results and to generate zero-knowledge
    proofs that this message was created honestly.
-3. Compute `G2 = G2b * a2` and `G3 = G3b * a3`.
-4. Compute `Pa = G3 * r4` and `Qa = G * r4 + G2 * (SHAKE-256(x, 64) mod q)`.
-5. Generate a zero-knowledge proof that `Pa` and `Qa` were created according to
+1. Compute `G2 = G2b * a2` and `G3 = G3b * a3`.
+1. Compute `Pa = G3 * r4` and `Qa = G * r4 + G2 * (SHAKE-256(x, 64) mod q)`.
+1. Generate a zero-knowledge proof that `Pa` and `Qa` were created according to
    the protocol by setting
    `cp = HashToScalar(0x06 || G3 * r5 || G * r5 + G2 * r6)`,
    `d5 = r5 - r4 * cp mod q` and `d6 = (r6 - (SHAKE-256(x, 64) mod q) * cp) mod
     q`.
-6. Compute `Ra = (Qa - Qb) * a3`.
-7. Generate a zero-knowledge proof that `Ra` was created according to the
+1. Compute `Ra = (Qa - Qb) * a3`.
+1. Generate a zero-knowledge proof that `Ra` was created according to the
    protocol by setting `cr = HashToScalar(0x07 || G * r7 || (Qa - Qb) * r7)` and
    `d7 = r7 - a3 * cr mod q`.
-8. Store the values of `G3b`, `Pa - Pb`, `Qa - Qb` and `a3` for use later in
+1. Store the values of `G3b`, `Pa - Pb`, `Qa - Qb` and `a3` for use later in
    the protocol.
 
 The SMP message 3 has the following data and format:
@@ -4164,10 +4171,10 @@ generated as follows:
 1. Validate that `Pa`, `Qa`, and `Ra` are on curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
-2. Pick a random value `r7` in `Z_q`. This will be used to generate Bob's final
+1. Pick a random value `r7` in `Z_q`. This will be used to generate Bob's final
    zero-knowledge proof that this message was created honestly.
-3. Compute `Rb = (Qa - Qb) * b3`.
-4. Generate a zero-knowledge proof that `Rb` was created according to the
+1. Compute `Rb = (Qa - Qb) * b3`.
+1. Generate a zero-knowledge proof that `Rb` was created according to the
    protocol by setting
    `cr = HashToScalar(0x08 || G * r7 || (Qa - Qb) * r7)`
    and `d7 = r7 - b3 * cr mod q`.
@@ -4207,8 +4214,8 @@ If smpstate is `SMPSTATE_EXPECT1`:
   1. Check that both `G2a` and `G3a` are on curve Ed448. See
      [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
      section for details.
-  2. Check that `c2 = HashToScalar(0x01 || G * d2 + G2a * c2)`.
-  3. Check that `c3 = HashToScalar(0x02 || G * d3 + G3a * c3)`.
+  1. Check that `c2 = HashToScalar(0x01 || G * d2 + G2a * c2)`.
+  1. Check that `c3 = HashToScalar(0x02 || G * d3 + G3a * c3)`.
 * Create a SMP message 2 and send it to Alice.
 * Set smpstate to `SMPSTATE_EXPECT3`.
 
@@ -4227,9 +4234,9 @@ If smpstate is `SMPSTATE_EXPECT2`:
   1. Check that `G2b`, `G3b`, `Pb` and `Qb` are on curve Ed448. See
      [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
      section for details.
-  2. Check that `c2 = HashToScalar(0x03 || G * d2 + G2b * c2)`.
-  3. Check that `c3 = HashToScalar(0x04 || G * d3 + G3b * c3)`.
-  4. Check that `cp = HashToScalar(0x05 || G3 * d5 + Pb * cp || G * d5 + G2 *
+  1. Check that `c2 = HashToScalar(0x03 || G * d2 + G2b * c2)`.
+  1. Check that `c3 = HashToScalar(0x04 || G * d3 + G3b * c3)`.
+  1. Check that `cp = HashToScalar(0x05 || G3 * d5 + Pb * cp || G * d5 + G2 *
      d6 + Qb * cp)`.
 * Create SMP message 3 and send it to Bob.
 * Set smpstate to `SMPSTATE_EXPECT4`.
@@ -4249,14 +4256,14 @@ If smpstate is `SMPSTATE_EXPECT3`:
   1. Check that `Pa`, `Qa` and `Ra` are on curve Ed448. See
      [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
      section for details.
-  2. Check that `cp = HashToScalar(0x06 || G3 * d5 + Pa * cp || G * d5 + G2 *
+  1. Check that `cp = HashToScalar(0x06 || G3 * d5 + Pa * cp || G * d5 + G2 *
      d6 + Qa * cp)`.
-  3. Check that `cr = HashToScalar(0x07 || G * d7 + G3a * cr || (Qa - Qb) * d7 +
+  1. Check that `cr = HashToScalar(0x07 || G * d7 + G3a * cr || (Qa - Qb) * d7 +
      Ra * cr)`.
 * Create a SMP message 4 and send it to Alice.
 * Check whether the protocol was successful:
   1. Compute `Rab = Ra * b3`.
-  2. Determine if `x = y` by checking the equivalent condition that
+  1. Determine if `x = y` by checking the equivalent condition that
      `Pa - Pb = Rab`.
 * Set smpstate to `SMPSTATE_EXPECT1`, as no more messages are expected from
   Alice.
@@ -4276,12 +4283,12 @@ If smpstate is `SMPSTATE_EXPECT4`:
    1. Check that `Rb` is on curve Ed448. See
       [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
       section for details.
-   2. Check that `cr = HashToScalar(0x08 || G * d7 + G3b * cr || (Qa - Qb) *
+   1. Check that `cr = HashToScalar(0x08 || G * d7 + G3b * cr || (Qa - Qb) *
       d7 + Rb * cr)`.
 * Check whether the protocol was successful:
-    1. `Compute Rab = Rb * a3`.
-    2. Determine if `x = y` by checking the equivalent condition that
-       `(Pa - Pb) = Rab`.
+   1. `Compute Rab = Rb * a3`.
+   1. Determine if `x = y` by checking the equivalent condition that
+      `(Pa - Pb) = Rab`.
 * Set smpstate to `SMPSTATE_EXPECT1`, as no more messages are expected
   from Bob.
 
@@ -4444,14 +4451,14 @@ Ed448. See
 section for details.
 
 1. Pick random values `t1, c2, c3, r2, r3` in `q`.
-2. Compute `T1 = G * t1`.
-3. Compute `T2 = G * r2 + A2 * c2`.
-4. Compute `T3 = G * r3 + A3 * c3`.
-5. Compute `c = HashToScalar(0x1D || G || q || A1 || A2 || A3 || T1 || T2 ||
+1. Compute `T1 = G * t1`.
+1. Compute `T2 = G * r2 + A2 * c2`.
+1. Compute `T3 = G * r3 + A3 * c3`.
+1. Compute `c = HashToScalar(0x1D || G || q || A1 || A2 || A3 || T1 || T2 ||
    T3 || m)`.
-6. Compute `c1 = c - c2 - c3 (mod q)`.
-7. Compute `r1 = t1 - c1 * a1 (mod q)`.
-8. Send `sigma = (c1, r1, c2, r2, c3, r3)`.
+1. Compute `c1 = c - c2 - c3 (mod q)`.
+1. Compute `r1 = t1 - c1 * a1 (mod q)`.
+1. Send `sigma = (c1, r1, c2, r2, c3, r3)`.
 
 This function can be generalized so it is not possible to determine which secret
 key was used to produce this ring signature, even if all secret keys are
@@ -4460,7 +4467,7 @@ revealed. For this, constant-time conditional operations should be used.
 The prover knows a secret `ai` and, therefore:
 
 1. Pick random values `t1, c2, c3, r2, r3` in `q`.
-2. Compute:
+1. Compute:
 
 ```
   P = G * ai
@@ -4469,7 +4476,7 @@ The prover knows a secret `ai` and, therefore:
   eq3 = constant_time_eq(P, A3)
 ```
 
-3. Depending the result of the above operations, compute:
+1. Depending the result of the above operations, compute:
 
 ```
   T1 = constant_time_select(eq1, encode(G * t1), encode(G * r1 + A1 * c1))
@@ -4477,26 +4484,26 @@ The prover knows a secret `ai` and, therefore:
   T3 = constant_time_select(eq3, encode(G * t3), encode(G * r3 + A3 * c3))
 ```
 
-4. Compute `c = HashToScalar(0x1D || G || q || A1 || A2 || A3 || T1 || T2 ||
+1. Compute `c = HashToScalar(0x1D || G || q || A1 || A2 || A3 || T1 || T2 ||
    T3 || m)`.
-5. For whichever equally returns true (if `eqi == 1`, `eqj == 0` and
+1. For whichever equally returns true (if `eqi == 1`, `eqj == 0` and
    `eqk == 0`, for `i != j != k`): `ci = c - cj - ck (mod q)`.
-6. For whichever equally returns true (if `eqi == 1`):
+1. For whichever equally returns true (if `eqi == 1`):
    `ri = ti - ci * ai (mod q)`.
-7. Compute `sigma = (ci, ri, cj, rj, ck, rk)`.
+1. Compute `sigma = (ci, ri, cj, rj, ck, rk)`.
 
 If the prover knows `a2`, for example, the `RSig` function looks like this:
 `RSig(A2, a2, {A1, A2, A3}, m)`
 
 1. Pick random values `t2, c1, c3, r1, r3` in `q`.
-2. Compute `T2 = G * t2`.
-3. Compute `T1 = G * r1 + A1 * c1`.
-4. Compute `T3 = G * r3 + A3 * c3`.
-5. Compute `c = HashToScalar(0x1D || G || q || A1 || A2 || A3 || T1 || T2 ||
-   T3 || m)`.
-6. Compute `c2 = c - c1 - c3 (mod q)`.
-7. Compute `r2 = t2 - c2 * a2 (mod q)`.
-8. Send `sigma = (c1, r1, c2, r2, c3, r3)`.
+1. Compute `T2 = G * t2`.
+1. Compute `T1 = G * r1 + A1 * c1`.
+1. Compute `T3 = G * r3 + A3 * c3`.
+1. Compute
+   `c = HashToScalar(0x1D || G || q || A1 || A2 || A3 || T1 || T2 || T3 || m)`.
+1. Compute `c2 = c - c1 - c3 (mod q)`.
+1. Compute `r2 = t2 - c2 * a2 (mod q)`.
+1. Send `sigma = (c1, r1, c2, r2, c3, r3)`.
 
 The order of elements passed to `H` and sent to the verifier must not depend
 on the secret known by the prover (otherwise, the key used to produce the proof
@@ -4509,12 +4516,12 @@ can be inferred in practice).
 `A1`, `A2`, and `A3` should be checked to verify that they are on curve Ed448.
 
 1. Parse `sigma` to retrieve components `(c1, r1, c2, r2, c3, r3)`.
-2. Compute `T1 = G * r1 + A1 * c1`
-3. Compute `T2 = G * r2 + A2 * c2`
-4. Compute `T3 = G * r3 + A3 * c3`
-5. Compute `c = HashToScalar(0x1D || G || q || A1 || A2 || A3 || T1 || T2 ||
-   T3 || m)`.
-6. Check if `c ≟ c1 + c2 + c3 (mod q)`. If it is true, verification succeeds.
+1. Compute `T1 = G * r1 + A1 * c1`
+1. Compute `T2 = G * r2 + A2 * c2`
+1. Compute `T3 = G * r3 + A3 * c3`
+1. Compute
+   `c = HashToScalar(0x1D || G || q || A1 || A2 || A3 || T1 || T2 || T3 || m)`.
+1. Check if `c ≟ c1 + c2 + c3 (mod q)`. If it is true, verification succeeds.
    If not, it fails.
 
 ### HashToScalar
@@ -4523,7 +4530,7 @@ This function is `HashToScalar(smpUsageID || d, 64)`, where d is an array of
 bytes.
 
 1. Compute `h = KDF_1(smpUsageID || d, 64)` as an unsigned value, little-endian.
-2. Return `h (mod q)`
+1. Return `h (mod q)`
 
 ### Modify an Encrypted Data Message
 
