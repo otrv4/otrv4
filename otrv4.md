@@ -1363,6 +1363,29 @@ sign the Client Profile with this keypair, and use the
 'Forge with Forge Key' functionality as defined in the
 [Forging Transcripts](#forging-transcripts) section.
 
+A Client Profile has an expiration date as this helps to revoke any past value
+stated on a previous profile. If a user's client, for example, changes its
+long-term public key, only the valid non-expired Client Profile is the one used
+for attesting that this is indeed the valid long-term public key. Any expired
+Client Profiles with old long-term public keys are invalid. Moreover, as
+version advertisement is public information (it is stated in the published
+Client Profile), a participant will not be able to delete this information from
+public servers (if the Client Profile is published in them). To facilitate
+versions revocation or any of the other values revocation, the Client Profile
+can be regenerated and published once the older Client Profile expires. This is
+also the reason why we recommend a short expiration date, so values can be
+easily revoked.
+
+Furthermore, notice that the lifetime of the long-term public key is exactly the
+same as the lifetime of the Client Profile. If you have no valid Client Profile
+available for a specific long-term public key, that long-term public key should
+be treated as invalid.
+
+A Client Profile also includes an instance tag. This value is used for locally
+storing and retrieving the Client Profile during the non-interactive DAKE. This
+instance tag has to match the sender instance tag of the DAKE message the Client
+Profile is included in.
+
 Note that a Client Profile is generated per client location basis. Users
 are not expected to manage Client Profiles (theirs or from others) in a client.
 As a consequence, clients are discouraged to allow importing or exporting of
