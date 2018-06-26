@@ -2,48 +2,60 @@
 
 ### Context
 
-When a client has more than one version of OTR protocol allowed (v3 and v4)
-he can send multiple query messages each one with a different protocol version.
+When a client has more than one version of OTR protocol allowed (v3 and v4), it
+can send several query messages each one with a different protocol version.
 
-Also a person could have more than one client active at the same time and
-these clients could answer the same query message multiple times.
+If Alice wishes to communicate to Bob that she would like to use OTR, she sends
+a message containing the string "?OTRv" followed by an indication of what
+versions of OTR she is willing to use with Bob. The versions she is willing to
+use, whether she can set this on a global level or per-correspondent basis, is
+up to the implementer. However, enabling users to choose whether they want to
+allow or disallow a version is required, as OTR clients can set different
+policies for different correspondents.
+
+Furthermore, a user can have more than one client active at the same time. These
+clients could answer to the same query message multiple times.
 
 ### Decision
 
-We decided that if a query message is sent to start a new DAKE it will set
-the running protocol version as the one which the query message brings, if it
-brings more than one version the highest verstion will be set as the running
-version. If a conversation was already started with some protocol version and
-suddenly a new query message with a different protocol version arrives the
-messages will now be encrypted using the protocol version of this message and
-any message encrypted with the previous decision of running version will be
-ignored.
+A query message will set the running version that the protocol is started with.
+If a query message, for example, only contains the byte identifier "4", then
+an instance of OTRv4 will be started. If the byte identifier contains more than
+one versions (version "4" and 3"), the highest version will be chosen and an
+instance of OTR of that version will begin.
+
+If a conversation was already started with a protocol version and a new query
+message with a different protocol version arrives (while being in
+`ENCRYPTED_MESSAGES` state), the conversation will be set to this new version.
+Any previous messages sent prior to the arrival of the new query message will be
+undecryptable.
 
 ### Example
 
-Alice wants to talk with Bob, both have clients with support to protocol
-version 3 and 4.
+Alice wants to talk with Bob. Their clients respectively support version 3 and 4
+of the OTR protocol.
 
-Alice starts the conversation and send a query message requesting that the
-conversation occurs with version 4 of the protocol and Bob's client accept it
-and the conversation starts with protocol running version equal to 4.
+Alice starts a conversation and sends a query message with version 4 of the
+protocol. Bob accepts this query message and the conversation starts with
+version 4.
 
-After a while Alice client had a bug and the conversation stops from her side
-without send the finish message to Bob. To keep the conversation she opens
-another client but this one support only the protocol version 3, so it sends
-a new query message with version 3 of the protocol, Bob will receive this
-message and change the protocol running version in his client.
+After a while, Alice's client has a bug and the conversation stops from her side
+without sending the TLV type 1 Disconnected. To stay in the conversation, she
+opens another client that only supports version 3 of the protocol. She sends
+a new query message that advertises version 3. Bob receives this message and
+changes the protocol running version of his client.
 
-All the Bob's message with protocol running version 4 sent to Alice during
-the period of the first client bug will be lost.
+All Bob's messages sent prior to the change of the running version, will be lost
+and undecryptable.
 
 ### Consequences
 
-- Some messages could not be received successfully due to different protocol
-version.
+Some messages will not be received or be able to be decrypted due to the change
+on the protocol versions.
 
-- This behaviour disallows the protocol to be initiated directly by sending a
-D-H commit message or an Identity message.
+A conversation started with and Identity message, in the OTRv4-interactive-only
+or OTRv4-standalone mode, is not able to handle plaintext messages and,
+therefore, is unable to change the running version with a new query message.
 
-- If the running version is set to 3 a Non-Interactive-Auth message will not be 
-received.
+As always, the protocol version 3 will not be able to receive messages from a
+non-interactive DAKE, even if previously it was in version 4.
