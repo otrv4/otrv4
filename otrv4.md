@@ -4024,7 +4024,7 @@ fields ensure that not only do both parties know the same secret input string,
 but no man-in-the-middle is capable of reading their communication either:
 
 ```
-  smp secret = KDF_1(usageSMPSecret || version || Initiator fingerprint ||
+  x or y = KDF_1(usageSMPSecret || version || Initiator fingerprint ||
   Responder fingerprint, Secure Session ID or SSID || User-specified secret),
   64)
 ```
@@ -4104,12 +4104,11 @@ follows:
 1. Generate a zero-knowledge proof that the value `b3` is known by setting
    `c3 = HashToScalar(0x04 || G * r3)` and `d3 = r3 - b3 * c3 mod q`.
 1. Compute `G2 = G2a * b2` and `G3 = G3a * b3`.
-1. Compute `Pb = G3 * r4` and `Qb = G * r4 + G2 * (SHAKE-256(y, 64) mod q)`.
+1. Compute `Pb = G3 * r4` and `Qb = G * r4 + G2 * (y mod q)`.
 1. Generate a zero-knowledge proof that `Pb` and `Qb` were created according
    to the protocol by setting
    `cp = HashToScalar(0x05 || G3 * r5 || G * r5 + G2 * r6)`,
-   `d5 = r5 - r4 * cp mod q` and `d6 = r6 - (SHAKE-256(y, 64) mod q) *
-    cp mod q`.
+   `d5 = r5 - r4 * cp mod q` and `d6 = (r6 - (y  mod q) * cp) mod q`.
 1. Store the values of `G3a`, `G2`, `G3`, `b3`, `Pb` and `Qb` for use later
    in the protocol.
 
@@ -4152,12 +4151,11 @@ is generated as follows:
    add a blinding factor to the final results and to generate zero-knowledge
    proofs that this message was created honestly.
 1. Compute `G2 = G2b * a2` and `G3 = G3b * a3`.
-1. Compute `Pa = G3 * r4` and `Qa = G * r4 + G2 * (SHAKE-256(x, 64) mod q)`.
+1. Compute `Pa = G3 * r4` and `Qa = G * r4 + G2 * (x mod q)`.
 1. Generate a zero-knowledge proof that `Pa` and `Qa` were created according to
    the protocol by setting
    `cp = HashToScalar(0x06 || G3 * r5 || G * r5 + G2 * r6)`,
-   `d5 = r5 - r4 * cp mod q` and `d6 = (r6 - (SHAKE-256(x, 64) mod q) * cp) mod
-    q`.
+   `d5 = r5 - r4 * cp mod q` and `d6 = ((r6 - (x mod q) * cp) mod q`.
 1. Compute `Ra = (Qa - Qb) * a3`.
 1. Generate a zero-knowledge proof that `Ra` was created according to the
    protocol by setting `cr = HashToScalar(0x07 || G * r7 || (Qa - Qb) * r7)` and
