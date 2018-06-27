@@ -966,6 +966,10 @@ defined as the "receiver" by the initiator of the interactive DAKE):
         DATA("alice@jabber.net") || DATA("bob@jabber.net")
 ```
 
+To make sure both participants has the same `phi` during DAKE, the OTRv4
+protocol sorts the instance tag by increasing order and instance tag
+lexicographically.
+
 ### Secure Session ID
 
 The secure session ID (`SSID`) is a 8-byte value. If the participant requests
