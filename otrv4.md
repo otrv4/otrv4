@@ -4218,7 +4218,31 @@ sections detail how values are computed differently during some states. Each
 case assumes that the protocol state is `ENCRYPTED_MESSAGES`. It must be taken
 into account that state `SMPSTATE_EXPECT1` is reached whenever an error occurs
 or SMP is aborted. In that case, the protocol must be restarted from the
-beginning.
+beginning. Whenever the OTRv4 message state machine is in `ENCRYPTED_MESSAGES`
+state, the SMP state machine may progress. If at any point you are not in
+`ENCRYPTED_MESSAGES`, the SMP must abandon its state and return to its initial
+setup.
+
+#### User requests to begin SMP
+
+If smpstate is not set to `SMPSTATE_EXPECT1`:
+
+  * SMP is already underway. If you wish to restart the SMP, send a type 6 TLV
+    (SMP abort) to the other party and then proceed as if smpstate was
+    `SMPSTATE_EXPECT1`. Otherwise, you may simply continue the current SMP
+    instance.
+
+If smpstate is set to `SMPSTATE_EXPECT1`:
+
+  * No current exchange is underway. In this case, Alice creates a valid type 2
+    TLV (SMP message 1) as follows:
+    1. Create a valid SMP Message 1 as defined in its [section](#smp-message-1)
+    1. Set smpstate to `SMPSTATE_EXPECT2`.
+
+#### User requests to abort SMP
+
+In all cases, send a type 6 TLV (SMP abort) to the correspondent and set
+smpstate to `SMPSTATE_EXPECT1`.
 
 #### Receiving a SMP Message 1
 
