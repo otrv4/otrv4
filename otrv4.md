@@ -967,7 +967,8 @@ defined as the "receiver" by the initiator of the interactive DAKE):
 ```
 
 To make sure both participants has the same phi during DAKE, sort the instance
-tag by numerical order and lexicographically.
+tag by numerical order and JIDs or any string passed too `phi`
+lexicographically.
 
 ### Secure Session ID
 
