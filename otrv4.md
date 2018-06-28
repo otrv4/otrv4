@@ -2339,6 +2339,18 @@ Verify.
 **Bob:**
 
 1. Receives the Non-Interactive-Auth message from Alice:
+   * Check that the receiver's instance tag matches your prekey message sender's
+     instance tag.
+   * Verify if the message type is `0x8D`.
+   * Verify that protocol's version of the message is `0x0004`.
+   * Validate the received ECDH ephemeral public key `X` is on curve Ed448.
+     See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+     section for details.
+   * Validate that the received DH ephemeral public key `A` is on the correct
+     group. See
+   [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
+     section for details.
+   * Validates Alice's Client Profile and extracts `H_a` from it.
    * Retrieves his corresponding Prekey message from local storage, by
      using the 'Prekey Indentifier' attached to the Non-Interactive-Auth
      message.
@@ -2361,7 +2373,6 @@ Verify.
      * If this 'Prekey Profile Identifier' does not correspond to any Prekey
        Profile on local storage:
        * Aborts the DAKE.
-   * Validates Alice's Client Profile and extracts `H_a` from it.
    * Picks a compatible version of OTR listed on Alice's Client Profile, and
      follows the specification for this version. If the versions are
      incompatible, Bob does not send any further messages.
@@ -2534,17 +2545,6 @@ A valid Non-Interactive-Auth message is generated as follows:
 
 To verify a Non-Interactive-Auth message:
 
-1. Check that the receiver's instance tag matches your prekey message sender's
-   instance tag.
-1. Verify if the message type is `0x8D`.
-1. Verify that protocol's version of the message is `0x0004`.
-1. Validate the received ECDH ephemeral public key `X` is on curve Ed448.
-   See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
-   section for details.
-1. Validate that the received DH ephemeral public key `A` is on the correct
-   group. See
-   [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
-   section for details.
 1. Compute
    `t = KDF_1(usageNonIntAuthBobClientProfile || Bobs_Client_Profile, 64) ||
     KDF_1(usageNonIntAuthAliceClientProfile || Alices_Client_Profile, 64) ||
