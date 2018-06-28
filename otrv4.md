@@ -1363,7 +1363,7 @@ that a user does not support OTRv4.
 A Client profile also contains a Ed448 forger public key, which is a long-term
 public key used to prevent the KCI vulnerability, as defined in the
 [KCI Attacks](#kci-attacks) section. If this functionality is going to be used,
-sign the Client Profile with this keypair, and use the
+sign the Client Profile with the secret key of this keypair, and use the
 'Forge with Forge Key' functionality as defined in the
 [Forging Transcripts](#forging-transcripts) section.
 
@@ -1841,6 +1841,9 @@ The Prekey Profile signature is verified as defined in RFC 8032
 
 To validate a Prekey Profile, you must (in this order):
 
+1. Verify that the Prekey Profile owner's instance tag is equal to the Sender
+   Instance tag of the person that sent the DAKE message in which the Prekey
+   Profile is received.
 1. Verify that the Prekey Profile has not expired.
 1. Verify that the Prekey Profile owner's instance tag is equal to the Sender
    Instance tag of the person that sent the DAKE message in which the Client
@@ -2618,9 +2621,9 @@ untrusted Prekey Server these values:
 
 An user only needs to upload its Client Profile and Prekey Profile to the
 untrusted Prekey Server once for every long-term public key it locally has,
-until this profile expire. This means that if Bob uploads 3 long-term keys for
-OTRv4 to his client, Bob's client must publish 3 Client Profiles (with 3
-long-term keys) and 3 Prekey Profiles.
+until this profile expire or one of its values changes. This means that if Bob
+uploads 3 long-term keys for OTRv4 to his client, Bob's client must publish 3
+Client Profiles (with 3 long-term keys) and 3 Prekey Profiles.
 
 However, this party may upload new prekey messages at other times, as defined in
 the [Publishing Prekey Messages](#publishing-prekey-messages) section.
@@ -2636,7 +2639,8 @@ The combination of one Client Profile, one Prekey Profile and one Prekey message
 is called a "Prekey Ensemble".
 
 Details on how to interact with an untrusted Prekey Server to publish these
-values are outside the scope of this protocol.
+values are outside the scope of this protocol. They can be found in the
+[OTRv4 Prekey Server Specification](#https://github.com/otrv4/otrv4-prekey-server)
 
 ##### Publishing Prekey Messages
 
@@ -2644,7 +2648,7 @@ An OTRv4 client must generate a user's prekey messages and publish them to an
 untrusted Prekey Server. Implementers are expected to create their own policy
 dictating how often their clients upload prekey messages to the Prekey Server.
 Nevertheless, prekey messages should be published to the Prekey Server once the
-server's store of prekeys messages gets low.
+server store of prekeys messages gets low.
 
 #### Validating Prekey Ensembles
 
@@ -2657,7 +2661,7 @@ fail, ignore the Prekey Ensemble:
 1. [Validate the Prekey Profile](#validating-a-prekey-profile).
 1. Check that the Prekey Profile is signed by the same long-term public key
    stated on it and on the Client Profile.
-1. Verify the Prekey message as stated on its [section](#prekey-message).
+1. Verify the Prekey message as stated in its [section](#prekey-message).
 1. Check that the OTR version of the prekey message matches one of the
    versions signed in the Client Profile contained in the Prekey Ensemble.
 1. Check if the Client Profile's version is supported by the receiver.
@@ -2668,15 +2672,17 @@ Non-Interactive-Auth message.
 #### Receiving Prekey Ensembles
 
 Details on how prekey ensembles may be received from an untrusted Prekey Server
-are outside the scope of this protocol. This specification assumes that for
+are outside the scope of this protocol. This specification assumes that none,
+one or more than one prekey ensembles may arrive. It also assumes that for
 every received Client Profile and Prekey Profile, at least, one prekey message
-might arrive. However, this specification also assumes that none, one or more
-than one prekey ensembles may arrive. If the prekey server cannot return one
-of the three values needed for a Prekey Ensemble, the non-interactive DAKE must
-wait until this value can be obtained. Note that for every prekey message
-retrieved, it should be deleted from storage on the untrusted Prekey Server.
-Nevertheless, the Client Profile and the Prekey Profile should not be deleted
-until they are replaced when expired.
+might arrive. If the prekey server cannot return one of the three values needed
+for a Prekey Ensemble, the non-interactive DAKE must wait until this value can
+be obtained.
+
+Note that when a prekey message is retrieved, it should be deleted from storage
+in the untrusted Prekey Server. Nevertheless, the Client Profile and the Prekey
+Profile should not be deleted until they are replaced when expired or when one
+of its values changed.
 
 The following guide is meant to help implementers identify and remove invalid
 prekey ensembles.
