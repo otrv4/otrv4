@@ -1336,19 +1336,19 @@ should determine the frequency of the Client Profile expiration and renewal.
 The recommended expiration time is one week.
 
 Nevertheless, for a short amount of time (decided by the client) a Client
-Profile can still be locally valid even if it has publicly expired. This is
-needed for non-interactive conversations as a party, Alice, can send offline
-encrypted messages using a non-expired Client Profile. This Client Profile,
-nevertheless, could have had expired prior to the moment in which the other
-party, Bob, receives the offline encrypted messages. To allow this party, Bob,
-to still be able to read these messages, the Client Profile can still be locally
-valid even if it has publicly expired. A recommended amount of time for this
-extra validity time is of 1 day.
+Profile can still be valid on local storage even if it has publicly expired.
+This is needed for non-interactive conversations as a party, Alice, can send
+offline encrypted messages using a non-expired published Client Profile from
+Bob. This Client Profile, nevertheless, could have had expired prior to the
+moment in which the other party, Bob, receives the offline encrypted messages.
+To allow this party, Bob, to still be able to read these messages, the Client
+Profile can still be locally valid even if it has publicly expired. A
+recommended amount of time for this extra validity time is of 1 day.
 
 It is also important to note that the absence of a Client Profile is not a proof
 that a user does not support OTRv4.
 
-A Client Profile also contains a Ed448 forger public key, which is a long-term
+A Client Profile also contains an Ed448 forger public key, which is a long-term
 public key used to prevent the KCI vulnerability, as described in the [KCI
 Attacks](#kci-attacks) section. If this functionality is going to be used, sign
 the Client Profile with the secret key of this keypair, and use the 'Forge with
@@ -1379,12 +1379,12 @@ storing and retrieving the Client Profile during the non-interactive DAKE. This
 instance tag has to match the sender instance tag of the DAKE message the Client
 Profile is included in.
 
-Note that a Client Profile is generated per client location basis. Users
-are not expected to manage Client Profiles (theirs or from others) in a client.
-As a consequence, clients are discouraged to allow importing or exporting of
-Client Profiles. Also, if a user has multiple client locations concurrently in
-use, it is expected that they have multiple Client Profiles simultaneously
-published and valid.
+Note that a Client Profile is generated per client basis. Users are not expected
+to manage Client Profiles (theirs or from others) in a client. As a consequence,
+clients are discouraged to allow importing or exporting of Client Profiles.
+Also, if a user has multiple client locations concurrently in use, it is
+expected that they have multiple Client Profiles simultaneously published and
+valid.
 
 ### Client Profile Data Type
 
@@ -1394,7 +1394,6 @@ Client Profile (CLIENT-PROF):
   Fields (SEQ-FIELDS)
     2 byte unsigned type, big-endian
     the encoded field
-  Number of Client Profile Signatures (INT)
   Client Profile Signature (CLIENT-EDDSA-SIG)
 ```
 
@@ -1636,9 +1635,8 @@ To validate a Client Profile, you must (in this order):
 1. Verify that the Client Profile owner's instance tag is equal to the Sender
    Instance tag of the person that sent the DAKE message in which the Client
    Profile is received.
-1. Verify that the `Number of Fields` is equal to the number of fields present
-   on the Client Profile.
 1. Verify that the `Client Profile Signature` field is not empty.
+1. [Verify that the Client Profile signature is valid](#verify-a-client-profile-signature).
 1. Verify that the Client Profile has not expired.
 1. Verify that the `Versions` field contains the character "4".
 1. Validate that `Ed448 Public Key` is on
@@ -1647,7 +1645,6 @@ To validate a Client Profile, you must (in this order):
    section for details.
 1. If the `Transitional Signature` is present, verify its validity using the
    OTRv3 DSA key.
-1. [Verify that the Client Profile signature is valid](#verify-a-client-profile-signature).
 
 ## Prekey Profile
 
@@ -1835,6 +1832,7 @@ To validate a Prekey Profile, you must (in this order):
 1. Verify that the Prekey Profile owner's instance tag is equal to the Sender
    Instance tag of the person that sent the DAKE message in which the Prekey
    Profile is received.
+1. [Verify that the Prekey Profile signature is valid](#verify-a-prekey-profile-signature).
 1. Verify that the Prekey Profile has not expired.
 1. Verify that the Prekey Profile owner's instance tag is equal to the Sender
    Instance tag of the person that sent the DAKE message in which the Client
@@ -1843,7 +1841,6 @@ To validate a Prekey Profile, you must (in this order):
    See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
-1. [Verify that the Prekey Profile signature is valid](#verify-a-prekey-profile-signature).
 
 ## Online Conversation Initialization
 
