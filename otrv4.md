@@ -955,7 +955,7 @@ look like:
 ```
 
 To make sure both participants has the same phi during DAKE, sort the instance
-tag by numerical order and JIDs or any string passed too `phi`
+tag by numerical order and JIDs or any string passed to `phi`
 lexicographically.
 
 ### Secure Session ID
