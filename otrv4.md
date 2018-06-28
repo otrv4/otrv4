@@ -2640,7 +2640,7 @@ is called a "Prekey Ensemble".
 
 Details on how to interact with an untrusted Prekey Server to publish these
 values are outside the scope of this protocol. They can be found in the
-[OTRv4 Prekey Server Specification](#https://github.com/otrv4/otrv4-prekey-server)
+[OTRv4 Prekey Server Specification](https://github.com/otrv4/otrv4-prekey-server).
 
 ##### Publishing Prekey Messages
 
