@@ -226,12 +226,11 @@ Unless otherwise noted, these conventions and definitions are used for this docu
   participants of this protocol from achieving their goal.
 * "Initiator" refers to the participant initiating a DAKE.
 * "Responder" refers to the participant responding to an Initiator's request.
-* "Prekey Server" refers to the untrusted server used to store Prekey Ensemble's
-  values.
-* "Publisher" refers to the participant publishing Prekey Ensemble's values to
-  the Prekey Server.
-* "Retriever" refers to the participant retrieving Prekey Ensemble's values from
-  the Prekey Server that correspond to the publishing participant.
+* "Prekey Server" refers to the untrusted server used to store Prekey Ensembles.
+* "Publisher" refers to the participant publishing Prekey Ensembles to the
+  Prekey Server.
+* "Retriever" refers to the participant retrieving Prekey Ensembles from the
+  Prekey Server that correspond to the publishing participant.
 * "Attacker" refers to a third participant that takes part in a conversation,
   with malicious intent.
 * "Judge" refers to a party who may be called upon to resolve a potential
@@ -242,7 +241,7 @@ Unless otherwise noted, these conventions and definitions are used for this docu
 * "Receiver" refers to the participant receiving an encoded message.
 * "Client" refers to a software used for communication between parties and that
   implements the OTRv4 protocol.
-* "Network" refers to the system which computing devices use to exchange data
+* "Network" refers to the system that computing devices use to exchange data
   with each other using connections between nodes.
 * "DAKE" refers to a Deniable Authenticated Key Exchange, in which two parties
   engage in the protocol whose result is a key which only the two of them know,
