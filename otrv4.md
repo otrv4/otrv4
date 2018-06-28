@@ -225,17 +225,35 @@ Unless otherwise noted, these conventions and definitions are used for this docu
 * "Adversary" refers to a malicious entity whose aim is to prevent the
   participants of this protocol from achieving their goal.
 * "Initiator" refers to the participant initiating a DAKE.
-* "Responder" refers to the participant respoding an Initiator's request.
+* "Responder" refers to the participant responding to an Initiator's request.
 * "Prekey Server" refers to the untrusted server used to store Prekey Ensemble's
   values.
 * "Publisher" refers to the participant publishing Prekey Ensemble's values to
   the Prekey Server.
 * "Retriever" refers to the participant retrieving Prekey Ensemble's values from
   the Prekey Server that correspond to the publishing participant.
+* "Attacker" refers to a third participant that takes part in a conversation,
+  with malicious intent.
+* "Judge" refers to a party who may be called upon to resolve a potential
+  dispute between participants.
+* "Informant" refers to an insider with privileged access capable of divulging
+  information.
 * "Sender" refers to the participant sending an encoded message.
 * "Receiver" refers to the participant receiving an encoded message.
+* "Client" refers to a software used for communication between parties and that
+  implements the OTRv4 protocol.
 * "Network" refers to the system which computing devices use to exchange data
   with each other using connections between nodes.
+* "DAKE" refers to a Deniable Authenticated Key Exchange, in which two parties
+  engage in the protocol whose result is a key which only the two of them know,
+  and they are assured to be sharing it with each other. They will use
+  it to encrypt and authenticate messages in the session, using an
+  authentication mechanism that is deniable provided that the key cannot be
+  traced to either party.
+* "Session" refers to a semi-permanent information interchange between parties.
+  It is a period of activity between them.
+* "Conversation" refers to an interaction between parties.
+* "Mode" refers to a way in which OTRv4 can be implemented.
 
 ## Assumptions
 
