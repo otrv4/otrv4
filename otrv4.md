@@ -1309,18 +1309,18 @@ an attacker.
 ## Client Profile
 
 OTRv4 introduces Client Profiles. A Client Profile has an arbitrary number of
-fields. A Client Profile contains a Client Profile's Identifier, the Client
-Profile owner's instance tag, a Ed448 long-term public key, a Ed448 forger
-public key, information about supported versions, a profile expiration date, a
-signature of all these, and an optional transitional signature. It has variable
-length.
+fields, but some fields are required. A Client Profile contains the Client
+Profile Identifier, the Client Profile owner instance tag, an Ed448 long-term
+public key, an Ed448 forger public key, information about supported versions, a
+profile expiration date, a signature of all these, and an optional transitional
+signature. It has variable length.
 
 There are two instances of the Client Profile that should be generated. One is
 used for authentication in both DAKEs (interactive and non-interactive). The
-other should be published in a public place to achieve deniability properties.
-This procedure allows two parties to send and verify each other's signed Client
-Profile during the DAKE without damaging participation deniability for the
-conversation, since the signed Client Profile is public information.
+other should be published in a public place. This allows two parties to send and
+verify each other's Client Profiles during the DAKE without damaging
+participation deniability for the conversation, since the Client Profile
+is public information.
 
 Each implementation should decide how to publish the Client Profile. For
 example, one client may publish profiles to a server pool (similar to a
@@ -1328,11 +1328,11 @@ keyserver pool, where PGP public keys can be published). Another client may use
 XMPP's publish-subscribe extension (XEP-0060 [\[8\]](#references)) for
 publishing Client Profiles. For sending offline messages, notice that the Client
 Profile has to be published and stored in the same untrusted Prekey Server used
-to store prekey messages and Prekey Profiles, so the Prekey Ensemble can be
+to store Prekey Messages and Prekey Profiles, so the Prekey Ensemble can be
 assembled.
 
-When the Client Profile expires, it should be updated. Client implementations
-should determine the frequency of the Client's Profile expiration and renewal.
+Before the Client Profile expires, it should be updated. Client implementations
+should determine the frequency of the Client Profile expiration and renewal.
 The recommended expiration time is one week.
 
 Nevertheless, for a short amount of time (decided by the client) a Client
@@ -1348,30 +1348,31 @@ extra validity time is of 1 day.
 It is also important to note that the absence of a Client Profile is not a proof
 that a user does not support OTRv4.
 
-A Client profile also contains a Ed448 forger public key, which is a long-term
-public key used to prevent the KCI vulnerability, as defined in the
-[KCI Attacks](#kci-attacks) section. If this functionality is going to be used,
-sign the Client Profile with the secret key of this keypair, and use the
-'Forge with Forge Key' functionality as defined in the
-[Forging Transcripts](#forging-transcripts) section.
+A Client Profile also contains a Ed448 forger public key, which is a long-term
+public key used to prevent the KCI vulnerability, as described in the [KCI
+Attacks](#kci-attacks) section. If this functionality is going to be used, sign
+the Client Profile with the secret key of this keypair, and use the 'Forge with
+Forge Key' functionality as defined in the [Forging
+Transcripts](#forging-transcripts) section.
 
-A Client Profile has an expiration date as this helps to revoke any past value
-stated on a previous profile. If a user's client, for example, changes its
+A Client Profile has an expiration time as this helps to revoke any past value
+stated in a previous profile. If a user's client, for example, changes its
 long-term public key, only the valid non-expired Client Profile is the one used
 for attesting that this is indeed the valid long-term public key. Any expired
 Client Profiles with old long-term public keys are invalid. Moreover, as
 version advertisement is public information (it is stated in the published
 Client Profile), a participant will not be able to delete this information from
 public servers (if the Client Profile is published in them). To facilitate
-versions revocation or any of the other values revocation, the Client Profile
+version revocation or any of the other values revocation, the Client Profile
 can be regenerated and published once the older Client Profile expires. This is
 also the reason why we recommend a short expiration date, so values can be
 easily revoked.
 
-Furthermore, notice that the lifetime of the long-term public key is exactly the
-same as the lifetime of the Client Profile. If you have no valid Client Profile
-available for a specific long-term public key, that long-term public key should
-be treated as invalid.
+Notice that the lifetime of the long-term public key is exactly the same as the
+lifetime of the Client Profile. If you have no valid Client Profile available
+for a specific long-term public key, that long-term public key should be treated
+as invalid. This also implies that a public key can go from being valid, to
+invalid, and back to valid.
 
 A Client Profile also includes an instance tag. This value is used for locally
 storing and retrieving the Client Profile during the non-interactive DAKE. This
@@ -1400,11 +1401,11 @@ Client Profile (CLIENT-PROF):
 The supported fields are:
 
 ```
-Client Profile's Identifier (INT)
+Client Profile Identifier (INT)
   Type = 0x0001
   A Client Profile ID used for local storage and retrieval.
 
-Client Profile owner's instance tag (INT)
+Client Profile owner instance tag (INT)
   Type = 0x0002
   The instance tag of the client that created the Client Profile.
 
@@ -1428,7 +1429,7 @@ OTRv3 public authentication DSA key (PUBKEY)
 Transitional Signature (CLIENT-SIG)
   Type = 0x0008
   This signature is defined as a signature over fields 0x0001,
-  0x0002, 0x0003, 0x0004 0x0005, 0x006 and 0x007 only.
+  0x0002, 0x0003, 0x0004, 0x0005, 0x006 and 0x007 only.
 ```
 
 The supported fields should not be duplicated.
@@ -1473,13 +1474,15 @@ OTRv3 public authentication DSA key (PUBKEY):
 To create a Client Profile, generate:
 
 1. A unique random id that is going to act as an identifier for this Client
-   Profile. It should be 4 byte unsigned value, big-endian.
-1. A 4-byte instance tag to use as the Client Profile owner's instance tag.
+   Profile. It should be a 4 byte unsigned value.
+1. A 4-byte instance tag to use as the Client Profile owner instance tag. This
+   should only be done if the client doesn't already have an instance tag for
+   this user.
 
-Then, assemble:
+Then assemble:
 
-1. Client Profile's identifier.
-1. Client Profile owner's instance tag.
+1. Client Profile identifier.
+1. Client Profile owner instance tag.
 1. Ed448 long-term public key.
 1. Versions: a string corresponding to the user's supported OTR versions.
    A Client Profile can advertise multiple OTR versions. The format is described
@@ -1516,7 +1519,7 @@ used to store prekey messages.
 
 ### Establishing Versions
 
-A valid versions string can be created by concatenating supported version
+A valid version string can be created by concatenating supported version
 numbers together in any order. For example, a user who supports versions 3 and 4
 will have the 2-byte version string "43" or "34" in their Client Profile. A user
 who only supports version 4 will have the 1-byte version string "4". Thus, a
@@ -1536,7 +1539,7 @@ participation deniability is at risk. Participation deniability is also at risk
 if the only publicly available Client Profile is expired. For that reason, a
 received expired Client Profile during the DAKE is considered invalid.
 
-When the Client Profile expires, the user must publish an updated Client
+Before the Client Profile expires, the user must publish an updated Client
 Profile with a new expiration date. The client establishes the frequency of
 expiration and when to publish (when the current Client Profile expires). Note
 that this can be configurable. A recommended value is one week.
@@ -1546,8 +1549,8 @@ that this can be configurable. A recommended value is one week.
 If version 3 and 4 are supported and the user has a pre-existing OTRv3
 long-term key:
 
-   * Concatenate `Client Profile's Identifier ||
-     Client Profile owner's instance tag || Ed448 public key || Versions ||
+   * Concatenate `Client Profile Identifier ||
+     Client Profile owner instance tag || Ed448 public key || Versions ||
      Client Profile Expiration || OTRv3 public authentication DSA key`. Denote
      this value `m`.
    * Sign `m` with the user's OTRv3 DSA key. Denote this value
