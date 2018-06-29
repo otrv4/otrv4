@@ -2012,6 +2012,7 @@ Bob will be initiating the DAKE with Alice.
    * She has to send a regular Data Message at this point, to initialize the
      Double Ratchet correctly. If a plaintext message is waiting to be sent,
      this can be used. Otherwise an empty heartbeat message should be sent.
+     This data message is called "DAKE Data Message".
    * In the case that she wants to immediately send a data message:
      * Follows what is defined in the
        [When you send a Data Message](#when-you-send-a-data-message) section.
@@ -2021,7 +2022,7 @@ Bob will be initiating the DAKE with Alice.
 
 1. At this point, the interactive DAKE is complete for Bob, but he has to
    correctly setup the double ratchet logarithm:
-   * He should immediately receive a data message that advertises the
+   * He should immediately receive a "DAKE Data Message" that advertises the
      new public keys from Alice:
      * Follows what is defined in the [When you receive a Data Message](#when-you-receive-a-data-message)
        section. Note that he will perform a new DH ratchet at this point.
@@ -2349,6 +2350,7 @@ Verify.
    * She has to send a regular Data Message at this point, to initialize the
      Double Ratchet correctly. If a plaintext message is waiting to be sent,
      this can be used. Otherwise an empty heartbeat message should be sent.
+     This data message is called "DAKE Data Message".
    * Follows what is defined in the
      [When you send a Data Message](#when-you-send-a-data-message)
      section. Note that she will perform a new DH ratchet for this message.
@@ -2442,7 +2444,7 @@ Verify.
      that it is equal to the one just calculated. If it is not, ignore the
      Non-Interactive-Auth message.
 1. At this point, the non-interactive DAKE is complete for Bob:
-   * He should immediately receive a data message that advertises the
+   * He should immediately receive a "DAKE Data Message" that advertises the
      new public keys from Alice:
      * Follows what is defined in the [When you receive a Data Message](#when-you-receive-a-data-message)
        section. Note that he will perform a new DH ratchet at this point.
@@ -3432,19 +3434,22 @@ WAITING_AUTH_I
   This is the state used when a participant is waiting for an Auth-I message.
   This state is entered after sending an Auth-R message.
 
-WAITING_DATA_MESSAGE
+WAITING_DAKE_DATA_MESSAGE
 
-  This is the state used when a participant is waiting for a Data message
-  (that can be a "heartbeat" message) to be sent. This state is entered once the
-  Auth-I or the Non-Interactive Auth is received.
+  This is the state used when the participant that do not started the DAKE is
+  waiting for a Data message (that can be a "heartbeat" message) to be sent.
+  This state is entered once the Auth-I or the Non-Interactive Auth is received.
 
 ENCRYPTED_MESSAGES
 
   This state is entered after the DAKE is finished. The interactive DAKE is
-  finished after the Auth-I message is sent, received and validated. The
-  non-interactive DAKE is finished when the Non-Interactive-Auth message is
-  sent, and when it is received and validated. Outgoing messages sent in this
-  state are encrypted.
+  finished, for the initiator, after the Auth-I message is sent, and, for the
+  receiver, when the DAKE data message is received and validated after receiving
+  the Auth-I message. The non-interactive DAKE is finished, for the initator,
+  when the Non-Interactive-Auth message is sent, and, for the receiver, when the
+  DAKE data message is received and validated after receiving the
+  Non-Interactive Auth message. Outgoing messages sent in this state are
+  encrypted.
 
 FINISHED
 
@@ -3479,6 +3484,7 @@ please refer to the previous OTR protocol document):
   * Auth-R Message
   * Auth-I Message
   * Non-Interactive-Auth Message
+  * DAKE Data Message
   * Data Message
 
 * User actions:
