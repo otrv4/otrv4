@@ -3432,6 +3432,12 @@ WAITING_AUTH_I
   This is the state used when a participant is waiting for an Auth-I message.
   This state is entered after sending an Auth-R message.
 
+WAITING_DATA_MESSAGE
+
+  This is the state used when a participant is waiting for a Data message
+  (that can be a "heartbeat" message) to be sent. This state is entered once the
+  Auth-I or the Non-Interactive Auth is received.
+
 ENCRYPTED_MESSAGES
 
   This state is entered after the DAKE is finished. The interactive DAKE is
