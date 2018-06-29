@@ -1896,6 +1896,7 @@ Alice                                           Bob
        <----------------------- Identity message
        Auth-R --------------------------------->
        <--------------------------------- Auth-I
+       DAKE Data Message ---------------------->
 ```
 
 Bob will be initiating the DAKE with Alice.
@@ -2274,7 +2275,8 @@ prekey messages                ----->
 								....
                                      <----- Request Prekey ensembles from Bob
                                      Prekeys ensembles from Bob ------------->
-      <---------------------------------------- Non-Interactive-Auth message
+      <------------------------------------------ Non-Interactive-Auth message
+      <----------------------------------------------------- DAKE Data Message
 Verify.
 ```
 
@@ -3472,7 +3474,7 @@ The following sections outline the actions that the protocol should implement.
 This assumes that the client is initialized with the allowed versions
 (3 and/or 4).
 
-There are thirteen events an OTRv4 client must handle (for version 3 messages,
+There are fourteen events an OTRv4 client must handle (for version 3 messages,
 please refer to the previous OTR protocol document):
 
 * Received messages:
@@ -3780,18 +3782,36 @@ If the state is not `WAITING_AUTH_R`:
     * Validate the Non-Interactive-Auth message.
     * Initialize the double ratcheting, as defined in the
       [Non-Interactive DAKE Overview](#non-interactive-dake-overview) section.
-    * Transition to state `ENCRYPTED_MESSAGES`.
+    * Transition to state to `WAITING_DAKE_DATA_MESSAGE`.
     * If there are stored Data Messages, for each one of them, transition to the
-      instructions in Receiving a Data Message and remove them from the store.
+      instructions in [Receiving a Data Message](#receiving-a-data-message) and
+      remove them from the store.
+
+#### Receiving a DAKE Data Message
+
+* If the state is `FINISHED` or `MSGSTATE_FINISHED`:
+  * Ignore the message.
+
+* Else:
+  * If the receiver's instance tag in the message is not the sender's instance
+    tag you are currently using:
+    * Ignore this message.
+
+  * Otherwise:
+    * Validate and decrypt the message, if needed, as defined in the
+      [Receiving a Data Message](#receiving-a-data-message) section.
+    * Transition to state to `ENCRYPTED_MESSAGE`.
+    * If there are stored Data Messages, for each one of them, transition to the
+      instructions in [Receiving a Data Message] and remove them from the store.
 
 #### Sending a Data Message
 
-The `ENCRYPTED_MESSAGES` state is the only state where a participant is allowed to
-send encrypted data messages.
+The `ENCRYPTED_MESSAGES` state is the only state where a participant is allowed
+to send encrypted data messages.
 
-If the state is `START`, `WAITING_AUTH_R`, or `WAITING_AUTH_I`, queue the
-message for encrypting and sending it when the participant transitions to the
-`ENCRYPTED_MESSAGES` state.
+If the state is `START`, `WAITING_AUTH_R`, `WAITING_AUTH_I`, or
+`WAITING_DAKE_DATA_MESSAGE` queue the message for encrypting and sending it when
+the participant transitions to the `ENCRYPTED_MESSAGES` state.
 
 If the state is `FINISHED`, the participant must start another OTR conversation
 to send encrypted messages:
