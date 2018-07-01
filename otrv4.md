@@ -17,7 +17,7 @@ an existing messaging protocol, such as XMPP.
 1. [High Level Overview](#high-level-overview)
    1. [Conversation started by an Interactive DAKE](#conversation-started-by-an-interactive-dake)
    1. [Conversation started by a Non-Interactive DAKE](#conversation-started-by-a-non-interactive-dake)
-1. [Conventions](#conventions)
+1. [Definitions](#definitions)
 1. [Assumptions](#assumptions)
 1. [Security Properties](#security-properties)
 1. [OTRv4 Modes](#otrv4-modes)
@@ -216,7 +216,7 @@ the other participant's client to a server. This have to be done so other
 participants, like Alice, can send messages to the other participant, like Bob,
 while the latter is offline.
 
-### Conventions
+### Definitions
 
 Unless otherwise noted, these conventions and definitions are used for this document:
 
