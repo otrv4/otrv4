@@ -1429,11 +1429,11 @@ Client Profile owner instance tag (INT)
 
 Ed448 public key (ED448-PUBKEY)
   Type = 0x0003
-  Corresponds to 'H'.
+  Corresponds to 'OTRv4's public authentication Ed448 key'.
 
 Ed448 forger public key (ED448-FORGER-PUBKEY)
   Type = 0x0004
-  Corresponds to 'F'.
+  Corresponds to 'OTRv4's forger public Ed448 key'.
 
 Versions (DATA)
   Type = 0x0005
@@ -1448,6 +1448,13 @@ Transitional Signature (CLIENT-SIG)
   Type = 0x0008
   This signature is defined as a signature over fields 0x0001,
   0x0002, 0x0003, 0x0004, 0x0005, 0x006 and 0x007 only.
+```
+
+Note that the Client Profile Expiration is encoded as:
+
+```
+Client Profile Expiration (CLIENT-PROF-EXP):
+  8 bytes signed value, big-endian
 ```
 
 The supported fields should not be duplicated.
@@ -1544,7 +1551,7 @@ who only supports version 4 will have the 1-byte version string "4". Thus, a
 version string has varying size, and it is represented as a DATA type with its
 length specified.
 
-A compliant OTRv4 implementation (in OTRv43-compatible mode) is required to
+A compliant OTRv4 implementation (in OTRv4-compatible mode) is required to
 support version 3 of OTR, but not versions 1 and 2. Therefore, invalid version
 strings contain a "2" or a "1".
 
@@ -1565,7 +1572,7 @@ that this can be configurable. A recommended value is one week.
 ### Create a Client Profile Signature
 
 If version 3 and 4 are supported and the user has a pre-existing OTRv3
-long-term key:
+long-term keypair:
 
    * Concatenate `Client Profile Identifier ||
      Client Profile owner instance tag || Ed448 public key || Versions ||
@@ -1575,6 +1582,10 @@ long-term key:
      `Transitional Signature`.
    * Sign `m || Transitional Signature` with the symmetric key, as stated
      below. Denote this value `Client Profile Signature`.
+
+Note that if you only have version 4 turned on but still support version 3
+(you have a OTRv3 long-term keypair), you don't need to sign the Client Profile
+with this key.
 
 If only version 4 is supported:
 
@@ -1717,12 +1728,19 @@ Prekey Profile (PREKEY-PROF):
   Prekey Profile owner's instance tag (INT)
     The instance tag of the client that created the Prekey Profile.
   Ed448 public key (ED448-PUBKEY)
-    Corresponds to 'H'.
+    Corresponds to 'OTRv4's public authentication Ed448 key'.
   Prekey Profile Expiration (PREKEY-PROF-EXP)
   Public Shared Prekey (ED448-SHARED-PREKEY)
     The shared prekey used between different prekey messages.
     Corresponds to 'D'.
   Prekey Profile Signature (PREKEY-EDDSA-SIG)
+```
+
+Note that the Prekey Profile Expiration is encoded as:
+
+```
+Client Profile Expiration (PREKEY-PROF-EXP):
+  8 bytes signed value, big-endian
 ```
 
 `PREKEY-EDDSA-SIG` refers to the OTRv4 EDDSA signature:
