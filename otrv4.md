@@ -3304,7 +3304,7 @@ OTR message as follows:
     structure (as `index` runs from 1 to `total` inclusive:
 
   ```
-  "?OTR|%hu|%x|%x,%hu,%hu,%s,", identifier, sender_instance, receiver_instance, index, total, piece[index]
+  "?OTR|%x|%x|%x,%hu,%hu,%s,", identifier, sender_instance, receiver_instance, index, total, piece[index]
   ```
 
   OTRv3 messages get fragmented in a similar format, but without the identifier
@@ -3355,7 +3355,8 @@ for this _before_ checking for any of the other `?OTR:` markers):
       received number of fragments for this buffer. If you have no currently
       stored fragments, there are no buffers, and `I`, `T` and `C` equal 0.
     * Set the length of the buffer as `total`: `len(B) = total`.
-    * Store `piece` at the `index` given position: `insert(piece, index)`.
+    * If `index` is empty, store `piece` at the `index` given position:
+      `insert(piece, index)`.
     * Let `total` be `T` and `identifier` be `I` for the buffer.
     * Increment the buffer counter: `C = C + 1`.
 
