@@ -821,11 +821,13 @@ authenticate a long-term key pair, the [Socialist Millionaire's
 Protocol](#socialist-millionaires-protocol-smp) or a manual fingerprint
 comparison may be used. The fingerprint is generated as:
 
-* `KDF_1(usageFingerprint || byte(H), 56)` (224-bit security level).
+* `KDF_1(usageFingerprint || OTRv4's public authentication Ed448 key, 56)`
+  (224-bit security level).
 
 The forger public key must have a fingerprint as well. It is calculated as:
 
-* `KDF_1(usageFingerprint || byte(F), 56)` (224-bit security level).
+* `KDF_1(usageFingerprint || OTRv4's forger public Ed448 ke, 56)` (224-bit
+  security level).
 
 ### Instance Tags
 
