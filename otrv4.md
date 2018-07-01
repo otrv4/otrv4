@@ -255,8 +255,9 @@ Unless otherwise noted, these conventions and definitions are used for this docu
   authentication mechanism that is deniable provided that the key cannot be
   traced to either party.
 * "Session" refers to a semi-permanent information interchange between parties.
-  It is a period of activity between them.
-* "Conversation" refers to an interaction between parties.
+  It is not only limited to exchanging of encrypted messages.
+* "Conversation" refers to an interaction between parties by exchanging
+  encrypted messages with each other.
 * "Mode" refers to a way in which OTRv4 can be implemented.
 
 ## Assumptions
