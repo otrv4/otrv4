@@ -3349,6 +3349,10 @@ a fragment.
 
 ### Receiving Fragments
 
+A reassemble process does not to be implemented in precesely the way we are
+going to describe; but the process implemented in a library has to be able to
+correctly reassemble the fragments.
+
 If you receive a message containing `?OTR|` (note that you'll need to check
 for this _before_ checking for any of the other `?OTR:` markers):
 
@@ -3380,14 +3384,16 @@ for this _before_ checking for any of the other `?OTR:` markers):
       stored fragments, there are no buffers, and `I`, `T` and `C` equal 0.
     * Set the length of the buffer as `total`: `len(B) = total`.
     * If `index` is empty, store `piece` at the `index` given position:
-      `insert(piece, index)`.
+      `insert(piece, index)`. If it is not, reject the fragment and do not
+      increment the buffer counter.
     * Let `total` be `T` and `identifier` be `I` for the buffer.
     * Increment the buffer counter: `C = C + 1`.
 
   * If `identifier == I`:
     * If `total == T`, and `C < T`:
       * Check that the given position of the buffer is empty:
-        `B[index] == NULL`. If it is not, reject the fragment.
+        `B[index] == NULL`. If it is not, reject the fragment and do not
+        increment the buffer counter.
       * Store the `piece` at the given position in the buffer:
         `insert(piece, index)`.
       * Increment the buffer counter: `C = C + 1`.
