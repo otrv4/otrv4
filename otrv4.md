@@ -2228,9 +2228,9 @@ A valid Auth-I message is generated as follows:
 
 To verify an Auth-I message:
 
-1. Check that the receiver's instance tag matches your sender's instance tag.
 1. Verify if the message type is `0x88`.
 1. Verify that protocol's version of the message is `0x0004`.
+1. Check that the receiver's instance tag matches your sender's instance tag.
 1. Compute
    `t = 0x1 || KDF_1(usageAuthIBobClientProfile || Bobs_Client_Profile, 64) ||
     KDF_1(usageAuthIAliceClientProfile || Alices_Client_Profile, 64) || Y ||
@@ -2592,6 +2592,7 @@ A valid Non-Interactive-Auth message is generated as follows:
 
 To verify a Non-Interactive-Auth message:
 
+1. Verify if the message type is `0x8D`.
 1. Compute
    `t = KDF_1(usageNonIntAuthBobClientProfile || Bobs_Client_Profile, 64) ||
     KDF_1(usageNonIntAuthAliceClientProfile || Alices_Client_Profile, 64) ||
