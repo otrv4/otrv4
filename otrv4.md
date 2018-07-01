@@ -2008,8 +2008,6 @@ Bob will be initiating the DAKE with Alice.
     * Securely deletes `their_ecdh` and `their_dh`.
 1. Sends Alice the Auth-I message (see [Auth-I message](#auth-i-message)
    section).
-1. At this point, the interactive DAKE is complete for Bob, but the double
-   ratchet algorithm still needs to be correctly set up.
 
 **Alice:**
 
