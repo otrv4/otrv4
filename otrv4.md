@@ -826,7 +826,7 @@ comparison may be used. The fingerprint is generated as:
 
 The forger public key must have a fingerprint as well. It is calculated as:
 
-* `KDF_1(usageFingerprint || OTRv4's forger public Ed448 ke, 56)` (224-bit
+* `KDF_1(usageFingerprint || OTRv4's forger public Ed448 key, 56)` (224-bit
   security level).
 
 ### Instance Tags
