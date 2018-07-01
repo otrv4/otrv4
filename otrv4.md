@@ -224,17 +224,22 @@ Unless otherwise noted, these conventions and definitions are used for this docu
   conversation.
 * "Adversary" refers to a malicious entity whose aim is to prevent the
   participants of this protocol from achieving their goal.
-* "Initiator" refers to the participant initiating a DAKE.
+* "Initiator" refers to the participant initiating a DAKE. In the case of the
+  interactive DAKE, this is the participant that sends the Identity message.
+  In the case of the non-interactive DAKE, this is the participant that
+  uploads a Prekey Ensemble.
 * "Responder" refers to the participant responding to an Initiator's request.
+  In the case of the interactive DAKE, this is the participant that sends the
+  Auth-R message. In the case of the non-interactive DAKE, this is the
+  participant that sends the Non-Interactive Auth message.
 * "Prekey Server" refers to the untrusted server used to store Prekey Ensembles.
 * "Publisher" refers to the participant publishing Prekey Ensembles to the
   Prekey Server.
 * "Retriever" refers to the participant retrieving Prekey Ensembles from the
   Prekey Server that correspond to the publishing participant.
-* "Attacker" refers to a third participant that takes part in a conversation,
-  with malicious intent.
-* "Judge" refers to a party who may be called upon to resolve a potential
-  dispute between participants.
+* "Judge" refers is an entity that decide whether or not a certain event
+  occurred. We say that an action is deniable with respect to a given judge if
+  the judge cannot be convinced that an individual performed the action.
 * "Informant" refers to an insider with privileged access capable of divulging
   information.
 * "Sender" refers to the participant sending an encoded message.
