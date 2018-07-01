@@ -1685,9 +1685,9 @@ To validate a Client Profile, you must (in this order):
 ## Prekey Profile
 
 OTRv4 introduces prekey profiles. The Prekey Profile contains a Prekey Profile's
-Identifier, the Client Profile owner's instance tag, the Ed448 long-term
-public key, a shared prekey, a prekey profile expiration date and a signature of
-all these. It is signed by the Ed448 long-term public key.
+Identifier, the Client Profile owner's instance tag, a shared prekey, a prekey
+profile expiration date and a signature of all these. It is signed by the Ed448
+long-term public key.
 
 A prekey profile is needed for it's signed shared prekey, which is used for
 offline conversations. It is changed on a regular basis as defined by the
@@ -1733,8 +1733,6 @@ Prekey Profile (PREKEY-PROF):
     A Prekey Profile id used for local storage and retrieval.
   Prekey Profile owner's instance tag (INT)
     The instance tag of the client that created the Prekey Profile.
-  Ed448 public key (ED448-PUBKEY)
-    Corresponds to 'OTRv4's public authentication Ed448 key'.
   Prekey Profile Expiration (PREKEY-PROF-EXP)
   Public Shared Prekey (ED448-SHARED-PREKEY)
     The shared prekey used between different prekey messages.
@@ -1800,8 +1798,8 @@ that this can be configurable. A recommended value is one week.
 For this:
 
 * Concatenate `Prekey Profile's Identifier ||
-  Prekey Profile's owner's instance tag || Ed448 public key ||
-  Prekey Profile Expiration || Public Shared Prekey`. Denote this value `m`.
+  Prekey Profile's owner's instance tag || Prekey Profile Expiration ||
+  Public Shared Prekey`. Denote this value `m`.
 * Sign `m` with the symmetric key, as stated below. Denote this value
   `Profile Signature`.
 
