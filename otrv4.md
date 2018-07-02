@@ -1952,7 +1952,7 @@ Bob will be initiating the DAKE with Alice.
     * Sets `Y` as `their_ecdh`.
     * Sets `B` as `their_dh`.
 1. Generates an Auth-R message, as defined in
-   [Auth-R Message](#auth-r-message) section.
+   the [Auth-R Message](#auth-r-message) section.
 1. Sets `X` and `x` as `our_ecdh`: the ephemeral ECDH keys.
 1. Sets `A` and `a` as `our_dh`: the ephemeral 3072-bit DH keys.
 1. Calculates the Mixed shared secret (`K`) and the SSID:
@@ -2013,7 +2013,7 @@ Bob will be initiating the DAKE with Alice.
     * Securely deletes `their_ecdh` and `their_dh`.
 1. Sends Alice the Auth-I message (see [Auth-I message](#auth-i-message)
    section).
-1. At this point, the interactive DAKE is complete for Bob, but the double
+1. At this point, Bob has authenticated with Alice, but the double
    ratchet algorithm still needs to be correctly set up.
 
 **Alice:**
@@ -2051,8 +2051,7 @@ Bob will be initiating the DAKE with Alice.
 
 **Bob:**
 
-1. At this point, the interactive DAKE is complete for Bob, but he has to
-   correctly setup the double ratchet logarithm:
+1. He correctly sets up the double ratchet logarithm:
    * He should immediately receive a "DAKE Data Message" that advertises the
      new public keys from Alice:
      * Follows what is defined in the [When you receive a Data Message](#when-you-receive-a-data-message)
@@ -3712,7 +3711,7 @@ If the state is `WAITING_AUTH_R`:
       * Send a new Auth-R message.
       * Transition state to `WAITING_AUTH_I`.
 
-If the state is `WAITING_AUTH_I`:
+If the state is `WAITING_AUTH_I` or `WAITING_DAKE_DATA_MESSAGE`:
 
   ```
     There are a number of reasons that you may receive an Identity Message in
