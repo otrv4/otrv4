@@ -1571,9 +1571,13 @@ if the only publicly available Client Profile is expired. For that reason, a
 received expired Client Profile during the DAKE is considered invalid.
 
 Before the Client Profile expires, the user must publish an updated Client
-Profile with a new expiration date. The client establishes the frequency of
-expiration and when to publish (when the current Client Profile expires). Note
-that this can be configurable. A recommended value is one week.
+Profile with a new expiration date. This expiration date is defined as the
+number of seconds that have elapsed since 00:00:00 Coordinated Universal Time
+(UTC), Thursday, 1 January 1970.
+
+The client establishes the frequency of expiration and when to publish (before
+the  current Client Profile expires). Note that this can be configurable. A
+recommended value is one week.
 
 ### Create a Client Profile Signature
 
@@ -1789,9 +1793,13 @@ Prekey Server.
 ### Prekey Profile Expiration and Renewal
 
 Before the prekey profile expires, the user must publish an updated prekey
-profile with a new expiration date. The client establishes the frequency of
-expiration and when to publish (before the current Prekey Profile expires). Note
-that this can be configurable. A recommended value is one week.
+profile with a new expiration date. This expiration date is defined as the
+number of seconds that have elapsed since 00:00:00 Coordinated Universal Time
+(UTC), Thursday, 1 January 1970.
+
+The client establishes the frequency of expiration and when to publish (before
+the current Prekey Profile expires). Note that this can be configurable. A
+recommended value is one week.
 
 ### Create a Prekey Profile Signature
 
