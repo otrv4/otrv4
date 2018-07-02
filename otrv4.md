@@ -595,34 +595,33 @@ The following usageID variables are defined:
 
 ```
   * usageFingerprint = 0x00
-  * usageSK = 0x01
-  * usageThirdBraceKey = 0x02
-  * usageBraceKey = 0x03
-  * usageSharedSecret = 0x04
-  * usageSSID = 0x05
-  * usageAuthRBobClientProfile = 0x06
-  * usageAuthRAliceClientProfile = 0x07
-  * usageAuthRPhi = 0x08
-  * usageAuthIBobClientProfile = 0x09
-  * usageAuthIAliceClientProfile = 0x0A
-  * usageAuthIPhi = 0x0B
-  * usageTmpKey = 0x0C
-  * usageAuthMACKey = 0x0D
-  * usageNonIntAuthBobClientProfile = 0x0E
-  * usageNonIntAuthAliceClientProfile = 0x0F
-  * usageNonIntAuthPhi = 0x10
-  * usageAuthMAC = 0x11
-  * usageECDHFirstEphemeral = 0x12
-  * usageDHFirstEphemeral = 0x13
-  * usageRootKey = 0x14
-  * usageChainKey = 0x15
-  * usageNextChainKey = 0x16
-  * usageMessageKey = 0x17
-  * usageMACKey = 0x18
-  * usageExtraSymmKey = 0x19
-  * usageDataMessageSections = 0x1A
-  * usageAuthenticator = 0x1B
-  * usageSMPSecret = 0x1C
+  * usageThirdBraceKey = 0x01
+  * usageBraceKey = 0x02
+  * usageSharedSecret = 0x03
+  * usageSSID = 0x04
+  * usageAuthRBobClientProfile = 0x05
+  * usageAuthRAliceClientProfile = 0x06
+  * usageAuthRPhi = 0x07
+  * usageAuthIBobClientProfile = 0x08
+  * usageAuthIAliceClientProfile = 0x09
+  * usageAuthIPhi = 0x0A
+  * usageTmpKey = 0x0B
+  * usageAuthMACKey = 0x0C
+  * usageNonIntAuthBobClientProfile = 0x0D
+  * usageNonIntAuthAliceClientProfile = 0x0E
+  * usageNonIntAuthPhi = 0x0F
+  * usageAuthMAC = 0x10
+  * usageECDHFirstEphemeral = 0x11
+  * usageDHFirstEphemeral = 0x12
+  * usageRootKey = 0x13
+  * usageChainKey = 0x14
+  * usageNextChainKey = 0x15
+  * usageMessageKey = 0x16
+  * usageMACKey = 0x17
+  * usageExtraSymmKey = 0x18
+  * usageDataMessageSections = 0x19
+  * usageAuthenticator = 0x1A
+  * usageSMPSecret = 0x1B
 ```
 
 ## Data Types
@@ -1105,7 +1104,6 @@ variable values are replaced:
 ```
 generateECDH()
   - pick a random value r (57 bytes)
-  - generate 'h' = KDF_1(usageSK || r, 57).
   - prune 'h': the two least significant bits of the first byte are cleared, all
     eight bits of the last byte are cleared, and the highest bit of the second
     to last byte is set.
