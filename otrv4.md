@@ -1687,7 +1687,7 @@ To validate a Client Profile, you must (in this order):
 ## Prekey Profile
 
 OTRv4 introduces prekey profiles. The Prekey Profile contains a Prekey Profile's
-Identifier, the Client Profile owner's instance tag, a shared prekey, a prekey
+Identifier, the Prekey Profile owner's instance tag, a shared prekey, a prekey
 profile expiration date and a signature of all these. It is signed by the Ed448
 long-term public key.
 
