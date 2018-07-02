@@ -3732,11 +3732,15 @@ If the state is `WAITING_AUTH_I` or `WAITING_DAKE_DATA_MESSAGE`:
 
 If the state is `ENCRYPTED_MESSAGES`:
 
-   * If this Auth-R message is the same the one you received earlier (when you
-     send an Auth-I message):
-     * Retransmit your Auth-I Message.
-   * Otherwise:
-     * Ignore the message.
+  * Validate the new Identity message. Ignore the message if validation fails.
+  * If validation succeeds:
+    * Remember the sender's instance tag to use as the receiver's instance tag
+      for future messages.
+    * Reply with an Auth-R message.
+    * Transition to the `WAITING_AUTH_I` state.
+
+Otherwise:
+   * Ignore the message.
 
 #### Sending an Auth-R Message
 
