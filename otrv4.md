@@ -622,6 +622,7 @@ The following usageID variables are defined:
   * usageDataMessageSections = 0x19
   * usageAuthenticator = 0x1A
   * usageSMPSecret = 0x1B
+  * usageAuth = 0x1C
 ```
 
 ## Data Types
@@ -1064,9 +1065,9 @@ Key variables:
   'their_ecdh': their ECDH ephemeral public key.
   'our_dh': our DH ephemeral key pair.
   'their_dh': their DH ephemeral public key.
-  'brace_key': either a hash of the shared DH key: 'KDF_1(0x02 || k_dh, 32)'
-   (every third DH ratchet) or a hash of the previuos 'brace_key:
-   KDF_1(0x03 || brace_key, 32)'
+  'brace_key': either a hash of the shared DH key: 'KDF_1(usageThridBraceKey ||
+   k_dh, 32)' (every third DH ratchet) or a hash of the previuos 'brace_key:
+   KDF_1(usageBraceKey || brace_key, 32)'
   'mac_keys_to_reveal': the MAC keys to be revealed in the first data message
     sent of the next ratchet.
   'skipped_MKenc': Dictionary of stored skipped-over message keys, indexed by
@@ -4587,8 +4588,8 @@ section for details.
 1. Compute `T1 = G * t1`.
 1. Compute `T2 = G * r2 + A2 * c2`.
 1. Compute `T3 = G * r3 + A3 * c3`.
-1. Compute `c = HashToScalar(0x1D || G || q || A1 || A2 || A3 || T1 || T2 ||
-   T3 || m)`.
+1. Compute `c = HashToScalar(usageAuth || G || q || A1 || A2 || A3 || T1 ||
+   T2 || T3 || m)`.
 1. Compute `c1 = c - c2 - c3 (mod q)`.
 1. Compute `r1 = t1 - c1 * a1 (mod q)`.
 1. Send `sigma = (c1, r1, c2, r2, c3, r3)`.
@@ -4617,8 +4618,8 @@ The prover knows a secret `ai` and, therefore:
   T3 = constant_time_select(eq3, encode(G * t3), encode(G * r3 + A3 * c3))
 ```
 
-1. Compute `c = HashToScalar(0x1D || G || q || A1 || A2 || A3 || T1 || T2 ||
-   T3 || m)`.
+1. Compute `c = HashToScalar(usageAuth || G || q || A1 || A2 || A3 || T1 ||
+   T2 || T3 || m)`.
 1. For whichever equally returns true (if `eqi == 1`, `eqj == 0` and
    `eqk == 0`, for `i != j != k`): `ci = c - cj - ck (mod q)`.
 1. For whichever equally returns true (if `eqi == 1`):
@@ -4633,7 +4634,8 @@ If the prover knows `a2`, for example, the `RSig` function looks like this:
 1. Compute `T1 = G * r1 + A1 * c1`.
 1. Compute `T3 = G * r3 + A3 * c3`.
 1. Compute
-   `c = HashToScalar(0x1D || G || q || A1 || A2 || A3 || T1 || T2 || T3 || m)`.
+   `c = HashToScalar(usageAuth || G || q || A1 || A2 || A3 || T1 || T2 || T3 ||
+   m)`.
 1. Compute `c2 = c - c1 - c3 (mod q)`.
 1. Compute `r2 = t2 - c2 * a2 (mod q)`.
 1. Send `sigma = (c1, r1, c2, r2, c3, r3)`.
@@ -4653,7 +4655,8 @@ can be inferred in practice).
 1. Compute `T2 = G * r2 + A2 * c2`
 1. Compute `T3 = G * r3 + A3 * c3`
 1. Compute
-   `c = HashToScalar(0x1D || G || q || A1 || A2 || A3 || T1 || T2 || T3 || m)`.
+   `c = HashToScalar(usageAuth || G || q || A1 || A2 || A3 || T1 || T2 || T3 ||
+   m)`.
 1. Check if `c ≟ c1 + c2 + c3 (mod q)`. If it is true, verification succeeds.
    If not, it fails.
 
