@@ -194,11 +194,11 @@ Alice                             Untrusted Prekey Server    Bob
 --------------------------------------------------------------------------------
                                   (<----------------------   Pre-conversation: Creates
                                                              and sends Prekey values: creates
-                                                             a Client Profile, Prekey Profiles and a set of
+                                                             a Client Profile, a Prekey Profile and a set of
                                                              prekey messages)
 Retrieves Bob's  ----------------->
 Prekey Ensemble: asks for
-a Client Profile, Prekey
+a Client Profile, a Prekey
 Profile and a prekey message
 
 Establishes Conversation  -------------------------------->
@@ -220,45 +220,45 @@ while the latter is offline.
 
 Unless otherwise noted, these conventions and definitions are used for this document:
 
-* "Participant" refers to any of the end-points that take part in a
-  conversation.
 * "Adversary" refers to a malicious entity whose aim is to prevent the
   participants of this protocol from achieving their goal.
-* "Judge" refers is an entity that decide whether or not a certain event
-  occurred. We say that an action is deniable with respect to a given judge if
-  the judge cannot be convinced that an individual performed the action.
-* "Informant" refers to an insider with privileged access capable of divulging
-  information.
-* "Initiator" refers to the participant initiating a DAKE. In the case of the
-  interactive DAKE, this is the participant that sends the Identity message.
-  In the case of the non-interactive DAKE, this is the participant that
-  uploads a Prekey Ensemble.
-* "Responder" refers to the participant responding to an Initiator's request.
-  In the case of the interactive DAKE, this is the participant that sends the
-  Auth-R message. In the case of the non-interactive DAKE, this is the
-  participant that sends the Non-Interactive Auth message.
+* "Client" refers to a software used for communication between parties. It
+  implements the OTRv4 protocol.
+* "OTR Conversation" and "Conversation" refers to an interaction between parties
+  by exchanging encrypted messages with each other using the OTRv4 protocol.
 * "DAKE" refers to a Deniable Authenticated Key Exchange, in which two parties
   engage in the protocol whose result is a key which only the two of them know,
   and they are assured to be sharing it with each other. They will use
   it to encrypt and authenticate messages in the session, using an
   authentication mechanism that is deniable provided that the key cannot be
   traced to either party.
+* "Informant" refers to an insider with privileged access capable of divulging
+  information.
+* "Initiator" refers to the participant initiating a DAKE. In the case of the
+  interactive DAKE, this is the participant that sends the Identity message.
+  In the case of the non-interactive DAKE, this is the participant that
+  uploads a Prekey Ensemble.
+* "Judge" refers to an entity that decide whether or not a certain event
+  occurred. We say that an action is deniable with respect to a given judge if
+  the judge cannot be convinced that an individual performed the action.
+* "Mode" refers to a way in which OTRv4 can be implemented.
+* "Network" refers to the system that computing devices use to exchange data
+  with each other using connections between nodes.
+* "Participant" or "Party" refers to any of the end-points that take part in a
+  conversation.
 * "Prekey Server" refers to the untrusted server used to store Prekey Ensembles.
 * "Publisher" refers to the participant publishing Prekey Ensembles to the
   Prekey Server.
-* "Retriever" refers to the participant retrieving Prekey Ensembles from the
-  Prekey Server that correspond to the publishing participant.
-* "Sender" refers to the participant sending an encoded message.
 * "Receiver" refers to the participant receiving an encoded message.
-* "Client" refers to a software used for communication between parties and that
-  implements the OTRv4 protocol.
-* "Network" refers to the system that computing devices use to exchange data
-  with each other using connections between nodes.
+* "Responder" refers to the participant responding to an Initiator's request.
+  In the case of the interactive DAKE, this is the participant that sends the
+  Auth-R message. In the case of the non-interactive DAKE, this is the
+  participant that sends the Non-Interactive Auth message.
+* "Retriever" refers to the participant retrieving Prekey Ensembles from the
+  Prekey Server that correspond to the Publisher.
+* "Sender" refers to the participant sending an encoded message.
 * "Session" refers to a semi-permanent information interchange between parties.
-  It is not only limited to exchanging of encrypted messages.
-* "Conversation" refers to an interaction between parties by exchanging
-  encrypted messages with each other.
-* "Mode" refers to a way in which OTRv4 can be implemented.
+  It is not only limited to the exchange of encrypted messages.
 
 ## Assumptions
 
