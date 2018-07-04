@@ -4886,13 +4886,6 @@ or `AUTHSTATE_AWAITING_REVEALSIG`:
 
   * Ignore the message.
 
-#### Sending a TLV type 1 (Disconnected) Message
-
-If the user requests to close its private connection, you may send a message
-(possibly with an empty human-readable part) containing a record with TLV type 1
-just before you discard the session keys. You should then transition to
-`MSGSTATE_PLAINTEXT`.
-
 ### OTRv3 Protocol State Machine
 
 OTRv3 defines three main state variables:
