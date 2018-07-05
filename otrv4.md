@@ -1360,14 +1360,14 @@ should determine the frequency of the Client Profile expiration and renewal.
 The recommended expiration time is one week.
 
 Nevertheless, for a short amount of time (decided by the client) a Client
-Profile can still be valid on local storage even if it has publicly expired.
-This is needed for non-interactive conversations as a party, Alice, can send
+Profile can still be locally used even if it has publicly expired. This is
+needed for non-interactive conversations as a party, Alice, can send
 offline encrypted messages using a non-expired published Client Profile from
-Bob. This Client Profile, nevertheless, could have had expired prior to the
-moment in which the other party, Bob, receives the offline encrypted messages.
-To allow this party, Bob, to still be able to read these messages, the Client
-Profile can still be locally valid even if it has publicly expired. A
-recommended amount of time for this extra validity time is of 1 day.
+Bob. This Client Profile, nevertheless, can expire prior to the moment in which
+the other party, Bob, receives the offline encrypted messages. To allow this
+party, Bob, to still be able to validate and decrypt these messages, the Client
+Profile can still be locally used even if it has publicly expired. A recommended
+amount of time for this extra validity time is of 1 day.
 
 It is also important to note that the absence of a Client Profile is not a proof
 that a user does not support OTRv4.
@@ -1709,14 +1709,14 @@ should determine the frequency of the prekey's profile expiration and renewal.
 The recommended expiration time is one week.
 
 Nevertheless, for a short amount of time (decided by the client) a Prekey
-Profile can still be locally valid even if it has publicly expired. This is
-needed for non-interactive conversations as a party, Alice, can send offline
-encrypted messages using a non-expired Prekey Profile. This Prekey Profile,
-nevertheless, could have had expired prior to the moment in which the other
-party, Bob, receives the offline encrypted messages. To allow this party, Bob,
-to still be able to read these messages, the Prekey Profile can still be valid
-even if it has publicly expired. A recommended amount of time for this extra
-validity is of 1 day.
+Profile can still be locally used even if it has publicly expired. This is
+needed for non-interactive conversations as a party, Alice, can send
+offline encrypted messages using a non-expired published Prekey Profile from
+Bob. This Prekey Profile, nevertheless, can expire prior to the moment in which
+the other party, Bob, receives the offline encrypted messages. To allow this
+party, Bob, to still be able to validate and decrypt these messages, the Prekey
+Profile can still be locally used even if it has publicly expired. A recommended
+amount of time for this extra validity time is of 1 day.
 
 Note that a Prekey Profile is generated per client location basis. Users
 are not expected to manage prekey profiles (theirs or from others) in a client.
