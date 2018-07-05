@@ -955,6 +955,9 @@ included.
 Note that varible length fields are encoded as DATA. If `phi'` is a string, it
 will be encoded in UTF-8.
 
+To make sure both participants has the same phi during DAKE, sort the instance
+tag by numerical order and any string passed to `phi'` lexicographically.
+
 ```
   session identifier mandated by the OTRv4 spec = sender and receiver's instance
     tags, or/and the query message or the whitespace tag
@@ -979,10 +982,6 @@ look like:
   phi = 0x00000100 || 0x00000101 || DATA("?OTRv4?") ||
         DATA("alice@jabber.net") || DATA("bob@jabber.net")
 ```
-
-To make sure both participants has the same phi during DAKE, sort the instance
-tag by numerical order and JIDs or any string passed to `phi`
-lexicographically.
 
 ### Secure Session ID
 
@@ -4656,8 +4655,9 @@ can be inferred in practice).
 1. Compute `T2 = G * r2 + A2 * c2`
 1. Compute `T3 = G * r3 + A3 * c3`
 1. Compute
-   `c = HashToScalar(usageAuth || G || q || A1 || A2 || A3 || T1 || T2 || T3 ||
+   `h = KDF_1(usageAuth || G || q || A1 || A2 || A3 || T1 || T2 || T3 ||
    m)`.
+1. Compute `c = h (mod q)`.
 1. Check if `c ≟ c1 + c2 + c3 (mod q)`. If it is true, verification succeeds.
    If not, it fails.
 
