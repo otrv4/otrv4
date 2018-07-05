@@ -279,16 +279,16 @@ such a way that only the recipient and sender can read it.
 
 OTRv4 provides trust establishment (user verification) by fingerprint
 verification or by the ability to perform the Socialist Millionaires Protocol
-(SMP). This is a zero-knowledge proof of knowledge protocol that determines if
-secret values held by two parties are equal without revealing the value
-itself.
+(SMP). The latter is a zero-knowledge proof of knowledge protocol that
+determines if secret values held by two parties are equal without revealing the
+value itself.
 
 In the interactive DAKE, although access to one participant's private long-term
 key is required for authentication, both participants can deny having used
 their private long-term keys. A forged transcript of the DAKE can be produced at
 any time by anyone who knows the long-term public keys of both alleged
 participants. This capability is called offline deniability because no
-transcript provides evidence of a past key exchange, as this could have been
+transcript provides evidence of a past key exchange, as it could have being
 forged by anyone. This property is provided for both participants taking part in
 the interactive DAKE as described below.
 
@@ -299,7 +299,7 @@ perform arbitrary protocols with these third parties. A KCI attack begins when
 the long-term secret key of a participant of a vulnerable DAKE is compromised.
 With this secret key, an adversary can impersonate other users to the owner of
 the key. The property by which participants cannot provide proof of
-participation to third parties is known as online or participation deniability.
+participation to third parties is known as online deniability.
 
 Online deniability can be broken in two ways: 1. coercive judges, when an
 online judge coerces a participant into interactively proving that messages were
@@ -313,7 +313,8 @@ to produce a non-repudiable proof/transcript of the otherwise deniable protocol
 
 Both DAKEs (interactive and non-interactive) provide offline deniability as
 anyone can forge a DAKE transcript between two parties using their long-term
-public keys.
+public keys. The interactive DAKE provides online deniability for both
+parties.
 
 In the non-interactive DAKE, the initiator (Bob, in the above overview) has
 participation deniability, but Alice, the responder, does not. This happens as
@@ -322,9 +323,9 @@ establish an authenticated conversation with Bob in Alice's name without having
 to learn her private keys. This generates irrefutable cryptographic proof that a
 conversation took place.
 
-Although both DAKEs (interactive and non-interactive) provide offline
-deniability, take into account that there may be a loss of deniability if an
-interactive DAKE is followed by a non-interactive one.
+Although both DAKEs (interactive and non-interactive) provide deniability, take
+into account that there may be a loss of deniability if an interactive DAKE is
+sfollowed by a non-interactive one.
 
 Once a conversation has been established with the DAKE, all data messages
 transmitted in it are confidential and retain their integrity. They are
