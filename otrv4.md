@@ -1334,10 +1334,10 @@ an attacker.
 
 OTRv4 introduces Client Profiles. A Client Profile has an arbitrary number of
 fields, but some fields are required. A Client Profile contains the Client
-Profile Identifier, the Client Profile owner instance tag, an Ed448 long-term
-public key, an Ed448 forger public key, information about supported versions, a
-profile expiration date, a signature of all these, and an optional transitional
-signature. It has variable length.
+Profile owner instance tag, an Ed448 long-term public key, an Ed448 forger
+public key, information about supported versions, a profile expiration date, a
+signature of all these, and an optional transitional signature. It has variable
+length.
 
 There are two instances of the Client Profile that should be generated. One is
 used for authentication in both DAKEs (interactive and non-interactive). The
@@ -1424,35 +1424,31 @@ Client Profile (CLIENT-PROF):
 The supported fields are:
 
 ```
-Client Profile Identifier (INT)
-  Type = 0x0001
-  A Client Profile ID used for local storage and retrieval.
-
 Client Profile owner instance tag (INT)
-  Type = 0x0002
+  Type = 0x0001
   The instance tag of the client that created the Client Profile.
 
 Ed448 public key (ED448-PUBKEY)
-  Type = 0x0003
+  Type = 0x0002
   Corresponds to 'OTRv4's public authentication Ed448 key'.
 
 Ed448 forger public key (ED448-FORGER-PUBKEY)
-  Type = 0x0004
+  Type = 0x0003
   Corresponds to 'OTRv4's forger public Ed448 key'.
 
 Versions (DATA)
-  Type = 0x0005
+  Type = 0x0004
 
 Client Profile Expiration (CLIENT-PROF-EXP)
-  Type = 0x0006
+  Type = 0x0005
 
 OTRv3 public authentication DSA key (PUBKEY)
-  Type = 0x0007
+  Type = 0x0006
 
 Transitional Signature (CLIENT-SIG)
   Type = 0x0008
   This signature is defined as a signature over fields 0x0001,
-  0x0002, 0x0003, 0x0004, 0x0005, 0x006 and 0x007 only.
+  0x0002, 0x0003, 0x0004, 0x0005, and 0x006 only.
 ```
 
 Note that the Client Profile Expiration is encoded as:
@@ -1503,15 +1499,12 @@ OTRv3 public authentication DSA key (PUBKEY):
 
 To create a Client Profile, generate:
 
-1. A unique random id that is going to act as an identifier for this Client
-   Profile. It should be a 4 byte unsigned value.
 1. A 4-byte instance tag to use as the Client Profile owner instance tag. This
    should only be done if the client doesn't already have an instance tag for
    this user.
 
 Then assemble:
 
-1. Client Profile identifier.
 1. Client Profile owner instance tag.
 1. Ed448 long-term public key.
 1. Versions: a string corresponding to the user's supported OTR versions.
@@ -1583,10 +1576,9 @@ recommended value is one week.
 If version 3 and 4 are supported and the user has a pre-existing OTRv3
 long-term keypair:
 
-   * Concatenate `Client Profile Identifier ||
-     Client Profile owner instance tag || Ed448 public key || Versions ||
-     Client Profile Expiration || OTRv3 public authentication DSA key`. Denote
-     this value `m`.
+   * Concatenate `Client Profile owner instance tag || Ed448 public key ||
+     Versions || Client Profile Expiration ||
+     OTRv3 public authentication DSA key`. Denote this value `m`.
    * Sign `m` with the user's OTRv3 DSA key. Denote this value
      `Transitional Signature`.
    * Sign `m || Transitional Signature` with the symmetric key, as stated
@@ -1598,9 +1590,8 @@ with this key.
 
 If only version 4 is supported:
 
-   * Concatenate `Client Profile's Identifier ||
-     Client Profile owner's instance tag || Ed448 public key || Versions ||
-     Client Profile Expiration`. Denote this value `m`.
+   * Concatenate `Client Profile owner's instance tag || Ed448 public key ||
+     Versions || Client Profile Expiration`. Denote this value `m`.
    * Sign `m` with the symmetric key, as stated below. Denote this value
      `Client Profile Signature`.
 
@@ -1687,10 +1678,9 @@ To validate a Client Profile, you must (in this order):
 
 ## Prekey Profile
 
-OTRv4 introduces prekey profiles. The Prekey Profile contains a Prekey Profile's
-Identifier, the Prekey Profile owner's instance tag, a shared prekey, a prekey
-profile expiration date and a signature of all these. It is signed by the Ed448
-long-term public key.
+OTRv4 introduces prekey profiles. The Prekey Profile contains the Prekey Profile
+owner's instance tag, a shared prekey, a prekey profile expiration date and a
+signature of all these. It is signed by the Ed448 long-term public key.
 
 A prekey profile is needed for it's signed shared prekey, which is used for
 offline conversations. It is changed on a regular basis as defined by the
@@ -1732,8 +1722,6 @@ Prekey Profile Expiration (PREKEY-PROF-EXP):
   8 byte signed value, big-endian
 
 Prekey Profile (PREKEY-PROF):
-  Prekey Profile's Identifier (INT)
-    A Prekey Profile id used for local storage and retrieval.
   Prekey Profile owner's instance tag (INT)
     The instance tag of the client that created the Prekey Profile.
   Prekey Profile Expiration (PREKEY-PROF-EXP)
@@ -1760,14 +1748,8 @@ PREKEY-EDDSA-SIG signature (PREKEY-EDDSA-SIG):
 
 ### Creating a Prekey Profile
 
-To create a Prekey Profile, generate:
-
-1. A unique random id that is going to act as an identifier for this Prekey
-   Profile. It should be 4 byte unsigned value, big-endian.
-
 To create a Prekey Profile, assemble:
 
-1. The Prekey Profile's identifier.
 1. The same Client Profile owner's instance tag. Denote this value Prekey
    Profile owner's instance tag.
 1. Prekey Profile Expiration: Expiration date in standard Unix 64-bit format
@@ -1804,9 +1786,8 @@ recommended value is one week.
 
 For this:
 
-* Concatenate `Prekey Profile's Identifier ||
-  Prekey Profile's owner's instance tag || Prekey Profile Expiration ||
-  Public Shared Prekey`. Denote this value `m`.
+* Concatenate `Prekey Profile's owner's instance tag ||
+  Prekey Profile Expiration || Public Shared Prekey`. Denote this value `m`.
 * Sign `m` with the symmetric key, as stated below. Denote this value
   `Profile Signature`.
 
@@ -2411,24 +2392,18 @@ Verify.
      * Otherwise:
        * Sets `Y` and `y` as `our_ecdh`: the ephemeral ECDH keys.
        * Sets `B` as  and `b` as `our_dh`: the ephemeral 3072-bit DH keys.
-   * Retrieves his corresponding Client Profile from local storage,
-     by using the 'Client Profile Indentifier' attached to the
-     Non-Interactive-Auth message.
-     * If this 'Client Profile Identifier' does not correspond to any Client
-       Profile in local storage:
+   * Retrieves his corresponding Client Profile from local storage.
+     * If there is no Client Profile in local storage:
        * Aborts the DAKE.
      * Sets the 'Ed448 Long-term Public Key' from the Client Profile as `H_b`.
-   * Retrieves his corresponding Prekey Profile from local storage, by
-     using the 'Prekey Profile Indentifier' attached to the Non-Interactive-Auth
-     message.
-     * If this 'Prekey Profile Identifier' does not correspond to any Prekey
-       Profile on local storage:
+   * Retrieves his corresponding Prekey Profile from local storage.
+     * If there is no Prekey Profile in local storage:
        * Aborts the DAKE.
+     * Sets his Public Shared Prekey (`D_b`) from his Prekey Profile as
+     `our_shared_prekey.public`.
    * Picks a compatible version of OTR listed on Alice's Client Profile, and
      follows the specification for this version. If the versions are
      incompatible, Bob does not send any further messages.
-   * Sets his Public Shared Prekey (`D_b`) from his Client Profile as
-     `our_shared_prekey.public`.
    * Verifies the Non-Interactive-Auth message. See
      [Non-Interactive-Auth Message](#non-interactive-auth-message) section. If
      the verification fails, rejects the message and does not send anything
@@ -2584,10 +2559,6 @@ A valid Non-Interactive-Auth message is generated as follows:
    for details.
 1. Attach the 'Prekey Message Identifier' that is stated in the retrieved
    Prekey message.
-1. Attach the 'Client Profile Message Identifier' that is stated in the
-   retrieved Client Profile.
-1. Attach the 'Prekey Profile Message Identifier' that is stated in the
-   retrieved Prekey Profile.
 1. Generate a 4-byte instance tag to use as the sender's instance tag.
    Additional messages in this conversation will continue to use this tag as
    the sender's instance tag. Also, this tag is used to filter future received
@@ -2635,14 +2606,6 @@ Sigma (RING-SIG)
 
 Prekey Message Identifier (INT)
   The 'Prekey Message Identifier' from the Prekey message that was retrieved
-  from the untrusted Prekey Server, as part of the Prekey Ensemble.
-
-Client Profile Identifier (INT)
-  The 'Client Profile Identifier' from the Client Profile that was retrieved
-  from the untrusted Prekey Server, as part of the Prekey Ensemble.
-
-Prekey Profile Identifier (INT)
-  The 'Prekey Profile Identifier' from the Prekey Profile that was retrieved
   from the untrusted Prekey Server, as part of the Prekey Ensemble.
 
 Auth MAC (MAC)
