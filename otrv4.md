@@ -2172,7 +2172,7 @@ Protocol version (SHORT)
   The version number of this protocol is 0x0004.
 
 Message type (BYTE)
-  The message has type 0x91.
+  The message has type 0x07.
 
 Sender's instance tag (INT)
   The instance tag of the person sending this message.
@@ -2232,7 +2232,7 @@ Protocol version (SHORT)
   The version number of this protocol is 0x0004.
 
 Message type (BYTE)
-  The message has type 0x88.
+  The message has type 0x13.
 
 Sender's instance tag (INT)
   The instance tag of the person sending this message.
@@ -2583,7 +2583,7 @@ Protocol version (SHORT)
   The version number of this protocol is 0x0004.
 
 Message type (BYTE)
-  The message has type 0x8D.
+  The message has type 0x0D.
 
 Sender's instance tag (INT)
   The instance tag of the person sending this message.
