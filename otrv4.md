@@ -2068,7 +2068,7 @@ A valid Identity message is generated as follows:
 
 To verify an Identity message:
 
-1. Verify if the message type is `0x08`.
+1. Verify if the message type is `0x35`.
 1. Verify that protocol's version of the message is `0x0004`.
 1. Validate the Client Profile, as defined in
    [Validating a Client Profile](#validating-a-client-profile) section.
@@ -2086,7 +2086,7 @@ Protocol version (SHORT)
   The version number of this protocol is 0x0004.
 
 Message type (BYTE)
-  The message has type 0x08.
+  The message has type 0x35.
 
 Sender's instance tag (INT)
   The instance tag of the person sending this message.
@@ -2145,7 +2145,7 @@ A valid Auth-R message is generated as follows:
 
 To verify an Auth-R message:
 
-1. Verify if the message type is `0x91`.
+1. Verify if the message type is `0x36`.
 1. Verify that protocol's version of the message is `0x0004`.
 1. Check that the receiver's instance tag matches your sender's instance tag.
 1. Validate the Client Profile as defined in
@@ -2172,7 +2172,7 @@ Protocol version (SHORT)
   The version number of this protocol is 0x0004.
 
 Message type (BYTE)
-  The message has type 0x07.
+  The message has type 0x36.
 
 Sender's instance tag (INT)
   The instance tag of the person sending this message.
@@ -2213,7 +2213,7 @@ A valid Auth-I message is generated as follows:
 
 To verify an Auth-I message:
 
-1. Verify if the message type is `0x88`.
+1. Verify if the message type is `0x37`.
 1. Verify that protocol's version of the message is `0x0004`.
 1. Check that the receiver's instance tag matches your sender's instance tag.
 1. Compute
@@ -2232,7 +2232,7 @@ Protocol version (SHORT)
   The version number of this protocol is 0x0004.
 
 Message type (BYTE)
-  The message has type 0x13.
+  The message has type 0x37.
 
 Sender's instance tag (INT)
   The instance tag of the person sending this message.
@@ -2567,7 +2567,7 @@ A valid Non-Interactive-Auth message is generated as follows:
 
 To verify a Non-Interactive-Auth message:
 
-1. Verify if the message type is `0x8D`.
+1. Verify if the message type is `0x0D`.
 1. Compute
    `t = KDF_1(usageNonIntAuthBobClientProfile || Bobs_Client_Profile, 64) ||
     KDF_1(usageNonIntAuthAliceClientProfile || Alices_Client_Profile, 64) ||
