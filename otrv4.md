@@ -1662,11 +1662,11 @@ The Client Profile signature is verified as defined in RFC 8032
 
 To validate a Client Profile, you must (in this order):
 
+1. Verify that the `Client Profile Signature` field is not empty.
+1. [Verify that the Client Profile signature is valid](#verify-a-client-profile-signature).
 1. Verify that the Client Profile owner's instance tag is equal to the Sender
    Instance tag of the person that sent the DAKE message in which the Client
    Profile is received.
-1. Verify that the `Client Profile Signature` field is not empty.
-1. [Verify that the Client Profile signature is valid](#verify-a-client-profile-signature).
 1. Verify that the Client Profile has not expired.
 1. Verify that the `Versions` field contains the character "4".
 1. Validate that `Ed448 Public Key` is on
@@ -1858,10 +1858,10 @@ The Prekey Profile signature is verified as defined in RFC 8032
 
 To validate a Prekey Profile, you must (in this order):
 
+1. [Verify that the Prekey Profile signature is valid](#verify-a-prekey-profile-signature).
 1. Verify that the Prekey Profile owner's instance tag is equal to the Sender
    Instance tag of the person that sent the DAKE message in which the Prekey
    Profile is received.
-1. [Verify that the Prekey Profile signature is valid](#verify-a-prekey-profile-signature).
 1. Verify that the Prekey Profile has not expired.
 1. Verify that the Prekey Profile owner's instance tag is equal to the Sender
    Instance tag of the person that sent the DAKE message in which the Client
