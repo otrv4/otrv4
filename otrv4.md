@@ -4473,9 +4473,9 @@ Forge DAKE and Session Keys
   profile owner authenticated the conversation.
 
 Show MAC Key
-  This function takes an encryption key and shows the MAC key. For example.
+  This function takes an message key and shows the corresponding MAC key.
   'Show MAC key' may be used with the ReMAC Message function below in the case
-  where a chain key has been compromised by an attacker who wishes to forge
+  where a message key has been compromised by an attacker who wishes to forge
   messages.
 
 ReMAC Message
