@@ -4470,12 +4470,10 @@ Forge DAKE and Session Keys
   profile owner authenticated the conversation.
 
 Show MAC Key
-  This function takes a chain key and the number of a message key, and shows
-  the MAC key associated with those two values. For example, if the message
-  key number is 3, the chain key is ratcheted 3 times, and the third MAC key is
-  derived and returned. 'Show MAC key' may be used with the ReMAC Message
-  function below in the case where a chain key has been compromised by an
-  attacker who wishes to forge messages.
+  This function takes an encryption key and shows the MAC key. For example.
+  'Show MAC key' may be used with the ReMAC Message function below in the case
+  where a chain key has been compromised by an attacker who wishes to forge
+  messages.
 
 ReMAC Message
   This will make a new OTR Data Message with a given MAC key and an original
