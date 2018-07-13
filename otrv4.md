@@ -1105,6 +1105,9 @@ variable values are replaced:
 ```
 generateECDH()
   - pick a random value r (57 bytes)
+  - Hash the 'r' using 'SHAKE-256(r, 114)'. Store the digest in a
+    114-byte buffer. Only the lower 57 bytes (denoted 'h') are used for
+    generating the public key.
   - prune 'h': the two least significant bits of the first byte are cleared, all
     eight bits of the last byte are cleared, and the highest bit of the second
     to last byte is set.
