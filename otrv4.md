@@ -4466,11 +4466,12 @@ Forge DAKE and Session Keys
   Any participant of an OTR conversation may forge a DAKE with another
   participant as long as they have their Client Profile. This function will
   take the Client Profile and the secret long-term key of one participant, and
-  the Client Profile of the other. It will return a DAKE transcript between
-  the two parties. The participant's private key is required since it is used
-  to authenticate the key exchange, but the resulting transcript is created
-  in such a way that a cryptographic expert cannot identify which user
-  profile owner authenticated the conversation.
+  the Client Profile of the other (or Prekey Ensemble in case of
+  non-interactive DAKE). It will return a DAKE transcript between the two
+  parties. The participant's private key is required since it is used to
+  authenticate the key exchange, but the resulting transcript is created in
+  such a way that a cryptographic expert cannot identify which user profile
+  owner authenticated the conversation.
 
 Show MAC Key
   This function takes an message key and shows the corresponding MAC key.
