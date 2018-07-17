@@ -4470,7 +4470,7 @@ Forge DAKE and Session Keys
   non-interactive DAKE). It will return a DAKE transcript between the two
   parties. The participant's private key is required since it is used to
   authenticate the key exchange, but the resulting transcript is created in
-  such a way that a cryptographic expert cannot identify which user profile
+  such a way that a cryptographic expert cannot identify which client profile
   owner authenticated the conversation.
 
 Show MAC Key
