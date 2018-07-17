@@ -3733,6 +3733,8 @@ If the state is `ENCRYPTED_MESSAGES`:
    * If this Auth-R message is the same the one you received earlier (when you
      send an Auth-I message):
      * Retransmit your Auth-I Message.
+   * Otherwise:
+     * Ignore the message.
 
 If the state is not `WAITING_AUTH_R`:
 
@@ -3743,10 +3745,10 @@ If the state is not `WAITING_AUTH_R`:
 * Generate and send an Auth-I message.
 * Initialize the double ratcheting, as defined in the
   [Interactive DAKE Overview](#interactive-dake-overview) section.
-* Transition to state `ENCRYPTED_MESSAGES`. In the case of the interactive
-  DAKE, after sending an Auth-I Message, a participant must wait for the
-  a data message (including a "heartbeat" message) from the other participant
-  in order to be able to send data messages.
+* Transition to state `WAITING_DAKE_DATA_MESSAGE`. After sending an Auth-I
+  Message, a participant must wait for a data message (that can be a "heartbeat"
+  message) to arrive from the other participant, in order to be able to send
+  data messages themselves.
 
 #### Receiving an Auth-I Message
 
@@ -3754,7 +3756,7 @@ If the state is not `WAITING_AUTH_R`:
   * If the receiver's instance tag in the message is not the sender's instance
     tag you are currently using, ignore this message.
   * Validate the Auth-I message.
-    * If validation fails
+    * If validation fails:
       * Ignore the message.
       * Stay in state `WAITING_AUTH_I`.
 
@@ -3762,10 +3764,14 @@ If the state is not `WAITING_AUTH_R`:
       * Transition to state `ENCRYPTED_MESSAGES`.
       * Initialize the double ratcheting, as defined in the
         [Interactive DAKE Overview](#interactive-dake-overview) section.
+      * Send a regular Data Message. If a plaintext message is
+        waiting to be sent, this can be used. Otherwise an empty heartbeat
+        message should be sent. This data message is called "DAKE Data Message".
       * If there are stored Data Messages, remove them from storage - there is
         no way these messages can be valid for the current DAKE.
 
 * If the state is not `WAITING_AUTH_I`:
+
   * Ignore this message.
 
 #### Sending a Data Message to an offline participant
@@ -3791,16 +3797,13 @@ If the state is not `WAITING_AUTH_R`:
     * Initialize the double ratcheting, as defined in the
       [Non-Interactive DAKE Overview](#non-interactive-dake-overview) section.
     * Transition to state to `WAITING_DAKE_DATA_MESSAGE`.
-    * If there are stored Data Messages, for each one of them, transition to the
-      instructions in [Receiving a Data Message](#receiving-a-data-message) and
-      remove them from the store.
 
 #### Receiving a DAKE Data Message
 
 * If the state is `FINISHED` or `MSGSTATE_FINISHED`:
   * Ignore the message.
 
-* Else:
+* If the state is `WAITING_DAKE_DATA_MESSAGE`:
   * If the receiver's instance tag in the message is not the sender's instance
     tag you are currently using:
     * Ignore this message.
@@ -3810,7 +3813,11 @@ If the state is not `WAITING_AUTH_R`:
       [Receiving a Data Message](#receiving-a-data-message) section.
     * Transition to state to `ENCRYPTED_MESSAGE`.
     * If there are stored Data Messages, for each one of them, transition to the
-      instructions in [Receiving a Data Message] and remove them from the store.
+      instructions in [Receiving a Data Message](#receiving-a-data-message) and
+      remove them from the store.
+
+* Otherwise:
+    * Ignore the message.
 
 #### Sending a Data Message
 
