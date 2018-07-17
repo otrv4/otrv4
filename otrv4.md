@@ -3697,7 +3697,7 @@ If the state is `WAITING_AUTH_I` or `WAITING_DAKE_DATA_MESSAGE`:
       previously received Identity message.
     * Send a new Auth-R message with the new values received.
 
-If the state is `ENCRYPTED_MESSAGES`:
+If the state is `ENCRYPTED_MESSAGES` or `FINISHED`:
 
   * Validate the new Identity message. Ignore the message if validation fails.
   * If validation succeeds:
