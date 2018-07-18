@@ -1676,8 +1676,8 @@ To validate a Client Profile, you must (in this order):
    the curve Ed448-Goldilocks. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
-1. If the `Transitional Signature` is present, verify its validity using the
-   OTRv3 DSA key.
+1. If the `Transitional Signature` and OTRv3 DSA key are present and, verify
+   their validity using the OTRv3 DSA key.
 
 ## Prekey Profile
 
