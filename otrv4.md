@@ -2408,9 +2408,13 @@ Verify.
      follows the specification for this version. If the versions are
      incompatible, Bob does not send any further messages.
    * Verifies the Non-Interactive-Auth message. See
-     [Non-Interactive-Auth Message](#non-interactive-auth-message) section. If
-     the verification fails, rejects the message and does not send anything
-     further.
+     [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
+     * If the verification fails and there is another valid Client Profile
+       in the local storage, it can be used to verify the Non-Interactive-Auth
+       message.
+       This depends on whether the client supports the usage of expired
+       Client Profiles for verification. See [Client Profile](#client_profile).
+     * Otherwise, rejects the message and does not send anything further.
 1. Retrieves the ephemeral public keys from Alice:
    * Sets the received ECDH ephemeral public key `X` as `their_ecdh`.
    * Sets the received DH ephemeral public key `A` as `their_dh`.
