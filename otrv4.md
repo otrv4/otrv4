@@ -3735,8 +3735,7 @@ If the state is `WAITING_AUTH_R`:
 
 If the state is `ENCRYPTED_MESSAGES`:
 
-   * If this Auth-R message is the same the one you received earlier (when you
-     send an Auth-I message):
+   * If this Auth-R message is the same one you received earlier:
      * Retransmit your Auth-I Message.
    * Otherwise:
      * Ignore the message.
@@ -3785,11 +3784,13 @@ If the state is not `WAITING_AUTH_R`:
 * Initialize the double ratcheting, as defined in the
   [Non-Interactive DAKE Overview](#non-interactive-dake-overview) section.
 * Transition to state `ENCRYPTED_MESSAGES`.
-* If there is a recent stored message, encrypt it and send it as a Data Message.
+* If there is a recent stored message, encrypt it and send it as the DAKE data
+  message.
 
 #### Receiving a Non-Interactive-Auth Message
 
-* If the state is `FINISHED` or `MSGSTATE_FINISHED`:
+* If the state is `FINISHED`, `MSGSTATE_FINISHED` or
+  `WAITING_DAKE_DATA_MESSAGE`:
   * Ignore the message.
 
 * Else:
