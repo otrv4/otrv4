@@ -4497,13 +4497,21 @@ ReMAC Message
   encrypted. A new MAC tag will be generated and replaced for the message. An
   attacker may use this function to forge messages with a compromised MAC key.
 
-Impersonate Responder
-  This function takes the long-term secret key of the Identifier as input.
-  It will make the owner of this long-term secret key to pretend to be the
-  Responder by executing the RSig functionality with its keys.
+Impersonate Initiator or Responder
+  In the case of wanting to impersonate the responder, this function takes the
+  long-term secret key of the Identifier as input. It will make the owner of
+  this long-term secret key to pretend to be the Responder by executing the RSig
+  functionality with those keys. This can happen in the interactive and
+  non-interactive DAKE.
+  In the case of wanting to impersonate the identifier, this function takes the
+  long-term secret key of the Responder as input. It will make the owner of
+  this long-term secret key to pretend to be the Identifier by executing the
+  RSig functionality with those keys. This can only happen in the interactive
+  DAKE.
 
 False Prekey Ensemble
-  This function will return a false Prekey Ensemble for the Identifier.
+  This function will return a false Prekey Ensemble for the Identifier. It
+  will only be used for the non-interactive DAKE.
 
 Forge with Forge Key
   This function takes the Ed448 forge long-term key and use it all over the
