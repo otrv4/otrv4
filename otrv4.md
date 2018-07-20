@@ -878,9 +878,6 @@ OTRv4 supports some TLV record types from OTRv3. The supported types are:
 Type 0: Padding
   The value may be an arbitrary amount of data. This data should be ignored.
   This type can be used to disguise the length of a plaintext message.
-  XSalsa20, the algorithm used for encryption of the messages, is a stream
-  cipher and, therefore, no padding is required. If you want to do message
-  padding (to disguise the length of your message), use this TLV.
 
 Type 1: Disconnected
   If the participant requests to close the private connection, you may send a
@@ -3266,9 +3263,9 @@ message into a number of fragments. This section describes the format for the
 fragments.
 
 OTRv4 fragmentation and reassembly procedure needs to be able to break
-data messages into an almost arbitrary number of pieces that can be later
-reassembled.  The receiver of the fragments uses the identifier field to ensure
-that fragments of different data messages are not mixed. The fragment index
+OTR messages into an almost arbitrary number of pieces that can be later
+reassembled. The receiver of the fragments uses the identifier field to ensure
+that fragments of different messages are not mixed. The fragment index
 field tells the receiver the position of a fragment in the original data
 message. These fields provide sufficient information to reassemble data
 messages.
