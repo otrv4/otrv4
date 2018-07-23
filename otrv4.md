@@ -2373,7 +2373,6 @@ Verify.
 1. Receives the Non-Interactive-Auth message from Alice:
    * Check that the receiver's instance tag matches your prekey message sender's
      instance tag.
-   * Verify if the message type is `0x8D`.
    * Verify that protocol's version of the message is `0x0004`.
    * Validate the received ECDH ephemeral public key `X` is on curve Ed448.
      See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
