@@ -2373,6 +2373,7 @@ Verify.
 1. Receives the Non-Interactive-Auth message from Alice:
    * Check that the receiver's instance tag matches your prekey message sender's
      instance tag.
+   * Verify if the message type is `0x0D`.
    * Verify that protocol's version of the message is `0x0004`.
    * Validate the received ECDH ephemeral public key `X` is on curve Ed448.
      See [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
@@ -2571,7 +2572,6 @@ A valid Non-Interactive-Auth message is generated as follows:
 
 To verify a Non-Interactive-Auth message:
 
-1. Verify if the message type is `0x0D`.
 1. Compute
    `t = KDF_1(usageNonIntAuthBobClientProfile || Bobs_Client_Profile, 64) ||
     KDF_1(usageNonIntAuthAliceClientProfile || Alices_Client_Profile, 64) ||
