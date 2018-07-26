@@ -777,22 +777,7 @@ OTRv4's public shared prekey (ED448-SHARED-PREKEY):
     RFC 8032.
 ```
 
-OTRv4's long-term public forging key is defined as follows:
-
-```
-OTRv4's forger public Ed448 key (ED448-FORGER-PUBKEY):
-
-  Forger key type
-    2 byte unsigned value, little-endian
-    Forger Ed448 public keys have type 0x0111
-
-  F (POINT)
-    F is the Ed448 forger key generated the same way as the public key in
-    RFC 8032.
-```
-
-
-The public key, forger key and shared prekey are generated as follows (refer to
+The public key and shared prekey are generated as follows (refer to
 RFC 8032 [\[9\]](#references), for more information on key generation). Note
 that, although the RFC 8032 defines parameters as octet strings, they are
 defined as bytes here:
@@ -809,15 +794,14 @@ The symmetric key (sym_key) is 57 bytes of cryptographically secure random data.
 3. Interpret the buffer as the little-endian integer, forming the
    secret scalar 'sk'.  Perform a known-base-point scalar multiplication
    'sk * Base point (G)'. If the result is for the 'ED448-PUBKEY', store it in
-   'H', encoded as POINT.  If the result is for the 'ED448-FORGER-PUBKEY', store
-   it in 'F', encoded as POINT. If the result is for the 'ED448-SHARED-PREKEY',
+   'H', encoded as POINT. If the result is for the 'ED448-SHARED-PREKEY',
    store it in 'D', encoded as POINT.
-4. Securely store 'sk' locally, as 'sk_h' for 'ED448-PUBKEY', 'sk_f' for
-   'ED448-FORGER-PUBKEY' and 'sk_d' for 'ED448-SHARED-PREKEY'. These keys will
-   be stored for as long as the 'ED448-PUBKEY' and the 'ED448-SHARED-PREKEY'
-   respectevely live. Additionally, securely store 'sym_key'. This key will be
-   used for the Client and Prekey profiles signature. After their public key
-   counterpart expires, they should be securely deleted or replaced.
+4. Securely store 'sk' locally, as 'sk_h' for 'ED448-PUBKEY', and 'sk_d' for
+   'ED448-SHARED-PREKEY'. These keys will be stored for as long as the
+   'ED448-PUBKEY' and the 'ED448-SHARED-PREKEY'  respectevely live.
+   Additionally, securely store 'sym_key'. This key will be used for the Client
+   and Prekey profiles signature. After their public key counterpart expires,
+   they should be securely deleted or replaced.
 5. Securely delete 'h'.
 ```
 
@@ -830,11 +814,6 @@ comparison may be used. The fingerprint is generated as:
 
 * `KDF_1(usageFingerprint || OTRv4's public authentication Ed448 key, 56)`
   (224-bit security level).
-
-The forger public key must have a fingerprint as well. It is calculated as:
-
-* `KDF_1(usageFingerprint || OTRv4's forger public Ed448 key, 56)` (224-bit
-  security level).
 
 ### Instance Tags
 
@@ -1334,10 +1313,9 @@ an attacker.
 
 OTRv4 introduces Client Profiles. A Client Profile has an arbitrary number of
 fields, but some fields are required. A Client Profile contains the Client
-Profile owner instance tag, an Ed448 long-term public key, an Ed448 forger
-public key, information about supported versions, a profile expiration date, a
-signature of all these, and an optional transitional signature. It has variable
-length.
+Profile owner instance tag, an Ed448 long-term public key, information about
+supported versions, a profile expiration date, a signature of all these, and an
+optional transitional signature. It has variable length.
 
 There are two instances of the Client Profile that should be generated. One is
 used for authentication in both DAKEs (interactive and non-interactive). The
@@ -1371,13 +1349,6 @@ amount of time for this extra validity time is of 1 day.
 
 It is also important to note that the absence of a Client Profile is not a proof
 that a user does not support OTRv4.
-
-A Client Profile also contains an Ed448 forger public key, which is a long-term
-public key used to prevent the KCI vulnerability, as described in the [KCI
-Attacks](#kci-attacks) section. If this functionality is going to be used, sign
-the Client Profile with the secret key of this keypair, and use the 'Forge with
-Forge Key' functionality as defined in the [Forging
-Transcripts](#forging-transcripts) section.
 
 A Client Profile has an expiration time as this helps to revoke any past value
 stated in a previous profile. If a user's client, for example, changes its
@@ -1431,10 +1402,6 @@ Client Profile owner instance tag (INT)
 Ed448 public key (ED448-PUBKEY)
   Type = 0x0002
   Corresponds to 'OTRv4's public authentication Ed448 key'.
-
-Ed448 forger public key (ED448-FORGER-PUBKEY)
-  Type = 0x0003
-  Corresponds to 'OTRv4's forger public Ed448 key'.
 
 Versions (DATA)
   Type = 0x0004
@@ -2750,7 +2717,8 @@ communication, we can use two alternatives:
 
 1. In the case of the non-interactive DAKE, ask the Prekey Server for a forged
    conversation.
-1. Include long-term "forger" keys in the DAKEs for both participants.
+1. Include long-term "forger" keys in the DAKEs for both participants. OTRv4
+   does not include this.
 
 ### Prekey Server Forged Conversations
 
@@ -2780,42 +2748,6 @@ always bypass this forgery attempt by obtaining a legitimate prekey ensemble
 from Bob and using this to respond. This limitation of the non-interactive DAKE
 is conjectured to be insurmountable by a two-flow non-interactive protocol
 [\[13\]](#references).
-
-### Forger Keys
-
-If the KCI vulnerability is undesirable, it is possible to make both DAKEs
-(interactive and non-interactive) more resilient to it while maintaining their
-deniability properties. To do so, long-term “forger” keys must be included for
-both participants. For example, for both the interactive and non-interactive
-DAKEs, both parties would distribute both the Ed448 public key and the Ed448
-forger public key, as part of the Client Profile. Bob's long-term forger keys
-will be `F_b` and `sk_fb` (public and private respectively); Alice's long-term
-forger keys will be `F_a` and `sk_fa` (public and private respectively).
-
-In the case of the interactive DAKE, Alice will compute
-`sigma = RSig(H_a, sk_ha, {F_b, H_a, Y}, t)` and Bob will compute
-`sigma = RSig(H_b, sk_hb, {F_b, H_a, X}, t)`.
-
-In the case of the non-interactive DAKE, Alice will compute
-`sigma = RSig(H_a, sk_ha, {F_b, H_a, Y}, t)` and Bob will compute
-`sigma = RSig(H_b, sk_hb, {F_b, H_a, X}, t)`.
-
-In general, this transformation changes all long-term public keys in the
-protocol to reference the forging long-term keys instead. This alteration also
-allows the forging keys to be stored in different ways: they may be stored
-offline (e.g., on paper in a vault). They can also be destroyed immediately
-after generation, which will sacrifice online deniability for this party, but
-will prevent KCI attacks against them.
-
-Implementing this option for parties can provide more benefits in practice.
-Consider a secure messaging application that asks users whether or not they
-would like to save forging long-term keys during setup. Even if most users
-select the default option to not store them, thereby preventing them from
-performing the online forgery techniques, an attacker does not generally know
-the choice of a particular user. Consequently, an attacker cannot known if
-conversation is genuine, or if the owner of the device is using the forging
-keys. Note that trust establishment (e.g., physical verification of
-fingerprints) must cover both keys.
 
 ## Data Exchange
 
@@ -4509,10 +4441,6 @@ Impersonate Initiator or Responder
 False Prekey Ensemble
   This function will return a false Prekey Ensemble for the Identifier. It
   will only be used for the non-interactive DAKE.
-
-Forge with Forge Key
-  This function takes the Ed448 forge long-term key and use it all over the
-  protocol in place of the "honest" Ed448 long-term key.
 
 Forge Entire Transcript
   The Forge Entire Transcript function will allow one participant to completely
