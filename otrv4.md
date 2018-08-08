@@ -1482,14 +1482,16 @@ Then assemble:
    seconds).
 1. OTRv3 public authentication DSA key (optional): The OTRv3 long-term public
    key. It should be included if version 3 and 4 are supported.
-1. Transitional Signature (mandatory if OTRv3 public authentication DSA key is
-   present): A signature of the Client Profile excluding the Client Profile
-   Signature and the user's OTRv3 DSA key. The Transitional Signature enables
-   parties that trust user's version 3 DSA key to trust the Client Profile in
-   version 4. This is only used if the user supports versions 3 and 4. For more
-   information, refer to
+1. Transitional Signature (optional): A signature of the Client Profile
+   excluding the Client Profile Signature and the user's OTRv3 DSA key. The
+   Transitional Signature enables parties that trust user's version 3 DSA key
+   to trust the Client Profile in version 4. This is only used if the user
+   supports versions 3 and 4. For more information, refer to
    [Create a Client Profile Signature](#create-a-client-profile-signature)
-   section.
+   section. The presence of OTRv3 public authentication DSA key means that the
+   Transitional signature is mandatory. But the user can decide to have a
+   Transitional signature without publish the OTRv3 public authentication DSA
+   key on the Client Profile.
 
 Then:
 
@@ -1642,7 +1644,7 @@ To validate a Client Profile, you must (in this order):
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
 1. If the `Transitional Signature` and OTRv3 DSA key are present and, verify
-   their validity using the OTRv3 DSA key.
+   their validity using the OTRv3 DSA key. This validation is optional.
 
 ## Prekey Profile
 
