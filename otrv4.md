@@ -2549,6 +2549,9 @@ To verify a Non-Interactive-Auth message:
     KDF_1(usageNonIntAuthPhi || phi, 64)`.
 1. Verify the `sigma` as defined in
    [Ring Signature Authentication](#ring-signature-authentication).
+1. As multiple client profiles can coexist, if the sigma verification fails and
+   there is another client profile in the local storage, it can be used to
+   validate the sigma.
 
 A Non-Interactive-Auth is an OTRv4 message encoded as:
 
