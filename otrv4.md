@@ -325,7 +325,7 @@ conversation took place.
 
 Although both DAKEs (interactive and non-interactive) provide deniability, take
 into account that there may be a loss of deniability if an interactive DAKE is
-sfollowed by a non-interactive one.
+followed by a non-interactive one.
 
 Once a conversation has been established with the DAKE, all data messages
 transmitted in it are confidential and retain their integrity. They are
