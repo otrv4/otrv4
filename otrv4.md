@@ -3003,7 +3003,9 @@ This is done by:
       `MKenc, extra_symm_key = skipped_MKenc[ratchet_id, message_id]`.
     * Securely delete `skipped_MKenc[ratchet_id, message_id]`.
     * Calculate `MKmac = KDF_1(usageMACKey || MKenc, 64)`.
-    * Use the `MKmac` to verify the MAC of the data message.
+    * Use the `MKmac` to verify the MAC of the data message. If this
+      verification fails:
+        * Reject the message.
     * Set `nonce` as the "nonce" from the received data message.
     * Decrypt the message using `MKenc` and `nonce`:
       ```
@@ -3025,7 +3027,7 @@ This is done by:
       * If `chain_key_r` is not `NULL`:
          * while `k` < received `Previous chain message number`:
              * Derive
-               `chain_key_r[i][k+1] = KDF_1(0x17 || chain_key_r[i][k], 64)`
+               `chain_key_r[i][k+1] = KDF_1(usageNextChainKey || chain_key_r[i][k], 64)`
                and `MKenc = KDF_1(usageMessageKey || chain_key_r[i][k], 32)`
              * Derive (this is done any time a message key is stored as
                there is no way of knowing if the message that will be received
@@ -3076,12 +3078,13 @@ This is done by:
       MKenc, MKmac = derive_enc_mac_keys(chain_key_r[i-1][k])
       extra_symm_key = KDF_1(usageExtraSymmKey || 0xFF || chain_key_r[i-1][k], 32)
     ```
-  * Derive the next receiving chain key:
-    `chain_key_r[i-1][k+1] = KDF_1(0x17 || chain_key_r[i-1][k], 64)`.
-  * Securely delete `chain_key_r[i-1][k]`.
   * Use the `MKmac` to verify the MAC of the message. If the verification fails:
       * Reject the message.
+      * Delete the derived `MKenc` and `MKmac`.
   * Otherwise:
+      * Derive the next receiving chain key:
+        `chain_key_r[i-1][k+1] = KDF_1(usageNextChainKey || chain_key_r[i-1][k], 64)`.
+      * Securely delete `chain_key_r[i-1][k]`.
       * Increment the next receiving message id `k = k + 1`.
       * Set `nonce` as the "nonce" from the received data message.
       * Decrypt the message using `MKenc` and `nonce`:
