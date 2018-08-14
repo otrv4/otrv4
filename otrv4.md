@@ -2375,14 +2375,9 @@ Verify.
      follows the specification for this version. If the versions are
      incompatible, Bob does not send any further messages.
    * Verifies the Non-Interactive-Auth message. See
-     [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
-     * If the verification fails and there is another valid Client Profile and
-       Prekey Profile in the local storage, it can be used to verify
-       the Non-Interactive-Auth message.
-       This depends on whether the client supports the usage of expired
-       profiles for verification. See [Client Profile](#client-profile) and
-       [Prekey Profile](#prekey-profile).
-     * Otherwise, rejects the message and does not send anything further.
+     [Non-Interactive-Auth Message](#non-interactive-auth-message) section. If
+     the verification fails, rejects the message and does not send anything
+     further.
 1. Retrieves the ephemeral public keys from Alice:
    * Sets the received ECDH ephemeral public key `X` as `their_ecdh`.
    * Sets the received DH ephemeral public key `A` as `their_dh`.
@@ -2547,11 +2542,11 @@ To verify a Non-Interactive-Auth message:
     KDF_1(usageNonIntAuthAliceClientProfile || Alices_Client_Profile, 64) ||
     Y || X || B || A || our_shared_prekey.public ||
     KDF_1(usageNonIntAuthPhi || phi, 64)`.
-1. Verify the `sigma` as defined in
-   [Ring Signature Authentication](#ring-signature-authentication).
-1. As multiple client profiles can coexist, if the sigma verification fails and
-   there is another client profile in the local storage, it can be used to
-   validate the sigma.
+1. Verify `sigma` as defined in the
+   [Ring Signature Authentication](#ring-signature-authentication) section. As
+   multiple client profiles can coexist on local storage for a short amount of
+   time, if the sigma verification fails and there are others profiles in local
+   storage, use them to generate `t` and validate `sigma`.
 
 A Non-Interactive-Auth is an OTRv4 message encoded as:
 
