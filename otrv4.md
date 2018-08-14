@@ -3568,6 +3568,14 @@ If the Query message offers OTR version 3 and version 3 is allowed:
   * Send a version `3 D-H Commit Message`.
   * Transition authstate to `AUTHSTATE_AWAITING_DHKEY`.
 
+#### Sending a Query Message
+
+In the case that a party received offline messages, comes online and wants to
+send online messages:
+
+   * Send a TLV type 1 (Disconnected).
+   * Send a Query Message.
+
 #### Starting a conversation interactively
 
 Rather than requesting an encrypted conversation, Alice can directly start an
@@ -3715,7 +3723,7 @@ If the state is not `WAITING_AUTH_R`:
 * Generate and send a Non-Interactive-Auth message.
 * Initialize the double ratcheting, as defined in the
   [Non-Interactive DAKE Overview](#non-interactive-dake-overview) section.
-* Transition to state `ENCRYPTED_MESSAGES`.
+* If not already in this state, transition to state `ENCRYPTED_MESSAGES`.
 * If there is a recent stored message, encrypt it and send it as the DAKE data
   message.
 
