@@ -688,6 +688,9 @@ Take into account that the scalars used for public key generation are 57 bytes
 long and encoded as: `h[0] + 2^8 * h[1] + ... + 2^448 * h[56]`. This latter
 scalar is not sent over the wire.
 
+It is decoded to by interpreting a byte array (buffer) as an unsigned value,
+little-endian, and doing `mod q` with the result.
+
 #### Point
 
 A curve point `(x,y)`, with coordinates in the range `0 <= x,y < p`, is
