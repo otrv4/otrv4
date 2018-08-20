@@ -4590,10 +4590,10 @@ can be inferred in practice).
 
 ### HashToScalar
 
-This function is `HashToScalar(smpUsageID || d, 64)`, where d is an array of
+This function is `HashToScalar(usageID || d, 64)`, where d is an array of
 bytes.
 
-1. Compute `h = KDF_1(smpUsageID || d, 64)` as an unsigned value, little-endian.
+1. Compute `h = KDF_1(usageID || d, 64)` as an unsigned value, little-endian.
 1. Return `h (mod q)`
 
 ### Modify an Encrypted Data Message
