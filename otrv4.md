@@ -689,7 +689,8 @@ long and encoded as: `h[0] + 2^8 * h[1] + ... + 2^448 * h[56]`. This latter
 scalar is not sent over the wire.
 
 It is decoded to by interpreting a byte array (buffer) as an unsigned value,
-little-endian, and doing `mod q` with the result.
+little-endian, and doing `mod q` with the result. Note that every time a
+`mod q` is specified, it is referred to this decoding.
 
 #### Point
 
