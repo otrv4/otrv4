@@ -4015,15 +4015,16 @@ The format for the secret information is:
 ```
 Version (BYTE)
   The version of SMP used. The version described here is 1.
-Initiator fingerprint (64 BYTEs)
+Initiator fingerprint (56 BYTEs)
   The fingerprint that the party initiating SMP is using in the current
   conversation.
-Responder fingerprint (64 BYTEs)
+Responder fingerprint (56 BYTEs)
   The fingerprint that the party that did not initiate SMP is using in the
   current conversation.
 Secure Session ID or SSID (8 BYTEs)
 User-specified secret
   The input string given by the user at runtime.
+  It is encoded as DATA and in UTF-8.
 ```
 
 The first 64 bytes of a SHAKE-256 hash of the above is taken, and the digest
@@ -4033,7 +4034,7 @@ but no man-in-the-middle is capable of reading their communication either:
 
 ```
   x or y = KDF_1(usageSMPSecret || version || Initiator fingerprint ||
-  Responder fingerprint, Secure Session ID or SSID || User-specified secret),
+  Responder fingerprint || Secure Session ID or SSID || User-specified secret),
   64)
 ```
 
