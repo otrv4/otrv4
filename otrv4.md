@@ -690,7 +690,7 @@ scalar is not sent over the wire.
 
 It is decoded to by interpreting a byte array (buffer) as an unsigned value,
 little-endian, and doing `mod q` with the result. Note that every time a
-`mod q` is specified, it is referred to this decoding.
+`mod q` is specified for decoding, it is referred to this decoding.
 
 #### Point
 
