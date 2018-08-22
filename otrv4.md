@@ -3674,6 +3674,7 @@ If the state is `WAITING_AUTH_R`:
     * If validation succeeds:
       * Reply with an Auth-I message, as defined in
         [Sending an Auth-I Message](#auth-i-message) section.
+    * Transition to the `WAITING_DAKE_DATA_MESSAGE` state.
 
 If the state is `ENCRYPTED_MESSAGES`:
 
