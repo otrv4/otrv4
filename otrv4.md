@@ -2599,10 +2599,8 @@ untrusted Prekey Server these values:
 - A set of prekey messages
 
 An user only needs to upload its Client Profile and Prekey Profile to the
-untrusted Prekey Server once for every long-term public key it locally has,
-until this profile expire or one of its values changes. This means that if Bob
-uploads 3 long-term keys for OTRv4 to his client, Bob's client must publish 3
-Client Profiles (with 3 long-term keys) and 3 Prekey Profiles.
+untrusted Prekey Server once for the long-term public key it locally has,
+until this profile expire or one of its values changes.
 
 However, this party may upload new prekey messages at other times, as defined in
 the [Publishing Prekey Messages](#publishing-prekey-messages) section.
