@@ -3676,7 +3676,7 @@ If the state is `WAITING_AUTH_R`:
         [Sending an Auth-I Message](#auth-i-message) section.
     * Transition to the `WAITING_DAKE_DATA_MESSAGE` state.
 
-If the state is `ENCRYPTED_MESSAGES`:
+If the state is `WAITING_DAKE_DATA_MESSAGE`:
 
    * If this Auth-R message is the same one you received earlier:
      * Retransmit your Auth-I Message.
