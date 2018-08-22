@@ -2007,7 +2007,7 @@ Bob will be initiating the DAKE with Alice.
 
 **Bob:**
 
-1. He correctly sets up the double ratchet logarithm:
+1. He sets up the double ratchet algorithm:
    * He should immediately receive a "DAKE Data Message" that advertises the
      new public keys from Alice:
      * Follows what is defined in the [When you receive a Data Message](#when-you-receive-a-data-message)
