@@ -1173,8 +1173,8 @@ To rotate the brace key:
     * Generate the new DH key pair and assign it to `our_dh = generateDH()`
       (by securely replacing the old value).
     * Calculate `k_dh = DH(our_dh.secret, their_dh)`.
-    * Securely delete `k_dh`.
     * Calculate a `brace_key = KDF_1(usageThirdBraceKey || k_dh, 32)`.
+    * Securely delete `k_dh`.
 
   * Otherwise:
 
