@@ -1987,14 +1987,14 @@ Bob will be initiating the DAKE with Alice.
        [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
        of using a random value `r`, it will use :
        `r = KDF_1(usageECDHFirstEphemeral || K, 57)`. Securely deletes
-       `their_ecdh` and replaces its with the output `our_ecdh.public (G * s)`,
-       and securely deletes the output `our_ecdh.secret (s)`.
+       `their_ecdh` and replaces its with the output of `G * s`,
+       and securely deletes the secret `s`.
      * Generates an ephemeral DH key pair, as defined in
        [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
        of using a random value `r`, it will use :
        `r = KDF_1(usageDHFirstEphemeral || K, 80)`. Securely deletes `their_dh`
-       and replaces it with the output `our_dh.public (g3 ^ r)`, and securely
-       deletes the output `our_dh.secret (r)`.
+       and replaces it with the output of `g3 ^ r`, and securely
+       deletes the secret `r`.
 1. At this point, the interactive DAKE is complete for Alice:
    * She has to send a regular Data Message at this point, to initialize the
      Double Ratchet correctly. If a plaintext message is waiting to be sent,
