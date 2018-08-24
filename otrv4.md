@@ -4025,9 +4025,9 @@ Responder fingerprint (56 BYTEs)
   The fingerprint that the party that did not initiate SMP is using in the
   current conversation.
 Secure Session ID or SSID (8 BYTEs)
-User-specified secret
+User-specified secret (DATA)
   The input string given by the user at runtime.
-  It is encoded as DATA and in UTF-8.
+  It is encoded as UTF-8.
 ```
 
 The first 64 bytes of a SHAKE-256 hash of the above is taken, and the digest
