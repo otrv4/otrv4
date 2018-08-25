@@ -2637,7 +2637,7 @@ fail, ignore the Prekey Ensemble:
 1. [Validate the Client Profile](#validating-a-client-profile).
 1. [Validate the Prekey Profile](#validating-a-prekey-profile).
 1. Check that the Prekey Profile is signed by the same long-term public key
-   stated on it and on the Client Profile.
+   stated in the Client Profile.
 1. Verify the Prekey message as stated in its [section](#prekey-message).
 1. Check that the OTR version of the prekey message matches one of the
    versions signed in the Client Profile contained in the Prekey Ensemble.
