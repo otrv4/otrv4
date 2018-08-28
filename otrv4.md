@@ -405,7 +405,9 @@ The modes are:
    achieves offline and online deniability for both participants in a
    conversation. It only supports interactive conversations. It is not backwards
    compatible with OTRv3. This mode can be used by network models that do not
-   have a central infrastructure, like Ricochet.
+   have a central infrastructure, like Ricochet (keep in mind, though, that if
+   OTRv4 is used over Ricochet, some online deniability properties will be
+   lost).
 
 For details on how these modes work, and how the DAKEs and double ratchet is
 initialized in them, review the
