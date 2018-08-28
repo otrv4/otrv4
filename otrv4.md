@@ -4463,8 +4463,8 @@ False Prekey Ensemble
 Forge Entire Transcript
   The Forge Entire Transcript function will allow one participant to completely
   forge a transcript between them and another person in a way that its forgery
-  cannot be cryptographically proven. The input will be: one participant's user
-  profile, their secret key, another participant's Client Profile, and a list of
+  cannot be cryptographically proven. The input will be: one participant's Client
+  Profile, their secret key, another participant's Client Profile, and a list of
   plain text messages corresponding to what messages were exchanged. Each
   message in the list will have the structure: 1) sender 2) plain text message,
   so that the function may precisely create the desired transcript. The
