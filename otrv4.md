@@ -3273,7 +3273,7 @@ for this _before_ checking for any of the other `?OTR:` markers):
 
   * Discard the message and optionally pass a warning to the participant if:
     * The recipient's own instance tag does not match the listed receiver
-      instance tag.
+      instance tag, and
     * The listed receiver's instance tag is not zero.
 
   * Discard the (illegal) fragment if:
