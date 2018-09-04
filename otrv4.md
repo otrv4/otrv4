@@ -1415,19 +1415,29 @@ Versions (DATA)
 Client Profile Expiration (CLIENT-PROF-EXP)
   Type = 0x0005
 
-OTRv3 public authentication DSA key (PUBKEY)
+Client Profile Extra Vality (CLIENT-PROF-EXTRA-VALID)
   Type = 0x0006
+
+OTRv3 public authentication DSA key (PUBKEY)
+  Type = 0x0007
 
 Transitional Signature (CLIENT-SIG)
   Type = 0x0008
   This signature is defined as a signature over fields 0x0001,
-  0x0002, 0x0003, 0x0004, 0x0005, and 0x006 only.
+  0x0002, 0x0003, 0x0004, 0x0005, 0x006 and 0x007 only.
 ```
 
 Note that the Client Profile Expiration is encoded as:
 
 ```
 Client Profile Expiration (CLIENT-PROF-EXP):
+  8 bytes signed value, big-endian
+```
+
+Note that the Client Profile Extra Validity is encoded as:
+
+```
+Client Profile Extra Validity (CLIENT-PROF-EXTRA-VALID):
   8 bytes signed value, big-endian
 ```
 
