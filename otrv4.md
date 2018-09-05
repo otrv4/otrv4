@@ -1410,34 +1410,24 @@ Ed448 public key (ED448-PUBKEY)
   Corresponds to 'OTRv4's public authentication Ed448 key'.
 
 Versions (DATA)
-  Type = 0x0004
+  Type = 0x0003
 
 Client Profile Expiration (CLIENT-PROF-EXP)
-  Type = 0x0005
-
-Client Profile Extra Vality (CLIENT-PROF-EXTRA-VALID)
-  Type = 0x0006
+  Type = 0x0004
 
 OTRv3 public authentication DSA key (PUBKEY)
-  Type = 0x0007
+  Type = 0x0005
 
 Transitional Signature (CLIENT-SIG)
-  Type = 0x0008
+  Type = 0x0006
   This signature is defined as a signature over fields 0x0001,
-  0x0002, 0x0003, 0x0004, 0x0005, 0x006 and 0x007 only.
+  0x0002, 0x0003, 0x0004, and 0x0005 only.
 ```
 
 Note that the Client Profile Expiration is encoded as:
 
 ```
 Client Profile Expiration (CLIENT-PROF-EXP):
-  8 bytes signed value, big-endian
-```
-
-Note that the Client Profile Extra Validity is encoded as:
-
-```
-Client Profile Extra Validity (CLIENT-PROF-EXTRA-VALID):
   8 bytes signed value, big-endian
 ```
 
