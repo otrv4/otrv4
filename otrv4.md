@@ -1047,7 +1047,7 @@ Key variables:
   'their_ecdh': their ECDH ephemeral public key.
   'our_dh': our DH ephemeral key pair.
   'their_dh': their DH ephemeral public key.
-  'brace_key': either a hash of the shared DH key: 'KDF_1(usageThridBraceKey ||
+  'brace_key': either a hash of the shared DH key: 'KDF_1(usageThirdBraceKey ||
    k_dh, 32)' (every third DH ratchet) or a hash of the previuos 'brace_key:
    KDF_1(usageBraceKey || brace_key, 32)'
   'mac_keys_to_reveal': the MAC keys to be revealed in the first data message
@@ -1111,7 +1111,7 @@ k_dh:
   big-endian unsigned integer.
 
 brace_key:
-  Either a hash of the shared DH key: 'KDF_1(usageThridBraceKey || k_dh, 32)'
+  Either a hash of the shared DH key: 'KDF_1(usageThirdBraceKey || k_dh, 32)'
   (every third DH ratchet) or a hash of the previuos:
   'brace_key: KDF_1(usageBraceKey || brace_key, 32)'.
 
