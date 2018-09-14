@@ -759,7 +759,7 @@ OTR users have long-lived public keys that they use for authentication (but not
 for encryption). OTRv4 introduces a new type of this long-term public key:
 
 ```
-OTRv4's public authentication Ed448 key (ED448-PUBKEY):
+OTRv4 public authentication Ed448 key (ED448-PUBKEY):
 
   Pubkey type
     2 byte unsigned value, little-endian
@@ -769,10 +769,25 @@ OTRv4's public authentication Ed448 key (ED448-PUBKEY):
     H is the Ed448 public key generated as defined in RFC 8032.
 ```
 
-OTRv4's public shared prekey is defined as follows:
+In addition, OTRv4 also has a long-lived forging key, used to protect against
+the KCI vulnurability. This type is serialized as follows:
 
 ```
-OTRv4's public shared prekey (ED448-SHARED-PREKEY):
+OTRv4 public Ed448 forging key (ED448-FORGING-KEY):
+
+  Pubkey type
+    2 byte unsigned value, little-endian
+    Ed448 public keys have type 0x0012
+
+  F (POINT)
+    F is the Ed448 public key generated as defined in RFC 8032, or directly 
+    as a random point.
+```
+
+The OTRv4 public shared prekey is defined as follows:
+
+```
+OTRv4 public shared prekey (ED448-SHARED-PREKEY):
 
   Shared Prekey type
     2 byte unsigned value, little-endian
@@ -811,6 +826,19 @@ The symmetric key (sym_key) is 57 bytes of cryptographically secure random data.
 5. Securely delete 'h'.
 ```
 
+The forging key can be generated in one of two different ways - either by
+generating the key as detailed above, just like the other long lived Ed448 keys,
+or by directly generating a point on the curve without the corresponding
+secret. The choice depends on whether the implementation aims to provide support
+for using the forging secret or not. If the secret will not be used, it's
+significantly more secure to not even have the secret generated, even for an
+instant. But if the secret will potentially be used, the key should be generated
+as above. 
+
+In order to generate a point directly, 57 bytes can be generated randomly,
+deserialized and checked whether the point corresponds to a valid point. Another
+choice would be use the Elligator algorithm.
+
 Public keys have fingerprints, which are hex strings that serve as identifiers
 for the public key. The full OTRv4 fingerprint is calculated by taking the
 SHAKE-256 hash of the byte-level representation of the public key. To
@@ -818,7 +846,7 @@ authenticate a long-term key pair, the [Socialist Millionaire's
 Protocol](#socialist-millionaires-protocol-smp) or a manual fingerprint
 comparison may be used. The fingerprint is generated as:
 
-* `KDF_1(usageFingerprint || OTRv4's public authentication Ed448 key, 56)`
+* `KDF_1(usageFingerprint || OTRv4 public authentication Ed448 key, 56)`
   (224-bit security level).
 
 ### Instance Tags
@@ -1319,9 +1347,10 @@ an attacker.
 
 OTRv4 introduces Client Profiles. A Client Profile has an arbitrary number of
 fields, but some fields are required. A Client Profile contains the Client
-Profile owner instance tag, an Ed448 long-term public key, information about
-supported versions, a profile expiration date, a signature of all these, and an
-optional transitional signature. It has variable length.
+Profile owner instance tag, an Ed448 long-term public key, the Ed448 long-term
+forging public key, information about supported versions, a profile expiration
+date, a signature of all these, and an optional transitional signature. It has
+variable length.
 
 There are two instances of the Client Profile that should be generated. One is
 used for authentication in both DAKEs (interactive and non-interactive). The
@@ -1407,21 +1436,25 @@ Client Profile owner instance tag (INT)
 
 Ed448 public key (ED448-PUBKEY)
   Type = 0x0002
-  Corresponds to 'OTRv4's public authentication Ed448 key'.
+  Corresponds to 'OTRv4 public authentication Ed448 key'.
+
+Ed448 public forging key (ED448-FORGING-KEY)
+  Type = 0x0003
+  Corresponds to 'OTRv4 public Ed448 forging key'.
 
 Versions (DATA)
-  Type = 0x0003
-
-Client Profile Expiration (CLIENT-PROF-EXP)
   Type = 0x0004
 
-OTRv3 public authentication DSA key (PUBKEY)
+Client Profile Expiration (CLIENT-PROF-EXP)
   Type = 0x0005
 
-Transitional Signature (CLIENT-SIG)
+OTRv3 public authentication DSA key (PUBKEY)
   Type = 0x0006
+
+Transitional Signature (CLIENT-SIG)
+  Type = 0x0007
   This signature is defined as a signature over fields 0x0001,
-  0x0002, 0x0003, 0x0004, and 0x0005 only.
+  0x0002, 0x0003, 0x0004, 0x0005 and 0x0006 only.
 ```
 
 Note that the Client Profile Expiration is encoded as:
@@ -1480,6 +1513,7 @@ Then assemble:
 
 1. Client Profile owner instance tag.
 1. Ed448 long-term public key.
+1. Ed448 long-term public forging key.
 1. Versions: a string corresponding to the user's supported OTR versions.
    A Client Profile can advertise multiple OTR versions. The format is described
    under the section [Establishing Versions](#establishing-versions) below.
@@ -1552,9 +1586,9 @@ recommended value is one week.
 If version 3 and 4 are supported and the user has a pre-existing OTRv3
 long-term keypair:
 
-   * Concatenate `Client Profile owner instance tag || Ed448 public key ||
-     Versions || Client Profile Expiration ||
-     OTRv3 public authentication DSA key`. Denote this value `m`.
+   * Concatenate `Client Profile owner instance tag || Ed448 public key || Ed448
+     public forging key || Versions || Client Profile Expiration || OTRv3 public
+     authentication DSA key`. Denote this value `m`.
    * Sign `m` with the user's OTRv3 DSA key. Denote this value
      `Transitional Signature`.
    * Sign `m || Transitional Signature` with the symmetric key, as stated
@@ -1567,7 +1601,8 @@ with this key.
 If only version 4 is supported:
 
    * Concatenate `Client Profile owner's instance tag || Ed448 public key ||
-     Versions || Client Profile Expiration`. Denote this value `m`.
+     Ed448 public forging key || Versions || Client Profile Expiration`. Denote
+     this value `m`.
    * Sign `m` with the symmetric key, as stated below. Denote this value
      `Client Profile Signature`.
 
@@ -1646,6 +1681,10 @@ To validate a Client Profile, you must (in this order):
 1. Verify that the Client Profile has not expired.
 1. Verify that the `Versions` field contains the character "4".
 1. Validate that `Ed448 Public Key` is on
+   the curve Ed448-Goldilocks. See
+   [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+   section for details.
+1. Validate that `Ed448 Public Forging Key` is on
    the curve Ed448-Goldilocks. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
@@ -1873,7 +1912,7 @@ uses a ring signature non-interactive zero-knowledge proof of knowledge
 Alice's long-term Ed448 key pair is `(sk_ha, Ha)` and Bob's long-term Ed448
 keypair is `(sk_hb, Hb)`. Both keypairs are generated as stated in the
 [Public keys, shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
-section.
+section. Alice and Bob also have long-term Ed448 forging public keys. These are denoted `Fa` for Alice's, and `Fb` for Bob's.
 
 #### Interactive DAKE Overview
 
@@ -2110,7 +2149,7 @@ A valid Auth-R message is generated as follows:
     B || A || KDF_1(usageAuthRPhi || phi, 64)`.
    `phi` is the shared session state as mention in its
    [section](#shared-session-state).
-1. Compute `sigma = RSig(H_a, sk_ha, {H_b, H_a, Y}, t)`, as defined in
+1. Compute `sigma = RSig(Ha, sk_ha, {Fb, Ha, Y}, t)`, as defined in
    [Ring Signature Authentication](#ring-signature-authentication).
 1. Generate a 4-byte instance tag to use as the sender's instance tag.
    Additional messages in this conversation will continue to use this tag as the
@@ -2126,7 +2165,7 @@ To verify an Auth-R message:
 1. Check that the receiver's instance tag matches your sender's instance tag.
 1. Validate the Client Profile as defined in
    [Validating a Client Profile](#validating-a-client-profile) section.
-   Extract `H_a` from it.
+   Extract `Ha` from it.
 1. Verify that the point `X` received is on curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
@@ -2183,7 +2222,7 @@ A valid Auth-I message is generated as follows:
     B || A || KDF_1(usageAuthIPhi || phi, 64)`.
    `phi` is the shared session state as mention in its
    [section](#shared-session-state).
-1. Compute `sigma = RSig(H_b, sk_hb, {H_b, H_a, X}, t)`, as defined in
+1. Compute `sigma = RSig(Hb, sk_hb, {Hb, Fa, X}, t)`, as defined in
    [Ring Signature Authentication](#ring-signature-authentication).
 1. Continue to use the sender's instance tag.
 
@@ -2246,10 +2285,12 @@ This protocol is derived from the XZDH protocol [\[1\]](#references), which uses
 a ring signature non-interactive zero-knowledge proof of knowledge (`RING-SIG`)
 for authentication (`RSig`).
 
-Alice's long-term Ed448 key pair is `(sk_ha, H_a)` and Bob's long-term Ed448 key
-pair is `(sk_hb, H_b)`. Both key pairs are generated as stated in the
-[Public keys, Shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
-section.
+Alice's long-term Ed448 key pair is `(sk_ha, Ha)` and Bob's long-term Ed448 key
+pair is `(sk_hb, Hb)`. Both key pairs are generated as stated in the [Public
+keys, Shared prekeys and
+Fingerprints](#public-keys-shared-prekeys-and-fingerprints) section. Alice and
+Bob also have long-term Ed448 forging public keys. These are denoted `Fa` for
+Alice's, and `Fb` for Bob's.
 
 #### Non-Interactive DAKE Overview
 
@@ -2296,7 +2337,7 @@ Verify.
    * Sets the received ECDH ephemeral public key `Y` as `their_ecdh`.
    * Sets the received DH ephemeral public key `B` as `their_dh`.
 1. Extracts the Public Shared Prekey (`D_b`) from Bob's Prekey Profile. Extracts
-   the Ed448 public key (`H_b`) from Bob's Client Profile. Sets
+   the Ed448 public key (`Hb`) from Bob's Client Profile. Sets
    the first as `their_shared_prekey`.
 1. Generates a Non-Interactive-Auth message. See
    [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
@@ -2358,7 +2399,7 @@ Verify.
      group. See
    [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
      section for details.
-   * Validates Alice's Client Profile and extracts `H_a` from it.
+   * Validates Alice's Client Profile and extracts `Ha` and `Fa` from it.
    * Retrieves his corresponding Prekey message from local storage, by
      using the 'Prekey Indentifier' attached to the Non-Interactive-Auth
      message.
@@ -2371,7 +2412,7 @@ Verify.
    * Retrieves his corresponding Client Profile from local storage.
      * If there is no Client Profile in local storage:
        * Aborts the DAKE.
-     * Sets the 'Ed448 Long-term Public Key' from the Client Profile as `H_b`.
+     * Sets the 'Ed448 Long-term Public Key' from the Client Profile as `Hb`.
    * Retrieves his corresponding Prekey Profile from local storage.
      * If there is no Prekey Profile in local storage:
        * Aborts the DAKE.
@@ -2521,7 +2562,7 @@ A valid Non-Interactive-Auth message is generated as follows:
    `brace_key = KDF_1(usageThirdBraceKey || k_dh, 32)`. Securely delete `k_dh`.
 1. Compute
    `tmp_k = KDF_1(usageTmpKey || K_ecdh || ECDH(x, their_shared_prekey) ||
-    ECDH(x, H_b) || brace_key, 64)`. Securely delete `K_ecdh`.
+    ECDH(x, Hb) || brace_key, 64)`. Securely delete `K_ecdh`.
    This value is needed for the generation of the Mixed shared secret.
 1. Calculate the Auth MAC key
    `auth_mac_k = KDF_1(usageAuthMACKey || tmp_k, 64)`.
@@ -2530,7 +2571,7 @@ A valid Non-Interactive-Auth message is generated as follows:
     KDF_1(usageNonIntAuthAliceClientProfile || Alice_Client_Profile, 64) ||
     Y || X || B || A || their_shared_prekey ||
     KDF_1(usageNonIntAuthPh || phi, 64)`.
-1. Compute `sigma = RSig(H_a, sk_ha, {H_b, H_a, Y}, t)`. Refer to
+1. Compute `sigma = RSig(Ha, sk_ha, {Fb, Ha, Y}, t)`. Refer to
    the [Ring Signature Authentication](#ring-signature-authentication) section
    for details.
 1. Attach the 'Prekey Message Identifier' that is stated in the retrieved
@@ -2703,7 +2744,8 @@ between DAKEs and key compromise impersonation attacks. A KCI attack begins when
 the long-term secret key of a party is compromised. With this long-term secret
 key, an attacker can impersonate other users to the owner of the key. The DAKEs
 used in OTRv4 are inherently vulnerable to KCI, but this can be a desirable
-property.
+property. However, OTRv4 includes forging keys to mitigate against this
+vulnurability.
 
 In theory, a user who claims to cooperate with a judge may justifiably refuse to
 reveal their long-term secret key because it would make them vulnerable to
@@ -2722,8 +2764,8 @@ communication, we can use two alternatives:
 
 1. In the case of the non-interactive DAKE, ask the Prekey Server for a forged
    conversation.
-1. Include long-term "forger" keys in the DAKEs for both participants. OTRv4
-   does not include this.
+1. Include long-term "forger" keys in the DAKEs for both participants. This is
+   the choice that OTRv4 has chosen.
 
 ### Prekey Server Forged Conversations
 
@@ -2738,7 +2780,7 @@ If an attacker attempts to act as Bob in the above non-interactive DAKE section
 using the compromised device, then he (or a trusted accomplice with access to
 Bob's long-term secret key) can impersonate Alice by executing `RSig`
 with Bob's long-term public and secret keys
-(`sigma = RSig(H_b, sk_hb, {H_a, H_b, Y}, t)` instead. In practice, Bob (or
+(`sigma = RSig(Hb, sk_hb, {Ha, Hb, Y}, t)` instead. In practice, Bob (or
 his accomplice) simply needs to run the non-interactive DAKE honestly, but
 pretend to be Alice in their response to the prekey message.
 
