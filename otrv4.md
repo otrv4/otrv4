@@ -904,7 +904,7 @@ Type 1: Disconnected
 
 Type 2: SMP Message 1
   The value represents the initial message of the Socialist Millionaires'
-  Protocol (SMP). Note that this represents TLV type 1 and 7 from OTRv3.
+  Protocol (SMP). Note that this represents TLV type 2 and 7 from OTRv3.
   This TLV should have the 'IGNORE_UNREADABLE' flag set.
 
 Type 3: SMP Message 2
