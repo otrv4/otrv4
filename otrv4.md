@@ -3182,7 +3182,7 @@ file transfer, voice encryption, etc. When one party wishes to use the extra
 symmetric key, they create a type 7 TLV, which they attach to a Data Message.
 The extra symmetric key itself is then derived using the same `chain_key` used
 to compute the message encryption key used to protect the Data Message. It is,
-therefore, derived by calculating `KDF_1(0x1A || 0xFF || chain_key)`.
+therefore, derived by calculating `KDF_1(usageExtraSymmKey || 0xFF || chain_key)`.
 
 Upon receipt of the Data Message containing the type 7 TLV, the recipient will
 compute the extra symmetric key in the same way. Note that the value of the
