@@ -1076,7 +1076,7 @@ Key variables:
   'our_dh': our DH ephemeral key pair.
   'their_dh': their DH ephemeral public key.
   'brace_key': either a hash of the shared DH key: 'KDF_1(usageThirdBraceKey ||
-   k_dh, 32)' (every third DH ratchet) or a hash of the previuos 'brace_key:
+   k_dh, 32)' (every third DH ratchet) or a hash of the previous 'brace_key:
    KDF_1(usageBraceKey || brace_key, 32)'
   'mac_keys_to_reveal': the MAC keys to be revealed in the first data message
     sent of the next ratchet.
@@ -1140,7 +1140,7 @@ k_dh:
 
 brace_key:
   Either a hash of the shared DH key: 'KDF_1(usageThirdBraceKey || k_dh, 32)'
-  (every third DH ratchet) or a hash of the previuos:
+  (every third DH ratchet) or a hash of the previous:
   'brace_key: KDF_1(usageBraceKey || brace_key, 32)'.
 
 K_ecdh:
