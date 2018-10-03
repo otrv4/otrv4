@@ -780,7 +780,7 @@ OTRv4 public Ed448 forging key (ED448-FORGING-KEY):
     Ed448 public keys have type 0x0012
 
   F (POINT)
-    F is the Ed448 public key generated as defined in RFC 8032, or directly 
+    F is the Ed448 public key generated as defined in RFC 8032, or directly
     as a random point.
 ```
 
@@ -833,7 +833,7 @@ secret. The choice depends on whether the implementation aims to provide support
 for using the forging secret or not. If the secret will not be used, it's
 significantly more secure to not even have the secret generated, even for an
 instant. But if the secret will potentially be used, the key should be generated
-as above. 
+as above.
 
 In order to generate a point directly, 57 bytes can be generated randomly,
 deserialized and checked whether the point corresponds to a valid point. Another
@@ -939,6 +939,10 @@ Type 7: Extra symmetric key
   will compute it on its own. This TLV represents TLV type 8 from OTRv3.
   This TLV should have the 'IGNORE_UNREADABLE' flag set.
 ```
+
+If you receive a data message with a corrupted TLV (an incomplete one or a TLV
+not included on this list), stop processing any other TLVs on the list, but
+process the remaining data message.
 
 ### Shared Session State
 
