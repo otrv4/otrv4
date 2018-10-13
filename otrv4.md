@@ -770,7 +770,7 @@ OTRv4 public authentication Ed448 key (ED448-PUBKEY):
 ```
 
 In addition, OTRv4 also has a long-lived forging key, used to protect against
-the KCI vulnurability. This type is serialized as follows:
+the KCI vulnerability. This type is serialized as follows:
 
 ```
 OTRv4 public Ed448 forging key (ED448-FORGING-KEY):
@@ -805,6 +805,9 @@ defined as bytes here:
 
 ```
 The symmetric key (sym_key) is 57 bytes of cryptographically secure random data.
+If the symmetric key is used for the generation of 'ED448-PUBKEY', it is
+denoted 'sym_h' If it is used for the generation of 'ED448-SHARED-PREKEY', it
+is denoted 'sym_d'.
 
 1. Hash the 'sym_key' using 'SHAKE-256(sym_key, 114)'. Store the digest in a
    114-byte buffer. Only the lower 57 bytes (denoted 'h') are used for
@@ -1703,7 +1706,7 @@ signature of all these. It is signed by the Ed448 long-term public key.
 
 A prekey profile is needed for it's signed shared prekey, which is used for
 offline conversations. It is changed on a regular basis as defined by the
-expiration date of the prekey profile.
+expiration date in it.
 
 There are two instances of the Prekey Profile that should be generated. One is
 used for publication in an untrusted prekey server, so parties can use it
@@ -1715,7 +1718,9 @@ conversations.
 
 When the Prekey Profile expires, it should be updated. Client implementations
 should determine the frequency of the prekey's profile expiration and renewal.
-The recommended expiration time is one week.
+They should also determine when a new Prekey Profile is published (prior to
+it been expired or just at moment it expires). The recommended expiration time
+is one week.
 
 Nevertheless, for a short amount of time (decided by the client) a Prekey
 Profile can still be locally used even if it has publicly expired. This is
@@ -1748,6 +1753,7 @@ Prekey Profile (PREKEY-PROF):
     The shared prekey used between different prekey messages.
     Corresponds to 'D'.
   Prekey Profile Signature (PREKEY-EDDSA-SIG)
+    Created with the Ed448 long-term public key.
 ```
 
 Note that the Prekey Profile Expiration is encoded as:
@@ -1780,10 +1786,10 @@ To create a Prekey Profile, assemble:
    secret key and their one-time ephemeral keys. For its generation, refer to
    the [Public keys, Shared Prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
    section. This key must expire when the Prekey Profile expires.
-1. Profile Signature: The symmetric key, the flag `f` (set to zero, as defined
-   on RFC 8032 [\[9\]](#references)) and the empty context `c` are used to
-   create signatures of the entire profile excluding the signature itself. The
-   size of the signature is 114 bytes. For its generation, refer to the
+1. Profile Signature: The symmetric key `sym_h`, the flag `f` (set to zero, as
+   defined on RFC 8032 [\[9\]](#references)) and the empty context `c` are used
+   to create signatures of the entire profile excluding the signature itself.
+   The size of the signature is 114 bytes. For its generation, refer to the
    [Create a Prekey Profile Signature](#create-a-prekey-profile-signature)
    section.
 
@@ -1807,7 +1813,7 @@ For this:
 
 * Concatenate `Prekey Profile's owner's instance tag ||
   Prekey Profile Expiration || Public Shared Prekey`. Denote this value `m`.
-* Sign `m` with the symmetric key, as stated below. Denote this value
+* Sign `m` with the symmetric key `sym_h`, as stated below. Denote this value
   `Profile Signature`.
 
 The Prekey Profile signature for version 4 is generated as defined in RFC 8032
@@ -1821,17 +1827,17 @@ It is generated as follows:
 
 ```
 The inputs are the symmetric key (57 bytes, defined in the 'Public keys and
-fingerprints' section. It is referred as 'sym_key'), a flag 'f', which is a byte
-with value 0, a context 'c' (a value set by the signer and verifier of maximum
-255 bytes), which is an empty byte string for this protocol, and a message 'm'.
-The function 'len(x)' should be interpreted here as the number of bytes in the
-string 'x'.
+fingerprints' section. It is referred as 'sym_key_h'), a flag 'f', which is a
+byte with value 0, a context 'c' (a value set by the signer and verifier of
+maximum 255 bytes), which is an empty byte string for this protocol, and a
+message 'm'. The function 'len(x)' should be interpreted here as the number of
+bytes in the string 'x'.
 
-1.  Hash the 'sym_key': 'SHAKE-256(sym_key, 114)'. Let 'h' denote the resulting
-    digest. Construct the secret key 'sk' from the first half of 'h' (57 bytes),
-    and the corresponding public key 'H', as defined in the 'Public keys, Shared
-    Prekeys and Fingerprints' section. Let 'prefix' denote the second half of
-    the 'h' (from 'h[57]' to 'h[113]').
+1.  Hash the 'sym_key_h': 'SHAKE-256(sym_key, 114)'. Let 'h' denote the
+    resulting digest. Construct the secret key 'sk' from the first half of
+    'h' (57 bytes), and the corresponding public key 'H', as defined in the
+    'Public keys, Shared Prekeys and Fingerprints' section. Let 'prefix' denote
+    the second half of the 'h' (from 'h[57]' to 'h[113]').
 
 2.  Compute 'SHAKE-256("SigEd448" || byte(f) || byte(len(c)) || c || prefix ||
     m, 114)', where 'm' is the message to be signed. Let 'r' be the 114-byte
@@ -1860,10 +1866,10 @@ The Prekey Profile signature is verified as defined in RFC 8032
 [\[9\]](#references), section 5.2.7. It works as follows:
 
 ```
-1.  To verify a signature on a message 'm', using the public key 'H', with 'f'
-    being 0, and 'c' being empty, split the signature into two 57-byte halves.
-    Decode the first half as a point 'R', and the second half as a scalar
-    'S'. Decode the public key 'H' as a point 'H_1'. If any of the
+1.  To verify a signature on a message 'm', using the long-term public key 'H',
+    with 'f' being 0, and 'c' being empty, split the signature into two 57-byte
+    halves. Decode the first half as a point 'R', and the second half as a
+    scalar 'S'. Decode the public key 'H' as a point 'H_1'. If any of the
     decodings fail (including 'S' being out of range), the signature is invalid.
 
 2.  Compute 'SHAKE-256("SigEd448" || byte(f) || byte(len(c)) || c || R || H ||
