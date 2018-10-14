@@ -147,7 +147,7 @@ byte array (this number is defined according to `b`, which is an integer with
 `2^(b-1) > p`). EdDSA public keys have exactly `b` bits, and EdDSA signatures
 have exactly `2 * b` bits. A `SCALAR` will be 56-bytes byte array ((`b-1)-bit`
 encoding of elements of the finite field `GF(p)`). The private keys and any
-secret information will be 57-byte. They both will be subject to the clamping
+secret information will be 57-byte. They both will be subject to the pruning
 mechanism:
 
 1. The two least significant bits of the first octet are cleared.
