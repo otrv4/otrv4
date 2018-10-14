@@ -4001,6 +4001,8 @@ OTRv4 makes a few changes to SMP:
     that `SMPSTATE_EXPECT1` only accepts SMP Message 1. Note that this
     state machine has no effect on type 0 or type 1 TLVs, which are always
     allowed.
+  * When SMP operations are being performed, make sure that you include the
+    [considerations](#Considerations while doing SMP operations) as outlined.
 
 ### SMP Overview
 
