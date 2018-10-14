@@ -25,7 +25,7 @@ an existing messaging protocol, such as XMPP.
    1. [Notation](#notation)
    1. [Elliptic Curve Parameters](#elliptic-curve-parameters)
       1. [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
-   1. [Considerations while doing SMP operations](#Considerations while doing SMP operations)
+   1. [Considerations while doing SMP operations](#considerations-while-doing-SMP-operations)
    1. [3072-bit Diffie-Hellman Parameters](#3072-bit-diffie-hellman-parameters)
       1. [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
    1. [Key Derivation Functions](#key-derivation-functions)
@@ -4002,7 +4002,7 @@ OTRv4 makes a few changes to SMP:
     state machine has no effect on type 0 or type 1 TLVs, which are always
     allowed.
   * When SMP operations are being performed, make sure that you include the
-    [considerations](#Considerations while doing SMP operations) as outlined.
+    [SMP Considerations](#Considerations-while-doing-SMP-operations) as outlined.
 
 ### SMP Overview
 
