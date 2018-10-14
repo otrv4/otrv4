@@ -158,6 +158,10 @@ Prior to do a key exchange or to encode a curve point, it should be multiplied
 by the cofactor (the ratio between the order of a group and that of the
 subgroup), which for Ed448 is 4.
 
+In some of the literature you might find the word clamping, which is a synonym
+for the pruning term we decided to use instead. As it can be found used in the
+RFC 8032.
+
 ### References
 
 1. Google, Seroussi, G. (2001). *Compression and decompression of elliptic curve
