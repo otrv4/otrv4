@@ -7,9 +7,10 @@ This protocol specification is a draft. It's currently under constant revision.
 ```
 
 This document describes version 4 of the Off-the-Record Messaging protocol.
-OTR version 4 (OTRv4) provides a deniable authenticated key exchange (DAKE) and
-better forward secrecy through the use of double ratcheting. OTR works on top of
-an existing messaging protocol, such as XMPP.
+OTR version 4 (OTRv4) provides better deniability properties by the use of a
+deniable authenticated key exchange (DAKE), and better forward secrecy through
+the use of double ratcheting. OTRv4 works on top of an existing messaging
+protocol, such as XMPP.
 
 ## Table of Contents
 
@@ -146,7 +147,7 @@ an existing messaging protocol, such as XMPP.
 - Additional protection against transcript decryption in the case of ECC
   compromise.
 - Support of conversations where one party is offline.
-- The cryptographic primitives and protocols have been updated:
+- Updated cryptographic primitives and protocols:
   - Deniable authenticated key exchanges (DAKE) using "DAKE with Zero Knowledge"
     (DAKEZ) and "Extended Zero-knowledge Diffie-Hellman" (XZDH)
     [\[1\]](#references).
@@ -194,7 +195,7 @@ with strong forward secrecy.
 Alice                             Untrusted Prekey Server    Bob
 --------------------------------------------------------------------------------
                                   (<----------------------   Pre-conversation: Creates
-                                                             and sends Prekey values: creates
+                                                             and sends Prekey Ensembles: creates
                                                              a Client Profile, a Prekey Profile and a set of
                                                              prekey messages)
 Retrieves Bob's  ----------------->
