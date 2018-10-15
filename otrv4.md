@@ -680,7 +680,7 @@ Ed448 point (POINT):
   57 bytes as defined in "Encoding and Decoding" section, little-endian
 
 Ed448 scalar (SCALAR):
-  56 bytes as defined in "Encoding and Decoding" section, little-endian
+  57 bytes as defined in "Encoding and Decoding" section, little-endian
 
 Client Profile (CLIENT-PROF):
   Detailed in "Client Profile Data Type" section
@@ -702,8 +702,8 @@ describes the encoding of the OTRv4 messages that should be transmitted encoded.
 
 #### Scalar
 
-Encoded as a little-endian array of 56 bytes, e.g.
-`h[0] + 2^8 * h[1] + ... + 2^447 * h[55]`.
+Encoded as a little-endian array of 57 bytes, e.g.
+`h[0] + 2^8 * h[1] + ... + 2^447 * h[56]`.
 Take into account that the scalars used for public key generation are 57 bytes
 long and encoded as: `h[0] + 2^8 * h[1] + ... + 2^448 * h[56]`. This latter
 scalar is not sent over the wire.
