@@ -4130,11 +4130,11 @@ generators, `g2` and `g3`. A valid SMP message 1 is generated as follows:
 
 1. Determine her secret input `x`, which is to be compared to Bob's secret
    `y`, as specified in the [Secret Information section](#secret-information).
-1. Pick random values `a2` and `a3` in `q`. These will be Alice's exponents
-   for the ECDH exchange to pick generators.
-1. Pick random values `r2` and `r3` in `q`. These will be used to generate
-   zero-knowledge proofs that this message was created according to the SMP
-   protocol.
+1. Pick random values of 57-bytes long for `a2` and `a3` in `q`. These will
+   be Alice's exponents for the ECDH exchange to pick generators.
+1. Pick random values of 57-bytes long for `r2` and `r3` in `q`. These will be
+   used to generate zero-knowledge proofs that this message was created according
+   to the SMP protocol.
 1. Compute `G2a = G * a2` and `G3a = G * a3`.
 1. Generate a zero-knowledge proof that the value `a2` is known by setting
    `c2 = HashToScalar(0x01 || G * r2)` and `d2 = r2 - a2 * c2 mod q`.
@@ -4179,9 +4179,9 @@ follows:
    section for details.
 1. Determine Bob's secret input `y`, which is to be compared to Alice's secret
    `x`.
-1. Pick random values `b2` and `b3` in `q`. These will be used for creating
-   the generators `g2` and `g3`.
-1. Pick random values `r2`, `r3`, `r4`, `r5` and `r6` in `q`. These
+1. Pick random values of 57-bytes long for `b2` and `b3` in `q`. These will be used 
+   for creating the generators `g2` and `g3`.
+1. Pick random values of 57-bytes long for `r2`, `r3`, `r4`, `r5` and `r6` in `q`. These
    will be used to add a blinding factor to the final results, and to generate
    zero-knowledge proofs that this message was created honestly.
 1. Compute `G2b = G * b2` and `G3b = G * b3`.
@@ -4233,9 +4233,9 @@ is generated as follows:
 1. Validate that `G2b`, `G3b`, `Pb`, and `Qb` are on curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
-1. Pick random values `r4`, `r5`, `r6` and `r7` in `q`. These will be used to
-   add a blinding factor to the final results and to generate zero-knowledge
-   proofs that this message was created honestly.
+1. Pick random values of 57-bytes long for `r4`, `r5`, `r6` and `r7` in `q`. These 
+   will be used to add a blinding factor to the final results and to generate 
+   zero-knowledge proofs that this message was created honestly.
 1. Compute `G2 = G2b * a2` and `G3 = G3b * a3`.
 1. Compute `Pa = G3 * r4` and `Qa = G * r4 + G2 * (x mod q)`.
 1. Generate a zero-knowledge proof that `Pa` and `Qa` were created according to
@@ -4278,8 +4278,8 @@ generated as follows:
 1. Validate that `Pa`, `Qa`, and `Ra` are on curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
-1. Pick a random value `r7` in `q`. This will be used to generate Bob's final
-   zero-knowledge proof that this message was created honestly.
+1. Pick a random value of 57-bytes long for `r7` in `q`. This will be used to generate 
+   Bob's final zero-knowledge proof that this message was created honestly.
 1. Compute `Rb = (Qa - Qb) * b3`.
 1. Generate a zero-knowledge proof that `Rb` was created according to the
    protocol by setting
