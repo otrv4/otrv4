@@ -509,8 +509,8 @@ To verify that a point (`X = x, y`) is on curve Ed448-Goldilocks:
 
 ### Considerations while doing SMP operations
 
-We hash the 57-byte private key directly into a 57-byte large buffer which we
-directly ```SHAKE-256(value, 57)```.
+We hash any 57-byte 'random values' in ```q``` (denoted 'value') directly into a
+57-byte large buffer by doing ```SHAKE-256(value, 57)```.
 
 ```
 Hash the 57-byte private key using SHAKE256(values, 57), storing the
