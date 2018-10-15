@@ -4012,8 +4012,8 @@ Assuming that Alice begins the exchange:
 
 **Alice:**
 
-* Picks random values `a2` and `a3` in `Z_q`.
-* Picks random values `r2` and `r3` in `Z_q`.
+* Picks random values `a2` and `a3` in `q`.
+* Picks random values `r2` and `r3` in `q`.
 * Computes `c2 = HashToScalar(0x01 || G * r2)` and `d2 = r2 - a2 * c2`.
 * Computes `c3 = HashToScalar(0x02 || G * r3)` and `d3 = r3 - a3 * c3`.
 * Sends Bob a SMP message 1 with `G2a = G * a2`, `c2`, `d2`, `G3a = G * a3`,
@@ -4023,8 +4023,8 @@ Assuming that Alice begins the exchange:
 
 * Validates that `G2a` and `G3a` are on the curve Ed448, that they are in
   the correct group and that they do not degenerate.
-* Picks random values `b2` and `b3` in `Z_q`.
-* Picks random values `r2`, `r3`, `r4`, `r5` and `r6` in `Z_q`.
+* Picks random values `b2` and `b3` in `q`.
+* Picks random values `r2`, `r3`, `r4`, `r5` and `r6` in `q`.
 * Computes `G2b = G * b2` and `G3b = G * b3`.
 * Computes `c2 = HashToScalar(0x03 || G * r2)` and `d2 = r2 - b2 * c2`.
 * Computes `c3 = HashToScalar(0x04 || G * r3)` and `d3 = r3 - b3 * c3`.
@@ -4041,7 +4041,7 @@ Assuming that Alice begins the exchange:
 * Validates that `G2b` and `G3b` are on the curve Ed448, that they are in
   the correct group and that they do not degenerate.
 * Computes `G2 = G2b * a2` and `G3 = G3b * a3`.
-* Picks random values `r4`, `r5`, `r6` and `r7` in `Z_q`.
+* Picks random values `r4`, `r5`, `r6` and `r7` in `q`.
 * Computes `Pa = G3 * r4` and `Qa = G * r4 + G2 * (x mod q)`,
   where `x` is the SMP secret value.
 * Computes `cp = HashToScalar(0x06 || G3 * r5 || G * r5 + G2 * r6)`,
@@ -4056,7 +4056,7 @@ Assuming that Alice begins the exchange:
 
 * Validates that `Pa`, `Qa`, and `Ra` are on the curve Ed448 that they are in
   the correct group and that they do not degenerate.
-* Picks a random value `r7` in `Z_q`.
+* Picks a random value `r7` in `q`.
 * Computes `Rb = (Qa - Qb) * b3`.
 * Computes `Rab = Ra * b3`.
 * Computes `cr = HashToScalar(0x08 || G * r7 || (Qa - Qb) * r7)` and
@@ -4130,9 +4130,9 @@ generators, `g2` and `g3`. A valid SMP message 1 is generated as follows:
 
 1. Determine her secret input `x`, which is to be compared to Bob's secret
    `y`, as specified in the [Secret Information section](#secret-information).
-1. Pick random values `a2` and `a3` in `Z_q`. These will be Alice's exponents
+1. Pick random values `a2` and `a3` in `q`. These will be Alice's exponents
    for the ECDH exchange to pick generators.
-1. Pick random values `r2` and `r3` in `Z_q`. These will be used to generate
+1. Pick random values `r2` and `r3` in `q`. These will be used to generate
    zero-knowledge proofs that this message was created according to the SMP
    protocol.
 1. Compute `G2a = G * a2` and `G3a = G * a3`.
@@ -4179,9 +4179,9 @@ follows:
    section for details.
 1. Determine Bob's secret input `y`, which is to be compared to Alice's secret
    `x`.
-1. Pick random values `b2` and `b3` in `Z_q`. These will be used for creating
+1. Pick random values `b2` and `b3` in `q`. These will be used for creating
    the generators `g2` and `g3`.
-1. Pick random values `r2`, `r3`, `r4`, `r5` and `r6` in `Z_q`. These
+1. Pick random values `r2`, `r3`, `r4`, `r5` and `r6` in `q`. These
    will be used to add a blinding factor to the final results, and to generate
    zero-knowledge proofs that this message was created honestly.
 1. Compute `G2b = G * b2` and `G3b = G * b3`.
@@ -4233,7 +4233,7 @@ is generated as follows:
 1. Validate that `G2b`, `G3b`, `Pb`, and `Qb` are on curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
-1. Pick random values `r4`, `r5`, `r6` and `r7` in `Z_q`. These will be used to
+1. Pick random values `r4`, `r5`, `r6` and `r7` in `q`. These will be used to
    add a blinding factor to the final results and to generate zero-knowledge
    proofs that this message was created honestly.
 1. Compute `G2 = G2b * a2` and `G3 = G3b * a3`.
@@ -4278,7 +4278,7 @@ generated as follows:
 1. Validate that `Pa`, `Qa`, and `Ra` are on curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
-1. Pick a random value `r7` in `Z_q`. This will be used to generate Bob's final
+1. Pick a random value `r7` in `q`. This will be used to generate Bob's final
    zero-knowledge proof that this message was created honestly.
 1. Compute `Rb = (Qa - Qb) * b3`.
 1. Generate a zero-knowledge proof that `Rb` was created according to the
