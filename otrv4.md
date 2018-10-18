@@ -4585,7 +4585,7 @@ Ed448. See
 [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
 section for details.
 
-1. Pick random values `t1, c2, c3, r2, r3` in `q`.
+1. Pick random values `t1, c2, c3, r2, r3` in `Z_q`.
 1. Compute `T1 = G * t1`.
 1. Compute `T2 = G * r2 + A2 * c2`.
 1. Compute `T3 = G * r3 + A3 * c3`.
@@ -4601,7 +4601,7 @@ revealed. For this, constant-time conditional operations should be used.
 
 The prover knows a secret `ai` and, therefore:
 
-1. Pick random values `t1, c2, c3, r2, r3` in `q`.
+1. Pick random values `t1, c2, c3, r2, r3` in `Z_q`.
 1. Compute:
 
 ```
