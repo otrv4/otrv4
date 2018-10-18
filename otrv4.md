@@ -4630,7 +4630,7 @@ The prover knows a secret `ai` and, therefore:
 If the prover knows `a2`, for example, the `RSig` function looks like this:
 `RSig(A2, a2, {A1, A2, A3}, m)`
 
-1. Pick random values `t2, c1, c3, r1, r3` in `q`.
+1. Pick random values `t2, c1, c3, r1, r3` in `Z_q`.
 1. Compute `T2 = G * t2`.
 1. Compute `T1 = G * r1 + A1 * c1`.
 1. Compute `T3 = G * r3 + A3 * c3`.
