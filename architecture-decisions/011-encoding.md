@@ -154,13 +154,8 @@ mechanism:
 2. All eight bits the last octet are cleared, and the highest bit of the second
    to last octet is set.
 
-Prior to do a key exchange or to encode a curve point, it should be multiplied
-by the cofactor (the ratio between the order of a group and that of the
-subgroup), which for Ed448 is 4.
-
 In some of the ECC literature the term clamp(ing) and/or prune(ing) are used.
-They are the same. We decided to use the pruning term instead. As it can be found
-used in RFC 8032.
+They are the same. We decided to use the pruning term, following RFC 8032.
 
 ### References
 

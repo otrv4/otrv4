@@ -1183,7 +1183,6 @@ K:
 
 ```
 ECDH(a, B)
-  B = B * cofactor
   K_ecdh = a * B
   if K_ecdh == 0 (check that it is an all-zero value)
      return error
