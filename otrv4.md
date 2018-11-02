@@ -520,8 +520,9 @@ The two least significant bits of the first byte are cleared, all eight bits of
 the last byte are cleared, and the highest bit of the second to last byte is
 set.
 
-Take into account these operations when choosing random values for the
-Sociallist Milionarie Protocol and the Ring Signature of Authentication.
+Take into account these operations when choosing random values for
+the [Socialist Millionaries Protocol](#socialist-millionaires-protocol-smp) and
+the [Ring Signature of Authentication](#ring-signature-authentication).
 
 ### 3072-bit Diffie-Hellman Parameters
 
