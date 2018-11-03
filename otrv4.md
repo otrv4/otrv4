@@ -4145,7 +4145,10 @@ generators, `g2` and `g3`. A valid SMP message 1 is generated as follows:
    defined in the
    [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
    section prior to be used.
-1. Compute `G2a = G * a2` and `G3a = G * a3`.
+1. Compute `G2a = G * a2` and `G3a = G * a3`. Check that `G2a` and `G3a` are on
+   curve Ed448. See
+   [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+   section for details.
 1. Generate a zero-knowledge proof that the value `a2` is known by setting
    `c2 = HashToScalar(0x01 || G * r2)` and `d2 = r2 - a2 * c2 mod q`.
 1. Generate a zero-knowledge proof that the value `a3` is known by setting
@@ -4201,13 +4204,22 @@ follows:
    defined in the
    [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
    section prior to be used.
-1. Compute `G2b = G * b2` and `G3b = G * b3`.
+1. Compute `G2b = G * b2` and `G3b = G * b3`. Check that `G2b` and `G3b` are on
+   curve Ed448. See
+   [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+   section for details.
 1. Generate a zero-knowledge proof that the value `b2` is known by setting
    `c2 = HashToScalar(0x03 || G * r2)` and `d2 = r2 - b2 * c2 mod q`.
 1. Generate a zero-knowledge proof that the value `b3` is known by setting
    `c3 = HashToScalar(0x04 || G * r3)` and `d3 = r3 - b3 * c3 mod q`.
-1. Compute `G2 = G2a * b2` and `G3 = G3a * b3`.
-1. Compute `Pb = G3 * r4` and `Qb = G * r4 + G2 * (y mod q)`.
+1. Compute `G2 = G2a * b2` and `G3 = G3a * b3`. Check that `G2` and `G3` are on
+   curve Ed448. See
+   [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+   section for details.
+1. Compute `Pb = G3 * r4` and `Qb = G * r4 + G2 * (y mod q)`. Check that `Pb`
+   and `Qb` are on curve Ed448. See
+   [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+   section for details.
 1. Generate a zero-knowledge proof that `Pb` and `Qb` were created according
    to the protocol by setting
    `cp = HashToScalar(0x05 || G3 * r5 || G * r5 + G2 * r6)`,
@@ -4256,13 +4268,22 @@ is generated as follows:
    These random values should be hashed and pruned as defined in the
    [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
    section prior to be used.
-1. Compute `G2 = G2b * a2` and `G3 = G3b * a3`.
-1. Compute `Pa = G3 * r4` and `Qa = G * r4 + G2 * (x mod q)`.
+1. Compute `G2 = G2b * a2` and `G3 = G3b * a3`. Check that `G2` and `G3` are on
+   curve Ed448. See
+   [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+   section for details.
+1. Compute `Pa = G3 * r4` and `Qa = G * r4 + G2 * (x mod q)`. Check that `Pa`
+   and `Qa` are on curve Ed448. See
+   [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+   section for details.
 1. Generate a zero-knowledge proof that `Pa` and `Qa` were created according to
    the protocol by setting
    `cp = HashToScalar(0x06 || G3 * r5 || G * r5 + G2 * r6)`,
    `d5 = r5 - r4 * cp mod q` and `d6 = ((r6 - (x mod q) * cp) mod q`.
-1. Compute `Ra = (Qa - Qb) * a3`.
+1. Compute `Ra = (Qa - Qb) * a3`. Check that `Ra`
+   is on curve Ed448. See
+   [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+   section for details.
 1. Generate a zero-knowledge proof that `Ra` was created according to the
    protocol by setting `cr = HashToScalar(0x07 || G * r7 || (Qa - Qb) * r7)` and
    `d7 = r7 - a3 * cr mod q`.
@@ -4303,7 +4324,9 @@ generated as follows:
    This random value should be hashed and pruned as defined in the
    [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
    section prior to be used.
-1. Compute `Rb = (Qa - Qb) * b3`.
+1. Compute `Rb = (Qa - Qb) * b3`. Check that `Rb` is on curve Ed448. See
+   [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+   section for details.
 1. Generate a zero-knowledge proof that `Rb` was created according to the
    protocol by setting
    `cr = HashToScalar(0x08 || G * r7 || (Qa - Qb) * r7)`
