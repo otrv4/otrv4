@@ -965,7 +965,7 @@ Type 7: Extra symmetric key
 
 If you receive a data message with a corrupted TLV (an incomplete one or a TLV
 not included on this list), stop processing any other TLVs on the list, but
-process the remaining data message.
+process the remaining data message and other TLVs included in it.
 
 ### Shared Session State
 
