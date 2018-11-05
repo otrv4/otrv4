@@ -512,7 +512,8 @@ To verify that a point (`X = x, y`) is on curve Ed448-Goldilocks:
 
 For any 57 bytes random value chosen in `Z_q` used for an elliptic curve
 operation (denoted `value`), hash it directly into a 57-byte large buffer `h` by
-doing `h = SHAKE-256(value, 57)`.
+doing `h = SHAKE-256(value, 57)`. Interpret this buffer as the little-endian integer,
+forming the secret scalar `h`.
 
 To prevent small subgroup attacks, prune the buffer:
 
