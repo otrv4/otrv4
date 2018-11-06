@@ -964,8 +964,8 @@ Type 7: Extra symmetric key
 ```
 
 If you receive a data message with a corrupted TLV (an incomplete one or a TLV
-not included on this list), stop processing any other TLVs on the list, but
-process the remaining data message and other TLVs included in it.
+not included on this list), stop processing it, but process the remaining data
+message and any other TLVs included in it.
 
 ### Shared Session State
 
@@ -4369,7 +4369,7 @@ If smpstate is set to `SMPSTATE_EXPECT1`:
 
   * No current exchange is underway. In this case, Alice creates a valid type 2
     TLV (SMP message 1) as follows:
-    1. Create a valid SMP Message 1 as defined in its [section](#smp-message-1)
+    1. Create a valid SMP Message 1 as defined in its [section](#smp-message-1).
     1. Set smpstate to `SMPSTATE_EXPECT2`.
 
 #### User requests to abort SMP
@@ -4384,11 +4384,12 @@ using, ignore the message.
 
 If smpstate is not `SMPSTATE_EXPECT1`:
 
-  * Set smpstate to `SMPSTATE_EXPECT1` and send a SMP abort to Alice.
+  * Set smpstate to `SMPSTATE_EXPECT1`
+  * Send a SMP abort to Alice.
 
 If smpstate is `SMPSTATE_EXPECT1`:
 
-* Verify Alice's zero-knowledge proofs for G2a and G3a:
+* Verify Alice's zero-knowledge proofs for `G2a` and `G3a`:
   1. Check that both `G2a` and `G3a` are on curve Ed448. See
      [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
      section for details.
