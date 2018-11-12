@@ -4122,7 +4122,7 @@ but no man-in-the-middle is capable of reading their communication either:
 
 ### SMP Hash Function
 
-There are many places where the first 64 bytes of a SHAKE-256 hash are taken of
+There are many places where the 57 bytes of a SHAKE-256 hash are taken of
 an integer followed by other values. This is defined as `HashToScalar(i || v)`
 where `i` is an integer used to distinguish the calls to the hash function and
 `v` are some values. Hashing is done in this way to prevent Alice from replaying
@@ -4146,6 +4146,8 @@ generators, `g2` and `g3`. A valid SMP message 1 is generated as follows:
    defined in the
    [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
    section prior to be used.
+1. Interpret `a2`, `a3`, `r2` and `r3` as a little-endian integer forming
+   scalars.
 1. Compute `G2a = G * a2` and `G3a = G * a3`. Check that `G2a` and `G3a` are on
    curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
@@ -4205,6 +4207,8 @@ follows:
    defined in the
    [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
    section prior to be used.
+1. Interpret `b2`, `b3`, `r2` and `r3`, `r4`, `r5` and `r6` as little-endian
+   integers forming scalars.
 1. Compute `G2b = G * b2` and `G3b = G * b3`. Check that `G2b` and `G3b` are on
    curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
@@ -4269,6 +4273,7 @@ is generated as follows:
    These random values should be hashed and pruned as defined in the
    [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
    section prior to be used.
+1. Interpret `r4`, `r5` and `r6` as little-endian integers forming scalars.
 1. Compute `G2 = G2b * a2` and `G3 = G3b * a3`. Check that `G2` and `G3` are on
    curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
@@ -4325,6 +4330,7 @@ generated as follows:
    This random value should be hashed and pruned as defined in the
    [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
    section prior to be used.
+1. Interpret `r7` as little-endian integer forming a scalar.
 1. Compute `Rb = (Qa - Qb) * b3`. Check that `Rb` is on curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
@@ -4723,8 +4729,12 @@ can be inferred in practice).
 This function is `HashToScalar(usageID || d, 57)`, where d is an array of
 bytes.
 
-1. Compute `h = KDF_1(usageID || d, 57)` as an unsigned value, little-endian.
-1. Return `h (mod q)`
+1. Compute `h = KDF_1(usageID || d, 57)`.
+1. Prune `h`: the two least significant bits of the first byte are cleared, all
+   eight bits of the last byte are cleared, and the highest bit of the second to
+   last byte is set.
+1. Interpret the buffer as a little-endian integer, forming a scalar. Return
+   this scalar.
 
 ### Modify an Encrypted Data Message
 
