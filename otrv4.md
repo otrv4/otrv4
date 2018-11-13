@@ -4276,7 +4276,7 @@ cp (SCALAR), d5 (SCALAR), d6 (SCALAR)
 ### SMP Message 3
 
 SMP message 3 is Alice's final message in the SMP exchange. It has the last of
-the information required by Bob to determine if `x = y`. A valid SMP message 3
+the information required by Bob to determine if `x == y`. A valid SMP message 3
 is generated as follows:
 
 1. Validate that `G2b`, `G3b`, `Pb`, and `Qb` are on curve Ed448. See
@@ -4340,7 +4340,7 @@ cr (SCALAR), d7 (SCALAR)
 ### SMP Message 4
 
 SMP message 4 is Bob's final message in the SMP exchange. It has the last of the
-information required by Alice to determine if `x = y`. A valid SMP message 4 is
+information required by Alice to determine if `x == y`. A valid SMP message 4 is
 generated as follows:
 
 1. Validate that `Pa`, `Qa`, and `Ra` are on curve Ed448. See
