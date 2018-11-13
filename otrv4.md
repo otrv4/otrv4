@@ -4153,9 +4153,15 @@ generators, `g2` and `g3`. A valid SMP message 1 is generated as follows:
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
 1. Generate a zero-knowledge proof that the value `a2` is known by setting
-   `c2 = HashToScalar(0x01 || G * r2)` and `d2 = r2 - a2 * c2 mod q`.
+   `c2 = HashToScalar(0x01 || G * r2)` and `d2 = r2 - a2 * c2 mod q`. Prior to
+   be encoded as a SCALAR, `d2` should be hashed and pruned as defined in the
+   [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
+   section.
 1. Generate a zero-knowledge proof that the value `a3` is known by setting
-   `c3 = HashToScalar(0x02 || G * r3)` and `d3 = r3 - a3 * c3 mod q`.
+   `c3 = HashToScalar(0x02 || G * r3)` and `d3 = r3 - a3 * c3 mod q`. Prior to
+   be encoded as a SCALAR, `d3` should be hashed and pruned as defined in the
+   [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
+   section.
 1. Store the values of `x`, `a2` and `a3` for use later in the protocol.
 
 
@@ -4214,9 +4220,15 @@ follows:
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
 1. Generate a zero-knowledge proof that the value `b2` is known by setting
-   `c2 = HashToScalar(0x03 || G * r2)` and `d2 = r2 - b2 * c2 mod q`.
+   `c2 = HashToScalar(0x03 || G * r2)` and `d2 = r2 - b2 * c2 mod q`. Prior to
+   be encoded as a SCALAR, `d2` should be hashed and pruned as defined in the
+   [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
+   section.
 1. Generate a zero-knowledge proof that the value `b3` is known by setting
-   `c3 = HashToScalar(0x04 || G * r3)` and `d3 = r3 - b3 * c3 mod q`.
+   `c3 = HashToScalar(0x04 || G * r3)` and `d3 = r3 - b3 * c3 mod q`. Prior to
+   be encoded as a SCALAR, `d3` should be hashed and pruned as defined in the
+   [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
+   section.
 1. Compute `G2 = G2a * b2` and `G3 = G3a * b3`. Check that `G2` and `G3` are on
    curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
@@ -4228,7 +4240,10 @@ follows:
 1. Generate a zero-knowledge proof that `Pb` and `Qb` were created according
    to the protocol by setting
    `cp = HashToScalar(0x05 || G3 * r5 || G * r5 + G2 * r6)`,
-   `d5 = r5 - r4 * cp mod q` and `d6 = (r6 - (y  mod q) * cp) mod q`.
+   `d5 = r5 - r4 * cp mod q` and `d6 = (r6 - (y  mod q) * cp) mod q`. Prior to
+   be encoded as a SCALAR, `d5` and `d6` should be hashed and pruned as defined
+   in the [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
+   section.
 1. Store the values of `G3a`, `G2`, `G3`, `b3`, `Pb` and `Qb` for use later
    in the protocol.
 
@@ -4285,14 +4300,20 @@ is generated as follows:
 1. Generate a zero-knowledge proof that `Pa` and `Qa` were created according to
    the protocol by setting
    `cp = HashToScalar(0x06 || G3 * r5 || G * r5 + G2 * r6)`,
-   `d5 = r5 - r4 * cp mod q` and `d6 = ((r6 - (x mod q) * cp) mod q`.
+   `d5 = r5 - r4 * cp mod q` and `d6 = ((r6 - (x mod q) * cp) mod q`. Prior to
+   be encoded as a SCALAR, `d5` and `d6` should be hashed and pruned as defined
+   in the [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
+   section.
 1. Compute `Ra = (Qa - Qb) * a3`. Check that `Ra`
    is on curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
 1. Generate a zero-knowledge proof that `Ra` was created according to the
    protocol by setting `cr = HashToScalar(0x07 || G * r7 || (Qa - Qb) * r7)` and
-   `d7 = r7 - a3 * cr mod q`.
+   `d7 = r7 - a3 * cr mod q`. Prior to be encoded as a SCALAR, `d7` should be
+   hashed and pruned as defined in the
+   [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
+   section.
 1. Store the values of `G3b`, `Pa - Pb`, `Qa - Qb` and `a3` for use later in
    the protocol.
 
@@ -4337,7 +4358,10 @@ generated as follows:
 1. Generate a zero-knowledge proof that `Rb` was created according to the
    protocol by setting
    `cr = HashToScalar(0x08 || G * r7 || (Qa - Qb) * r7)`
-   and `d7 = r7 - b3 * cr mod q`.
+   and `d7 = r7 - b3 * cr mod q`. Prior to be encoded as a SCALAR, `d7` should
+   be hashed and pruned as defined in the
+   [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
+   section.
 
 The SMP message 4 has the following data and format:
 
@@ -4399,8 +4423,8 @@ If smpstate is `SMPSTATE_EXPECT1`:
   1. Check that both `G2a` and `G3a` are on curve Ed448. See
      [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
      section for details.
-  1. Check that `c2 = HashToScalar(0x01 || G * d2 + G2a * c2)`.
-  1. Check that `c3 = HashToScalar(0x02 || G * d3 + G3a * c3)`.
+  1. Check that `c2 == HashToScalar(0x01 || G * d2 + G2a * c2)`.
+  1. Check that `c3 == HashToScalar(0x02 || G * d3 + G3a * c3)`.
 * Create a SMP message 2 and send it to Alice.
 * Set smpstate to `SMPSTATE_EXPECT3`.
 
@@ -4419,11 +4443,11 @@ If smpstate is `SMPSTATE_EXPECT2`:
   1. Check that `G2b`, `G3b`, `Pb` and `Qb` are on curve Ed448. See
      [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
      section for details.
-  1. Check that `c2 = HashToScalar(0x03 || G * d2 + G2b * c2)`.
-  1. Check that `c3 = HashToScalar(0x04 || G * d3 + G3b * c3)`.
-  1. Check that `cp = HashToScalar(0x05 || G3 * d5 + Pb * cp || G * d5 + G2 *
+  1. Check that `c2 == HashToScalar(0x03 || G * d2 + G2b * c2)`.
+  1. Check that `c3 == HashToScalar(0x04 || G * d3 + G3b * c3)`.
+  1. Check that `cp == HashToScalar(0x05 || G3 * d5 + Pb * cp || G * d5 + G2 *
      d6 + Qb * cp)`.
-* Create SMP message 3 and send it to Bob.
+* Create a SMP message 3 and send it to Bob.
 * Set smpstate to `SMPSTATE_EXPECT4`.
 
 #### Receiving a SMP Message 3
@@ -4441,15 +4465,15 @@ If smpstate is `SMPSTATE_EXPECT3`:
   1. Check that `Pa`, `Qa` and `Ra` are on curve Ed448. See
      [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
      section for details.
-  1. Check that `cp = HashToScalar(0x06 || G3 * d5 + Pa * cp || G * d5 + G2 *
+  1. Check that `cp == HashToScalar(0x06 || G3 * d5 + Pa * cp || G * d5 + G2 *
      d6 + Qa * cp)`.
-  1. Check that `cr = HashToScalar(0x07 || G * d7 + G3a * cr || (Qa - Qb) * d7 +
-     Ra * cr)`.
+  1. Check that `cr == HashToScalar(0x07 || G * d7 + G3a * cr || (Qa - Qb) *
+     d7 + Ra * cr)`.
 * Create a SMP message 4 and send it to Alice.
 * Check whether the protocol was successful:
   1. Compute `Rab = Ra * b3`.
-  1. Determine if `x = y` by checking the equivalent condition that
-     `Pa - Pb = Rab`.
+  1. Determine if `x == y` by checking the equivalent condition that
+     `Pa - Pb == Rab`.
 * Set smpstate to `SMPSTATE_EXPECT1`, as no more messages are expected from
   Alice.
 
@@ -4468,12 +4492,12 @@ If smpstate is `SMPSTATE_EXPECT4`:
    1. Check that `Rb` is on curve Ed448. See
       [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
       section for details.
-   1. Check that `cr = HashToScalar(0x08 || G * d7 + G3b * cr || (Qa - Qb) *
+   1. Check that `cr == HashToScalar(0x08 || G * d7 + G3b * cr || (Qa - Qb) *
       d7 + Rb * cr)`.
 * Check whether the protocol was successful:
    1. `Compute Rab = Rb * a3`.
-   1. Determine if `x = y` by checking the equivalent condition that
-      `(Pa - Pb) = Rab`.
+   1. Determine if `x == y` by checking the equivalent condition that
+      `(Pa - Pb) == Rab`.
 * Set smpstate to `SMPSTATE_EXPECT1`, as no more messages are expected
   from Bob.
 
