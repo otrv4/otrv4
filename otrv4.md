@@ -4079,9 +4079,10 @@ Assuming that Alice begins the exchange:
 
 If everything is done correctly, then `Rab` should hold the value of
 `(Pa - Pb) * ((G2 * a3 * b3) * (x - y))`.  This test will only succeed if the
-secret information provided by each participant are equal (essentially `x == y`).
-Further, since `G2 * a3 * b3` is a random number not known to any party, if `x`
-is not equal to `y`, no other information is revealed.
+secret information provided by each participant are equal
+(essentially `x == y`). Further, since `G2 * a3 * b3` is a random number not
+known to any party, if `x` is not equal to `y`, no other information is
+revealed.
 
 ### Secret Information
 
@@ -4109,15 +4110,18 @@ User-specified secret (DATA)
   It is encoded as UTF-8.
 ```
 
-The first 64 bytes of a SHAKE-256 hash of the above is taken, and the digest
-becomes the SMP secret value (`x` or `y`) to be used in SMP. The additional
-fields ensure that not only do both parties know the same secret input string,
-but no man-in-the-middle is capable of reading their communication either:
+The first 57 bytes of a SHAKE-256 hash of the above is taken, the digest is then
+pruned as defined in the
+[Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
+section. This digest then becomes the SMP secret value (`x` or `y`) to be used
+in SMP. The additional fields ensure that not only do both parties know the same
+secret input string, but no man-in-the-middle is capable of reading their
+communication either:
 
 ```
   x or y = KDF_1(usageSMPSecret || version || Initiator fingerprint ||
   Responder fingerprint || Secure Session ID or SSID || User-specified secret),
-  64)
+  57)
 ```
 
 ### SMP Hash Function
@@ -4233,14 +4237,15 @@ follows:
    curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
-1. Compute `Pb = G3 * r4` and `Qb = G * r4 + G2 * (y mod q)`. Check that `Pb`
+1. Interpret `y` as little-endian integer forming a scalar.
+1. Compute `Pb = G3 * r4` and `Qb = G * r4 + G2 * y`. Check that `Pb`
    and `Qb` are on curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
 1. Generate a zero-knowledge proof that `Pb` and `Qb` were created according
    to the protocol by setting
    `cp = HashToScalar(0x05 || G3 * r5 || G * r5 + G2 * r6)`,
-   `d5 = r5 - r4 * cp mod q` and `d6 = (r6 - (y  mod q) * cp) mod q`. Prior to
+   `d5 = r5 - r4 * cp mod q` and `d6 = (r6 - y * cp) mod q`. Prior to
    be encoded as a SCALAR, `d5` and `d6` should be hashed and pruned as defined
    in the [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
    section.
