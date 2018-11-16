@@ -512,14 +512,16 @@ To verify that a point (`X = x, y`) is on curve Ed448-Goldilocks:
 
 For any 57 bytes random value chosen in `Z_q` used for an elliptic curve
 operation (denoted `value`), hash it directly into a 57-byte large buffer `h` by
-doing `h = SHAKE-256(value, 57)`. Interpret this buffer as the little-endian integer,
-forming the secret scalar `h`.
+doing `h = SHAKE-256(value, 57)`.
 
 To prevent small subgroup attacks, prune the buffer:
 
 The two least significant bits of the first byte are cleared, all eight bits of
 the last byte are cleared, and the highest bit of the second to last byte is
 set.
+
+Interpret this prunned buffer as the little-endian integer, forming a secret
+scalar.
 
 Take into account these operations when choosing random values for
 the [Socialist Millionaries Protocol](#socialist-millionaires-protocol-smp) and
@@ -4298,14 +4300,15 @@ is generated as follows:
    curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
-1. Compute `Pa = G3 * r4` and `Qa = G * r4 + G2 * (x mod q)`. Check that `Pa`
+1. Interpret `x` as little-endian integer forming a scalar.
+1. Compute `Pa = G3 * r4` and `Qa = G * r4 + G2 * x`. Check that `Pa`
    and `Qa` are on curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
 1. Generate a zero-knowledge proof that `Pa` and `Qa` were created according to
    the protocol by setting
    `cp = HashToScalar(0x06 || G3 * r5 || G * r5 + G2 * r6)`,
-   `d5 = r5 - r4 * cp mod q` and `d6 = ((r6 - (x mod q) * cp) mod q`. Prior to
+   `d5 = r5 - r4 * cp mod q` and `d6 = ((r6 - x * cp) mod q`. Prior to
    be encoded as a SCALAR, `d5` and `d6` should be hashed and pruned as defined
    in the [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
    section.
