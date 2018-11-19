@@ -1996,7 +1996,21 @@ Bob will be initiating the DAKE with Alice.
       `K = KDF_1(usageSharedSecret ||K_ecdh || brace_key, 64)`.
       Securely deletes `K_ecdh` and `brace_key`.
     * Calculates the SSID from shared secret: `KDF_1(usageSSID || K, 8)`.
-1. Sends Bob the Auth-R message (see [Auth-R Message](#auth-r-message) section).
+1. Initializes the double ratchet algorithm:
+   * Sets ratchet id `i` as 0.
+   * Sets `j` as 0, `k` as 0 and `pn` as 0.
+   * Interprets `K` as the first root key (`root_key[i-1]`).
+   * Generates the sending chain key:
+     `chain_key_s[i][j] = KDF_1(usageChainKey || root_key[i-1] || K, 64)`. If
+     she wants to send a data message, she will use this key.
+   * Securely deletes `their_ecdh` and `their_dh`.
+   * Generates her ECDH and DH key pairs:
+     * Generates an ephemeral ECDH key pair, as defined in
+       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys).
+     * Generates an ephemeral DH key pair, as defined in
+       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys).
+1. Sends Bob the Auth-R message (see [Auth-R Message](#auth-r-message) section),
+   with `our_ecdh.public` and `our_dh.public` attached.
 
 **Bob:**
 
@@ -2028,21 +2042,31 @@ Bob will be initiating the DAKE with Alice.
     * Sets ratchet id `i` as 0.
     * Sets `j` as 0, `k` as 0 and `pn` as 0.
     * Interprets `K` as the first root key (`root_key[i-1]`).
+    * Generates the receiving chain key:
+      `chain_key_r[i][j] = KDF_1(usageChainKey || root_key[i-1] || K, 64)`. If
+      he receives a data message from Alice that adviertizes the same public keys
+      as advertizes in the Auth-R message, he will use this key.
+    * Securely sets `their_ecdh` and `their_dh` to the attached ECDH and DH keys
+      on the Auth-R message.
     * Generates an ephemeral ECDH key pair, as defined in
-      [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
-      of using a random value `r`, it will use :
-      `r = KDF_1(usageFirstECDHEphemeral || K, 57)`. Securely deletes `our_ecdh`
-      and replaces it with the outputs.
+      [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys). Securely
+      deletes `our_ecdh` and replaces it with the outputs.
     * Generates an ephemeral DH key pair, as defined in
-      [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
-      of using a random value `r`, it will use :
-      `r = KDF_1(usageDHFirstEphemeral  || K, 80)`. Securely deletes `our_dh`
-      and replaces it with the outputs.
-    * Securely deletes `their_ecdh` and `their_dh`.
+      [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), Securely
+      deletes `our_dh` and replaces it with the outputs.
 1. Sends Alice the Auth-I message (see [Auth-I message](#auth-i-message)
    section).
 1. At this point, Bob has authenticated with Alice, but the double
    ratchet algorithm still needs to be correctly set up.
+1. At this point, the interactive DAKE is complete for Bob:
+   * In the case that he wants to immediately send a data message:
+     * Follows what is defined in the
+       [When you send a Data Message](#when-you-send-a-data-message) section.
+       Note that he will perform a new DH ratchet.
+   * In the case that he immediately receives a data message:
+     * Follows what is defined in the
+       [When you receive a Data Message](#when-you-send-a-data-message) section.
+       Note that he will use the already derived `chain_key_r[i][j]`.
 
 **Alice:**
 
@@ -2050,43 +2074,16 @@ Bob will be initiating the DAKE with Alice.
    * Verifies the Auth-I message as defined in the
      [Auth-I message](#auth-i-message) section. If the verification fails,
      rejects the message and does not send anything further.
-1. Initializes the double ratchet algorithm:
-   * Sets ratchet id `i` as 0.
-   * Sets `j` as 0, `k` as 0 and `pn` as 0.
-   * Interprets `K` as the first root key (`root_key[i-1]`).
-   * Generates Bob's ECDH and DH public keys:
-     * Generates an ephemeral ECDH key pair, as defined in
-       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
-       of using a random value `r`, it will use :
-       `r = KDF_1(usageECDHFirstEphemeral || K, 57)`. Securely deletes
-       `their_ecdh` and replaces its with the output of `G * s`,
-       and securely deletes the secret `s`.
-     * Generates an ephemeral DH key pair, as defined in
-       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
-       of using a random value `r`, it will use :
-       `r = KDF_1(usageDHFirstEphemeral || K, 80)`. Securely deletes `their_dh`
-       and replaces it with the output of `g3 ^ r`, and securely
-       deletes the secret `r`.
 1. At this point, the interactive DAKE is complete for Alice:
-   * She has to send a regular Data Message at this point, to initialize the
-     Double Ratchet correctly. If a plaintext message is waiting to be sent,
-     this can be used. Otherwise an empty heartbeat message should be sent.
-     This data message is called "DAKE Data Message".
    * In the case that she wants to immediately send a data message:
      * Follows what is defined in the
        [When you send a Data Message](#when-you-send-a-data-message) section.
-       Note that she will perform a new DH ratchet for this message.
-
-**Bob:**
-
-1. He sets up the double ratchet algorithm:
-   * He should immediately receive a "DAKE Data Message" that advertises the
-     new public keys from Alice:
-     * Follows what is defined in the [When you receive a Data Message](#when-you-receive-a-data-message)
-       section. Note that he will perform a new DH ratchet at this point.
-       When he wants to send a data message after receiving one, he will
-       follow the [When you send a Data Message](#when-you-send-a-data-message)
-       section, and perform a new DH Ratchet.
+       Note that she will use the already derived `chain_key_s[i][j]`.
+   * In the case that she immediately receives a data message:
+     * Follows what is defined in the
+       [When you receive a Data Message](#when-you-send-a-data-message) section.
+       Note that she will perform a new DH ratchet. If she wants to send data
+       messages at this point, she will perform a new DH ratchet as well.
 
 #### Identity Message
 
