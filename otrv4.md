@@ -520,7 +520,7 @@ The two least significant bits of the first byte are cleared, all eight bits of
 the last byte are cleared, and the highest bit of the second to last byte is
 set.
 
-Interpret this prunned buffer as the little-endian integer, forming a secret
+Interpret this pruned buffer as the little-endian integer, forming a secret
 scalar.
 
 Take into account these operations when choosing random values for
