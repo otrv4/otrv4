@@ -3562,7 +3562,7 @@ Example query messages:
 ```
 
 These strings may be hidden from the user (for example, in an attribute of an
-HTML tag), and may be accompanied by an explanatory message ("Alice has
+HTML tag), and may be accompanied by an explanatory message ("Your buddy has
 requested an Off-the-Record private conversation."). If Bob is willing to use
 OTR with Alice (with a protocol version that Alice has offered), he should start
 the AKE or DAKE according to the compatible version he supports.
