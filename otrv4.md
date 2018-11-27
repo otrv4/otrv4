@@ -1056,9 +1056,7 @@ Currently, the following errors are supported:
     Unreadable message
   ERROR_2: (the message arrived in a state that is not encrypted messages)
     Not in private state message
-  ERROR_3: (you were unable to encrypt the message)
-    Encryption error
-  ERROR_4: (the instance tags do not correspond)
+  ERROR_3: (the instance tags do not correspond)
     Malformed message
 ```
 Note that the string "?OTR Error:" must be in at the start position of the
