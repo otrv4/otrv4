@@ -2033,7 +2033,7 @@ Bob will be initiating the DAKE with Alice.
       * `our_dh.public = our_dh_first.public`.
       * `their_dh = their_dh_first`.
       * Securely deletes `our_dh_first.secret`, `our_dh_first.public` and
-        `their_dh`.
+        `their_dh_first`.
     * Calculates the brace key
       `brace_key = KDF_1(usageThirdBraceKey || k_dh, 32)`. Securely deletes
       `k_dh`.
@@ -2079,7 +2079,7 @@ Bob will be initiating the DAKE with Alice.
    * In the case that he wants to immediately send a data message:
      * Follows what is defined in the
        [When you send a Data Message](#when-you-send-a-data-message) section.
-       Note that he will not perform a new DH ratchet; but rather start using
+       Note that he will not perform a new DH ratchet, but rather start using
        the derived `chain_key_s[i][j]`.
    * In the case that he receives a data message:
      * Follows what is defined in the
@@ -2109,13 +2109,13 @@ Bob will be initiating the DAKE with Alice.
        * `our_dh.public = our_dh_first.public`.
        * `their_dh = their_dh_first`.
        * Securely deletes `our_dh_first.secret`, `our_dh_first.public` and
-         `their_dh`.
+         `their_dh_first`.
    * Calculates the sending keys:
       * Calculates `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
       * Calculates `k_dh = DH(our_dh.secret, their_dh)`.
       * Calculates `brace_key = KDF_1(usageThirdBraceKey || k_dh, 32)`.
       * Securely deletes `k_dh`.
-      * Calculates the Mixed shared secret (and replaces the old value)
+      * Calculates the Mixed shared secret (and replaces the old value):
         `K = KDF_1(usageSharedSecret || K_ecdh || brace_key, 64)`. Securely
         deletes `K_ecdh`.
       * Derives new set of keys:
@@ -2516,6 +2516,14 @@ Verify.
      group. See
    [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
      section for details.
+   * Verify that the point `our_ecdh_first.public` received is on curve Ed448.
+     See
+     [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+     section for details.
+   * Verify that the DH public key `our_dh_first.public` is from the correct
+     group. See
+     [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
+     section for details.
    * Validates Alice's Client Profile and extracts `Ha` and `Fa` from it.
    * Retrieves his corresponding Prekey message from local storage, by
      using the 'Prekey Indentifier' attached to the Non-Interactive-Auth
@@ -2582,7 +2590,7 @@ Verify.
    * If he immediately receives a data message, he follows what is defined in
      the [When you send a Data Message](#when-you-send-a-data-message)
      section. Note that he will not perform a new DH ratchet for this message,
-     but rather use the already derived receiving chain key.
+     but rather use the already derived `chain_key_receiving[i][j]`.
    * If he wants to send a data message, he follows what is defined in the
      [When you send a Data Message](#when-you-send-a-data-message)
      section. Note that he will perform a new DH ratchet for this message.
