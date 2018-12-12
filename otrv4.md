@@ -2055,7 +2055,7 @@ Bob will be initiating the DAKE with Alice.
         `K = KDF_1(usageSharedSecret || K_ecdh || brace_key, 64)`. Securely
         deletes `K_ecdh`.
       * Derives new set of keys:
-        `root_key[i], chain_key_r[i][j] = derive_ratchet_keys(receiving, root_key[i-1], K)`.
+        `root_key[i], chain_key_r[i][k] = derive_ratchet_keys(receiving, root_key[i-1], K)`.
       * Securely deletes the previous root key (`root_key[i-1]`) and `K`.
     * Calculates the sending keys:
       * Generates a new ECDH key pair and assigns it to
@@ -2084,7 +2084,7 @@ Bob will be initiating the DAKE with Alice.
    * In the case that he receives a data message:
      * Follows what is defined in the
        [When you receive a Data Message](#when-you-send-a-data-message) section.
-       Note that he will use the already derived `chain_key_r[i][j]`.
+       Note that he will use the already derived `chain_key_r[i][k]`.
 
 **Alice:**
 
@@ -2130,7 +2130,7 @@ Bob will be initiating the DAKE with Alice.
      * Follows what is defined in the
        [When you receive a Data Message](#when-you-send-a-data-message) section.
        Note that she will perform a new DH ratchet with the advertised keys
-       from Bob attached in the data message. If she wants to send data
+       from Bob attached in the message. If she wants to send data
        messages at this point, she will perform a new DH ratchet as well.
 
 #### Identity Message
@@ -2319,6 +2319,9 @@ A (MPI)
   The ephemeral public DH key. Note that even though this is in uppercase, this
   is NOT a POINT.
 
+sigma (RING-SIG)
+  The 'RING-SIG' proof of authentication value.
+
 our_ecdh_first.public
   The ephemeral public ECDH key that will be used for the intialization of
   the double ratchet algorithm.
@@ -2326,9 +2329,6 @@ our_ecdh_first.public
 our_dh_first.public
   The ephemeral public DH key that will be used for the intialization of
   the double ratchet algorithm.
-
-sigma (RING-SIG)
-  The 'RING-SIG' proof of authentication value.
 ```
 
 #### Auth-I Message
@@ -2459,14 +2459,14 @@ Verify.
    * Sets the received ECDH ephemeral public key `Y` as `their_ecdh`.
    * Sets the received DH ephemeral public key `B` as `their_dh`.
 1. Extracts the Public Shared Prekey (`D_b`) from Bob's Prekey Profile. Extracts
-   the Ed448 public key (`Hb`) from Bob's Client Profile. Sets
+   the Ed448 public key (`H_b`) from Bob's Client Profile. Sets
    the first as `their_shared_prekey`.
 1. Generates a Non-Interactive-Auth message. See
    [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 1. Sets `X` and `x` as `our_ecdh`: the ephemeral ECDH keys.
 1. Sets `A` and `a` as `our_dh`: ephemeral 3072-bit DH keys.
 1. Calculates the Mixed shared secret (`K`) and the SSID:
-   * Gets `tmp_k` from the
+   * Gets `tmp_k` generated during the generation of the
      [Non-Interactive-Auth Message](#non-interactive-auth-message).
    * Calculates the Mixed shared secret
      `K = KDF_1(usageSharedSecret || tmp_k, 64)`. Securely deletes `tmp_k` and
@@ -2494,8 +2494,8 @@ Verify.
    * Sets ratchet id `i` as 0.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
    * Calculates the root key and sending chain key:
-     `root_key[i] = KDF_1(usageRootKey || root_key[i-1] || K, 64)` and
-     `chain_key_sending[i][j] = KDF_1(usageChainKey || root_key[i-1] || K, 64)`.
+     `root_key[i] = KDF_1(usageRootKey || K, 64)` and
+     `chain_key_sending[i][j] = KDF_1(usageChainKey || K, 64)`.
 1. At this point, the non-interactive DAKE is complete for Alice:
    * If she wants to send a data message, she follows what is defined in the
      [When you send a Data Message](#when-you-send-a-data-message)
@@ -2524,7 +2524,7 @@ Verify.
      group. See
      [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
      section for details.
-   * Validates Alice's Client Profile and extracts `Ha` and `Fa` from it.
+   * Validates Alice's Client Profile and extracts `H_a` and `F_a` from it.
    * Retrieves his corresponding Prekey message from local storage, by
      using the 'Prekey Indentifier' attached to the Non-Interactive-Auth
      message.
@@ -2584,13 +2584,13 @@ Verify.
    * Sets ratchet id `i` as 0.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
    * Calculates the root key and receiving chain key:
-     `root_key[i] = KDF_1(usageRootKey || root_key[i-1] || K, 64)` and
-     `chain_key_receiving[i][j] = KDF_1(usageChainKey || root_key[i-1] || K, 64)`.
+     `root_key[i] = KDF_1(usageRootKey || K, 64)` and
+     `chain_key_receiving[i][k] = KDF_1(usageChainKey || K, 64)`.
 1. At this point, the non-interactive DAKE is complete for Bob:
    * If he immediately receives a data message, he follows what is defined in
      the [When you send a Data Message](#when-you-send-a-data-message)
      section. Note that he will not perform a new DH ratchet for this message,
-     but rather use the already derived `chain_key_receiving[i][j]`.
+     but rather use the already derived `chain_key_receiving[i][k]`.
    * If he wants to send a data message, he follows what is defined in the
      [When you send a Data Message](#when-you-send-a-data-message)
      section. Note that he will perform a new DH ratchet for this message.
@@ -2689,7 +2689,7 @@ A valid Non-Interactive-Auth message is generated as follows:
    `brace_key = KDF_1(usageThirdBraceKey || k_dh, 32)`. Securely delete `k_dh`.
 1. Compute
    `tmp_k = KDF_1(usageTmpKey || K_ecdh || ECDH(x, their_shared_prekey) ||
-    ECDH(x, Hb) || brace_key, 64)`. Securely delete `K_ecdh`.
+    ECDH(x, H_b) || brace_key, 64)`. Securely delete `K_ecdh`.
    This value is needed for the generation of the Mixed shared secret.
 1. Calculate the Auth MAC key
    `auth_mac_k = KDF_1(usageAuthMACKey || tmp_k, 64)`.
@@ -2747,14 +2747,6 @@ A (MPI)
   The ephemeral public DH key. Note that even though this is in uppercase, this
   is NOT a POINT.
 
-our_ecdh_first.public
-  The ephemeral public ECDH key that will be used for the intialization of
-  the double ratchet algorithm.
-
-our_dh_first.public
-  The ephemeral public DH key that will be used for the intialization of
-  the double ratchet algorithm.
-
 Sigma (RING-SIG)
   The 'RING-SIG' proof of authentication value.
 
@@ -2765,6 +2757,14 @@ Prekey Message Identifier (INT)
 Auth MAC (MAC)
   The MAC with the appropriate MAC key (see above) of the message ('t') for the
   Ring Signature ('RING-SIG').
+
+our_ecdh_first.public
+  The ephemeral public ECDH key that will be used for the intialization of
+  the double ratchet algorithm.
+
+our_dh_first.public
+  The ephemeral public DH key that will be used for the intialization of
+  the double ratchet algorithm.
 ```
 
 #### Publishing Prekey Ensembles
