@@ -81,9 +81,10 @@ Alice will be initiating the DAKE with Bob.
 
 1. Generates an Identity message, as defined in
    [Identity Message](../otrv4.md#identity-message) section.
-2. Sets `Y` and `y` as `our_ecdh`: the ephemeral ECDH keys.
-3. Sets `B` as  and `b` as `our_dh`: the ephemeral 3072-bit DH keys.
-4. Sends Bob the Identity message.
+1. Sets `Y` and `y` as `our_ecdh`: the ephemeral ECDH keys.
+1. Sets `B` as  and `b` as `our_dh`: the ephemeral 3072-bit DH keys.
+1. Sends Bob the Identity message with her `our_ecdh_first.public`
+   and `our_dh_first.public` attached.
 
 **Bob:**
 
@@ -92,73 +93,115 @@ Alice will be initiating the DAKE with Bob.
       [Identity message](#identity-message) section. If the verification fails
       (for example, if Alice's public keys -`Y` or `B`- are not valid), rejects
       the message and does not send anything further.
-    * Checks that the version in Alice's Client Profile includes "4". If it is
-      not, Bob does not send any further messages.
     * Sets `Y` as `their_ecdh`.
     * Sets `B` as `their_dh`.
-2. Generates an Auth-R message, as defined in
+    * Sets the received `our_ecdh_first.public` from Alice as `their_ecdh_first`.
+    * Sets the received `our_dh_first.public` from Alice as `their_dh_first`.
+1. Generates an Auth-R message, as defined in
    [Auth-R Message](../otrv4.md#auth-r-message) section.
-3. Sets `X` and `x` as `our_ecdh`: the ephemeral ECDH keys.
-4. Sets `A` and `a` as `our_dh`: the ephemeral 3072-bit DH keys.
-5. Calculates the Mixed shared secret (`K`) and the SSID:
+1. Sets `X` and `x` as `our_ecdh`: the ephemeral ECDH keys.
+1. Sets `A` and `a` as `our_dh`: the ephemeral 3072-bit DH keys.
+1. Calculates the Mixed shared secret (`K`) and the SSID:
     * Calculates ECDH shared secret
       `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
       Securely deletes `our_ecdh.secret`.
     * Calculates DH shared secret `k_dh = DH(our_dh.secret, their_dh)`.
       Securely deletes `our_dh.secret`.
-    * Calculates the brace key `brace_key = KDF_1(0x02 || k_dh, 32)`.
+    * Calculates the brace key `brace_key = KDF_1(usageThirdBraceKey || k_dh, 32)`.
       Securely deletes `k_dh`.
     * Calculates the Mixed shared secret
-      `K = KDF_1(0x04 ||K_ecdh || brace_key, 64)`.
+      `K = KDF_1(usageSharedSecret ||K_ecdh || brace_key, 64)`.
       Securely deletes `K_ecdh` and `brace_key`.
     * Calculates the SSID from shared secret: the first 8 bytes of
-      `KDF_1(0x05 || K, 64)`.
-6. Sends Alice the Auth-R message (see [Auth-R Message](../otrv4.md#auth-r-message) section).
+      `KDF_1(usageSSID || K, 64)`.
+1. Sends Alice the Auth-R message (see [Auth-R Message](../otrv4.md#auth-r-message) section)
+   with his `our_ecdh_first.public` and `our_dh_first.public` attached.
 
 **Alice:**
 
 1. Receives the Auth-R message from Bob:
-   * Picks a compatible version of OTR listed on Bob's profile (only "4" for
-     this mode). If the versions are incompatible, Alice does not send any
-     further messages.
-2. Verifies the Auth-R message as defined in the
+   * Picks a compatible version of OTR listed on Alice's profile, and follows
+     the specification for this version. If the versions are incompatible, Bob
+     does not send any further messages.
+1. Verifies the Auth-R message as defined in the
    [Auth-R Message](../otrv4.md#auth-r-message) section. If the verification fails
    (for example, if Bob's public keys -`X` or `A`- are not valid), rejects
    the message and does not send anything further.
    * Sets `X` as `their_ecdh`.
    * Sets `A` as `their_dh`.
-3. Creates an Auth-I message (see [Auth-I Message](../otrv4.md#auth-i-message)
+   * Sets the received `our_ecdh_first.public` from Alice as `their_ecdh_first`.
+   * Sets the received `our_dh_first.public` from Alice as `their_dh_first`.
+1. Creates an Auth-I message (see [Auth-I Message](../otrv4.md#auth-i-message)
    section).
-4. Calculates the Mixed shared secret (`K`) and the SSID:
+1. Calculates the Mixed shared secret (`K`) and the SSID:
     * Calculates ECDH shared secret
       `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
-      Securely deletes `our_ecdh.secret`.
+      Securely deletes `our_ecdh.secret`, `our_ecdh.public` and `their_ecdh`.
+      Replaces them with:
+      * `our_ecdh.secret = our_ecdh_first.secret`.
+      * `our_ecdh.public = our_ecdh_first.public`.
+      * `their_ecdh = their_ecdh_first`.
+      * Securely deletes `our_ecdh_first.secret`, `our_ecdh_first.public` and
+        `their_ecdh_first`.
     * Calculates DH shared secret `k_dh = DH(our_dh.secret, their_dh)`.
-      Securely deletes `our_dh.secret`.
-    * Calculates the brace key `brace_key = KDF_1(0x02 || k_dh, 32)`.
+      Securely deletes `our_dh.secret`, `our_dh.public` and `their_dh`.
+      Replaces them with:
+      * `our_dh.secret = our_dh_first.secret`.
+      * `our_dh.public = our_dh_first.public`.
+      * `their_dh = their_dh_first`.
+      * Securely deletes `our_dh_first.secret`, `our_dh_first.public` and
+        `their_dh_first`.
+    * Calculates the brace key `brace_key = KDF_1(usageThirdBraceKey || k_dh, 32)`.
       Securely deletes `k_dh`.
     * Calculates the Mixed shared secret
-      `K = KDF_1(0x04 || K_ecdh || brace_key, 64)`.
+      `K = KDF_1(usageSharedSecret || K_ecdh || brace_key, 64)`.
       Securely deletes `k_ecdh` and `brace_key`.
     * Calculates the SSID from shared secret: the first 8 bytes of
-      `KDF_1(0x05 || K, 64)`.
-5. Initializes the double-ratchet:
+      `KDF_1(usageSSID || K, 64)`.
+1. Initializes the double-ratchet:
     * Sets ratchet id `i` as 0.
     * Sets `j` as 0, `k` as 0 and `pn` as 0.
-    * Interprets `K` as the first root key (`root_key[i-1]`).
-    * Generates an ephemeral ECDH key pair, as defined in
-      [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys), but instead
-      of using a random value `r`, it will use : `r = KDF_1(0x19 || K, 57)`.
-      Securely deletes `our_ecdh` and replaces it with the outputs.
-    * Generates an ephemeral DH key pair, as defined in
-      [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys), but instead
-      of using a random value `r`, it will use : `r = KDF_1(0x20 || K, 80)`.
-      Securely deletes `our_dh` and replaces it with the outputs.
-    * Securely deletes `their_ecdh` and `their_dh`.
-6. Sends Bob the Auth-I message (see [Auth-I message](../otrv4.md#auth-i-message)
+    * Interprets `K` as the first root key (`root_key[i-1]`) by:
+      `KDF_1(usageFirstRootKey || K, 64)`.
+    * Calculates the receiving keys:
+      * Calculates `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
+      * Calculates `k_dh = DH(our_dh.secret, their_dh)`.
+      * Calculates `brace_key = KDF_1(usageThirdBraceKey || k_dh, 32)`.
+      * Securely deletes `k_dh`.
+      * Calculates the Mixed shared secret (and replaces the old value)
+        `K = KDF_1(usageSharedSecret || K_ecdh || brace_key, 64)`. Securely
+        deletes `K_ecdh`.
+      * Derives new set of keys:
+        `root_key[i], chain_key_r[i][k] = derive_ratchet_keys(receiving, root_key[i-1], K)`.
+      * Securely deletes the previous root key (`root_key[i-1]`) and `K`.
+    * Calculates the sending keys:
+      * Generates a new ECDH key pair and assigns it to
+        `our_ecdh = generateECDH()` (by securely replacing the old value).
+      * Calculates `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
+      * Generates the new DH key pair and assigns it to
+        `our_dh = generateDH()` (by securely replacing the old value).
+      * Calculates `k_dh = DH(our_dh.secret, their_dh)`.
+      * Calculates `brace_key = KDF_1(usageThirdBraceKey || k_dh, 32)`.
+      * Securely deletes `k_dh`.
+      * Calculates the Mixed shared secret (and replaces the old value)
+        `K = KDF_1(usageSharedSecret || K_ecdh || brace_key, 64)`. Securely
+        deletes `K_ecdh`.
+      * Derives new set of keys:
+        `root_key[i], chain_key_s[i][j] = derive_ratchet_keys(sending, root_key[i-1], K)`.
+      * Securely deletes the previous root key (`root_key[i-1]`) and `K`.
+      * Increments the ratchet id `i = i + 1`.
+1. Sends Bob the Auth-I message (see [Auth-I message](#auth-i-message)
    section).
-7. At this point, the interactive DAKE is complete for Alice, but the double
-   ratchet algorithm still needs to be correctly set up.
+1. At this point, the interactive DAKE is complete for Alice:
+   * In the case that he wants to immediately send a data message:
+     * Follows what is defined in the
+       [When you send a Data Message](#when-you-send-a-data-message) section.
+       Note that he will not perform a new DH ratchet, but rather start using
+       the derived `chain_key_s[i][j]`.
+   * In the case that she receives a data message:
+     * Follows what is defined in the
+       [When you receive a Data Message](#when-you-send-a-data-message) section.
+       Note that he will use the already derived `chain_key_r[i][k]`.
 
 **Bob:**
 
@@ -166,35 +209,46 @@ Alice will be initiating the DAKE with Bob.
    * Verifies the Auth-I message as defined in the
      [Auth-I Message](../otrv4.md#auth-i-message) section. If the verification
      fails, rejects the message and does not send anything further.
-2. Initializes the double ratchet:
+1. Initializes the double-ratchet algorithm:
    * Sets ratchet id `i` as 0.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
-   * Interprets `K` as the first root key (`root_key[i-1]`).
-   * Generates Alice's ECDH and DH public keys:
-      * Generates an ephemeral ECDH key pair, as defined in
-        [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
-        of using a random value `r`, it will use : `r = KDF_1(0x13 || K, 57)`.
-        Securely deletes `their_ecdh` and replaces it with the output
-        `our_ecdh.public (G * s)`, and securely deletes the output
-	`our_ecdh.secret (s)`.
-      * Generates an ephemeral DH key pair, as defined in
-        [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
-        of using a random value `r`, it will use : `r = KDF_1(0x14 || K, 80)`.
-        Securely deletes `their_dh` and replaces it with the output
-        `our_dh.public (g3 ^ r)`, and securely deletes the output
-	`our_dh.secret (r)`.
-3. At this point, the interactive DAKE is complete for Bob:
-   * Sends a "heartbeat" message. Note that he will perform a new DH ratchet.
-
-**Alice:**
-
-1. At this point, the interactive DAKE is complete for Alice, but she has to
-   correctly setup the double ratchet logarithm:
-   * Receives the "heartbeat" message that advertises the new public keys
-     from Bob. She retrieves the new advertised public keys.
-   * In the case that she wants to immediately send a data message:
+   * Interprets `K` as the first root key (`root_key[i-1]`) by:
+     `KDF_1(usageFirstRootKey || K, 64)`.
+   * Securely deletes `our_ecdh.public` and `their_ecdh`.
+     Replaces them with:
+       * `our_ecdh.secret = our_ecdh_first.secret`.
+       * `our_ecdh.public = our_ecdh_first.public`.
+       * `their_ecdh = their_ecdh_first`.
+       * Securely deletes `our_ecdh_first.secret`, `our_ecdh_first.public` and
+         `their_ecdh_first`.
+   * Securely deletes `our_dh.public` and `their_dh`. Replaces them with:
+       * `our_dh.secret = our_dh_first.secret`.
+       * `our_dh.public = our_dh_first.public`.
+       * `their_dh = their_dh_first`.
+       * Securely deletes `our_dh_first.secret`, `our_dh_first.public` and
+         `their_dh_first`.
+   * Calculates the sending keys:
+      * Calculates `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
+      * Calculates `k_dh = DH(our_dh.secret, their_dh)`.
+      * Calculates `brace_key = KDF_1(usageThirdBraceKey || k_dh, 32)`.
+      * Securely deletes `k_dh`.
+      * Calculates the Mixed shared secret (and replaces the old value):
+        `K = KDF_1(usageSharedSecret || K_ecdh || brace_key, 64)`. Securely
+        deletes `K_ecdh`.
+      * Derives new set of keys:
+        `root_key[i], chain_key_s[i][j] = derive_ratchet_keys(sending, root_key[i-1], K)`.
+      * Securely deletes the previous root key (`root_key[i-1]`) and `K`.
+1. At this point, the interactive DAKE is complete for Bob:
+   * In the case that he wants to immediately send a data message:
      * Follows what is defined in the
        [When you send a Data Message](#when-you-send-a-data-message) section.
+       Note that he will use the already derived `chain_key_s[i][j]`.
+   * In the case that he immediately receives a data message:
+     * Follows what is defined in the
+       [When you receive a Data Message](#when-you-send-a-data-message) section.
+       Note that he will perform a new DH ratchet with the advertised keys
+       from Alice attached in the message. If he wants to send data
+       messages at this point, he will perform a new DH ratchet as well.
 
 ### Scenarios and applications
 
