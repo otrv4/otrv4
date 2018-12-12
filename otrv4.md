@@ -1953,7 +1953,6 @@ Alice                                           Bob
        <----------------------- Identity message
        Auth-R --------------------------------->
        <--------------------------------- Auth-I
-       DAKE Data Message ---------------------->
 ```
 
 Bob will be initiating the DAKE with Alice.
@@ -2426,7 +2425,6 @@ prekey messages                ----->
                                      <----- Request Prekey ensembles from Bob
                                      Prekeys ensembles from Bob ------------->
       <------------------------------------------ Non-Interactive-Auth message
-      <----------------------------------------------------- DAKE Data Message
 Verify.
 ```
 
@@ -3558,22 +3556,14 @@ WAITING_AUTH_I
   This is the state used when a participant is waiting for an Auth-I message.
   This state is entered after sending an Auth-R message.
 
-WAITING_DAKE_DATA_MESSAGE
-
-  This is the state used when the participant that do not started the DAKE is
-  waiting for a Data message (that can be a "heartbeat" message) to be sent.
-  This state is entered once the Auth-I or the Non-Interactive Auth is received.
-
 ENCRYPTED_MESSAGES
 
   This state is entered after the DAKE is finished. The interactive DAKE is
-  finished, for the initiator, after the Auth-I message is sent, and, for the
-  receiver, when the DAKE data message is received and validated after receiving
-  the Auth-I message. The non-interactive DAKE is finished, for the initator,
-  when the Non-Interactive-Auth message is sent, and, for the receiver, when the
-  DAKE data message is received and validated after receiving the
-  Non-Interactive Auth message. Outgoing messages sent in this state are
-  encrypted.
+  finished, for Bob, after the Auth-I message is sent, and, for Alice, when the
+  Auth-I message is received and validated. The non-interactive DAKE is
+  finished, for Alice, when the Non-Interactive-Auth message is sent, and, for
+  Bob, when the Non-Interactive-Auth message is received and validated. Outgoing
+  messages sent in this state are encrypted.
 
 FINISHED
 
@@ -3596,7 +3586,7 @@ The following sections outline the actions that the protocol should implement.
 This assumes that the client is initialized with the allowed versions
 (3 and/or 4).
 
-There are fourteen events an OTRv4 client must handle (for version 3 messages,
+There are thirdteen events an OTRv4 client must handle (for version 3 messages,
 please refer to the previous OTR protocol document):
 
 * Received messages:
@@ -3608,7 +3598,6 @@ please refer to the previous OTR protocol document):
   * Auth-R Message
   * Auth-I Message
   * Non-Interactive-Auth Message
-  * DAKE Data Message
   * Data Message
 
 * User actions:
@@ -3759,9 +3748,9 @@ send online messages:
 
 #### Starting a conversation interactively
 
-Rather than requesting an encrypted conversation, Alice can directly start an
-OTRv4 conversation with Bob if she is certain that they both support it and are
-willing to do so. In such case, Alice should:
+Rather than requesting to start an encrypted conversation, Alice can directly
+start a OTRv4 conversation with Bob if she is certain that they both support it
+and are willing to do so. In such case, Alice should:
 
 * Send an Identity message.
 * Transition the state to `WAITING_AUTH_R`.
@@ -3804,7 +3793,7 @@ If the state is `WAITING_AUTH_R`:
       * Send a new Auth-R message.
       * Transition state to `WAITING_AUTH_I`.
 
-If the state is `WAITING_AUTH_I` or `WAITING_DAKE_DATA_MESSAGE`:
+If the state is `WAITING_AUTH_I`:
 
   ```
     There are a number of reasons that you may receive an Identity Message in
@@ -3819,8 +3808,9 @@ If the state is `WAITING_AUTH_I` or `WAITING_DAKE_DATA_MESSAGE`:
 
   * Validate the Identity message. Ignore the message if validation fails.
   * If validation succeeds:
-    * Forget the old `their_ecdh`, `their_dh` and Client Profile from the
-      previously received Identity message.
+    * Forget the old `their_ecdh`, `their_dh`, `their_ecdh_first`,
+      `their_dh_first` and Client Profile from the previously received Identity
+      message.
     * Send a new Auth-R message with the new values received.
 
 If the state is `ENCRYPTED_MESSAGES` or `FINISHED`:
@@ -3853,14 +3843,7 @@ If the state is `WAITING_AUTH_R`:
     * If validation succeeds:
       * Reply with an Auth-I message, as defined in
         [Sending an Auth-I Message](#auth-i-message) section.
-    * Transition to the `WAITING_DAKE_DATA_MESSAGE` state.
-
-If the state is `WAITING_DAKE_DATA_MESSAGE`:
-
-   * If this Auth-R message is the same one you received earlier:
-     * Retransmit your Auth-I Message.
-   * Otherwise:
-     * Ignore the message.
+    * Transition to the `ENCRYPTED_MESSAGES` state.
 
 If the state is not `WAITING_AUTH_R`:
 
@@ -3871,10 +3854,7 @@ If the state is not `WAITING_AUTH_R`:
 * Generate and send an Auth-I message.
 * Initialize the double ratcheting, as defined in the
   [Interactive DAKE Overview](#interactive-dake-overview) section.
-* Transition to state `WAITING_DAKE_DATA_MESSAGE`. After sending an Auth-I
-  Message, a participant must wait for a data message (that can be a "heartbeat"
-  message) to arrive from the other participant, in order to be able to send
-  data messages themselves.
+* Transition to state `ENCRYPTED_MESSAGES`.
 
 #### Receiving an Auth-I Message
 
@@ -3890,9 +3870,7 @@ If the state is not `WAITING_AUTH_R`:
       * Transition to state `ENCRYPTED_MESSAGES`.
       * Initialize the double ratcheting, as defined in the
         [Interactive DAKE Overview](#interactive-dake-overview) section.
-      * Send a regular Data Message. If a plaintext message is
-        waiting to be sent, this can be used. Otherwise an empty heartbeat
-        message should be sent. This data message is called "DAKE Data Message".
+      * If a plaintext message is waiting to be sent, encrypt it and send it.
       * If there are stored Data Messages, remove them from storage - there is
         no way these messages can be valid for the current DAKE.
 
@@ -3906,13 +3884,11 @@ If the state is not `WAITING_AUTH_R`:
 * Initialize the double ratcheting, as defined in the
   [Non-Interactive DAKE Overview](#non-interactive-dake-overview) section.
 * If not already in this state, transition to state `ENCRYPTED_MESSAGES`.
-* If there is a recent stored message, encrypt it and send it as the DAKE data
-  message.
+* If there is a recent stored plaintext message, encrypt it and send it.
 
 #### Receiving a Non-Interactive-Auth Message
 
-* If the state is `FINISHED`, `MSGSTATE_FINISHED` or
-  `WAITING_DAKE_DATA_MESSAGE`:
+* If the state is `FINISHED` or `MSGSTATE_FINISHED`:
   * Ignore the message.
 
 * Else:
@@ -3924,37 +3900,16 @@ If the state is not `WAITING_AUTH_R`:
     * Validate the Non-Interactive-Auth message.
     * Initialize the double ratcheting, as defined in the
       [Non-Interactive DAKE Overview](#non-interactive-dake-overview) section.
-    * Transition to state to `WAITING_DAKE_DATA_MESSAGE`.
-
-#### Receiving a DAKE Data Message
-
-* If the state is `FINISHED` or `MSGSTATE_FINISHED`:
-  * Ignore the message.
-
-* If the state is `WAITING_DAKE_DATA_MESSAGE`:
-  * If the receiver's instance tag in the message is not the sender's instance
-    tag you are currently using:
-    * Ignore this message.
-
-  * Otherwise:
-    * Validate and decrypt the message, if needed, as defined in the
-      [Receiving a Data Message](#receiving-a-data-message) section.
-    * Transition to state to `ENCRYPTED_MESSAGE`.
-    * If there are stored Data Messages, for each one of them, transition to the
-      instructions in [Receiving a Data Message](#receiving-a-data-message) and
-      remove them from the store.
-
-* Otherwise:
-    * Ignore the message.
+    * Transition to state to `ENCRYPTED_MESSAGES`.
 
 #### Sending a Data Message
 
 The `ENCRYPTED_MESSAGES` state is the only state where a participant is allowed
 to send encrypted data messages.
 
-If the state is `START`, `WAITING_AUTH_R`, `WAITING_AUTH_I`, or
-`WAITING_DAKE_DATA_MESSAGE` queue the message for encrypting and sending it when
-the participant transitions to the `ENCRYPTED_MESSAGES` state.
+If the state is `START`, `WAITING_AUTH_R` or `WAITING_AUTH_I`, queue the message
+for encrypting and sending it when the participant transitions to
+the `ENCRYPTED_MESSAGES` state.
 
 If the state is `FINISHED`, the participant must start another OTR conversation
 to send encrypted messages:
@@ -3963,7 +3918,7 @@ to send encrypted messages:
   * Store the plaintext message for possible retransmission.
 
 If the state is `ENCRYPTED`, encrypt the message, and send it as a Data Message.
-Store plaintext message for possible retransmission.
+Store any plaintext message for possible retransmission.
 
 #### Receiving a Data Message
 
