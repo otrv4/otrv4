@@ -2151,11 +2151,11 @@ A valid Identity message is generated as follows:
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
    * secret key `b` (80 bytes).
    * public key `B`.
-1. Generates another ephemeral ECDH key pair, as defined in
+1. Generate another ephemeral ECDH key pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
    * secret key `our_ecdh_first.secret` (57 bytes).
    * public key `our_ecdh_first.public`.
-1. Generates another ephemeral DH key pair, as defined in
+1. Generate another ephemeral DH key pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
    * secret key `our_dh_first.secret` (80 bytes).
    * public key `our_dh_first.public`.
@@ -2242,11 +2242,11 @@ A valid Auth-R message is generated as follows:
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
    * secret key `a` (80 bytes).
    * public key `A`.
-1. Generates another ephemeral ECDH key pair, as defined in
+1. Generate another ephemeral ECDH key pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
    * secret key `our_ecdh_first.secret` (57 bytes).
    * public key `our_ecdh_first.public`.
-1. Generates another ephemeral DH key pair, as defined in
+1. Generate another ephemeral DH key pair, as defined in
    [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
    * secret key `our_dh_first.secret` (80 bytes).
    * public key `our_dh_first.public`.
@@ -2472,6 +2472,14 @@ Verify.
      `K = KDF_1(usageSharedSecret || tmp_k, 64)`. Securely deletes `tmp_k` and
      `brace_key`.
    * Calculates the SSID from shared secret: `KDF_1(usageSSID || K, 8)`.
+   * Securely deletes `our_ecdh.secret`, `our_ecdh.public`. Replaces them with:
+     * `our_ecdh.secret = our_ecdh_first.secret`.
+     * `our_ecdh.public = our_ecdh_first.public`.
+     * Securely deletes `our_ecdh_first.secret` and `our_ecdh_first.public`.
+   * Securely deletes `our_dh.secret` and `our_dh.public`. Replaces them with:
+     * `our_dh.secret = our_dh_first.secret`.
+     * `our_dh.public = our_dh_first.public`.
+     * Securely deletes `our_dh_first.secret` and `our_dh_first.public`.
 1. Calculates the `Auth MAC`:
     * Calculates the value:
       ```
@@ -2479,33 +2487,20 @@ Verify.
       ```
     * Includes this value in the Non-Interactive-Auth message and securely
       deletes the `auth_mac_k`.
+1. Sends Bob a Non-Interactive-Auth message. See
+   [Non-Interactive-Auth Message](#non-interactive-auth-message) section with
+   her `our_ecdh.public` and `our_dh.public` attached.
 1. Initializes the double-ratchet:
    * Sets ratchet id `i` as 0.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
-   * Interprets `K` as the first root key (`root_key[i-1]`).
-   * Generates Bob's ECDH and DH public keys:
-     * Generates an ephemeral ECDH key pair, as defined in
-       [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys), but instead
-       of using a random value `r`, it will use :
-       `r = KDF_1(usageECDHFirstEphemeral, K, 57)`. Securely deletes
-       `their_ecdh` and replaces it with the output `our_ecdh.public (G * s)`,
-       and securely deletes the output `our_ecdh.secret (s)`.
-     * Generates an ephemeral DH key pair, as defined in
-       [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys), but instead
-       of using a random value `r`, it will use :
-       `r = KDF_1(usageDHFirstEphemeral, K, 80)`. Securely deletes `their_dh`
-       and replaces it with the output `our_dh.public (g3 ^ r)`, and securely
-       deletes the output `our_dh.secret (r)`.
-1. Sends Bob a Non-Interactive-Auth message. See
-   [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
+   * Calculates the root key and sending chain key:
+     `root_key[i] = KDF_1(usageRootKey || root_key[i-1] || K, 64)` and
+     `chain_key_sending[i][j] = KDF_1(usageChainKey || root_key[i-1] || K, 64)`.
 1. At this point, the non-interactive DAKE is complete for Alice:
-   * She has to send a regular Data Message at this point, to initialize the
-     Double Ratchet correctly. If a plaintext message is waiting to be sent,
-     this can be used. Otherwise an empty heartbeat message should be sent.
-     This data message is called "DAKE Data Message".
-   * Follows what is defined in the
+   * If she wants to send a data message, she follows what is defined in the
      [When you send a Data Message](#when-you-send-a-data-message)
-     section. Note that she will perform a new DH ratchet for this message.
+     section. Note that she will not perform a new DH ratchet for this message,
+     but rather use the already derived `chain_key_sending[i][j]`.
 
 **Bob:**
 
@@ -2550,6 +2545,8 @@ Verify.
 1. Retrieves the ephemeral public keys from Alice:
    * Sets the received ECDH ephemeral public key `X` as `their_ecdh`.
    * Sets the received DH ephemeral public key `A` as `their_dh`.
+   * Sets the received `our_ecdh_first.public` from Alice as `their_ecdh_first`.
+   * Sets the received `our_dh_first.public` from Alice as `their_dh_first`.
 1. Calculates the keys needed for the generation of the Mixed shared secret
    (`K`):
    * Calculates the ECDH shared secret
@@ -2564,7 +2561,13 @@ Verify.
    `tmp_k = KDF_1(usageTmpKey || K_ecdh ||
     ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(sk_hb, their_ecdh) ||
     brace_key, 64)`. Securely deletes `K_ecdh`.
-1. Computes the Auth MAC key `auth_mac_k = KDF_1(usageAuthMACKey || tmp_k, 64)`.
+1. Computes the Auth MAC key `auth_mac_k = KDF_1(usageAuthMACKey || tmp_k, 64)`:
+  * Computes `Auth MAC = KDF_1(usageAuthMAC || auth_mac_k || t, 64)`.
+     The `t` value here is the one computed during the verification of the
+     Non-Interactive-Auth message.
+   * Extracts the `Auth MAC` from the Non-Interactive-Auth message and verifies
+     that it is equal to the one just calculated. If it is not, ignore the
+     Non-Interactive-Auth message.
 1. Computes the Mixed shared secret and the SSID:
    * `K = KDF_1(usageSharedSecret || tmp_k, 64)`. Securely deletes `tmp_k` and
      `brace_key`.
@@ -2572,31 +2575,17 @@ Verify.
 1. Initializes the double ratchet algorithm:
    * Sets ratchet id `i` as 0.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
-   * Interprets `K` as the first root key (`root_key[i-1]`).
-   * Generates an ephemeral ECDH key pair, as defined in
-     [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys), but instead
-     of using a random value `r`, it will use :
-     `r = KDF_1(usageECDHFirstEphemeral, K, 57)`. Securely deletes `our_ecdh`
-     and replaces it with the outputs.
-   * Generates an ephemeral DH key pair, as defined in
-     [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys), but instead
-     of using a random value `r`, it will use :
-     `r = KDF_1(usageDHFirstEphemeral, K, 80)`. Securely deletes `our_dh` and
-     replaces it with the outputs.
-   * Computes `Auth MAC = KDF_1(usageAuthMAC || auth_mac_k || t, 64)`.
-     The `t` value here is the one computed during the verification of the
-     Non-Interactive-Auth message.
-   * Extracts the `Auth MAC` from the Non-Interactive-Auth message and verifies
-     that it is equal to the one just calculated. If it is not, ignore the
-     Non-Interactive-Auth message.
+   * Calculates the root key and receiving chain key:
+     `root_key[i] = KDF_1(usageRootKey || root_key[i-1] || K, 64)` and
+     `chain_key_receiving[i][j] = KDF_1(usageChainKey || root_key[i-1] || K, 64)`.
 1. At this point, the non-interactive DAKE is complete for Bob:
-   * He should immediately receive a "DAKE Data Message" that advertises the
-     new public keys from Alice:
-     * Follows what is defined in the [When you receive a Data Message](#when-you-receive-a-data-message)
-       section. Note that he will perform a new DH ratchet at this point.
-       When he wants to send a data message after receiving one, he will
-       follow the [When you send a Data Message](#when-you-send-a-data-message)
-       section, and perform a new DH Ratchet.
+   * If he immediately receives a data message, he follows what is defined in
+     the [When you send a Data Message](#when-you-send-a-data-message)
+     section. Note that he will not perform a new DH ratchet for this message,
+     but rather use the already derived receiving chain key.
+   * If he wants to send a data message, he follows what is defined in the
+     [When you send a Data Message](#when-you-send-a-data-message)
+     section. Note that he will perform a new DH ratchet for this message.
 
 #### Prekey Message
 
@@ -2679,6 +2668,14 @@ A valid Non-Interactive-Auth message is generated as follows:
    [Generating ECDH and DH Keys](#generating-ecdh-and-dh-keys):
    * secret key `a` (80 bytes).
    * public key `A`.
+1. Generate another ephemeral ECDH key pair, as defined in
+   [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
+   * secret key `our_ecdh_first.secret` (57 bytes).
+   * public key `our_ecdh_first.public`.
+1. Generate another ephemeral DH key pair, as defined in
+   [Generating ECDH and DH keys](#generating-ecdh-and-dh-keys):
+   * secret key `our_dh_first.secret` (80 bytes).
+   * public key `our_dh_first.public`.
 1. Compute `K_ecdh = ECDH(x, their_ecdh)`.
 1. Compute `k_dh = DH(a, their_dh)` and
    `brace_key = KDF_1(usageThirdBraceKey || k_dh, 32)`. Securely delete `k_dh`.
@@ -2741,6 +2738,14 @@ X (POINT)
 A (MPI)
   The ephemeral public DH key. Note that even though this is in uppercase, this
   is NOT a POINT.
+
+our_ecdh_first.public
+  The ephemeral public ECDH key that will be used for the intialization of
+  the double ratchet algorithm.
+
+our_dh_first.public
+  The ephemeral public DH key that will be used for the intialization of
+  the double ratchet algorithm.
 
 Sigma (RING-SIG)
   The 'RING-SIG' proof of authentication value.
