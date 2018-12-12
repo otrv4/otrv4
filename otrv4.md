@@ -1000,7 +1000,8 @@ tag by numerical order and any string passed to `phi'` lexicographically.
 
 ```
   session identifier mandated by the OTRv4 spec = sender and receiver's instance
-    tags, or/and the query message or the whitespace tag
+    tags, first ephemeral keys for the double initialization, or/and the query
+    message or the whitespace tag
   phi' = session identifier defined by the implementer
   phi = session identifier mandated by the OTRv4 spec || phi'
 ```
@@ -1016,11 +1017,12 @@ For example, a shared session state which higher-level protocol is XMPP, will
 look like:
 
 ```
-  phi = sender's instance tag || receiver's instance tag ||
+  phi = sender's instance tag || receiver's instance tag || our_ecdh_first ||
+        our_dh_first || their_ecdh_first || their_dh_first ||
         DATA(query message) || DATA(sender's bare JID) ||
         DATA(receiver's bare JID)
-  phi = 0x00000100 || 0x00000101 || DATA("?OTRv4?") ||
-        DATA("alice@jabber.net") || DATA("bob@jabber.net")
+  phi = 0x00000100 || 0x00000101 || 0x57 || 0x164 || 0x57 || 0x164 ||
+        DATA("?OTRv4?") || DATA("alice@jabber.net") || DATA("bob@jabber.net")
 ```
 
 ### Secure Session ID
