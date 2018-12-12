@@ -156,18 +156,17 @@ Prekey Message Identifier (INT)
   The 'Prekey Message Identifier' from the Prekey message that was retrieved
   from the untrusted Prekey Server, as part of the Prekey Ensemble.
 
-Client Profile Identifier (INT)
-  The 'Client Profile Identifier' from the Client Profile that was retrieved
-  from the untrusted Prekey Server, as part of the Prekey Ensemble.
-
-Prekey Profile Identifier (INT)
-  The 'Prekey Profile Identifier' from the Prekey Profile that was retrieved
-  from the untrusted Prekey Server, as part of the Prekey Ensemble.
-
 Auth MAC (MAC)
   The MAC with the appropriate MAC key (see above) of the message (t) for the
   Ring Signature (RING-SIG).
 
+our_ecdh_first.public
+  The ephemeral public ECDH key that will be used for the intialization of
+  the double ratchet algorithm.
+
+our_dh_first.public
+  The ephemeral public DH key that will be used for the intialization of
+  the double ratchet algorithm.
 ```
 
 #### Multiple OTR protocol versions
