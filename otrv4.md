@@ -628,24 +628,25 @@ The following usageID variables are defined:
   * usageAuthIBobClientProfile = 0x08
   * usageAuthIAliceClientProfile = 0x09
   * usageAuthIPhi = 0x0A
-  * usageTmpKey = 0x0B
-  * usageAuthMACKey = 0x0C
-  * usageNonIntAuthBobClientProfile = 0x0D
-  * usageNonIntAuthAliceClientProfile = 0x0E
-  * usageNonIntAuthPhi = 0x0F
-  * usageAuthMAC = 0x10
-  * usageECDHFirstEphemeral = 0x11
-  * usageDHFirstEphemeral = 0x12
-  * usageRootKey = 0x13
-  * usageChainKey = 0x14
-  * usageNextChainKey = 0x15
-  * usageMessageKey = 0x16
-  * usageMACKey = 0x17
-  * usageExtraSymmKey = 0x18
-  * usageDataMessageSections = 0x19
-  * usageAuthenticator = 0x1A
-  * usageSMPSecret = 0x1B
-  * usageAuth = 0x1C
+  * usageFirstRootKey = 0x0B
+  * usageTmpKey = 0x0C
+  * usageAuthMACKey = 0x0D
+  * usageNonIntAuthBobClientProfile = 0x0E
+  * usageNonIntAuthAliceClientProfile = 0x0F
+  * usageNonIntAuthPhi = 0x10
+  * usageAuthMAC = 0x11
+  * usageECDHFirstEphemeral = 0x12
+  * usageDHFirstEphemeral = 0x13
+  * usageRootKey = 0x14
+  * usageChainKey = 0x15
+  * usageNextChainKey = 0x16
+  * usageMessageKey = 0x17
+  * usageMACKey = 0x18
+  * usageExtraSymmKey = 0x19
+  * usageDataMessageSections = 0x1A
+  * usageAuthenticator = 0x1B
+  * usageSMPSecret = 0x1C
+  * usageAuth = 0x1D
 ```
 
 ## Data Types
@@ -1963,7 +1964,7 @@ Bob will be initiating the DAKE with Alice.
    [Identity Message](#identity-message) section.
 1. Sets `Y` and `y` as `our_ecdh`: the ephemeral ECDH keys.
 1. Sets `B` as  and `b` as `our_dh`: the ephemeral 3072-bit DH keys.
-1. Sends Alice the Identity message with `our_ecdh_first.public`
+1. Sends Alice the Identity message with his `our_ecdh_first.public`
    and `our_dh_first.public` attached.
 
 **Alice:**
@@ -1998,7 +1999,7 @@ Bob will be initiating the DAKE with Alice.
       Securely deletes `K_ecdh` and `brace_key`.
     * Calculates the SSID from shared secret: `KDF_1(usageSSID || K, 8)`.
 1. Sends Bob the Auth-R message (see [Auth-R Message](#auth-r-message) section),
-   with `our_ecdh_first.public` and `our_dh_first.public` attached.
+   with her `our_ecdh_first.public` and `our_dh_first.public` attached.
 
 **Bob:**
 
