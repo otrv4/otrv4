@@ -4213,7 +4213,7 @@ generators, `g2` and `g3`. A valid SMP message 1 is generated as follows:
    defined in the
    [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
    section prior to be used.
-1. Interpret `a2`, `a3`, `r2` and `r3` as a little-endian integer forming
+1. Interpret `a2`, `a3`, `r2` and `r3` as little-endian integers forming
    scalars.
 1. Compute `G2a = G * a2` and `G3a = G * a3`. Check that `G2a` and `G3a` are on
    curve Ed448. See
@@ -4225,10 +4225,7 @@ generators, `g2` and `g3`. A valid SMP message 1 is generated as follows:
    [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
    section.
 1. Generate a zero-knowledge proof that the value `a3` is known by setting
-   `c3 = HashToScalar(0x02 || G * r3)` and `d3 = r3 - a3 * c3 mod q`. Prior to
-   be encoded as a SCALAR, `d3` should be hashed and pruned as defined in the
-   [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
-   section.
+   `c3 = HashToScalar(0x02 || G * r3)` and `d3 = r3 - a3 * c3 mod q`.
 1. Store the values of `x`, `a2` and `a3` for use later in the protocol.
 
 
@@ -4287,15 +4284,9 @@ follows:
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
 1. Generate a zero-knowledge proof that the value `b2` is known by setting
-   `c2 = HashToScalar(0x03 || G * r2)` and `d2 = r2 - b2 * c2 mod q`. Prior to
-   be encoded as a SCALAR, `d2` should be hashed and pruned as defined in the
-   [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
-   section.
+   `c2 = HashToScalar(0x03 || G * r2)` and `d2 = r2 - b2 * c2 mod q`.
 1. Generate a zero-knowledge proof that the value `b3` is known by setting
-   `c3 = HashToScalar(0x04 || G * r3)` and `d3 = r3 - b3 * c3 mod q`. Prior to
-   be encoded as a SCALAR, `d3` should be hashed and pruned as defined in the
-   [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
-   section.
+   `c3 = HashToScalar(0x04 || G * r3)` and `d3 = r3 - b3 * c3 mod q`.
 1. Compute `G2 = G2a * b2` and `G3 = G3a * b3`. Check that `G2` and `G3` are on
    curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
@@ -4308,10 +4299,7 @@ follows:
 1. Generate a zero-knowledge proof that `Pb` and `Qb` were created according
    to the protocol by setting
    `cp = HashToScalar(0x05 || G3 * r5 || G * r5 + G2 * r6)`,
-   `d5 = r5 - r4 * cp mod q` and `d6 = (r6 - y * cp) mod q`. Prior to
-   be encoded as a SCALAR, `d5` and `d6` should be hashed and pruned as defined
-   in the [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
-   section.
+   `d5 = r5 - r4 * cp mod q` and `d6 = (r6 - y * cp) mod q`.
 1. Store the values of `G3a`, `G2`, `G3`, `b3`, `Pb` and `Qb` for use later
    in the protocol.
 
@@ -4369,20 +4357,14 @@ is generated as follows:
 1. Generate a zero-knowledge proof that `Pa` and `Qa` were created according to
    the protocol by setting
    `cp = HashToScalar(0x06 || G3 * r5 || G * r5 + G2 * r6)`,
-   `d5 = r5 - r4 * cp mod q` and `d6 = ((r6 - x * cp) mod q`. Prior to
-   be encoded as a SCALAR, `d5` and `d6` should be hashed and pruned as defined
-   in the [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
-   section.
+   `d5 = r5 - r4 * cp mod q` and `d6 = ((r6 - x * cp) mod q`.
 1. Compute `Ra = (Qa - Qb) * a3`. Check that `Ra`
    is on curve Ed448. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
 1. Generate a zero-knowledge proof that `Ra` was created according to the
    protocol by setting `cr = HashToScalar(0x07 || G * r7 || (Qa - Qb) * r7)` and
-   `d7 = r7 - a3 * cr mod q`. Prior to be encoded as a SCALAR, `d7` should be
-   hashed and pruned as defined in the
-   [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
-   section.
+   `d7 = r7 - a3 * cr mod q`.
 1. Store the values of `G3b`, `Pa - Pb`, `Qa - Qb` and `a3` for use later in
    the protocol.
 
@@ -4427,10 +4409,7 @@ generated as follows:
 1. Generate a zero-knowledge proof that `Rb` was created according to the
    protocol by setting
    `cr = HashToScalar(0x08 || G * r7 || (Qa - Qb) * r7)`
-   and `d7 = r7 - b3 * cr mod q`. Prior to be encoded as a SCALAR, `d7` should
-   be hashed and pruned as defined in the
-   [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
-   section.
+   and `d7 = r7 - b3 * cr mod q`.
 
 The SMP message 4 has the following data and format:
 
@@ -4823,9 +4802,6 @@ This function is `HashToScalar(usageID || d, 57)`, where d is an array of
 bytes.
 
 1. Compute `h = KDF_1(usageID || d, 57)`.
-1. Prune `h`: the two least significant bits of the first byte are cleared, all
-   eight bits of the last byte are cleared, and the highest bit of the second to
-   last byte is set.
 1. Interpret the buffer as a little-endian integer, forming a scalar. Return
    this scalar.
 
