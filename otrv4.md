@@ -3893,12 +3893,13 @@ If the state is not `WAITING_AUTH_R`:
 * If the state is `FINISHED` or `MSGSTATE_FINISHED`:
   * Ignore the message.
 
-* Else:
+* Else (including any interactive state):
   * If the receiver's instance tag in the message is not the sender's instance
     tag you are currently using:
     * Ignore this message.
 
   * Otherwise:
+    * Forget any set values.
     * Validate the Non-Interactive-Auth message.
     * Initialize the double ratcheting, as defined in the
       [Non-Interactive DAKE Overview](#non-interactive-dake-overview) section.
