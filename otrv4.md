@@ -4730,7 +4730,7 @@ revealed. For this, constant-time conditional operations should be used.
 
 The prover knows a secret `ai` and, therefore:
 
-1. Pick random values `t1, c2, c3, r2, r3` in `Z_q`.
+1. Pick random values `t1, t2, t3, c1, c2, c3, r1, r2, r3` in `Z_q`.
    These random values should be hashed and pruned as defined in the
    [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
    section prior to be used.
@@ -4743,7 +4743,7 @@ The prover knows a secret `ai` and, therefore:
   eq3 = constant_time_eq(P, A3)
 ```
 
-1. Depending the result of the above operations, compute:
+1. Depending of the result of the above operations, compute:
 
 ```
   T1 = constant_time_select(eq1, encode(G * t1), encode(G * r1 + A1 * c1))
@@ -4755,7 +4755,7 @@ The prover knows a secret `ai` and, therefore:
    T2 || T3 || m)`.
 1. For whichever equally returns true (if `eqi == 1`, `eqj == 0` and
    `eqk == 0`, for `i != j != k`): `ci = c - cj - ck (mod q)`.
-1. For whichever equally returns true (if `eqi == 1`):
+1. For whichever equally returns true (for example, if `eqi == 1`):
    `ri = ti - ci * ai (mod q)`.
 1. Compute `sigma = (ci, ri, cj, rj, ck, rk)`.
 
