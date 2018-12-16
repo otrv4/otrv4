@@ -3763,7 +3763,7 @@ OTRv4-interactive-only mode or the OTRv4-standalone-mode one.
 
 #### Receiving an Identity Message
 
-If the state is `START`:
+If the state is `START`, `ENCRYPTED_MESSAGES` or `FINISHED`:
 
   * Validate the Identity message. Ignore the message if validation fails.
   * If validation succeeds:
@@ -3814,15 +3814,6 @@ If the state is `WAITING_AUTH_I`:
       `their_dh_first` and Client Profile from the previously received Identity
       message.
     * Send a new Auth-R message with the new values received.
-
-If the state is `ENCRYPTED_MESSAGES` or `FINISHED`:
-
-  * Validate the new Identity message. Ignore the message if validation fails.
-  * If validation succeeds:
-    * Remember the sender's instance tag to use as the receiver's instance tag
-      for future messages.
-    * Reply with an Auth-R message.
-    * Transition to the `WAITING_AUTH_I` state.
 
 Otherwise:
    * Ignore the message.
