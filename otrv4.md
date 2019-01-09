@@ -130,6 +130,7 @@ protocol, such as XMPP.
 1. [Implementation Notes](#implementation-notes)
    1. [Considerations for Networks that allow Multiple Clients](#considerations-for-networks-that-allow-multiple-clients)
 1. [Forging Transcripts](#forging-transcripts)
+1. [Licensing and Use](#licensing-and-use)
 1. [Appendices](#appendices)
    1. [Ring Signature Authentication](#ring-signature-authentication)
    1. [HashToScalar](#hashtoscalar)
@@ -4672,6 +4673,15 @@ Forge Entire Transcript
   cryptographic expert cannot identify which Client Profile owner authenticated
   the conversation.
 ```
+
+## Licensing and Use
+
+<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+
+The OTR team does not review implementations or specify which ones are compliant
+are not. Software implementors are free to implement this specification in any
+way they choose - under limitations of software licenses if using existing
+software. 
 
 ## Appendices
 
