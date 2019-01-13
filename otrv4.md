@@ -505,8 +505,8 @@ Non-square element in Z_p (d)
 To verify that a point (`X = x, y`) is on curve Ed448-Goldilocks:
 
 1. Check that `X` is not equal to the identity element (`I`).
-1. Check that `X` lies on the curve: `x` and `y` are on in interval
-   `[0, p - 1]`.
+1. Check that `X` lies on the curve: this can be done by checking that `x`
+   and `y` are integers on in interval `[0, p - 1]`.
 1. Check that `q * X = I`.
 
 ### Considerations while working with elliptic curve parameters
