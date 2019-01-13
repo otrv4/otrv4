@@ -506,7 +506,7 @@ To verify that a point (`X = x, y`) is on curve Ed448-Goldilocks:
 
 1. Check that `X` is not equal to the identity element (`I`).
 1. Check that `X` lies on the curve: `x` and `y` are on in interval
-   `[0, q - 1]`.
+   `[0, p - 1]`.
 1. Check that `q * X = I`.
 
 ### Considerations while working with elliptic curve parameters
@@ -4681,7 +4681,7 @@ Forge Entire Transcript
 The OTR team does not review implementations or specify which ones are compliant
 are not. Software implementors are free to implement this specification in any
 way they choose - under limitations of software licenses if using existing
-software. 
+software.
 
 ## Appendices
 
