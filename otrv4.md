@@ -502,7 +502,7 @@ Non-square element in Z_p (d)
 
 #### Verifying that a point is on the curve
 
-To verify that a point (`X = x, y`) is on curve Ed448-Goldilocks:
+To verify that a point (`X = x, y`) is on curve Ed448-Goldilocks [\[14\]](#references):
 
 1. Check that `X` is not equal to the identity element (`I`).
 1. Check that `X` lies on the curve: this can be done by checking that `x`
@@ -5161,3 +5161,6 @@ Compute:
 13. Unger, N. and Goldberg, I. (2015). *Deniable Key Exchanges for Secure
     Messaging*. Available at:
     https://www.cypherpunks.ca/~iang/pubs/dake-ccs15.pdf
+14. Antipa, A., Brown D., Menezes, A., Struik R., and Vanstone, S. (2015).
+    *Validation of Elliptic Curve Public Keys*. Available at:
+    https://iacr.org/archive/pkc2003/25670211/25670211.pdf
