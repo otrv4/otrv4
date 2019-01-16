@@ -29,10 +29,9 @@ Alice wants to send a message to Bob.
 
 1. Alice adds Bob as a contact.
 2. Alice verifies Bob's identity. She either:
-   * Uses Bob's Client Profile and verifies Bob's fingerprint using a business
-     card, a HTTPS website, etc.
+   * Verifies Bob's fingerprint using a business card, a HTTPS website, etc.
    * Performs an interactive DAKE with Bob and uses SMP.
-3. Alice types messages, encrypts them and "sends them" to Bob.
+3. Alice types messages, encrypts them and sends them to Bob.
    * A DAKE is performed if the application is not already in an encrypted
      state.
    * She is warned about any problem while establishing an encrypted channel

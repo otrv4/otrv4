@@ -426,7 +426,7 @@ talking with each other. In those cases:
 
 The OTRv4 state machine will also need to know the mode in which is working on
 when initialized. It will also need to take this mode into account every time it
-makes a decision aound how to transition from every state.
+makes a decision around how to transition from every state.
 
 ## Notation and Parameters
 
@@ -1001,8 +1001,8 @@ tag by numerical order and any string passed to `phi'` lexicographically.
 
 ```
   session identifier mandated by the OTRv4 spec = sender and receiver's instance
-    tags, first ephemeral keys for the double initialization, or/and the query
-    message or the whitespace tag
+    tags, first ephemeral keys for the double ratchet initialization, or/and the
+    query message or the whitespace tag
   phi' = session identifier defined by the implementer
   phi = session identifier mandated by the OTRv4 spec || phi'
 ```
