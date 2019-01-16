@@ -2082,7 +2082,8 @@ Bob will be initiating the DAKE with Alice.
      * Follows what is defined in the
        [When you send a Data Message](#when-you-send-a-data-message) section.
        Note that he will not perform a new DH ratchet, but rather start using
-       the derived `chain_key_s[i][j]`.
+       the derived `chain_key_s[i][j]`. He should follow the
+       "When sending a data message in the same DH Ratchet:" subsection.
    * In the case that he receives a data message:
      * Follows what is defined in the
        [When you receive a Data Message](#when-you-send-a-data-message) section.
@@ -2127,7 +2128,9 @@ Bob will be initiating the DAKE with Alice.
    * In the case that she wants to immediately send a data message:
      * Follows what is defined in the
        [When you send a Data Message](#when-you-send-a-data-message) section.
-       Note that she will use the already derived `chain_key_s[i][j]`.
+       Note that she will not perform a new DH ratchet, but rather use the
+       already derived `chain_key_s[i][j]`. She should follow the
+       "When sending a data message in the same DH Ratchet:" subsection.
    * In the case that she immediately receives a data message:
      * Follows what is defined in the
        [When you receive a Data Message](#when-you-send-a-data-message) section.
@@ -2501,7 +2504,9 @@ Verify.
    * If she wants to send a data message, she follows what is defined in the
      [When you send a Data Message](#when-you-send-a-data-message)
      section. Note that she will not perform a new DH ratchet for this message,
-     but rather use the already derived `chain_key_sending[i][j]`.
+     but rather use the already derived `chain_key_sending[i][j]`. She should
+     follow the  "When sending a data message in the same DH Ratchet:"
+     subsection.
 
 **Bob:**
 
