@@ -3197,9 +3197,8 @@ This is done by:
     * Securely delete `MKenc`.
     * Add `MKmac` to the list `mac_keys_to_reveal`.
 
-* Given a new ratchet (the local `j` is equal to 0, the 'Public ECDH
-  Key' is different from `their_ecdh` and the 'Public DH Key' is different from
-  `their_dh` -if present-):
+* Given a new ratchet (the 'Public ECDH Key' is different from `their_ecdh` and
+  the 'Public DH Key' is different from `their_dh` -if present-):
 
   * Store any message keys from the previous DH Ratchet that correspond to
     messages that have not yet arrived:
