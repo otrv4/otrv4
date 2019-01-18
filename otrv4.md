@@ -1112,8 +1112,8 @@ Key variables:
   'mac_keys_to_reveal': the MAC keys to be revealed in the first data message
     sent of the next ratchet.
   'skipped_MKenc': Dictionary of stored skipped-over message keys, indexed by
-    their_ecdh, their_dh, the ratchet id ('i') and the message number ('j').
-    Raises and exception if too many elements are stored.
+    'their_ecdh' and the message number ('j'). Raises and exception if too many
+    elements are stored.
   'max_skip' a constant that specifies the maximum number of message keys
     that can be skipped in a ratchet. It should be set by the implementer. Take
     into account that it should be set high enough to tolerate routine lost or
@@ -3155,9 +3155,9 @@ When sending a data message in the same DH Ratchet:
 
 The counterpart of the sending an encoded data message. As that one, it also
 needs a per-message key derived from the previous chain key to decrypt the
-message in it. If the receiving `j` is equal to 0, and the receiving 'Public
-ECDH Key' has not yet been seen, ratchet keys should be rotated (the ECDH keys,
-the brace key, the root key and the receiving chain key).
+message in it. If the the receiving 'Public ECDH Key' has not yet been seen,
+ratchet keys should be rotated (the ECDH keys, the brace key, the root key and
+the receiving chain key).
 
 Decrypting a data message consists of:
 
@@ -3179,11 +3179,11 @@ This is done by:
 
 * Try to decrypt the message with a stored skipped message key:
 
-  * If the received `message_id` and `ratchet_id` are in the `skipped_MKenc`
-    dictionary:
+  * If the received `message_id` and `Public ECDH Key` are in the
+    `skipped_MKenc` dictionary:
     * Get the message key and the extra symmetric key (if needed):
-      `MKenc, extra_symm_key = skipped_MKenc[ratchet_id, message_id]`.
-    * Securely delete `skipped_MKenc[ratchet_id, message_id]`.
+      `MKenc, extra_symm_key = skipped_MKenc[Public ECDH Key, message_id]`.
+    * Securely delete `skipped_MKenc[Public ECDH Key, message_id]`.
     * Calculate `MKmac = KDF_1(usageMACKey || MKenc, 64)`.
     * Use the `MKmac` to verify the MAC of the data message. If this
       verification fails:
@@ -3216,7 +3216,7 @@ This is done by:
                symmetric key):
                `extra_symm_key = KDF_1(usageExtraSymmKey || 0xFF || chain_key_r[i][j], 32)`.
              * Store
-               `MKenc, extra_sym_key = skipped_MKenc[i, k]`.
+               `MKenc, extra_sym_key = skipped_MKenc[their_ecdh, k]`.
              * Increment `k = k + 1`.
              * Delete `chain_key_r[i][k]`.
   * Rotate the ECDH keys and brace key, see
@@ -3250,7 +3250,7 @@ This is done by:
           symmetric key):
           `extra_symm_key = KDF_1(usageExtraSymmKey || 0xFF || chain_key_r[i-1][j], 32)`.
         * Store
-          `MKenc, extra_sym_key = skipped_MKenc[i, k]`.
+          `MKenc, extra_sym_key = skipped_MKenc[their_ecdh, k]`.
         * Increment `k = k + 1`.
         * Delete `chain_key_r[i-1][k]`.
   * Calculate the encryption and MAC keys (`MKenc` and `MKmac`).
