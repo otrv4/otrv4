@@ -3121,6 +3121,7 @@ When sending a data message in the same DH Ratchet:
 
   * Set `j` as the Data message's message id.
   * Set `i - 1` as the Data message's ratchet id.
+  * Set `pn` as the Data message's previous chain message number.
   * Derive the next sending chain key
     `chain_key_s[i-1][j+1] = KDF_1(usageNextChainKey || chain_key_s[i-1][j], 64)`.
   * Calculate the encryption key (`MKenc`), the MAC key (`MKmac`) and, if needed
