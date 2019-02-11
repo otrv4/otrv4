@@ -116,8 +116,8 @@ Alice will be initiating the DAKE with Bob.
       Securely deletes `K_ecdh` and `brace_key`.
     * Calculates the SSID from shared secret: the first 8 bytes of
       `KDF_1(usageSSID || K, 64)`.
-1. Sends Alice the Auth-R message (see [Auth-R Message](../otrv4.md#auth-r-message) section)
-   with his `our_ecdh_first.public` and `our_dh_first.public` attached.
+1. Sends Alice the Auth-R message (see [Auth-R Message](../otrv4.md#auth-r-message)
+   section) with his `our_ecdh_first.public` and `our_dh_first.public` attached.
 
 **Alice:**
 
@@ -161,9 +161,9 @@ Alice will be initiating the DAKE with Bob.
     * Calculates the SSID from shared secret: the first 8 bytes of
       `KDF_1(usageSSID || K, 64)`.
 1. Initializes the double-ratchet:
-    * Sets ratchet id `i` as 0.
+    * Sets `since_last_dh` as 0.
     * Sets `j` as 0, `k` as 0 and `pn` as 0.
-    * Interprets `K` as the first root key (`root_key[i-1]`) by:
+    * Interprets `K` as the first root key (`prev_root_key`) by:
       `KDF_1(usageFirstRootKey || K, 64)`.
     * Calculates the receiving keys:
       * Calculates `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
@@ -174,8 +174,8 @@ Alice will be initiating the DAKE with Bob.
         `K = KDF_1(usageSharedSecret || K_ecdh || brace_key, 64)`. Securely
         deletes `K_ecdh`.
       * Derives new set of keys:
-        `root_key[i], chain_key_r[i][k] = derive_ratchet_keys(receiving, root_key[i-1], K)`.
-      * Securely deletes the previous root key (`root_key[i-1]`) and `K`.
+        `curr_root_key, chain_key_r[k] = derive_ratchet_keys(receiving, prev_root_key, K)`.
+      * Securely deletes the previous root key (`prev_root_key`) and `K`.
     * Calculates the sending keys:
       * Generates a new ECDH key pair and assigns it to
         `our_ecdh = generateECDH()` (by securely replacing the old value).
@@ -188,10 +188,11 @@ Alice will be initiating the DAKE with Bob.
       * Calculates the Mixed shared secret (and replaces the old value)
         `K = KDF_1(usageSharedSecret || K_ecdh || brace_key, 64)`. Securely
         deletes `K_ecdh`.
+     * Interprets `curr_root_key` as `prev_root_key`.
       * Derives new set of keys:
-        `root_key[i], chain_key_s[i][j] = derive_ratchet_keys(sending, root_key[i-1], K)`.
-      * Securely deletes the previous root key (`root_key[i-1]`) and `K`.
-      * Increments the ratchet id `i = i + 1`.
+        `curr_root_key, chain_key_s[j] = derive_ratchet_keys(sending, prev_root_key, K)`.
+      * Securely deletes the previous root key (`prev_root_key`) and `K`.
+      * Increments `since_last_dh = since_last_dh + 1`.
 1. Sends Bob the Auth-I message (see [Auth-I message](#auth-i-message)
    section).
 1. At this point, the interactive DAKE is complete for Alice:
@@ -199,11 +200,12 @@ Alice will be initiating the DAKE with Bob.
      * Follows what is defined in the
        [When you send a Data Message](#when-you-send-a-data-message) section.
        Note that he will not perform a new DH ratchet, but rather start using
-       the derived `chain_key_s[i][j]`.
+       the derived `chain_key_s[j]`. She should follow the
+       "When sending a data message in the same DH Ratchet:" subsection.
    * In the case that she receives a data message:
      * Follows what is defined in the
        [When you receive a Data Message](#when-you-send-a-data-message) section.
-       Note that he will use the already derived `chain_key_r[i][k]`.
+       Note that he will use the already derived `chain_key_r[k]`.
 
 **Bob:**
 
@@ -212,9 +214,9 @@ Alice will be initiating the DAKE with Bob.
      [Auth-I Message](../otrv4.md#auth-i-message) section. If the verification
      fails, rejects the message and does not send anything further.
 1. Initializes the double-ratchet algorithm:
-   * Sets ratchet id `i` as 0.
+   * Sets `since_last_dh` as 0.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
-   * Interprets `K` as the first root key (`root_key[i-1]`) by:
+   * Interprets `K` as the first root key (`prev_root_key`) by:
      `KDF_1(usageFirstRootKey || K, 64)`.
    * Securely deletes `our_ecdh.public` and `their_ecdh`.
      Replaces them with:
@@ -238,13 +240,15 @@ Alice will be initiating the DAKE with Bob.
         `K = KDF_1(usageSharedSecret || K_ecdh || brace_key, 64)`. Securely
         deletes `K_ecdh`.
       * Derives new set of keys:
-        `root_key[i], chain_key_s[i][j] = derive_ratchet_keys(sending, root_key[i-1], K)`.
-      * Securely deletes the previous root key (`root_key[i-1]`) and `K`.
+        `curr_root_key, chain_key_s[j] = derive_ratchet_keys(sending, prev_root_key, K)`.
+      * Securely deletes the previous root key (`prev_root_key`) and `K`.
 1. At this point, the interactive DAKE is complete for Bob:
    * In the case that he wants to immediately send a data message:
      * Follows what is defined in the
        [When you send a Data Message](#when-you-send-a-data-message) section.
-       Note that he will use the already derived `chain_key_s[i][j]`.
+       Note that he will use the already derived `chain_key_s[j]`. She should
+       follow the "When sending a data message in the same DH Ratchet:"
+       subsection.
    * In the case that he immediately receives a data message:
      * Follows what is defined in the
        [When you receive a Data Message](#when-you-send-a-data-message) section.
