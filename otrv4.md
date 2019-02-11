@@ -2081,7 +2081,7 @@ Bob will be initiating the DAKE with Alice.
         deletes `K_ecdh`.
       * Interprets `curr_root_key` as `prev_root_key`.
       * Derives new set of keys:
-        `curr_root_key, chain_key_s[i][j] = derive_ratchet_keys(sending, prev_root_key, K)`.
+        `curr_root_key, chain_key_s[j] = derive_ratchet_keys(sending, prev_root_key, K)`.
       * Securely deletes the previous root key (`prev_root_key`) and `K`.
       * Increments `since_last_dh = since_last_dh + 1`.
 1. Sends Alice the Auth-I message (see [Auth-I message](#auth-i-message)
@@ -3238,7 +3238,7 @@ This is done by:
   * Interpret `curr_root_key` as `prev_root_key`, if present.
   * Derive new set of keys
     `curr_root_key, chain_key_r[k] = derive_ratchet_keys(receiving, prev_root_key, K)`.
-  * Securely delete the previous root key (`root_key[i-1]`) and `K`.
+  * Securely delete the previous root key (`prev_root_key`) and `K`.
   * Increment the ratchet id `i = i + 1`.
   * Derive the next receiving chain key, `MKenc` and `MKmac`, and decrypt the
     message as described below.
