@@ -1091,17 +1091,18 @@ The following variables keep state as the ratchet moves forward:
 
 ```
 State variables:
-  i: the ratchet id.
   j: the sending message id.
   k: the receiving message id.
   pn: the number of messages in the previous DH ratchet.
+  since_last_dh: a variable that keeps track of the last time a DH key was
+                 generated.
 
 Key variables:
-  'root_key[i]': the root key for ratchet i.
-  'chain_key_s[i][j]': the sending chain key for the sending message 'j' in
-    ratchet 'i'.
-  'chain_key_r[i][k]': the receiving chain key for the receiving message 'k' in
-    ratchet 'i'.
+  'root_key': the root key. If it is 'prev_root_key', it refers to the previous
+              generated root key. If it is 'curr_root_key', it refers to the
+              current root key.
+  'chain_key_s[j]': the sending chain key for the sending message 'j'.
+  'chain_key_r[k]': the receiving chain key for the receiving message 'k'.
   'our_ecdh': our current ECDH ephemeral key pair.
   'their_ecdh': their ECDH ephemeral public key.
   'our_dh': our DH ephemeral key pair.
@@ -1228,18 +1229,20 @@ To rotate the ECDH keys:
 
 To rotate the brace key:
 
-  * If `i % 3 == 0`:
+  * If `since_last_dh == 3`:
 
     * Generate the new DH key pair and assign it to `our_dh = generateDH()`
       (by securely replacing the old value).
     * Calculate `k_dh = DH(our_dh.secret, their_dh)`.
     * Calculate a `brace_key = KDF_1(usageThirdBraceKey || k_dh, 32)`.
     * Securely delete `k_dh`.
+    * Set `since_last_dh` to 0.
 
   * Otherwise:
 
     * Derive and securely overwrite
       `brace_key = KDF_1(usageBraceKey || brace_key, 32)`.
+    * Increase `since_last_dh` by 1.
 
 ### Rotating ECDH Keys and Brace Key as receiver
 
@@ -1260,32 +1263,37 @@ To rotate the ECDH keys:
 
 To rotate the brace key:
 
-  * If `i % 3 == 0`:
+  * If `since_last_dh == 3`:
 
     * Retrieve the DH key ('Public DH key') from the received data message and
       assign it to `their_dh`.
     * Calculate `k_dh = DH(our_dh.secret, their_dh)`.
     * Calculate a `brace_key = KDF_1(usageThirdBraceKey || k_dh, 32)`.
     * Securely delete `our_dh.secret` and `k_dh`.
+    * Set `since_last_dh` to 0.
 
   * Otherwise:
 
     * Derive and securely overwrite
       `brace_key = KDF_1(usageBraceKey || brace_key, 32)`.
+    * Increase `since_last_dh` by 1.
 
 ### Deriving Double Ratchet Keys
 
 To derive the next root key and the current chain key:
 
-Note that if there is no previous root key (because this is the first ratchet:
-`i == 0`), then the keys are derived from the previous Mixed shared secret `K`
-(interpreted as `root_key[i-1]`) and the current Mixed shared secret `K`.
+Note that if there is no previous root key (because this is the first ratchet),
+then keys are derived from the previous Mixed shared secret `K` (interpreted
+as `prev_root_key`) and the current Mixed shared secret `K`.
+
+Depending if this is used to derive sending or receiving chain keys, the
+variable `i` should refer to `j` (for sending) and `k` (for receiving).
 
 ```
-derive_ratchet_keys(purpose, root_key[i-1], K):
-  root_key[i] = KDF_1(usageRootKey || root_key[i-1] || K, 64)
-  chain_key_purpose[i][j] = KDF_1(usageChainKey || root_key[i-1] || K, 64)
-  return root_key[i], chain_key_purpose[i][j]
+derive_ratchet_keys(purpose, prev_root_key, K):
+  curr_root_key = KDF_1(usageRootKey || prev_root_key || K, 64)
+  chain_key_purpose[i] = KDF_1(usageChainKey || prev_root_key || K, 64)
+  return curr_root_key, chain_key_purpose[i]
 ```
 
 ### Calculating Encryption and MAC Keys
@@ -2044,9 +2052,9 @@ Bob will be initiating the DAKE with Alice.
       Securely deletes `k_ecdh` and `brace_key`.
     * Calculates the SSID from shared secret: `KDF_1(usageSSID || K, 8)`.
 1. Initializes the double-ratchet algorithm:
-    * Sets ratchet id `i` as 0.
+    * Sets `since_last_dh` as 0.
     * Sets `j` as 0, `k` as 0 and `pn` as 0.
-    * Interprets `K` as the first root key (`root_key[i-1]`) by:
+    * Interprets `K` as the first root key (`prev_root_key`) by:
       `KDF_1(usageFirstRootKey || K, 64)`.
     * Calculates the receiving keys:
       * Calculates `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
@@ -2057,8 +2065,8 @@ Bob will be initiating the DAKE with Alice.
         `K = KDF_1(usageSharedSecret || K_ecdh || brace_key, 64)`. Securely
         deletes `K_ecdh`.
       * Derives new set of keys:
-        `root_key[i], chain_key_r[i][k] = derive_ratchet_keys(receiving, root_key[i-1], K)`.
-      * Securely deletes the previous root key (`root_key[i-1]`) and `K`.
+        `curr_root_key, chain_key_r[k] = derive_ratchet_keys(receiving, prev_root_key, K)`.
+      * Securely deletes the previous root key (`prev_root_key`) and `K`.
     * Calculates the sending keys:
       * Generates a new ECDH key pair and assigns it to
         `our_ecdh = generateECDH()` (by securely replacing the old value).
@@ -2071,10 +2079,11 @@ Bob will be initiating the DAKE with Alice.
       * Calculates the Mixed shared secret (and replaces the old value)
         `K = KDF_1(usageSharedSecret || K_ecdh || brace_key, 64)`. Securely
         deletes `K_ecdh`.
+      * Interprets `curr_root_key` as `prev_root_key`.
       * Derives new set of keys:
-        `root_key[i], chain_key_s[i][j] = derive_ratchet_keys(sending, root_key[i-1], K)`.
-      * Securely deletes the previous root key (`root_key[i-1]`) and `K`.
-      * Increments the ratchet id `i = i + 1`.
+        `curr_root_key, chain_key_s[i][j] = derive_ratchet_keys(sending, prev_root_key, K)`.
+      * Securely deletes the previous root key (`prev_root_key`) and `K`.
+      * Increments `since_last_dh = since_last_dh + 1`.
 1. Sends Alice the Auth-I message (see [Auth-I message](#auth-i-message)
    section).
 1. At this point, the interactive DAKE is complete for Bob:
@@ -2082,12 +2091,12 @@ Bob will be initiating the DAKE with Alice.
      * Follows what is defined in the
        [When you send a Data Message](#when-you-send-a-data-message) section.
        Note that he will not perform a new DH ratchet, but rather start using
-       the derived `chain_key_s[i][j]`. He should follow the
+       the derived `chain_key_s[j]`. He should follow the
        "When sending a data message in the same DH Ratchet:" subsection.
    * In the case that he receives a data message:
      * Follows what is defined in the
        [When you receive a Data Message](#when-you-send-a-data-message) section.
-       Note that he will use the already derived `chain_key_r[i][k]`.
+       Note that he will use the already derived `chain_key_r[k]`.
 
 **Alice:**
 
@@ -2096,9 +2105,9 @@ Bob will be initiating the DAKE with Alice.
      [Auth-I message](#auth-i-message) section. If the verification fails,
      rejects the message and does not send anything further.
 1. Initializes the double-ratchet algorithm:
-   * Sets ratchet id `i` as 0.
+   * Sets `since_last_dh` as 0.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
-   * Interprets `K` as the first root key (`root_key[i-1]`) by:
+   * Interprets `K` as the first root key (`prev_root_key`) by:
      `KDF_1(usageFirstRootKey || K, 64)`.
    * Securely deletes `our_ecdh.public` and `their_ecdh`.
      Replaces them with:
@@ -2122,14 +2131,14 @@ Bob will be initiating the DAKE with Alice.
         `K = KDF_1(usageSharedSecret || K_ecdh || brace_key, 64)`. Securely
         deletes `K_ecdh`.
       * Derives new set of keys:
-        `root_key[i], chain_key_s[i][j] = derive_ratchet_keys(sending, root_key[i-1], K)`.
-      * Securely deletes the previous root key (`root_key[i-1]`) and `K`.
+        `curr_root_key, chain_key_s[j] = derive_ratchet_keys(sending, prev_root_key, K)`.
+      * Securely deletes the previous root key (`prev_root_key`) and `K`.
 1. At this point, the interactive DAKE is complete for Alice:
    * In the case that she wants to immediately send a data message:
      * Follows what is defined in the
        [When you send a Data Message](#when-you-send-a-data-message) section.
        Note that she will not perform a new DH ratchet, but rather use the
-       already derived `chain_key_s[i][j]`. She should follow the
+       already derived `chain_key_s[j]`. She should follow the
        "When sending a data message in the same DH Ratchet:" subsection.
    * In the case that she immediately receives a data message:
      * Follows what is defined in the
@@ -2495,16 +2504,16 @@ Verify.
    [Non-Interactive-Auth Message](#non-interactive-auth-message) section with
    her `our_ecdh.public` and `our_dh.public` attached.
 1. Initializes the double-ratchet:
-   * Sets ratchet id `i` as 0.
+   * Sets `since_last_dh` as 0.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
    * Calculates the root key and sending chain key:
-     `root_key[i] = KDF_1(usageRootKey || K, 64)` and
-     `chain_key_sending[i][j] = KDF_1(usageChainKey || K, 64)`.
+     `curr_root_key = KDF_1(usageRootKey || K, 64)` and
+     `chain_key_sending[j] = KDF_1(usageChainKey || K, 64)`.
 1. At this point, the non-interactive DAKE is complete for Alice:
    * If she wants to send a data message, she follows what is defined in the
      [When you send a Data Message](#when-you-send-a-data-message)
      section. Note that she will not perform a new DH ratchet for this message,
-     but rather use the already derived `chain_key_sending[i][j]`. She should
+     but rather use the already derived `chain_key_sending[j]`. She should
      follow the  "When sending a data message in the same DH Ratchet:"
      subsection.
 
@@ -2587,16 +2596,18 @@ Verify.
      `brace_key`.
    * Calculates the SSID from shared secret: `KDF_1(usageSSID || K, 8)`.
 1. Initializes the double ratchet algorithm:
-   * Sets ratchet id `i` as 0.
+   * Sets `since_last_dh` as 0.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
    * Calculates the root key and receiving chain key:
-     `root_key[i] = KDF_1(usageRootKey || K, 64)` and
-     `chain_key_receiving[i][k] = KDF_1(usageChainKey || K, 64)`.
+     `curr_root_key = KDF_1(usageRootKey || K, 64)` and
+     `chain_key_receiving[k] = KDF_1(usageChainKey || K, 64)`.
+   * Sets the received `their_ecdh_first` from Alice as `their_ecdh`.
+   * Sets the received `their_dh_first` from Alice as `their_dh`.
 1. At this point, the non-interactive DAKE is complete for Bob:
    * If he immediately receives a data message, he follows what is defined in
      the [When you send a Data Message](#when-you-send-a-data-message)
      section. Note that he will not perform a new DH ratchet for this message,
-     but rather use the already derived `chain_key_receiving[i][k]`.
+     but rather use the already derived `chain_key_receiving[k]`.
    * If he wants to send a data message, he follows what is defined in the
      [When you send a Data Message](#when-you-send-a-data-message)
      section. Note that he will perform a new DH ratchet for this message.
@@ -2962,49 +2973,49 @@ and the other party ECDH and DH keys                   and the other party ECDH 
 
 Derive MKenc & MKmac
 Generate MAC,
-Encrypt message 0_0
+Encrypt message 0
 
-Send data message 0_0            -------------------->
+Send data message 0            -------------------->
 
 Derive MKenc & MKmac
 Generate MAC,
-Encrypt message 0_1
+Encrypt message 1
 
-Send data message 0_1            -------------------->
+Send data message 1            -------------------->
 
-                                                       Receive data message 0_0
-                                                       Compute receiving chain key 0_0
+                                                       Receive data message 0
+                                                       Compute receiving chain key 0
                                                        Derive MKenc & MKmac
-                                                       Verify MAC, Decrypt message 0_0
+                                                       Verify MAC, Decrypt message 0
 
-                                                       Receive data message 0_1
-                                                       Compute receiving chain key 0_1
+                                                       Receive data message 1
+                                                       Compute receiving chain key 1
                                                        Derive MKenc & MKmac
-                                                       Verify MAC, Decrypt message 0_1
+                                                       Verify MAC, Decrypt message 1
 
                                  Perform a new DH Ratchet
 
                                                        Derive MKenc & MKmac
                                                        Generate MAC,
-                                                       Encrypt message 1_0
+                                                       Encrypt message 0
 
-                                 <-------------------- Send data message 1_0
+                                 <-------------------- Send data message 0
 
                                                        Derive MKenc & MKmac
                                                        Generate MAC,
-                                                       Encrypt message 1_1
+                                                       Encrypt message 1
 
-                                 <-------------------- Send data message 1_1
+                                 <-------------------- Send data message 1
 
-Receive data message 1_0
-Compute receiving chain key 1_0
+Receive data message 0
+Compute receiving chain key 0
 Derive MKenc & MKmac
-Verify MAC, Decrypt message 1_0
+Verify MAC, Decrypt message 0
 
-Receive data message 1_1
-Compute receiving chain key 1_1
+Receive data message 1
+Compute receiving chain key 1
 Derive MKenc & MKmac
-Verify MAC, Decrypt message 1_1
+Verify MAC, Decrypt message 1
 ```
 
 ### Data Message
@@ -3048,9 +3059,6 @@ Flags (BYTE)
 
 Previous chain message number (INT)
   This should be set with sender's pn.
-
-Ratchet id (INT)
-  This should be set with sender's i.
 
 Message id (INT)
   This should be set with sender's j.
@@ -3108,10 +3116,10 @@ Given a new DH Ratchet:
   * Calculate the Mixed shared secret
     `K = KDF_1(usageSharedSecret  || K_ecdh || brace_key, 64)`. Securely deletes
     `K_ecdh`.
+  * Interpret `curr_root_key` as `prev_root_key`, if present.
   * Derive new set of keys:
-    `root_key[i], chain_key_s[i][j] = derive_ratchet_keys(sending, root_key[i-1], K)`.
-  * Securely delete the previous root key (`root_key[i-1]`) and `K`.
-  * Increment the ratchet id `i = i + 1`.
+    `curr_root_key, chain_key_s[j] = derive_ratchet_keys(sending, prev_root_key, K)`.
+  * Securely delete the previous root key (`prev_root_key`) and `K`.
   * If present, forget and reveal MAC keys. The conditions for revealing MAC
     keys are stated in the [Revealing MAC Keys](#revealing-mac-keys) section.
   * Derive the next sending chain key, `MKenc` and `MKmac`, and encrypt the
@@ -3120,19 +3128,18 @@ Given a new DH Ratchet:
 When sending a data message in the same DH Ratchet:
 
   * Set `j` as the Data message's message id.
-  * Set `i - 1` as the Data message's ratchet id.
   * Set `pn` as the Data message's previous chain message number.
   * Derive the next sending chain key
-    `chain_key_s[i-1][j+1] = KDF_1(usageNextChainKey || chain_key_s[i-1][j], 64)`.
+    `chain_key_s[j+1] = KDF_1(usageNextChainKey || chain_key_s[j], 64)`.
   * Calculate the encryption key (`MKenc`), the MAC key (`MKmac`) and, if needed
     the extra symmetric key:
 
    ```
-     MKenc, MKmac = derive_enc_mac_keys(chain_key_s[i-1][j])
-     extra_symm_key = KDF_1(usageExtraSymmKey || 0xFF || chain_key_s[i-1][j], 32)
+     MKenc, MKmac = derive_enc_mac_keys(chain_key_s[j])
+     extra_symm_key = KDF_1(usageExtraSymmKey || 0xFF || chain_key_s[j], 32)
    ```
 
-  * Securely delete `chain_key_s[i-1][j]`.
+  * Securely delete `chain_key_s[j]`.
   * Generate a new random 24 bytes value to be the `nonce`.
   * Use the `MKenc` to encrypt the message:
 
@@ -3209,17 +3216,17 @@ This is done by:
       * If `chain_key_r` is not `NULL`:
          * while `k` < received `Previous chain message number`:
              * Derive
-               `chain_key_r[i][k+1] = KDF_1(usageNextChainKey || chain_key_r[i][k], 64)`
-               and `MKenc = KDF_1(usageMessageKey || chain_key_r[i][k], 32)`
+               `chain_key_r[k+1] = KDF_1(usageNextChainKey || chain_key_r[k], 64)`
+               and `MKenc = KDF_1(usageMessageKey || chain_key_r[k], 32)`
              * Derive (this is done any time a message key is stored as
                there is no way of knowing if the message that will be received
                in the future will ask for the computation of the extra
                symmetric key):
-               `extra_symm_key = KDF_1(usageExtraSymmKey || 0xFF || chain_key_r[i][j], 32)`.
+               `extra_symm_key = KDF_1(usageExtraSymmKey || 0xFF || chain_key_r[k], 32)`.
              * Store
                `MKenc, extra_sym_key = skipped_MKenc[their_ecdh, k]`.
              * Increment `k = k + 1`.
-             * Delete `chain_key_r[i][k]`.
+             * Delete `chain_key_r[k]`.
   * Rotate the ECDH keys and brace key, see
     [Rotating ECDH Keys and Brace Key as receiver](#rotating-ecdh-keys-and-brace-key-as-receiver)
     section.
@@ -3228,8 +3235,9 @@ This is done by:
   * Set `k` as 0.
   * Calculate `K = KDF_1(usageSharedSecret || K_ecdh || brace_key, 64)`.
     Securely delete `K_ecdh`.
+  * Interpret `curr_root_key` as `prev_root_key`, if present.
   * Derive new set of keys
-    `root_key[i], chain_key_r[i][k] = derive_ratchet_keys(receiving, root_key[i-1], K)`.
+    `curr_root_key, chain_key_r[k] = derive_ratchet_keys(receiving, prev_root_key, K)`.
   * Securely delete the previous root key (`root_key[i-1]`) and `K`.
   * Increment the ratchet id `i = i + 1`.
   * Derive the next receiving chain key, `MKenc` and `MKmac`, and decrypt the
@@ -3243,30 +3251,30 @@ This is done by:
     * If `chain_key_r` is not `NULL`:
       * while `k` < received `message_id`:
         * Derive
-          `chain_key_r[i][k+1] = KDF_1(usageNextChainKey || chain_key_r[i][k], 64)`
-           and `MKenc = KDF_1(usageMessageKey || chain_key_r[i][k], 32)`
+          `chain_key_r[k+1] = KDF_1(usageNextChainKey || chain_key_r[k], 64)`
+           and `MKenc = KDF_1(usageMessageKey || chain_key_r[k], 32)`
         * Derive (this is done any time a message key is stored as
           there is no way of knowing if the message that will be received
           in the future will ask for the computation of the extra
           symmetric key):
-          `extra_symm_key = KDF_1(usageExtraSymmKey || 0xFF || chain_key_r[i-1][j], 32)`.
+          `extra_symm_key = KDF_1(usageExtraSymmKey || 0xFF || chain_key_r[k], 32)`.
         * Store
           `MKenc, extra_sym_key = skipped_MKenc[their_ecdh, k]`.
         * Increment `k = k + 1`.
-        * Delete `chain_key_r[i-1][k]`.
+        * Delete `chain_key_r[k]`.
   * Calculate the encryption and MAC keys (`MKenc` and `MKmac`).
 
     ```
-      MKenc, MKmac = derive_enc_mac_keys(chain_key_r[i-1][k])
-      extra_symm_key = KDF_1(usageExtraSymmKey || 0xFF || chain_key_r[i-1][k], 32)
+      MKenc, MKmac = derive_enc_mac_keys(chain_key_r[k])
+      extra_symm_key = KDF_1(usageExtraSymmKey || 0xFF || chain_key_r[k], 32)
     ```
   * Use the `MKmac` to verify the MAC of the message. If the verification fails:
       * Reject the message.
       * Delete the derived `MKenc` and `MKmac`.
   * Otherwise:
       * Derive the next receiving chain key:
-        `chain_key_r[i-1][k+1] = KDF_1(usageNextChainKey || chain_key_r[i-1][k], 64)`.
-      * Securely delete `chain_key_r[i-1][k]`.
+        `chain_key_r[k+1] = KDF_1(usageNextChainKey || chain_key_r[k], 64)`.
+      * Securely delete `chain_key_r[k]`.
       * Increment the next receiving message id `k = k + 1`.
       * Set `nonce` as the "nonce" from the received data message.
       * Decrypt the message using `MKenc` and `nonce`:
