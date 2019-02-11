@@ -265,12 +265,11 @@ ignore the message:
 ```
   1. Check that all the instance tags on the Prekey Ensemble's values are the
      same.
-  2. [Validate the Client Profile](../otrv4.md#validating-a-client-profile).
-  3. [Validate the Prekey Profile](../otrv4.md#validating-a-prekey-profile).
+  2. Validate the Client Profile.
+  3. Validate the Prekey Profile.
   4. Check that the Prekey Profile is signed by the same long-term public key
      stated on it and on the Client Profile.
-  5. Verify the Prekey message as stated on its
-     [section](../otrv4.md#prekey-message).
+  5. Verify the Prekey message as stated on its section.
   6. Check that the OTR version of the prekey message matches one of the
      versions signed in the Client Profile contained in the Prekey Ensemble.
   7. Check if the Client Profile's version is supported by the receiver.

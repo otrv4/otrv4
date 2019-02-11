@@ -1,4 +1,4 @@
-## ADR 5: Brace keys
+## ADR 5: Brace key
 
 ### Context
 
