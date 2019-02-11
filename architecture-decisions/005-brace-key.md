@@ -56,7 +56,7 @@ function that takes as an input the previous brace key
 
 This key has a 128-bit security level  according to Table 2: Comparable
 strengths in NIST’s Recommendation for Key Management,
-page 53 [\[2\]](#references).
+page 53 [\[1\]](#references).
 
 **generateDH function: generateDH()**
 
