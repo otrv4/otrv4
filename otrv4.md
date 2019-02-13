@@ -3953,7 +3953,7 @@ A received data message will look like this:
 
 ```
   ["?OTR" || protocol version || message type || sender's instance_tag ||receiver's instance tag ||
-    flags || previous chain message number || ratchet id || message id || public ECDH key ||
+    flags || previous chain message number || message id || public ECDH key ||
     public DH key || nonce || enc(plaintext message || TLV) || authenticator ||
     old MAC keys to be revealed ]
 ```
