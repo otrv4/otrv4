@@ -3812,7 +3812,8 @@ If the state is `WAITING_AUTH_R`:
         This means that the other side have the lower hash value and, therefore,
         will keep going as stated below.
     * Otherwise:
-      * Forget your old `our_ecdh` and `our_dh` values that you sent earlier.
+      * Forget the old `our_ecdh`, `our_dh`, `our_ecdh_first.public`
+        and `our_dh_first.public` values that you sent earlier.
       * Pretend you are on `START` state.
       * Send a new Auth-R message.
       * Transition state to `WAITING_AUTH_I`.
@@ -3904,10 +3905,11 @@ If the state is not `WAITING_AUTH_R`:
 
 #### Sending a Data Message to an offline participant
 
-* Generate and send a Non-Interactive-Auth message.
+* Generate and send a Non-Interactive-Auth message (replace any state or key
+  variables).
 * Initialize the double ratcheting, as defined in the
   [Non-Interactive DAKE Overview](#non-interactive-dake-overview) section.
-* If not already in this state, transition to state `ENCRYPTED_MESSAGES`.
+* If not already in this state, transition `ENCRYPTED_MESSAGES` state.
 * If there is a recent stored plaintext message, encrypt it and send it.
 
 #### Receiving a Non-Interactive-Auth Message
@@ -3921,7 +3923,7 @@ If the state is not `WAITING_AUTH_R`:
     * Ignore this message.
 
   * Otherwise:
-    * Forget any set values.
+    * Forget any set values (state or key variables).
     * Validate the Non-Interactive-Auth message.
     * Initialize the double ratcheting, as defined in the
       [Non-Interactive DAKE Overview](#non-interactive-dake-overview) section.
@@ -3959,8 +3961,9 @@ A received data message will look like this:
 If the version is 4:
 
 * If the state is not `ENCRYPTED_MESSAGES`:
-  * If the ratchet id is 0, store this message for a configurable, short amount
-    of time (10-60 minutes is recommended).
+  * If this is the first DH ratchet after a DAKE, store this message for a
+    configurable, short amount of time configurable by the client (10-60 minutes
+    is recommended).
   * Otherwise:
     * Inform the user that an unreadable encrypted message was received by
       replying with an Error Message: `ERROR_2`.
