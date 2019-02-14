@@ -1449,6 +1449,11 @@ Also, if a user has multiple client locations concurrently in use, it is
 expected that they have multiple Client Profiles simultaneously published and
 valid.
 
+A Clien Profile can be used to prevent rollback attacks. As a query message can
+be intercepted and changed by a MITM to enforce the lowest version advertised,
+a participant can check for the published Client Profile to see if this is
+indeed the highest supported version.
+
 ### Client Profile Data Type
 
 ```

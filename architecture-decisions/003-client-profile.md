@@ -15,7 +15,7 @@ really determine if participants are using the highest version they both
 support.
 
 OTRv4 seeks to protect future versions of OTR against these rollback attacks
-while providing backward compatibility.
+while providing backwards compatibility.
 
 Furthermore, as both DAKEs in OTRv4 (interactive and non-interactive) require
 an implementation-defined identifier for both parties, we are using the Client
