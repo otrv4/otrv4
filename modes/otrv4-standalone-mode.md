@@ -40,8 +40,6 @@ differ in these sections:
   a participant sends an Identity message. In this mode, there is no
   advertisement of which version a participant supports as both parties
   only support OTRv4.
-- "Shared Session State": do not include any query message or the whitespace tag
-  as part of `phi`.
 - "Creating a Client Profile": the `Versions` field must only allow the 1-byte
   version string "4".
 - "Creating a Client Profile": the `Transitional Signature` field is not allowed
