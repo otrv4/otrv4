@@ -988,10 +988,7 @@ The shared session state (Φ) verifies shared state from the higher-level
 protocol as well as from OTR itself. Therefore, an implementer (who has complete
 knowledge of the application network stack) should define a known shared session
 state from the higher-level protocol as `phi'`, as well as include the values
-imposed by this specification. Notice that the inclusion of the query message or
-the whitespace tag depends on the mode the protocol is initialized with. In the
-case of OTRv4-standalone and OTRv4-interactive-only modes, these values are not
-included.
+imposed by this specification.
 
 Note that varible length fields are encoded as DATA. If `phi'` is a string, it
 will be encoded in UTF-8.
@@ -1001,8 +998,7 @@ tag by numerical order and any string passed to `phi'` lexicographically.
 
 ```
   session identifier mandated by the OTRv4 spec = sender and receiver's instance
-    tags, first ephemeral keys for the double ratchet initialization, or/and the
-    query message or the whitespace tag
+    tags, first ephemeral keys for the double ratchet initialization
   phi' = session identifier defined by the implementer
   phi = session identifier mandated by the OTRv4 spec || phi'
 ```
@@ -1020,10 +1016,9 @@ look like:
 ```
   phi = sender's instance tag || receiver's instance tag || our_ecdh_first ||
         our_dh_first || their_ecdh_first || their_dh_first ||
-        DATA(query message) || DATA(sender's bare JID) ||
-        DATA(receiver's bare JID)
+        DATA(sender's bare JID) || DATA(receiver's bare JID)
   phi = 0x00000100 || 0x00000101 || 0x57 || 0x164 || 0x57 || 0x164 ||
-        DATA("?OTRv4?") || DATA("alice@jabber.net") || DATA("bob@jabber.net")
+        DATA("alice@jabber.net") || DATA("bob@jabber.net")
 ```
 
 ### Secure Session ID
