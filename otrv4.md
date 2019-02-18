@@ -288,8 +288,8 @@ value itself.
 
 In the interactive DAKE, although access to one participant's private long-term
 key is required for authentication, both participants can deny having used
-their private long-term keys. A forged transcript of the DAKE can be produced at
-any time by anyone who knows the long-term public keys of both alleged
+their private long-term keys. A forged transcript of the DAKE can be produced
+by anyone who knows the long-term public keys of both alleged
 participants. This capability is called offline deniability because no
 transcript provides evidence of a past key exchange, as it could have being
 forged by anyone. This property is provided for both participants taking part in
@@ -302,7 +302,9 @@ perform arbitrary protocols with these third parties. A KCI attack begins when
 the long-term secret key of a participant of a vulnerable DAKE is compromised.
 With this secret key, an adversary can impersonate other users to the owner of
 the key. The property by which participants cannot provide proof of
-participation to third parties is known as online deniability.
+participation to third parties is known as online deniability. Notice that OTRv4
+uses 'forging keys' to provide online deniability and to prevent KCI attacks at
+the same time.
 
 Online deniability can be broken in two ways: 1. coercive judges, when an
 online judge coerces a participant into interactively proving that messages were
@@ -320,7 +322,7 @@ public keys. The interactive DAKE provides online deniability for both
 parties.
 
 In the non-interactive DAKE, the initiator (Bob, in the above overview) has
-participation deniability, but Alice, the responder, does not. This happens as
+online deniability, but Alice, the responder, does not. This happens as
 there can exist a protocol whereby a third party, with Alice's help, can
 establish an authenticated conversation with Bob in Alice's name without having
 to learn her private keys. This generates irrefutable cryptographic proof that a
@@ -354,11 +356,12 @@ decrypted by passive attackers, then the protocol is said to have backward
 secrecy. Furthermore, if the compromise of a single session key is not
 permanent, as, after some time, subsequent messages will be impossible to
 decrypt again because of the "self-healing" nature of the algorithm, then the
-protocol is said to have post-compromise security. OTRv4, by using the Double
-Ratchet Algorithm, provides these three properties. If key material used to
-encrypt a particular data message is compromised, previous messages are
-protected. Additionally, future messages are protected by the Diffie-Hellman and
-Elliptic Curve Diffie-Hellman ratchets.
+protocol is said to have post-compromise security. In the current academic
+literature, backwars secrecy is included in post-compromise security. OTRv4, by
+using the Double Ratchet Algorithm, provides these two properties: forward
+secrecy and post-compromise security. If key material used to encrypt a
+particular data message is compromised, previous and future messages are
+protected.
 
 The DAKEs in OTRv4 provide contributiveness as well. This means that the
 initiator of the protocol cannot force the shared secret to take on a specific
