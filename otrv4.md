@@ -2289,7 +2289,7 @@ A valid Auth-R message is generated as follows:
     B || A || KDF_1(usageAuthRPhi || phi, 64)`.
    `phi` is the shared session state as mention in its
    [section](#shared-session-state).
-1. Compute `sigma = RSig(Ha, sk_ha, {Fb, Ha, Y}, t)`, as defined in
+1. Compute `sigma = RSig(H_a, sk_ha, {F_b, H_a, Y}, t)`, as defined in
    [Ring Signature Authentication](#ring-signature-authentication).
 1. Generate a 4-byte instance tag to use as the sender's instance tag.
    Additional messages in this conversation will continue to use this tag as the
@@ -2325,7 +2325,8 @@ To verify an Auth-R message:
    B || A || KDF_1(usageAuthRPhi || phi, 64)`. `phi` is the shared session state
    as mention in its [section](#shared-session-state).
 1. Verify the `sigma` as defined in
-   [Ring Signature Authentication](#ring-signature-authentication).
+   [Ring Signature Authentication](#ring-signature-authentication):
+   `RVrf({F_b, H_a, Y}, sigma, t)`.
 
 An Auth-R message is an OTRv4 message encoded as:
 
@@ -2377,7 +2378,7 @@ A valid Auth-I message is generated as follows:
     B || A || KDF_1(usageAuthIPhi || phi, 64)`.
    `phi` is the shared session state as mention in its
    [section](#shared-session-state).
-1. Compute `sigma = RSig(Hb, sk_hb, {Hb, Fa, X}, t)`, as defined in
+1. Compute `sigma = RSig(H_b, sk_hb, {H_b, F_a, X}, t)`, as defined in
    [Ring Signature Authentication](#ring-signature-authentication).
 1. Continue to use the sender's instance tag.
 
@@ -2393,7 +2394,8 @@ To verify an Auth-I message:
    `phi` is the shared session state as mention in its
    [section](#shared-session-state).
 1. Verify the `sigma` as defined in
-   [Ring Signature Authentication](#ring-signature-authentication).
+   [Ring Signature Authentication](#ring-signature-authentication):
+   `RVrf({H_b, F_a, X}, sigma, t)`.
 
 An Auth-I is an OTRv4 message encoded as:
 
@@ -2734,7 +2736,7 @@ A valid Non-Interactive-Auth message is generated as follows:
     KDF_1(usageNonIntAuthAliceClientProfile || Alice_Client_Profile, 64) ||
     Y || X || B || A || their_shared_prekey ||
     KDF_1(usageNonIntAuthPh || phi, 64)`.
-1. Compute `sigma = RSig(Ha, sk_ha, {Fb, Ha, Y}, t)`. Refer to
+1. Compute `sigma = RSig(H_a, sk_ha, {F_b, H_a, Y}, t)`. Refer to
    the [Ring Signature Authentication](#ring-signature-authentication) section
    for details.
 1. Attach the 'Prekey Message Identifier' that is stated in the retrieved
@@ -2756,7 +2758,8 @@ To verify a Non-Interactive-Auth message:
    [Ring Signature Authentication](#ring-signature-authentication) section. As
    multiple client profiles can coexist on local storage for a short amount of
    time, if the sigma verification fails and there are others profiles in local
-   storage, use them to generate `t` and validate `sigma`.
+   storage, use them to generate `t` and validate `sigma`:
+   `RVrf({F_b, H_a, Y}, sigma, t)`.
 
 A Non-Interactive-Auth is an OTRv4 message encoded as:
 
