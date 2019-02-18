@@ -797,7 +797,7 @@ OTRv4 public authentication Ed448 key (ED448-PUBKEY):
 ```
 
 In addition, OTRv4 also has a long-lived forging key, used to protect against
-the KCI vulnerability. This type is serialized as follows:
+KCI attacks. This type is serialized as follows:
 
 ```
 OTRv4 public Ed448 forging key (ED448-FORGING-KEY):
@@ -859,15 +859,21 @@ is denoted 'sym_d'.
 The forging key can be generated in one of two different ways - either by
 generating the key as detailed above, just like the other long lived Ed448 keys,
 or by directly generating a point on the curve without the corresponding
-secret. The choice depends on whether the implementation aims to provide support
-for using the forging secret or not. If the secret will not be used, it's
-significantly more secure to not even have the secret generated, even for an
-instant. But if the secret will potentially be used, the key should be generated
-as above.
+secret. An implementation that uses OTRv4 must always implement the forging
+keys. It should ask users whether or not they would like to save the secret part
+of the forging keys, or only generate a point in the curve. Even if most users
+select the default option to securely erase the forging keys, thereby preventing
+them from performing online forgery techniques, someone watching the protocol
+does not generally know the choice of a particular user. Consequently, a judge
+that engages in a conversation using a compromised device is given two
+explanations: either the conversation is genuine, or the owner of the device was
+one of the users that elected to store the forgery keys and they are using those
+keys to forge the conversation. The result is that online deniability is
+preserved, while preventing KCI attacks.
 
 In order to generate a point directly, 57 bytes can be generated randomly,
 deserialized and checked whether the point corresponds to a valid point. Another
-choice would be use the Elligator algorithm.
+choice would be use the Elligator technique.
 
 Public keys have fingerprints, which are hex strings that serve as identifiers
 for the public key. The full OTRv4 fingerprint is calculated by taking the
@@ -1434,11 +1440,17 @@ can be regenerated and published once the older Client Profile expires. This is
 also the reason why we recommend a short expiration date, so values can be
 easily revoked.
 
-Notice that the lifetime of the long-term public key is exactly the same as the
-lifetime of the Client Profile. If you have no valid Client Profile available
-for a specific long-term public key, that long-term public key should be treated
-as invalid. This also implies that a public key can go from being valid, to
-invalid, and back to valid.
+Notice that the valid lifetime of the long-term public key and forging public
+key is exactly the same as the lifetime of the Client Profile. If you have no
+valid Client Profile available for a specific long-term public key or for a
+specific forging public key, that long-term public key or forging public key
+should be treated as invalid. This also implies that a long term public key or
+forging public key can go from being valid, to invalid, and back to valid.
+Notice, nevertheless, that long-term public keys and forging public keys can
+live longer than a Client Profile. A long-term public keys or forging public key
+does not need to be generated every time a Client Profile is renewed. But a
+long-term public key or a forging public key is only valid for the amount of
+time a Client Profile (that has them) is valid.
 
 A Client Profile also includes an instance tag. This value is used for locally
 storing and retrieving the Client Profile during the non-interactive DAKE. This
@@ -2954,6 +2966,34 @@ always bypass this forgery attempt by obtaining a legitimate prekey ensemble
 from Bob and using this to respond. This limitation of the non-interactive DAKE
 is conjectured to be insurmountable by a two-flow non-interactive protocol
 [\[13\]](#references).
+
+### Forger Keys
+
+For OTRv4, the above KCI vulnerability is undesirable. For this reason, the
+protocol design includes 'forging keys', which should be generated and
+implemented. To use them, both DAKEs can be altered to include this long-term
+forging keys for all participants. In the case of non-interactive conversations,
+for example, Bob distributes these keys on his Client Profile. Alice, after
+retriving the Prekey Ensemble, extracts the 'OTRv4 public Ed448 forging key'
+(`F_b`) and uses to compute `sigma = RSig(H_a, sk_ha, {F_b, Ha, Y}, t)`.
+
+This transformation changes all long-term public keys in the protocol that are
+not used in the “honest” case to reference to the forging keys instead. This
+alteration allows the forging keys to be stored more securely than the “honest”
+long-term public keys; since the forging keys are not needed for normal
+operation, they may be stored offline. Additionally, long-term forging keys
+don't need to be generated like the long-term public keys; they can be a random
+valid point on the curve. Alternatively, the forging secret keys can be
+destroyed immediately after generation.
+This last option should be implemented for users. A secure messaging application
+should ask users whether or not they would like to save the forging keys duringsetup. Even if most users select the default option to securely erase the
+forging keys, thereby preventing them from performing the online forgery
+techniques described in the section above, a judge does not generally know the
+choice of a particular user. Consequently, a judge that engages in a
+conversation using a compromised device is given two explanations: either the
+conversation is genuine, or the owner of the device was one of the users that
+elected to store the forgery keys and they are using those keys to forge the
+conversation.
 
 ## Data Exchange
 
