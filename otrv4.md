@@ -857,23 +857,33 @@ is denoted 'sym_d'.
 ```
 
 The forging key can be generated in one of two different ways - either by
-generating the key as detailed above, just like the other long lived Ed448 keys,
-or by directly generating a point on the curve without the corresponding
-secret. An implementation that uses OTRv4 must always implement the forging
-keys. It should ask users whether or not they would like to save the secret part
-of the forging keys, or only generate a point in the curve. Even if most users
-select the default option to securely erase the forging keys, thereby preventing
-them from performing online forgery techniques, someone watching the protocol
-does not generally know the choice of a particular user. Consequently, a judge
-that engages in a conversation using a compromised device is given two
-explanations: either the conversation is genuine, or the owner of the device was
-one of the users that elected to store the forgery keys and they are using those
-keys to forge the conversation. The result is that online deniability is
-preserved, while preventing KCI attacks.
+generating the key as detailed above, just like the 'honest' long lived Ed448
+keys, or by directly generating a point on the curve without its corresponding
+secret, as detailed below. An implementation that uses OTRv4 must always
+implement the forging keys. It should ask users whether or not they would like
+to save the secret part of the forging keys (even if they are generated only as
+a point in the curve). Even if most users select the default option to securely
+erase the forging keys, thereby preventing them from performing online forgery
+techniques, someone watching the protocol does not generally know the choice of
+the particular user. Consequently, someone that engages in a conversation using
+a compromised device is given two explanations: either the conversation is
+genuine, or the owner of the device was one of the users that elected to store
+the forgery keys and they are using those keys to forge the conversation. The
+result is that online deniability is preserved, while preventing KCI attacks.
 
-In order to generate a point directly, 57 bytes can be generated randomly,
-deserialized and checked whether the point corresponds to a valid point. Another
-choice would be use the Elligator technique.
+In order to generate a point directly on the curve:
+
+either:
+
+1. Generate 57 bytes of cryptographically secure random data (`buf`).
+2. Deserialized `buf` into a POINT.
+3. Check whether it is a valid point. See
+   [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
+   section for details.
+
+or:
+
+1. Use the Elligator technique [\[15\]](#references).
 
 Public keys have fingerprints, which are hex strings that serve as identifiers
 for the public key. The full OTRv4 fingerprint is calculated by taking the
@@ -5234,3 +5244,7 @@ Compute:
 14. Antipa, A., Brown D., Menezes, A., Struik R., and Vanstone, S. (2015).
     *Validation of Elliptic Curve Public Keys*. Available at:
     https://iacr.org/archive/pkc2003/25670211/25670211.pdf
+15. Bernstein, D., Hamburg, M., Krasnova, A., and Lange T. (2013).
+    *Elligator: Elliptic-curve points indistinguishable from uniform random
+    strings*. Available at:
+    https://elligator.cr.yp.to/elligator-20130828.pdf
