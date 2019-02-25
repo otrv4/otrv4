@@ -4302,10 +4302,7 @@ generators, `g2` and `g3`. A valid SMP message 1 is generated as follows:
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
 1. Generate a zero-knowledge proof that the value `a2` is known by setting
-   `c2 = HashToScalar(0x01 || G * r2)` and `d2 = r2 - a2 * c2 mod q`. Prior to
-   be encoded as a SCALAR, `d2` should be hashed and pruned as defined in the
-   [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
-   section.
+   `c2 = HashToScalar(0x01 || G * r2)` and `d2 = r2 - a2 * c2 mod q`.
 1. Generate a zero-knowledge proof that the value `a3` is known by setting
    `c3 = HashToScalar(0x02 || G * r3)` and `d3 = r3 - a3 * c3 mod q`.
 1. Store the values of `x`, `a2` and `a3` for use later in the protocol.
