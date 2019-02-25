@@ -885,15 +885,15 @@ or:
 
 1. Use the Elligator technique [\[15\]](#references).
 
-Public keys have fingerprints, which are hex strings that serve as identifiers
-for the public key. The full OTRv4 fingerprint is calculated by taking the
-SHAKE-256 hash of the byte-level representation of the public key. To
-authenticate a long-term key pair, the [Socialist Millionaire's
-Protocol](#socialist-millionaires-protocol-smp) or a manual fingerprint
-comparison may be used. The fingerprint is generated as:
+Public keys (Ed448 public key) and forging keys (Ed448 public forging key) have
+fingerprints, which are hex strings that serve as identifiers. The full OTRv4
+public key fingerprint is calculated by taking the SHAKE-256 hash of the
+byte-level representation of the public key and the byte-level representation of
+the forging public key. To authenticate the long-term key pairs, the
+[Socialist Millionaire's Protocol](#socialist-millionaires-protocol-smp) or a
+manual fingerprint comparison may be used. The fingerprint is generated as:
 
-* `KDF_1(usageFingerprint || OTRv4 public authentication Ed448 key, 56)`
-  (224-bit security level).
+* `KDF_1(usageFingerprint || byte(H) || byte(F), 56)` (224-bit security level).
 
 ### Instance Tags
 
@@ -4122,7 +4122,7 @@ additional information about the secrets.
 
 OTRv4 makes a few changes to SMP:
 
-  * OTRv4 uses Ed448 as the cryptographic primitive. This changes the way
+  * OTRv4 uses Ed448 as a cryptographic primitive. This changes the way
   values are serialized and how they are computed. To define the SMP values
   under Ed448, we reuse the previously defined generator `G` for Ed448:
 
@@ -4135,7 +4135,7 @@ OTRv4 makes a few changes to SMP:
 
   * OTRv4 creates fingerprints using SHAKE-256. The fingerprint is generated as:
 
-      * Use of the first 56 bytes from the `KDF_1(usageFingerprint || byte(H), 56)`
+      * `KDF_1(usageFingerprint || byte(H) || byte(F), 56)`
 
   * SMP in OTRv4 uses all of the [TLV Record Types](#tlv-record-types) as OTRv3,
     except for SMP Message 1Q. When SMP Message 1Q is used in OTRv4, SMP Message
