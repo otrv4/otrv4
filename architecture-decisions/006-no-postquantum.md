@@ -28,5 +28,17 @@ attacks done in quantum computers. If elliptic curve cryptography and 3072-bit
 Diffie-Hellman can be attacked by quantum computers in the next upcoming years,
 OTRv4's primitives will become unsafe and unusable. However, the use of a
 3072-bit Diffie-Hellman "brace key" is used partly due to the potential of
-quantum computers arriving earlier than predicted. We want extra protection
-against post-conversation decryption of transcripts in this case.
+quantum computers arriving earlier than predicted. When fault-tolerant quantum
+computers break Ed448-Goldilocks keys, it will take some years beyond that point
+to break 3072-bit Diffie-Hellman keys. Notice, though, that the 3072-bit Diffie
+Hellman keys does not provide any kind of post-quantum confidentiality. We use
+them because, in theory, the Elliptic Curve Discrete Logarithm Problem (ECDLP)
+will be broken faster than the Discrete Logarithm Problem (DLP). According to
+[\[1\]](#references)), it will be needed 4060 qubits for breaking Ed448 and 6146
+for breaking 3072-bit Diffie Hellman.
+
+### References
+
+1. Roetteler, M., Naehri, M., Krysta M., and Lauter K. (2017).
+   *Quantum Resource Estimates for Computing Elliptic Curve Discrete Logarithms*.
+   Available at: https://eprint.iacr.org/2017/598.pdf

@@ -2,11 +2,17 @@
 
 ### Context
 
-We acknowledge that there may be unknown weaknesses in elliptic curves and
-that quantum computers may arrive earlier than predicted.
+We acknowledge that there may be unknown weaknesses in elliptic curve crytography
+and that quantum computers may arrive earlier than predicted.
 
-We propose an additional mechanism for protecting transcripts against
-post-conversation decryption.
+For this reason, we propose an additional mechanism for protecting transcripts
+against post-conversation decryption.
+
+OTRv4 does not take advantage of quantum resistant algorithms, as the key
+described here does not provide any kind of post-quantum confidentiality.
+When fault-tolerant quantum computers break Ed448-Goldilocks keys, it will take
+some years beyond that point to break the described 3072-bit Diffie-Hellman
+keys.
 
 ### Proposal
 

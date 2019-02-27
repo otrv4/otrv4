@@ -379,7 +379,10 @@ paragraphs only apply to non-quantum adversaries.
 
 The only exception is the usage of a "brace key" to provide some
 post-conversation transcript protection against potential weaknesses of elliptic
-curves and the early arrival of quantum computers.
+curves and the early arrival of quantum computers. Nevetheless, notice that the
+"brace key" does not provide any kind of post-quantum confidentiality.
+When fault-tolerant quantum computers break Ed448-Goldilocks keys, it will take
+some years beyond that point to break 3072-bit Diffie-Hellman keys.
 
 These security properties only hold for when a conversation with OTRv4 is
 started. They do not hold for the previous versions of the OTR protocol, meaning
