@@ -2,122 +2,147 @@
 
 ### Context
 
-Currently, OTRv3 supports previous OTR versions by allowing the user to configure
-their version policy to allow previous versions or not: when a user wants to
-have a conversation with someone, they send a query message which states
-which versions are supported. This message is sent as plaintext at the beginning
-of the protocol and, therefore, can be intercepted and changed by a MITM for a
-rollback attack.
+Currently, OTRv3 supports previous OTR versions by letting the user configure
+their version policy to allow or not previous versions: when a user wants to
+have a conversation with someone, they send a query message or whitespace tag
+which advertises which versions are supported, depending on the defined policy.
+This messages (the query message or the whitespace tag) are sent in plaintext at
+the beginning of the protocol and, therefore, can be intercepted and changed by
+a Man-in-the-middle (MitM) attack to advertise an older/previous version. This
+is what will be known as a "version" rollback attack.
 
-In a version rollback attack, a query message is intercepted and changed by
-a MITM to enforce the lowest version advertised, and the protocol is unable to
-really determine if participants are using the highest version both participants
-support.
+In a version rollback attack, a query message or whitespace tag is intercepted
+and changed by a MitM to enforce a lower version. At this instance, the protocol
+is unable to determine if the highest OTR version both participants support is
+been used.
 
 OTRv4 seeks to protect future versions of OTR against these rollback attacks
-while still providing backwards compatibility. The mechanism used for this is the
-usage of signed published Client Profiles.
+while still providing backwards compatibility with previous OTR versions. The
+mechanism used for this is the usage of signed published Client Profiles. A
+Client Profile is a profile that advertises some information related to an user
+using an specific client/device. It is published in an untrusted place and
+transmitted over the DAKEs.
 
-As both DAKEs in OTRv4 (interactive and non-interactive) require an
-implementation-defined identifier for both parties, the Client Profile is also
-used as that identifier. To achieve this, a copy of the generated Client Profile
-should be published in a public place to maintain the deniability properties of
-the overall protocol. This procedure allows two parties to send and verify each
-other's signed Client Profile during the DAKE without damaging participation
-deniability for the conversation, since the signed Client Profile is public
-information, and anyone could have published it.
-
-A Client Profile has an expiration date as this helps to revoke any past value
-stated on a previous profile. If a user's client, for example, changes its
-long-term public key, only the valid non-expired Client Profile is the one used
-for attesting that this is indeed the valid long-term public key. Any expired
-Client Profile with old long-term public keys is invalid. Moreover, as
-version advertisement is public information (it is stated in the published
-Client Profile), a participant will not be able to delete this information from
-public servers (if the Client Profile is published in them). To facilitate
-versions revocation or any of the other values revocation, the Client Profile
-can be regenerated and published once the older Client Profile expires. This is
-the reason why we recommend a short expiration date, so values can be easily
-revoked.
-
-Furthermore, notice that the lifetime of the long-term public key is exactly the
-same as the lifetime of the Client Profile. If you have no valid Client Profile
-available for a specific long-term public key, that long-term public key should
-be treated as invalid. Nevertheless, a long-term public key can live for longer
-than a Client Profile as long-term public keys are not generated every time a
-Client Profile is renewed.
-
-A Client Profile also includes an instance tag. This value is used for locally
-storing and retrieving the Client Profile during the non-interactive DAKE. This
-instance tag has to match the sender instance tag of any DAKE message the Client
-Profile is included in.
+Notice that using Client Profiles pertain some considerations: how can values
+be revoked, if an user changes any of them?; how is deniability maintained?;
+how are Client Profiles associated to devices/clients?
 
 ### Decision
 
-To address version rollback attacks and to keep deniability in OTRv4, both parties
-must exchange verified version information, without compromising their
-participation deniability while keeping backwards compatibility with OTRv3.
+To avoid version rollback attacks in OTRv4, both parties must exchange
+verified version information, without compromising the deniability properties.
+They must do so while maintaining backwards compatibility with OTRv3.
 
-On OTRv4, we still use query messages (for OTRv3 compatibility) but it's usage
-is more like a ping message.
+On OTRv4, we still use query messages and whitespace tags, depending on the
+mode OTRv4 is defined. These messages are mainly used as ping messages.
 
-We introduce a Client Profile in OTRv4, which includes:
+As stated, we introduce a Client Profile in OTRv4, which includes:
 
-1. The long-term public key of the participant. It is used for verifying the
-   Client Profile signature and to be exchanged during the DAKE. Participants
-   must  check whether they trust this key or not by doing manual fingerprint
-   verification or executing the Socialist Millionaries Protocol.
-2. Supported versions in the form of a string.
-3. Expiration date of the Client Profile.
-4. OTRv3 DSA long-term public key used for verifying the transitional signature.
-   Users must check whether they trust this key or not. This value is optional.
-5. A Transitional Signature, which is a signature of the Client Profile
-   excluding the Client Profile Signature and itself. It is signed by the
-   user's OTRv3 DSA long-term key. This value is optional.
-6. Client Profile signature of the above parts (including the Transitional
-   Signature and the OTRv3 DSA long-term public key if present).
+1. A Client Profile instance tag: an instance tag that defines the client/device
+   this profile was generated from.
+1. Ed448 public key: the long-term public key associated with an user in
+   relationship with its client/device. It is used to verify the signature of
+   the Client Profile and to be exchanged during the DAKE. Participants must
+   check whether they trust this key and the next one by doing a manual
+   fingerprint verification or executing the Socialist Millionaires Protocol.
+1. Ed448 public forging key: the long-term forging public key associated with an
+   user in relationship with its client/device. It is used to preserve online
+   deniability, while somewhat preventing Key Compromise Impersonation (KCI)
+   attacks. Participants must check whether they trust this key and the previous
+   one by doing a manual fingerprint verification or executing the Socialist
+   Millionaires Protocol.
+1. Versions: A string listing the supported versions for client/device defined
+   by the instance tag.
+1. Client Profile Expiration: the expiration date of the Client Profile.
+1. OTRv3 public authentication DSA key: The OTRv3 DSA long-term public key used
+   for verifying the transitional signature. Users must check whether they trust
+   this key or not. This value is optional.
+1. Transitional Signature: a Transitional Signature, which is a signature of the
+   Client Profile excluding the Client Profile Signature and itself. It is
+   signed by the Client Profile's OTRv3 DSA long-term key. This value is
+   optional.
+1. Client Profile Signature: A signature of the above fields (including the
+   Transitional Signature and the OTRv3 DSA long-term public key, if present).
+   The signature should be generated as defined in RFC 8032,[\[2\]](#references),
+   according to the EdDSA scheme. We chose this scheme because we are using
+   Ed448 in OTRv4.
 
-Note that a Client Profile is generated per client basis (hence, the name).
-Users are not expected to manage Client Profiles (theirs or from others). As a
-consequence, clients are discouraged to allow importing or exporting of Client
-Profiles. Also, if a user has multiple clients concurrently in use, it is
-expected that they have multiple Client Profiles simultaneously published and
-non-expired.
+Note that a Client Profile is generated per client/device basis (hence, the
+name). Users are not expected to manage Client Profiles (theirs or from others).
+As a consequence, clients are discouraged to allow importing or exporting of
+Client Profiles. Therefore, if an user has multiple clients concurrently in use,
+it is expected that they have multiple Client Profiles simultaneously published
+and non-expired.
 
-The Client Profile must be published publicly and updated before it expires. The
-main reason for doing this is that the publication allows two parties to send
-the signed Client Profile during the DAKE. Since this signed Client profile is
-public information, it does not damage participation deniability for the
-conversation. As a side affect, it is possible for the receiver of a Query
-Message that contains versions lower than four to check for a Client Profile
-and be able to detect a version rollback attack. Requesting a Client Profile
-from the server is not necessary for online conversations using OTRv4. It's
-important to note that the absence of a Client Profile is not proof that a user
-doesn't support OTRv4.
+As both DAKEs in OTRv4 (interactive and non-interactive) require an
+implementation-defined identifier for both parties (as defined
+in [\[1\]](#references)), the Client Profile is used as that identifier. In
+order to maintain the deniability properties of the overall OTRv4 protocol, a
+copy of the Client Profile should be published, as stated, in a public untrusted
+place. This procedure allows two parties to send and verify each other's signed
+Client Profile during the DAKE without damaging the deniability properties of
+the conversation: the signed Client Profile is public information, so anyone
+could have published it.
+
+The Client Profile must be published in a public place, and updated before it
+expires or when one of its values changes. This makes it possible for a
+participant that receives a Query Message or a whitespace tag that advertises
+versions lower than 4, to check for the published Client Profile from the other
+participant and detect a "version" rollback attack. Note that requesting a
+Client Profile is not necessary for online conversations; but it is necessary
+for offline conversations, as it is cached as prekey material in the Prekey
+server. It's important to note that the absence of a Client Profile is not proof
+that a user doesn't support OTRv4.
 
 Although it is possible to check for a version on a published Client Profile,
 this does not stop an attacker from spoofing responses about whether a Client
-Profile exists or not. In the case where an attacker spoofs the Query Message to
-contain a lower version (less than four) and the response to a request for a
-Client Profile, a version rollback attack is still possible. On the other hand,
+Profile exists in a public place or not. In the case where an attacker spoofs
+the Query Message to contain a lower version (less than 4) and the response
+to a request for a Client Profile to advertise that there is no published Client
+Profile, a "version" rollback attack is still possible. Nevertheless,
 the Client Profile will protect against version rollback attacks for OTRv4 and
-higher.
+higher, as those versions will always require the existence of Client Profiles,
+and they will be included on DAKE messages.
 
-If more than one valid Client Profile is available from the server defined by
-the client, the one with the latest expiry will take priority.
+A Client Profile has an expiration date to help revoke any past value advertised
+in a previous profile. If a user, for example, changes its long-term public key
+associated to a client/device, they will publish a new Client Profile and only
+this new valid non-expired Client Profile is the one used for attesting that
+this is indeed the valid long-term public key. Any expired Client Profile with
+old long-term public keys is invalid. Moreover, as version advertisement is
+public information (it is stated in the published Client Profile), a participant
+will not be able to delete this information from public servers (if the
+Client Profile is published in them). To facilitate version revocation or any of
+the other values revocation, the Client Profile can be regenerated and
+republished once the older Client Profile expires. A short expiration date is
+recommended for this reason: it is easier, therefore, to revoke values.
 
-The signature should be generated as defined in RFC 8032 according to the
-EdDSA scheme. We chose this scheme because we are using Ed448 for the rest of
-OTRv4.
+If more than one valid Client Profile is available in the public place defined
+by the client, the one with the latest expiry will take priority.
+
+Notice that the lifetime of the validity of the long-term public key is exactly
+the same as the lifetime of the Client Profile. If you have no valid Client
+Profile available for a specific long-term public key, and you receive a
+long-term public key, that long-term public key should be treated as invalid.
+Nevertheless, a long-term public key can live for a longer period of time than
+the Client Profile, as long-term public keys are not regenerated every time a
+Client Profile is renewed.
+
+A Client Profile includes an instance tag, as well. This value is used for
+locally storing and retrieving the Client Profile during the non-interactive
+DAKE, as it is associated with a device/client. This instance tag has to match
+the sender instance tag of any DAKE message the Client Profile is included in.
 
 #### Protecting from rollback in OTRv4
 
 Rollback from v4 protocol to v3 protocol cannot be fully detected by OTRv4, as
 Bob's DH-Commit message (from OTRv3) does not contain a Client Profile. After
-the AKE finishes, Alice could potentially contact the place where the Client
-Profile is published and ask for Bob's Client Profile to validate if Bob really
-does not support 4. This mechanism assumes that the place where the Client
-Profile is published is trusted.
+the OTRv3 AKE finishes, Alice can potentially contact the place where the
+Client Profile is published and check for Bob's Client Profile to validate if
+Bob really does not support version 4. This mechanism puts trust on the place
+where the Client Profile is published.
+
+A MitM attack that generates a "version" roolback attack looks like this:
 
 ```
 Alice                        Malory                         Bob
@@ -126,27 +151,27 @@ Alice                        Malory                         Bob
  The OTRv3 AKE continues.
 ```
 
-Rollback from vX (released after 4) protocol to v4 protocol can be fully
+Rollback from vX (defined after version 4) protocol to v4 protocol can be fully
 detected by OTRv4:
 
-- For OTRvX (released after OTRv4), the known state machine versions are:
+- For OTRvX (released after OTRv4), the known protocol versions are:
   X, ..., 4.
-- After receiving a Client Profile, an OTRvX client may cryptographically
-  verify that OTRvX is supported and enforce using that version.
+- After receiving a Client Profile, an OTRvX client will verify that OTRvX is
+  supported and enforce using the "X" version.
 
 ```
 Alice                               Malory                                Bob
  ?OTRvX4  ----------------------->  ?OTRv4  ---------------------------->
           <-------------------------------------------------------------  Identity Message (v4)
                                                                           + Client Profile (versions "X4")
- Detects the rollback and notifies the user. Should also abort the DAKE.
+ Bob's client detects the "version" rollback attack and notifies Bob. It should also abort the DAKE.
 ```
 
-Notice the following case is not a rollback because "X" is not a known version
-from Alice's perspective. Also notice that the list of known versions for OTRv4
-is (4, 3) - and 3 does not support Client Profiles. In this case, the only check
-you need to perform in OTRv4 is making sure "4" is in the received Client
-Profile.
+Consider that the following case is not a "version" rollback attack because "X"
+is not a known version from Alice's perspective. Also take into account that the
+list of known versions for OTRv4 is (4, 3), and version 3 does not support
+Client Profiles. For this reason, the only check to be performed in OTRv4 is
+making sure that "4" is in the version field of the received Client Profile.
 
 ```
 Alice                               Malory                                Bob
@@ -158,16 +183,33 @@ Alice                               Malory                                Bob
 
 ### Consequences
 
-Although it is possible to check for a version statement publication, this does
-not stop an attacker from spoofing responses about whether the version statement
-(or a Client Profile) exists or not. In this case an attacker can spoof the
-Query Message to contain version "3" and also spoof the response to a request
-for a Client Profile, making a rollback attack possible when the victims
-support OTRv3.
+OTRv4 makes uses of Client Profiles and mandates them to be published in an
+untrusted place. Client Profiles are needed to: advertise verified information:
+supported versions, long-term public keys, and instance tags; start offline
+conversations; and easily revoke values. They need to be published to: maintain
+the deniability properties, revoke past values and prevent "version" rollback
+attacks.
 
-As OTRv4 do not fix any known security issue on OTRv3 in regards to rollback
-attacks, it is acceptable for users to chat using version 3, but is preferable
-to use 4 if both parties support it.
+Note that, although, it is possible to check for a published version statement
+(in the published Client Profile), this does not stop an attacker from spoofing
+responses about whether the Client Profile exists or not. As stated, in this
+case, an attacker can spoof the Query Message to contain version "3" and also
+spoof the response to a request for a Client Profile. This causes a "version"
+rollback attack possible when a participant supports version 3.
 
-We will support a conversation using version 3 if a Query message advertises it
-and if we don't find any published Client Profile.
+As OTRv4 does not fix any known security issues in OTRv3 in regards to rollback
+attacks, it is acceptable for users to chat using version 3; but it is always
+preferable to use version 4 if both participants support it.
+
+OTR version 3 will be supported in a conversation if a Query message advertises
+that version and there can't be found any published Client Profile.
+
+### References
+
+1. Goldberg, I. and Unger, N. (2016). *Improved Strongly Deniable Authenticated
+   Key Exchanges for Secure Messaging*, Waterloo, Canada: University of
+   Waterloo. Available at:
+   http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf
+2. Josefsson, S. and Liusvaara, I. (2017). *Edwards-curve Digital Signature
+   Algorithm (EdDSA)*, Internet Engineering Task Force, RFC 8032. Available at:
+   https://tools.ietf.org/html/rfc8032
