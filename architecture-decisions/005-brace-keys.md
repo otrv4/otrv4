@@ -2,7 +2,7 @@
 
 ### Context
 
-We acknowledge that there may be unknown weaknesses in elliptic curve crytography
+We acknowledge that there may be unknown weaknesses in elliptic curve cryptography
 and that quantum computers may arrive earlier than predicted.
 
 For this reason, we propose an additional mechanism for protecting transcripts
