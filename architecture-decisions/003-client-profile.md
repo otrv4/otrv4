@@ -19,13 +19,14 @@ been used.
 OTRv4 seeks to protect future versions of OTR against these rollback attacks
 while still providing backwards compatibility with previous OTR versions. The
 mechanism used for this is the usage of signed published Client Profiles. A
-Client Profile is a profile that advertises some information related to an user
-using an specific client/device. It is published in an untrusted place and
-transmitted over the DAKEs.
+Client Profile is a profile that advertises some information (long-term public
+keys, versions supported, etc.) related to an user using an specific
+client/device. It is published in an untrusted place and transmitted over the
+appropriate DAKEs.
 
 Notice that using Client Profiles pertain some considerations: how can values
 be revoked, if an user changes any of them?; how is deniability maintained?;
-how are Client Profiles associated to devices/clients?
+how are Client Profiles associated with devices/clients?
 
 ### Decision
 
@@ -33,8 +34,9 @@ To avoid version rollback attacks in OTRv4, both parties must exchange
 verified version information, without compromising the deniability properties.
 They must do so while maintaining backwards compatibility with OTRv3.
 
-On OTRv4, we still use query messages and whitespace tags, depending on the
-mode OTRv4 is defined. These messages are mainly used as ping messages.
+In OTRv4, we still use query messages and whitespace tags from OTRv3, depending
+on the mode in which OTRv4 is defined. These messages are mainly used as ping
+messages.
 
 As stated, we introduce a Client Profile in OTRv4, which includes:
 
@@ -44,14 +46,14 @@ As stated, we introduce a Client Profile in OTRv4, which includes:
    relationship with its client/device. It is used to verify the signature of
    the Client Profile and to be exchanged during the DAKE. Participants must
    check whether they trust this key and the next one by doing a manual
-   fingerprint verification or executing the Socialist Millionaires Protocol.
+   fingerprint verification or by executing the Socialist Millionaires Protocol.
 1. Ed448 public forging key: the long-term forging public key associated with an
    user in relationship with its client/device. It is used to preserve online
    deniability, while somewhat preventing Key Compromise Impersonation (KCI)
    attacks. Participants must check whether they trust this key and the previous
    one by doing a manual fingerprint verification or executing the Socialist
    Millionaires Protocol.
-1. Versions: A string listing the supported versions for client/device defined
+1. Versions: A string listing the supported versions for a client/device defined
    by the instance tag.
 1. Client Profile Expiration: the expiration date of the Client Profile.
 1. OTRv3 public authentication DSA key: The OTRv3 DSA long-term public key used
@@ -64,7 +66,7 @@ As stated, we introduce a Client Profile in OTRv4, which includes:
 1. Client Profile Signature: A signature of the above fields (including the
    Transitional Signature and the OTRv3 DSA long-term public key, if present).
    The signature should be generated as defined in RFC 8032,[\[2\]](#references),
-   according to the EdDSA scheme. We chose this scheme because we are using
+   according to the EdDSA scheme. This scheme was chosen as we are using
    Ed448 in OTRv4.
 
 Note that a Client Profile is generated per client/device basis (hence, the
@@ -89,9 +91,10 @@ expires or when one of its values changes. This makes it possible for a
 participant that receives a Query Message or a whitespace tag that advertises
 versions lower than 4, to check for the published Client Profile from the other
 participant and detect a "version" rollback attack. Note that requesting a
-Client Profile is not necessary for online conversations; but it is necessary
-for offline conversations, as it is cached as prekey material in the Prekey
-server. It's important to note that the absence of a Client Profile is not proof
+Client Profile is not necessary for online conversations (unless checking for
+a version rollback attack is needed); but it is necessary for offline
+conversations, as it is cached as prekey material in the Prekey server. It's
+important to note that the absence of a Client Profile is not proof
 that a user doesn't support OTRv4.
 
 Although it is possible to check for a version on a published Client Profile,
@@ -139,10 +142,10 @@ Rollback from v4 protocol to v3 protocol cannot be fully detected by OTRv4, as
 Bob's DH-Commit message (from OTRv3) does not contain a Client Profile. After
 the OTRv3 AKE finishes, Alice can potentially contact the place where the
 Client Profile is published and check for Bob's Client Profile to validate if
-Bob really does not support version 4. This mechanism puts trust on the place
-where the Client Profile is published.
+Bob really does not support version 4. Note that this mechanism puts trust on
+the place where the Client Profile is published.
 
-A MitM attack that generates a "version" roolback attack looks like this:
+A MitM attack that generates a "version" rollback attack looks like this:
 
 ```
 Alice                        Malory                         Bob
@@ -164,7 +167,7 @@ Alice                               Malory                                Bob
  ?OTRvX4  ----------------------->  ?OTRv4  ---------------------------->
           <-------------------------------------------------------------  Identity Message (v4)
                                                                           + Client Profile (versions "X4")
- Bob's client detects the "version" rollback attack and notifies Bob. It should also abort the DAKE.
+ Alice's client detects the "version" rollback attack and notifies Alice. It should also abort the DAKE.
 ```
 
 Consider that the following case is not a "version" rollback attack because "X"
@@ -184,8 +187,8 @@ Alice                               Malory                                Bob
 ### Consequences
 
 OTRv4 makes uses of Client Profiles and mandates them to be published in an
-untrusted place. Client Profiles are needed to: advertise verified information:
-supported versions, long-term public keys, and instance tags; start offline
+untrusted place. Client Profiles are needed to: advertise verified information
+(supported versions, long-term public keys, and instance tags); start offline
 conversations; and easily revoke values. They need to be published to: maintain
 the deniability properties, revoke past values and prevent "version" rollback
 attacks.
@@ -199,9 +202,8 @@ rollback attack possible when a participant supports version 3.
 
 As OTRv4 does not fix any known security issues in OTRv3 in regards to rollback
 attacks, it is acceptable for users to chat using version 3; but it is always
-preferable to use version 4 if both participants support it.
-
-OTR version 3 will be supported in a conversation if a Query message advertises
+preferable to use version 4 if both participants support it. OTR version 3 will
+be supported in a conversation if a Query message or whitespace tag advertises
 that version and there can't be found any published Client Profile.
 
 ### References

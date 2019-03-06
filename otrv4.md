@@ -879,7 +879,7 @@ In order to generate a point directly on the curve:
 either:
 
 1. Generate 57 bytes of cryptographically secure random data (`buf`).
-2. Deserialized `buf` into a POINT.
+2. Deserialize `buf` into a POINT.
 3. Check whether it is a valid point. See
    [Verifying that a point is on the curve](#verifying-that-a-point-is-on-the-curve)
    section for details.
@@ -1404,8 +1404,8 @@ OTRv4 introduces Client Profiles. A Client Profile has an arbitrary number of
 fields, but some fields are required. A Client Profile contains the Client
 Profile owner instance tag, an Ed448 long-term public key, the Ed448 long-term
 forging public key, information about supported versions, a profile expiration
-date, a signature of all these, and an optional transitional signature. Thefore,
-the Client Profile has variable length.
+date, a signature of all these, and an optional transitional signature.
+Therefore, the Client Profile has variable length.
 
 There are two instances of the Client Profile that should be generated. One is
 used for authentication in both DAKEs (interactive and non-interactive). The
@@ -1413,8 +1413,8 @@ other should be published in a public place. This allows two parties to send and
 verify each other's Client Profiles during the DAKEs without damaging
 the deniability properties for the conversation, since the Client Profile is
 public information. A Client Profile is also published so it is easier to revoke
-any past value that could have been advertised on a previous Client Profile, and
-to prevent "version" rollback attacks.
+any past value that could have been advertised on a previous Client Profile, to
+to prevent "version" rollback attacks, and to start offline conversations.
 
 Each implementation should decide how to publish the Client Profile. For
 example, one client may publish profiles to a server pool (similar to a
@@ -1480,9 +1480,9 @@ expected that they have multiple Client Profiles simultaneously published and
 valid.
 
 A Client Profile can be used to prevent rollback attacks. As a query message can
-be intercepted and changed by a MitM to enforce the lowest version advertised,
-a participant can check for the published Client Profile to see if this is
-indeed the highest supported version.
+be intercepted and changed by a Man-in-the-Middle (MitM) to enforce the lowest
+version advertised, a participant can check for the published Client Profile to
+see if this is indeed the highest supported version.
 
 ### Client Profile Data Type
 
@@ -1495,12 +1495,12 @@ Client Profile (CLIENT-PROF):
   Client Profile Signature (CLIENT-EDDSA-SIG)
 ```
 
-The supported fields are:
+The supported fields should not be duplicated. They are:
 
 ```
 Client Profile owner instance tag (INT)
   Type = 0x0001
-  The instance tag of the client that created the Client Profile.
+  The instance tag of the client/device that created the Client Profile.
 
 Ed448 public key (ED448-PUBKEY)
   Type = 0x0002
@@ -1532,8 +1532,6 @@ Client Profile Expiration (CLIENT-PROF-EXP):
   8 bytes signed value, big-endian
 ```
 
-The supported fields should not be duplicated.
-
 `CLIENT-EDDSA-SIG` refers to the OTRv4 EDDSA signature:
 
 ```
@@ -1544,7 +1542,8 @@ EDDSA signature (CLIENT-EDDSA-SIG):
 
 `CLIENT-SIG` is the DSA Signature. It is the same signature as used in OTRv3.
 From the OTRv3 protocol, section "Public keys, signatures, and fingerprints",
-the format for a signature made by a OTRv3 DSA public key is as follows:
+the format for a signature generated with the OTRv3 DSA public key is as
+follows:
 
 ```
 DSA signature (CLIENT-SIG):
@@ -1577,7 +1576,7 @@ To create a Client Profile, generate:
    should only be done if the client doesn't already have an instance tag for
    this user.
 
-Then assemble:
+Then, assemble:
 
 1. Client Profile owner instance tag.
 1. Ed448 long-term public key.
@@ -1605,18 +1604,18 @@ Then:
 
 1. Assemble the previous fields as `Fields`.
 1. Assign the number of `Fields` as `Number of Fields`.
-1. The symmetric key, the flag `f` (set to
-   zero, as defined on RFC 8032 [\[9\]](#references)) and the empty context `c`
-   are used to create a signature of the entire Client Profile excluding the
-   signature itself. The size of the signature is 114 bytes. For its generation,
-   refer to
+1. Generate the Client Profile signature: The symmetric key, the flag `f` (set
+   to zero, as defined on RFC 8032 [\[9\]](#references)) and the empty
+   context `c` are used to create a signature of the entire Client Profile
+   excluding the signature itself. The size of the signature is 114 bytes. For
+   its generation, refer to
    [Create a Client Profile Signature](#create-a-client-profile-signature)
    section.
 
-After the Client Profile is created, it must be published in a public place.
-When using OTRv4 in OTRv3-compatible mode and OTRv4-standalone mode, notice that
-the Client Profile has to be published and stored in the untrusted Prekey Server
-used to store prekey messages.
+After the Client Profile is created, it must be published in a public untrusted
+place. When using OTRv4 in OTRv3-compatible mode and OTRv4-standalone mode,
+notice that the Client Profile has to be published and stored in the untrusted
+Prekey Server used to store prekey messages and Prekey Profiles.
 
 ### Establishing Versions
 
@@ -1636,9 +1635,9 @@ Any other version string that is not "4", "3", "2", or "1" should be ignored.
 ### Client Profile Expiration and Renewal
 
 If a renewed Client Profile is not published in a public place, the user's
-participation deniability is at risk. Participation deniability is also at risk
-if the only publicly available Client Profile is expired. For that reason, a
-received expired Client Profile during the DAKE is considered invalid.
+deniability is at risk. Deniability is also at risk if the only publicly
+available Client Profile is expired. For that reason, a received expired Client
+Profile during the DAKE meeting that criteria is considered invalid.
 
 Before the Client Profile expires, the user must publish an updated Client
 Profile with a new expiration date. This expiration date is defined as the
@@ -1662,9 +1661,9 @@ long-term keypair:
    * Sign `m || Transitional Signature` with the symmetric key, as stated
      below. Denote this value `Client Profile Signature`.
 
-Note that if you only have version 4 turned on but still support version 3
-(you have a OTRv3 long-term keypair), you don't need to sign the Client Profile
-with this key.
+Note that if you only have version 4 turned on (on a local policy) but still
+support version 3 (you have a OTRv3 long-term keypair), you don't need to sign
+the Client Profile with this key.
 
 If only version 4 is supported:
 
