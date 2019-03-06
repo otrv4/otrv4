@@ -357,7 +357,7 @@ secrecy. Furthermore, if the compromise of a single session key is not
 permanent, as, after some time, subsequent messages will be impossible to
 decrypt again because of the "self-healing" nature of the algorithm, then the
 protocol is said to have post-compromise security. In the current academic
-literature, backwars secrecy is included in post-compromise security. OTRv4, by
+literature, backwards secrecy is included in post-compromise security. OTRv4, by
 using the Double Ratchet Algorithm, provides these two properties: forward
 secrecy and post-compromise security. If key material used to encrypt a
 particular data message is compromised, previous and future messages are
@@ -379,7 +379,7 @@ paragraphs only apply to non-quantum adversaries.
 
 The only exception is the usage of a "brace key" to provide some
 post-conversation transcript protection against potential weaknesses of elliptic
-curves and the early arrival of quantum computers. Nevetheless, notice that the
+curves and the early arrival of quantum computers. Nevertheless, notice that the
 "brace key" does not provide any kind of post-quantum confidentiality.
 When fault-tolerant quantum computers break Ed448-Goldilocks keys, it will take
 some years beyond that point to break 3072-bit Diffie-Hellman keys.
@@ -531,7 +531,7 @@ Interpret this pruned buffer as the little-endian integer, forming a secret
 scalar.
 
 Take into account these operations when choosing random values for
-the [Socialist Millionaries Protocol](#socialist-millionaires-protocol-smp) and
+the [Socialist Millionaires Protocol](#socialist-millionaires-protocol-smp) and
 the [Ring Signature of Authentication](#ring-signature-authentication).
 
 ### 3072-bit Diffie-Hellman Parameters
@@ -1012,7 +1012,7 @@ knowledge of the application network stack) should define a known shared session
 state from the higher-level protocol as `phi'`, as well as include the values
 imposed by this specification.
 
-Note that varible length fields are encoded as DATA. If `phi'` is a string, it
+Note that variable length fields are encoded as DATA. If `phi'` is a string, it
 will be encoded in UTF-8.
 
 To make sure both participants has the same phi during DAKE, sort the instance
@@ -1404,15 +1404,17 @@ OTRv4 introduces Client Profiles. A Client Profile has an arbitrary number of
 fields, but some fields are required. A Client Profile contains the Client
 Profile owner instance tag, an Ed448 long-term public key, the Ed448 long-term
 forging public key, information about supported versions, a profile expiration
-date, a signature of all these, and an optional transitional signature. It has
-variable length.
+date, a signature of all these, and an optional transitional signature. Thefore,
+the Client Profile has variable length.
 
 There are two instances of the Client Profile that should be generated. One is
 used for authentication in both DAKEs (interactive and non-interactive). The
 other should be published in a public place. This allows two parties to send and
-verify each other's Client Profiles during the DAKE without damaging
-participation deniability for the conversation, since the Client Profile
-is public information.
+verify each other's Client Profiles during the DAKEs without damaging
+the deniability properties for the conversation, since the Client Profile is
+public information. A Client Profile is also published so it is easier to revoke
+any past value that could have been advertised on a previous Client Profile, and
+to prevent "version" rollback attacks.
 
 Each implementation should decide how to publish the Client Profile. For
 example, one client may publish profiles to a server pool (similar to a
@@ -1422,6 +1424,19 @@ publishing Client Profiles. For sending offline messages, notice that the Client
 Profile has to be published and stored in the same untrusted Prekey Server used
 to store Prekey Messages and Prekey Profiles, so the Prekey Ensemble can be
 assembled.
+
+A Client Profile has an expiration time as this helps to revoke any past value
+stated in a previous profile. If a user's client, for example, changes its
+long-term public key, only the valid non-expired Client Profile is the one used
+for attesting that this is indeed the valid long-term public key. Any expired
+Client Profiles with old long-term public keys are invalid. Moreover, as
+version advertisement is public information (it is stated in the published
+Client Profile), a participant will not be able to delete this information from
+public servers (if the Client Profile is published in them). To facilitate
+version revocation or any of the other values revocation, the Client Profile
+can be regenerated and republished once the older Client Profile expires. This
+is also the reason why we recommend a short expiration date, so values can be
+easily revoked.
 
 Before the Client Profile expires, it should be updated. Client implementations
 should determine the frequency of the Client Profile expiration and renewal.
@@ -1440,25 +1455,12 @@ amount of time for this extra validity time is of 1 day.
 It is also important to note that the absence of a Client Profile is not a proof
 that a user does not support OTRv4.
 
-A Client Profile has an expiration time as this helps to revoke any past value
-stated in a previous profile. If a user's client, for example, changes its
-long-term public key, only the valid non-expired Client Profile is the one used
-for attesting that this is indeed the valid long-term public key. Any expired
-Client Profiles with old long-term public keys are invalid. Moreover, as
-version advertisement is public information (it is stated in the published
-Client Profile), a participant will not be able to delete this information from
-public servers (if the Client Profile is published in them). To facilitate
-version revocation or any of the other values revocation, the Client Profile
-can be regenerated and published once the older Client Profile expires. This is
-also the reason why we recommend a short expiration date, so values can be
-easily revoked.
-
 Notice that the valid lifetime of the long-term public key and forging public
 key is exactly the same as the lifetime of the Client Profile. If you have no
 valid Client Profile available for a specific long-term public key or for a
 specific forging public key, that long-term public key or forging public key
 should be treated as invalid. This also implies that a long term public key or
-forging public key can go from being valid, to invalid, and back to valid.
+forging public key can go from being valid to invalid, and back to valid.
 Notice, nevertheless, that long-term public keys and forging public keys can
 live longer than a Client Profile. A long-term public keys or forging public key
 does not need to be generated every time a Client Profile is renewed. But a
@@ -1477,8 +1479,8 @@ Also, if a user has multiple client locations concurrently in use, it is
 expected that they have multiple Client Profiles simultaneously published and
 valid.
 
-A Clien Profile can be used to prevent rollback attacks. As a query message can
-be intercepted and changed by a MITM to enforce the lowest version advertised,
+A Client Profile can be used to prevent rollback attacks. As a query message can
+be intercepted and changed by a MitM to enforce the lowest version advertised,
 a participant can check for the published Client Profile to see if this is
 indeed the highest supported version.
 
