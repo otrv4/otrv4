@@ -286,6 +286,10 @@ verification or by the ability to perform the Socialist Millionaires Protocol
 determines if secret values held by two parties are equal without revealing the
 value itself.
 
+OTRv4 uses two kinds of Deniable Authenticated Key Exchanges (DAKE), as stated
+above: one for interactive conversations and one for non-interactive
+conversations.
+
 In the interactive DAKE, although access to one participant's private long-term
 key is required for authentication, both participants can deny having used
 their private long-term keys. A forged transcript of the DAKE can be produced
@@ -304,7 +308,9 @@ With this secret key, an adversary can impersonate other users to the owner of
 the key. The property by which participants cannot provide proof of
 participation to third parties is known as online deniability. Notice that OTRv4
 uses 'forging keys' to provide online deniability and to prevent KCI attacks at
-the same time.
+the same time. For a detailed explanation around how forging keys work in
+regards to online deniability and KCI attacks, refer to
+section [KCI attacks](#kci-attacks).
 
 Online deniability can be broken in two ways: 1. coercive judges, when an
 online judge coerces a participant into interactively proving that messages were
@@ -799,8 +805,10 @@ OTRv4 public authentication Ed448 key (ED448-PUBKEY):
     H is the Ed448 public key generated as defined in RFC 8032.
 ```
 
-In addition, OTRv4 also has a long-lived forging key, used to protect against
-KCI attacks. This type is serialized as follows:
+In addition, OTRv4 also has a long-lived forging key, used for online
+deniability purposes and to somewhat protect against KCI attacks. Refer to
+section [KCI attacks](#kci-attacks) for an explanation . This long-lived key is
+serialized as follows:
 
 ```
 OTRv4 public Ed448 forging key (ED448-FORGING-KEY):
@@ -859,22 +867,24 @@ is denoted 'sym_d'.
 5. Securely delete 'h'.
 ```
 
-The forging key can be generated in one of two different ways - either by
-generating the key as detailed above, just like the 'honest' long lived Ed448
-keys, or by directly generating a point on the curve without its corresponding
-secret, as detailed below. An implementation that uses OTRv4 must always
+The forging keypair can be generated in one of two different ways - either by
+generating the key as detailed above (by using scalar multiplication), just
+like the 'honest' long lived Ed448 keys, or by directly generating a point on
+the curve (the long-term public key) without its corresponding secret, as
+detailed below. An implementation that uses the OTRv4 protocol must always
 implement the forging keys. It should ask users whether or not they would like
-to save the secret part of the forging keys (even if they are generated only as
-a point in the curve). Even if most users select the default option to securely
-erase the forging keys, thereby preventing them from performing online forgery
-techniques, someone watching the protocol does not generally know the choice of
-the particular user. Consequently, someone that engages in a conversation using
-a compromised device is given two explanations: either the conversation is
-genuine, or the owner of the device was one of the users that elected to store
-the forgery keys and they are using those keys to forge the conversation. The
-result is that online deniability is preserved, while preventing KCI attacks.
+to save the secret part of the forging keys (even if it was generated only
+as a point in the curve without a secret key counterpart). Even if most users
+select the default option to securely erase the forging keys, thereby preventing
+them from performing online forgery techniques, someone watching the protocol
+does not generally know the choice of the particular user. Consequently, someone
+that engages in a conversation using a compromised device is given two
+explanations: either the conversation is genuine, or the owner of the device is
+one of the users that elected to store the forgery keys and they are using those
+keys to forge the conversation. The result is that online deniability is
+preserved, while preventing KCI attacks.
 
-In order to generate a point directly on the curve:
+In order to generate the forging key as a point directly on the curve:
 
 either:
 
@@ -886,7 +896,8 @@ either:
 
 or:
 
-1. Use the Elligator technique [\[15\]](#references).
+1. Use the Elligator technique [\[15\]](#references) by mapping a string to
+   valid Ed448 curve point.
 
 Public keys (Ed448 public key) and forging keys (Ed448 public forging key) have
 fingerprints, which are hex strings that serve as identifiers. The full OTRv4
@@ -2933,7 +2944,7 @@ the long-term secret key of a party is compromised. With this long-term secret
 key, an attacker can impersonate other users to the owner of the key. The DAKEs
 used in OTRv4 are inherently vulnerable to KCI, but this can be a desirable
 property. However, OTRv4 includes forging keys to mitigate against this
-vulnurability.
+vulnerability.
 
 In theory, a user who claims to cooperate with a judge may justifiably refuse to
 reveal their long-term secret key because it would make them vulnerable to
@@ -2944,7 +2955,7 @@ protocol where the judge is given cryptographic proof of communication
 while the informant suffers no repercussions. However, this scenario seems to be
 mostly theoretical. The more common case in practice may be the one in which the
 judge has access to the party's long-term secret keys. In this latter case, a
-KCI vulnerability can be a desirale property.
+KCI vulnerability can be a desirable property.
 
 To prevent an scenario where a judge has access to the party's long-term secret
 key and still make it impossible for this party to provide proof of
@@ -2960,20 +2971,20 @@ communication, we can use two alternatives:
 The security of the non-interactive DAKE does not require trusting the prekey
 server used to distribute prekeys ensembles. However, if we allow a scenario in
 which one party’s long-term keys have been compromised but the prekey server has
-not, we can achieve better deniability. The party may ask the prekey server in
-advance for a forged conversation, which will cast doubt on all conversations
-conducted by an attacker using the compromised device.
+not, we can achieve better deniability properties. The party may ask the prekey
+server in advance for a forged conversation, which will cast doubt on all
+conversations conducted by an attacker using the compromised device.
 
-If an attacker attempts to act as Bob in the above non-interactive DAKE section
-using the compromised device, then he (or a trusted accomplice with access to
-Bob's long-term secret key) can impersonate Alice by executing `RSig`
-with Bob's long-term public and secret keys
+If an attacker attempts to act as Bob in the above overview of the
+non-interactive DAKE using a compromised device, then he (or a trusted
+accomplice with access to Bob's long-term secret key) can impersonate Alice by
+executing `RSig` with his long-term public and secret keys
 (`sigma = RSig(Hb, sk_hb, {Ha, Hb, Y}, t)` instead. In practice, Bob (or
 his accomplice) simply needs to run the non-interactive DAKE honestly, but
 pretend to be Alice in their response to the prekey message.
 
 If an attacker attempts to act as Alice in the above non-interactive DAKE
-section using the compromised device, we cannot offer full deniability. Alice
+overview using the compromised device, we cannot offer full deniability. Alice
 must ask the prekey server to return a false prekey ensemble from Bob that was
 generated by Bob or his trusted accomplice, and to redirect all traffic to the
 associated forging device. This false prekey ensemble must be returned to the
@@ -2988,10 +2999,10 @@ is conjectured to be insurmountable by a two-flow non-interactive protocol
 
 For OTRv4, the above KCI vulnerability is undesirable. For this reason, the
 protocol design includes 'forging keys', which should be generated and
-implemented. To use them, both DAKEs can be altered to include this long-term
-forging keys for all participants. In the case of non-interactive conversations,
+implemented. To use them, both DAKEs are altered to include these long-term
+forging keys for all participants. In the case of the non-interactive DAKE,
 for example, Bob distributes these keys on his Client Profile. Alice, after
-retriving the Prekey Ensemble, extracts the 'OTRv4 public Ed448 forging key'
+retrieving the Prekey Ensemble, extracts the 'OTRv4 public Ed448 forging key'
 (`F_b`) and uses to compute `sigma = RSig(H_a, sk_ha, {F_b, Ha, Y}, t)`.
 
 This transformation changes all long-term public keys in the protocol that are
@@ -2999,18 +3010,39 @@ not used in the “honest” case to reference to the forging keys instead. This
 alteration allows the forging keys to be stored more securely than the “honest”
 long-term public keys; since the forging keys are not needed for normal
 operation, they may be stored offline. Additionally, long-term forging keys
-don't need to be generated like the long-term public keys; they can be a random
-valid point on the curve. Alternatively, the forging secret keys can be
-destroyed immediately after generation.
-This last option should be implemented for users. A secure messaging application
-should ask users whether or not they would like to save the forging keys duringsetup. Even if most users select the default option to securely erase the
-forging keys, thereby preventing them from performing the online forgery
-techniques described in the section above, a judge does not generally know the
-choice of a particular user. Consequently, a judge that engages in a
-conversation using a compromised device is given two explanations: either the
-conversation is genuine, or the owner of the device was one of the users that
-elected to store the forgery keys and they are using those keys to forge the
-conversation.
+don't need to be generated like the "honest" long-term public keys; they can be
+a random valid point on the curve, as described in [Public keys, Shared Prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
+section. Alternatively, the forging secret keys can be destroyed immediately
+after generation. This last technique have to be implemented as an option for
+users: a secure messaging application should ask users whether or not they would
+like to save the forging keys during setup. Even if most users select the
+default option to securely erase the forging keys, thereby preventing them from
+performing the online forgery techniques described in the section above, someone
+watching the protocol execution does not generally know the choice of a
+particular user. Consequently, a judge that engages in a conversation using a
+compromised device is given two explanations: either the conversation is
+genuine, or the owner of the device was one of the users that elected to store
+the forgery keys and they are using those keys to forge the conversation.
+
+Note that forging keys have to be included in the generation of the fingerprint
+as well, as this will prevent an attack where a judge forces a participant (Bob,
+for example) to use specific "honest" long-term and forging long-term keys, and
+advertise them in a new published Client Profile. When Alice performs a DAKE
+with Bob, she sends Bob her ring signature. Since only the judge knows the
+private keys associated with the coerced long-term keys (honest and forger ones),
+the judge learns that the signature could have only been made with Alice's
+"honest" long-term key, which generates proof of Alice participation. In this
+case, Bob does not suffer any repercussions as he can simply let the compromised
+Client Profile expire and update his forging key to other value that he
+generated himself. To prevent this, Alice can always verify that, when
+performing a DAKE, only the keys that she trusts (because she has done a manual
+fingerprint verification or executed the Socialist Millionaires Protocol with
+Bob) are the ones actually used, so it is not that easy for a judge to coerce
+Bob to change his long-term keys without raising suspicion. Nevertheless, a
+judge can always try to force Bob to do a manual fingerprint verification of
+the coerced keys with Alice which will trick her into believing that those are
+Bob's non-coerced keys. This latter scenario seems difficult to perform without
+raising suspicion.
 
 ## Data Exchange
 
