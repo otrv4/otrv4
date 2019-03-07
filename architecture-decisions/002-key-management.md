@@ -78,22 +78,25 @@ of possible message forgers. OTRv4, therefore, will improve forward secrecy,
 provide post-compromise secrecy, support out-of-order resilence and
 asynchronicity (through the usage of prekey ensembles uploaded to a server).
 
-It is worth to note that OTR version 2 contains a vulnerability related to
-message authentication when the revelation of MAC keys is done immediately by
-both participants in a conversation [\[2\]](#references). Two potential solutions are possible:
+As OTRv4 reveals the MAC keys, it is worth to note that OTR version 2 contains
+a vulnerability related to message authentication when the revelation of MAC
+keys is done immediately by both participants in a
+conversation [\[2\]](#references). Two potential solutions to this problem are
+possible:
 
-1. Only the receiver can reveal MAC keys, which gives weaker deniability as
-   it puts full trust in receiver.
+1. Only the receiver will reveal the MAC keys, which gives weaker deniability as
+   it puts full trust on receiver.
 2. Both the sender and receiver can reveal MAC keys, but the sender must reveal
    only after two ratchet generations.
 
-OTRv3 made the decision to only allow the receiver to reveal MAC keys.
+OTRv3 made the decision to only allow the receiver to reveal the MAC keys. In
+OTRv4 the same decision is chosen.
 
-Therefore, to reveal MAC keys in the Double Ratchet:
+To reveal MAC keys in the Double Ratchet for OTRv4:
 
-1. The receiver of data messages can reveal MAC keys on the first message sent
-   per ratchet.
-2. The participant expiring the session can reveal MAC keys on the sent TLV
+1. The receiver of data messages will reveal the MAC keys on the first message
+   sent per ratchet.
+2. The participant expiring the session can reveal the MAC keys on the sent TLV
    type 1.
 
 ### Decision
@@ -103,10 +106,11 @@ This allows OTRv4 to support out-of-order resilence and to improve forward
 secrecy (in the form of per-message forward secrecy).
 
 As OTRv4 supports an out-of-order network model, message keys should be stored
-for a reasonable amount of time so skipped messages can be decrypted.
-Implementers should, nevertheless, be careful around the storage of message keys
-as attackers can try to cause denial-of-service (by storing large amounts of
-message keys), or to try to capture and retroactively decrypt messages.
+for a reasonable amount of time so skipped (delayed or out-of-order) messages
+can be decrypted. Implementers should, nevertheless, be careful with the
+storage of message keys as attackers can try to cause Denial-of-Service attacks
+(by, for example, forcing to store large amounts of message keys), or try to
+capture and retroactively decrypt messages.
 
 Sent data messages can always have a type 7 TLV attached. In the case of the
 receiver, this participant is never sure of when a message corresponding to a
@@ -115,8 +119,8 @@ every time a message key is stored, an extra symmetric key is also derived an
 stored. Upon receipt of the message corresponding to the stored message key, the
 extra symmetric key can either be used or discarded.
 
-We decided that only the receiver will reveal MAC keys on the first message
-sent of every ratchet (even the MAC keys from stored messages keys). When the
+We decided that only the receiver will reveal the MAC keys in the first message
+sent of every DH ratchet (even the MAC keys from stored messages keys). When the
 session is expired or when stored message keys are deleted, their corresponding
 MAC keys are placed in the `old_mac_keys` list so they can be later revealed
 in either the next sent data message or in the immediate TLV type 1 sent when
@@ -124,13 +128,14 @@ a session is expired.
 
 ### Consequences
 
-This heavily changes how data is exchanged as compared with previous versions.
+These decisions change how data is exchanged in comparison with previous OTR
+versions.
 
-We achieve improved forward secrecy, but key management and ratcheting processes
-become somewhat complex because of the many types of keys involved.
-
-As a consequence of allowing an out-of-order network model, message keys should
-be stored. This also changes how fragmentation of data messages work.
+The usage of the Double Ratchet algorithm improves forward secrecy, but key
+management and ratcheting processes become somewhat complex. As a consequence of
+allowing an out-of-order network model, message keys should be stored, which
+changes how fragmentation of data messages work in comparison to previous OTR
+versions.
 
 ### References
 
