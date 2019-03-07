@@ -3026,23 +3026,23 @@ the forgery keys and they are using those keys to forge the conversation.
 
 Note that forging keys have to be included in the generation of the fingerprint
 as well, as this will prevent an attack where a judge forces a participant (Bob,
-for example) to use specific "honest" long-term and forging long-term keys, and
-advertise them in a new published Client Profile. When Alice performs a DAKE
-with Bob, she sends Bob her ring signature. Since only the judge knows the
-private keys associated with the coerced long-term keys (honest and forger ones),
-the judge learns that the signature could have only been made with Alice's
-"honest" long-term key, which generates proof of Alice participation. In this
-case, Bob does not suffer any repercussions as he can simply let the compromised
-Client Profile expire and update his forging key to other value that he
-generated himself. To prevent this, Alice can always verify that, when
-performing a DAKE, only the keys that she trusts (because she has done a manual
-fingerprint verification or executed the Socialist Millionaires Protocol with
-Bob) are the ones actually used, so it is not that easy for a judge to coerce
-Bob to change his long-term keys without raising suspicion. Nevertheless, a
-judge can always try to force Bob to do a manual fingerprint verification of
-the coerced keys with Alice which will trick her into believing that those are
-Bob's non-coerced keys. This latter scenario seems difficult to perform without
-raising suspicion.
+for example) to use specific keys as the forging long-term key and the
+ephemeral DAKE key, and advertise this new forging key in a new published Client
+Profile. When Alice performs a DAKE with Bob, she sends Bob her ring signature.
+Since only the judge knows the private keys associated with the coerced keys
+(forger and ephemeral ones), the judge learns that the signature could have only
+been made with Alice's "honest" long-term key, which generates proof of Alice
+participation. In this case, Bob does not suffer any repercussions as he can
+simply let the compromised Client Profile expire and update his forging key to
+other value that he generated himself. To prevent this attack, Alice can always
+verify  that, when performing a DAKE, only the keys that she trusts (because she
+has done a manual fingerprint verification or executed the Socialist
+Millionaires Protocol with Bob) are the ones actually used, so it is not that
+easy for a judge to coerce Bob to change his long-term forging keys without
+raising suspicion. Nevertheless, a judge can always try to force Bob to do a
+manual fingerprint verification of the coerced keys with Alice which will trick
+her into believing that those are Bob's non-coerced keys. This latter scenario
+seems difficult to perform without raising suspicion.
 
 ## Data Exchange
 
