@@ -27,8 +27,8 @@ Ignore this whole sections:
 The specification for this mode, as compared with the "OTRv4-standalone"
 version, will differ in these sections:
 
-- "Public keys, Shared Prekeys and Fingerprints": an OTRv4's public shared
-  prekey will never be created.
+- "Public keys, Shared Prekeys, Forging keys and Fingerprints": an OTRv4's
+  public shared prekey will never be created.
 - The `ENCRYPTED_MESSAGES` state is the only state where a participant is
   allowed to send encrypted data messages.
 

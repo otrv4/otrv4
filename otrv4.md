@@ -36,7 +36,7 @@ protocol, such as XMPP.
       1. [Point](#point)
       1. [Encoded Messages](#encoded-messages)
    1. [Serializing the Ring Signature Proof of Authentication](#serializing-the-ring-signature-proof-of-authentication)
-   1. [Public keys, Shared Prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
+   1. [Public keys, Shared Prekeys, Forging keys and Fingerprints](#public-keys-shared-prekeys-forging-keys-and-fingerprints)
    1. [Instance Tags](#instance-tags)
    1. [TLV Record Types](#tlv-record-types)
    1. [Shared Session State](#shared-session-state)
@@ -789,7 +789,7 @@ Ring Signature Authentication (RING-SIG):
   r3 (SCALAR)
 ```
 
-### Public keys, Shared Prekeys and Fingerprints
+### Public keys, Shared Prekeys, Forging keys and Fingerprints
 
 OTR users have long-lived public keys that they use for authentication (but not 
 for encryption). OTRv4 introduces a new type of this long-term public key:
@@ -1855,7 +1855,7 @@ To create a Prekey Profile, assemble:
    It adds partial protection against an attacker that modifies the first flow
    of the non-interactive DAKE and that compromises the receivers long-term
    secret key and their one-time ephemeral keys. For its generation, refer to
-   the [Public keys, Shared Prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
+   the [Public keys, Shared Prekeys, Forging keys and Fingerprints](#public-keys-shared-prekeys-forging-keys-and-fingerprints)
    section. This key must expire when the Prekey Profile expires.
 1. Profile Signature: The symmetric key `sym_h`, the flag `f` (set to zero, as
    defined on RFC 8032 [\[9\]](#references)) and the empty context `c` are used
@@ -1907,8 +1907,8 @@ bytes in the string 'x'.
 1.  Hash the 'sym_key_h': 'SHAKE-256(sym_key, 114)'. Let 'h' denote the
     resulting digest. Construct the secret key 'sk' from the first half of
     'h' (57 bytes), and the corresponding public key 'H', as defined in the
-    'Public keys, Shared Prekeys and Fingerprints' section. Let 'prefix' denote
-    the second half of the 'h' (from 'h[57]' to 'h[113]').
+    'Public keys, Shared Prekeys, Forging keys and Fingerprints' section. Let
+    'prefix' denote the second half of the 'h' (from 'h[57]' to 'h[113]').
 
 2.  Compute 'SHAKE-256("SigEd448" || byte(f) || byte(len(c)) || c || prefix ||
     m, 114)', where 'm' is the message to be signed. Let 'r' be the 114-byte
@@ -3011,7 +3011,7 @@ alteration allows the forging keys to be stored more securely than the “honest
 long-term public keys; since the forging keys are not needed for normal
 operation, they may be stored offline. Additionally, long-term forging keys
 don't need to be generated like the "honest" long-term public keys; they can be
-a random valid point on the curve, as described in [Public keys, Shared Prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
+a random valid point on the curve, as described in [Public keys, Shared Prekeys, Forging keys and Fingerprints](#public-keys-shared-prekeys-forging-keys-and-fingerprints)
 section. Alternatively, the forging secret keys can be destroyed immediately
 after generation. This last technique have to be implemented as an option for
 users: a secure messaging application should ask users whether or not they would
