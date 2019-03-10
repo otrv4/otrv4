@@ -3679,7 +3679,8 @@ ENCRYPTED_MESSAGES
   Auth-I message is received and validated. The non-interactive DAKE is
   finished, for Alice, when the Non-Interactive-Auth message is sent, and, for
   Bob, when the Non-Interactive-Auth message is received and validated. Outgoing
-  messages sent in this state are encrypted.
+  messages sent in this state are encrypted. Query messages or plaintext with
+  withespace tags are not allowed to be sent in this state.
 
 FINISHED
 
