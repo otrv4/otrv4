@@ -151,7 +151,6 @@ versions.
 
 ### References
 
-
 1. Marlinspike, M. (2013). *Advanced cryptographic ratcheting*, Signal blog.
    Available at: https://signal.org/blog/advanced-ratcheting/
 2. Bonneau, J., Morrison, A. (2006) *Finite-State Security Analysis of OTR
