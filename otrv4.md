@@ -97,7 +97,7 @@ protocol, such as XMPP.
 1. [Fragmentation](#fragmentation)
    1. [Transmitting Fragments](#transmitting-fragments)
    1. [Receiving Fragments](#receiving-fragments)
-1. [The protocol State Machine](#the-protocol-state-machine)
+1. [The Protocol State Machine](#the-protocol-state-machine)
    1. [Protocol States](#protocol-states)
    1. [Protocol Events](#protocol-events)
       1. [User requests to start an OTR Conversation](#user-requests-to-start-an-otr-conversation)
@@ -2049,7 +2049,9 @@ Bob will be initiating the DAKE with Alice.
       Securely deletes `K_ecdh` and `brace_key`.
     * Calculates the SSID from shared secret: `KDF_1(usageSSID || K, 8)`.
 1. Sends Bob the Auth-R message (see [Auth-R Message](#auth-r-message) section),
-   with her `our_ecdh_first.public` and `our_dh_first.public` attached.
+   with her `our_ecdh_first.public` and `our_dh_first.public` attached. Alice
+   is not able to send data messages at this point, as she needs to receive
+   the 'Auth-I' message from Bob.
 
 **Bob:**
 
@@ -2224,6 +2226,9 @@ A valid Identity message is generated as follows:
    number as the receiver's instance tag.
 
 To verify an Identity message:
+
+When receiving an Identity message, note that the participant cannot start
+sending data messages, as they still need to receive the 'Auth-I' message.
 
 1. Verify if the message type is `0x35`.
 1. Verify that protocol's version of the message is `0x0004`.
@@ -3881,6 +3886,8 @@ OTRv4-interactive-only mode or the OTRv4-standalone-mode one.
 If the state is `START`:
 
   * Validate the Identity message. Ignore the message if validation fails.
+    Note that after receiving an Indentity message, a participant can't start
+    sending data messages.
   * If validation succeeds:
     * Remember the sender's instance tag to use as the receiver's instance tag
       for future messages.
