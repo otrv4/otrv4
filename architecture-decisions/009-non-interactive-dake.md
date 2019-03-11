@@ -93,6 +93,14 @@ allows the receiver to reply within one month. However, if the client is
 compromised within one month, an attacker is able to read and tamper with the
 last message sent.
 
+Due to the usage of the Double Ratchet Algorithm in the protocol, a correct way
+for initializing it after the non-interactive DAKE must be taken into
+consideration. To preserve the security proofs of the DAKE [\[1\]](#references),
+initial ephemeral keys (that are not used for the Ring Signature or the
+derivation of the first Mixed Shared Secret) are used. These keys are attached
+to the second non-interactive DAKE message (the Non-Interactive-Auth message).
+These ratcheting ephemeral public keys should be included in the "Phi" value.
+
 #### Message formats
 
 Prekey messages have the format:
