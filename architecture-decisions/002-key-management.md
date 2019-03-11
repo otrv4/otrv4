@@ -78,6 +78,18 @@ of possible message forgers. OTRv4, therefore, will improve forward secrecy,
 provide post-compromise secrecy, support out-of-order resilence and
 asynchronicity (through the usage of prekey ensembles uploaded to a server).
 
+Because of the usage of the Double Ratchet Algorithm, a correct way for
+initializing it after a DAKE must be taken into consideration. To preserve the
+security proofs of both DAKEs used in OTRv4 [\[4\]](#references), initial
+ephemeral keys (that are not used for the Ring Signature or the derivation
+of the first Mixed Shared Secret) must be used. These keys can be simply
+attached to the first two interactive DAKE messages (the Identity message and
+the Auth-R message) and to the second non-interactive DAKE message (the
+Non-Interactive-Auth message). This design composes properly with the security
+proofs, as it can be modeled as if the ratcheting ephemeral public keys are
+exchanged in two flows before any DAKE even begins. Furthermore, these
+ratcheting ephemeral public keys should be included in the "Phi" value.
+
 As OTRv4 reveals the MAC keys, it is worth to note that OTR version 2 contains
 a vulnerability related to message authentication when the revelation of MAC
 keys is done immediately by both participants in a
@@ -102,7 +114,7 @@ To reveal MAC keys in the Double Ratchet for OTRv4:
 ### Decision
 
 For OTRv4, we decided to use the Double Ratchet Algorithm for key management.
-This allows OTRv4 to support out-of-order resilence and to improve forward
+This allows OTRv4 to support out-of-order resilience and to improve forward
 secrecy (in the form of per-message forward secrecy).
 
 As OTRv4 supports an out-of-order network model, message keys should be stored
@@ -148,3 +160,7 @@ versions.
 3. Unger, N., Dechand, S., Bonneau, J., Fahl, S., Perl, H., Goldberg, I., Smith,
    M. (2015). *SoK: Secure Messaging*, CACR, Available at:
    http://cacr.uwaterloo.ca/techreports/2015/cacr2015-02.pdf
+4. Goldberg, I. and Unger, N. (2016). *Improved Strongly Deniable Authenticated
+   Key Exchanges for Secure Messaging*, Waterloo, Canada: University of
+   Waterloo. Available at:
+   http://cacr.uwaterloo.ca/techreports/2016/cacr2016-06.pdf
