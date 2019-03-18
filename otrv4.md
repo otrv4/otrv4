@@ -656,10 +656,9 @@ The following usageID variables are defined:
   * usageMessageKey = 0x17
   * usageMACKey = 0x18
   * usageExtraSymmKey = 0x19
-  * usageDataMessageSections = 0x1A
-  * usageAuthenticator = 0x1B
-  * usageSMPSecret = 0x1C
-  * usageAuth = 0x1D
+  * usageAuthenticator = 0x1A
+  * usageSMPSecret = 0x1B
+  * usageAuth = 0x1C
 ```
 
 ## Data Types
@@ -2551,9 +2550,9 @@ Verify.
       ```
     * Includes this value in the Non-Interactive-Auth message and securely
       deletes the `auth_mac_k`.
-1. Sends Bob a Non-Interactive-Auth message. See
-   [Non-Interactive-Auth Message](#non-interactive-auth-message) section with
-   her `our_ecdh.public` and `our_dh.public` attached.
+1. Sends Bob a Non-Interactive-Auth message with
+   her `our_ecdh.public` and `our_dh.public` attached. See
+   [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 1. Initializes the double-ratchet:
    * Sets `since_last_dh` as 0.
    * Sets `j` as 0, `k` as 0 and `pn` as 0.
@@ -3254,8 +3253,7 @@ When sending a data message in the same DH Ratchet:
     message from the protocol version to the encrypted message.
 
    ```
-     Authenticator = KDF_1(usageAuthenticator || MKmac ||
-     KDF_1(usageDataMessageSections || data_message_sections, 64), 64)
+     Authenticator = KDF_1(usageAuthenticator || MKmac || data_message_sections, 64)
    ```
 
   * Increment the next sending message id `j = j + 1`.
