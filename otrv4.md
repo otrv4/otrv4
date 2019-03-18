@@ -1329,7 +1329,7 @@ When sending or receiving data messages, you must calculate the message keys:
 
 ```
 derive_enc_mac_keys(chain_key):
-  MKenc = KDF_1(usageMessageKey || chain_key, 32)
+  MKenc = KDF_1(usageMessageKey || chain_key, 64)
   MKmac = KDF_1(usageMACKey || MKenc, 64)
   return MKenc, MKmac
 ```
@@ -3238,7 +3238,7 @@ When sending a data message in the same DH Ratchet:
 
    ```
      MKenc, MKmac = derive_enc_mac_keys(chain_key_s[j])
-     extra_symm_key = KDF_1(usageExtraSymmKey || 0xFF || chain_key_s[j], 32)
+     extra_symm_key = KDF_1(usageExtraSymmKey || 0xFF || chain_key_s[j], 64)
    ```
 
   * Securely delete `chain_key_s[j]`.
@@ -3322,12 +3322,12 @@ The decryption mechanism works as:
          * while `k` < received `Previous chain message number`:
              * Derive
                `chain_key_r[k+1] = KDF_1(usageNextChainKey || chain_key_r[k], 64)`
-               and `MKenc = KDF_1(usageMessageKey || chain_key_r[k], 32)`
+               and `MKenc = KDF_1(usageMessageKey || chain_key_r[k], 64)`
              * Derive (this is done any time a message key is stored as
                there is no way of knowing if the message that will be received
                in the future will ask for the computation of the extra
                symmetric key):
-               `extra_symm_key = KDF_1(usageExtraSymmKey || 0xFF || chain_key_r[k], 32)`.
+               `extra_symm_key = KDF_1(usageExtraSymmKey || 0xFF || chain_key_r[k], 64)`.
              * Store
                `MKenc, extra_sym_key = skipped_MKenc[their_ecdh, k]`.
              * Increment `k = k + 1`.
@@ -3357,12 +3357,12 @@ The decryption mechanism works as:
       * while `k` < received `message_id`:
         * Derive
           `chain_key_r[k+1] = KDF_1(usageNextChainKey || chain_key_r[k], 64)`
-           and `MKenc = KDF_1(usageMessageKey || chain_key_r[k], 32)`
+           and `MKenc = KDF_1(usageMessageKey || chain_key_r[k], 64)`
         * Derive (this is done any time a message key is stored as
           there is no way of knowing if the message that will be received
           in the future will ask for the computation of the extra
           symmetric key):
-          `extra_symm_key = KDF_1(usageExtraSymmKey || 0xFF || chain_key_r[k], 32)`.
+          `extra_symm_key = KDF_1(usageExtraSymmKey || 0xFF || chain_key_r[k], 64)`.
         * Store
           `MKenc, extra_sym_key = skipped_MKenc[their_ecdh, k]`.
         * Increment `k = k + 1`.
@@ -3371,7 +3371,7 @@ The decryption mechanism works as:
 
     ```
       MKenc, MKmac = derive_enc_mac_keys(chain_key_r[k])
-      extra_symm_key = KDF_1(usageExtraSymmKey || 0xFF || chain_key_r[k], 32)
+      extra_symm_key = KDF_1(usageExtraSymmKey || 0xFF || chain_key_r[k], 64)
     ```
   * Use the `MKmac` to verify the MAC of the message. If the verification fails:
       * Reject the message.
@@ -3448,7 +3448,7 @@ in the data message and the context received in 7 TLV (the 4-byte indication
 of what this symmetric key will be used for), and use them as inputs to a KDF:
 
 ```
-  symkey1 = KDF_1(index || context || extra_sym_key, 32)
+  symkey1 = KDF_1(index || context || extra_sym_key, 64)
 ```
 
 So, if for example, these TLVs arrive with the data message:
@@ -3466,10 +3466,10 @@ Three keys can, therefore, be calculated from the already derived extra
 symmetric key:
 
 ```
-  extra_sym_key = KDF_1(usageExtraSymmKey || 0xFF || chain_key, 32)
-  symkey1 = KDF_1(0x00 || 0x0042 || extra_sym_key, 32)
-  symkey2 = KDF_1(0x01 || 0x104A || extra_sym_key, 32)
-  symkey3 = KDF_1(0x02 || 0x0001 || extra_sym_key, 32)
+  extra_sym_key = KDF_1(usageExtraSymmKey || 0xFF || chain_key, 64)
+  symkey1 = KDF_1(0x00 || 0x0042 || extra_sym_key, 64)
+  symkey2 = KDF_1(0x01 || 0x104A || extra_sym_key, 64)
+  symkey3 = KDF_1(0x02 || 0x0001 || extra_sym_key, 64)
 ```
 
 Every derived key and the `extra_symm_key` should be deleted after being used.
