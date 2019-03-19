@@ -3279,9 +3279,9 @@ When sending a data message in the same DH Ratchet:
 
 The counterpart of the sending an encoded data message. As that one, it also
 needs a per-message key derived from the previous chain key to decrypt the
-message in it. If the the receiving 'Public ECDH Key' has not yet been seen,
-ratchet keys should be rotated (the ECDH keys, the brace key, the root key and
-the receiving chain key).
+message. If the receiving 'Public ECDH Key' has not yet been seen, ratchet keys
+should be rotated (the ECDH keys, the brace key, the root key and the receiving
+chain key). It also checks for duplicated messages and discards them.
 
 Decrypting a data message consists of:
 
@@ -3326,8 +3326,14 @@ The decryption mechanism works as:
     * Securely delete `MKenc`.
     * Add `MKmac` to the list `mac_keys_to_reveal`.
 
+  * If the received 'Public ECDH Key' is the same as `their_ecdh` and
+    the 'Public DH Key is the same as `their_dh`, and the keys were not found in
+    the `skipped_MKenc` dictionary:
+    * If `message_id` < `k`:
+      * This is a duplicated message. Discard the message.
+
 * Given a new ratchet (the 'Public ECDH Key' is different from `their_ecdh` and
-  the 'Public DH Key' is different from `their_dh` -if present-):
+  the 'Public DH Key' is different from `their_dh`):
 
   * Store any message keys from the previous DH Ratchet that correspond to
     messages that have not yet arrived:
