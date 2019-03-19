@@ -3326,6 +3326,12 @@ The decryption mechanism works as:
     * Securely delete `MKenc`.
     * Add `MKmac` to the list `mac_keys_to_reveal`.
 
+  * If `max_remote_i_seen` > `message_id`:
+    * If the received `message_id` and `Public ECDH Key` are not in the
+      `skipped_MKenc` dictionary:
+      * This is a duplicated message from a past DH ratchet. Discard the
+         message.
+
   * If the received 'Public ECDH Key' is the same as `their_ecdh` and
     the 'Public DH Key is the same as `their_dh`, and the keys were not found in
     the `skipped_MKenc` dictionary:
@@ -3418,6 +3424,7 @@ The decryption mechanism works as:
       * Set `their_dh` as the 'Public DH Key' from the message, if it is not
         empty.
       * Add `MKmac` to the list `mac_keys_to_reveal`.
+   * Set `max_remote_i_seen` to `message_id`.
 
 * If a message arrives that corresponds to a message key already deleted or that
   cannot be derived:
