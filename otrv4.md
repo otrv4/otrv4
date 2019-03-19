@@ -3243,7 +3243,7 @@ When sending a data message in the same DH Ratchet:
 
   * Securely delete `chain_key_s[j]`.
   * Generate a new random 24 bytes value to be the `nonce`.
-  * Use the `MKenc` to encrypt the message:
+  * Use only the first 32 bytes of `MKenc` to encrypt the message:
 
    ```
      encrypted_message = XSalsa20_Enc(MKenc, nonce, m)
@@ -3302,7 +3302,8 @@ The decryption mechanism works as:
         * Reject the message.
     * Securely delete `skipped_MKenc[Public ECDH Key, message_id]`.
     * Set `nonce` with the "nonce" from the received data message.
-    * Decrypt the message using `MKenc` and `nonce`:
+    * Decrypt the message by using the nonce and only the 32 bytes of `MKenc`:
+
       ```
         decrypted_message = XSalsa20_Dec(MKenc, nonce, m)
       ```
@@ -3382,7 +3383,7 @@ The decryption mechanism works as:
       * Securely delete `chain_key_r[k]`.
       * Increment the receiving message id `k = k + 1`.
       * Set `nonce` with the "nonce" from the received data message.
-      * Decrypt the message using `MKenc` and `nonce`:
+      * Decrypt the message by using the nonce and only the 32 bytes of `MKenc`:
 
       ```
         decrypted_message = XSalsa20_Dec(MKenc, nonce, m)

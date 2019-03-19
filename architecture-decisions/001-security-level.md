@@ -52,7 +52,7 @@ We use XSalsa20 as the encryption stream cipher because it has a block size of
 and immune to timing attacks. Since its nonce is significantly larger, it is
 safe randomly generate it. It takes 2<sup>249</sup> simple operations against
 XSalsa20 reduced to 8 rounds to break it. In OTRv4, XSalsa20 is used with the
-following parameters: 20 rounds, 192-bits nonces, and 256-bit keys.
+following parameters: 20 rounds, 192-bits nonce, and 256-bit key.
 
 The protocol uses SHAKE-256 as the hash function, as it gives a 256-bit security
 if the output is 64 bytes, and 128 if the output is 32 bytes. We only use
