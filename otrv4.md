@@ -3333,8 +3333,8 @@ The decryption mechanism works as:
          message.
 
   * If the received 'Public ECDH Key' is the same as `their_ecdh` and
-    the 'Public DH Key is the same as `their_dh`, and the keys were not found in
-    the `skipped_MKenc` dictionary:
+    the 'Public DH Key' is the same as `their_dh`, and the keys were not found
+    in the `skipped_MKenc` dictionary:
     * If `message_id` < `k`:
       * This is a duplicated message. Discard the message.
 
