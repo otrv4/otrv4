@@ -29,7 +29,7 @@ protocol, such as XMPP.
    1. [Considerations while working with elliptic curve parameters](#considerations-while-working-with-elliptic-curve-parameters)
    1. [3072-bit Diffie-Hellman Parameters](#3072-bit-diffie-hellman-parameters)
       1. [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
-   1. [Key Derivation Functions](#key-derivation-functions)
+   1. [Key Derivation Function, Hash Function and MAC Function](#key-derivation-function-hash-function-and-MAC-function)
 1. [Data Types](#data-types)
    1. [Encoding and Decoding](#encoding-and-decoding)
       1. [Scalar](#scalar)
