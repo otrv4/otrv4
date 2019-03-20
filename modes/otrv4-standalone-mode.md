@@ -160,7 +160,8 @@ Alice will be initiating the DAKE with Bob.
       `KDF_1(usageSSID || K, 64)`.
 1. Initializes the double-ratchet:
     * Sets `since_last_dh` as 0.
-    * Sets `j` as 0, `k` as 0 and `pn` as 0.
+    * Sets `i`, `j`, `k` `pn` as 0.
+    * Sets `max_remote_i_seen` as -1.
     * Interprets `K` as the first root key (`prev_root_key`) by:
       `KDF_1(usageFirstRootKey || K, 64)`.
     * Calculates the receiving keys:
@@ -191,6 +192,7 @@ Alice will be initiating the DAKE with Bob.
         `curr_root_key, chain_key_s[j] = derive_ratchet_keys(sending, prev_root_key, K)`.
       * Securely deletes the previous root key (`prev_root_key`) and `K`.
       * Increments `since_last_dh = since_last_dh + 1`.
+      * Increments `i = i + 1`.
 1. Sends Bob the Auth-I message (see [Auth-I message](#auth-i-message)
    section).
 1. At this point, the interactive DAKE is complete for Alice:
@@ -202,8 +204,11 @@ Alice will be initiating the DAKE with Bob.
        "When sending a data message in the same DH Ratchet:" subsection.
    * In the case that she receives a data message:
      * Follows what is defined in the
-       [When you receive a Data Message](#when-you-send-a-data-message) section.
-       Note that he will use the already derived `chain_key_r[k]`.
+       [When you receive a Data Message](#when-you-receive-a-data-message)
+       section. Note that he will use the already derived `chain_key_r[k]`.
+       She should follow the "Try to decrypt the message with a stored skipped
+       message key" or "When receiving a data message in the same DH Ratchet:"
+       subsections.
 
 **Bob:**
 
@@ -213,7 +218,8 @@ Alice will be initiating the DAKE with Bob.
      fails, rejects the message and does not send anything further.
 1. Initializes the double-ratchet algorithm:
    * Sets `since_last_dh` as 0.
-   * Sets `j` as 0, `k` as 0 and `pn` as 0.
+   * Sets `i`, `j`, `k` and `pn` as 0.
+   * Sets `max_remote_i_seen` as -1.
    * Interprets `K` as the first root key (`prev_root_key`) by:
      `KDF_1(usageFirstRootKey || K, 64)`.
    * Securely deletes `our_ecdh.public` and `their_ecdh`.

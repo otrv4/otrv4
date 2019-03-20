@@ -1996,7 +1996,8 @@ uses a ring signature non-interactive zero-knowledge proof of knowledge
 Alice's long-term Ed448 key pair is `(sk_ha, Ha)` and Bob's long-term Ed448
 keypair is `(sk_hb, Hb)`. Both keypairs are generated as stated in the
 [Public keys, shared prekeys and Fingerprints](#public-keys-shared-prekeys-and-fingerprints)
-section. Alice and Bob also have long-term Ed448 forging public keys. These are denoted `Fa` for Alice's, and `Fb` for Bob's.
+section. Alice and Bob also have long-term Ed448 forging public keys. These are
+denoted `Fa` for Alice's, and `Fb` for Bob's.
 
 #### Interactive DAKE Overview
 
