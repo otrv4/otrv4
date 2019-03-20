@@ -60,15 +60,18 @@ SHAKE-256 with an output of 32 bytes for generation of the brace key (when it is
 not the *n* ratchet) as it has a security level of 128 bits. It is also use for
 generation of Message Authentication Codes (MAC).
 
-SHAKE-256 is defined as a key derivation function in the protocol. Two functions
-are used:
+SHAKE-256 is used for the key derivation, hash and MAC function in the protocol.
+The functions are:
 
 ```
-KDF_1(usageID || m, output_size) = SHAKE-256("OTRv4" || usageID || m, size)
+  KDF(usageID || values, size) = SHAKE-256("OTRv4" || usageID || values, size)
+  HWC(usageID || values, size) = SHAKE-256("OTRv4" || usageID || values, size)
+  HCMAC(usageID || values, size) = SHAKE-256("OTRv4" || usageID || values, size)
 ```
 
-In `KDF_1`, the `size` first bytes of the SHAKE-256 output for input
-`"OTRv4" || usageID || m` are returned.
+The `size` first bytes of the SHAKE-256 output for input
+`"OTRv4" || usageID || m` are returned in all three functions. Unlike the SHAKE
+standard, notice that the output size here is defined in bytes.
 
 The only different KDF function used in this specification is the one used when
 referring to RFC 8032. As defined in that document:
@@ -76,8 +79,6 @@ referring to RFC 8032. As defined in that document:
 ```
 SHAKE-256(x, y) = The 'y' first bytes of SHAKE-256 output for input 'x'
 ```
-
-Unlike the SHAKE standard, notice that the output size here is defined in bytes.
 
 In OTRv4, long-term key verification can be done by using the Socialist
 Millionaires Protocol (SMP) or by doing a manual fingerprint comparison. The

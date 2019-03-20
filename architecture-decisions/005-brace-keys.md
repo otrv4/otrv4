@@ -54,11 +54,11 @@ A brace key is a key that is added to the KDF used to derive a new Mixed shared
 secret. A brace key can be produced through a DH function or through a key
 derivation function. The first method produces a 3072-bit public key which is
 later used as an input to a key derivation
-function `KDF_1(usageThirdBraceKey || k_dh, 32)`.
+function `KDF(usageThirdBraceKey || k_dh, 32)`.
 
 The second method produces a 32-byte key as a result of a key derivation
 function that takes as an input the previous brace key
-`KDF_1(usageBraceKey || brace_key, 32)`.
+`KDF(usageBraceKey || brace_key, 32)`.
 
 This key has a 128-bit security level  according to Table 2: Comparable
 strengths in NIST’s Recommendation for Key Management,
@@ -123,16 +123,16 @@ Alice                                                 Bob
   public key received in a previous ratchet ('B_0')
     'k_dh = DH(B_0, a_1)'
 * Derives the new brace key from 'k_dh'
-    brace_key_3 = KDF_1(usageBraceKey || k_dh, 32)
+    brace_key_3 = KDF(usageBraceKey || k_dh, 32)
 * Mixes the brace key with the ECDH shared
   secret to create the Mixed shared secret 'K_3'
     'K_3 =
-    KDF_1(usageSharedSecret || K_ecdh || brace_key_3, 64)'
+    KDF(usageSharedSecret || K_ecdh || brace_key_3, 64)'
 * Generates the root key and
   the sending chain key from root key 2 ('root_key_2')
   and the Mixed shared secret ('K_3')
-    'root_key_3 = KDF_1(usageRootKey || root_key_2 || K_3, 64)'
-    'chain_key_s_0 = KDF_1(usageChainKey || root_key_2 || K_3, 64)'
+    'root_key_3 = KDF(usageRootKey || root_key_2 || K_3, 64)'
+    'chain_key_s_0 = KDF(usageChainKey || root_key_2 || K_3, 64)'
 * Encrypts data message with a message key
   derived from 'chain_key_s_0'
 * Sends data_message_0 attached with 'A_1' ----------------->
@@ -142,35 +142,35 @@ Alice                                                 Bob
                                                        public key received in the data message ('A_1')
                                                          'k_dh = DH(A_1, b_1)'
                                                      * Derives the new brace key from the 'k_dh'
-                                                         'brace_key_3 = KDF_1(usageBraceKey || k_dh, 32)'
+                                                         'brace_key_3 = KDF(usageBraceKey || k_dh, 32)'
                                                      * Mixes the brace key with the ECDH shared secret
                                                        to create the shared secret 'K_3'
-                                                         'K_3 = KDF_1(usageSharedSecret || K_ecdh || brace_key_3, 64)'
+                                                         'K_3 = KDF(usageSharedSecret || K_ecdh || brace_key_3, 64)'
                                                      * Generates the root and the receiving chain key
                                                        from root key 2 ('root_key_2') and from the
                                                        Mixed shared secret ('K_3')
-                                                        'root_key_3 = KDF_1(usageRootKey || root_key_2 ||
+                                                        'root_key_3 = KDF(usageRootKey || root_key_2 ||
                                                          K_3, 64)'
-                                                        'chain_key_r_0 = KDF_1(usageChainKey || root_key_2 ||
+                                                        'chain_key_r_0 = KDF(usageChainKey || root_key_2 ||
                                                          K_3, 64)'
                                                      * Decrypts the received message with a message key
                                                        derived from 'chain_key_r_0'
                                                      * Derives a new brace key from the one derived
                                                        previously
-                                                         'brace_key_4 = KDF_1(0x03 || brace_key, 32)'
+                                                         'brace_key_4 = KDF(0x03 || brace_key, 32)'
                                                      * Generates new ECDH keys and uses Alice's ECDH
                                                        public key (received in data_message_0) to
                                                        create the ECDH shared secret ('K_ecdh').
                                                      * Mixes the brace key with 'K_ecdh' to create
                                                        the Mixed shared secret 'K_4'
-                                                         'K_4 = KDF_1(0x04 || K_ecdh ||
+                                                         'K_4 = KDF(0x04 || K_ecdh ||
                                                           brace_key_4, 64)'
                                                      * Generates the root and the sending chain key
                                                        from root key 3 ('root_key_3') and from the
                                                        Mixed shared secret ('K_4')
-                                                         'root_key_4 = KDF_1(usageRootKey || root_key_3 ||
+                                                         'root_key_4 = KDF(usageRootKey || root_key_3 ||
                                                           K_4, 64)'
-                                                         'chain_key_s_0 = KDF_1(usageChainKey || root_key_3 ||
+                                                         'chain_key_s_0 = KDF(usageChainKey || root_key_3 ||
                                                           K_4, 64)'
                                                       * Encrypts data message with a message key derived
                                                         from 'chain_key_s_0'
@@ -192,14 +192,14 @@ zero when the DH keys are generated.
 If `since_last_dh ==  3`
 
   * Compute the new brace key from a DH computation e.g.
-    `brace_key_i = KDF_1(usageThirdBraceKey || DH(our_DH.secret, their_DH.public), 32)`.
+    `brace_key_i = KDF(usageThirdBraceKey || DH(our_DH.secret, their_DH.public), 32)`.
   * Send the new `brace_key`'s public key (our_DH.public) to the other party
     for further key computation.
 
 Otherwise
 
   * Derive the new brace key:
-    `KDF_1(usageBraceKey || brace_key, 32)`
+    `KDF(usageBraceKey || brace_key, 32)`
 
 **Alice or Bob send a follow-up message**
 
@@ -218,13 +218,13 @@ If `since_last_dh ==  3`:
 
     * Otherwise:
       * Compute the new brace key from a new DH computation e.g.
-        `brace_key_i = KDF_1(usageThirdBraceKey || DH(our_DH.secret, their_DH.public), 32)
+        `brace_key_i = KDF(usageThirdBraceKey || DH(our_DH.secret, their_DH.public), 32)
       * Use `brace_key_i` to calculate the Mixed shared secret.
 
 **Diagram: Pattern of DH computations and key derivations in a conversation**
 
 This diagram describes when public keys should be sent and when Alice and Bob
-should compute the `brace_key` from a KDF_1 or a new DH computation.
+should compute the `brace_key` from a KDF or a new DH computation.
 
 Both parties share knowledge of `brace_key_0`, established immediately after
 the DAKE.
@@ -240,15 +240,15 @@ If Alice sends the first message:
     Alice                 ratchet_id        public_key           Bob
 ---------------------------------------------------------------------------------------
 
-brace_key_1 = KDF_1(brace_key_0)   -----1---------------->   brace_key_1 = KDF_1(brace_key_0)
-brace_key_2 = KDF_1(brace_key_1)   <----2-----------------   brace_key_2 = KDF_1(brace_key_1)
-brace_key_3 = KDF_1(DH(a_1, B_0))  -----3-------A_1------>   brace_key_3 = KDF_1(DH(b_0, A_1))
-brace_key_4 = KDF_1(brace_key_3)   <----4-----------------   brace_key_4 = KDF_1(brace_key_3)
-brace_key_5 = KDF_1(brace_key_4)   -----5---------------->   brace_key_5 = KDF_1(brace_key_4)
-brace_key_6 = KDF_1(DH(a_1, B_1))  <----6-------B_1-------   brace_key_6 = KDF_1(DH(b_1, A_1))
-brace_key_7 = KDF_1(brace_key_6)   -----7---------------->   brace_key_7 = KDF_1(brace_key_6)
-brace_key_8 = KDF_1(brace_key_7)   <----8-----------------   brace_key_8 = KDF_1(brace_key_7)
-brace_key_9 = KDF_1(DH(a_2, B_1))  -----9-------A_2------>   brace_key_9 = KDF_1(DH(b_1, A_2))
+brace_key_1 = KDF(brace_key_0)   -----1---------------->   brace_key_1 = KDF(brace_key_0)
+brace_key_2 = KDF(brace_key_1)   <----2-----------------   brace_key_2 = KDF(brace_key_1)
+brace_key_3 = KDF(DH(a_1, B_0))  -----3-------A_1------>   brace_key_3 = KDF(DH(b_0, A_1))
+brace_key_4 = KDF(brace_key_3)   <----4-----------------   brace_key_4 = KDF(brace_key_3)
+brace_key_5 = KDF(brace_key_4)   -----5---------------->   brace_key_5 = KDF(brace_key_4)
+brace_key_6 = KDF(DH(a_1, B_1))  <----6-------B_1-------   brace_key_6 = KDF(DH(b_1, A_1))
+brace_key_7 = KDF(brace_key_6)   -----7---------------->   brace_key_7 = KDF(brace_key_6)
+brace_key_8 = KDF(brace_key_7)   <----8-----------------   brace_key_8 = KDF(brace_key_7)
+brace_key_9 = KDF(DH(a_2, B_1))  -----9-------A_2------>   brace_key_9 = KDF(DH(b_1, A_2))
 ```
 
 ### Performance
@@ -268,7 +268,7 @@ We've decide to use a 3072-bit key produced by:
 
 1. a DH function which takes as an argument the other party’s exponent
    (advertised through a data message) to produce brace key.
-2. a KDF `KDF_1(usageBraceKey || brace_key, 32)` which uses the previous brace
+2. a KDF `KDF(usageBraceKey || brace_key, 32)` which uses the previous brace
    key to produce a new one.
 
 The DH function will run every `n = 3` times because:
