@@ -157,13 +157,13 @@ Alice                                                 Bob
                                                        derived from 'chain_key_r_0'
                                                      * Derives a new brace key from the one derived
                                                        previously
-                                                         'brace_key_4 = KDF(0x03 || brace_key, 32)'
+                                                         'brace_key_4 = KDF(usageBraceKey || brace_key, 32)'
                                                      * Generates new ECDH keys and uses Alice's ECDH
                                                        public key (received in data_message_0) to
                                                        create the ECDH shared secret ('K_ecdh').
                                                      * Mixes the brace key with 'K_ecdh' to create
                                                        the Mixed shared secret 'K_4'
-                                                         'K_4 = KDF(0x04 || K_ecdh ||
+                                                         'K_4 = KDF(usageSharedSecret || K_ecdh ||
                                                           brace_key_4, 64)'
                                                      * Generates the root and the sending chain key
                                                        from root key 3 ('root_key_3') and from the
