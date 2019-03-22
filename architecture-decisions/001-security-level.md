@@ -57,11 +57,11 @@ vulnerable to cache-collision timing attacks [\[6]\](#references). This is all
 defined in [\[7\]](#references).
 
 We chose to use the modified version of Chacha20 as defined
-in [\[7\]](#references). In OTRv4, therefore, we used the following parameters:
-20 rounds, a 256-bit key, and a 32-bit block count. As we are using a unique
-message key for each encrypted message, we can use a constant nonce set to 0.
-With this, it will remain true that `nonce, key` pairs are never reused for
-different messages.
+in [\[7\]](#references), it is more widely adopted. In OTRv4, therefore, we
+used the following parameters: 20 rounds, a 256-bit key, and a 32-bit block
+count. As we are using a unique message key for each encrypted message, we can
+use a constant nonce set to 0. With this, it will remain true
+that `nonce, key` pairs are never reused for different messages.
 
 The protocol uses SHAKE-256 as the hash function, as it gives a 256-bit security
 if the output is 64 bytes, and 128 if the output is 32 bytes. We only use
