@@ -693,6 +693,9 @@ Opaque variable-length data (DATA):
 OTRv4 also uses the following data types:
 
 ```
+Nonce (NONCE):
+  96 bytes data
+
 Message Authentication Code (MAC):
   64 bytes MAC data
 
