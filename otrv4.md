@@ -157,7 +157,7 @@ protocol, such as XMPP.
     (non-interactive).
   - Key management using the Double Ratchet Algorithm [\[2\]](#references).
   - Upgraded SHA-1 and SHA-2 to SHAKE-256.
-  - Switched from AES to XSalsa20 [\[3\]](#references).
+  - Switched from AES to Chacha20 [\[3\]](#references).
 - Support of an out-of-order network model.
 - Support of different modes in which this specification can be implemented.
 - Explicit instructions for producing forged transcripts using the same
@@ -692,9 +692,6 @@ Opaque variable-length data (DATA):
 OTRv4 also uses the following data types:
 
 ```
-Nonce (NONCE):
-  24 bytes data
-
 Message Authentication Code (MAC):
   64 bytes MAC data
 
@@ -3196,15 +3193,11 @@ Public DH Key (MPI)
   is 'our_dh.public' value. For the receiver of this message, it is used as
   'their_dh'. If this value is empty, its length is zero.
 
-Nonce (NONCE)
-  The nonce used with XSalsa20 to create the encrypted message contained in this
-  packet.
-
 Encrypted message (DATA)
   Using the appropriate encryption key (see below) derived from the sender's
   and recipient's ECDH and DH public keys (with the keyids given in this
-  message), perform an XSalsa20 encryption of the message. The 'nonce' used for
-  this operation is also included in the header of the data message packet.
+  message), perform an encryption of the message using ChaCha20. The 'nonce'
+  used for this operation is set to 0.
 
 Authenticator (MAC)
   The MAC with the appropriate MAC key (see below) of everything: from the
@@ -3264,11 +3257,11 @@ When sending a data message in the same DH Ratchet:
    ```
 
   * Securely delete `chain_key_s[j]`.
-  * Generate a new random 24 bytes value to be the `nonce`.
+  * Set `nonce` to 0.
   * Use only the first 32 bytes of `MKenc` to encrypt the message:
 
    ```
-     encrypted_message = XSalsa20_Enc(MKenc, nonce, m)
+     encrypted_message = Chacha20_Enc(MKenc, nonce, m)
    ```
 
   * Use the `MKmac` to create a MAC tag. MAC all the sections of the data
@@ -3323,11 +3316,11 @@ The decryption mechanism works as:
       verification fails:
         * Reject the message.
     * Securely delete `skipped_MKenc[Public ECDH Key, message_id]`.
-    * Set `nonce` with the "nonce" from the received data message.
+    * Set `nonce` to 0.
     * Decrypt the message by using the nonce and only the 32 bytes of `MKenc`:
 
       ```
-        decrypted_message = XSalsa20_Dec(MKenc, nonce, m)
+        decrypted_message = Chacha20_Dec(MKenc, nonce, m)
       ```
 
     * Securely delete `MKenc`.
@@ -3416,11 +3409,11 @@ The decryption mechanism works as:
         `chain_key_r[k+1] = KDF(usageNextChainKey || chain_key_r[k], 64)`.
       * Securely delete `chain_key_r[k]`.
       * Increment the receiving message id `k = k + 1`.
-      * Set `nonce` with the "nonce" from the received data message.
+      * Set `nonce` to 0.
       * Decrypt the message by using the nonce and only the 32 bytes of `MKenc`:
 
       ```
-        decrypted_message = XSalsa20_Dec(MKenc, nonce, m)
+        decrypted_message = Chacha20_Dec(MKenc, nonce, m)
       ```
 
       * If the message cannot be decrypted:
@@ -4089,8 +4082,8 @@ A received data message will look like this:
 
 ```
   ["?OTR" || protocol version || message type || sender's instance_tag ||receiver's instance tag ||
-    flags || previous chain message number || message id || public ECDH key ||
-    public DH key || nonce || enc(plaintext message || TLV) || authenticator ||
+    flags || previous chain message number || ratchet id || message id || public ECDH key ||
+    public DH key || enc(plaintext message || TLV) || authenticator ||
     old MAC keys to be revealed ]
 ```
 
@@ -5288,9 +5281,9 @@ Compute:
 2. Perrin, T. and Marlinspike, M. (2016). *The Double Ratchet Algorithm*.
    [online]signal.org. Available at:
    https://whispersystems.org/docs/specifications/doubleratchet
-3. Bernstein, D. (2008). *Extending the Salsa20 Nonce*, Chicago,
+3. Bernstein, D. (2008). *ChaCha, a variant of Salsa20*, Chicago,
    USA: The University of Illinois at Chicago. Available at:
-   https://cr.yp.to/snuffle/xsalsa-20081128.pdf
+   https://cr.yp.to/chacha/chacha-20080128.pdf
 4. Hamburg, M. (2015). *Ed448-Goldilocks, a new elliptic curve*, NIST ECC
    workshop. Available at: https://eprint.iacr.org/2015/625.pdf
 5. Hamburg, M., Langley, A. and Turner, S. (2016). *Elliptic Curves for
