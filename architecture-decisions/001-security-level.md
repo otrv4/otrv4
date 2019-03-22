@@ -43,16 +43,25 @@ cryptanalysis when compared with Curve25519, it can be safely
 used [\[1\]](#references): it hedges against some amount of analytical advance
 against elliptic curves.
 
-To achieve classic Diffie-Hellman ~128-bit security, we use a brace key of
-3072-bit, which is described in
+To achieve classic Diffie-Hellman ~128-bit security, we use a 3072-bit brace
+key, as described in
 [ADR 5](https://github.com/otrv4/otrv4/blob/master/architecture-decisions/005-brace-keys.md).
 
-We use XSalsa20 as the encryption stream cipher because it has a block size of
-512 bits compared to AES' block size of 128 bits. XSalsa20 is faster than AES
-and immune to timing attacks. Since its nonce is significantly larger, it is
-safe randomly generate it. It takes 2<sup>249</sup> simple operations against
-XSalsa20 reduced to 8 rounds to break it. In OTRv4, XSalsa20 is used with the
-following parameters: 20 rounds, 192-bits nonce, and 256-bit key.
+We use Chacha20 as the encryption stream cipher because it is faster than AES
+in software-only implementations, it is not sensitive to timing attacks and has
+undergone rigorous analysis ([\[3\]](#references), [\[4\]](#references)
+and [\[5\]](#references)). We chose this over AES as future advances
+cryptanalysis might uncover security issues with it, its performance on
+platforms that lack dedicated hardware is slow, and many AES implementations are
+vulnerable to cache-collision timing attacks [\[6]\](#references). This is all
+defined in [\[7\]](#references).
+
+We chose to use the modified version of Chacha20 as defined
+in [\[7\]](#references). In OTRv4, therefore, we used the following parameters:
+20 rounds, a 256-bit key, and a 32-bit block count. As we are using a unique
+message key for each encrypted message, we can use a constant nonce set to 0.
+With this, it will remain true that `nonce, key` pairs are never reused for
+different messages.
 
 The protocol uses SHAKE-256 as the hash function, as it gives a 256-bit security
 if the output is 64 bytes, and 128 if the output is 32 bytes. We only use
@@ -101,3 +110,20 @@ bytes in OTRv3.
    http://www.ietf.org/rfc/rfc7748.txt
 2. Hamburg, M. *Ed448-Goldilocks*. Available at:
    https://sourceforge.net/p/ed448goldilocks/wiki/Home/
+3. Aumasson, J., Fischer, S., Khazaei, S., Meier, W., and C. Rechberger. (2007)
+   *New Features of Latin Dances: Analysis of Salsa, ChaCha, and Rumba*.
+   Available at:
+   http://cr.yp.to/rumba20/newfeatures-20071218.pdf.
+4. Ishiguro, T., Kiyomoto, S., and Y. Miyake. (2012). *Modified version of
+   'Latin Dances Revisited: New Analytic Results of Salsa20 and ChaCha'*.
+   KDDI R&D Laboratories Inc. Available at:
+   https://eprint.iacr.org/2012/065.pdf.
+5. Zhenqing, S., Bin, Z., Dengguo, F., and W. Wenling. (2012). *Improved Key
+   Recovery Attacks on Reduced-Round Salsa20 and ChaCha*. Available at:
+   https://link.springer.com/chapter/10.1007/978-3-642-37682-5_24
+6. Bonneau, J. and I. Mironov. (2006). *Cache-Collision Timing Attacks Against
+   AES*, Cryptographic Hardware and Embedded Systems, CHES 2006. Available at:
+   http://research.microsoft.com/pubs/64024/aes-timing.pdf.
+7. Nir, Y. and Langley, A. (2015). *ChaCha20 and Poly1305 for IETF Protocols*,
+   Internet Research Task Force (IRTF), RFC 7539. Available at:
+   https://tools.ietf.org/html/rfc7539
