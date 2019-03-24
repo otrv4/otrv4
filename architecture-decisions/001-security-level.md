@@ -47,7 +47,7 @@ To achieve classic Diffie-Hellman ~128-bit security, we use a 3072-bit brace
 key, as described in
 [ADR 5](https://github.com/otrv4/otrv4/blob/master/architecture-decisions/005-brace-keys.md).
 
-We use Chacha20 as the encryption stream cipher because it is faster than AES
+We use ChaCha20 as the encryption stream cipher because it is faster than AES
 in software-only implementations, it is not sensitive to timing attacks and has
 undergone rigorous analysis ([\[3\]](#references), [\[4\]](#references)
 and [\[5\]](#references)). We chose this over AES as future advances
@@ -56,12 +56,13 @@ platforms that lack dedicated hardware is slow, and many AES implementations are
 vulnerable to cache-collision timing attacks [\[6]\](#references). This is all
 defined in [\[7\]](#references).
 
-We chose to use the modified version of Chacha20 as defined
-in [\[7\]](#references), it is more widely adopted. In OTRv4, therefore, we
-used the following parameters: 20 rounds, a 256-bit key, and a 32-bit block
-count. As we are using a unique message key for each encrypted message, we can
-use a constant nonce set to 0. With this, it will remain true
-that `nonce, key` pairs are never reused for different messages.
+We chose to use the modified version of ChaCha20 as defined
+in [\[7\]](#references) because it is more widely adopted. In OTRv4, therefore,
+we used the following parameters: 20 rounds, a 256-bit key, a 96-bit nonce and
+a 32-bit block count, in comparison with the original ChaCha20 that has a 64-bit
+nonce and a 64-bit block count. As we are using a unique message key for each
+encrypted message, we can use a constant nonce of 96-bit set to 0. With this, it
+will remain true that `nonce, key` pairs are never reused for different messages.
 
 The protocol uses SHAKE-256 as the hash function, as it gives a 256-bit security
 if the output is 64 bytes, and 128 if the output is 32 bytes. We only use

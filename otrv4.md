@@ -157,7 +157,7 @@ protocol, such as XMPP.
     (non-interactive).
   - Key management using the Double Ratchet Algorithm [\[2\]](#references).
   - Upgraded SHA-1 and SHA-2 to SHAKE-256.
-  - Switched from AES to Chacha20 [\[3\]](#references). The RFC 7539 variant is
+  - Switched from AES to ChaCha20 [\[3\]](#references). The RFC 7539 variant is
     used [\[16\]](#references) .
 - Support of an out-of-order network model.
 - Support of different modes in which this specification can be implemented.
@@ -3324,7 +3324,7 @@ The decryption mechanism works as:
     * Decrypt the message by using the nonce and only the 32 bytes of `MKenc`:
 
       ```
-        decrypted_message = Chacha20_Dec(MKenc, nonce, m)
+        decrypted_message = ChaCha20_Dec(MKenc, nonce, m)
       ```
 
     * Securely delete `MKenc`.
@@ -3417,7 +3417,7 @@ The decryption mechanism works as:
       * Decrypt the message by using the nonce and only the 32 bytes of `MKenc`:
 
       ```
-        decrypted_message = Chacha20_Dec(MKenc, nonce, m)
+        decrypted_message = ChaCha20_Dec(MKenc, nonce, m)
       ```
 
       * If the message cannot be decrypted:
