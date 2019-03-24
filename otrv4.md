@@ -157,7 +157,7 @@ protocol, such as XMPP.
     (non-interactive).
   - Key management using the Double Ratchet Algorithm [\[2\]](#references).
   - Upgraded SHA-1 and SHA-2 to SHAKE-256.
-  - Switched from AES to Chacha20 [\[3\]](#references). The RFC 7538 variant is
+  - Switched from AES to Chacha20 [\[3\]](#references). The RFC 7539 variant is
     used [\[16\]](#references) .
 - Support of an out-of-order network model.
 - Support of different modes in which this specification can be implemented.
@@ -694,7 +694,7 @@ OTRv4 also uses the following data types:
 
 ```
 Nonce (NONCE):
-  96 bytes data
+  12 bytes data
 
 Message Authentication Code (MAC):
   64 bytes MAC data
@@ -5319,9 +5319,9 @@ Compute:
     *Validation of Elliptic Curve Public Keys*. Available at:
     https://iacr.org/archive/pkc2003/25670211/25670211.pdf
 15. Bernstein, D., Hamburg, M., Krasnova, A., and Lange T. (2013).
-16. Nir, Y. and Langley, A. (2015). *ChaCha20 and Poly1305 for IETF Protocols*,
-   Internet Research Task Force (IRTF), RFC 7539. Available at:
-   https://tools.ietf.org/html/rfc7539
     *Elligator: Elliptic-curve points indistinguishable from uniform random
     strings*. Available at:
     https://elligator.cr.yp.to/elligator-20130828.pdf
+16. Nir, Y. and Langley, A. (2015). *ChaCha20 and Poly1305 for IETF Protocols*,
+   Internet Research Task Force (IRTF), RFC 7539. Available at:
+   https://tools.ietf.org/html/rfc7539
