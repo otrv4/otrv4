@@ -3,7 +3,7 @@
 ### Context
 
 The security level of a protocol can be roughly estimated as the smallest
-security level amongst all the cryptographic primitives in use in that protocol.
+security level amongst all the cryptographic primitives in use in a protocol.
 In general, there is an inverse relation between security level and speed of
 execution. For this reason, the cryptographic primitives should be chosen to
 have roughly the same security level as the target security level, while taking
@@ -18,21 +18,25 @@ group.
 As OTRv4 is an open standard, the protocol should only use cryptographic
 primitives that have no intellectual-property claims.
 
-Furthermore, the OTRv4 protocol specification should be ready for implementation
-now. Therefore, using cryptographic primitives with existing implementations in
-various programming languages should be favored.
+Furthermore, the OTRv4 protocol specification should be ready for current
+implementations. Therefore, using cryptographic primitives with existing already
+implementations in various programming languages should be favored.
 
 These are the considerations to be taken into account while defining a
 target overall protocol security level: individual algorithm security level,
 speed, license requirements, and availability.
 
-Because of this, two security levels were evaluated: 128-bit and 224-bit.
+Because of this, two security levels are evaluated: 128-bit and 224-bit.
 
 ### Decision
 
-OTRv4 design have a target security level of ~224-bit. It uses elliptic curve
-cryptography. In case that elliptic curves can broken, data message
-transcripts of OTRv4 will have classic Diffie-Hellman ~128-bit security.
+OTRv4 design have a target security level of ~224-bit. This is so as it is
+reasonable to choose ~224-bit primitives because the ~128-bit primitives could
+not really provide the ~128-bit security.
+
+OTRv4 uses elliptic curve cryptography. In case that elliptic curves can broken,
+data message transcripts of OTRv4 will have a classic Diffie-Hellman ~128-bit
+security.
 
 To achieve the ~224-bit in regards to the choice of elliptic curve cryptography,
 curve Ed448 ("Goldilocks") was chosen, as it has a ~224-bit security level (note
@@ -50,7 +54,7 @@ key, as described in
 We use ChaCha20 as the encryption stream cipher because it is faster than AES
 in software-only implementations, it is not sensitive to timing attacks and has
 undergone rigorous analysis ([\[3\]](#references), [\[4\]](#references)
-and [\[5\]](#references)). We chose this over AES as future advances
+and [\[5\]](#references)). We chose this over AES as future advances in
 cryptanalysis might uncover security issues with it, its performance on
 platforms that lack dedicated hardware is slow, and many AES implementations are
 vulnerable to cache-collision timing attacks [\[6]\](#references). This is all
@@ -62,13 +66,13 @@ we used the following parameters: 20 rounds, a 256-bit key, a 96-bit nonce and
 a 32-bit block count, in comparison with the original ChaCha20 that has a 64-bit
 nonce and a 64-bit block count. As we are using a unique message key for each
 encrypted message, we can use a constant nonce of 96-bit set to 0. With this, it
-will remain true that `nonce, key` pairs are never reused for different messages.
+will remain true that `nonce, key` pairs are never reused for different
+messages. The ChaCha20 cipher is designed to provide a 256-bit security level.
 
 The protocol uses SHAKE-256 as the hash function, as it gives a 256-bit security
 if the output is 64 bytes, and 128 if the output is 32 bytes. We only use
 SHAKE-256 with an output of 32 bytes for generation of the brace key (when it is
-not the *n* ratchet) as it has a security level of 128 bits. It is also use for
-generation of Message Authentication Codes (MAC).
+not the third ratchet) as it has a security level of 128 bits.
 
 SHAKE-256 is used for the key derivation, hash and MAC function in the protocol.
 The functions are:
