@@ -32,21 +32,18 @@ Ratchet algorithm.
 The first 3072-bit DH key agreement takes place in the DAKE, as a traditional
 Diffie-Hellman key exchange.
 
-We considered two options for ratcheting/deriving this brace key:
+We considered two options for ratcheting/deriving the brace key:
 
 1. Obtain a brace key from a DH function which requires the other party to
    contribute to the computation each time a new Mixed shared secret is derived.
 2. Obtain a brace key with DH functions which require the other party to
    contribute to the computation every n times. Between these derivations, the
    brace keys are obtained using a key derivation function (KDF) that is seeded
-   with the last DH key. We propose n = 3, but n can be adjusted for
-   performance.
+   with the last DH key. For 'n' we propose 'n = 3'.
 
-We chose the second option.
+We chose the second option. Therefore, OTRv4 uses 'n = 3'.
 
 ### Algorithm
-
-In this description of the algorithm's functions, we will assume n = 3.
 
 **k_dh = A_i, a_i**
 
@@ -104,7 +101,8 @@ Bob's DH keypair = `(b_i, B_i)`
 Every Mixed shared secret derivation requires both an ECDH key and a brace key.
 For the purposes of this explanation, we will only discuss the brace key.
 
-`n` is the number of DH ratchets before performing a new DH computation.
+`n` is the number of DH ratchets before performing a new DH computation. This
+variable is set to 3.
 
 The interim root key derivations will use a brace key derived from a
 `SHAKE-256` using the previous brace key as the seed.
