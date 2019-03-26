@@ -1379,7 +1379,7 @@ To expire a session:
    1. Reset the state and key variables, as defined in
       [its section](#resetting-state-variables-and-key-variables).
 
-1. Transition the protocol state machine to `START`.
+1. Transition the protocol state machine to `FINISHED` state.
 
 The session expiration time is decided individually by each party so it is
 possible for one person to have an expiration time of two hours and the other
@@ -3693,12 +3693,13 @@ required and if it will advertise OTR support.
 ```
 START
 
-  This is the initial state before an OTR conversation starts. The only way to
-  enter this state is for the participant to explicitly request it via some UI
-  operation. Messages sent in this state are plaintext messages. If a TLV type 1
-  (Disconnected) message is sent in ENCRYPTED_MESSAGES state, transition to this
-  state. Note that this transition only happens when TLV type 1 message is sent,
-  not when it is received.
+  This is the initial state before an OTRv4 or OTRv3 conversation starts. The
+  only way to enter this state is for the participant to explicitly request it
+  via some UI operation. Messages sent in this state are plaintext messages. If
+  a TLV type 1 (Disconnected) message is sent in ENCRYPTED_MESSAGES state,
+  transition to this state (except when the session is expired). Note that this
+  transition only happens when TLV type 1 message is sent, not when it is
+received.
 
 WAITING_AUTH_R
 
@@ -3724,15 +3725,17 @@ FINISHED
 
   This state is entered only when a participant receives a TLV type 1
   (Disconnected) message, which indicates they have terminated their side
-  of the OTR conversation. For example, if Alice and Bob are having an OTR
-  conversation, and Bob instructs his OTR client to end its private session
+  of the OTRv4 conversation. For example, if Alice and Bob are having an OTRv4
+  conversation, and Bob instructs his OTRv4 client to end its private session
   with Alice (for example, by logging out), Alice will be notified of this,
   and her client will switch to the FINISHED state. This prevents Alice from
   accidentally sending a message to Bob in plaintext (consider what happens
   if Alice was in the middle of typing a private message to Bob when he
-  suddenly logs out, just as Alice hits the 'enter' key). Note that this
-  transition only happens when TLV type 1 message is received, not when it is
-  sent. This state indicates that outgoing messages are not delivered at all.
+  suddenly closes the session, just as Alice hits the 'enter' key). Note that
+  this transition only happens when TLV type 1 message from OTRv4 is received,
+  not when it is sent. This state indicates that outgoing messages are not
+  delivered at all. If a OTRv3 message is received in this state, it should be
+  ignored.
 ```
 
 ### Protocol Events
@@ -3741,8 +3744,9 @@ The following sections outline the actions that the protocol should implement.
 This assumes that the client is initialized with the allowed versions
 (3 and/or 4).
 
-There are thirdteen events an OTRv4 client must handle (for version 3 messages,
-please refer to the previous OTR protocol document):
+There are thirteen events an OTRv4 client must handle (for version 3 messages,
+please refer to the previous OTR protocol document. The only state where OTRv3
+messages are taken into account is the `START` state):
 
 * Received messages:
   * Plaintext without the whitespace tag
@@ -3787,7 +3791,8 @@ has only an old client; so that it will opportunistically start an OTR
 conversation whenever it detects the correspondent supports it; or so that it
 refuses to send non-encrypted messages to Bob, ever.
 
-Query Messages are not allowed to be sent in `ENCRYPTED_MESSAGES` state.
+Note that query Messages are not allowed to be sent
+in `ENCRYPTED_MESSAGES` state.
 
 The version string is constructed as follows:
 
@@ -3813,7 +3818,8 @@ Example query messages:
 ```
 
 These strings may be hidden from the user (for example, in an attribute of an
-HTML tag), and may be accompanied by an explanatory message ("Your buddy has
+HTML tag), and may be accompanied by an explanatory message which should not
+reveal information regarding the participants (an example can be "Your buddy has
 requested an Off-the-Record private conversation."). If Bob is willing to use
 OTR with Alice (with a protocol version that Alice has offered), he should start
 the AKE or DAKE according to the compatible version he supports.
@@ -4071,7 +4077,7 @@ If the state is `START`, `WAITING_AUTH_R` or `WAITING_AUTH_I`, queue the message
 for encrypting and sending it when the participant transitions to
 the `ENCRYPTED_MESSAGES` state.
 
-If the state is `FINISHED`, the participant must start another OTR conversation
+If the state is `FINISHED`, the participant must start another OTRv4 conversation
 to send encrypted messages:
 
   * Inform the user that the message cannot be sent at this time.
@@ -4185,7 +4191,7 @@ AKE will start when receiving an OTR Error message, as defined in OTRv3):
 
   * Reply with a Query Message.
 
-#### User requests to end an OTR Conversation
+#### User requests to end an OTRv4 Conversation
 
 * Send a data message with an encoding of the message with an empty
   human-readable part, and the TLV type 1.
