@@ -3699,7 +3699,7 @@ START
   a TLV type 1 (Disconnected) message is sent in ENCRYPTED_MESSAGES state,
   transition to this state (except when the session is expired). Note that this
   transition only happens when TLV type 1 message is sent, not when it is
-received.
+  received.
 
 WAITING_AUTH_R
 
@@ -3853,11 +3853,15 @@ DAKE), she should stop sending him a whitespace tag.
 
 #### Receiving plaintext without the whitespace tag
 
-Display the message to the user.
+Display the message to the user. Depending on the policy set up by the
+client or the mode in which it was initiated, the user should be warned that
+the message received was unencrypted.
 
 If the state is `ENCRYPTED_MESSAGES` or `FINISHED`:
 
-  * The user should be warned that the message received was unencrypted.
+  * Display the message to the user, depending on the policy set up by the
+    client or the mode in which it was initiated. The user should be warned that
+    the message received was unencrypted.
 
 For OTRv3, if msgstate is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
 
@@ -3866,11 +3870,14 @@ For OTRv3, if msgstate is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
 
 #### Receiving plaintext with the whitespace tag
 
-Remove the whitespace tag and display the message to the user.
+Remove the whitespace tag and display the message to the user. Depending on the
+policy set up by the client or the mode in which it was initiated, the user
+should be warned that the message received was unencrypted.
 
 If the state is `ENCRYPTED_MESSAGES` or `FINISHED`:
 
-  * The user should be warned that the message received was unencrypted.
+  * Remove the whitespace tag and display the message to the user. The user
+    should be warned that the message received was unencrypted.
 
 For OTRv3, if msgstate is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
 
@@ -3887,6 +3894,14 @@ In any event:
     * Send a version `3 D-H Commit Message`.
     * Transition authstate to `AUTHSTATE_AWAITING_DHKEY`.
 
+#### Sending a Query Message after an offline conversation
+
+In the case that a party received offline messages, comes online and wants to
+send online messages:
+
+   * Send a TLV type 1 (Disconnected).
+   * Send a Query Message.
+
 #### Receiving a Query Message
 
 If the Query Message offers OTR version 4 and version 4 is allowed:
@@ -3898,14 +3913,6 @@ If the Query message offers OTR version 3 and version 3 is allowed:
 
   * Send a version `3 D-H Commit Message`.
   * Transition authstate to `AUTHSTATE_AWAITING_DHKEY`.
-
-#### Sending a Query Message
-
-In the case that a party received offline messages, comes online and wants to
-send online messages:
-
-   * Send a TLV type 1 (Disconnected).
-   * Send a Query Message.
 
 #### Starting a conversation interactively
 
@@ -4035,8 +4042,8 @@ If the state is not `WAITING_AUTH_R`:
       * Initialize the double ratcheting, as defined in the
         [Interactive DAKE Overview](#interactive-dake-overview) section.
       * If a plaintext message is waiting to be sent, encrypt it and send it.
-      * If there are stored Data Messages, remove them from storage - there is
-        no way these messages can be valid for the current DAKE.
+      * If there are stored received Data Messages, remove them from storage
+        - there is no way these messages are valid for the current DAKE.
 
 * If the state is not `WAITING_AUTH_I`:
 
@@ -4067,15 +4074,19 @@ If the state is not `WAITING_AUTH_R`:
     * Initialize the double ratcheting, as defined in the
       [Non-Interactive DAKE Overview](#non-interactive-dake-overview) section.
     * Transition to state to `ENCRYPTED_MESSAGES`.
+    * If a plaintext message is waiting to be sent, encrypt it and send it.
+    * If there are stored received Data Messages, remove them from storage
+      - there is no way these messages are valid for the current DAKE.
 
 #### Sending a Data Message
 
 The `ENCRYPTED_MESSAGES` state is the only state where a participant is allowed
 to send encrypted data messages.
 
-If the state is `START`, `WAITING_AUTH_R` or `WAITING_AUTH_I`, queue the message
-for encrypting and sending it when the participant transitions to
-the `ENCRYPTED_MESSAGES` state.
+If the state is `START`, `WAITING_AUTH_R`, `WAITING_AUTH_I`:
+
+  * Queue the message for encrypting and sending it when the participant
+    transitions to the `ENCRYPTED_MESSAGES` state.
 
 If the state is `FINISHED`, the participant must start another OTRv4 conversation
 to send encrypted messages:
@@ -4083,8 +4094,10 @@ to send encrypted messages:
   * Inform the user that the message cannot be sent at this time.
   * Store the plaintext message for possible retransmission.
 
-If the state is `ENCRYPTED`, encrypt the message, and send it as a Data Message.
-Store any plaintext message for possible retransmission.
+If the state is `ENCRYPTED`:
+
+  * Encrypt the message, and send it as a Data Message.
+  * Store any plaintext message for possible retransmission.
 
 #### Receiving a Data Message
 
@@ -4123,7 +4136,7 @@ If the version is 4:
 
     * If the message is not valid in any of the above steps:
       * Inform the user that an unreadable encrypted message was received by
-        replying with an Error Message: `ERROR_2`.
+        replying with an Error Message: `ERROR_1`.
 
     * Otherwise:
       * Derive the corresponding decryption key depending if you are on a new
@@ -4193,9 +4206,19 @@ AKE will start when receiving an OTR Error message, as defined in OTRv3):
 
 #### User requests to end an OTRv4 Conversation
 
-* Send a data message with an encoding of the message with an empty
-  human-readable part, and the TLV type 1.
-* Transition to the `START` state.
+If state is `START`:
+
+  * Do nothing
+
+If state is `ENCRYPTED_MESSAGES`:
+
+  * Send a data message with an encoding of the message with an empty
+    human-readable part, and the TLV type 1.
+  * Transition to the `START` state.
+
+If state is `FINISHED`:
+
+  * Transition to state `START`.
 
 ## Socialist Millionaires Protocol (SMP)
 
