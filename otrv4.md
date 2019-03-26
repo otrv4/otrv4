@@ -4914,7 +4914,7 @@ section for details.
 1. Compute `c = HashToScalar(usageAuth || G || q || A1 || A2 || A3 || T1 ||
    T2 || T3 || m)`.
 1. Compute `c1 = c - c2 - c3 (mod q)`.
-1. Compute `r1 = t1 - c1 * a1 (mod q)`.
+1. Compute `r1 = t1 - c1 * a1 (mod q)`. Securely delete `t1`.
 1. Send `sigma = (c1, r1, c2, r2, c3, r3)`.
 
 This function can be generalized so it is not possible to determine which secret
@@ -4949,7 +4949,7 @@ The prover knows a secret `ai` and, therefore:
 1. For whichever equally returns true (if `eqi == 1`, `eqj == 0` and
    `eqk == 0`, for `i != j != k`): `ci = c - cj - ck (mod q)`.
 1. For whichever equally returns true (for example, if `eqi == 1`):
-   `ri = ti - ci * ai (mod q)`.
+   `ri = ti - ci * ai (mod q)`. Securely delete `ti`.
 1. Compute `sigma = (ci, ri, cj, rj, ck, rk)`.
 
 If the prover knows `a2`, for example, the `RSig` function looks like this:
