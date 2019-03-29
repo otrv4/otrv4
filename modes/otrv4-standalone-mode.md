@@ -107,13 +107,13 @@ Alice will be initiating the DAKE with Bob.
       Securely deletes `our_ecdh.secret`.
     * Calculates DH shared secret `k_dh = DH(our_dh.secret, their_dh)`.
       Securely deletes `our_dh.secret`.
-    * Calculates the brace key `brace_key = KDF(usageThirdBraceKey || k_dh, 32)`.
+    * Calculates the brace key `brace_key = KDF(usage_third_brace_key || k_dh, 32)`.
       Securely deletes `k_dh`.
     * Calculates the Mixed shared secret
-      `K = KDF(usageSharedSecret ||K_ecdh || brace_key, 64)`.
+      `K = KDF(usage_shared_secret ||K_ecdh || brace_key, 64)`.
       Securely deletes `K_ecdh` and `brace_key`.
     * Calculates the SSID from shared secret: the first 8 bytes of
-      `HWC(usageSSID || K, 64)`.
+      `HWC(usage_SSID || K, 64)`.
 1. Sends Alice the Auth-R message (see [Auth-R Message](../otrv4.md#auth-r-message)
    section) with his `our_ecdh_first.public` and `our_dh_first.public` attached.
 
@@ -151,26 +151,26 @@ Alice will be initiating the DAKE with Bob.
       * `their_dh = their_dh_first`.
       * Securely deletes `our_dh_first.secret`, `our_dh_first.public` and
         `their_dh_first`.
-    * Calculates the brace key `brace_key = KDF(usageThirdBraceKey || k_dh, 32)`.
+    * Calculates the brace key `brace_key = KDF(usage_third_brace_key || k_dh, 32)`.
       Securely deletes `k_dh`.
     * Calculates the Mixed shared secret
-      `K = KDF(usageSharedSecret || K_ecdh || brace_key, 64)`.
+      `K = KDF(usage_shared_secret || K_ecdh || brace_key, 64)`.
       Securely deletes `k_ecdh` and `brace_key`.
     * Calculates the SSID from shared secret: the first 8 bytes of
-      `HWC(usageSSID || K, 64)`.
+      `HWC(usage_SSID || K, 64)`.
 1. Initializes the double-ratchet:
     * Sets `since_last_dh` as 0.
     * Sets `i`, `j`, `k` `pn` as 0.
     * Sets `max_remote_i_seen` as -1.
     * Interprets `K` as the first root key (`prev_root_key`) by:
-      `KDF(usageFirstRootKey || K, 64)`.
+      `KDF(usage_first_root_key || K, 64)`.
     * Calculates the receiving keys:
       * Calculates `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
       * Calculates `k_dh = DH(our_dh.secret, their_dh)`.
-      * Calculates `brace_key = KDF(usageThirdBraceKey || k_dh, 32)`.
+      * Calculates `brace_key = KDF(usage_third_brace_key || k_dh, 32)`.
       * Securely deletes `k_dh`.
       * Calculates the Mixed shared secret (and replaces the old value)
-        `K = KDF(usageSharedSecret || K_ecdh || brace_key, 64)`. Securely
+        `K = KDF(usage_shared_secret || K_ecdh || brace_key, 64)`. Securely
         deletes `K_ecdh`.
       * Derives new set of keys:
         `curr_root_key, chain_key_r[k] = derive_ratchet_keys(receiving, prev_root_key, K)`.
@@ -182,10 +182,10 @@ Alice will be initiating the DAKE with Bob.
       * Generates the new DH key pair and assigns it to
         `our_dh = generateDH()` (by securely replacing the old value).
       * Calculates `k_dh = DH(our_dh.secret, their_dh)`.
-      * Calculates `brace_key = KDF(usageThirdBraceKey || k_dh, 32)`.
+      * Calculates `brace_key = KDF(usage_third_brace_key || k_dh, 32)`.
       * Securely deletes `k_dh`.
       * Calculates the Mixed shared secret (and replaces the old value)
-        `K = KDF(usageSharedSecret || K_ecdh || brace_key, 64)`. Securely
+        `K = KDF(usage_shared_secret || K_ecdh || brace_key, 64)`. Securely
         deletes `K_ecdh`.
      * Interprets `curr_root_key` as `prev_root_key`.
       * Derives new set of keys:
@@ -221,7 +221,7 @@ Alice will be initiating the DAKE with Bob.
    * Sets `i`, `j`, `k` and `pn` as 0.
    * Sets `max_remote_i_seen` as -1.
    * Interprets `K` as the first root key (`prev_root_key`) by:
-     `KDF(usageFirstRootKey || K, 64)`.
+     `KDF(usage_first_root_key || K, 64)`.
    * Securely deletes `our_ecdh.public` and `their_ecdh`.
      Replaces them with:
        * `our_ecdh.secret = our_ecdh_first.secret`.
@@ -238,10 +238,10 @@ Alice will be initiating the DAKE with Bob.
    * Calculates the sending keys:
       * Calculates `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
       * Calculates `k_dh = DH(our_dh.secret, their_dh)`.
-      * Calculates `brace_key = KDF(usageThirdBraceKey || k_dh, 32)`.
+      * Calculates `brace_key = KDF(usage_third_brace_key || k_dh, 32)`.
       * Securely deletes `k_dh`.
       * Calculates the Mixed shared secret (and replaces the old value):
-        `K = KDF(usageSharedSecret || K_ecdh || brace_key, 64)`. Securely
+        `K = KDF(usage_shared_secret || K_ecdh || brace_key, 64)`. Securely
         deletes `K_ecdh`.
       * Derives new set of keys:
         `curr_root_key, chain_key_s[j] = derive_ratchet_keys(sending, prev_root_key, K)`.

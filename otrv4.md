@@ -614,9 +614,9 @@ To verify that an integer (`x`) is on the group with a 3072-bit modulus:
 The following functions are used:
 
 ```
-  KDF(usageID || values, size) = SHAKE-256("OTRv4" || usageID || values, size)
-  HWC(usageID || values, size) = SHAKE-256("OTRv4" || usageID || values, size)
-  HCMAC(usageID || values, size) = SHAKE-256("OTRv4" || usageID || values, size)
+  KDF(usage_ID || values, size) = SHAKE-256("OTRv4" || usage_ID || values, size)
+  HWC(usage_ID || values, size) = SHAKE-256("OTRv4" || usage_ID || values, size)
+  HCMAC(usage_ID || values, size) = SHAKE-256("OTRv4" || usage_ID || values, size)
 ```
 
 The Key Derivation Function (KDF) is a function used when generating a key. The
@@ -624,7 +624,7 @@ Hash with Context Function (HWC) is a function used to generate a hash. The Hash
 with Context Message Authentication Code is a function used to generate a MAC.
 
 The `size` first bytes of the SHAKE-256 output for input
-`"OTRv4" || usageID || m` are returned for the three functions. Unlike SHAKE
+`"OTRv4" || usage_ID || m` are returned for the three functions. Unlike SHAKE
 standard, notice that the output size here is defined in bytes.
 
 
@@ -638,35 +638,33 @@ referring to RFC 8032. As defined in that document:
 The following usageID variables are defined:
 
 ```
-  * usageFingerprint = 0x00
-  * usageThirdBraceKey = 0x01
-  * usageBraceKey = 0x02
-  * usageSharedSecret = 0x03
-  * usageSSID = 0x04
-  * usageAuthRBobClientProfile = 0x05
-  * usageAuthRAliceClientProfile = 0x06
-  * usageAuthRPhi = 0x07
-  * usageAuthIBobClientProfile = 0x08
-  * usageAuthIAliceClientProfile = 0x09
-  * usageAuthIPhi = 0x0A
-  * usageFirstRootKey = 0x0B
-  * usageTmpKey = 0x0C
-  * usageAuthMACKey = 0x0D
-  * usageNonIntAuthBobClientProfile = 0x0E
-  * usageNonIntAuthAliceClientProfile = 0x0F
-  * usageNonIntAuthPhi = 0x10
-  * usageAuthMAC = 0x11
-  * usageECDHFirstEphemeral = 0x12
-  * usageDHFirstEphemeral = 0x13
-  * usageRootKey = 0x14
-  * usageChainKey = 0x15
-  * usageNextChainKey = 0x16
-  * usageMessageKey = 0x17
-  * usageMACKey = 0x18
-  * usageExtraSymmKey = 0x19
-  * usageAuthenticator = 0x1A
-  * usageSMPSecret = 0x1B
-  * usageAuth = 0x1C
+  * usage_fingerprint = 0x00
+  * usage_third_brace_key = 0x01
+  * usage_brace_key = 0x02
+  * usage_shared_secret = 0x03
+  * usage_SSID = 0x04
+  * usage_auth_r_bob_client_profile = 0x05
+  * usage_auth_r_alice_client_profile = 0x06
+  * usage_auth_r_phi = 0x07
+  * usage_auth_i_bob_client_profile = 0x08
+  * usage_auth_i_alice_client_profile = 0x09
+  * usage_auth_i_phi = 0x0A
+  * usage_first_root_key = 0x0B
+  * usage_tmp_key = 0x0C
+  * usage_auth_MAC_key = 0x0D
+  * usage_non_int_auth_bob_client_profile = 0x0E
+  * usage_non_int_auth_alice_client_profile = 0x0F
+  * usage_non_int_auth_phi = 0x10
+  * usage_auth_MAC = 0x11
+  * usage_root_key = 0x12
+  * usage_chain_key = 0x13
+  * usage_next_chain_key = 0x14
+  * usage_message_key = 0x15
+  * usage_MAC_key = 0x16
+  * usage_extra_symm_key = 0x17
+  * usage_authenticator = 0x18
+  * usage_SMP_secret = 0x19
+  * usage_auth = 0x1A
 ```
 
 ## Data Types
@@ -914,7 +912,7 @@ the forging public key. To authenticate the long-term key pairs, the
 [Socialist Millionaire's Protocol](#socialist-millionaires-protocol-smp) or a
 manual fingerprint comparison may be used. The fingerprint is generated as:
 
-* `HWC(usageFingerprint || byte(H) || byte(F), 56)` (224-bit security level).
+* `HWC(usage_fingerprint || byte(H) || byte(F), 56)` (224-bit security level).
 
 ### Instance Tags
 
@@ -1144,9 +1142,9 @@ Key variables:
   'their_ecdh': their ECDH ephemeral public key.
   'our_dh': our DH ephemeral key pair.
   'their_dh': their DH ephemeral public key.
-  'brace_key': either a hash of the shared DH key: 'KDF(usageThirdBraceKey ||
+  'brace_key': either a hash of the shared DH key: 'KDF(usage_third_brace_key ||
    k_dh, 32)' (every third DH ratchet) or a hash of the previous 'brace_key:
-   KDF(usageBraceKey || brace_key, 32)'
+   KDF(usage_brace_key || brace_key, 32)'
   'mac_keys_to_reveal': the MAC keys to be revealed in the first data message
     sent of the next ratchet.
   'skipped_MKenc': Dictionary of stored skipped-over message keys, indexed by
@@ -1208,9 +1206,9 @@ k_dh:
   big-endian unsigned integer.
 
 brace_key:
-  Either a hash of the shared DH key: 'KDF(usageThirdBraceKey || k_dh, 32)'
+  Either a hash of the shared DH key: 'KDF(usage_third_brace_key || k_dh, 32)'
   (every third DH ratchet) or a hash of the previous:
-  'brace_key: KDF(usageBraceKey || brace_key, 32)'.
+  'brace_key: KDF(usage_brace_key || brace_key, 32)'.
 
 K_ecdh:
   The serialized ECDH shared secret computed from an ECDH exchange, serialized
@@ -1219,7 +1217,7 @@ K_ecdh:
 K:
   The Mixed shared secret is the final shared secret derived from both the
   brace key and ECDH shared secrets:
-  'KDF(usageSharedSecret || K_ecdh || brace_key, 64)'.
+  'KDF(usage_shared_secret || K_ecdh || brace_key, 64)'.
 ```
 
 ### Generating Shared Secrets
@@ -1272,14 +1270,14 @@ To rotate the brace key:
     * Generate the new DH key pair and assign it to `our_dh = generateDH()`
       (by securely replacing the old value).
     * Calculate `k_dh = DH(our_dh.secret, their_dh)`.
-    * Calculate a `brace_key = KDF(usageThirdBraceKey || k_dh, 32)`.
+    * Calculate a `brace_key = KDF(usage_third_brace_key || k_dh, 32)`.
     * Securely delete `k_dh`.
     * Set `since_last_dh` to 0.
 
   * Otherwise:
 
     * Derive and securely overwrite
-      `brace_key = KDF(usageBraceKey || brace_key, 32)`.
+      `brace_key = KDF(usage_brace_key || brace_key, 32)`.
     * Increase `since_last_dh` by 1.
 
 ### Rotating ECDH Keys and Brace Key as receiver
@@ -1306,14 +1304,14 @@ To rotate the brace key:
     * Retrieve the DH key ('Public DH key') from the received data message and
       assign it to `their_dh`.
     * Calculate `k_dh = DH(our_dh.secret, their_dh)`.
-    * Calculate a `brace_key = KDF(usageThirdBraceKey || k_dh, 32)`.
+    * Calculate a `brace_key = KDF(usage_third_brace_key || k_dh, 32)`.
     * Securely delete `our_dh.secret` and `k_dh`.
     * Set `since_last_dh` to 0.
 
   * Otherwise:
 
     * Derive and securely overwrite
-      `brace_key = KDF(usageBraceKey || brace_key, 32)`.
+      `brace_key = KDF(usage_brace_key || brace_key, 32)`.
     * Increase `since_last_dh` by 1.
 
 ### Deriving Double Ratchet Keys
@@ -1329,8 +1327,8 @@ variable `i` should refer to `j` (for sending) and `k` (for receiving).
 
 ```
 derive_ratchet_keys(purpose, prev_root_key, K):
-  curr_root_key = KDF(usageRootKey || prev_root_key || K, 64)
-  chain_key_purpose[i] = KDF(usageChainKey || prev_root_key || K, 64)
+  curr_root_key = KDF(usage_root_key || prev_root_key || K, 64)
+  chain_key_purpose[i] = KDF(usage_chain_key || prev_root_key || K, 64)
   return curr_root_key, chain_key_purpose[i]
 ```
 
@@ -1340,8 +1338,8 @@ When sending or receiving data messages, you must calculate the message keys:
 
 ```
 derive_enc_mac_keys(chain_key):
-  MKenc = KDF(usageMessageKey || chain_key, 64)
-  MKmac = KDF(usageMACKey || MKenc, 64)
+  MKenc = KDF(usage_message_key || chain_key, 64)
+  MKmac = KDF(usage_MAC_key || MKenc, 64)
   return MKenc, MKmac
 ```
 
@@ -2053,12 +2051,12 @@ Bob will be initiating the DAKE with Alice.
     * Calculates DH shared secret `k_dh = DH(our_dh.secret, their_dh)`.
       Securely deletes `our_dh.secret`.
     * Calculates the brace key
-      `brace_key = KDF(usageThirdBraceKey || k_dh, 32)`. Securely deletes
+      `brace_key = KDF(usage_third_brace_key || k_dh, 32)`. Securely deletes
       `k_dh`.
     * Calculates the Mixed shared secret
-      `K = KDF(usageSharedSecret ||K_ecdh || brace_key, 64)`.
+      `K = KDF(usage_shared_secret ||K_ecdh || brace_key, 64)`.
       Securely deletes `K_ecdh` and `brace_key`.
-    * Calculates the SSID from shared secret: `HWC(usageSSID || K, 8)`.
+    * Calculates the SSID from shared secret: `HWC(usage_SSID || K, 8)`.
 1. Sends Bob the Auth-R message (see [Auth-R Message](#auth-r-message) section),
    with her `our_ecdh_first.public` and `our_dh_first.public` attached. Alice
    must not send data messages at this point, as she still needs to receive
@@ -2098,25 +2096,25 @@ Bob will be initiating the DAKE with Alice.
       * Securely deletes `our_dh_first.secret`, `our_dh_first.public` and
         `their_dh_first`.
     * Calculates the brace key
-      `brace_key = KDF(usageThirdBraceKey || k_dh, 32)`. Securely deletes
+      `brace_key = KDF(usage_third_brace_key || k_dh, 32)`. Securely deletes
       `k_dh`.
     * Calculates the Mixed shared secret
-      `K = KDF(usageSharedSecret || K_ecdh || brace_key, 64)`.
+      `K = KDF(usage_shared_secret || K_ecdh || brace_key, 64)`.
       Securely deletes `k_ecdh` and `brace_key`.
-    * Calculates the SSID from shared secret: `HWC(usageSSID || K, 8)`.
+    * Calculates the SSID from shared secret: `HWC(usage_SSID || K, 8)`.
 1. Initializes the double-ratchet algorithm:
     * Sets `since_last_dh` as 0.
     * Sets `i`, `j`, `k` `pn` as 0.
     * Sets `max_remote_i_seen` as -1.
     * Interprets `K` as the first root key (`prev_root_key`) by:
-      `prev_root_key = KDF(usageFirstRootKey || K, 64)`.
+      `prev_root_key = KDF(usage_first_root_key || K, 64)`.
     * Calculates the receiving keys:
       * Calculates `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
       * Calculates `k_dh = DH(our_dh.secret, their_dh)`.
-      * Calculates `brace_key = KDF(usageThirdBraceKey || k_dh, 32)`.
+      * Calculates `brace_key = KDF(usage_third_brace_key || k_dh, 32)`.
       * Securely deletes `k_dh`.
       * Calculates the Mixed shared secret (and replaces the old value)
-        `K = KDF(usageSharedSecret || K_ecdh || brace_key, 64)`. Securely
+        `K = KDF(usage_shared_secret || K_ecdh || brace_key, 64)`. Securely
         deletes `K_ecdh`.
       * Derives new set of keys:
         `curr_root_key, chain_key_r[k] = derive_ratchet_keys(receiving, prev_root_key, K)`.
@@ -2128,10 +2126,10 @@ Bob will be initiating the DAKE with Alice.
       * Generates the new DH key pair and assigns it to
         `our_dh = generateDH()` (by securely replacing the old value).
       * Calculates `k_dh = DH(our_dh.secret, their_dh)`.
-      * Calculates `brace_key = KDF(usageThirdBraceKey || k_dh, 32)`.
+      * Calculates `brace_key = KDF(usage_third_brace_key || k_dh, 32)`.
       * Securely deletes `k_dh`.
       * Calculates the Mixed shared secret (and replaces the old value)
-        `K = KDF(usageSharedSecret || K_ecdh || brace_key, 64)`. Securely
+        `K = KDF(usage_shared_secret || K_ecdh || brace_key, 64)`. Securely
         deletes `K_ecdh`.
       * Interprets `curr_root_key` as `prev_root_key`.
       * Derives new set of keys:
@@ -2167,7 +2165,7 @@ Bob will be initiating the DAKE with Alice.
    * Sets `i`, `j`, `k` and `pn` as 0.
    * Sets `max_remote_i_seen` as -1.
    * Interprets `K` as the first root key (`prev_root_key`) by:
-     `KDF(usageFirstRootKey || K, 64)`.
+     `KDF(usage_first_root_key || K, 64)`.
    * Securely deletes `our_ecdh.public` and `their_ecdh`.
      Replaces them with:
        * `our_ecdh.secret = our_ecdh_first.secret`.
@@ -2184,10 +2182,10 @@ Bob will be initiating the DAKE with Alice.
    * Calculates the sending keys:
       * Calculates `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
       * Calculates `k_dh = DH(our_dh.secret, their_dh)`.
-      * Calculates `brace_key = KDF(usageThirdBraceKey || k_dh, 32)`.
+      * Calculates `brace_key = KDF(usage_third_brace_key || k_dh, 32)`.
       * Securely deletes `k_dh`.
       * Calculates the Mixed shared secret (and replaces the old value):
-        `K = KDF(usageSharedSecret || K_ecdh || brace_key, 64)`. Securely
+        `K = KDF(usage_shared_secret || K_ecdh || brace_key, 64)`. Securely
         deletes `K_ecdh`.
       * Derives new set of keys:
         `curr_root_key, chain_key_s[j] = derive_ratchet_keys(sending, prev_root_key, K)`.
@@ -2329,9 +2327,9 @@ A valid Auth-R message is generated as follows:
    * secret key `our_dh_first.secret` (80 bytes).
    * public key `our_dh_first.public`.
 1. Compute
-   `t = 0x0 || HWC(usageAuthRBobClientProfile || Bob_Client_Profile, 64) ||
-    HWC(usageAuthRAliceClientProfile || Alice_Client_Profile, 64) || Y || X ||
-    B || A || HWC(usageAuthRPhi || phi, 64)`.
+   `t = 0x0 || HWC(usage_auth_r_bob_client_profile || Bob_Client_Profile, 64) ||
+    HWC(usage_auth_r_alice_client_profile || Alice_Client_Profile, 64) || Y || X ||
+    B || A || HWC(usage_auth_r_phi || phi, 64)`.
    `phi` is the shared session state as mention in its
    [section](#shared-session-state).
 1. Compute `sigma = RSig(H_a, sk_ha, {F_b, H_a, Y}, t)`, as defined in
@@ -2365,9 +2363,9 @@ To verify an Auth-R message:
    [Verifying that an integer is in the DH group](#verifying-that-an-integer-is-in-the-dh-group)
    section for details.
 1. Compute `t = 0x0 ||
-   HWC(usageAuthRBobClientProfile || Bob_Client_Profile, 64) ||
-   HWC(usageAuthRAliceClientProfile || Alice_Client_Profile, 64) || Y || X ||
-   B || A || HWC(usageAuthRPhi || phi, 64)`. `phi` is the shared session state
+   HWC(usage_auth_r_bob_client_profile || Bob_Client_Profile, 64) ||
+   HWC(usage_auth_r_alice_client_profile || Alice_Client_Profile, 64) || Y || X ||
+   B || A || HWC(usage_auth_r_phi || phi, 64)`. `phi` is the shared session state
    as mention in its [section](#shared-session-state).
 1. Verify the `sigma` as defined in
    [Ring Signature Authentication](#ring-signature-authentication):
@@ -2418,9 +2416,9 @@ This is the final message of the DAKE. It is sent to verify the authentication
 A valid Auth-I message is generated as follows:
 
 1. Compute
-   `t = 0x1 || HWC(usageAuthIBobClientProfile || Bobs_Client_Profile, 64) ||
-    HWC(usageAuthIAliceClientProfile || Alice_Client_Profile, 64) || Y || X ||
-    B || A || HWC(usageAuthIPhi || phi, 64)`.
+   `t = 0x1 || HWC(usage_auth_i_bob_client_profile || Bobs_Client_Profile, 64) ||
+    HWC(usage_auth_i_alice_client_profile || Alice_Client_Profile, 64) || Y || X ||
+    B || A || HWC(usage_auth_i_phi || phi, 64)`.
    `phi` is the shared session state as mention in its
    [section](#shared-session-state).
 1. Compute `sigma = RSig(H_b, sk_hb, {H_b, F_a, X}, t)`, as defined in
@@ -2433,9 +2431,9 @@ To verify an Auth-I message:
 1. Verify that protocol's version of the message is `0x0004`.
 1. Check that the receiver's instance tag matches your sender's instance tag.
 1. Compute
-   `t = 0x1 || HWC(usageAuthIBobClientProfile || Bobs_Client_Profile, 64) ||
-    HWC(usageAuthIAliceClientProfile || Alices_Client_Profile, 64) || Y ||
-    X || B || A || HWC(usageAuthIPhi || phi, 64)`.
+   `t = 0x1 || HWC(usage_auth_i_bob_client_profile || Bobs_Client_Profile, 64) ||
+    HWC(usage_auth_i_alice_client_profile || Alices_Client_Profile, 64) || Y ||
+    X || B || A || HWC(usage_auth_i_phi || phi, 64)`.
    `phi` is the shared session state as mention in its
    [section](#shared-session-state).
 1. Verify the `sigma` as defined in
@@ -2548,9 +2546,9 @@ Verify.
    * Gets `tmp_k` generated during the generation of the
      [Non-Interactive-Auth Message](#non-interactive-auth-message).
    * Calculates the Mixed shared secret
-     `K = KDF(usageSharedSecret || tmp_k, 64)`. Securely deletes `tmp_k` and
+     `K = KDF(usage_shared_secret || tmp_k, 64)`. Securely deletes `tmp_k` and
      `brace_key`.
-   * Calculates the SSID from shared secret: `HWC(usageSSID || K, 8)`.
+   * Calculates the SSID from shared secret: `HWC(usage_SSID || K, 8)`.
    * Securely deletes `our_ecdh.secret`, `our_ecdh.public`. Replaces them with:
      * `our_ecdh.secret = our_ecdh_first.secret`.
      * `our_ecdh.public = our_ecdh_first.public`.
@@ -2562,7 +2560,7 @@ Verify.
 1. Calculates the `Auth MAC`:
     * Calculates the value:
       ```
-        Auth MAC = HCMAC(usageAuthMAC || auth_mac_k || t, 64)
+        Auth MAC = HCMAC(usage_auth_MAC || auth_mac_k || t, 64)
       ```
     * Includes this value in the Non-Interactive-Auth message and securely
       deletes the `auth_mac_k`.
@@ -2574,8 +2572,8 @@ Verify.
    * Sets `i`, `j`, `k` and `pn` as 0.
    * Sets `max_remote_i_seen` as -1.
    * Calculates the root key and sending chain key:
-     `curr_root_key = KDF(usageRootKey || K, 64)` and
-     `chain_key_sending[j] = KDF(usageChainKey || K, 64)`.
+     `curr_root_key = KDF(usage_root_key || K, 64)` and
+     `chain_key_sending[j] = KDF(usage_chain_key || K, 64)`.
    * Increments `i = i + 1`.
 1. At this point, the non-interactive DAKE is complete for Alice:
    * If she wants to send a data message, she follows what is defined in the
@@ -2646,30 +2644,30 @@ Verify.
    * Calculates the DH shared secret `k_dh = DH(our_dh.secret, their_dh)`.
      Securely deletes `our_dh.secret`.
    * Calculates the brace key
-     `brace_key = KDF(usageThirdBraceKey || k_dh, 32)`. Securely deletes
+     `brace_key = KDF(usage_third_brace_key || k_dh, 32)`. Securely deletes
      `k_dh`.
 1. Calculates
-   `tmp_k = KDF(usageTmpKey || K_ecdh ||
+   `tmp_k = KDF(usage_tmp_key || K_ecdh ||
     ECDH(our_shared_prekey.secret, their_ecdh) || ECDH(sk_hb, their_ecdh) ||
     brace_key, 64)`. Securely deletes `K_ecdh`.
-1. Computes the Auth MAC key `auth_mac_k = KDF(usageAuthMACKey || tmp_k, 64)`:
-  * Computes `Auth MAC = HCMAC(usageAuthMAC || auth_mac_k || t, 64)`.
+1. Computes the Auth MAC key `auth_mac_k = KDF(usage_auth_MAC_key || tmp_k, 64)`:
+  * Computes `Auth MAC = HCMAC(usage_auth_MAC || auth_mac_k || t, 64)`.
      The `t` value here is the one computed during the verification of the
      Non-Interactive-Auth message.
    * Extracts the `Auth MAC` from the Non-Interactive-Auth message and verifies
      that it is equal to the one just calculated. If it is not, ignore the
      Non-Interactive-Auth message.
 1. Computes the Mixed shared secret and the SSID:
-   * `K = KDF(usageSharedSecret || tmp_k, 64)`. Securely deletes `tmp_k` and
+   * `K = KDF(usage_shared_secret || tmp_k, 64)`. Securely deletes `tmp_k` and
      `brace_key`.
-   * Calculates the SSID from shared secret: `HWC(usageSSID || K, 8)`.
+   * Calculates the SSID from shared secret: `HWC(usage_SSID || K, 8)`.
 1. Initializes the double ratchet algorithm:
    * Sets `since_last_dh` as 0.
    * Sets `i`, `j`, `k` and `pn` as 0.
    * Sets `max_remote_i_seen` as -1.
    * Calculates the root key and receiving chain key:
-     `curr_root_key = KDF(usageRootKey || K, 64)` and
-     `chain_key_receiving[k] = KDF(usageChainKey || K, 64)`.
+     `curr_root_key = KDF(usage_root_key || K, 64)` and
+     `chain_key_receiving[k] = KDF(usage_chain_key || K, 64)`.
    * Sets the received `their_ecdh_first` from Alice as `their_ecdh`.
    * Sets the received `their_dh_first` from Alice as `their_dh`.
 1. At this point, the non-interactive DAKE is complete for Bob:
@@ -2772,16 +2770,16 @@ A valid Non-Interactive-Auth message is generated as follows:
    * public key `our_dh_first.public`.
 1. Compute `K_ecdh = ECDH(x, their_ecdh)`.
 1. Compute `k_dh = DH(a, their_dh)` and
-   `brace_key = KDF(usageThirdBraceKey || k_dh, 32)`. Securely delete `k_dh`.
+   `brace_key = KDF(usage_third_brace_key || k_dh, 32)`. Securely delete `k_dh`.
 1. Compute
-   `tmp_k = KDF(usageTmpKey || K_ecdh || ECDH(x, their_shared_prekey) ||
+   `tmp_k = KDF(usage_tmp_key || K_ecdh || ECDH(x, their_shared_prekey) ||
     ECDH(x, H_b) || brace_key, 64)`. Securely delete `K_ecdh`.
    This value is needed for the generation of the Mixed shared secret.
 1. Calculate the Auth MAC key
-   `auth_mac_k = KDF(usageAuthMACKey || tmp_k, 64)`.
+   `auth_mac_k = KDF(usage_auth_MAC_key || tmp_k, 64)`.
 1. Compute
-   `t = HWC(usageNonIntAuthBobClientProfile || Bob_Client_Profile, 64) ||
-    HWC(usageNonIntAuthAliceClientProfile || Alice_Client_Profile, 64) ||
+   `t = HWC(usage_non_int_auth_bob_client_profile || Bob_Client_Profile, 64) ||
+    HWC(usage_non_int_auth_alice_client_profile || Alice_Client_Profile, 64) ||
     Y || X || B || A || their_shared_prekey ||
     HWC(usageNonIntAuthPh || phi, 64)`.
 1. Compute `sigma = RSig(H_a, sk_ha, {F_b, H_a, Y}, t)`. Refer to
@@ -2798,10 +2796,10 @@ A valid Non-Interactive-Auth message is generated as follows:
 To verify a Non-Interactive-Auth message:
 
 1. Compute
-   `t = HWC(usageNonIntAuthBobClientProfile || Bobs_Client_Profile, 64) ||
-    HWC(usageNonIntAuthAliceClientProfile || Alices_Client_Profile, 64) ||
+   `t = HWC(usage_non_int_auth_bob_client_profile || Bobs_Client_Profile, 64) ||
+    HWC(usage_non_int_auth_alice_client_profile || Alices_Client_Profile, 64) ||
     Y || X || B || A || our_shared_prekey.public ||
-    HWC(usageNonIntAuthPhi || phi, 64)`.
+    HWC(usage_non_int_auth_phi || phi, 64)`.
 1. Verify `sigma` as defined in the
    [Ring Signature Authentication](#ring-signature-authentication) section. As
    multiple client profiles can coexist on local storage for a short amount of
@@ -3234,7 +3232,7 @@ Given a new DH Ratchet:
     not created (meaning it is only a KDF of the previous one), then it will be
     empty.
   * Calculate the Mixed shared secret
-    `K = KDF(usageSharedSecret  || K_ecdh || brace_key, 64)`. Securely deletes
+    `K = KDF(usage_shared_secret  || K_ecdh || brace_key, 64)`. Securely deletes
     `K_ecdh`.
   * Interpret `curr_root_key` as `prev_root_key`, if present.
   * Derive new set of keys:
@@ -3251,13 +3249,13 @@ When sending a data message in the same DH Ratchet:
   * Set `j` as the Data message's message id.
   * Set `pn` as the Data message's previous chain message number.
   * Derive the next sending chain key
-    `chain_key_s[j+1] = KDF(usageNextChainKey || chain_key_s[j], 64)`.
+    `chain_key_s[j+1] = KDF(usage_next_chain_key || chain_key_s[j], 64)`.
   * Calculate the encryption key (`MKenc`), the MAC key (`MKmac`) and, if needed
     the extra symmetric key:
 
    ```
      MKenc, MKmac = derive_enc_mac_keys(chain_key_s[j])
-     extra_symm_key = KDF(usageExtraSymmKey || 0xFF || chain_key_s[j], 64)
+     extra_symm_key = KDF(usage_extra_symm_key || 0xFF || chain_key_s[j], 64)
    ```
 
   * Securely delete `chain_key_s[j]`.
@@ -3272,7 +3270,7 @@ When sending a data message in the same DH Ratchet:
     message from the protocol version to the encrypted message.
 
    ```
-     Authenticator = HWMAC(usageAuthenticator || MKmac || data_message_sections, 64)
+     Authenticator = HWMAC(usage_authenticator || MKmac || data_message_sections, 64)
    ```
 
   * Increment the next sending message id `j = j + 1`.
@@ -3315,7 +3313,7 @@ The decryption mechanism works as:
     `skipped_MKenc` dictionary:
     * Get the message key and the extra symmetric key (if needed):
       `MKenc, extra_symm_key = skipped_MKenc[Public ECDH Key, message_id]`.
-    * Calculate `MKmac = KDF(usageMACKey || MKenc, 64)`.
+    * Calculate `MKmac = KDF(usage_MAC_key || MKenc, 64)`.
     * Use the `MKmac` to verify the MAC of the data message. If this
       verification fails:
         * Reject the message.
@@ -3353,13 +3351,13 @@ The decryption mechanism works as:
       * If `chain_key_r` is not `NULL`:
          * while `k` < received `Previous chain message number`:
              * Derive
-               `chain_key_r[k+1] = KDF(usageNextChainKey || chain_key_r[k], 64)`
-               and `MKenc = KDF(usageMessageKey || chain_key_r[k], 64)`
+               `chain_key_r[k+1] = KDF(usage_next_chain_key || chain_key_r[k], 64)`
+               and `MKenc = KDF(usage_message_key || chain_key_r[k], 64)`
              * Derive (this is done any time a message key is stored as
                there is no way of knowing if the message that will be received
                in the future will ask for the computation of the extra
                symmetric key):
-               `extra_symm_key = KDF(usageExtraSymmKey || 0xFF || chain_key_r[k], 64)`.
+               `extra_symm_key = KDF(usage_extra_symm_key || 0xFF || chain_key_r[k], 64)`.
              * Store
                `MKenc, extra_sym_key = skipped_MKenc[their_ecdh, k]`.
              * Increment `k = k + 1`.
@@ -3370,7 +3368,7 @@ The decryption mechanism works as:
   * Set `pn` as `j`.
   * Set `j` as 0.
   * Set `k` as 0.
-  * Calculate `K = KDF(usageSharedSecret || K_ecdh || brace_key, 64)`.
+  * Calculate `K = KDF(usage_shared_secret || K_ecdh || brace_key, 64)`.
     Securely delete `K_ecdh`.
   * Interpret `curr_root_key` as `prev_root_key`, if present.
   * Derive new set of keys
@@ -3388,13 +3386,13 @@ The decryption mechanism works as:
     * If `chain_key_r` is not `NULL`:
       * while `k` < received `message_id`:
         * Derive
-          `chain_key_r[k+1] = KDF(usageNextChainKey || chain_key_r[k], 64)`
-           and `MKenc = KDF(usageMessageKey || chain_key_r[k], 64)`
+          `chain_key_r[k+1] = KDF(usage_next_chain_key || chain_key_r[k], 64)`
+           and `MKenc = KDF(usage_message_key || chain_key_r[k], 64)`
         * Derive (this is done any time a message key is stored as
           there is no way of knowing if the message that will be received
           in the future will ask for the computation of the extra
           symmetric key):
-          `extra_symm_key = KDF(usageExtraSymmKey || 0xFF || chain_key_r[k], 64)`.
+          `extra_symm_key = KDF(usage_extra_symm_key || 0xFF || chain_key_r[k], 64)`.
         * Store
           `MKenc, extra_sym_key = skipped_MKenc[their_ecdh, k]`.
         * Increment `k = k + 1`.
@@ -3403,14 +3401,14 @@ The decryption mechanism works as:
 
     ```
       MKenc, MKmac = derive_enc_mac_keys(chain_key_r[k])
-      extra_symm_key = KDF(usageExtraSymmKey || 0xFF || chain_key_r[k], 64)
+      extra_symm_key = KDF(usage_extra_symm_key || 0xFF || chain_key_r[k], 64)
     ```
   * Use the `MKmac` to verify the MAC of the message. If the verification fails:
       * Reject the message.
       * Delete the derived `MKenc` and `MKmac`.
   * Otherwise:
       * Derive the next receiving chain key:
-        `chain_key_r[k+1] = KDF(usageNextChainKey || chain_key_r[k], 64)`.
+        `chain_key_r[k+1] = KDF(usage_next_chain_key || chain_key_r[k], 64)`.
       * Securely delete `chain_key_r[k]`.
       * Increment the receiving message id `k = k + 1`.
       * Set `nonce` to 0.
@@ -3469,7 +3467,7 @@ file transfer, voice encryption, etc. When one party wishes to use the extra
 symmetric key, they create a type 7 TLV, which they attach to a Data Message.
 The extra symmetric key itself is then derived using the same `chain_key` used
 to compute the message encryption key used to protect the Data Message. It is,
-therefore, derived by calculating `KDF(usageExtraSymmKey || 0xFF || chain_key)`.
+therefore, derived by calculating `KDF(usage_extra_symm_key || 0xFF || chain_key)`.
 
 Upon receipt of the Data Message containing the type 7 TLV, the recipient will
 compute the extra symmetric key in the same way. Note that the value of the
@@ -3499,7 +3497,7 @@ Three keys can, therefore, be calculated from the already derived extra
 symmetric key:
 
 ```
-  extra_sym_key = KDF(usageExtraSymmKey || 0xFF || chain_key, 64)
+  extra_sym_key = KDF(usage_extra_symm_key || 0xFF || chain_key, 64)
   symkey1 = KDF(0x00 || 0x0042 || extra_sym_key, 64)
   symkey2 = KDF(0x01 || 0x104A || extra_sym_key, 64)
   symkey3 = KDF(0x02 || 0x0001 || extra_sym_key, 64)
@@ -4241,7 +4239,7 @@ OTRv4 makes a few changes to SMP:
 
   * OTRv4 creates fingerprints using SHAKE-256. The fingerprint is generated as:
 
-      * `HWC(usageFingerprint || byte(H) || byte(F), 56)`
+      * `HWC(usage_fingerprint || byte(H) || byte(F), 56)`
 
   * SMP in OTRv4 uses all of the [TLV Record Types](#tlv-record-types) as OTRv3,
     except for SMP Message 1Q. When SMP Message 1Q is used in OTRv4, SMP Message
@@ -4370,7 +4368,7 @@ secret input string, but no man-in-the-middle is capable of reading their
 communication either:
 
 ```
-  x or y = HWC(usageSMPSecret || version || Initiator fingerprint ||
+  x or y = HWC(usage_SMP_secret || version || Initiator fingerprint ||
   Responder fingerprint || Secure Session ID or SSID || User-specified secret),
   57)
 ```
@@ -4911,7 +4909,7 @@ section for details.
 1. Compute `T1 = G * t1`.
 1. Compute `T2 = G * r2 + A2 * c2`.
 1. Compute `T3 = G * r3 + A3 * c3`.
-1. Compute `c = HashToScalar(usageAuth || G || q || A1 || A2 || A3 || T1 ||
+1. Compute `c = HashToScalar(usage_auth || G || q || A1 || A2 || A3 || T1 ||
    T2 || T3 || m)`.
 1. Compute `c1 = c - c2 - c3 (mod q)`.
 1. Compute `r1 = t1 - c1 * a1 (mod q)`. Securely delete `t1`.
@@ -4944,7 +4942,7 @@ The prover knows a secret `ai` and, therefore:
   T3 = constant_time_select(eq3, encode(G * t3), encode(G * r3 + A3 * c3))
 ```
 
-1. Compute `c = HashToScalar(usageAuth || G || q || A1 || A2 || A3 || T1 ||
+1. Compute `c = HashToScalar(usage_auth || G || q || A1 || A2 || A3 || T1 ||
    T2 || T3 || m)`.
 1. For whichever equally returns true (if `eqi == 1`, `eqj == 0` and
    `eqk == 0`, for `i != j != k`): `ci = c - cj - ck (mod q)`.
@@ -4963,7 +4961,7 @@ If the prover knows `a2`, for example, the `RSig` function looks like this:
 1. Compute `T1 = G * r1 + A1 * c1`.
 1. Compute `T3 = G * r3 + A3 * c3`.
 1. Compute
-   `c = HashToScalar(usageAuth || G || q || A1 || A2 || A3 || T1 || T2 || T3 ||
+   `c = HashToScalar(usage_auth || G || q || A1 || A2 || A3 || T1 || T2 || T3 ||
    m)`.
 1. Compute `c2 = c - c1 - c3 (mod q)`.
 1. Compute `r2 = t2 - c2 * a2 (mod q)`.
@@ -4984,7 +4982,7 @@ can be inferred in practice).
 1. Compute `T2 = G * r2 + A2 * c2`
 1. Compute `T3 = G * r3 + A3 * c3`
 1. Compute
-   `h = HWC(usageAuth || G || q || A1 || A2 || A3 || T1 || T2 || T3 ||
+   `h = HWC(usage_auth || G || q || A1 || A2 || A3 || T1 || T2 || T3 ||
    m)`.
 1. Compute `c = h (mod q)`.
 1. Check if `c ≟ c1 + c2 + c3 (mod q)`. If it is true, verification succeeds.

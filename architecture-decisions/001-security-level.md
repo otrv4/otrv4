@@ -78,13 +78,13 @@ SHAKE-256 is used for the key derivation, hash and MAC function in the protocol.
 The functions are:
 
 ```
-  KDF(usageID || values, size) = SHAKE-256("OTRv4" || usageID || values, size)
-  HWC(usageID || values, size) = SHAKE-256("OTRv4" || usageID || values, size)
-  HCMAC(usageID || values, size) = SHAKE-256("OTRv4" || usageID || values, size)
+  KDF(usage_ID || values, size) = SHAKE-256("OTRv4" || usage_ID || values, size)
+  HWC(usage_ID || values, size) = SHAKE-256("OTRv4" || usage_ID || values, size)
+  HCMAC(usage_ID || values, size) = SHAKE-256("OTRv4" || usage_ID || values, size)
 ```
 
 The `size` first bytes of the SHAKE-256 output for input
-`"OTRv4" || usageID || m` are returned in all three functions. Unlike the SHAKE
+`"OTRv4" || usage_ID || m` are returned in all three functions. Unlike the SHAKE
 standard, notice that the output size here is defined in bytes.
 
 The only different KDF function used in this specification is the one used when
