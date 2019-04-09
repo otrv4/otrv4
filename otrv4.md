@@ -1261,7 +1261,7 @@ To rotate the ECDH keys:
   * Generate a new ECDH key pair and assign it to `our_ecdh = generateECDH()`
     (by securely replacing the old value).
   * Calculate `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
-  * i = i + 1
+  * `i = i + 1`
 
 To rotate the brace key:
 
