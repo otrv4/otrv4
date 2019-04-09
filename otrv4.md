@@ -1358,8 +1358,8 @@ To expire a session:
 1. Calculate the MAC keys corresponding to the stored message keys in the
    `skipped_MKenc` dictionary and put them on the `old_mac_keys` list (so they
    are revealed in TLV type 1 (Disconnected) message).
-1. Send a TLV type 1 (Disconnected) message, with the `old_mac_keys` list
-   attached to it.
+1. Send a Disconnect message (containing a TLV type 1 with empty payload), with
+   the `old_mac_keys` list attached to it.
 1. Securely delete all keys and data associated with the conversation.
    This includes:
 
