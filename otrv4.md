@@ -1278,7 +1278,6 @@ To rotate the brace key:
 
     * Derive and securely overwrite
       `brace_key = KDF(usage_brace_key || brace_key, 32)`.
-    * Increase `since_last_dh` by 1.
 
 ### Rotating ECDH Keys and Brace Key as receiver
 
@@ -1312,7 +1311,6 @@ To rotate the brace key:
 
     * Derive and securely overwrite
       `brace_key = KDF(usage_brace_key || brace_key, 32)`.
-    * Increase `since_last_dh` by 1.
 
 ### Deriving Double Ratchet Keys
 
@@ -2145,7 +2143,8 @@ Bob will be initiating the DAKE with Alice.
        [When you send a Data Message](#when-you-send-a-data-message) section.
        Note that he will not perform a new DH ratchet, but rather start using
        the derived `chain_key_s[j]`. He should follow the
-       "When sending a data message in the same DH Ratchet:" subsection.
+       "When sending a data message in the same DH Ratchet:" subsection and
+        attaches his ECDH and DH public keys to this message.
    * In the case that he receives a data message:
      * Follows what is defined in the
        [When you receive a Data Message](#when-you-receive-a-data-message)
@@ -2200,7 +2199,7 @@ Bob will be initiating the DAKE with Alice.
        "When sending a data message in the same DH Ratchet:" subsection.
    * In the case that she immediately receives a data message:
      * Follows what is defined in the
-       [When you receive a Data Message](#when-you-send-a-data-message) section.
+       [When you receive a Data Message](#when-you-receive-a-data-message) section.
        Note that she will perform a new DH ratchet with the advertised keys
        from Bob attached in the message. If she wants to send data
        messages at this point (after receiving ones), she will perform a new DH
@@ -3238,6 +3237,7 @@ Given a new DH Ratchet:
   * Derive new set of keys:
     `curr_root_key, chain_key_s[j] = derive_ratchet_keys(sending, prev_root_key, K)`.
   * Securely delete the previous root key (`prev_root_key`) and `K`.
+  * Increments `since_last_dh = since_last_dh + 1`.
   * If present, forget and reveal MAC keys. The conditions for revealing MAC
     keys are stated in the [Revealing MAC Keys](#revealing-mac-keys) section.
   * Derive the next sending chain key, `MKenc` and `MKmac`, and encrypt the
@@ -3374,7 +3374,7 @@ The decryption mechanism works as:
   * Derive new set of keys
     `curr_root_key, chain_key_r[k] = derive_ratchet_keys(receiving, prev_root_key, K)`.
   * Securely delete the previous root key (`prev_root_key`) and `K`.
-  * Increment `since_last_dh` to 1.
+  * Increments `since_last_dh = since_last_dh + 1`.
   * Derive the next receiving chain key, `MKenc` and `MKmac`, and decrypt the
     message as described below.
 
