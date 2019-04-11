@@ -2047,9 +2047,20 @@ Bob will be initiating the DAKE with Alice.
 1. Calculates the Mixed shared secret (`K`) and the SSID:
     * Calculates ECDH shared secret
       `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`. Securely deletes
-       `our_ecdh.secret`.
+      `our_ecdh.secret`, `our_ecdh.public` and `their_ecdh`. Replaces them with:
+      * `our_ecdh.secret = our_ecdh_first.secret`.
+      * `our_ecdh.public = our_ecdh_first.public`.
+      * `their_ecdh = their_ecdh_first`.
+      * Securely deletes `our_ecdh_first.secret`, `our_ecdh_first.public` and
+        `their_ecdh_first`.
     * Calculates DH shared secret `k_dh = DH(our_dh.secret, their_dh)`.
-      Securely deletes `our_dh.secret`.
+      Securely deletes `our_dh.secret`, `our_dh.public` and `their_dh`.
+      Replaces them with:
+      * `our_dh.secret = our_dh_first.secret`.
+      * `our_dh.public = our_dh_first.public`.
+      * `their_dh = their_dh_first`.
+      * Securely deletes `our_dh_first.secret`, `our_dh_first.public` and
+        `their_dh_first`.
     * Calculates the brace key
       `brace_key = KDF(usage_third_brace_key || k_dh, 32)`. Securely deletes
       `k_dh`.
@@ -2166,19 +2177,6 @@ Bob will be initiating the DAKE with Alice.
    * Sets `max_remote_i_seen` as -1.
    * Interprets `K` as the first root key (`prev_root_key`) by:
      `KDF(usage_first_root_key || K, 64)`.
-   * Securely deletes `our_ecdh.public` and `their_ecdh`.
-     Replaces them with:
-       * `our_ecdh.secret = our_ecdh_first.secret`.
-       * `our_ecdh.public = our_ecdh_first.public`.
-       * `their_ecdh = their_ecdh_first`.
-       * Securely deletes `our_ecdh_first.secret`, `our_ecdh_first.public` and
-         `their_ecdh_first`.
-   * Securely deletes `our_dh.public` and `their_dh`. Replaces them with:
-       * `our_dh.secret = our_dh_first.secret`.
-       * `our_dh.public = our_dh_first.public`.
-       * `their_dh = their_dh_first`.
-       * Securely deletes `our_dh_first.secret`, `our_dh_first.public` and
-         `their_dh_first`.
    * Calculates the sending keys:
       * Calculates `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
       * Calculates `k_dh = DH(our_dh.secret, their_dh)`.
