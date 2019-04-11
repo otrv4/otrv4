@@ -1278,6 +1278,7 @@ To rotate the brace key:
 
     * Derive and securely overwrite
       `brace_key = KDF(usage_brace_key || brace_key, 32)`.
+    * Increase `since_last_dh` by 1.
 
 ### Rotating ECDH Keys and Brace Key as receiver
 
@@ -1311,6 +1312,7 @@ To rotate the brace key:
 
     * Derive and securely overwrite
       `brace_key = KDF(usage_brace_key || brace_key, 32)`.
+    * Increase `since_last_dh` by 1.
 
 ### Deriving Double Ratchet Keys
 
@@ -1358,8 +1360,9 @@ To expire a session:
 1. Calculate the MAC keys corresponding to the stored message keys in the
    `skipped_MKenc` dictionary and put them on the `old_mac_keys` list (so they
    are revealed in TLV type 1 (Disconnected) message).
-1. Send a Disconnect message (containing a TLV type 1 with empty payload), with
-   the `old_mac_keys` list attached to it.
+1. Send a Data message containing a TLV type 1 with empty payload - this is
+   often referred to as 'Disconnected message' - with the `old_mac_keys` list
+   attached to it.
 1. Securely delete all keys and data associated with the conversation.
    This includes:
 
@@ -3237,7 +3240,6 @@ Given a new DH Ratchet:
   * Derive new set of keys:
     `curr_root_key, chain_key_s[j] = derive_ratchet_keys(sending, prev_root_key, K)`.
   * Securely delete the previous root key (`prev_root_key`) and `K`.
-  * Increments `since_last_dh = since_last_dh + 1`.
   * If present, forget and reveal MAC keys. The conditions for revealing MAC
     keys are stated in the [Revealing MAC Keys](#revealing-mac-keys) section.
   * Derive the next sending chain key, `MKenc` and `MKmac`, and encrypt the
@@ -3374,7 +3376,6 @@ The decryption mechanism works as:
   * Derive new set of keys
     `curr_root_key, chain_key_r[k] = derive_ratchet_keys(receiving, prev_root_key, K)`.
   * Securely delete the previous root key (`prev_root_key`) and `K`.
-  * Increments `since_last_dh = since_last_dh + 1`.
   * Derive the next receiving chain key, `MKenc` and `MKmac`, and decrypt the
     message as described below.
 
