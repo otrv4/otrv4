@@ -3247,7 +3247,7 @@ Given a new DH Ratchet:
 
 When sending a data message in the same DH Ratchet:
 
-  * Set `i - 1` as the Data message's message id.
+  * Set `i - 1` as the Data message's ratchet id.
   * Set `j` as the Data message's message id.
   * Set `pn` as the Data message's previous chain message number.
   * Derive the next sending chain key
@@ -3330,8 +3330,8 @@ The decryption mechanism works as:
     * Securely delete `MKenc`.
     * Add `MKmac` to the list `mac_keys_to_reveal`.
 
-  * If `max_remote_i_seen` > `message_id`:
-    * If the received `message_id` and `Public ECDH Key` are not in the
+  * If `max_remote_i_seen` > `ratchet_id`:
+    * If the received `ratchet_id` and `Public ECDH Key` are not in the
       `skipped_MKenc` dictionary:
       * This is a duplicated message from a past DH ratchet. Discard the
          message.
@@ -3427,7 +3427,7 @@ The decryption mechanism works as:
       * Set `their_dh` as the 'Public DH Key' from the message, if it is not
         empty.
       * Add `MKmac` to the list `mac_keys_to_reveal`.
-   * Set `max_remote_i_seen` to `message_id`.
+   * Set `max_remote_i_seen` to `ratchet_id`.
 
 * If a message arrives that corresponds to a message key already deleted or that
   cannot be derived:
