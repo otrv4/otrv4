@@ -1261,7 +1261,7 @@ To rotate the ECDH keys:
   * Generate a new ECDH key pair and assign it to `our_ecdh = generateECDH()`
     (by securely replacing the old value).
   * Calculate `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
-  * i = i + 1
+  * `i = i + 1`
 
 To rotate the brace key:
 
@@ -1306,7 +1306,6 @@ To rotate the brace key:
     * Calculate `k_dh = DH(our_dh.secret, their_dh)`.
     * Calculate a `brace_key = KDF(usage_third_brace_key || k_dh, 32)`.
     * Securely delete `our_dh.secret` and `k_dh`.
-    * Set `since_last_dh` to 0.
 
   * Otherwise:
 
@@ -1360,7 +1359,8 @@ To expire a session:
 1. Calculate the MAC keys corresponding to the stored message keys in the
    `skipped_MKenc` dictionary and put them on the `old_mac_keys` list (so they
    are revealed in TLV type 1 (Disconnected) message).
-1. Send a TLV type 1 (Disconnected) message, with the `old_mac_keys` list
+1. Send a Data message containing a TLV type 1 with empty payload - this is
+   often referred to as 'Disconnected message' - with the `old_mac_keys` list
    attached to it.
 1. Securely delete all keys and data associated with the conversation.
    This includes:
@@ -2156,7 +2156,8 @@ Bob will be initiating the DAKE with Alice.
        [When you send a Data Message](#when-you-send-a-data-message) section.
        Note that he will not perform a new DH ratchet, but rather start using
        the derived `chain_key_s[j]`. He should follow the
-       "When sending a data message in the same DH Ratchet:" subsection.
+       "When sending a data message in the same DH Ratchet:" subsection and
+        attaches his ECDH and DH public keys to this message.
    * In the case that he receives a data message:
      * Follows what is defined in the
        [When you receive a Data Message](#when-you-receive-a-data-message)
@@ -2198,7 +2199,7 @@ Bob will be initiating the DAKE with Alice.
        "When sending a data message in the same DH Ratchet:" subsection.
    * In the case that she immediately receives a data message:
      * Follows what is defined in the
-       [When you receive a Data Message](#when-you-send-a-data-message) section.
+       [When you receive a Data Message](#when-you-receive-a-data-message) section.
        Note that she will perform a new DH ratchet with the advertised keys
        from Bob attached in the message. If she wants to send data
        messages at this point (after receiving ones), she will perform a new DH
@@ -3243,7 +3244,7 @@ Given a new DH Ratchet:
 
 When sending a data message in the same DH Ratchet:
 
-  * Set `i - 1` as the Data message's message id.
+  * Set `i - 1` as the Data message's ratchet id.
   * Set `j` as the Data message's message id.
   * Set `pn` as the Data message's previous chain message number.
   * Derive the next sending chain key
@@ -3326,8 +3327,8 @@ The decryption mechanism works as:
     * Securely delete `MKenc`.
     * Add `MKmac` to the list `mac_keys_to_reveal`.
 
-  * If `max_remote_i_seen` > `message_id`:
-    * If the received `message_id` and `Public ECDH Key` are not in the
+  * If `max_remote_i_seen` > `ratchet_id`:
+    * If the received `ratchet_id` and `Public ECDH Key` are not in the
       `skipped_MKenc` dictionary:
       * This is a duplicated message from a past DH ratchet. Discard the
          message.
@@ -3372,7 +3373,6 @@ The decryption mechanism works as:
   * Derive new set of keys
     `curr_root_key, chain_key_r[k] = derive_ratchet_keys(receiving, prev_root_key, K)`.
   * Securely delete the previous root key (`prev_root_key`) and `K`.
-  * Increment `since_last_dh` to 1.
   * Derive the next receiving chain key, `MKenc` and `MKmac`, and decrypt the
     message as described below.
 
@@ -3424,7 +3424,7 @@ The decryption mechanism works as:
       * Set `their_dh` as the 'Public DH Key' from the message, if it is not
         empty.
       * Add `MKmac` to the list `mac_keys_to_reveal`.
-   * Set `max_remote_i_seen` to `message_id`.
+   * Set `max_remote_i_seen` to `ratchet_id`.
 
 * If a message arrives that corresponds to a message key already deleted or that
   cannot be derived:
