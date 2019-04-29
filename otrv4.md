@@ -1306,7 +1306,6 @@ To rotate the brace key:
     * Calculate `k_dh = DH(our_dh.secret, their_dh)`.
     * Calculate a `brace_key = KDF(usage_third_brace_key || k_dh, 32)`.
     * Securely delete `our_dh.secret` and `k_dh`.
-    * Set `since_last_dh` to 0.
 
   * Otherwise:
 
