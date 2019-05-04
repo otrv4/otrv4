@@ -4093,7 +4093,6 @@ to send encrypted messages:
 If the state is `ENCRYPTED`:
 
   * Encrypt the message, and send it as a Data Message.
-  * Store any plaintext message for possible retransmission.
 
 #### Receiving a Data Message
 
