@@ -3695,7 +3695,8 @@ START
   a TLV type 1 (Disconnected) message is sent in ENCRYPTED_MESSAGES state,
   transition to this state (except when the session is expired). Note that this
   transition only happens when TLV type 1 message is sent, not when it is
-  received.
+  received. Note, that if a request to start an OTRv3 conversation arrives at
+  this state, a '3 D-H Commit Message' should be sent.
 
 WAITING_AUTH_R
 
