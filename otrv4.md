@@ -4094,7 +4094,8 @@ to send encrypted messages:
 If the state is `ENCRYPTED`:
 
   * Encrypt the message, and send it as a Data Message.
-  * Store any plaintext message for possible retransmission.
+  * Store any plaintext message for possible retransmission (for example, if
+    there is the case that the network dropped the message).
 
 #### Receiving a Data Message
 
