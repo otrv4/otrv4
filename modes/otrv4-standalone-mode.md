@@ -159,7 +159,6 @@ Alice will be initiating the DAKE with Bob.
     * Calculates the SSID from shared secret: the first 8 bytes of
       `HWC(usage_SSID || K, 64)`.
 1. Initializes the double-ratchet:
-    * Sets `since_last_dh` as 0.
     * Sets `i`, `j`, `k` `pn` as 0.
     * Sets `max_remote_i_seen` as -1.
     * Interprets `K` as the first root key (`prev_root_key`) by:
@@ -191,7 +190,6 @@ Alice will be initiating the DAKE with Bob.
       * Derives new set of keys:
         `curr_root_key, chain_key_s[j] = derive_ratchet_keys(sending, prev_root_key, K)`.
       * Securely deletes the previous root key (`prev_root_key`) and `K`.
-      * Increments `since_last_dh = since_last_dh + 1`.
       * Increments `i = i + 1`.
 1. Sends Bob the Auth-I message (see [Auth-I message](#auth-i-message)
    section).
@@ -217,7 +215,6 @@ Alice will be initiating the DAKE with Bob.
      [Auth-I Message](../otrv4.md#auth-i-message) section. If the verification
      fails, rejects the message and does not send anything further.
 1. Initializes the double-ratchet algorithm:
-   * Sets `since_last_dh` as 0.
    * Sets `i`, `j`, `k` and `pn` as 0.
    * Sets `max_remote_i_seen` as -1.
    * Interprets `K` as the first root key (`prev_root_key`) by:

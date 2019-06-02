@@ -183,11 +183,10 @@ A new DH ratchet happens every time you:
 2. When you receive a data message that advertises a new ECDH public key from
    the other party.
 
-The state variable `since_last_dh` exists to keep track of the last time a DH
-key was generated. It is increased every time a DH ratchet happens and set to
-zero when the DH keys are generated.
+The state variable `i` exists to keep track of the last time a DH key was
+generated. It is increased every time a DH ratchet happens.
 
-If `since_last_dh ==  3`
+If `i %  3 == 0`
 
   * Compute the new brace key from a DH computation e.g.
     `brace_key_i = KDF(usage_third_brace_key || DH(our_DH.secret, their_DH.public), 32)`.
@@ -207,7 +206,7 @@ the DH public key in case they arrive in an out-of-order way or they are dropped
 
 **Alice or Bob receive the first message in a ratchet**
 
-If `since_last_dh ==  3`:
+If `i %  3 == 0`:
 
    * Check that a new DH public key is attached to the message.
 
