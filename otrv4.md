@@ -1129,8 +1129,6 @@ State variables:
   j: the sending message id.
   k: the receiving message id.
   pn: the number of messages in the previous DH ratchet.
-  since_last_dh: a variable that keeps track of the last time a DH key was
-                 generated.
 
 Key variables:
   'root_key': the root key. If it is 'prev_root_key', it refers to the previous
@@ -1261,24 +1259,23 @@ To rotate the ECDH keys:
   * Generate a new ECDH key pair and assign it to `our_ecdh = generateECDH()`
     (by securely replacing the old value).
   * Calculate `K_ecdh = ECDH(our_ecdh.secret, their_ecdh)`.
-  * `i = i + 1`
 
 To rotate the brace key:
 
-  * If `since_last_dh == 3`:
+  * If `i == 3`:
 
     * Generate the new DH key pair and assign it to `our_dh = generateDH()`
       (by securely replacing the old value).
     * Calculate `k_dh = DH(our_dh.secret, their_dh)`.
     * Calculate a `brace_key = KDF(usage_third_brace_key || k_dh, 32)`.
     * Securely delete `k_dh`.
-    * Set `since_last_dh` to 0.
+    * Set `i = 0`.
 
   * Otherwise:
 
     * Derive and securely overwrite
       `brace_key = KDF(usage_brace_key || brace_key, 32)`.
-    * Increase `since_last_dh` by 1.
+    * Set `i = i + 1`.
 
 ### Rotating ECDH Keys and Brace Key as receiver
 
@@ -1299,19 +1296,20 @@ To rotate the ECDH keys:
 
 To rotate the brace key:
 
-  * If `since_last_dh == 3`:
+  * If `data_message.i == 3`:
 
     * Retrieve the DH key ('Public DH key') from the received data message and
       assign it to `their_dh`.
     * Calculate `k_dh = DH(our_dh.secret, their_dh)`.
     * Calculate a `brace_key = KDF(usage_third_brace_key || k_dh, 32)`.
     * Securely delete `our_dh.secret` and `k_dh`.
+    * Set `i = 0`.
 
   * Otherwise:
 
     * Derive and securely overwrite
       `brace_key = KDF(usage_brace_key || brace_key, 32)`.
-    * Increase `since_last_dh` by 1.
+    * Set `i = i + 1`.
 
 ### Deriving Double Ratchet Keys
 
@@ -1322,12 +1320,12 @@ then keys are derived from the previous Mixed shared secret `K` (interpreted
 as `prev_root_key`) and the current Mixed shared secret `K`.
 
 Depending if this is used to derive sending or receiving chain keys, the
-variable `i` should refer to `j` (for sending) and `k` (for receiving).
+variable `l` should refer to `j` (for sending) and `k` (for receiving).
 
 ```
 derive_ratchet_keys(purpose, prev_root_key, K):
   curr_root_key = KDF(usage_root_key || prev_root_key || K, 64)
-  chain_key_purpose[i] = KDF(usage_chain_key || prev_root_key || K, 64)
+  chain_key_purpose[l] = KDF(usage_chain_key || prev_root_key || K, 64)
   return curr_root_key, chain_key_purpose[i]
 ```
 
@@ -2114,7 +2112,6 @@ Bob will be initiating the DAKE with Alice.
       Securely deletes `k_ecdh` and `brace_key`.
     * Calculates the SSID from shared secret: `HWC(usage_SSID || K, 8)`.
 1. Initializes the double-ratchet algorithm:
-    * Sets `since_last_dh` as 0.
     * Sets `i`, `j`, `k` `pn` as 0.
     * Sets `max_remote_i_seen` as -1.
     * Interprets `K` as the first root key (`prev_root_key`) by:
@@ -2146,7 +2143,6 @@ Bob will be initiating the DAKE with Alice.
       * Derives new set of keys:
         `curr_root_key, chain_key_s[j] = derive_ratchet_keys(sending, prev_root_key, K)`.
       * Securely deletes the previous root key (`prev_root_key`) and `K`.
-      * Increments `since_last_dh = since_last_dh + 1`.
       * Increments `i = i + 1`.
 1. Sends Alice the Auth-I message (see [Auth-I message](#auth-i-message)
    section).
@@ -2173,7 +2169,6 @@ Bob will be initiating the DAKE with Alice.
      [Auth-I message](#auth-i-message) section. If the verification fails,
      rejects the message and does not send anything further.
 1. Initializes the double-ratchet algorithm:
-   * Sets `since_last_dh` as 0.
    * Sets `i`, `j`, `k` and `pn` as 0.
    * Sets `max_remote_i_seen` as -1.
    * Interprets `K` as the first root key (`prev_root_key`) by:
@@ -2189,7 +2184,6 @@ Bob will be initiating the DAKE with Alice.
       * Derives new set of keys:
         `curr_root_key, chain_key_s[j] = derive_ratchet_keys(sending, prev_root_key, K)`.
       * Securely deletes the previous root key (`prev_root_key`) and `K`.
-      * Increments `i = i + 1`.
 1. At this point, the interactive DAKE is complete for Alice:
    * In the case that she wants to immediately send a data message:
      * Follows what is defined in the
@@ -2567,7 +2561,6 @@ Verify.
    her `our_ecdh.public` and `our_dh.public` attached. See
    [Non-Interactive-Auth Message](#non-interactive-auth-message) section.
 1. Initializes the double-ratchet:
-   * Sets `since_last_dh` as 0.
    * Sets `i`, `j`, `k` and `pn` as 0.
    * Sets `max_remote_i_seen` as -1.
    * Calculates the root key and sending chain key:
@@ -2579,7 +2572,7 @@ Verify.
      [When you send a Data Message](#when-you-send-a-data-message)
      section. Note that she will not perform a new DH ratchet for this message,
      but rather use the already derived `chain_key_sending[j]`. She should
-     follow the  "When sending a data message in the same DH Ratchet:"
+     follow the "When sending a data message in the same DH Ratchet:"
      subsection.
 
 **Bob:**
@@ -2661,7 +2654,6 @@ Verify.
      `brace_key`.
    * Calculates the SSID from shared secret: `HWC(usage_SSID || K, 8)`.
 1. Initializes the double ratchet algorithm:
-   * Sets `since_last_dh` as 0.
    * Sets `i`, `j`, `k` and `pn` as 0.
    * Sets `max_remote_i_seen` as -1.
    * Calculates the root key and receiving chain key:
@@ -2669,6 +2661,7 @@ Verify.
      `chain_key_receiving[k] = KDF(usage_chain_key || K, 64)`.
    * Sets the received `their_ecdh_first` from Alice as `their_ecdh`.
    * Sets the received `their_dh_first` from Alice as `their_dh`.
+   * Increments `i = i + 1`.
 1. At this point, the non-interactive DAKE is complete for Bob:
    * If he immediately receives a data message, he follows what is defined in
      the [When you send a Data Message](#when-you-send-a-data-message)
@@ -3244,7 +3237,9 @@ Given a new DH Ratchet:
 
 When sending a data message in the same DH Ratchet:
 
-  * Set `i - 1` as the Data message's ratchet id.
+  * Set `i - 1` as the Data message's ratchet id (except for when immediately
+    sending data messages after receiving a Auth-I message. In that it case
+    it should be Set `i` as the Data message's ratchet id).
   * Set `j` as the Data message's message id.
   * Set `pn` as the Data message's previous chain message number.
   * Derive the next sending chain key
