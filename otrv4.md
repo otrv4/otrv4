@@ -1262,14 +1262,13 @@ To rotate the ECDH keys:
 
 To rotate the brace key:
 
-  * If `i == 3`:
+  * If `i % 3 == 0`:
 
     * Generate the new DH key pair and assign it to `our_dh = generateDH()`
       (by securely replacing the old value).
     * Calculate `k_dh = DH(our_dh.secret, their_dh)`.
     * Calculate a `brace_key = KDF(usage_third_brace_key || k_dh, 32)`.
     * Securely delete `k_dh`.
-    * Set `i = 0`.
 
   * Otherwise:
 
