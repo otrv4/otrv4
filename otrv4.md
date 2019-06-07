@@ -3782,18 +3782,15 @@ has only an old client; so that it will opportunistically start an OTR
 conversation whenever it detects the correspondent supports it; or so that it
 refuses to send non-encrypted messages to Bob, ever.
 
-Note that query Messages are not allowed to be sent
-in `ENCRYPTED_MESSAGES` state.
-
 The version string is constructed as follows:
 
 If Alice is willing to use OTR, she appends a byte identifier for the versions
 in question, followed by "?". The byte identifier for OTR version 3 is "3", and
 "4" for 4. Thus, if she is willing to use OTR versions 3 and 4, the identifier
 would be "34". The order of the identifiers between the "v" and the "?" does not
-matter, but none should be listed more than once. The OTRv4 specification only
-supports versions 3 and higher. Thus, query messages for older versions have
-been omitted.
+matter, but none should be listed more than once. The character "?" cannot be
+used as a byte identifier. The OTRv4 specification only supports versions 3 and
+higher. Thus, query messages for older versions have been omitted.
 
 Example query messages:
 
@@ -3804,8 +3801,11 @@ Example query messages:
     Version 4, and hypothetical future versions identified by "5" and "x"
 "?OTRv?"
     A bizarre claim that Alice would like to start an OTR conversation, but is
-    unwilling to speak any version of the protocol. Although this is
-    syntactically valid, the receiver will not reply when receiving this.
+    unwilling to speak any version of the protocol. The receiver will not reply
+    when receiving this.
+"?OTRv?4?"
+    A synthatically invalid query message. The receiver will not reply when
+    receiving this.
 ```
 
 These strings may be hidden from the user (for example, in an attribute of an
@@ -3814,6 +3814,9 @@ reveal information regarding the participants (an example can be "Your buddy has
 requested an Off-the-Record private conversation."). If Bob is willing to use
 OTR with Alice (with a protocol version that Alice has offered), he should start
 the AKE or DAKE according to the compatible version he supports.
+
+Note that query Messages are not allowed to be sent
+in `ENCRYPTED_MESSAGES` state.
 
 ##### Whitespace Tags
 
