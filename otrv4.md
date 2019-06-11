@@ -1295,7 +1295,7 @@ To rotate the ECDH keys:
 
 To rotate the brace key:
 
-  * If `data_message.i == 3`:
+  * If `data_message.i % 3 == 0`:
 
     * Retrieve the DH key ('Public DH key') from the received data message and
       assign it to `their_dh`.
