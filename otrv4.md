@@ -336,6 +336,13 @@ establish an authenticated conversation with Bob in Alice's name without having
 to learn her private keys. This generates irrefutable cryptographic proof that a
 conversation took place.
 
+OTRv4 provides both participation and message deniability, as well: both DAKEs
+used ensure participation deniability because a key exchange between any two
+participants can be forged (a judge, therefore, cannot be convinced that two
+participants actually communicated); message deniability is held due to the
+usage of both DAKEs and because no message is individually digitally signed
+with long-term keys (MAC keys are, furthermore, revealed).
+
 Although both DAKEs (interactive and non-interactive) provide deniability, take
 into account that there may be a loss of deniability if an interactive DAKE is
 followed by a non-interactive one.
