@@ -1,6 +1,5 @@
 # OTRv4
 
-
 ```
 Disclaimer
 
@@ -18,4 +17,4 @@ Protocol version 4.
 The OTR team does not review implementations or specify which ones are compliant
 are not. Software implementors are free to implement this specification in any
 way they choose - under limitations of software licenses if using existing
-software. 
+software.
