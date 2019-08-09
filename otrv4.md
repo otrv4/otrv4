@@ -2159,7 +2159,7 @@ Bob will be initiating the DAKE with Alice.
        Note that he will not perform a new DH ratchet, but rather start using
        the derived `chain_key_s[j]`. He should follow the
        "When sending a data message in the same DH Ratchet:" subsection and
-        attaches his ECDH and DH public keys to this message.
+       attach his new ECDH and DH public keys to this message.
    * In the case that he receives a data message:
      * Follows what is defined in the
        [When you receive a Data Message](#when-you-receive-a-data-message)
@@ -3316,17 +3316,19 @@ The decryption mechanism works as:
     * Calculate `MKmac = KDF(usage_MAC_key || MKenc, 64)`.
     * Use the `MKmac` to verify the MAC of the data message. If this
       verification fails:
-        * Reject the message.
-    * Securely delete `skipped_MKenc[Public ECDH Key, message_id]`.
+        * Reject the message and delete `MKmac`.
     * Set `nonce` to 0.
-    * Decrypt the message by using the nonce and only the 32 bytes of `MKenc`:
+    * Try to decrypt the message by using the nonce and only the 32 bytes
+      of `MKenc`:
 
       ```
         decrypted_message = ChaCha20_Dec(MKenc, nonce, m)
       ```
 
-    * Securely delete `MKenc`.
-    * Add `MKmac` to the list `mac_keys_to_reveal`.
+    * If sucessful, securely delete `MKenc` and `extra_symm_key` (if not
+      needed). Add `MKmac` to the list `mac_keys_to_reveal`. Otherwise,
+      delete `MKmac`.
+    * Securely delete `skipped_MKenc[Public ECDH Key, message_id]`.
 
   * If `max_remote_i_seen` > `ratchet_id`:
     * If the received `message_id` and `Public ECDH Key` are not in the
@@ -3404,12 +3406,10 @@ The decryption mechanism works as:
     ```
   * Use the `MKmac` to verify the MAC of the message. If the verification fails:
       * Reject the message.
-      * Delete the derived `MKenc` and `MKmac`.
+      * Delete the derived `MKenc`, `extra_symm_key` and `MKmac`.
   * Otherwise:
       * Derive the next receiving chain key:
         `chain_key_r[k+1] = KDF(usage_next_chain_key || chain_key_r[k], 64)`.
-      * Securely delete `chain_key_r[k]`.
-      * Increment the receiving message id `k = k + 1`.
       * Set `nonce` to 0.
       * Decrypt the message by using the nonce and only the 32 bytes of `MKenc`:
 
@@ -3420,6 +3420,8 @@ The decryption mechanism works as:
       * If the message cannot be decrypted:
         * Reject the message.
 
+      * Securely delete `chain_key_r[k]`.
+      * Increment the receiving message id `k = k + 1`.
       * Securely delete `MKenc`.
       * Set `their_ecdh` as the 'Public ECDH key' from the message.
       * Set `their_dh` as the 'Public DH Key' from the message, if it is not
@@ -3895,13 +3897,31 @@ In any event:
     * Send a version `3 D-H Commit Message`.
     * Transition authstate to `AUTHSTATE_AWAITING_DHKEY`.
 
-#### Sending a Query Message after an offline conversation
+#### Starting an online conversation after an offline one
 
 In the case that a party received offline messages, comes online and wants to
 send online messages:
 
    * Send a TLV type 1 (Disconnected).
-   * Send a Query Message.
+   * Send a Query Message, a whitespace tag or an Identity message.
+
+Note that in this case delayed messages from a previous offline conversation
+can potentially be received when the online conversation has started
+(in `ENCRYPTED_STATE`). For recommendations on how to handle this, check the
+'OTRv4 recommendations for implementations' repository.
+
+#### Starting an offline conversation after an online one
+
+In the case that a party received online messages, the participant they are
+talking to goes offline and they still want to send offline messages:
+
+   * Send a TLV type 1 (Disconnected).
+   * Request a Prekey Ensemble and send a Non-Interactive-Auth message.
+
+Note that in this case delayed messages from a previous online conversation
+can potentially be received when the offline conversation has started
+(in `ENCRYPTED_STATE`). For recommendations on how to handle this, check the
+'OTRv4 recommendations for implementations' repository.
 
 #### Receiving a Query Message
 
@@ -3993,6 +4013,11 @@ If the state is `ENCRYPTED_MESSAGES` or `FINISHED`:
       for future messages.
     * Reply with an Auth-R message.
     * Transition to the `WAITING_AUTH_I` state.
+
+Note that in this case delayed messages from a previous session
+can potentially be received after the new DAKE has been established
+(in `ENCRYPTED_STATE`). For recommendations on how to handle this, check the
+'OTRv4 recommendations for implementations' repository.
 
 Otherwise:
    * Ignore the message.
