@@ -1180,7 +1180,7 @@ variable values are replaced:
   [Non-interactive-Auth Message](#non-interactive-auth-message).
 * When you [send a Data Message](#when-you-send-a-data-message) or
   [receive a Data Message](#when-you-receive-a-data-message).
-* When you [send a TLV type 1 (Disconnected)](#sending-a-tlv-type-1-disconnected-message).
+* When you [request to end an OTRv4 Conversation](#user-requests-to-end-an-otrv4-conversation).
 
 ### Generating ECDH and DH keys
 
@@ -3761,9 +3761,12 @@ messages are taken into account is the `START` state):
 
 * User actions:
   * User requests to start an OTR conversation
+  * Starting an online conversation after an offline one
+  * Starting an offline conversation after an online one
   * Starting a conversation interactively
-  * User requests to end an OTR conversation
+  * Sending a Data Message to an offline participant
   * Sending an encrypted data message
+  * User requests to end an OTRv4 conversation
 
 For version 4 messages, someone receiving a message with a recipient instance
 tag specified that does not equal their own, should discard the message and
@@ -4183,8 +4186,8 @@ If the version is 4:
           * Display the human-readable part (if non empty) to the user.
             SMP TLVs should be addressed according to the SMP state machine.
           * If the received message contains a TLV type 1 (Disconnected):
-            * Forget all encryption keys for this correspondent and transition
-              the state to `FINISHED`.
+            * Forget any state variables and key variables for this
+              correspondent and transition the state to `FINISHED`.
 
       * If you have not sent a message to this correspondent in some
         (configurable) time, send a "heartbeat" message. The heartbeat message
@@ -4239,8 +4242,9 @@ If state is `START`:
 
 If state is `ENCRYPTED_MESSAGES`:
 
-  * Send a data message with an encoding of the message with an empty
-    human-readable part, and the TLV type 1.
+  * Send a data message with an encoding of the message of an empty
+    human-readable part attached with a TLV type 1.
+  * Forget any state variables and key variables.
   * Transition to the `START` state.
 
 If state is `FINISHED`:
