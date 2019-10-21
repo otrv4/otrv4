@@ -9,6 +9,20 @@ For requests, suggestions and bug reports, please open an issue on our Github,
 on the appropriate repository. If you want to fix a bug or suggest something,
 ask for mentoring to Sofía Celi at sofia@otr.im
 
+# Expected behavior while working on OTRv4
+
+This is inspired on Mozillas [Community Participation Guidelines](https://www.mozilla.org/en-US/about/governance/policies/participation/).
+
+* Be respectful
+* Be direct and honest
+* Be inclusive: understand other peoples background
+* Have a feedback culture
+* Strive for a non-hierarchical work
+* Have a teaching culture
+
+Remember, that we have zero tolerance with sexism, racism or any kind of
+discrimination.
+
 # Code of Conduct
 
 We follow the [Rust Code of Conduct](https://www.rust-lang.org/policies/code-of-conduct)
