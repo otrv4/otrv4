@@ -102,7 +102,7 @@ This is inspired on Mozillas [Community Participation Guidelines](https://www.mo
 Remember, that we have zero tolerance with sexism, racism or any kind of
 discrimination.
 
-# Code of Conduct
+## Code of Conduct
 
 We follow the [Rust Code of Conduct](https://www.rust-lang.org/policies/code-of-conduct)
 and base our ideals on the [Citizen Code of Conduct](http://citizencodeofconduct.org/).
@@ -112,3 +112,21 @@ you report it by sending an email to conduct@otr.im . Don't hesitate to reach us
 
 You can always use the pseudonym `cypherpunks` to report an issue or get in
 contact with us in an anonymous way.
+
+## Reporting
+
+If you feel that someone from the OTRv4 community has violated the Code of
+Conduct or any of the expected behaviors, send an email to report@otr.im.
+The email should contain:
+
+* Names of the people involved or knowledgeable identifiers.
+* Description of the incident in the form of:
+  <Specific time>
+  <Observed behavior>
+  <Impact>
+* Relationship between the reporter/reportee.
+
+We will not question you report; but rather research around it. There is no
+retaliation that can happen to you if you report. It is your right to report and
+it is our right to investigate it ;)
+
