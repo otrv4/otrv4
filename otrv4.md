@@ -3983,9 +3983,8 @@ If the state is `WAITING_AUTH_R`:
         will keep going as stated below.
     * Otherwise:
       * Forget the old `our_ecdh`, `our_dh`, `our_ecdh_first.public`
-        and `our_dh_first.public` values that you sent earlier.
-      * Pretend you are on `START` state.
-      * Send a new Auth-R message.
+        and `our_dh_first.public` values that you generated earlier.
+      * Pretend you are on `START` state and send a new Auth-R message.
       * Transition state to `WAITING_AUTH_I`.
 
 If the state is `WAITING_AUTH_I`:
@@ -3993,20 +3992,18 @@ If the state is `WAITING_AUTH_I`:
   ```
     There are a number of reasons that you may receive an Identity Message in
     this state. Perhaps your correspondent simply started a new DAKE or they
-    resent their Identity Message. On some networks, like AIM, if your
-    correspondent is logged in multiple times, each of his clients will send an
-    Identity Message in response to a Query Message. Resending the same Auth-R
-    Message in response to each of those messages will prevent compounded
-    confusion, since each of their clients will see each of the Auth-R Messages
-    you send.
+    resent their Identity Message.
   ```
 
-  * Validate the Identity message. Ignore the message if validation fails.
+  * Validate the Identity message. Notice that this Identity message should have
+    the 'Receiver's instance tag'. Validate that that value is equal to your 'Sender's instance tag'.
+    Ignore the message if any of the validations fails.
   * If validation succeeds:
     * Forget the old `their_ecdh`, `their_dh`, `their_ecdh_first`,
       `their_dh_first` and Client Profile from the previously received Identity
       message.
-    * Send a new Auth-R message with the new values received.
+    * Send a new Auth-R message with the new values received in the Indentity
+      message.
 
 If the state is `ENCRYPTED_MESSAGES` or `FINISHED`:
 
