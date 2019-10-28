@@ -3885,25 +3885,26 @@ If the state is `ENCRYPTED_MESSAGES` or `FINISHED`:
   * Remove the whitespace tag and display the message to the user. The user
     should be warned that the message received was unencrypted.
 
-For OTRv3, if msgstate is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
-
-  * Display the message to the user. The user should be warned that the message
-    received was unencrypted.
-
-For OTRv3, if msgstate is `MSGSTATE_PLAINTEXT`:
-
-  * Remove the whitespace tag and display the message to the user. The user
-    should be warned that the message received was unencrypted.
-
-In any event:
+Otherwise:
 
   * If the tag offers OTR version 4 and version 4 is allowed:
     * Send an Identity message.
     * Transition the state to `WAITING_AUTH_R`.
 
   * If the tag offers OTR version 3 and version 3 is allowed:
-    * Send a version `3 D-H Commit Message`.
-    * Transition authstate to `AUTHSTATE_AWAITING_DHKEY`.
+     * In any event, if `WHITESPACE_START_AKE` is set:
+        * Send a version `3 D-H Commit Message`.
+        * Transition authstate to `AUTHSTATE_AWAITING_DHKEY`.
+
+For OTRv3:
+
+  * If msgstate is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
+     * Display the message to the user. The user should be warned that the message
+       received was unencrypted.
+
+  * If msgstate is `MSGSTATE_PLAINTEXT`:
+     * Remove the whitespace tag and display the message to the user. The user
+       should be warned that the message received was unencrypted.
 
 #### Starting an online conversation after an offline one
 
