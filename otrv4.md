@@ -3901,10 +3901,9 @@ For OTRv3:
      * Remove the whitespace tag and display the message to the user. The user
        should be warned that the message received was unencrypted.
 
-  * If the tag offers OTR version 3 and version 3 is allowed:
-     * In any event, if `WHITESPACE_START_AKE` is set:
-        * Send a version `3 D-H Commit Message`.
-        * Transition authstate to `AUTHSTATE_AWAITING_DHKEY`.
+  * In any event, if `WHITESPACE_START_AKE` is set:
+     * Send a version `3 D-H Commit Message`.
+     * Transition authstate to `AUTHSTATE_AWAITING_DHKEY`.
 
 #### Starting an online conversation after an offline one
 
