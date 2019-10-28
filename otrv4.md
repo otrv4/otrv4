@@ -3890,6 +3890,11 @@ For OTRv3, if msgstate is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
   * Display the message to the user. The user should be warned that the message
     received was unencrypted.
 
+For OTRv3, if msgstate is `MSGSTATE_PLAINTEXT`:
+
+  * Remove the whitespace tag and display the message to the user. The user
+    should be warned that the message received was unencrypted.
+
 In any event:
 
   * If the tag offers OTR version 4 and version 4 is allowed:
