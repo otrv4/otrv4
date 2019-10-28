@@ -3891,11 +3891,6 @@ Otherwise:
     * Send an Identity message.
     * Transition the state to `WAITING_AUTH_R`.
 
-  * If the tag offers OTR version 3 and version 3 is allowed:
-     * In any event, if `WHITESPACE_START_AKE` is set:
-        * Send a version `3 D-H Commit Message`.
-        * Transition authstate to `AUTHSTATE_AWAITING_DHKEY`.
-
 For OTRv3:
 
   * If msgstate is `MSGSTATE_ENCRYPTED` or `MSGSTATE_FINISHED`:
@@ -3905,6 +3900,11 @@ For OTRv3:
   * If msgstate is `MSGSTATE_PLAINTEXT`:
      * Remove the whitespace tag and display the message to the user. The user
        should be warned that the message received was unencrypted.
+
+  * If the tag offers OTR version 3 and version 3 is allowed:
+     * In any event, if `WHITESPACE_START_AKE` is set:
+        * Send a version `3 D-H Commit Message`.
+        * Transition authstate to `AUTHSTATE_AWAITING_DHKEY`.
 
 #### Starting an online conversation after an offline one
 
