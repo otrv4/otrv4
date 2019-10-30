@@ -32,7 +32,7 @@ The OTRv4 project is divided as follows:
   found [here](https://github.com/otrv4/libotr-ng).
 * The OTRv4 main Golang library (otr4), which can be
   found [here](https://github.com/otrv4/otr4)
-  and [here](https://github.com/coyim/gotra).
+  and [here](https://github.com/otrv4/gotr4).
 * The OTRv4 implementation of the Prekey Server in Golang, which can be
   found [here](https://github.com/otrv4/otrng-prekey-server).
 * The OTRv4 implementation of the XMPP Prekey Server in Golang, which can be
