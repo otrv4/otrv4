@@ -699,6 +699,7 @@ OTRv4 also uses the following data types:
 
 ```
 Nonce (NONCE):
+  Always set to 0
   12 bytes data
 
 Message Authentication Code (MAC):
