@@ -267,19 +267,18 @@ Alice wants to send a message to Bob.
 
 1. Alice adds Bob as a contact:
    * A DAKE (interactive or non-interactive depending on the contact's
-     availability) is immediately done. The conversation keys are stored on the
-     device for later use.
-   * No identity verification is necessary and the app uses a Trust on first use
-     (TOFU) policy. Bob's Client Profile can be used to verify the information
-     about the alleged identity.
+     availability) is immediately executed. The long-term key material is stored
+     in the device for later use.
+   * Identity verification is still necessary even if the app uses a 'Trust On
+     First Use' (TOFU) policy.
 2. Alice types messages, encrypts them and "sends them" to Bob.
-   * Every message will always be encrypted.
-   * Instance tags could be optional in this "one device per contact" model.
-   * Fragmentation will be optional as it depends on the network.
+   * Every message exchanged will always be encrypted.
+   * Instance tags could be optional in this "one device per contact" model,
+     unless the user has logged in from the same account in different devices.
+   * Fragmentation will be optional.
 3. Bob receives the encrypted messages from Alice.
 
-There is no plaintext messages in this scenario, since the only way to send
-messages through this application's network is using the application.
+There is no exchange of plaintext messages in this scenario.
 
 #### Scenario B: an OTRv4-Standalone Pidgin-like application
 
@@ -288,17 +287,16 @@ Alice wants to send a message to Bob.
 1. Alice adds Bob as a contact
 2. Alice verifies Bob's identity. She either:
    * Uses Bob's Client Profile and verifies Bob's fingerprint using a business
-     card, a HTTPS website, etc.
-   * Performs a interactive DAKE and uses SMP.
+     card, a HTTPS website, or other.
+   * If Bob is online, she performs a interactive DAKE and uses the Socialist
+     Millionaires Protocol.
 2. Alice types a messages and "sends them" to Bob.
-   * A DAKE is performed if the application is not already in an encrypted
-     state.
+   * A DAKE (either online or offline) is performed, if the application is not
+     already in an encrypted state.
    * Alice is warned about any problem to establish an encrypted channel and/or
-     any problem with the identity verification for Bob.
-   * The conversation keys do not need to be stored on the device for later use.
+     any problem with the identity verification from Bob.
    * Instance tags are required because there may be multiple devices.
-   * Fragmentation could be optional depending on the network, but this is
-     unlikely due support to multiple networks.
+   * Fragmentation could be optional depending on the network.
 3. Bob receives the message from Alice.
 
 If the network allows Alice to receive messages from devices not on the same
@@ -315,12 +313,11 @@ This means that query messages and whitespace tags are not allowed in this mode.
 By always requiring encryption, this mode may encourage long-lived sessions.
 The section [Session Expiration](../otrv4.md#session-expiration) of the OTRv4
 protocol specification outlines how to mitigate the risks of long-lived
-sessions. For this reason, TLVs type 1 (Disconnected) are necessary in this
-mode.
+sessions. TLVs type 1 (Disconnected) can still be necessary in this mode.
 
 Furthermore, as this mode always requires encryption, the protocol can get stuck
-if, for example, a DAKE message is lost and never delivered. This mode does not
-define any strategy, like a timeout, for dealing with such cases; but
+if, for example, a DAKE message is lost and never delivered. This document does
+not define any strategy, like a timeout, for dealing with such cases; but
 implementers are recommended to do so.
 
 Even though there is no need to prefix OTR messages with the five bytes "?OTR:",
