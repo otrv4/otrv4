@@ -360,9 +360,9 @@ the session key when at least one party completes the exchange). The
 non-interactive DAKE offers a forward secrecy that is between strong and
 weak, as it protects completed sessions and incomplete sessions that stall long
 enough to be invalidated by a participant. The key exchange mechanism used
-in OTRv4 is the Double Ratchet algorithm which provides forward and backward
-secrecy, as parties negotiate secrets several times using an ephemeral key
-exchange.
+in OTRv4 is the Double Ratchet algorithm which provides forward secrecy and
+post-compromise security, as parties negotiate keys several times using an
+ephemeral key exchange.
 
 A protocol provides forward secrecy if the compromise of a long-term key does
 not allow ciphertexts encrypted with previous session keys to be decrypted. If
@@ -371,12 +371,10 @@ decrypted by passive attackers, then the protocol is said to have backward
 secrecy. Furthermore, if the compromise of a single session key is not
 permanent, as, after some time, subsequent messages will be impossible to
 decrypt again because of the "self-healing" nature of the algorithm, then the
-protocol is said to have post-compromise security. In the current academic
-literature, backwards secrecy is included in post-compromise security. OTRv4, by
-using the Double Ratchet Algorithm, provides these two properties: forward
-secrecy and post-compromise security. If key material used to encrypt a
-particular data message is compromised, previous and future messages are
-protected.
+protocol is said to have post-compromise security. OTRv4, by using the Double
+Ratchet Algorithm, provides these two properties: forward secrecy and
+post-compromise security. If key material used to encrypt a particular data
+message is compromised, previous and future messages are protected.
 
 The DAKEs in OTRv4 provide contributiveness as well. This means that the
 initiator of the protocol cannot force the shared secret to take on a specific
