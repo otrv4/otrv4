@@ -5384,5 +5384,5 @@ Compute:
     strings*. Available at:
     https://elligator.cr.yp.to/elligator-20130828.pdf
 16. Nir, Y. and Langley, A. (2015). *ChaCha20 and Poly1305 for IETF Protocols*,
-   Internet Research Task Force (IRTF), RFC 7539. Available at:
-   https://tools.ietf.org/html/rfc7539
+    Internet Research Task Force (IRTF), RFC 7539. Available at:
+    https://tools.ietf.org/html/rfc7539
