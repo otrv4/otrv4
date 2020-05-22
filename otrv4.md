@@ -3465,24 +3465,28 @@ Like OTRv3, OTRv4 defines an additional symmetric key that can be derived by
 the communicating parties for use of application-specific purposes, such as
 file transfer, voice encryption, etc. When one party wishes to use the extra
 symmetric key, they create a type 7 TLV, which they attach to a Data Message.
-The extra symmetric key itself is then derived using the same `chain_key` used
-to compute the message encryption key used to protect the Data Message. It is,
-therefore, derived by calculating `KDF(usage_extra_symm_key || 0xFF || chain_key)`.
+The extra symmetric key itself is then derived using the same `chain_key_s` used
+to compute the message encryption key (`mk`) used to protect the Data Message
+(note that this `chain_key_s` will be deleted after the derivation of the
+extra symmetric key). It is, therefore, derived by
+calculating `KDF(usage_extra_symm_key || 0xFF || chain_key_s)`.
 
 Upon receipt of the Data Message containing the type 7 TLV, the recipient will
-compute the extra symmetric key in the same way. Note that the value of the
-extra symmetric key is not contained in the TLV itself.
+compute the extra symmetric key in the same way, by using `chain_key_r`. Note
+that the value of the extra symmetric key is not contained in the TLV itself.
 
 If more keys are wished to be derived from this already calculated extra
-symmetric key, this can be done by taking the index from the TLV list received
-in the data message and the context received in 7 TLV (the 4-byte indication
-of what this symmetric key will be used for), and use them as inputs to a KDF:
+symmetric key, this can be done by taking the index (starting from 0) from the
+TLV list received in the data message and the context received in 7 TLV itself
+(the 4-byte indication of what this symmetric key will be used for. If there is
+no context, 4-byte zeros can be used `0x0000`), and use them as inputs to the
+KDF:
 
 ```
   symkey1 = KDF(index || context || extra_sym_key, 64)
 ```
 
-So, if for example, these TLVs arrive with the data message:
+So, if, for example, these TLVs arrive with the data message:
 
 ```
   TLV 1
@@ -3497,13 +3501,18 @@ Three keys can, therefore, be calculated from the already derived extra
 symmetric key:
 
 ```
-  extra_sym_key = KDF(usage_extra_symm_key || 0xFF || chain_key, 64)
-  symkey1 = KDF(0x00 || 0x0042 || extra_sym_key, 64)
-  symkey2 = KDF(0x01 || 0x104A || extra_sym_key, 64)
-  symkey3 = KDF(0x02 || 0x0001 || extra_sym_key, 64)
+  extra_sym_key_1 = KDF(usage_extra_symm_key || 0xFF || chain_key, 64)
+  extra_sym_key_2 = KDF(0x01 || 0x0042 || extra_sym_key_1, 64)
+  extra_sym_key_3 = KDF(0x03 || 0x104A || extra_sym_key_2, 64)
+  extra_sym_key_4 = KDF(0x05 || 0x0001 || extra_sym_key_3, 64)
 ```
 
-Every derived key and the `extra_symm_key` should be deleted after being used.
+Note that, in order to preserve post-compromise security, only 10 extra
+symmetric keys can be derived.
+
+After each `extra_sym_key_n` is used to derived the next one, it should be
+safely deleted. If it is not used to derive any subsequent keys, then
+it should be deleted after an appropriate interval.
 
 ### Revealing MAC Keys
 
