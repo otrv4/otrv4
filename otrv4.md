@@ -481,7 +481,7 @@ elliptic curve arithmetic (`POINT`, `SCALAR`, `ED448-PUBKEY`,
 `ED448-SHARED-PREKEY` and `EDDSA-SIG`) are encoded as little-endian. The rest of
 data types are encoded as big-endian. Little-endian encoding into bits places
 bits from left to right and from least significant to most significant.
-Big-endian encoding into bits places bits from right to left and from most
+Big-endian encoding into bits places bits from left to right and from most
 significant to least significant.
 
 ### Elliptic Curve Parameters
