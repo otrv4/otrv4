@@ -13,7 +13,7 @@ Protocol version 4.
 
 ## Funding
 
-The work made hare was supported by the NlNet Foundation.
+The work made hare was partially supported by the NlNet Foundation.
 Find information [here](https://nlnet.nl/project/OTR4/).
 
 ## Licensing and Use
